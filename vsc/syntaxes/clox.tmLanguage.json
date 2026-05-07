@@ -2,6 +2,10 @@
   "scopeName": "source.clox",
   "patterns": [
     {
+      "name": "storage.modifier.access-control.clox",
+      "match": "\\b(private|public)\\b"
+    },
+    {
       "name": "keyword.control.clox",
       "match": "\\b(if|else|for|while|fun|return|var|print|true|false|nil|class|this)\\b"
     },

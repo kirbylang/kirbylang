@@ -223,7 +223,22 @@ static TokenType identifierType(Scanner *scanner) {
   case 'o':
     return checkKeyword(scanner, 1, 1, "r", TOKEN_OR);
   case 'p':
-    return checkKeyword(scanner, 1, 4, "rint", TOKEN_PRINT);
+    if (scanner->current - scanner->start > 1) {
+      switch (scanner->start[1]) {
+      case 'r':
+        if (scanner->current - scanner->start > 2) {
+          switch (scanner->start[2]) {
+          case 'i':
+            return checkKeyword(scanner, 3, 2, "nt", TOKEN_PRINT);
+          case 'v':
+            return checkKeyword(scanner, 3, 4, "ate", TOKEN_PRIVATE);
+          }
+        }
+        break;
+      case 'u':
+        return checkKeyword(scanner, 2, 4, "blic", TOKEN_PUBLIC);
+      }
+    }
   case 'r':
     return checkKeyword(scanner, 1, 5, "eturn", TOKEN_RETURN);
   case 's':

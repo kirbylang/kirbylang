@@ -42,7 +42,7 @@ list(FILTER SRC_FILES EXCLUDE REGEX ".*/version\\.c$")
 # -----------------------------------------------------------------
 # Add the generated file to the source list for each target.
 add_executable(clox ${SRC_FILES} ${VERSION_C})
-# target_compile_definitions(clox PRIVATE DEBUG_STRESS_GC)
+target_compile_definitions(clox PRIVATE DEBUG_PRINT_CODE)
 # target_compile_definitions(clox PRIVATE DEBUG_TRACE_EXECUTION)
 # target_compile_definitions(clox PRIVATE DEBUG_STRESS_GC)
 # target_compile_definitions(clox PRIVATE DEBUG_LOG_GC)

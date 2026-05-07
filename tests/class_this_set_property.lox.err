@@ -111,3 +111,6 @@
 0041    | OP_PRINT
 0042   16 OP_NIL
 0043    | OP_RETURN
+Dynamic fields are not allowed.
+[line 3] in set()
+[line 9] in script

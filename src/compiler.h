@@ -12,6 +12,19 @@ typedef struct {
   bool panicMode;
 } Parser;
 
+typedef enum { VIS_PRIVATE, VIS_PUBLIC } Visibility;
+
+typedef struct {
+  Token name;
+  Visibility visibility;
+  int slot;
+} FieldCompiler;
+
+typedef struct {
+  Token name;
+  Visibility visibility;
+} MethodCompiler;
+
 typedef enum {
   PREC_NONE,
   PREC_ASSIGNMENT, // =
@@ -66,6 +79,12 @@ struct Compiler {
 };
 
 typedef struct ClassCompiler {
+  Token name;
+  FieldCompiler fields[256];
+  int fieldCount;
+  MethodCompiler methods[256];
+  int methodCount;
+
   struct ClassCompiler *enclosing;
 } ClassCompiler;
 

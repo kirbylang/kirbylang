@@ -448,8 +448,44 @@ static void function(Scanner *scanner, FunctionType type) {
   }
 }
 
-static void method(Scanner *scanner) {
+static void fieldDeclaration(Scanner *scanner, Visibility visibility) {
+  consume(scanner, TOKEN_IDENTIFIER, "Expect field name.");
+
+  ClassCompiler *klass = currentClass;
+
+  int slot = klass->fieldCount;
+
+  klass->fields[slot].name = parser.previous;
+  klass->fields[slot].visibility = visibility;
+  klass->fields[slot].slot = slot;
+
+  klass->fieldCount++;
+
+  consume(scanner, TOKEN_SEMICOLON, "Expect ';' after field declaration.");
+}
+
+static int resolveField(ClassCompiler *klass, Token *name) {
+  for (int i = 0; i < klass->fieldCount; i++) {
+
+    FieldCompiler *field = &klass->fields[i];
+
+    if (field->name.length == name->length &&
+        memcmp(field->name.start, name->start, name->length) == 0) {
+      return field->slot;
+    }
+  }
+
+  return -1;
+}
+
+static void method(Scanner *scanner, Visibility visibility) {
   consume(scanner, TOKEN_IDENTIFIER, "Expect method name.");
+
+  ClassCompiler *klass = currentClass;
+  klass->methods[klass->methodCount].name = parser.previous;
+  klass->methods[klass->methodCount].visibility = visibility;
+  klass->methodCount++;
+
   uint8_t constant = identifierConstant(&parser.previous);
 
   FunctionType type = TYPE_METHOD;
@@ -474,14 +510,30 @@ static void classDeclaration(Scanner *scanner) {
   defineVariable(nameConstant);
 
   ClassCompiler classCompiler;
+  classCompiler.name = parser.previous;
+  classCompiler.fieldCount = 0;
+  classCompiler.methodCount = 0;
   classCompiler.enclosing = currentClass;
   currentClass = &classCompiler;
 
   namedVariable(scanner, className, false);
   consume(scanner, TOKEN_LEFT_BRACE, "Expect '{' before class body.");
+
   while (!check(TOKEN_RIGHT_BRACE) && !check(TOKEN_EOF)) {
-    method(scanner);
+    Visibility visibility = VIS_PRIVATE;
+
+    if (match(scanner, TOKEN_PUBLIC)) {
+      visibility = VIS_PUBLIC;
+    } else if (match(scanner, TOKEN_PRIVATE)) {
+      visibility = VIS_PRIVATE;
+    }
+    if (match(scanner, TOKEN_VAR)) {
+      fieldDeclaration(scanner, visibility);
+    } else {
+      method(scanner, visibility);
+    }
   }
+
   consume(scanner, TOKEN_RIGHT_BRACE, "Expect '}' after class body.");
   emitByte(OP_POP);
 
@@ -756,6 +808,20 @@ static void call(Scanner *scanner, bool canAssign) {
 
 static void dot(Scanner *scanner, bool canAssign) {
   consume(scanner, TOKEN_IDENTIFIER, "Expect property name after '.'.");
+
+  if (currentClass != NULL) {
+    int slot = resolveField(currentClass, &parser.previous);
+    if (slot != -1) {
+      if (canAssign && match(scanner, TOKEN_EQUAL)) {
+        expression(scanner);
+        emitBytes(OP_SET_FIELD, (uint8_t)slot);
+      } else {
+        emitBytes(OP_GET_FIELD, (uint8_t)slot);
+      }
+      return;
+    }
+  }
+
   uint8_t name = identifierConstant(&parser.previous);
 
   if (canAssign && match(scanner, TOKEN_EQUAL)) {

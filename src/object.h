@@ -72,15 +72,31 @@ typedef struct {
 } ObjClosure;
 
 typedef struct {
+  ObjString *name;
+  ObjClosure *closure;
+  bool isPublic;
+  struct ObjClass *owner;
+} MethodInfo;
+
+typedef struct {
+  ObjString *name;
+  bool isPublic;
+  int slot;
+} FieldInfo;
+
+typedef struct {
   Obj obj;
   ObjString *name;
-  Table methods;
+  MethodInfo *methods;
+  int methodCount;
+  FieldInfo *fields;
+  int fieldCount;
 } ObjClass;
 
 typedef struct {
   Obj obj;
   ObjClass *klass;
-  Table fields;
+  Value *fields;
 } ObjInstance;
 
 typedef struct {

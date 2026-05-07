@@ -940,6 +940,31 @@ static InterpretResult run() {
     case OP_CLASS:
       push(OBJ_VAL(newClass(READ_STRING())));
       break;
+    case OP_GET_FIELD: {
+      uint8_t slot = READ_BYTE();
+      if (!IS_INSTANCE(peek(0))) {
+        runtimeError(&vm, "Only instances have fields.");
+        return INTERPRET_RUNTIME_ERROR;
+      }
+      ObjInstance *instance = AS_INSTANCE(peek(0));
+      pop();
+      push(instance->fields[slot]);
+      break;
+    }
+    case OP_SET_FIELD: {
+      uint8_t slot = READ_BYTE();
+      Value value = peek(0);
+      if (!IS_INSTANCE(peek(1))) {
+        runtimeError(&vm, "Only instances have fields.");
+        return INTERPRET_RUNTIME_ERROR;
+      }
+      ObjInstance *instance = AS_INSTANCE(peek(1));
+      instance->fields[slot] = value;
+      pop();
+      pop();
+      push(value);
+      break;
+    }
     case OP_GET_PROPERTY: {
       if (!IS_INSTANCE(peek(0))) {
         runtimeError(&vm, "Only instances have properties.");

@@ -35,7 +35,12 @@ ObjBoundMethod *newBoundMethod(Value receiver, ObjClosure *method) {
 ObjClass *newClass(ObjString *name) {
   ObjClass *klass = ALLOCATE_OBJ(ObjClass, OBJ_CLASS);
   klass->name = name;
-  initTable(&klass->methods);
+
+  klass->methods = NULL;
+  klass->methodCount = 0;
+  klass->fields = NULL;
+  klass->fieldCount = 0;
+
   return klass;
 }
 
@@ -64,7 +69,12 @@ ObjFunction *newFunction() {
 ObjInstance *newInstance(ObjClass *klass) {
   ObjInstance *instance = ALLOCATE_OBJ(ObjInstance, OBJ_INSTANCE);
   instance->klass = klass;
-  initTable(&instance->fields);
+
+  instance->fields = ALLOCATE(Value, klass->fieldCount);
+  for (int i = 0; i < klass->fieldCount; i++) {
+    instance->fields[i] = NIL_VAL;
+  }
+
   return instance;
 }
 

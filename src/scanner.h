@@ -41,6 +41,8 @@ typedef enum {
   // Keywords.
   TOKEN_AND,
   TOKEN_CLASS,
+  TOKEN_PRIVATE,
+  TOKEN_PUBLIC,
   TOKEN_ELSE,
   TOKEN_FALSE,
   TOKEN_FOR,

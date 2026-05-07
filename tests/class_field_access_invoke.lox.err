@@ -79,26 +79,28 @@
 0028   28 OP_NIL
 0029    | OP_RETURN
 == fn ==
-0000    6 OP_CONSTANT         0 'Hello World'
+0000    8 OP_CONSTANT         0 'Hello World'
 0002    | OP_PRINT
-0003    7 OP_NIL
+0003    9 OP_NIL
 0004    | OP_RETURN
 == <script> ==
 0000    1 OP_CLASS            0 'Class'
 0002    | OP_DEFINE_GLOBAL    0 'Class'
 0004    | OP_GET_GLOBAL       1 'Class'
-0006    | OP_POP
-0007    3 OP_GET_GLOBAL       3 'Class'
+0006    3 OP_POP
+0007    5 OP_GET_GLOBAL       3 'Class'
 0009    | OP_CALL             0
 0011    | OP_DEFINE_GLOBAL    2 'instance'
-0013    7 OP_CLOSURE          5 <fn fn>
+0013    9 OP_CLOSURE          5 <fn fn>
 0015    | OP_DEFINE_GLOBAL    4 'fn'
-0017    9 OP_GET_GLOBAL       6 'instance'
+0017   11 OP_GET_GLOBAL       6 'instance'
 0019    | OP_GET_GLOBAL       8 'fn'
 0021    | OP_SET_PROPERTY     7 'fn'
 0023    | OP_POP
-0024   11 OP_GET_GLOBAL       9 'instance'
+0024   13 OP_GET_GLOBAL       9 'instance'
 0026    | OP_INVOKE        (0 args)   10 'fn'
 0029    | OP_POP
-0030   12 OP_NIL
+0030   14 OP_NIL
 0031    | OP_RETURN
+Dynamic fields are not allowed.
+[line 11] in script
