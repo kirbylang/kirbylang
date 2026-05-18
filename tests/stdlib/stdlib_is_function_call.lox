@@ -1,5 +1,5 @@
-print is_function(ceil);
-print is_function(true);
-print is_function(12345);
-print is_function("Hello");
-print is_function(nil);
+print isFunction(ceil);
+print isFunction(true);
+print isFunction(12345);
+print isFunction("Hello");
+print isFunction(nil);

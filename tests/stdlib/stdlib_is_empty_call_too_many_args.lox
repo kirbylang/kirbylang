@@ -1,0 +1,1 @@
+strIsEmpty("Hello World", nil);

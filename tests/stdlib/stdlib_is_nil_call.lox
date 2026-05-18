@@ -1,5 +1,5 @@
-print is_nil(nil);
-print is_nil("Hello");
-print is_nil(12345);
-print is_nil(ceil);
-print is_nil(true);
+print isNil(nil);
+print isNil("Hello");
+print isNil(12345);
+print isNil(ceil);
+print isNil(true);

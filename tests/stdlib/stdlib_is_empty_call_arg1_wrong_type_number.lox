@@ -1,0 +1,1 @@
+print strIsEmpty(123);

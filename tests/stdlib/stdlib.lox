@@ -1,7 +1,0 @@
-print is;
-print is_function;
-print is_number;
-print is_string;
-print is_nil;
-print is_bool;
-print is_empty;

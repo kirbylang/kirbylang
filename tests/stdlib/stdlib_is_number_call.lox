@@ -1,5 +1,5 @@
-print is_number(12345);
-print is_number(ceil);
-print is_number(true);
-print is_number("Hello");
-print is_number(nil);
+print isNumber(12345);
+print isNumber(ceil);
+print isNumber(true);
+print isNumber("Hello");
+print isNumber(nil);

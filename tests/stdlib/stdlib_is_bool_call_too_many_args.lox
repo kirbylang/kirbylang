@@ -1,0 +1,1 @@
+print isBool(true, true);

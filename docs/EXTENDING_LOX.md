@@ -7,6 +7,14 @@ These are the documented changes to the language/syntax from the original Lox la
 - Support to escape characters in strings: `\n`, `\r`, `\t`, `\"`, `\\`
 - Function body expressions: `fun sum(a, b) = a + b;`
 - Function implicit returns: `fun sum(a, b) { a + b }`
+- Move all functions in stdlib.lox to native functions
+  - `is`
+  - `isBool`
+  - `isNumber`
+  - `isFunction`
+  - `isString`
+  - `isNil`
+  - `strIsEmpty`
 - Native Functions
   - [ ] `arrSort(array, fn)`
   - [ ] `arrMap(array, fn)`

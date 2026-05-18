@@ -1,5 +1,5 @@
-print is_bool(true);
-print is_bool("Hello");
-print is_bool(12345);
-print is_bool(ceil);
-print is_bool(nil);
+print isBool(true);
+print isBool("Hello");
+print isBool(12345);
+print isBool(ceil);
+print isBool(nil);

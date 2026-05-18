@@ -259,6 +259,84 @@ static Value typeofNative(VM *vm, int argCount, Value *args) {
   return OBJ_VAL(takeString(buffer, strlen(buffer)));
 }
 
+static bool isHelper(Value value, char *type) {
+  char *buffer = malloc(9);
+
+  if (buffer == NULL) {
+    return false;
+  }
+
+  valueTypeToString(value, buffer, 9);
+
+  // free(buffer);
+
+  bool equals = strcmp(type, buffer) == 0;
+
+  return equals;
+}
+
+static Value isNative(VM *vm, int argCount, Value *args) {
+  assertArgCount(vm, "is", 2, argCount);
+  assertArgIsString(vm, "is", args, 1);
+
+  Value value = args[0];
+  Value type = args[1];
+
+  bool equals = isHelper(value, AS_STRING(type)->chars);
+
+  return BOOL_VAL(equals);
+}
+
+static Value isNumberNative(VM *vm, int argCount, Value *args) {
+  assertArgCount(vm, "isNumber", 1, argCount);
+
+  Value value = args[0];
+
+  bool equals = isHelper(value, "number");
+
+  return BOOL_VAL(equals);
+}
+
+static Value isFunctionNative(VM *vm, int argCount, Value *args) {
+  assertArgCount(vm, "isFunction", 1, argCount);
+
+  Value value = args[0];
+
+  bool equals = isHelper(value, "function");
+
+  return BOOL_VAL(equals);
+}
+
+static Value isBoolNative(VM *vm, int argCount, Value *args) {
+  assertArgCount(vm, "isBool", 1, argCount);
+
+  Value value = args[0];
+
+  bool equals = isHelper(value, "bool");
+
+  return BOOL_VAL(equals);
+}
+
+static Value isStringNative(VM *vm, int argCount, Value *args) {
+  assertArgCount(vm, "isString", 1, argCount);
+
+  Value value = args[0];
+
+  bool equals = isHelper(value, "string");
+
+  return BOOL_VAL(equals);
+}
+
+static Value isNilNative(VM *vm, int argCount, Value *args) {
+  assertArgCount(vm, "isNil", 1, argCount);
+
+  Value value = args[0];
+
+  bool equals = isHelper(value, "nil");
+
+  return BOOL_VAL(equals);
+}
+
 static Value instanceOfNative(VM *vm, int argCount, Value *args) {
   assertArgCount(vm, "instanceOf", 2, argCount);
   assertArgIsClass(vm, "instanceOf", args, 1);
@@ -402,6 +480,17 @@ static Value arrIsEmptyNative(VM *vm, int argCount, Value *args) {
   ObjArray *array = AS_ARRAY(args[0]);
 
   bool isEmpty = array->count == 0;
+
+  return BOOL_VAL(isEmpty);
+}
+
+static Value strIsEmptyNative(VM *vm, int argCount, Value *args) {
+  assertArgCount(vm, "strIsEmpty", 1, argCount);
+  assertArgIsString(vm, "strIsEmpty", args, 0);
+
+  ObjString *string = AS_STRING(args[0]);
+
+  bool isEmpty = string->length == 0;
 
   return BOOL_VAL(isEmpty);
 }
@@ -710,4 +799,11 @@ void defineAllNatives(VM *vm) {
   defineNative(vm, "arrSlice", arrSliceNative);
   defineNative(vm, "arrConcat", arrConcatNative);
   defineNative(vm, "arrReverse", arrReverseNative);
+  defineNative(vm, "is", isNative);
+  defineNative(vm, "isNumber", isNumberNative);
+  defineNative(vm, "isFunction", isFunctionNative);
+  defineNative(vm, "isBool", isBoolNative);
+  defineNative(vm, "isString", isStringNative);
+  defineNative(vm, "isNil", isNilNative);
+  defineNative(vm, "strIsEmpty", strIsEmptyNative);
 }

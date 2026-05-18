@@ -1,5 +1,5 @@
-print is_string("Hello");
-print is_string(12345);
-print is_string(ceil);
-print is_string(true);
-print is_string(nil);
+print isString("Hello");
+print isString(12345);
+print isString(ceil);
+print isString(true);
+print isString(nil);

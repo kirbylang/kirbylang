@@ -1,0 +1,6 @@
+print strIsEmpty("");
+print strIsEmpty("Hello World");
+print strIsEmpty(123);
+print strIsEmpty(true);
+print strIsEmpty(nil);
+print strIsEmpty(ceil);

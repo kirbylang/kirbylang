@@ -1,6 +1,2 @@
-print is_empty("");
-print is_empty("Hello World");
-print is_empty(123);
-print is_empty(true);
-print is_empty(nil);
-print is_empty(ceil);
+print strIsEmpty("");
+print strIsEmpty("Hello World");

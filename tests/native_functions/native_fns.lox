@@ -90,3 +90,24 @@ print typeof(arrConcat);
 
 print arrReverse;
 print typeof(arrReverse);
+
+print is;
+print typeof(is);
+
+print isNumber;
+print typeof(isNumber);
+
+print isFunction;
+print typeof(isFunction);
+
+print isBool;
+print typeof(isBool);
+
+print isNil;
+print typeof(isNil);
+
+print isString;
+print typeof(isString);
+
+print strIsEmpty;
+print typeof(strIsEmpty);
