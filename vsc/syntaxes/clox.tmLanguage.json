@@ -10,8 +10,8 @@
       "match": "\\b(clock|len|argv|argc|typeof|rand|rand01|randBetween|ceil|readFileToString|writeStringToFile|fileExists|getenv|setenv|__version__|exit|instanceOf|prompt|stdin|parseNumber|numberToString|arrPush|arrPop|arrInsert|arrRemove|arrClear|arrContains|arrCopy|arrEqual|arrIsEmpty|arrSlice|arrConcat|arrReverse)\\b"
     },
     {
-      "name": "entity.name.function.stdlib.clox",
-      "match": "\\b(is|is_number|is_string|is_nil|is_function|is_bool|is_empty)\\b"
+      "name": "entity.name.function.native.clox",
+      "match": "\\b(is|isNumber|isString|isNil|isFunction|isBool|strIsEmpty)\\b"
     },
     {
       "name": "entity.name.function.method.clox",
