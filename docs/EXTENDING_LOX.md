@@ -17,7 +17,10 @@ These are the documented changes to the language/syntax from the original Lox la
   - `strIsEmpty`
 - Block expressions: `var sum = { 5 + 10 };`
   - New bytecode op: `OP_CLOSE_BLOCK_EXPR n`
-- If expressions: `print if (true) "Hello" else "World"; // Hello`, `print if (false) 123; // nil`
+- If expressions
+  - `print if (true) "Hello" else "World"; // Hello`
+  - `print if (value > 9000) "Over 9000!" else if (value == 42) "Life, Universe, Everything" else "Error"; // Error`
+  - `print if (false) 123; // nil`
 - Native Functions
   - [ ] `arrSort(array, fn)`
   - [ ] `arrMap(array, fn)`
