@@ -1,0 +1,7 @@
+print if (true) {
+    "Hello"
+};
+
+print if (false) {
+    "World"
+};

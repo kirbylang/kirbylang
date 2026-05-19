@@ -642,6 +642,31 @@ static void ifStatement(Scanner *scanner) {
   patchJump(elseJump);
 }
 
+static void ifExpression(Scanner *scanner, bool canAssign) {
+  TRACELN("  compiler.ifExpression()");
+
+  consume(scanner, TOKEN_LEFT_PAREN, "Expect '(' after 'if'.");
+  expression(scanner);
+  consume(scanner, TOKEN_RIGHT_PAREN, "Expect ')' after condition.");
+
+  int thenJump = emitJump(OP_JUMP_IF_FALSE);
+  emitByte(OP_POP);
+  expression(scanner);
+
+  int elseJump = emitJump(OP_JUMP);
+
+  patchJump(thenJump);
+  emitByte(OP_POP);
+
+  if (match(scanner, TOKEN_ELSE)) {
+    expression(scanner);
+  } else {
+    emitByte(OP_NIL);
+  }
+
+  patchJump(elseJump);
+}
+
 static void printStatement(Scanner *scanner) {
   TRACELN("  compiler.printStatement()");
 
@@ -1121,7 +1146,7 @@ ParseRule rules[] = {
     [TOKEN_FALSE] = {literal, NULL, PREC_NONE},
     [TOKEN_FOR] = {NULL, NULL, PREC_NONE},
     [TOKEN_FUN] = {NULL, NULL, PREC_NONE},
-    [TOKEN_IF] = {NULL, NULL, PREC_NONE},
+    [TOKEN_IF] = {ifExpression, NULL, PREC_NONE},
     [TOKEN_NIL] = {literal, NULL, PREC_NONE},
     [TOKEN_OR] = {NULL, or_, PREC_OR},
     [TOKEN_QUESTION_QUESTION] = {NULL, nullish, PREC_OR},

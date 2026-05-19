@@ -1,0 +1,3 @@
+print if (true) "Hello" else "World";
+
+print if (false) "Hello" else "World";

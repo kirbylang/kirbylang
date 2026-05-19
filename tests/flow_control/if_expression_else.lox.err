@@ -1,0 +1,26 @@
+== <script> ==
+0000    1 OP_NIL
+0001    | OP_RETURN
+== <script> ==
+0000    1 OP_TRUE
+0001    | OP_JUMP_IF_FALSE    1 -> 12
+0004    | OP_POP
+0005    2 OP_CONSTANT         0 'Hello'
+0007    3 OP_CLOSE_BLOCK      0
+0009    | OP_JUMP             9 -> 17
+0012    | OP_POP
+0013    4 OP_CONSTANT         1 'World'
+0015    5 OP_CLOSE_BLOCK      0
+0017    | OP_PRINT
+0018    7 OP_FALSE
+0019    | OP_JUMP_IF_FALSE   19 -> 30
+0022    | OP_POP
+0023    8 OP_CONSTANT         2 'Hello'
+0025    9 OP_CLOSE_BLOCK      0
+0027    | OP_JUMP            27 -> 35
+0030    | OP_POP
+0031   10 OP_CONSTANT         3 'World'
+0033   11 OP_CLOSE_BLOCK      0
+0035    | OP_PRINT
+0036    | OP_NIL
+0037    | OP_RETURN
