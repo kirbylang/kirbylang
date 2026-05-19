@@ -1,0 +1,12 @@
+fun process(a, b) = {
+    var result = {
+        var total = a + b;
+        var half = total * 0.5;
+
+        half
+    };
+
+    result
+};
+
+print process(5, 20);

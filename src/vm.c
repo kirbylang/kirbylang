@@ -721,6 +721,19 @@ static InterpretResult run() {
 
       break;
     }
+    case OP_CLOSE_BLOCK_EXPR: {
+      int locals = READ_BYTE();
+
+      Value result = popFromStack();
+
+      closeUpvalues(vm.stackTop - locals);
+
+      vm.stackTop -= locals;
+
+      pushOnStack(result);
+
+      break;
+    }
     }
   }
 #undef READ_BYTE

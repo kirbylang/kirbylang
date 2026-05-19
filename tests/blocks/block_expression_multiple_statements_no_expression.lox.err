@@ -1,0 +1,11 @@
+== <script> ==
+0000    1 OP_NIL
+0001    | OP_RETURN
+== <script> ==
+0000    2 OP_CONSTANT         0 '10.000000'
+0002    3 OP_CONSTANT         1 '50.000000'
+0004    4 OP_NIL
+0005    | OP_CLOSE_BLOCK      2
+0007    | OP_PRINT
+0008    5 OP_NIL
+0009    | OP_RETURN

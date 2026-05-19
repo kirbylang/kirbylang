@@ -15,6 +15,8 @@ These are the documented changes to the language/syntax from the original Lox la
   - `isString`
   - `isNil`
   - `strIsEmpty`
+- Block expressions: `var sum = { 5 + 10 };`
+  - New bytecode op: `OP_CLOSE_BLOCK_EXPR n`
 - Native Functions
   - [ ] `arrSort(array, fn)`
   - [ ] `arrMap(array, fn)`

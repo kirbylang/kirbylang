@@ -1,0 +1,8 @@
+var a = "global";
+
+print {
+  var a = "local";
+  a
+};
+
+print a;

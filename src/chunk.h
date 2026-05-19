@@ -45,6 +45,7 @@ typedef enum {
   OP_ARRAY,
   OP_GET_INDEX,
   OP_SET_INDEX,
+  OP_CLOSE_BLOCK_EXPR,
 } OpCode;
 
 typedef struct {

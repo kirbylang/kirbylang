@@ -1,0 +1,9 @@
+var closure = {
+  var x = "hello";
+
+  fun inner() = x;
+
+  inner
+};
+
+print closure();

@@ -1,15 +1,17 @@
-if (argc() != 4) {
+if (argc() != 5) {
   print "Usage: clox -f examples/cat.lox <file>";
   exit(1);
 }
 
-var path = argv(3);
+var fileText = {
+  var path = argv(4);
 
-if (!fileExists(path)) {
-  print "File doesn't exist '" + path + "'";
-  exit(1);
-}
+  if (!fileExists(path)) {
+    print "File doesn't exist '" + path + "'";
+    exit(1);
+  }
 
-var text = readFileToString(path);
+  readFileToString(path)
+};
 
-print text;
+print fileText;

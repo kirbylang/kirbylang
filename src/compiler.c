@@ -1040,10 +1040,60 @@ static void this_(Scanner *scanner, bool canAssign) {
   variable(scanner, false);
 }
 
+static bool isExpressionStart(Token *token) {
+  return getRule(token->type)->prefix != NULL;
+}
+
+static void endScopeExpression() {
+  current->scopeDepth--;
+
+  int locals = 0;
+
+  while (current->localCount > 0 &&
+         current->locals[current->localCount - 1].depth > current->scopeDepth) {
+
+    locals++;
+    current->localCount--;
+  }
+
+  emitBytes(OP_CLOSE_BLOCK_EXPR, locals);
+}
+
+static void blockExpression(Scanner *scanner, bool canAssign) {
+  beginScope();
+
+  bool producedValue = false;
+
+  while (!check(TOKEN_RIGHT_BRACE) && !check(TOKEN_EOF)) {
+    if (isExpressionStart(&parser.current)) {
+      expression(scanner);
+
+      if (check(TOKEN_RIGHT_BRACE)) {
+        producedValue = true;
+        break;
+      }
+
+      consume(scanner, TOKEN_SEMICOLON, "Expect ';' after expression.");
+
+      emitByte(OP_POP);
+    } else {
+      declaration(scanner);
+    }
+  }
+
+  consume(scanner, TOKEN_RIGHT_BRACE, "Expect '}' after block expression.");
+
+  if (!producedValue) {
+    emitByte(OP_NIL);
+  }
+
+  endScopeExpression();
+}
+
 ParseRule rules[] = {
     [TOKEN_LEFT_PAREN] = {grouping, call, PREC_CALL},
     [TOKEN_RIGHT_PAREN] = {NULL, NULL, PREC_NONE},
-    [TOKEN_LEFT_BRACE] = {NULL, NULL, PREC_NONE},
+    [TOKEN_LEFT_BRACE] = {blockExpression, NULL, PREC_NONE},
     [TOKEN_RIGHT_BRACE] = {NULL, NULL, PREC_NONE},
     [TOKEN_LEFT_BRACKET] = {arrayLiteral, indexValue, PREC_CALL},
     [TOKEN_RIGHT_BRACKET] = {NULL, NULL, PREC_NONE},
