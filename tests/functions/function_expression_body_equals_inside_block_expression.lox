@@ -1,0 +1,8 @@
+var result = {
+    fun map(value, fn) = fn(value);
+    fun pow(value) = value * value;
+
+    map(10, pow)
+};
+
+print result;

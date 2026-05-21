@@ -1,0 +1,26 @@
+== <script> ==
+0000    1 OP_NIL
+0001    | OP_RETURN
+== map ==
+0000    2 OP_GET_LOCAL        2
+0002    | OP_GET_LOCAL        1
+0004    | OP_CALL             1
+0006    | OP_RETURN
+== pow ==
+0000    3 OP_GET_LOCAL        1
+0002    | OP_GET_LOCAL        1
+0004    | OP_MULTIPLY
+0005    | OP_RETURN
+== <script> ==
+0000    2 OP_CLOSURE          1 <fn map>
+0002    3 OP_CLOSURE          2 <fn pow>
+0004    5 OP_GET_LOCAL        1
+0006    | OP_CONSTANT         3 '10.000000'
+0008    | OP_GET_LOCAL        2
+0010    | OP_CALL             2
+0012    6 OP_CLOSE_BLOCK      2
+0014    | OP_DEFINE_GLOBAL    0 'result'
+0016    8 OP_GET_GLOBAL       4 'result'
+0018    | OP_PRINT
+0019    9 OP_NIL
+0020    | OP_RETURN

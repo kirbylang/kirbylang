@@ -63,7 +63,8 @@ ClassCompiler *currentClass = NULL;
  * - Sets the function type being compiled
  * - Sets new compiler as the current one
  */
-static void initCompiler(Compiler *compiler, FunctionType functionType) {
+static void initCompiler(Compiler *compiler, FunctionType functionType,
+                         Token *nameToken) {
   TRACELN("  compiler.initCompiler()");
   compiler->enclosing = current;
   compiler->function = NULL;
@@ -95,7 +96,7 @@ ObjFunction *compile(Scanner *scanner, const char *source) {
   TRACELN("  compiler.compile()");
 
   Compiler compiler;
-  initCompiler(&compiler, TYPE_SCRIPT);
+  initCompiler(&compiler, TYPE_SCRIPT, NULL);
 
   parser.hadError = false;
   parser.panicMode = false;
@@ -436,10 +437,10 @@ static void block(Scanner *scanner) {
   consume(scanner, TOKEN_RIGHT_BRACE, "Expect '}' after block.");
 }
 
-static void function(Scanner *scanner, FunctionType type) {
+static void function(Scanner *scanner, FunctionType type, Token *nameToken) {
   TRACELN("  compiler.function()");
   Compiler compiler;
-  initCompiler(&compiler, type);
+  initCompiler(&compiler, type, nameToken);
   beginScope();
 
   consume(scanner, TOKEN_LEFT_PAREN, "Expect '(' after function name.");
@@ -481,9 +482,17 @@ static void function(Scanner *scanner, FunctionType type) {
   }
 }
 
+static void funExpression(Scanner *scanner, bool canAssign) {
+  TRACELN("  compiler.funExpression()");
+
+  function(scanner, TYPE_FUNCTION, NULL);
+}
+
 static void method(Scanner *scanner) {
   consume(scanner, TOKEN_IDENTIFIER, "Expect method name.");
   uint8_t constant = identifierConstant(&parser.previous);
+
+  Token nameToken = parser.previous;
 
   FunctionType type = TYPE_METHOD;
 
@@ -492,7 +501,7 @@ static void method(Scanner *scanner) {
     type = TYPE_INITIALIZER;
   }
 
-  function(scanner, type);
+  function(scanner, type, &nameToken);
 
   emitBytes(OP_METHOD, constant);
 }
@@ -543,7 +552,8 @@ static void funDeclaration(Scanner *scanner) {
 
   uint8_t global = parseVariable(scanner, "Expected function name");
   markInitialized();
-  function(scanner, TYPE_FUNCTION);
+  Token nameToken = parser.previous;
+  function(scanner, TYPE_FUNCTION, &nameToken);
   defineVariable(global);
 }
 
@@ -1065,10 +1075,6 @@ static void this_(Scanner *scanner, bool canAssign) {
   variable(scanner, false);
 }
 
-static bool isExpressionStart(Token *token) {
-  return getRule(token->type)->prefix != NULL;
-}
-
 static void endScopeExpression() {
   current->scopeDepth--;
 
@@ -1082,6 +1088,22 @@ static void endScopeExpression() {
   }
 
   emitBytes(OP_CLOSE_BLOCK_EXPR, locals);
+}
+
+/**
+ * Determine if a token should be treated as an expression inside a block
+ * expression
+ */
+static bool isExpressionStart(Token *token) {
+  switch (token->type) {
+  // Treat all `fun` keywords as function declarations inside block
+  // expressions.
+  case TOKEN_FUN:
+    return false;
+
+  default:
+    return getRule(token->type)->prefix != NULL;
+  }
 }
 
 static void blockExpression(Scanner *scanner, bool canAssign) {
@@ -1145,7 +1167,7 @@ ParseRule rules[] = {
     [TOKEN_ELSE] = {NULL, NULL, PREC_NONE},
     [TOKEN_FALSE] = {literal, NULL, PREC_NONE},
     [TOKEN_FOR] = {NULL, NULL, PREC_NONE},
-    [TOKEN_FUN] = {NULL, NULL, PREC_NONE},
+    [TOKEN_FUN] = {funExpression, NULL, PREC_NONE},
     [TOKEN_IF] = {ifExpression, NULL, PREC_NONE},
     [TOKEN_NIL] = {literal, NULL, PREC_NONE},
     [TOKEN_OR] = {NULL, or_, PREC_OR},
