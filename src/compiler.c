@@ -56,6 +56,8 @@ Chunk *compilingChunk;
 Compiler *current = NULL;
 ClassCompiler *currentClass = NULL;
 
+int lambdaCount = 0;
+
 /**
  * Initialize compiler to compile a function
  *
@@ -78,7 +80,11 @@ static void initCompiler(Compiler *compiler, FunctionType functionType,
   if (nameToken != NULL) {
     current->function->name = copyString(nameToken->start, nameToken->length);
   } else if (functionType == TYPE_FUNCTION) {
-    current->function->name = copyString("lambda", 7);
+    char lambdaName[32];
+
+    snprintf(lambdaName, sizeof(lambdaName), "lambda0x%x", lambdaCount);
+
+    current->function->name = copyString(lambdaName, sizeof(lambdaName));
   }
 
   Local *local = &current->locals[current->localCount++];
@@ -490,6 +496,8 @@ static void funExpression(Scanner *scanner, bool canAssign) {
   TRACELN("  compiler.funExpression()");
 
   (void)canAssign;
+
+  lambdaCount++;
 
   function(scanner, TYPE_FUNCTION, NULL);
 }

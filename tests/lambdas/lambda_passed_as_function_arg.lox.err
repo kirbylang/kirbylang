@@ -6,7 +6,7 @@
 0002    | OP_GET_LOCAL        1
 0004    | OP_CALL             1
 0006    | OP_RETURN
-== lambda ==
+== lambda0x1 ==
 0000    3 OP_GET_LOCAL        1
 0002    | OP_GET_LOCAL        1
 0004    | OP_MULTIPLY
@@ -16,7 +16,7 @@
 0002    | OP_DEFINE_GLOBAL    0 'map'
 0004    3 OP_GET_GLOBAL       2 'map'
 0006    | OP_CONSTANT         3 '10.000000'
-0008    | OP_CLOSURE          4 <fn lambda>
+0008    | OP_CLOSURE          4 <fn lambda0x1>
 0010    | OP_CALL             2
 0012    | OP_PRINT
 0013    4 OP_NIL

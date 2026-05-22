@@ -1,0 +1,60 @@
+var fn1 = fun () {};
+print fn1;
+
+var fn2 = fun () {};
+print fn2;
+
+var fn3 = fun () {};
+print fn3;
+
+var fn4 = fun () {};
+print fn4;
+
+var fn5 = fun () {};
+print fn5;
+
+var fn6 = fun () {};
+print fn6;
+
+var fn7 = fun () {};
+print fn7;
+
+var fn8 = fun () {};
+print fn8;
+
+var fn9 = fun () {};
+print fn9;
+
+var fn10 = fun () {};
+print fn10;
+
+var fn11 = fun () {};
+print fn11;
+
+var fn12 = fun () {};
+print fn12;
+
+var fn13 = fun () {};
+print fn13;
+
+var fn14 = fun () {};
+print fn14;
+
+var fn15 = fun () {};
+print fn15;
+
+var fn16 = fun () {};
+print fn16;
+
+var fn17 = fun () {};
+print fn17;
+
+var fn18 = fun () {};
+print fn18;
+
+var fn19 = fun () {};
+print fn19;
+
+var fn20 = fun () {};
+print fn20;
+

@@ -1,0 +1,146 @@
+== <script> ==
+0000    1 OP_NIL
+0001    | OP_RETURN
+== lambda0x1 ==
+0000    1 OP_NIL
+0001    | OP_RETURN
+== lambda0x2 ==
+0000    4 OP_NIL
+0001    | OP_RETURN
+== lambda0x3 ==
+0000    7 OP_NIL
+0001    | OP_RETURN
+== lambda0x4 ==
+0000   10 OP_NIL
+0001    | OP_RETURN
+== lambda0x5 ==
+0000   13 OP_NIL
+0001    | OP_RETURN
+== lambda0x6 ==
+0000   16 OP_NIL
+0001    | OP_RETURN
+== lambda0x7 ==
+0000   19 OP_NIL
+0001    | OP_RETURN
+== lambda0x8 ==
+0000   22 OP_NIL
+0001    | OP_RETURN
+== lambda0x9 ==
+0000   25 OP_NIL
+0001    | OP_RETURN
+== lambda0xa ==
+0000   28 OP_NIL
+0001    | OP_RETURN
+== lambda0xb ==
+0000   31 OP_NIL
+0001    | OP_RETURN
+== lambda0xc ==
+0000   34 OP_NIL
+0001    | OP_RETURN
+== lambda0xd ==
+0000   37 OP_NIL
+0001    | OP_RETURN
+== lambda0xe ==
+0000   40 OP_NIL
+0001    | OP_RETURN
+== lambda0xf ==
+0000   43 OP_NIL
+0001    | OP_RETURN
+== lambda0x10 ==
+0000   46 OP_NIL
+0001    | OP_RETURN
+== lambda0x11 ==
+0000   49 OP_NIL
+0001    | OP_RETURN
+== lambda0x12 ==
+0000   52 OP_NIL
+0001    | OP_RETURN
+== lambda0x13 ==
+0000   55 OP_NIL
+0001    | OP_RETURN
+== lambda0x14 ==
+0000   58 OP_NIL
+0001    | OP_RETURN
+== <script> ==
+0000    1 OP_CLOSURE          1 <fn lambda0x1>
+0002    | OP_DEFINE_GLOBAL    0 'fn1'
+0004    2 OP_GET_GLOBAL       2 'fn1'
+0006    | OP_PRINT
+0007    4 OP_CLOSURE          4 <fn lambda0x2>
+0009    | OP_DEFINE_GLOBAL    3 'fn2'
+0011    5 OP_GET_GLOBAL       5 'fn2'
+0013    | OP_PRINT
+0014    7 OP_CLOSURE          7 <fn lambda0x3>
+0016    | OP_DEFINE_GLOBAL    6 'fn3'
+0018    8 OP_GET_GLOBAL       8 'fn3'
+0020    | OP_PRINT
+0021   10 OP_CLOSURE         10 <fn lambda0x4>
+0023    | OP_DEFINE_GLOBAL    9 'fn4'
+0025   11 OP_GET_GLOBAL      11 'fn4'
+0027    | OP_PRINT
+0028   13 OP_CLOSURE         13 <fn lambda0x5>
+0030    | OP_DEFINE_GLOBAL   12 'fn5'
+0032   14 OP_GET_GLOBAL      14 'fn5'
+0034    | OP_PRINT
+0035   16 OP_CLOSURE         16 <fn lambda0x6>
+0037    | OP_DEFINE_GLOBAL   15 'fn6'
+0039   17 OP_GET_GLOBAL      17 'fn6'
+0041    | OP_PRINT
+0042   19 OP_CLOSURE         19 <fn lambda0x7>
+0044    | OP_DEFINE_GLOBAL   18 'fn7'
+0046   20 OP_GET_GLOBAL      20 'fn7'
+0048    | OP_PRINT
+0049   22 OP_CLOSURE         22 <fn lambda0x8>
+0051    | OP_DEFINE_GLOBAL   21 'fn8'
+0053   23 OP_GET_GLOBAL      23 'fn8'
+0055    | OP_PRINT
+0056   25 OP_CLOSURE         25 <fn lambda0x9>
+0058    | OP_DEFINE_GLOBAL   24 'fn9'
+0060   26 OP_GET_GLOBAL      26 'fn9'
+0062    | OP_PRINT
+0063   28 OP_CLOSURE         28 <fn lambda0xa>
+0065    | OP_DEFINE_GLOBAL   27 'fn10'
+0067   29 OP_GET_GLOBAL      29 'fn10'
+0069    | OP_PRINT
+0070   31 OP_CLOSURE         31 <fn lambda0xb>
+0072    | OP_DEFINE_GLOBAL   30 'fn11'
+0074   32 OP_GET_GLOBAL      32 'fn11'
+0076    | OP_PRINT
+0077   34 OP_CLOSURE         34 <fn lambda0xc>
+0079    | OP_DEFINE_GLOBAL   33 'fn12'
+0081   35 OP_GET_GLOBAL      35 'fn12'
+0083    | OP_PRINT
+0084   37 OP_CLOSURE         37 <fn lambda0xd>
+0086    | OP_DEFINE_GLOBAL   36 'fn13'
+0088   38 OP_GET_GLOBAL      38 'fn13'
+0090    | OP_PRINT
+0091   40 OP_CLOSURE         40 <fn lambda0xe>
+0093    | OP_DEFINE_GLOBAL   39 'fn14'
+0095   41 OP_GET_GLOBAL      41 'fn14'
+0097    | OP_PRINT
+0098   43 OP_CLOSURE         43 <fn lambda0xf>
+0100    | OP_DEFINE_GLOBAL   42 'fn15'
+0102   44 OP_GET_GLOBAL      44 'fn15'
+0104    | OP_PRINT
+0105   46 OP_CLOSURE         46 <fn lambda0x10>
+0107    | OP_DEFINE_GLOBAL   45 'fn16'
+0109   47 OP_GET_GLOBAL      47 'fn16'
+0111    | OP_PRINT
+0112   49 OP_CLOSURE         49 <fn lambda0x11>
+0114    | OP_DEFINE_GLOBAL   48 'fn17'
+0116   50 OP_GET_GLOBAL      50 'fn17'
+0118    | OP_PRINT
+0119   52 OP_CLOSURE         52 <fn lambda0x12>
+0121    | OP_DEFINE_GLOBAL   51 'fn18'
+0123   53 OP_GET_GLOBAL      53 'fn18'
+0125    | OP_PRINT
+0126   55 OP_CLOSURE         55 <fn lambda0x13>
+0128    | OP_DEFINE_GLOBAL   54 'fn19'
+0130   56 OP_GET_GLOBAL      56 'fn19'
+0132    | OP_PRINT
+0133   58 OP_CLOSURE         58 <fn lambda0x14>
+0135    | OP_DEFINE_GLOBAL   57 'fn20'
+0137   59 OP_GET_GLOBAL      59 'fn20'
+0139    | OP_PRINT
+0140   61 OP_NIL
+0141    | OP_RETURN

@@ -1,13 +1,13 @@
 == <script> ==
 0000    1 OP_NIL
 0001    | OP_RETURN
-== lambda ==
+== lambda0x1 ==
 0000    2 OP_CONSTANT         0 '1.000000'
 0002    | OP_CONSTANT         1 '1.000000'
 0004    | OP_ADD
 0005    | OP_RETURN
 == <script> ==
-0000    2 OP_CLOSURE          0 <fn lambda>
+0000    2 OP_CLOSURE          0 <fn lambda0x1>
 0002    | OP_CALL             0
 0004    | OP_PRINT
 0005    3 OP_NIL
