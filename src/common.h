@@ -16,13 +16,13 @@
 #define ANSI_COLOR_RESET "\x1b[0m"
 
 #ifdef DEBUG_TRACE_EXECUTION
-#define TRACE(fmt, ...) fprintf(stderr, fmt, ##__VA_ARGS__)
-#define TRACELN(fmt, ...) fprintf(stderr, fmt "\n", ##__VA_ARGS__)
+#define TRACE(...) fprintf(stderr, __VA_ARGS__)
+#define TRACELN(...) fprintf(stderr, __VA_ARGS__, "\n")
 #else
-#define TRACE(fmt, ...)                                                        \
+#define TRACE(...)                                                             \
   do {                                                                         \
   } while (0)
-#define TRACELN(fmt, ...)                                                      \
+#define TRACELN(...)                                                           \
   do {                                                                         \
   } while (0)
 #endif

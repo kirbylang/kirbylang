@@ -32,8 +32,8 @@ static void declaration(Scanner *scanner);
 static uint8_t makeConstant(Value value);
 static void emitByte(uint8_t byte);
 static void emitBytes(uint8_t byte1, uint8_t byte2);
-static ObjFunction *endCompiler();
-static void beginScope();
+static ObjFunction *endCompiler(void);
+static void beginScope(void);
 static void block(Scanner *scanner);
 static void ifStatement(Scanner *scanner);
 static void patchJump(int offset);
@@ -43,9 +43,9 @@ static void emitLoop(int loopStart);
 static void forStatement(Scanner *scanner);
 static void funDeclaration(Scanner *scanner);
 static void returnStatement(Scanner *scanner);
-static void emitImplicitReturn();
-static void emitValueReturn();
-static void endScope();
+static void emitImplicitReturn(void);
+static void emitValueReturn(void);
+static void endScope(void);
 static void classDeclaration(Scanner *scanner);
 static void namedVariable(Scanner *scanner, Token name, bool canAssign);
 static void indexValue(Scanner *scanner, bool canAssign);
@@ -66,6 +66,7 @@ ClassCompiler *currentClass = NULL;
 static void initCompiler(Compiler *compiler, FunctionType functionType,
                          Token *nameToken) {
   TRACELN("  compiler.initCompiler()");
+
   compiler->enclosing = current;
   compiler->function = NULL;
   compiler->type = functionType;
@@ -74,9 +75,10 @@ static void initCompiler(Compiler *compiler, FunctionType functionType,
   compiler->function = newFunction();
   current = compiler;
 
-  if (functionType != TYPE_SCRIPT) {
-    current->function->name =
-        copyString(parser.previous.start, parser.previous.length);
+  if (nameToken != NULL) {
+    current->function->name = copyString(nameToken->start, nameToken->length);
+  } else if (functionType == TYPE_FUNCTION) {
+    current->function->name = copyString("lambda", 7);
   }
 
   Local *local = &current->locals[current->localCount++];
@@ -92,7 +94,7 @@ static void initCompiler(Compiler *compiler, FunctionType functionType,
   }
 }
 
-ObjFunction *compile(Scanner *scanner, const char *source) {
+ObjFunction *compile(Scanner *scanner) {
   TRACELN("  compiler.compile()");
 
   Compiler compiler;
@@ -112,7 +114,7 @@ ObjFunction *compile(Scanner *scanner, const char *source) {
   return parser.hadError ? NULL : function;
 }
 
-void markCompilerRoots() {
+void markCompilerRoots(void) {
   Compiler *compiler = current;
   while (compiler != NULL) {
     markObject((Obj *)compiler->function);
@@ -173,9 +175,9 @@ static void statement(Scanner *scanner) {
 /**
  * Get the current chunk being compiled
  */
-static Chunk *currentChunk() { return &current->function->chunk; }
+static Chunk *currentChunk(void) { return &current->function->chunk; }
 
-static uint8_t previousOpCode() {
+static uint8_t previousOpCode(void) {
   Chunk *chunk = currentChunk();
 
   if (chunk->count == 0) {
@@ -333,7 +335,7 @@ static void addLocal(Token name) {
   local->isCaptured = false;
 }
 
-static void declareVariable() {
+static void declareVariable(void) {
   if (current->scopeDepth == 0)
     return;
 
@@ -343,6 +345,8 @@ static void declareVariable() {
 }
 
 static void and_(Scanner *scanner, bool canAssign) {
+  (void)canAssign;
+
   int endJump = emitJump(OP_JUMP_IF_FALSE);
 
   emitByte(OP_POP);
@@ -363,7 +367,7 @@ static uint8_t parseVariable(Scanner *scanner, const char *errorMessage) {
   return identifierConstant(&parser.previous);
 }
 
-static void markInitialized() {
+static void markInitialized(void) {
   if (current->scopeDepth == 0)
     return;
   current->locals[current->localCount - 1].depth = current->scopeDepth;
@@ -484,6 +488,8 @@ static void function(Scanner *scanner, FunctionType type, Token *nameToken) {
 
 static void funExpression(Scanner *scanner, bool canAssign) {
   TRACELN("  compiler.funExpression()");
+
+  (void)canAssign;
 
   function(scanner, TYPE_FUNCTION, NULL);
 }
@@ -655,6 +661,8 @@ static void ifStatement(Scanner *scanner) {
 static void ifExpression(Scanner *scanner, bool canAssign) {
   TRACELN("  compiler.ifExpression()");
 
+  (void)canAssign;
+
   consume(scanner, TOKEN_LEFT_PAREN, "Expect '(' after 'if'.");
   expression(scanner);
   consume(scanner, TOKEN_RIGHT_PAREN, "Expect ')' after condition.");
@@ -752,6 +760,8 @@ static void synchronize(Scanner *scanner) {
 static void grouping(Scanner *scanner, bool canAssign) {
   TRACELN("  compiler.grouping()");
 
+  (void)canAssign;
+
   expression(scanner);
   consume(scanner, TOKEN_RIGHT_PAREN, "Expect ')' after expression.");
 }
@@ -789,6 +799,8 @@ static int emitJump(uint8_t instruction) {
 
 static void binary(Scanner *scanner, bool canAssign) {
   TRACELN("  compiler.binary()");
+
+  (void)canAssign;
 
   TokenType operatorType = parser.previous.type;
   ParseRule *rule = getRule(operatorType);
@@ -836,6 +848,8 @@ static void binary(Scanner *scanner, bool canAssign) {
 static void call(Scanner *scanner, bool canAssign) {
   TRACELN("  compiler.call()");
 
+  (void)canAssign;
+
   uint8_t argCount = argumentList(scanner);
   emitBytes(OP_CALL, argCount);
 }
@@ -857,6 +871,9 @@ static void dot(Scanner *scanner, bool canAssign) {
 }
 
 static void literal(Scanner *scanner, bool canAssign) {
+  (void)scanner;
+  (void)canAssign;
+
   switch (parser.previous.type) {
   case TOKEN_FALSE:
     TRACELN("  compiler.literal() -> false");
@@ -878,6 +895,8 @@ static void literal(Scanner *scanner, bool canAssign) {
 static void unary(Scanner *scanner, bool canAssign) {
   TRACELN("  compiler.unary()");
 
+  (void)canAssign;
+
   TokenType operatorType = parser.previous.type;
 
   parsePrecedence(scanner, PREC_UNARY);
@@ -896,6 +915,8 @@ static void unary(Scanner *scanner, bool canAssign) {
 
 static void arrayLiteral(Scanner *scanner, bool canAssign) {
   int array_size = 0;
+
+  (void)canAssign;
 
   if (!check(TOKEN_RIGHT_BRACKET)) {
     do {
@@ -960,11 +981,16 @@ static void patchJump(int offset) {
 static void number(Scanner *scanner, bool canAssign) {
   TRACELN("  compiler.number()");
 
+  (void)scanner;
+  (void)canAssign;
+
   double value = strtod(parser.previous.start, NULL);
   emitConstant(NUMBER_VAL(value));
 }
 
 static void or_(Scanner *scanner, bool canAssign) {
+  (void)canAssign;
+
   int elseJump = emitJump(OP_JUMP_IF_FALSE);
   int endJump = emitJump(OP_JUMP);
 
@@ -978,6 +1004,8 @@ static void or_(Scanner *scanner, bool canAssign) {
 static void nullish(Scanner *scanner, bool canAssign) {
   int endJump = emitJump(OP_JUMP_IF_NOT_NIL);
 
+  (void)canAssign;
+
   emitByte(OP_POP);                  // discard left if it's nil
   parsePrecedence(scanner, PREC_OR); // compile RHS
 
@@ -987,6 +1015,9 @@ static void nullish(Scanner *scanner, bool canAssign) {
 static void string(Scanner *scanner, bool canAssign) {
   TRACELN("  compiler.string()");
 
+  (void)scanner;
+  (void)canAssign;
+
   const char *chars = parser.previous.start + 1;
   int length = parser.previous.length - 2;
 
@@ -994,7 +1025,7 @@ static void string(Scanner *scanner, bool canAssign) {
 
   int out = 0;
 
-  for (size_t i = 0; i < length; i++) {
+  for (int i = 0; i < length; i++) {
     if (chars[i] == '\\' && i + 1 < length) {
       i++;
 
@@ -1072,10 +1103,12 @@ static void this_(Scanner *scanner, bool canAssign) {
     return;
   }
 
+  (void)canAssign;
+
   variable(scanner, false);
 }
 
-static void endScopeExpression() {
+static void endScopeExpression(void) {
   current->scopeDepth--;
 
   int locals = 0;
@@ -1108,6 +1141,9 @@ static bool isExpressionStart(Token *token) {
 
 static void blockExpression(Scanner *scanner, bool canAssign) {
   beginScope();
+
+  (void)scanner;
+  (void)canAssign;
 
   bool producedValue = false;
 
@@ -1186,7 +1222,7 @@ ParseRule rules[] = {
 
 static ParseRule *getRule(TokenType type) { return &rules[type]; }
 
-static void emitImplicitReturn() {
+static void emitImplicitReturn(void) {
   TRACELN("  compiler.emitImplicitReturn()");
 
   if (current->type == TYPE_INITIALIZER) {
@@ -1198,7 +1234,7 @@ static void emitImplicitReturn() {
   emitByte(OP_RETURN);
 }
 
-static void emitValueReturn() {
+static void emitValueReturn(void) {
   TRACELN("  compiler.emitValueReturn()");
 
   // Assumes return value is already on the stack.
@@ -1211,7 +1247,7 @@ static void emitValueReturn() {
   emitByte(OP_RETURN);
 }
 
-static ObjFunction *endCompiler() {
+static ObjFunction *endCompiler(void) {
   TRACELN("  compiler.endCompiler()");
 
   if (previousOpCode() != OP_RETURN) {
@@ -1233,9 +1269,9 @@ static ObjFunction *endCompiler() {
   return function;
 }
 
-static void beginScope() { current->scopeDepth++; }
+static void beginScope(void) { current->scopeDepth++; }
 
-static void handleLocalsInScope() {
+static void handleLocalsInScope(void) {
   while (current->localCount > 0 &&
          current->locals[current->localCount - 1].depth > current->scopeDepth) {
     emitByte(OP_POP);
@@ -1249,7 +1285,7 @@ static void handleLocalsInScope() {
   }
 }
 
-static void endScope() {
+static void endScope(void) {
   current->scopeDepth--;
 
   handleLocalsInScope();

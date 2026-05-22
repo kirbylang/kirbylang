@@ -1,112 +1,217 @@
-# CMakeLists.txt
 cmake_minimum_required(VERSION 3.22)
-
-enable_testing()
 
 project(clox LANGUAGES C)
 
-# -----------------------------------------------------------------
-# General compiler flags
-# -----------------------------------------------------------------
+enable_testing()
+
+# -----------------------------------------------------------------------------
+# Options
+# -----------------------------------------------------------------------------
+
+option(BUILD_TESTS "Build unit tests" OFF)
+option(ENABLE_COVERAGE "Enable coverage reporting" OFF)
+
+# -----------------------------------------------------------------------------
+# Compiler configuration
+# -----------------------------------------------------------------------------
+
 set(CMAKE_C_STANDARD 99)
 set(CMAKE_C_STANDARD_REQUIRED ON)
-set(CMAKE_C_FLAGS "-Wall")
+set(CMAKE_C_EXTENSIONS OFF)
 
-# -----------------------------------------------------------------
-# Version‑generation
-# -----------------------------------------------------------------
+# -----------------------------------------------------------------------------
+# Version generation
+# -----------------------------------------------------------------------------
+
 set(VERSION_TXT ${CMAKE_SOURCE_DIR}/VERSION.txt)
-set(VERSION_C   ${CMAKE_SOURCE_DIR}/src/version.c)   # <-- generated in‑place
 
-# Custom command that creates/updates src/version.c
+# Generate into build tree
+set(GENERATED_DIR ${CMAKE_BINARY_DIR}/generated)
+set(VERSION_C ${GENERATED_DIR}/version.c)
+
 add_custom_command(
-    OUTPUT  ${VERSION_C}
-    COMMAND ${CMAKE_COMMAND} -E env bash ${CMAKE_SOURCE_DIR}/scripts/generate_version_c.sh ${VERSION_C}
-    DEPENDS ${VERSION_TXT} ${CMAKE_SOURCE_DIR}/scripts/generate_version_c.sh
-    COMMENT "Generating src/version.c from VERSION.txt"
+    OUTPUT ${VERSION_C}
+    COMMAND bash
+        ${CMAKE_SOURCE_DIR}/scripts/generate_version_c.sh
+        ${VERSION_C}
+        ${VERSION_TXT}
+    DEPENDS
+        ${VERSION_TXT}
+        ${CMAKE_SOURCE_DIR}/scripts/generate_version_c.sh
+    COMMENT "Generating version.c"
 )
 
-add_custom_target(generate_version_c
-    DEPENDS ${VERSION_C}
+# -----------------------------------------------------------------------------
+# Shared configuration helper
+# -----------------------------------------------------------------------------
+
+function(configure_clox_target TARGET_NAME)
+
+    target_include_directories(${TARGET_NAME}
+        PUBLIC
+            ${CMAKE_SOURCE_DIR}/src
+            ${GENERATED_DIR}
+    )
+
+    target_compile_options(${TARGET_NAME}
+        PRIVATE
+            -Wall
+            -Wextra
+            -Wpedantic
+    )
+
+    target_link_libraries(${TARGET_NAME}
+        PUBLIC
+            readline
+            m
+    )
+
+    if(ENABLE_COVERAGE)
+
+        target_compile_options(${TARGET_NAME}
+            PRIVATE
+                --coverage
+                -O0
+                -g
+        )
+
+        target_link_options(${TARGET_NAME}
+            PRIVATE
+                --coverage
+        )
+
+    endif()
+
+endfunction()
+
+# -----------------------------------------------------------------------------
+# Main runtime library
+# -----------------------------------------------------------------------------
+
+add_library(clox_core STATIC
+    src/asserts.c
+    src/chunk.c
+    src/compiler.c
+    src/debug.c
+    src/hashtable.c
+    src/memory.c
+    src/native.c
+    src/object.c
+    src/scanner.c
+    src/token.c
+    src/value.c
+    src/vm.c
+    ${VERSION_C}
 )
 
-set_source_files_properties(${VERSION_C} PROPERTIES GENERATED TRUE)
+configure_clox_target(clox_core)
 
-# -----------------------------------------------------------------
-# Source files
-# -----------------------------------------------------------------
-# Glob all .c files *except* the generated one – it will be added later.
-file(GLOB SRC_FILES CONFIGURE_DEPENDS src/*.c)
-list(FILTER SRC_FILES EXCLUDE REGEX ".*/version\\.c$")
+# -----------------------------------------------------------------------------
+# Debug runtime library
+# -----------------------------------------------------------------------------
 
-# ---
-# Test Source Files
-# ---
-file(GLOB UNIT_TEST_SRCS unit/*.c)
+add_library(clox_core_debug STATIC
+    src/asserts.c
+    src/chunk.c
+    src/compiler.c
+    src/debug.c
+    src/hashtable.c
+    src/memory.c
+    src/native.c
+    src/object.c
+    src/scanner.c
+    src/token.c
+    src/value.c
+    src/vm.c
+    ${VERSION_C}
+)
 
-option(BUILD_TESTS "Build unit‑tests for project" OFF)
+target_compile_definitions(clox_core_debug
+    PRIVATE
+        DEBUG_PRINT_CODE
+        DEBUG_STRESS_GC
+)
 
-# -----------------------------------------------------------------
-# Executables
-# -----------------------------------------------------------------
-# Add the generated file to the source list for each target.
-add_executable(clox ${SRC_FILES} ${VERSION_C})
-# target_compile_definitions(clox PRIVATE DEBUG_STRESS_GC)
+configure_clox_target(clox_core_debug)
+
+# -----------------------------------------------------------------------------
+# Main executable
+# -----------------------------------------------------------------------------
+
+add_executable(clox
+    src/main.c
+)
+
+target_link_libraries(clox
+    PRIVATE
+        clox_core
+)
+
+# Optional debug flags
 # target_compile_definitions(clox PRIVATE DEBUG_TRACE_EXECUTION)
 # target_compile_definitions(clox PRIVATE DEBUG_STRESS_GC)
 # target_compile_definitions(clox PRIVATE DEBUG_LOG_GC)
 
-add_executable(clox-test ${SRC_FILES} ${VERSION_C})
-target_compile_definitions(clox-test PRIVATE DEBUG_PRINT_CODE DEBUG_STRESS_GC)
+# -----------------------------------------------------------------------------
+# Debug executable
+# -----------------------------------------------------------------------------
 
-target_link_libraries(clox          PRIVATE readline m)
-target_link_libraries(clox-test     PRIVATE readline m)
-
-add_dependencies(clox generate_version_c)
-add_dependencies(clox-test generate_version_c)
-
-if (BUILD_TESTS)
-
-# -----------------------------------------------------------------
-# Tests
-# -----------------------------------------------------------------
-
-add_executable(clox-version-unit-test unit/version.c ${VERSION_C})
-add_dependencies(clox-version-unit-test generate_version_c)
-add_test(
-    NAME   clox-version-unit-test
-    COMMAND clox-version-unit-test
+add_executable(clox-test
+    src/main.c
 )
 
-add_executable(clox-token-token-test unit/token.c src/token.c ${VERSION_C})
-add_dependencies(clox-token-token-test generate_version_c)
-add_test(
-    NAME   clox-token-unit-test
-    COMMAND clox-token-unit-test
+target_link_libraries(clox-test
+    PRIVATE
+        clox_core_debug
 )
 
-add_executable(clox-value-unit-test unit/value.c src/value.c src/object.c src/hashtable.c src/chunk.c src/memory.c src/vm.c src/assert.c src/scanner.c src/compiler.c src/token.c src/native.c ${VERSION_C})
-add_dependencies(clox-value-unit-test generate_version_c)
-target_link_libraries(clox-value-unit-test     PRIVATE readline m)
-add_test(
-    NAME   clox-value-unit-test
-    COMMAND clox-value-unit-test
-)
+# -----------------------------------------------------------------------------
+# Unit tests
+# -----------------------------------------------------------------------------
 
-endif()
+if(BUILD_TESTS)
 
-# -----------------------------------------------------------------
-# Coverage option
-# -----------------------------------------------------------------
-option(ENABLE_COVERAGE "Enable coverage reporting" OFF)
+    add_executable(clox-version-unit-test
+        unit/version.c
+    )
 
-if(ENABLE_COVERAGE)
-    message(STATUS "Coverage enabled")
+    target_link_libraries(clox-version-unit-test
+        PRIVATE
+            clox_core_debug
+    )
 
-    # GCC/Clang-compatible flags
-    set(COVERAGE_COMPILE_FLAGS --coverage -O0 -g)
-    set(COVERAGE_LINK_FLAGS    --coverage)
+    add_test(
+        NAME clox-version-unit-test
+        COMMAND clox-version-unit-test
+    )
 
-    target_compile_options(clox-test PRIVATE ${COVERAGE_COMPILE_FLAGS})
-    target_link_options(clox-test PRIVATE ${COVERAGE_LINK_FLAGS})
+    add_executable(clox-token-unit-test
+        unit/token.c
+        src/token.c
+    )
+
+    target_link_libraries(clox-token-unit-test
+        PRIVATE
+            clox_core_debug
+    )
+
+    add_test(
+        NAME clox-token-unit-test
+        COMMAND clox-token-unit-test
+    )
+
+    add_executable(clox-value-unit-test
+        unit/value.c
+    )
+
+    target_link_libraries(clox-value-unit-test
+        PRIVATE
+            clox_core_debug
+    )
+
+    add_test(
+        NAME clox-value-unit-test
+        COMMAND clox-value-unit-test
+    )
+
 endif()

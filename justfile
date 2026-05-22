@@ -68,7 +68,7 @@ docker-run:
 
 # VERSION.txt => src/version.c
 generate_version_c:
-    ./scripts/generate_version_c.sh
+    ./scripts/generate_version_c.sh ./build/generated/version.c VERSION.txt
 
 increment-version *args:
     ./scripts/increment-version.sh {{ args }}

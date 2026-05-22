@@ -6,7 +6,7 @@
 #include <string.h>
 #include <time.h>
 
-#include "assert.h"
+#include "asserts.h"
 #include "memory.h"
 #include "native.h"
 #include "object.h"
@@ -77,12 +77,16 @@ void defineNative(VM *vm, const char *name, NativeFn function) {
 }
 
 static Value clockNative(VM *vm, int argCount, Value *args) {
+  (void)args;
+
   assertArgCount(vm, "clock", 0, argCount);
 
   return NUMBER_VAL((double)clock() / CLOCKS_PER_SEC);
 }
 
 static Value versionNative(VM *vm, int argCount, Value *args) {
+  (void)args;
+
   assertArgCount(vm, "__version__", 0, argCount);
 
   return OBJ_VAL(copyString(CLOX_VERSION, CLOX_VERSION_len));
@@ -102,12 +106,16 @@ static Value exitNative(VM *vm, int argCount, Value *args) {
 }
 
 static Value randNative(VM *vm, int argCount, Value *args) {
+  (void)args;
+
   assertArgCount(vm, "rand", 0, argCount);
 
   return NUMBER_VAL((double)rand());
 }
 
 static Value rand01Native(VM *vm, int argCount, Value *args) {
+  (void)args;
+
   assertArgCount(vm, "rand01", 0, argCount);
 
   return NUMBER_VAL((double)rand() / (double)RAND_MAX);
@@ -734,6 +742,8 @@ static Value argvNative(VM *vm, int argCount, Value *args) {
 
 static Value argcNative(VM *vm, int argCount, Value *args) {
   assertArgCount(vm, "argc", 0, argCount);
+
+  (void)args;
 
   int argc = vm->argc;
 

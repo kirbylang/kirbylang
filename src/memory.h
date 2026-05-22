@@ -40,13 +40,13 @@ void markValue(Value value);
 /**
  * Check for unreachable/unsed objects and free them from memory
  */
-void collectGarbage();
+void collectGarbage(void);
 
 /**
  * Free object from memory
  *
  * This happens when the VM is shutting down
  */
-void freeObjects();
+void freeObjects(void);
 
 #endif

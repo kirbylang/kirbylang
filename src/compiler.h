@@ -82,11 +82,11 @@ typedef struct ClassCompiler {
  *
  * This compiled object can be ran by the VM.
  */
-ObjFunction *compile(Scanner *scanner, const char *source);
+ObjFunction *compile(Scanner *scanner);
 
 /**
  * Mark all objects that are referenced by the compiler as roots
  */
-void markCompilerRoots();
+void markCompilerRoots(void);
 
 #endif

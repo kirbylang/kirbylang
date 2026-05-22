@@ -67,7 +67,7 @@ ObjClosure *newClosure(ObjFunction *function) {
   return closure;
 }
 
-ObjFunction *newFunction() {
+ObjFunction *newFunction(void) {
   ObjFunction *function = ALLOCATE_OBJ(ObjFunction, OBJ_FUNCTION);
   function->arity = 0;
   function->upvalueCount = 0;
@@ -98,7 +98,7 @@ ObjNative *newNative(NativeFn function) {
   return native;
 }
 
-ObjArray *newArray() {
+ObjArray *newArray(void) {
   ObjArray *array = ALLOCATE_OBJ(ObjArray, OBJ_ARRAY);
   array->count = 0;
   array->capacity = 0;
@@ -386,6 +386,9 @@ void printObjectToErr(Value value) {
   case OBJ_BOUND_METHOD:
     fprintf(stderr, "<fn method %s>",
             AS_BOUND_METHOD(value)->method->function->name->chars);
+    break;
+  case OBJ_ARRAY:
+    fprintf(stderr, "<array size=%d>", AS_ARRAY(value)->count);
     break;
   }
 }

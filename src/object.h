@@ -104,7 +104,7 @@ typedef struct {
   ObjClosure *method;
 } ObjBoundMethod;
 
-ObjArray *newArray();
+ObjArray *newArray(void);
 
 /**
  * Allocate a new class
@@ -128,7 +128,7 @@ typedef struct {
 /**
  * Allocate a new function
  */
-ObjFunction *newFunction();
+ObjFunction *newFunction(void);
 
 /**
  * Allocate a new class instance

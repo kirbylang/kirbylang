@@ -5,7 +5,7 @@
 #include <stdlib.h>
 #include <time.h>
 
-#include "assert.h"
+#include "asserts.h"
 #include "common.h"
 #include "compiler.h"
 #include "debug.h"
@@ -16,12 +16,13 @@
 #include "version.h"
 #include "vm.h"
 
-static void resetStack();
+static void resetStack(void);
 void runtimeError(VM *vm, const char *format, ...);
 static Value peekStack(int distance);
-static InterpretResult run();
-static void concatenate();
+static InterpretResult run(void);
+static void concatenate(void);
 static bool call(ObjClosure *function, int argCount);
+static InterpretResult run(void);
 
 VM vm;
 
@@ -47,12 +48,12 @@ InterpretResult interpret(const char *source) {
   Scanner scanner;
   initScanner(&scanner, source);
 
-  ObjFunction *function = compile(&scanner, source);
+  ObjFunction *function = compile(&scanner);
 
   return interpretFunction(function);
 }
 
-static void resetStack() {
+static void resetStack(void) {
   vm.stackTop = vm.stack;
   vm.frameCount = 0;
   vm.openUpvalues = NULL;
@@ -105,7 +106,7 @@ void initVM(int argc, char *argv[]) {
   defineAllNatives(&vm);
 }
 
-void freeVM() {
+void freeVM(void) {
   TRACELN("vm.freeVM()");
   freeTable(&vm.globals);
   freeTable(&vm.strings);
@@ -118,7 +119,7 @@ void pushOnStack(Value value) {
   vm.stackTop++;
 }
 
-Value popFromStack() {
+Value popFromStack(void) {
   vm.stackTop--;
   return *vm.stackTop;
 }
@@ -275,7 +276,7 @@ static bool isFalsey(Value value) {
   return IS_NIL(value) || (IS_BOOL(value) && !AS_BOOL(value));
 }
 
-static void concatenate() {
+static void concatenate(void) {
   ObjString *b = AS_STRING(peekStack(0));
   ObjString *a = AS_STRING(peekStack(1));
 
@@ -291,7 +292,7 @@ static void concatenate() {
   pushOnStack(OBJ_VAL(result));
 }
 
-static InterpretResult run() {
+static InterpretResult run(void) {
   CallFrame *frame = &vm.frames[vm.frameCount - 1];
 #define READ_BYTE() (*frame->ip++)
 #define READ_CONSTANT()                                                        \

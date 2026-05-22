@@ -81,7 +81,7 @@ void initVM(int argc, char *argv[]);
  * - Garbage collect class initializer string
  * - Free all objects
  */
-void freeVM();
+void freeVM(void);
 
 /**
  * Interpret a compiled function's bytecode
@@ -102,7 +102,7 @@ void pushOnStack(Value value);
 
 // Pop a value from the VM's stack and returns it
 // @return The popped value
-Value popFromStack();
+Value popFromStack(void);
 
 // Pop n values from the VM's stack
 void popNFromStack(int count);
