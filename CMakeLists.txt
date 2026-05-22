@@ -42,7 +42,7 @@ add_custom_command(
 )
 
 # -----------------------------------------------------------------------------
-# Shared configuration helper
+# Shared configuration helpers
 # -----------------------------------------------------------------------------
 
 function(configure_clox_target TARGET_NAME)
@@ -65,6 +65,10 @@ function(configure_clox_target TARGET_NAME)
             readline
             m
     )
+
+endfunction()
+
+function(enable_coverage TARGET_NAME)
 
     if(ENABLE_COVERAGE)
 
@@ -105,6 +109,7 @@ add_library(clox_core STATIC
 )
 
 configure_clox_target(clox_core)
+enable_coverage(clox_core)
 
 # -----------------------------------------------------------------------------
 # Debug runtime library
@@ -133,6 +138,7 @@ target_compile_definitions(clox_core_debug
 )
 
 configure_clox_target(clox_core_debug)
+enable_coverage(clox_core_debug)
 
 # -----------------------------------------------------------------------------
 # Main executable
@@ -146,6 +152,9 @@ target_link_libraries(clox
     PRIVATE
         clox_core
 )
+
+configure_clox_target(clox)
+enable_coverage(clox)
 
 # Optional debug flags
 # target_compile_definitions(clox PRIVATE DEBUG_TRACE_EXECUTION)
@@ -165,6 +174,9 @@ target_link_libraries(clox-test
         clox_core_debug
 )
 
+configure_clox_target(clox-test)
+enable_coverage(clox-test)
+
 # -----------------------------------------------------------------------------
 # Unit tests
 # -----------------------------------------------------------------------------
@@ -179,6 +191,9 @@ if(BUILD_TESTS)
         PRIVATE
             clox_core_debug
     )
+
+    configure_clox_target(clox-version-unit-test)
+    enable_coverage(clox-version-unit-test)
 
     add_test(
         NAME clox-version-unit-test
@@ -195,6 +210,9 @@ if(BUILD_TESTS)
             clox_core_debug
     )
 
+    configure_clox_target(clox-token-unit-test)
+    enable_coverage(clox-token-unit-test)
+
     add_test(
         NAME clox-token-unit-test
         COMMAND clox-token-unit-test
@@ -208,6 +226,9 @@ if(BUILD_TESTS)
         PRIVATE
             clox_core_debug
     )
+
+    configure_clox_target(clox-value-unit-test)
+    enable_coverage(clox-value-unit-test)
 
     add_test(
         NAME clox-value-unit-test
