@@ -42,6 +42,26 @@ add_custom_command(
 )
 
 # -----------------------------------------------------------------------------
+# Shared source list
+# -----------------------------------------------------------------------------
+
+set(CLOX_SOURCES
+    src/asserts.c
+    src/chunk.c
+    src/compiler.c
+    src/debug.c
+    src/hashtable.c
+    src/memory.c
+    src/native.c
+    src/object.c
+    src/scanner.c
+    src/token.c
+    src/value.c
+    src/vm.c
+    ${VERSION_C}
+)
+
+# -----------------------------------------------------------------------------
 # Shared configuration helpers
 # -----------------------------------------------------------------------------
 
@@ -89,46 +109,37 @@ function(enable_coverage TARGET_NAME)
 endfunction()
 
 # -----------------------------------------------------------------------------
-# Main runtime library
+# Main runtime library (static)
 # -----------------------------------------------------------------------------
 
 add_library(clox_core STATIC
-    src/asserts.c
-    src/chunk.c
-    src/compiler.c
-    src/debug.c
-    src/hashtable.c
-    src/memory.c
-    src/native.c
-    src/object.c
-    src/scanner.c
-    src/token.c
-    src/value.c
-    src/vm.c
-    ${VERSION_C}
+    ${CLOX_SOURCES}
 )
 
 configure_clox_target(clox_core)
 enable_coverage(clox_core)
 
 # -----------------------------------------------------------------------------
+# Shared runtime library
+# -----------------------------------------------------------------------------
+
+add_library(cloxlib SHARED
+    ${CLOX_SOURCES}
+)
+
+set_target_properties(cloxlib PROPERTIES
+    OUTPUT_NAME clox
+)
+
+configure_clox_target(cloxlib)
+enable_coverage(cloxlib)
+
+# -----------------------------------------------------------------------------
 # Debug runtime library
 # -----------------------------------------------------------------------------
 
 add_library(clox_core_debug STATIC
-    src/asserts.c
-    src/chunk.c
-    src/compiler.c
-    src/debug.c
-    src/hashtable.c
-    src/memory.c
-    src/native.c
-    src/object.c
-    src/scanner.c
-    src/token.c
-    src/value.c
-    src/vm.c
-    ${VERSION_C}
+    ${CLOX_SOURCES}
 )
 
 target_compile_definitions(clox_core_debug
