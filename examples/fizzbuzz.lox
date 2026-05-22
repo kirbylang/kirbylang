@@ -1,18 +1,16 @@
-var arg = argv(4) ?? prompt("n: ");
-var n = parseNumber(arg);
+var arg = argv(4) ?? prompt("limit: ");
+var limit = parseNumber(arg);
 
-fun fizzbuzz(i) {
-    if (i % 5 == 0 and i % 3 == 0) {
-        return "FizzBuzz";
-    } else if (i % 3 == 0) {
-        return "Fizz";
-    } else if (i % 5 == 0) {
-        return "Buzz";
-    } else {
-        return i;
-    }
-}
+fun fizzbuzz(n) = if (n % 5 == 0 and n % 3 == 0) {
+    "FizzBuzz"
+} else if (n % 3 == 0) {
+    "Fizz"
+} else if (n % 5 == 0) {
+    "Buzz"
+} else {
+    n
+};
 
-for (var i = 1; i <= n; i = i + 1) {
+for (var i = 1; i <= limit; i = i + 1) {
     print fizzbuzz(i);
 }
