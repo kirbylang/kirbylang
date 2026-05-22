@@ -29,6 +29,7 @@ These are the documented changes to the language/syntax from the original Lox la
   - [ ] `arrSort(array, fn)`
   - [ ] `arrMap(array, fn)`
   - [ ] `arrJoinToString(array, separator)`
+- A shared library is now generated on build: `libclox.{so,dylib,dll}`
 
 ## 0.2.0
 
