@@ -11,7 +11,7 @@
 #include "version.h"
 #include "vm.h"
 
-static void repl();
+static void repl(void);
 static char *readFile(const char *path);
 static void runFile(const char *path);
 static void runCode(const char *source);
@@ -75,7 +75,7 @@ int main(int argc, char *argv[]) {
   return 64;
 }
 
-static void repl() {
+static void repl(void) {
   fprintf(stderr, "========================================\n");
   fprintf(stderr, "REPL %30s clox\n\n", CLOX_VERSION);
   fprintf(stderr, "Enter code or type 'exit' to quit.\n\n");
