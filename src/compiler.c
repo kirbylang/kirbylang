@@ -128,6 +128,7 @@ void markCompilerRoots(void) {
   }
 }
 
+// Parse the current declaration statement
 static void declaration(Scanner *scanner) {
   TRACELN("  compiler.declaration()");
   if (match(scanner, TOKEN_CLASS)) {
@@ -144,6 +145,7 @@ static void declaration(Scanner *scanner) {
     synchronize(scanner);
 }
 
+// Parse the current statement
 static void statement(Scanner *scanner) {
   TRACELN("  compiler.statement()");
 
@@ -183,6 +185,7 @@ static void statement(Scanner *scanner) {
  */
 static Chunk *currentChunk(void) { return &current->function->chunk; }
 
+// Get the last emitted opcode
 static uint8_t previousOpCode(void) {
   Chunk *chunk = currentChunk();
 
@@ -220,6 +223,7 @@ static void errorAtCurrent(const char *message) {
   errorAt(&parser.current, message);
 }
 
+// Advance the scanner to the next token. Skip error tokens.
 static void advance(Scanner *scanner) {
   // TRACELN(ANSI_COLOR_YELLOW "compiler.advance()" ANSI_COLOR_RESET);
 
@@ -261,20 +265,29 @@ static void parsePrecedence(Scanner *scanner, Precedence precedence) {
   TRACELN("  compiler.parsePrecedence() end");
 }
 
-static uint8_t identifierConstant(Token *name) {
-  return makeConstant(OBJ_VAL(copyString(name->start, name->length)));
+// Make a new constant from an identifier token
+static uint8_t identifierConstant(Token *identifier) {
+  return makeConstant(
+      OBJ_VAL(copyString(identifier->start, identifier->length)));
 }
 
+// Compare two identifier tokens for equality
 static bool identifiersEqual(Token *a, Token *b) {
   if (a->length != b->length)
     return false;
   return memcmp(a->start, b->start, a->length) == 0;
 }
 
-static int resolveLocal(Compiler *compiler, Token *name) {
+// Resolve local variable by identifier
+//
+// @returns -1 if not found, otherwise the index of the local from the
+// function's locals
+static int resolveLocal(Compiler *compiler, Token *identifier) {
+  // Loop through the locals in reverse order to find by identifier
   for (int i = compiler->localCount - 1; i >= 0; i--) {
     Local *local = &compiler->locals[i];
-    if (identifiersEqual(name, &local->name)) {
+
+    if (identifiersEqual(identifier, &local->name)) {
       if (local->depth == -1) {
         error("Can't read local variable in its own initializer");
       }
@@ -373,6 +386,7 @@ static uint8_t parseVariable(Scanner *scanner, const char *errorMessage) {
   return identifierConstant(&parser.previous);
 }
 
+// Initialize a new local variable
 static void markInitialized(void) {
   if (current->scopeDepth == 0)
     return;
@@ -390,10 +404,14 @@ static void defineVariable(uint8_t global) {
   emitBytes(OP_DEFINE_GLOBAL, global);
 }
 
-static void consume(Scanner *scanner, TokenType type, const char *message) {
-  TRACELN("  compiler.consume(%s)", tokenTypeToString(type));
+// Consumes current token if it matches expected token type
+//
+// Errors if the current token doesn't match
+static void consume(Scanner *scanner, TokenType expectedTokenType,
+                    const char *message) {
+  TRACELN("  compiler.consume(%s)", tokenTypeToString(expectedTokenType));
 
-  if (parser.current.type == type) {
+  if (parser.current.type == expectedTokenType) {
     TRACELN("  compiler.consume matches = true");
     advance(scanner);
     return;
@@ -422,8 +440,10 @@ static uint8_t argumentList(Scanner *scanner) {
   return argCount;
 }
 
+// Checks if the current token matches expected token type
 static bool check(TokenType type) { return parser.current.type == type; }
 
+// Consumes current token if it matches expected token type
 static bool match(Scanner *scanner, TokenType type) {
   if (!check(type))
     return false;
@@ -431,12 +451,14 @@ static bool match(Scanner *scanner, TokenType type) {
   return true;
 }
 
+// Parse the current expression
 static void expression(Scanner *scanner) {
   TRACELN("  compiler.expression()");
 
   parsePrecedence(scanner, PREC_ASSIGNMENT);
 }
 
+// Parse the current block statement
 static void block(Scanner *scanner) {
   TRACELN("  compiler.block()");
 
@@ -447,6 +469,9 @@ static void block(Scanner *scanner) {
   consume(scanner, TOKEN_RIGHT_BRACE, "Expect '}' after block.");
 }
 
+// Parse the current function
+//
+// The `fun` keyword and name identifier are already parsed at this point
 static void function(Scanner *scanner, FunctionType type, Token *nameToken) {
   TRACELN("  compiler.function()");
   Compiler compiler;
@@ -533,6 +558,7 @@ static void fieldDeclaration(Scanner *scanner) {
   consume(scanner, TOKEN_SEMICOLON, "Expect ';' after field.");
   emitBytes(OP_FIELD, constant);
 }
+
 static void classDeclaration(Scanner *scanner) {
   consume(scanner, TOKEN_IDENTIFIER, "Expect class name.");
   Token className = parser.previous;
