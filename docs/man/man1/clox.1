@@ -1,0 +1,98 @@
+.\" Man page for clox (main.c)
+.TH CLOX 1 "May 2026" "0.2.0" "Clox Manual"
+.SH NAME
+clox \- a simple Lox language interpreter
+.SH SYNOPSIS
+.B clox
+.RB [ -h ]
+.RB [ -v ]
+.RB [ -r ]
+.RB [ -f \fIfile\fR ]
+.RB [ -c \fIsource\fR ]
+.SH DESCRIPTION
+.B clox
+is the command‑line driver for a Lox interpreter written in C.  It
+initialises the virtual machine, loads the standard library, and then
+executes code according to the selected mode.
+
+The program supports the following operation modes:
+
+.TP
+.BR \-h ", " \-\-help
+Print a short usage summary and exit.
+
+.TP
+.BR \-v ", " \-\-version
+Print the interpreter version (the value of
+.BR CLOX_VERSION )
+and exit.
+
+.TP
+.BR \-r ", " \-\-repl
+Start an interactive Read‑Eval‑Print Loop (REPL) after loading the
+standard library.  The REPL reads lines from the user via
+.BR readline (3),
+stores history, and evaluates each line using
+.BR interpret (3).
+Typing
+.I exit
+or sending EOF terminates the REPL.
+
+.TP
+.BR \-f " " \fIfile\fR ", " \-\-file=\fIfile\fR
+Execute the Lox source file
+.I file
+after the standard library has been loaded.  The file path must be
+provided as the next command‑line argument after the option.
+
+.TP
+.BR \-c " " \fIsource\fR ", " \-\-code=\fIsource\fR
+Interpret the literal Lox source code supplied on the command line
+in
+.I source,
+again after loading the standard library.
+
+If none of the above options are given, the program prints the usage
+message and exits with status 64.
+
+.SH OPTIONS
+.TP
+.B \-h, \-\-help
+Show the help message.
+.TP
+.B \-v, \-\-version
+Show the version string.
+.TP
+.B \-r, \-\-repl
+Run the REPL.
+.TP
+.B \-f, \-\-file
+Run a file; the next argument is taken as the file path.
+.TP
+.B \-c, \-\-code
+Run a string of source code; the next argument is interpreted as the
+source.
+
+.SH EXIT STATUS
+.TP
+0
+Successful execution or when the user exits the REPL.
+.TP
+64
+Invalid command‑line usage (no valid option supplied).
+.TP
+65
+Compilation error in the executed source.
+.TP
+70
+Runtime error in the executed source.
+.TP
+Other non‑zero values
+Returned by internal calls such as
+.BR malloc (3)
+or
+.BR fopen (3)
+ on failure.
+
+.SH AUTHOR
+Kylee Tilley <kyleetilley@gmail.com>

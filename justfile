@@ -76,3 +76,6 @@ increment-version *args:
 # Run one of the example programs
 examples file *args:
     ./scripts/run-example.sh {{ file }} {{ args }}
+
+man:
+    man ./docs/man/man1/clox.1
