@@ -66,7 +66,7 @@ struct Compiler {
 };
 
 typedef struct {
-  ObjString *name;
+  Token name;
   uint8_t slot;
 } Field;
 

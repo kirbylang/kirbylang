@@ -40,6 +40,10 @@ typedef enum {
   OP_FIELD,
   OP_GET_PROPERTY,
   OP_SET_PROPERTY,
+  // Similar to OP_GET_PROPERTY but uses slot index instead of constant index
+  OP_GET_FIELD,
+  // Similar to OP_GET_PROPERTY but uses slot index instead of constant index
+  OP_SET_FIELD,
   OP_METHOD,
   OP_INVOKE,
   OP_ARRAY,

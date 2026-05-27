@@ -43,7 +43,7 @@ InterpretResult interpretFunction(ObjFunction *function) {
 }
 
 InterpretResult interpret(const char *source) {
-  TRACELN("vm.interpret()");
+  TRACELN("\nvm.interpret()\n");
 
   Scanner scanner;
   initScanner(&scanner, source);
@@ -564,6 +564,36 @@ static InterpretResult run(void) {
     case OP_CLASS:
       pushOnStack(OBJ_VAL(newClass(READ_STRING())));
       break;
+    case OP_GET_FIELD: {
+      uint8_t slot = READ_BYTE(); // the slot was encoded at compile time
+      // The receiver is on top of the stack.
+      // It must be an instance.
+      if (!IS_INSTANCE(peekStack(0))) {
+        runtimeError(&vm, "Only instances have fields.");
+        return INTERPRET_RUNTIME_ERROR;
+      }
+      ObjInstance *instance = AS_INSTANCE(peekStack(0));
+      Value value = instance->fields[slot];
+      // Replace the receiver on the stack with the field value.
+      popFromStack(); // pop instance
+      pushOnStack(value);
+      break;
+    }
+    case OP_SET_FIELD: {
+      uint8_t slot = READ_BYTE();
+      // Stack layout: … [value] [instance]
+      if (!IS_INSTANCE(peekStack(1))) {
+        runtimeError(&vm, "Only instances have fields.");
+        return INTERPRET_RUNTIME_ERROR;
+      }
+      ObjInstance *instance = AS_INSTANCE(peekStack(1));
+      Value value = peekStack(0); // the value to store
+      instance->fields[slot] = value;
+
+      // The semantics of the original OP_SET_PROPERTY are to leave the value on
+      // the stack. We already have it there, so just keep it.
+      break;
+    }
     case OP_GET_PROPERTY: {
       if (!IS_INSTANCE(peekStack(0))) {
         runtimeError(&vm, "Only instances have properties.");

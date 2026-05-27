@@ -10,10 +10,11 @@
       "request": "launch",
       "program": "${workspaceFolder}/build/clox",
       "args": [
-        "${workspaceFolder}/tests/native_functions/native_fn_exit_call_no_args_passed.lox"
+        "-f",
+        "${workspaceFolder}/tests/classes/class_this_set_property.lox"
       ],
       "stopAtEntry": false,
-      "cwd": "${fileDirname}",
+      "cwd": "${workspaceFolder}",
       "environment": [],
       "externalConsole": false,
       "MIMode": "lldb"

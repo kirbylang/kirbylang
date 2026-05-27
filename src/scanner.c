@@ -39,15 +39,15 @@ void initScanner(Scanner *scanner, const char *source) {
  * Advance scanner to the next character and return the associated token
  */
 Token scanToken(Scanner *scanner) {
-  TRACELN(ANSI_COLOR_GREEN "scanner.scanToken()" ANSI_COLOR_RESET);
+  // TRACELN(ANSI_BOLD "\nscanner.scanToken()" ANSI_COLOR_RESET);
 
   skipWhitespace(scanner);
 
   scanner->start = scanner->current;
 
   if (isAtEnd(scanner)) {
-    TRACELN(ANSI_COLOR_GREEN
-            "scanner.scanToken.isAtEnd = true" ANSI_COLOR_RESET);
+    // TRACELN(ANSI_COLOR_GREEN
+    //         "scanner.scanToken.isAtEnd = true" ANSI_COLOR_RESET);
     return makeToken(scanner, TOKEN_EOF);
   }
 
@@ -125,13 +125,14 @@ static bool isAlpha(char c) {
 static char peek(Scanner *scanner) {
   char peeked = *scanner->current;
 
-  TRACELN("scanner.peek() -> '%c'", peeked);
+  // TRACELN("scanner.peek() -> '%s'",
+  //         peeked == '\n' ? "\\n" : (char[]){peeked, '\0'});
 
   return peeked;
 }
 
 static char advance(Scanner *scanner) {
-  TRACELN("scanner.advance()");
+  // TRACELN("scanner.advance()");
   if (isAtEnd(scanner))
     return '\0';
   scanner->current++;
@@ -141,14 +142,14 @@ static char advance(Scanner *scanner) {
 static bool isAtEnd(Scanner *scanner) { return *scanner->current == '\0'; }
 
 static char peekNext(Scanner *scanner) {
-  TRACELN("scanner.peekNext()");
+  // TRACELN("scanner.peekNext()");
   if (isAtEnd(scanner) || scanner->current[1] == '\0')
     return '\0';
   return scanner->current[1];
 }
 
 static bool match(Scanner *scanner, char expected) {
-  TRACELN("scanner.match(%s)", &expected);
+  // TRACELN("scanner.match(%s)", &expected);
 
   if (isAtEnd(scanner))
     return false;
@@ -165,10 +166,12 @@ static Token makeToken(Scanner *scanner, TokenType type) {
 #ifdef DEBUG_TRACE_EXECUTION
   if (type == TOKEN_IDENTIFIER) {
     const char *typeString = tokenTypeToString(type);
-    TRACELN("scanner.makeToken() -> %s = '%.*s'", typeString, length, start);
+    TRACELN(ANSI_BOLD "\nscanner.makeToken() -> %s = '%.*s'\n" ANSI_COLOR_RESET,
+            typeString, length, start);
   } else {
     const char *typeString = tokenTypeToString(type);
-    TRACELN("scanner.makeToken() -> %s", typeString);
+    TRACELN(ANSI_BOLD "\nscanner.makeToken() -> %s\n" ANSI_COLOR_RESET,
+            typeString);
   }
 #endif // DEBUG_TRACE_EXECUTION
 
@@ -252,7 +255,7 @@ static TokenType identifierType(Scanner *scanner) {
 }
 
 static Token identifier(Scanner *scanner) {
-  TRACELN("scanner.identifier()");
+  // TRACELN("scanner.identifier()");
 
   while (isAlpha(peek(scanner)) || isDigit(peek(scanner)))
     advance(scanner);
@@ -260,7 +263,7 @@ static Token identifier(Scanner *scanner) {
 }
 
 static Token number(Scanner *scanner) {
-  TRACELN("scanner.number()");
+  // TRACELN("scanner.number()");
 
   while (isDigit(peek(scanner)))
     advance(scanner);
@@ -278,7 +281,7 @@ static Token number(Scanner *scanner) {
 }
 
 static Token string(Scanner *scanner) {
-  TRACELN("scanner.string()");
+  // TRACELN("scanner.string()");
 
   while (peek(scanner) != '"' && !isAtEnd(scanner)) {
     if (peek(scanner) == '\n') {
@@ -301,7 +304,7 @@ static Token string(Scanner *scanner) {
 }
 
 static void skipWhitespace(Scanner *scanner) {
-  TRACELN("\nscanner.skipWhitespace()\n");
+  // TRACELN("\nscanner.skipWhitespace()\n");
 
   for (;;) {
     char c = peek(scanner);

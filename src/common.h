@@ -14,10 +14,17 @@
 #define ANSI_COLOR_MAGENTA "\x1b[35m"
 #define ANSI_COLOR_CYAN "\x1b[36m"
 #define ANSI_COLOR_RESET "\x1b[0m"
+#define ANSI_BOLD "\x1b[1m"
 
 #ifdef DEBUG_TRACE_EXECUTION
 #define TRACE(...) fprintf(stderr, __VA_ARGS__)
-#define TRACELN(...) fprintf(stderr, __VA_ARGS__, "\n")
+#define TRACELN(...)                                                           \
+  do {                                                                         \
+    fprintf(stderr, __VA_ARGS__);                                              \
+    fputc('\n', stderr);                                                       \
+    break;                                                                     \
+                                                                               \
+  } while (0)
 #else
 #define TRACE(...)                                                             \
   do {                                                                         \

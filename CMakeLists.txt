@@ -116,6 +116,11 @@ add_library(clox_core STATIC
     ${CLOX_SOURCES}
 )
 
+target_compile_definitions(clox_core
+    PRIVATE
+        DEBUG_TRACE_EXECUTION
+)
+
 configure_clox_target(clox_core)
 enable_coverage(clox_core)
 
@@ -168,7 +173,7 @@ configure_clox_target(clox)
 enable_coverage(clox)
 
 # Optional debug flags
-# target_compile_definitions(clox PRIVATE DEBUG_TRACE_EXECUTION)
+target_compile_definitions(clox PRIVATE DEBUG_TRACE_EXECUTION)
 # target_compile_definitions(clox PRIVATE DEBUG_STRESS_GC)
 # target_compile_definitions(clox PRIVATE DEBUG_LOG_GC)
 

@@ -156,13 +156,15 @@ ObjString *takeString(char *chars, int length) {
 ObjString *copyString(const char *chars, int length) {
   uint32_t hash = hashString(chars, length);
 
-  ObjString *interned = tableFindString(&vm.strings, chars, length, hash);
-  if (interned != NULL) {
-    TRACELN("object.copyString() found interned string");
-    return interned;
-  } else {
-    TRACELN("object.copyString() not interned string");
-  }
+  // TRACELN("object.copyString() '%.*s'", length, chars);
+
+  // ObjString *interned = tableFindString(&vm.strings, chars, length, hash);
+  // if (interned != NULL) {
+  //   TRACELN(ANSI_COLOR_GREEN " found interned string" ANSI_COLOR_RESET);
+  //   return interned;
+  // } else {
+  //   TRACELN(ANSI_COLOR_RED " not interned string" ANSI_COLOR_RESET);
+  // }
 
   char *heapChars = ALLOCATE(char, length + 1);
   memcpy(heapChars, chars, length);

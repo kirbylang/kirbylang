@@ -358,9 +358,10 @@ static void declareVariable(void) {
   if (current->scopeDepth == 0)
     return;
 
-  Token *name = &parser.previous;
-  TRACELN("  compiler.declareVariable() -> %s", AS_CSTRING(OBJ_VAL(name)));
-  addLocal(*name);
+  Token name = parser.previous;
+  TRACELN("  compiler.declareVariable() -> %*.s", name.length, name.start);
+
+  addLocal(name);
 }
 
 static void and_(Scanner *scanner, bool canAssign) {
@@ -409,10 +410,10 @@ static void defineVariable(uint8_t global) {
 // Errors if the current token doesn't match
 static void consume(Scanner *scanner, TokenType expectedTokenType,
                     const char *message) {
-  TRACELN("  compiler.consume(%s)", tokenTypeToString(expectedTokenType));
+  // TRACELN("  compiler.consume(%s)", tokenTypeToString(expectedTokenType));
 
   if (parser.current.type == expectedTokenType) {
-    TRACELN("  compiler.consume matches = true");
+    // TRACELN("  compiler.consume matches = true");
     advance(scanner);
     return;
   }
@@ -545,8 +546,42 @@ static void method(Scanner *scanner) {
   emitBytes(OP_METHOD, constant);
 }
 
+static void registerField(Token name) {
+  TRACELN("  compiler.registerField('%.*s')", name.length, name.start);
+
+  for (size_t i = 0; i < currentClass->fieldCount; i++) {
+    Field *field = &currentClass->fields[i];
+
+    if (identifiersEqual(&name, &field->name)) {
+      errorAt(&name, "Duplicate field declaration");
+      return;
+    }
+  }
+
+  if (currentClass->fieldCount == 256) {
+    errorAt(&name, "Too many fields in the class (max 256)");
+    return;
+  }
+
+  TRACELN("    fieldCount = %d", currentClass->fieldCount);
+
+  uint8_t slot = currentClass->fieldCount;
+  TRACELN("    slot = %d", slot);
+  Field *field = &currentClass->fields[slot];
+  field->name = name;
+  field->slot = slot;
+
+  currentClass->fieldCount++;
+}
+
 static void fieldDeclaration(Scanner *scanner) {
   consume(scanner, TOKEN_IDENTIFIER, "Expect field name.");
+
+  Token fieldName = parser.previous;
+
+  TRACELN("  compiler.fieldDeclaration('%.*s')", fieldName.length,
+          fieldName.start);
+
   uint8_t constant = identifierConstant(&parser.previous);
 
   if (match(scanner, TOKEN_EQUAL)) {
@@ -556,12 +591,19 @@ static void fieldDeclaration(Scanner *scanner) {
   }
 
   consume(scanner, TOKEN_SEMICOLON, "Expect ';' after field.");
+
+  registerField(fieldName);
+
   emitBytes(OP_FIELD, constant);
 }
 
 static void classDeclaration(Scanner *scanner) {
   consume(scanner, TOKEN_IDENTIFIER, "Expect class name.");
   Token className = parser.previous;
+
+  TRACELN("  compiler.classDeclaration('%.*s')", className.length,
+          className.start);
+
   uint8_t nameConstant = identifierConstant(&parser.previous);
   declareVariable();
 
@@ -569,11 +611,17 @@ static void classDeclaration(Scanner *scanner) {
   defineVariable(nameConstant);
 
   ClassCompiler classCompiler;
+  classCompiler.fieldCount = 0;
   classCompiler.enclosing = currentClass;
   currentClass = &classCompiler;
 
   namedVariable(scanner, className, false);
+
+  TRACELN(ANSI_BOLD ANSI_COLOR_MAGENTA
+          "\nParsing class body\n" ANSI_COLOR_RESET);
+
   consume(scanner, TOKEN_LEFT_BRACE, "Expect '{' before class body.");
+
   while (!check(TOKEN_RIGHT_BRACE) && !check(TOKEN_EOF)) {
     if (match(scanner, TOKEN_VAR)) {
       fieldDeclaration(scanner);
@@ -581,8 +629,25 @@ static void classDeclaration(Scanner *scanner) {
       method(scanner);
     }
   }
+
   consume(scanner, TOKEN_RIGHT_BRACE, "Expect '}' after class body.");
+
+  TRACELN(ANSI_BOLD ANSI_COLOR_MAGENTA
+          "\nDone parsing class body\n" ANSI_COLOR_RESET);
+
   emitByte(OP_POP);
+
+  TRACELN("  Assigning field slots... Field count: %d",
+          currentClass->fieldCount);
+
+  // Assign field slots
+  for (int i = 0; i < currentClass->fieldCount; i++) {
+    Field *field = &currentClass->fields[i];
+
+    TRACELN("  Assigning field slot %d to '%.*s': %p", field->name.length,
+            field->name.start, field);
+    field->slot = (uint8_t)i;
+  }
 
   currentClass = currentClass->enclosing;
 }
@@ -888,19 +953,60 @@ static void call(Scanner *scanner, bool canAssign) {
   emitBytes(OP_CALL, argCount);
 }
 
+static bool resolveFieldSlot(Token *name, uint8_t *outSlot) {
+  TRACELN("  compiler.resolveFieldSlot()");
+
+  for (ClassCompiler *cc = currentClass; cc != NULL; cc = cc->enclosing) {
+    for (size_t i = 0; i < cc->fieldCount; i++) {
+      Field *field = &cc->fields[i];
+
+      if (identifiersEqual(&name, &field->name)) {
+        TRACELN("    compiler.resolveFieldSlot() FOUND!");
+        *outSlot = field->slot;
+        return true;
+      }
+    }
+  }
+
+  TRACELN("    compiler.resolveFieldSlot() NOT FOUND!");
+
+  return false;
+}
+
 static void dot(Scanner *scanner, bool canAssign) {
+  TRACELN("compiler.dot()");
+
   consume(scanner, TOKEN_IDENTIFIER, "Expect property name after '.'.");
+  Token nameToken = parser.previous;
   uint8_t name = identifierConstant(&parser.previous);
+
+  uint8_t slot;
+  bool isField = resolveFieldSlot(&nameToken, &slot);
+
+  if (isField) {
+    TRACELN("  is a field, resolved to slot: %d", slot);
+  } else {
+    TRACELN("  not a field");
+  }
 
   if (canAssign && match(scanner, TOKEN_EQUAL)) {
     expression(scanner);
-    emitBytes(OP_SET_PROPERTY, name);
+
+    if (isField) {
+      emitBytes(OP_SET_FIELD, slot);
+    } else {
+      emitBytes(OP_SET_PROPERTY, name);
+    }
   } else if (match(scanner, TOKEN_LEFT_PAREN)) {
     uint8_t argCount = argumentList(scanner);
     emitBytes(OP_INVOKE, name);
     emitByte(argCount);
   } else {
-    emitBytes(OP_GET_PROPERTY, name);
+    if (isField) {
+      emitBytes(OP_GET_FIELD, slot);
+    } else {
+      emitBytes(OP_GET_PROPERTY, name);
+    }
   }
 }
 
@@ -1105,14 +1211,14 @@ static void namedVariable(Scanner *scanner, Token name, bool canAssign) {
   uint8_t getOp, setOp;
   int arg = resolveLocal(current, &name);
   if (arg != -1) {
-    TRACELN("  compiler.namedVariable() is local");
+    TRACELN("    compiler.namedVariable() is local");
     getOp = OP_GET_LOCAL;
     setOp = OP_SET_LOCAL;
   } else if ((arg = resolveUpvalue(current, &name)) != -1) {
     getOp = OP_GET_UPVALUE;
     setOp = OP_SET_UPVALUE;
   } else {
-    TRACELN("  compiler.namedVariable() is global");
+    TRACELN("    compiler.namedVariable() is global");
     arg = identifierConstant(&name);
     getOp = OP_GET_GLOBAL;
     setOp = OP_SET_GLOBAL;
@@ -1299,6 +1405,7 @@ static ObjFunction *endCompiler(void) {
 #endif
 
   current = current->enclosing;
+  // currentClass = NULL; TODO
 
   return function;
 }
