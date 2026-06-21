@@ -10,7 +10,7 @@ typedef struct {
   Token previous;
   bool hadError;
   bool panicMode;
-} Parser;
+} CompilerParser;
 
 typedef enum {
   PREC_NONE,

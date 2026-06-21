@@ -8,6 +8,8 @@
 #include "chunk.h"
 #include "common.h"
 #include "debug.h"
+#include "lexer.h"
+#include "token_stream.h"
 #include "version.h"
 #include "vm.h"
 
@@ -17,13 +19,16 @@ static void runFile(const char *path);
 static void runCode(const char *source);
 
 const char *help_message =
-    "Usage: clox [-h] [-v] [-r|-f [path]|-c [source]] \n";
+    "Usage: clox [-h] [-v] [-r|-f [path]|-c [source]|-l [path]] \n";
 
-const char *short_options = "hvrfc";
-static struct option long_options[] = {
-    {"help", no_argument, 0, 'h'}, {"version", no_argument, 0, 'v'},
-    {"file", no_argument, 0, 'f'}, {"repl", no_argument, 0, 'r'},
-    {"code", no_argument, 0, 'c'}, {0, 0, 0, 0}};
+const char *short_options = "hvrfcl";
+static struct option long_options[] = {{"help", no_argument, 0, 'h'},
+                                       {"version", no_argument, 0, 'v'},
+                                       {"file", no_argument, 0, 'f'},
+                                       {"repl", no_argument, 0, 'r'},
+                                       {"code", no_argument, 0, 'c'},
+                                       {"lex", no_argument, 0, 'l'},
+                                       {0, 0, 0, 0}};
 
 int main(int argc, char *argv[]) {
   int saved_argc = argc;
@@ -60,6 +65,20 @@ int main(int argc, char *argv[]) {
       freeVM();
       free(saved_argv);
       return 0;
+    case 'l': {
+      const char *source = readFile(argv[optind]);
+      TokenStream tokens = lex(source);
+
+      for (int i = 0; i < tokens.count; i++) {
+        Token token = tsAdvance(&tokens);
+
+        printf("%s\n", tokenTypeToString(token.type));
+      }
+
+      free(saved_argv);
+      tsFree(&tokens);
+      return 0;
+    }
     case 'c':
       initVM(saved_argc, saved_argv);
       runFile("stdlib/stdlib.lox");

@@ -47,14 +47,18 @@ add_custom_command(
 
 set(CLOX_SOURCES
     src/asserts.c
+    src/ast.c
     src/chunk.c
     src/compiler.c
     src/debug.c
     src/hashtable.c
+    src/lexer.c
     src/memory.c
     src/native.c
     src/object.c
+    src/parser.c
     src/scanner.c
+    src/token_stream.c
     src/token.c
     src/value.c
     src/vm.c
@@ -115,6 +119,12 @@ endfunction()
 add_library(clox_core STATIC
     ${CLOX_SOURCES}
 )
+
+# target_compile_definitions(clox_core
+#     PRIVATE
+#         DEBUG_TRACE_EXECUTION
+# )
+
 
 configure_clox_target(clox_core)
 enable_coverage(clox_core)
@@ -244,6 +254,23 @@ if(BUILD_TESTS)
     add_test(
         NAME clox-value-unit-test
         COMMAND clox-value-unit-test
+    )
+
+    add_executable(clox-parser-unit-test
+        unit/parser.c
+    )
+
+    target_link_libraries(clox-parser-unit-test
+        PRIVATE
+            clox_core_debug
+    )
+
+    configure_clox_target(clox-parser-unit-test)
+    enable_coverage(clox-parser-unit-test)
+
+    add_test(
+        NAME clox-parser-unit-test
+        COMMAND clox-parser-unit-test
     )
 
 endif()

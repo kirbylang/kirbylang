@@ -23,7 +23,7 @@ static bool check(TokenType type);
 static void varDeclaration(Scanner *scanner);
 static void expressionStatement(Scanner *scanner);
 static void consume(Scanner *scanner, TokenType type, const char *message);
-static ParseRule *getRule(TokenType type);
+static ParseRule *get_rule(TokenType type);
 static bool match(Scanner *scanner, TokenType type);
 static void statement(Scanner *scanner);
 static void printStatement(Scanner *scanner);
@@ -51,7 +51,7 @@ static void namedVariable(Scanner *scanner, Token name, bool canAssign);
 static void indexValue(Scanner *scanner, bool canAssign);
 static void error(const char *message);
 
-Parser parser;
+CompilerParser compilerParser;
 Chunk *compilingChunk;
 Compiler *current = NULL;
 ClassCompiler *currentClass = NULL;
@@ -106,8 +106,8 @@ ObjFunction *compile(Scanner *scanner) {
   Compiler compiler;
   initCompiler(&compiler, TYPE_SCRIPT, NULL);
 
-  parser.hadError = false;
-  parser.panicMode = false;
+  compilerParser.hadError = false;
+  compilerParser.panicMode = false;
 
   advance(scanner);
 
@@ -117,7 +117,7 @@ ObjFunction *compile(Scanner *scanner) {
 
   ObjFunction *function = endCompiler();
 
-  return parser.hadError ? NULL : function;
+  return compilerParser.hadError ? NULL : function;
 }
 
 void markCompilerRoots(void) {
@@ -141,7 +141,7 @@ static void declaration(Scanner *scanner) {
     statement(scanner);
   }
 
-  if (parser.panicMode)
+  if (compilerParser.panicMode)
     synchronize(scanner);
 }
 
@@ -197,10 +197,10 @@ static uint8_t previousOpCode(void) {
 }
 
 static void errorAt(Token *token, const char *message) {
-  if (parser.panicMode)
+  if (compilerParser.panicMode)
     return;
 
-  parser.hadError = true;
+  compilerParser.hadError = true;
 
   fprintf(stderr, "[line %d] Error", token->line);
 
@@ -214,28 +214,28 @@ static void errorAt(Token *token, const char *message) {
   }
 
   fprintf(stderr, ": %s\n", message);
-  parser.hadError = true;
+  compilerParser.hadError = true;
 }
 
-static void error(const char *message) { errorAt(&parser.previous, message); }
+static void error(const char *message) { errorAt(&compilerParser.previous, message); }
 
 static void errorAtCurrent(const char *message) {
-  errorAt(&parser.current, message);
+  errorAt(&compilerParser.current, message);
 }
 
 // Advance the scanner to the next token. Skip error tokens.
 static void advance(Scanner *scanner) {
   // TRACELN(ANSI_COLOR_YELLOW "compiler.advance()" ANSI_COLOR_RESET);
 
-  parser.previous = parser.current;
+  compilerParser.previous = compilerParser.current;
 
   for (;;) {
-    parser.current = scanToken(scanner);
+    compilerParser.current = scanToken(scanner);
 
-    if (parser.current.type != TOKEN_ERROR)
+    if (compilerParser.current.type != TOKEN_ERROR)
       break;
 
-    errorAtCurrent(parser.current.start);
+    errorAtCurrent(compilerParser.current.start);
   }
 }
 
@@ -243,7 +243,7 @@ static void parsePrecedence(Scanner *scanner, Precedence precedence) {
   TRACELN("  compiler.parsePrecedence(%d)", precedence);
 
   advance(scanner);
-  ParseFn prefixRule = getRule(parser.previous.type)->prefix;
+  ParseFn prefixRule = get_rule(compilerParser.previous.type)->prefix;
   if (prefixRule == NULL) {
     error("Expect expression.");
     return;
@@ -252,9 +252,9 @@ static void parsePrecedence(Scanner *scanner, Precedence precedence) {
   bool canAssign = precedence <= PREC_ASSIGNMENT;
   prefixRule(scanner, canAssign);
 
-  while (precedence <= getRule(parser.current.type)->precedence) {
+  while (precedence <= get_rule(compilerParser.current.type)->precedence) {
     advance(scanner);
-    ParseFn infixRule = getRule(parser.previous.type)->infix;
+    ParseFn infixRule = get_rule(compilerParser.previous.type)->infix;
     infixRule(scanner, canAssign);
   }
 
@@ -358,7 +358,7 @@ static void declareVariable(void) {
   if (current->scopeDepth == 0)
     return;
 
-  Token *name = &parser.previous;
+  Token *name = &compilerParser.previous;
   TRACELN("  compiler.declareVariable() -> %s", AS_CSTRING(OBJ_VAL(name)));
   addLocal(*name);
 }
@@ -383,7 +383,7 @@ static uint8_t parseVariable(Scanner *scanner, const char *errorMessage) {
   if (current->scopeDepth > 0)
     return 0;
 
-  return identifierConstant(&parser.previous);
+  return identifierConstant(&compilerParser.previous);
 }
 
 // Initialize a new local variable
@@ -411,7 +411,7 @@ static void consume(Scanner *scanner, TokenType expectedTokenType,
                     const char *message) {
   TRACELN("  compiler.consume(%s)", tokenTypeToString(expectedTokenType));
 
-  if (parser.current.type == expectedTokenType) {
+  if (compilerParser.current.type == expectedTokenType) {
     TRACELN("  compiler.consume matches = true");
     advance(scanner);
     return;
@@ -441,7 +441,7 @@ static uint8_t argumentList(Scanner *scanner) {
 }
 
 // Checks if the current token matches expected token type
-static bool check(TokenType type) { return parser.current.type == type; }
+static bool check(TokenType type) { return compilerParser.current.type == type; }
 
 // Consumes current token if it matches expected token type
 static bool match(Scanner *scanner, TokenType type) {
@@ -529,14 +529,14 @@ static void funExpression(Scanner *scanner, bool canAssign) {
 
 static void method(Scanner *scanner) {
   consume(scanner, TOKEN_IDENTIFIER, "Expect method name.");
-  uint8_t constant = identifierConstant(&parser.previous);
+  uint8_t constant = identifierConstant(&compilerParser.previous);
 
-  Token nameToken = parser.previous;
+  Token nameToken = compilerParser.previous;
 
   FunctionType type = TYPE_METHOD;
 
-  if (parser.previous.length == 4 &&
-      memcmp(parser.previous.start, "init", 4) == 0) {
+  if (compilerParser.previous.length == 4 &&
+      memcmp(compilerParser.previous.start, "init", 4) == 0) {
     type = TYPE_INITIALIZER;
   }
 
@@ -547,7 +547,7 @@ static void method(Scanner *scanner) {
 
 static void fieldDeclaration(Scanner *scanner) {
   consume(scanner, TOKEN_IDENTIFIER, "Expect field name.");
-  uint8_t constant = identifierConstant(&parser.previous);
+  uint8_t constant = identifierConstant(&compilerParser.previous);
 
   if (match(scanner, TOKEN_EQUAL)) {
     expression(scanner);
@@ -561,8 +561,8 @@ static void fieldDeclaration(Scanner *scanner) {
 
 static void classDeclaration(Scanner *scanner) {
   consume(scanner, TOKEN_IDENTIFIER, "Expect class name.");
-  Token className = parser.previous;
-  uint8_t nameConstant = identifierConstant(&parser.previous);
+  Token className = compilerParser.previous;
+  uint8_t nameConstant = identifierConstant(&compilerParser.previous);
   declareVariable();
 
   emitBytes(OP_CLASS, nameConstant);
@@ -592,7 +592,7 @@ static void funDeclaration(Scanner *scanner) {
 
   uint8_t global = parseVariable(scanner, "Expected function name");
   markInitialized();
-  Token nameToken = parser.previous;
+  Token nameToken = compilerParser.previous;
   function(scanner, TYPE_FUNCTION, &nameToken);
   defineVariable(global);
 }
@@ -768,12 +768,12 @@ static void whileStatement(Scanner *scanner) {
 }
 
 static void synchronize(Scanner *scanner) {
-  parser.panicMode = false;
+  compilerParser.panicMode = false;
 
-  while (parser.current.type != TOKEN_EOF) {
-    if (parser.previous.type == TOKEN_SEMICOLON)
+  while (compilerParser.current.type != TOKEN_EOF) {
+    if (compilerParser.previous.type == TOKEN_SEMICOLON)
       return;
-    switch (parser.current.type) {
+    switch (compilerParser.current.type) {
     case TOKEN_CLASS:
     case TOKEN_FUN:
     case TOKEN_VAR:
@@ -804,7 +804,7 @@ static void emitByte(uint8_t byte) {
   // #ifdef DEBUG_PRINT_CODE
   //   TRACELN("  compiler.emitByte() -> %s", disassembleByte(byte));
   // #endif
-  writeChunk(currentChunk(), byte, parser.previous.line);
+  writeChunk(currentChunk(), byte, compilerParser.previous.line);
 }
 
 static void emitBytes(uint8_t byte1, uint8_t byte2) {
@@ -836,8 +836,8 @@ static void binary(Scanner *scanner, bool canAssign) {
 
   (void)canAssign;
 
-  TokenType operatorType = parser.previous.type;
-  ParseRule *rule = getRule(operatorType);
+  TokenType operatorType = compilerParser.previous.type;
+  ParseRule *rule = get_rule(operatorType);
   parsePrecedence(scanner, (Precedence)(rule->precedence + 1));
 
   switch (operatorType) {
@@ -890,7 +890,7 @@ static void call(Scanner *scanner, bool canAssign) {
 
 static void dot(Scanner *scanner, bool canAssign) {
   consume(scanner, TOKEN_IDENTIFIER, "Expect property name after '.'.");
-  uint8_t name = identifierConstant(&parser.previous);
+  uint8_t name = identifierConstant(&compilerParser.previous);
 
   if (canAssign && match(scanner, TOKEN_EQUAL)) {
     expression(scanner);
@@ -908,7 +908,7 @@ static void literal(Scanner *scanner, bool canAssign) {
   (void)scanner;
   (void)canAssign;
 
-  switch (parser.previous.type) {
+  switch (compilerParser.previous.type) {
   case TOKEN_FALSE:
     TRACELN("  compiler.literal() -> false");
     emitByte(OP_FALSE);
@@ -931,7 +931,7 @@ static void unary(Scanner *scanner, bool canAssign) {
 
   (void)canAssign;
 
-  TokenType operatorType = parser.previous.type;
+  TokenType operatorType = compilerParser.previous.type;
 
   parsePrecedence(scanner, PREC_UNARY);
 
@@ -1018,7 +1018,7 @@ static void number(Scanner *scanner, bool canAssign) {
   (void)scanner;
   (void)canAssign;
 
-  double value = strtod(parser.previous.start, NULL);
+  double value = strtod(compilerParser.previous.start, NULL);
   emitConstant(NUMBER_VAL(value));
 }
 
@@ -1052,8 +1052,8 @@ static void string(Scanner *scanner, bool canAssign) {
   (void)scanner;
   (void)canAssign;
 
-  const char *chars = parser.previous.start + 1;
-  int length = parser.previous.length - 2;
+  const char *chars = compilerParser.previous.start + 1;
+  int length = compilerParser.previous.length - 2;
 
   char *buffer = ALLOCATE(char, length + 1);
 
@@ -1128,7 +1128,7 @@ static void namedVariable(Scanner *scanner, Token name, bool canAssign) {
 
 static void variable(Scanner *scanner, bool canAssign) {
   TRACELN("  compiler.variable()");
-  namedVariable(scanner, parser.previous, canAssign);
+  namedVariable(scanner, compilerParser.previous, canAssign);
 }
 
 static void this_(Scanner *scanner, bool canAssign) {
@@ -1169,7 +1169,7 @@ static bool isExpressionStart(Token *token) {
     return false;
 
   default:
-    return getRule(token->type)->prefix != NULL;
+    return get_rule(token->type)->prefix != NULL;
   }
 }
 
@@ -1182,7 +1182,7 @@ static void blockExpression(Scanner *scanner, bool canAssign) {
   bool producedValue = false;
 
   while (!check(TOKEN_RIGHT_BRACE) && !check(TOKEN_EOF)) {
-    if (isExpressionStart(&parser.current)) {
+    if (isExpressionStart(&compilerParser.current)) {
       expression(scanner);
 
       if (check(TOKEN_RIGHT_BRACE)) {
@@ -1254,7 +1254,7 @@ ParseRule rules[] = {
     [TOKEN_EOF] = {NULL, NULL, PREC_NONE},
 };
 
-static ParseRule *getRule(TokenType type) { return &rules[type]; }
+static ParseRule *get_rule(TokenType type) { return &rules[type]; }
 
 static void emitImplicitReturn(void) {
   TRACELN("  compiler.emitImplicitReturn()");
@@ -1291,7 +1291,7 @@ static ObjFunction *endCompiler(void) {
   ObjFunction *function = current->function;
 
 #ifdef DEBUG_PRINT_CODE
-  if (!parser.hadError) {
+  if (!compilerParser.hadError) {
     disassembleChunk(currentChunk(), function->name != NULL
                                          ? function->name->chars
                                          : "<script>");
