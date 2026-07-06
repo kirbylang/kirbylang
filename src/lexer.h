@@ -8,22 +8,7 @@
  * @param source The source code to lex
  * @return A token array containing the lexed tokens
  */
-TokenStream lex(const char *source) {
-  TokenStream ts;
-  tsInit(&ts);
-
-  Scanner scanner;
-  initScanner(&scanner, source);
-
-  for (;;) {
-    Token token = scanToken(&scanner);
-    tsWrite(&ts, token);
-    if (token.type == TOKEN_EOF)
-      break;
-  }
-
-  return ts;
-}
+TokenStream lex(const char *source);
 
 #define clox_lexer_h
 #endif // clox_lexer_h

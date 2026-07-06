@@ -1,4 +1,5 @@
 #include "token.h"
+#include <stdio.h>
 
 const char *tokenTypeToString(TokenType type) {
   switch (type) {
@@ -10,6 +11,10 @@ const char *tokenTypeToString(TokenType type) {
     return "TOKEN_LEFT_BRACE";
   case TOKEN_RIGHT_BRACE:
     return "TOKEN_RIGHT_BRACE";
+  case TOKEN_LEFT_BRACKET:
+    return "TOKEN_LEFT_BRACKET";
+  case TOKEN_RIGHT_BRACKET:
+    return "TOKEN_RIGHT_BRACKET";
   case TOKEN_COMMA:
     return "TOKEN_COMMA";
   case TOKEN_DOT:
@@ -85,6 +90,7 @@ const char *tokenTypeToString(TokenType type) {
   case TOKEN_EOF:
     return "TOKEN_EOF";
   default:
+    fprintf(stderr, "Unknown token: %d", type);
     return "UNKNOWN TOKEN";
   }
 }

@@ -1,11 +1,18 @@
 #include <stdbool.h>
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
 #include "ast.h"
 #include "lexer.h"
 #include "object.h"
+#include "parser.h"
 #include "token.h"
 #include "token_stream.h"
+
+#ifndef TRACELN
+#define TRACELN(...) ((void)0)
+#endif
 
 typedef struct {
   TokenStream *tokens;
@@ -29,24 +36,34 @@ typedef enum {
   PREC_PRIMARY
 } Precedence;
 
-static AstNode *expression(Parser *p);
-static AstNode *statement(Parser *p);
-static AstNode *declaration(Parser *p);
-static AstNode *parse_precedence(Parser *p, Precedence prec);
-static void parse_error_at(Parser *p, Token *token, const char *message);
-static void error_at_current(Parser *p, const char *message);
-static void parse_error(Parser *p, const char *message);
-
-typedef AstNode *(*PrefixFn)(Parser *p, bool canAssign);
-typedef AstNode *(*InfixFn)(Parser *p, AstNode *left, bool canAssign);
+// Prefix parsers never have a left-hand node yet (nothing precedes them),
+// so they take one fewer argument than infix parsers, which always
+// receive the already-parsed left operand.
+typedef AstNode *(*PrefixParseFn)(Parser *p, bool canAssign);
+typedef AstNode *(*InfixParseFn)(Parser *p, AstNode *left, bool canAssign);
 
 typedef struct {
-  PrefixFn prefix;
-  InfixFn infix;
+  PrefixParseFn prefix;
+  InfixParseFn infix;
   Precedence precedence;
 } ParseRule;
 
-// Token Functions
+static AstNode *expression(Parser *p);
+static AstNode *statement(Parser *p, bool *isTail);
+static AstNode *declaration(Parser *p, bool *isTail);
+static AstNode *parse_precedence(Parser *p, Precedence prec);
+static ParseRule *get_rule(TokenType type);
+static void parse_error_at(Parser *p, Token *token, const char *message);
+static void error_at_current(Parser *p, const char *message);
+static void parse_error(Parser *p, const char *message);
+static AstNode *blockExpr(Parser *p, bool canAssign);
+static BlockNode parseBlock(Parser *p);
+static AstNode *lambda(Parser *p, bool canAssign);
+static AstNode *ifExpr(Parser *p, bool canAssign);
+static AstNode *nullish_(Parser *p, AstNode *left, bool canAssign);
+
+// ── Token helpers
+// ────────────────────────────────────────────────────────────
 
 static void advance(Parser *parser) {
   parser->previous = parser->current;
@@ -67,9 +84,7 @@ static bool check(Parser *parser, TokenType type) {
 static bool match(Parser *parser, TokenType type) {
   if (!check(parser, type))
     return false;
-
   advance(parser);
-
   return true;
 }
 
@@ -78,7 +93,6 @@ static void consume(Parser *parser, TokenType type, const char *message) {
     advance(parser);
     return;
   }
-
   error_at_current(parser, message);
 }
 
@@ -108,30 +122,26 @@ static void synchronize(Parser *p) {
   }
 }
 
-// Parsing Functions
-
-static ParseRule *get_rule(TokenType type);
-typedef AstNode *(*ParseFn)(Parser *parser, bool canAssign);
+// ── Pratt core ───────────────────────────────────────────────────────────────
 
 static AstNode *parse_precedence(Parser *parser, Precedence precedence) {
   TRACELN("parser.parse_precedence(%d)", precedence);
 
   advance(parser);
 
-  ParseFn prefixRule = get_rule(parser->previous.type)->prefix;
+  PrefixParseFn prefixRule = get_rule(parser->previous.type)->prefix;
   if (prefixRule == NULL) {
     parse_error(parser, "Expect expression.");
     return NULL;
   }
 
   bool canAssign = precedence <= PREC_ASSIGNMENT;
-
-  prefixRule(parser, canAssign);
+  AstNode *left = prefixRule(parser, canAssign);
 
   while (precedence <= get_rule(parser->current.type)->precedence) {
     advance(parser);
-    ParseFn infixRule = get_rule(parser->previous.type)->infix;
-    infixRule(parser, canAssign);
+    InfixParseFn infixRule = get_rule(parser->previous.type)->infix;
+    left = infixRule(parser, left, canAssign);
   }
 
   if (canAssign && match(parser, TOKEN_EQUAL)) {
@@ -139,15 +149,16 @@ static AstNode *parse_precedence(Parser *parser, Precedence precedence) {
   }
 
   TRACELN("parser.parse_precedence() end");
-}
 
-// Parsing Rule Functions
+  return left;
+}
 
 static AstNode *expression(Parser *parser) {
   TRACELN("parser.expression()");
-
   return parse_precedence(parser, PREC_ASSIGNMENT);
 }
+
+// ── Prefix rules ─────────────────────────────────────────────────────────────
 
 static AstNode *number(Parser *parser, bool canAssign) {
   (void)canAssign;
@@ -159,10 +170,50 @@ static AstNode *number(Parser *parser, bool canAssign) {
 
 static AstNode *string_(Parser *parser, bool canAssign) {
   (void)canAssign;
-  // Strip the surrounding quotes and intern the string.
   AstNode *node = astAlloc(NODE_LITERAL, parser->previous.line);
-  node->as.literal.value = OBJ_VAL(
-      copyString(parser->previous.start + 1, parser->previous.length - 2));
+
+  const char *chars = parser->previous.start + 1;
+  int length = parser->previous.length - 2;
+
+  // Scratch buffer for decoding escapes -- plain malloc/free since it never
+  // outlives this function; copyString() below makes its own copy of the
+  // decoded bytes, so there's nothing for the GC to track here.
+  char *buffer = (char *)malloc((size_t)length + 1);
+  int out = 0;
+
+  for (int i = 0; i < length; i++) {
+    if (chars[i] == '\\' && i + 1 < length) {
+      i++;
+      switch (chars[i]) {
+      case 'n':
+        buffer[out++] = '\n';
+        break;
+      case 'r':
+        buffer[out++] = '\r';
+        break;
+      case 't':
+        buffer[out++] = '\t';
+        break;
+      case '"':
+        buffer[out++] = '"';
+        break;
+      case '\\':
+        buffer[out++] = '\\';
+        break;
+      default: {
+        char msg[48];
+        snprintf(msg, sizeof(msg), "Invalid escape sequence: \\%c", chars[i]);
+        parse_error(parser, msg);
+        break;
+      }
+      }
+    } else {
+      buffer[out++] = chars[i];
+    }
+  }
+
+  node->as.literal.value = OBJ_VAL(copyString(buffer, out));
+  free(buffer);
   return node;
 }
 
@@ -208,7 +259,6 @@ static AstNode *unary(Parser *p, bool canAssign) {
 static AstNode *variable(Parser *p, bool canAssign) {
   Token name = p->previous;
 
-  // If followed by '=' and we're in an assignable position, parse assignment.
   if (canAssign && match(p, TOKEN_EQUAL)) {
     AstNode *value = expression(p);
     AstNode *node = astAlloc(NODE_ASSIGN, name.line);
@@ -241,14 +291,81 @@ static AstNode *super_(Parser *p, bool canAssign) {
   return node;
 }
 
-// ── Infix rules
-// ───────────────────────────────────────────────────────────────
+// `if` used as an EXPRESSION: `if (cond) thenExpr else elseExpr`. Unlike
+// ifStatement(), both arms are parsed via expression() rather than
+// statement(), and a missing `else` just means "value is nil" at compile
+// time (see compileExpr's NODE_IF case) rather than "no else branch".
+static AstNode *ifExpr(Parser *p, bool canAssign) {
+  (void)canAssign;
+  int line = p->previous.line;
+  consume(p, TOKEN_LEFT_PAREN, "Expect '(' after 'if'.");
+  AstNode *cond = expression(p);
+  consume(p, TOKEN_RIGHT_PAREN, "Expect ')' after condition.");
+  AstNode *thenBranch = expression(p);
+  AstNode *elseBranch = NULL;
+  if (match(p, TOKEN_ELSE)) {
+    elseBranch = expression(p);
+  }
+
+  AstNode *node = astAlloc(NODE_IF, line);
+  node->as.if_.condition = cond;
+  node->as.if_.thenBranch = thenBranch;
+  node->as.if_.elseBranch = elseBranch;
+  return node;
+}
+
+static AstNode *arrayLiteral(Parser *p, bool canAssign) {
+  (void)canAssign;
+  TRACELN("---arrayLiteral start---");
+
+  Token bracket = p->previous;
+
+  // `and` is just a temporary builder — its heap buffer is copied into the
+  // AST arena below and then released, so the node itself never points into
+  // it.
+  ArrayNodeData and;
+  arrayNodeDataInit(&and);
+
+  TRACELN("arrayLiteral data initialized empty");
+
+  if (!check(p, TOKEN_RIGHT_BRACKET)) {
+    TRACELN("right bracket not found");
+
+    do {
+      AstNode *expr_node = expression(p);
+      arrayNodeDataWrite(&and, expr_node);
+
+    } while (match(p, TOKEN_COMMA));
+  }
+
+  consume(p, TOKEN_RIGHT_BRACKET, "Expect ']' after array elements.");
+
+  TRACELN("right bracket found");
+
+  AstNode *node = astAlloc(NODE_ARRAY, bracket.line);
+  node->as.array.count = and.count;
+  if (and.count > 0) {
+    AstNode **items = (AstNode **)astAllocRaw(and.count * sizeof(AstNode *));
+    memcpy(items, and.data, and.count * sizeof(AstNode *));
+    node->as.array.items = items;
+  } else {
+    node->as.array.items = NULL;
+  }
+
+  arrayNodeDataFree(&and); // release the temporary heap buffer
+
+  TRACELN("---arrayLiteral end---");
+
+  return node;
+}
+
+// ── Infix rules ──────────────────────────────────────────────────────────────
 
 static AstNode *binary(Parser *p, AstNode *left, bool canAssign) {
   (void)canAssign;
   Token op = p->previous;
-  ParseRule *rule = getRule(op.type);
-  AstNode *right = parsePrecedence(p, (Precedence)(rule->precedence + 1));
+  ParseRule *rule = get_rule(op.type);
+  AstNode *right = parse_precedence(p, (Precedence)(rule->precedence + 1));
   AstNode *node = astAlloc(NODE_BINARY, op.line);
   node->as.binary.op = op;
   node->as.binary.left = left;
@@ -258,7 +375,7 @@ static AstNode *binary(Parser *p, AstNode *left, bool canAssign) {
 
 static AstNode *and_(Parser *p, AstNode *left, bool canAssign) {
   (void)canAssign;
-  AstNode *right = parsePrecedence(p, PREC_AND);
+  AstNode *right = parse_precedence(p, PREC_AND);
   AstNode *node = astAlloc(NODE_AND, p->previous.line);
   node->as.logical.left = left;
   node->as.logical.right = right;
@@ -267,8 +384,17 @@ static AstNode *and_(Parser *p, AstNode *left, bool canAssign) {
 
 static AstNode *or_(Parser *p, AstNode *left, bool canAssign) {
   (void)canAssign;
-  AstNode *right = parsePrecedence(p, PREC_OR);
+  AstNode *right = parse_precedence(p, PREC_OR);
   AstNode *node = astAlloc(NODE_OR, p->previous.line);
+  node->as.logical.left = left;
+  node->as.logical.right = right;
+  return node;
+}
+
+static AstNode *nullish_(Parser *p, AstNode *left, bool canAssign) {
+  (void)canAssign;
+  AstNode *right = parse_precedence(p, PREC_OR);
+  AstNode *node = astAlloc(NODE_NULLISH, p->previous.line);
   node->as.logical.left = left;
   node->as.logical.right = right;
   return node;
@@ -278,15 +404,13 @@ static AstNode *call(Parser *p, AstNode *left, bool canAssign) {
   (void)canAssign;
   int line = p->previous.line;
 
-  // Parse argument list.
-  // We store args in a temporary stack-local array then copy into the arena.
   AstNode *argBuf[256];
   int argCount = 0;
 
   if (!check(p, TOKEN_RIGHT_PAREN)) {
     do {
       if (argCount >= 255) {
-        errorAtCurrent(p, "Can't have more than 255 arguments.");
+        error_at_current(p, "Can't have more than 255 arguments.");
       }
       argBuf[argCount++] = expression(p);
     } while (match(p, TOKEN_COMMA));
@@ -294,7 +418,6 @@ static AstNode *call(Parser *p, AstNode *left, bool canAssign) {
   Token paren = p->current;
   consume(p, TOKEN_RIGHT_PAREN, "Expect ')' after arguments.");
 
-  // Copy arg pointers into arena.
   AstNode **args = NULL;
   if (argCount > 0) {
     args = (AstNode **)astAllocRaw(argCount * sizeof(AstNode *));
@@ -328,14 +451,37 @@ static AstNode *dot(Parser *p, AstNode *left, bool canAssign) {
   return node;
 }
 
-// ── Pratt dispatch table
-// ──────────────────────────────────────────────────────
+static AstNode *index_(Parser *p, AstNode *left, bool canAssign) {
+  Token bracket = p->previous;
+  AstNode *index = expression(p);
+  consume(p, TOKEN_RIGHT_BRACKET, "Expect ']' after index.");
+
+  if (canAssign && match(p, TOKEN_EQUAL)) {
+    AstNode *value = expression(p);
+    AstNode *node = astAlloc(NODE_INDEX_SET, bracket.line);
+    node->as.indexSet.object = left;
+    node->as.indexSet.index = index;
+    node->as.indexSet.value = value;
+    node->as.indexSet.bracket = bracket;
+    return node;
+  }
+
+  AstNode *node = astAlloc(NODE_INDEX_GET, bracket.line);
+  node->as.indexGet.object = left;
+  node->as.indexGet.index = index;
+  node->as.indexGet.bracket = bracket;
+  return node;
+}
+
+// ── Pratt dispatch table ─────────────────────────────────────────────────────
 
 static ParseRule rules[] = {
     [TOKEN_LEFT_PAREN] = {grouping, call, PREC_CALL},
     [TOKEN_RIGHT_PAREN] = {NULL, NULL, PREC_NONE},
-    [TOKEN_LEFT_BRACE] = {NULL, NULL, PREC_NONE},
+    [TOKEN_LEFT_BRACE] = {blockExpr, NULL, PREC_NONE},
     [TOKEN_RIGHT_BRACE] = {NULL, NULL, PREC_NONE},
+    [TOKEN_LEFT_BRACKET] = {arrayLiteral, index_, PREC_CALL},
+    [TOKEN_RIGHT_BRACKET] = {NULL, NULL, PREC_NONE},
     [TOKEN_COMMA] = {NULL, NULL, PREC_NONE},
     [TOKEN_DOT] = {NULL, dot, PREC_CALL},
     [TOKEN_MINUS] = {unary, binary, PREC_TERM},
@@ -359,10 +505,11 @@ static ParseRule rules[] = {
     [TOKEN_ELSE] = {NULL, NULL, PREC_NONE},
     [TOKEN_FALSE] = {literal, NULL, PREC_NONE},
     [TOKEN_FOR] = {NULL, NULL, PREC_NONE},
-    [TOKEN_FUN] = {NULL, NULL, PREC_NONE},
-    [TOKEN_IF] = {NULL, NULL, PREC_NONE},
+    [TOKEN_FUN] = {lambda, NULL, PREC_NONE},
+    [TOKEN_IF] = {ifExpr, NULL, PREC_NONE},
     [TOKEN_NIL] = {literal, NULL, PREC_NONE},
     [TOKEN_OR] = {NULL, or_, PREC_OR},
+    [TOKEN_QUESTION_QUESTION] = {NULL, nullish_, PREC_OR},
     [TOKEN_PRINT] = {NULL, NULL, PREC_NONE},
     [TOKEN_RETURN] = {NULL, NULL, PREC_NONE},
     [TOKEN_SUPER] = {super_, NULL, PREC_NONE},
@@ -370,32 +517,39 @@ static ParseRule rules[] = {
     [TOKEN_TRUE] = {literal, NULL, PREC_NONE},
     [TOKEN_VAR] = {NULL, NULL, PREC_NONE},
     [TOKEN_WHILE] = {NULL, NULL, PREC_NONE},
+    [TOKEN_MODULO] = {NULL, binary, PREC_FACTOR},
     [TOKEN_ERROR] = {NULL, NULL, PREC_NONE},
     [TOKEN_EOF] = {NULL, NULL, PREC_NONE},
 };
 
-static ParseRule *getRule(TokenType type) { return &rules[type]; }
+static ParseRule *get_rule(TokenType type) { return &rules[type]; }
 
-// ── Statement parsers
-// ─────────────────────────────────────────────────────────
+// ── Statement parsers ────────────────────────────────────────────────────────
 
-// Parses a block body `{ stmts* }` — the opening brace must already be
-// consumed. Returns a heap-allocated BlockNode; stmts array lives in the arena.
 static BlockNode parseBlock(Parser *p) {
-  // Collect into a local growable array, then copy into arena once done.
   int capacity = 8, count = 0;
   AstNode **buf = (AstNode **)malloc(capacity * sizeof(AstNode *));
+  AstNode *tailNode = NULL;
 
   while (!check(p, TOKEN_RIGHT_BRACE) && !is_at_end(p)) {
+    bool isTail = false;
+    AstNode *node = declaration(p, &isTail);
+
+    if (isTail) {
+      tailNode = node;
+      break;
+    }
+
     if (count >= capacity) {
       capacity *= 2;
       buf = (AstNode **)realloc(buf, capacity * sizeof(AstNode *));
     }
-    buf[count++] = declaration(p);
+
+    buf[count++] = node;
   }
+
   consume(p, TOKEN_RIGHT_BRACE, "Expect '}' after block.");
 
-  // Copy into arena so the array outlives this stack frame.
   AstNode **stmts = NULL;
   if (count > 0) {
     stmts = (AstNode **)astAllocRaw(count * sizeof(AstNode *));
@@ -406,6 +560,8 @@ static BlockNode parseBlock(Parser *p) {
   BlockNode block;
   block.stmts = stmts;
   block.count = count;
+  block.value = tailNode;
+  block.endLine = p->previous.line; // the '}' just consumed above
   return block;
 }
 
@@ -426,24 +582,38 @@ static AstNode *printStatement(Parser *p) {
   return node;
 }
 
-static AstNode *expressionStatement(Parser *p) {
+static AstNode *expressionStatement(Parser *p, bool *isTail) {
   int line = p->current.line;
   AstNode *expr = expression(p);
-  consume(p, TOKEN_SEMICOLON, "Expect ';' after expression.");
+
+  if (check(p, TOKEN_RIGHT_BRACE)) {
+    *isTail = true;
+    return expr;
+  }
+
+  // Deliberately match(), not consume(): the original's inline fallback in
+  // statement() reports a missing semicolon at the expression's own last
+  // token (parser.previous) via error(), not at whatever token comes next
+  // (parser.current) via errorAtCurrent() -- e.g. for a bare `1` with no
+  // trailing ';', this reports "at '1'", not "at end".
+  if (!match(p, TOKEN_SEMICOLON)) {
+    parse_error(p, "Expect ';' after expression.");
+  }
+  *isTail = false;
   AstNode *node = astAlloc(NODE_EXPR_STMT, line);
   node->as.exprStmt.expr = expr;
   return node;
 }
 
-static AstNode *ifStatement(Parser *p) {
+static AstNode *ifStatement(Parser *p, bool *isTail) {
   int line = p->previous.line;
   consume(p, TOKEN_LEFT_PAREN, "Expect '(' after 'if'.");
   AstNode *cond = expression(p);
   consume(p, TOKEN_RIGHT_PAREN, "Expect ')' after condition.");
-  AstNode *thenBranch = statement(p);
+  AstNode *thenBranch = statement(p, isTail);
   AstNode *elseBranch = NULL;
   if (match(p, TOKEN_ELSE))
-    elseBranch = statement(p);
+    elseBranch = statement(p, isTail);
 
   AstNode *node = astAlloc(NODE_IF, line);
   node->as.if_.condition = cond;
@@ -452,34 +622,33 @@ static AstNode *ifStatement(Parser *p) {
   return node;
 }
 
-static AstNode *whileStatement(Parser *p) {
+static AstNode *whileStatement(Parser *p, bool *isTail) {
   int line = p->previous.line;
   consume(p, TOKEN_LEFT_PAREN, "Expect '(' after 'while'.");
   AstNode *cond = expression(p);
   consume(p, TOKEN_RIGHT_PAREN, "Expect ')' after condition.");
-  AstNode *body = statement(p);
+  AstNode *body = statement(p, isTail);
 
   AstNode *node = astAlloc(NODE_WHILE, line);
+  node->as.while_.init = NULL;
   node->as.while_.condition = cond;
   node->as.while_.body = body;
+  node->as.while_.increment = NULL;
   return node;
 }
 
-// A `for` loop is desugared into a while loop at parse time.
-//   for (init; cond; incr) body
-// becomes:
-//   { init; while (cond) { body; incr; } }
-static AstNode *forStatement(Parser *p) {
+// A `for` loop is desugared into a single NODE_WHILE at parse time, with
+// its init/increment clauses kept as distinct fields (see WhileNode in
+// ast.h) rather than spliced into surrounding blocks -- see compileWhile()
+// in compiler.c for why.
+static AstNode *forStatement(Parser *p, bool *isTail) {
   int line = p->previous.line;
   consume(p, TOKEN_LEFT_PAREN, "Expect '(' after 'for'.");
 
-  // -- Initialiser --
   AstNode *init = NULL;
   if (match(p, TOKEN_SEMICOLON)) {
     // no initialiser
   } else if (match(p, TOKEN_VAR)) {
-    // reuse varDecl parsing — implemented below; forward call via declaration()
-    // We need only the var-decl node, so handle it inline:
     consume(p, TOKEN_IDENTIFIER, "Expect variable name.");
     Token name = p->previous;
     AstNode *initializer = NULL;
@@ -489,95 +658,148 @@ static AstNode *forStatement(Parser *p) {
     AstNode *vd = astAlloc(NODE_VAR_DECL, name.line);
     vd->as.varDecl.name = name;
     vd->as.varDecl.initializer = initializer;
+    vd->as.varDecl.declEndLine = p->previous.line; // the ';' just consumed
     init = vd;
   } else {
-    init = expressionStatement(p);
+    init = expressionStatement(p, isTail);
   }
 
-  // -- Condition --
   AstNode *cond = NULL;
   if (!check(p, TOKEN_SEMICOLON))
     cond = expression(p);
   consume(p, TOKEN_SEMICOLON, "Expect ';' after loop condition.");
 
-  // -- Increment --
   AstNode *incr = NULL;
   if (!check(p, TOKEN_RIGHT_PAREN))
     incr = expression(p);
   consume(p, TOKEN_RIGHT_PAREN, "Expect ')' after for clauses.");
 
-  // -- Body --
-  AstNode *body = statement(p);
+  AstNode *body = statement(p, isTail);
 
-  // Attach increment at end of body (wrap in a block).
-  if (incr != NULL) {
-    AstNode **stmts = (AstNode **)astAllocRaw(2 * sizeof(AstNode *));
-    stmts[0] = body;
-    AstNode *incrStmt = astAlloc(NODE_EXPR_STMT, incr->line);
-    incrStmt->as.exprStmt.expr = incr;
-    stmts[1] = incrStmt;
-    AstNode *bodyBlock = astAlloc(NODE_BLOCK, line);
-    bodyBlock->as.block.stmts = stmts;
-    bodyBlock->as.block.count = 2;
-    body = bodyBlock;
-  }
-
-  // If no condition, synthesise `true`.
   if (cond == NULL) {
     cond = astAlloc(NODE_LITERAL, line);
     cond->as.literal.value = BOOL_VAL(true);
   }
 
-  // Build while node.
   AstNode *loop = astAlloc(NODE_WHILE, line);
+  loop->as.while_.init = init;
   loop->as.while_.condition = cond;
   loop->as.while_.body = body;
+  loop->as.while_.increment = incr;
+  return loop;
+}
 
-  // Wrap in a block if there's an initialiser.
-  if (init != NULL) {
-    AstNode **stmts = (AstNode **)astAllocRaw(2 * sizeof(AstNode *));
-    stmts[0] = init;
-    stmts[1] = loop;
-    AstNode *outerBlock = astAlloc(NODE_BLOCK, line);
-    outerBlock->as.block.stmts = stmts;
-    outerBlock->as.block.count = 2;
-    return outerBlock;
+// Determines whether the upcoming token can start an EXPRESSION, for the
+// dynamic per-item dispatch a block used as an expression needs (see
+// parseBlockExprContents below). `fun` is special-cased to always mean a
+// (named) function declaration even inside a block-expression, matching
+// the original: `fun` has a prefix rule (lambda) too, but block-expressions
+// never want a bare `fun name() {...}` line to be parsed as a lambda
+// expression-statement.
+static bool isExpressionStart(TokenType type) {
+  if (type == TOKEN_FUN)
+    return false;
+  return get_rule(type)->prefix != NULL;
+}
+
+// Parses the contents of a block used in EXPRESSION position: `{ ... }`.
+// Unlike a regular (statement) block, each item is independently
+// classified: if the next token can start an expression, it's parsed as an
+// expression -- POP'd once compiled, unless it's the last item before `}`,
+// in which case it becomes the block's value (BlockNode.value); otherwise
+// it's parsed as a full declaration (var/class/for/while/print/return/fun).
+static BlockNode parseBlockExprContents(Parser *p) {
+  int capacity = 8, count = 0;
+  AstNode **buf = (AstNode **)malloc(capacity * sizeof(AstNode *));
+  AstNode *tailNode = NULL;
+
+  while (!check(p, TOKEN_RIGHT_BRACE) && !is_at_end(p)) {
+    AstNode *node;
+
+    if (isExpressionStart(p->current.type)) {
+      int line = p->current.line;
+      AstNode *expr = expression(p);
+
+      if (check(p, TOKEN_RIGHT_BRACE)) {
+        tailNode = expr;
+        break;
+      }
+
+      consume(p, TOKEN_SEMICOLON, "Expect ';' after expression.");
+      node = astAlloc(NODE_EXPR_STMT, line);
+      node->as.exprStmt.expr = expr;
+    } else {
+      bool isTail = false;
+      node = declaration(p, &isTail);
+    }
+
+    if (count >= capacity) {
+      capacity *= 2;
+      buf = (AstNode **)realloc(buf, capacity * sizeof(AstNode *));
+    }
+    buf[count++] = node;
+
+    if (p->panicMode) {
+      synchronize(p);
+    }
   }
 
-  return loop;
+  consume(p, TOKEN_RIGHT_BRACE, "Expect '}' after block expression.");
+
+  AstNode **stmts = NULL;
+  if (count > 0) {
+    stmts = (AstNode **)astAllocRaw(count * sizeof(AstNode *));
+    memcpy(stmts, buf, count * sizeof(AstNode *));
+  }
+  free(buf);
+
+  BlockNode block;
+  block.stmts = stmts;
+  block.count = count;
+  block.value = tailNode;
+  block.endLine = p->previous.line; // the '}' just consumed above
+  return block;
+}
+
+static AstNode *blockExpr(Parser *p, bool canAssign) {
+  (void)canAssign;
+  int line = p->previous.line;
+  BlockNode block = parseBlockExprContents(p);
+  AstNode *node = astAlloc(NODE_BLOCK, line);
+  node->as.block = block;
+  return node;
 }
 
 static AstNode *returnStatement(Parser *p) {
   int line = p->previous.line;
-  Token keyword = p->previous;
   AstNode *value = NULL;
   if (!check(p, TOKEN_SEMICOLON))
     value = expression(p);
   consume(p, TOKEN_SEMICOLON, "Expect ';' after return value.");
   AstNode *node = astAlloc(NODE_RETURN, line);
   node->as.return_.value = value;
-  (void)keyword;
   return node;
 }
 
-static AstNode *statement(Parser *p) {
+static AstNode *statement(Parser *p, bool *isTail) {
+  *isTail = false;
+
   if (match(p, TOKEN_PRINT))
     return printStatement(p);
   if (match(p, TOKEN_IF))
-    return ifStatement(p);
+    return ifStatement(p, isTail);
   if (match(p, TOKEN_WHILE))
-    return whileStatement(p);
+    return whileStatement(p, isTail);
   if (match(p, TOKEN_FOR))
-    return forStatement(p);
+    return forStatement(p, isTail);
   if (match(p, TOKEN_RETURN))
     return returnStatement(p);
   if (match(p, TOKEN_LEFT_BRACE))
     return blockStatement(p);
-  return expressionStatement(p);
+  return expressionStatement(p, isTail);
 }
 
-// ── Declaration parsers
-// ───────────────────────────────────────────────────────
+// ── Declaration parsers ──────────────────────────────────────────────────────
 
 static AstNode *varDeclaration(Parser *p) {
   consume(p, TOKEN_IDENTIFIER, "Expect variable name.");
@@ -591,50 +813,93 @@ static AstNode *varDeclaration(Parser *p) {
   AstNode *node = astAlloc(NODE_VAR_DECL, name.line);
   node->as.varDecl.name = name;
   node->as.varDecl.initializer = initializer;
+  node->as.varDecl.declEndLine = p->previous.line; // the ';' just consumed
   return node;
 }
 
-// Parses `fun` or a method inside a class.
-// `isMethod` controls whether a `fun` keyword is expected before the name.
-static AstNode *functionDeclaration(Parser *p, bool isMethod) {
-  if (!isMethod)
-    consume(p, TOKEN_IDENTIFIER, "Expect function name.");
-  Token name = p->previous;
-  int line = name.line;
-
+// Parses the "(params) { body }" or "(params) = expr;" tail shared by
+// function declarations, methods, and lambdas -- the `fun` keyword (or, for
+// a method, the name identifier) has already been consumed by the caller.
+// `name` is stored on the node but is otherwise unused when isLambda is
+// true (there's no real name token for an anonymous function -- the
+// compiler generates one, matching the original's `lambda0x...` naming).
+static AstNode *functionTail(Parser *p, Token name, int line, bool isMethod,
+                             bool isLambda) {
   consume(p, TOKEN_LEFT_PAREN, "Expect '(' after function name.");
 
-  // Collect parameter tokens into a temporary buffer.
   Token paramBuf[256];
   int arity = 0;
   if (!check(p, TOKEN_RIGHT_PAREN)) {
     do {
       if (arity >= 255) {
-        errorAtCurrent(p, "Can't have more than 255 parameters.");
+        error_at_current(p, "Can't have more than 255 parameters.");
       }
       consume(p, TOKEN_IDENTIFIER, "Expect parameter name.");
       paramBuf[arity++] = p->previous;
     } while (match(p, TOKEN_COMMA));
   }
   consume(p, TOKEN_RIGHT_PAREN, "Expect ')' after parameters.");
-  consume(p, TOKEN_LEFT_BRACE, "Expect '{' before function body.");
 
-  // Copy params into arena.
   Token *params = NULL;
   if (arity > 0) {
     params = (Token *)astAllocRaw(arity * sizeof(Token));
     memcpy(params, paramBuf, arity * sizeof(Token));
   }
 
-  BlockNode body = parseBlock(p);
-
   AstNode *node = astAlloc(NODE_FUNCTION, line);
   node->as.function.name = name;
   node->as.function.params = params;
   node->as.function.arity = arity;
-  node->as.function.body = body;
   node->as.function.isMethod = isMethod;
+  node->as.function.isLambda = isLambda;
+  node->as.function.exprBody = NULL;
+  node->as.function.body.stmts = NULL;
+  node->as.function.body.count = 0;
+  node->as.function.body.value = NULL;
+  node->as.function.body.endLine = line;
+  node->as.function.bodyEndLine = line;
+
+  if (!isLambda && match(p, TOKEN_EQUAL)) {
+    // Function body expression: `fun sum(a, b) = a + b;`. Only offered for
+    // named functions/methods, which are always their own complete
+    // statement -- the ';' consumed here is that statement's own
+    // terminator. A lambda has no such guarantee (it's usually embedded in
+    // a larger statement, e.g. `var f = fun (x) = x;`), which would leave
+    // that enclosing statement's own ';' unconsumed; matches the
+    // changelog's "Lambda body expressions" item, which is intentionally
+    // still unchecked/unimplemented.
+    node->as.function.exprBody = expression(p);
+    consume(p, TOKEN_SEMICOLON, "Expect ';' after function body expression.");
+    node->as.function.bodyEndLine = p->previous.line; // the ';' just consumed
+  } else {
+    consume(p, TOKEN_LEFT_BRACE, "Expect '{' before function body.");
+    node->as.function.body = parseBlock(p);
+    node->as.function.bodyEndLine = node->as.function.body.endLine;
+  }
+
   return node;
+}
+
+// Parses `fun` or a method inside a class. When isMethod is true, the caller
+// (classDeclaration) has already consumed the name identifier — it's sitting
+// in p->previous — so this skips consuming it again.
+static AstNode *functionDeclaration(Parser *p, bool isMethod) {
+  if (!isMethod)
+    consume(p, TOKEN_IDENTIFIER, "Expect function name.");
+  Token name = p->previous;
+  int line = name.line;
+  return functionTail(p, name, line, isMethod, /*isLambda=*/false);
+}
+
+// A lambda expression: `fun (a, b) { a + b }` or `fun (a, b) = a + b;`,
+// used anywhere an expression is expected (e.g. `var f = fun (x) { x };`).
+// The 'fun' keyword is already consumed (p->previous) -- there's no name to
+// consume next, just straight into the parameter list.
+static AstNode *lambda(Parser *p, bool canAssign) {
+  (void)canAssign;
+  Token funKeyword = p->previous;
+  return functionTail(p, funKeyword, funKeyword.line, /*isMethod=*/false,
+                      /*isLambda=*/true);
 }
 
 static AstNode *classDeclaration(Parser *p) {
@@ -651,43 +916,73 @@ static AstNode *classDeclaration(Parser *p) {
 
   consume(p, TOKEN_LEFT_BRACE, "Expect '{' before class body.");
 
-  // Collect methods.
-  int methodCap = 8, methodCount = 0;
-  FunctionNode **methodBuf =
-      (FunctionNode **)malloc(methodCap * sizeof(FunctionNode *));
+  // Fields and methods are kept in a single array, in source order --
+  // `var x; foo() {} var y;` must compile its OP_FIELD/OP_METHOD bytecode
+  // in that same interleaved order, not "all fields then all methods".
+  int memberCap = 8, memberCount = 0;
+  ClassMember *memberBuf =
+      (ClassMember *)malloc(memberCap * sizeof(ClassMember));
 
   while (!check(p, TOKEN_RIGHT_BRACE) && !is_at_end(p)) {
-    if (methodCount >= methodCap) {
-      methodCap *= 2;
-      methodBuf = (FunctionNode **)realloc(methodBuf,
-                                           methodCap * sizeof(FunctionNode *));
+    if (memberCount >= memberCap) {
+      memberCap *= 2;
+      memberBuf =
+          (ClassMember *)realloc(memberBuf, memberCap * sizeof(ClassMember));
     }
-    // Each method is a function without a leading `fun` keyword.
-    consume(p, TOKEN_IDENTIFIER, "Expect method name.");
-    AstNode *method = functionDeclaration(p, /*isMethod=*/true);
-    methodBuf[methodCount++] = &method->as.function;
+
+    if (match(p, TOKEN_VAR)) {
+      consume(p, TOKEN_IDENTIFIER, "Expect field name.");
+      Token fieldName = p->previous;
+      AstNode *init = NULL;
+      if (match(p, TOKEN_EQUAL)) {
+        init = expression(p);
+      }
+      consume(p, TOKEN_SEMICOLON, "Expect ';' after field.");
+
+      memberBuf[memberCount].kind = CLASS_MEMBER_FIELD;
+      memberBuf[memberCount].as.field.name = fieldName;
+      memberBuf[memberCount].as.field.initializer = init;
+      memberBuf[memberCount].as.field.declEndLine = p->previous.line; // the ';'
+      memberCount++;
+    } else {
+      consume(p, TOKEN_IDENTIFIER, "Expect method name.");
+      AstNode *method = functionDeclaration(p, /*isMethod=*/true);
+
+      memberBuf[memberCount].kind = CLASS_MEMBER_METHOD;
+      memberBuf[memberCount].as.method = &method->as.function;
+      memberCount++;
+    }
+
+    // Without this, a malformed member (e.g. a missing '}') leaves the
+    // offending token in place forever and this loop spins indefinitely,
+    // since nothing here ever calls synchronize() the way declaration() does
+    // for top-level statements.
+    if (p->panicMode) {
+      synchronize(p);
+    }
   }
   consume(p, TOKEN_RIGHT_BRACE, "Expect '}' after class body.");
+  int endLine = p->previous.line;
 
-  // Copy method array into arena.
-  FunctionNode **methods = NULL;
-  if (methodCount > 0) {
-    methods =
-        (FunctionNode **)astAllocRaw(methodCount * sizeof(FunctionNode *));
-    memcpy(methods, methodBuf, methodCount * sizeof(FunctionNode *));
+  ClassMember *members = NULL;
+  if (memberCount > 0) {
+    members = (ClassMember *)astAllocRaw(memberCount * sizeof(ClassMember));
+    memcpy(members, memberBuf, memberCount * sizeof(ClassMember));
   }
-  free(methodBuf);
+  free(memberBuf);
 
   AstNode *node = astAlloc(NODE_CLASS, line);
   node->as.class_.name = name;
   node->as.class_.superclass = superclass;
-  node->as.class_.methods = methods;
-  node->as.class_.methodCount = methodCount;
+  node->as.class_.members = members;
+  node->as.class_.memberCount = memberCount;
+  node->as.class_.endLine = endLine;
   return node;
 }
 
-static AstNode *declaration(Parser *p) {
+static AstNode *declaration(Parser *p, bool *isTail) {
   AstNode *node = NULL;
+  *isTail = false;
 
   if (match(p, TOKEN_CLASS)) {
     node = classDeclaration(p);
@@ -696,7 +991,7 @@ static AstNode *declaration(Parser *p) {
   } else if (match(p, TOKEN_VAR)) {
     node = varDeclaration(p);
   } else {
-    node = statement(p);
+    node = statement(p, isTail);
   }
 
   if (p->panicMode)
@@ -708,14 +1003,15 @@ static void initParser(Parser *parser, TokenStream *tokens) {
   parser->tokens = tokens;
   parser->hadError = false;
   parser->panicMode = false;
-
   advance(parser);
 }
 
-// ── Entry point
-// ───────────────────────────────────────────────────────────────
+// ── Entry point ──────────────────────────────────────────────────────────────
 
-AstNode **parse(const char *source, int *outCount, bool *hadError) {
+AstNode **parse(const char *source, int *outCount, bool *hadError,
+                int *outEndLine) {
+  TRACELN("parse!");
+
   TokenStream tokens = lex(source);
 
   Parser parser;
@@ -723,18 +1019,18 @@ AstNode **parse(const char *source, int *outCount, bool *hadError) {
 
   int capacity = 8;
   int count = 0;
-
   AstNode **ast = (AstNode **)malloc(capacity * sizeof(AstNode *));
 
   while (!is_at_end(&parser)) {
     if (count >= capacity) {
       capacity *= 2;
-
       ast = (AstNode **)realloc(ast, capacity * sizeof(AstNode *));
     }
-
-    ast[count++] = declaration(&parser);
+    bool isTail = false;
+    ast[count++] = declaration(&parser, &isTail);
   }
+
+  *outEndLine = parser.current.line; // the EOF token itself
 
   tsFree(&tokens);
 
@@ -744,12 +1040,22 @@ AstNode **parse(const char *source, int *outCount, bool *hadError) {
   return ast;
 }
 
-// Error Reporting Functions
+// ── Error reporting ──────────────────────────────────────────────────────────
 
 static void parse_error_at(Parser *p, Token *token, const char *message) {
   if (p->panicMode)
     return;
-  p->panicMode = true;
+  // NOTE: the original never actually sets panicMode = true anywhere in its
+  // error-reporting function (only checks it) -- so in practice, panic-mode
+  // suppression never engages, and cascading errors after a syntax error
+  // are NOT suppressed, and declaration()'s `if (p->panicMode) synchronize()`
+  // never fires either (parsing just continues token-by-token as if
+  // nothing happened). That's surprising, but it's the actual observed
+  // behavior of the reference compiler and other code depends on it
+  // (e.g. a later statement that happens to look like a valid
+  // implicit-return tail expression will compile fine even after an
+  // earlier sibling statement had a syntax error) -- so it's replicated
+  // here deliberately, not fixed.
   p->hadError = true;
 
   fprintf(stderr, "[line %d] Error", token->line);

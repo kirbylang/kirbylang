@@ -58,6 +58,7 @@ set(CLOX_SOURCES
     src/object.c
     src/parser.c
     src/scanner.c
+    src/strbuf.c
     src/token_stream.c
     src/token.c
     src/value.c
@@ -120,10 +121,10 @@ add_library(clox_core STATIC
     ${CLOX_SOURCES}
 )
 
-# target_compile_definitions(clox_core
-#     PRIVATE
-#         DEBUG_TRACE_EXECUTION
-# )
+target_compile_definitions(clox_core
+    PRIVATE
+        # DEBUG_TRACE_EXECUTION
+)
 
 
 configure_clox_target(clox_core)
@@ -156,6 +157,7 @@ target_compile_definitions(clox_core_debug
     PRIVATE
         DEBUG_PRINT_CODE
         DEBUG_STRESS_GC
+        # DEBUG_TRACE_EXECUTION
 )
 
 configure_clox_target(clox_core_debug)
@@ -271,6 +273,23 @@ if(BUILD_TESTS)
     add_test(
         NAME clox-parser-unit-test
         COMMAND clox-parser-unit-test
+    )
+
+    add_executable(clox-lexer-unit-test
+        unit/lexer.c
+    )
+
+    target_link_libraries(clox-lexer-unit-test
+        PRIVATE
+            clox_core_debug
+    )
+
+    configure_clox_target(clox-lexer-unit-test)
+    enable_coverage(clox-lexer-unit-test)
+
+    add_test(
+        NAME clox-lexer-unit-test
+        COMMAND clox-lexer-unit-test
     )
 
 endif()

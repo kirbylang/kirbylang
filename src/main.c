@@ -9,6 +9,7 @@
 #include "common.h"
 #include "debug.h"
 #include "lexer.h"
+#include "parser.h"
 #include "token_stream.h"
 #include "version.h"
 #include "vm.h"
@@ -19,16 +20,14 @@ static void runFile(const char *path);
 static void runCode(const char *source);
 
 const char *help_message =
-    "Usage: clox [-h] [-v] [-r|-f [path]|-c [source]|-l [path]] \n";
+    "Usage: clox [-h] [-v] [-r|-f [path]|-c [source]|-l [path]|-p [path]] \n";
 
-const char *short_options = "hvrfcl";
-static struct option long_options[] = {{"help", no_argument, 0, 'h'},
-                                       {"version", no_argument, 0, 'v'},
-                                       {"file", no_argument, 0, 'f'},
-                                       {"repl", no_argument, 0, 'r'},
-                                       {"code", no_argument, 0, 'c'},
-                                       {"lex", no_argument, 0, 'l'},
-                                       {0, 0, 0, 0}};
+const char *short_options = "hvrfclp";
+static struct option long_options[] = {
+    {"help", no_argument, 0, 'h'},  {"version", no_argument, 0, 'v'},
+    {"file", no_argument, 0, 'f'},  {"repl", no_argument, 0, 'r'},
+    {"code", no_argument, 0, 'c'},  {"lex", no_argument, 0, 'l'},
+    {"parse", no_argument, 0, 'p'}, {0, 0, 0, 0}};
 
 int main(int argc, char *argv[]) {
   int saved_argc = argc;
@@ -77,6 +76,33 @@ int main(int argc, char *argv[]) {
 
       free(saved_argv);
       tsFree(&tokens);
+      return 0;
+    }
+    case 'p': {
+      TRACELN("PARSE TIME");
+      initVM(saved_argc, saved_argv);
+      int outCount = 0;
+      bool hadError = false;
+
+      const char *source = readFile(argv[optind]);
+
+      TRACELN("--- START PARSE ---");
+
+      int endLine = 0;
+      AstNode **ast = parse(source, &outCount, &hadError, &endLine);
+
+      TRACELN("--- END PARSE ---");
+
+      for (int i = 0; i < outCount; i++) {
+        const char *ast_str = print_ast(ast[i]);
+        printf("AST: %s\n", ast_str);
+        free((void *)ast_str);
+      }
+
+      astFreeAll();
+      free(ast);
+      freeVM();
+      free(saved_argv);
       return 0;
     }
     case 'c':

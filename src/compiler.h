@@ -1,38 +1,10 @@
 #ifndef clox_compiler_h
 #define clox_compiler_h
 
+#include "ast.h"
 #include "chunk.h"
 #include "object.h"
-#include "scanner.h"
-
-typedef struct {
-  Token current;
-  Token previous;
-  bool hadError;
-  bool panicMode;
-} CompilerParser;
-
-typedef enum {
-  PREC_NONE,
-  PREC_ASSIGNMENT, // =
-  PREC_OR,         // or || ??
-  PREC_AND,        // and &&
-  PREC_EQUALITY,   // == !=
-  PREC_COMPARISON, // < > <= >=
-  PREC_TERM,       // + -
-  PREC_FACTOR,     // * /
-  PREC_UNARY,      // ! -
-  PREC_CALL,       // . ()
-  PREC_PRIMARY
-} Precedence;
-
-typedef void (*ParseFn)(Scanner *scanner, bool canAssign);
-
-typedef struct {
-  ParseFn prefix;
-  ParseFn infix;
-  Precedence precedence;
-} ParseRule;
+#include "token.h"
 
 typedef struct {
   Token name;
@@ -78,11 +50,21 @@ typedef struct ClassCompiler {
 } ClassCompiler;
 
 /**
- * Compile source code in to a compiled function object.
+ * Compile a fully-parsed AST into a compiled function object.
  *
- * This compiled object can be ran by the VM.
+ * `ast`/`count` are exactly what parse() (see parser.h) returns: the
+ * top-level declaration nodes. `endLine` is parse()'s *outEndLine --
+ * needed to tag the script's trailing implicit return with the same line
+ * the original single-pass compiler would have (the line of the last
+ * token in the file), rather than whatever line was last visited while
+ * compiling the final statement. compile() does not take ownership of the
+ * AST -- the caller still frees it via astFreeAll(), same as before.
+ *
+ * This compiled object can be run by the VM.
+ *
+ * Returns NULL if any compile-time error was reported.
  */
-ObjFunction *compile(Scanner *scanner);
+ObjFunction *compile(AstNode **ast, int count, int endLine);
 
 /**
  * Mark all objects that are referenced by the compiler as roots

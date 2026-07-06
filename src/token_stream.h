@@ -1,4 +1,5 @@
 #ifndef clox_token_stream_h
+#define clox_token_stream_h
 
 #include <stdbool.h>
 
@@ -19,5 +20,4 @@ Token tsPeekNext(TokenStream *ts);
 Token tsAdvance(TokenStream *ts);
 bool tsIsAtEnd(TokenStream *ts);
 
-#define clox_token_stream_h
 #endif // clox_token_stream_h
