@@ -10,13 +10,9 @@
 
 static void printNode(StrBuf *sb, AstNode *node);
 
-// Flexible array member lets a slab's data region be sized to whatever a
-// single oversized allocation needs, instead of always being exactly
-// SLAB_SIZE — see allocSlab().
 typedef struct Slab {
   struct Slab *next;
-  size_t capacity; // size of data[], in bytes — usually SLAB_SIZE, but can
-                   // be larger for a single oversized allocation
+  size_t capacity;
   uint8_t data[];
 } Slab;
 
@@ -62,8 +58,6 @@ void arrayNodeDataInit(ArrayNodeData *and) {
 }
 
 void arrayNodeDataWrite(ArrayNodeData *and, AstNode *item) {
-  TRACELN("arrayNodeDataWrite");
-
   if (and->capacity < and->count + 1) {
     int oldCapacity = and->capacity;
     and->capacity = GROW_CAPACITY(oldCapacity);
@@ -134,8 +128,6 @@ static void sbAppendToken(StrBuf *sb, Token t) {
 }
 
 static void printNode(StrBuf *sb, AstNode *node) {
-  TRACELN("---ast printNode start---");
-
   if (node == NULL) {
     sb_append(sb, "<null>");
     return;
@@ -143,12 +135,10 @@ static void printNode(StrBuf *sb, AstNode *node) {
 
   switch (node->kind) {
   case NODE_LITERAL:
-    TRACELN("---ast printNode NODE_LITERAL---");
     printAstValue(sb, node->as.literal.value);
     break;
 
   case NODE_UNARY:
-    TRACELN("---ast printNode NODE_UNARY---");
     sb_append(sb, "(");
     sbAppendToken(sb, node->as.unary.op);
     sb_append(sb, " ");
@@ -157,7 +147,6 @@ static void printNode(StrBuf *sb, AstNode *node) {
     break;
 
   case NODE_BINARY:
-    TRACELN("---ast printNode NODE_BINARY---");
     sb_append(sb, "(");
     sbAppendToken(sb, node->as.binary.op);
     sb_append(sb, " ");
@@ -168,7 +157,6 @@ static void printNode(StrBuf *sb, AstNode *node) {
     break;
 
   case NODE_GROUPING:
-    TRACELN("---ast printNode NODE_GROUPING---");
     sb_append(sb, "(group ");
     printNode(sb, node->as.grouping.inner);
     sb_append(sb, ")");
@@ -179,7 +167,6 @@ static void printNode(StrBuf *sb, AstNode *node) {
     break;
 
   case NODE_ASSIGN:
-    TRACELN("---ast printNode NODE_ASSIGN---");
     sb_append(sb, "(assign ");
     sbAppendToken(sb, node->as.assign.name);
     sb_append(sb, " ");
@@ -188,7 +175,6 @@ static void printNode(StrBuf *sb, AstNode *node) {
     break;
 
   case NODE_AND:
-    TRACELN("---ast printNode NODE_AND---");
     sb_append(sb, "(and ");
     printNode(sb, node->as.logical.left);
     sb_append(sb, " ");
@@ -197,7 +183,6 @@ static void printNode(StrBuf *sb, AstNode *node) {
     break;
 
   case NODE_OR:
-    TRACELN("---ast printNode NODE_OR ---");
     sb_append(sb, "(or ");
     printNode(sb, node->as.logical.left);
     sb_append(sb, " ");
@@ -206,7 +191,6 @@ static void printNode(StrBuf *sb, AstNode *node) {
     break;
 
   case NODE_NULLISH:
-    TRACELN("---ast printNode NODE_NULLISH ---");
     sb_append(sb, "(?? ");
     printNode(sb, node->as.logical.left);
     sb_append(sb, " ");
@@ -215,7 +199,6 @@ static void printNode(StrBuf *sb, AstNode *node) {
     break;
 
   case NODE_CALL:
-    TRACELN("---ast printNode NODE_CALL ---");
     sb_append(sb, "(call ");
     printNode(sb, node->as.call.callee);
     for (int i = 0; i < node->as.call.argCount; i++) {
@@ -226,7 +209,6 @@ static void printNode(StrBuf *sb, AstNode *node) {
     break;
 
   case NODE_GET:
-    TRACELN("---ast printNode NODE_GET ---");
     sb_append(sb, "(get ");
     printNode(sb, node->as.get.object);
     sb_append(sb, " ");
@@ -235,7 +217,6 @@ static void printNode(StrBuf *sb, AstNode *node) {
     break;
 
   case NODE_SET:
-    TRACELN("---ast printNode NODE_SET ---");
     sb_append(sb, "(set ");
     printNode(sb, node->as.set.object);
     sb_append(sb, " ");
@@ -246,7 +227,6 @@ static void printNode(StrBuf *sb, AstNode *node) {
     break;
 
   case NODE_INDEX_GET:
-    TRACELN("---ast printNode NODE_INDEX_GET ---");
     sb_append(sb, "(index-get ");
     printNode(sb, node->as.indexGet.object);
     sb_append(sb, " ");
@@ -255,7 +235,6 @@ static void printNode(StrBuf *sb, AstNode *node) {
     break;
 
   case NODE_INDEX_SET:
-    TRACELN("---ast printNode NODE_INDEX_SET ---");
     sb_append(sb, "(index-set ");
     printNode(sb, node->as.indexSet.object);
     sb_append(sb, " ");
@@ -266,31 +245,26 @@ static void printNode(StrBuf *sb, AstNode *node) {
     break;
 
   case NODE_THIS:
-    TRACELN("---ast printNode NODE_THIS ---");
     sb_append(sb, "this");
     break;
 
   case NODE_SUPER:
-    TRACELN("---ast printNode NODE_SUPER ---");
     sb_append(sb, "(super ");
     sbAppendToken(sb, node->as.super_.method);
     sb_append(sb, ")");
     break;
 
   case NODE_EXPR_STMT:
-    TRACELN("---ast printNode EXPR_STMT ---");
     printNode(sb, node->as.exprStmt.expr);
     break;
 
   case NODE_PRINT:
-    TRACELN("---ast printNode NODE_PRINT ---");
     sb_append(sb, "(print ");
     printNode(sb, node->as.print.expr);
     sb_append(sb, ")");
     break;
 
   case NODE_VAR_DECL:
-    TRACELN("---ast printNode NODE_VAR_DECL ---");
     sb_append(sb, "(var ");
     sbAppendToken(sb, node->as.varDecl.name);
     if (node->as.varDecl.initializer != NULL) {
@@ -301,12 +275,10 @@ static void printNode(StrBuf *sb, AstNode *node) {
     break;
 
   case NODE_BLOCK:
-    TRACELN("---ast printNode NODE_BLOCK ---");
     printBlock(sb, &node->as.block);
     break;
 
   case NODE_IF:
-    TRACELN("---ast printNode NODE_IF ---");
     sb_append(sb, "(if ");
     printNode(sb, node->as.if_.condition);
     sb_append(sb, " ");
@@ -319,7 +291,6 @@ static void printNode(StrBuf *sb, AstNode *node) {
     break;
 
   case NODE_WHILE:
-    TRACELN("---ast printNode NODE_WHILE ---");
     sb_append(sb, "(while ");
     printNode(sb, node->as.while_.condition);
     sb_append(sb, " ");
@@ -328,7 +299,6 @@ static void printNode(StrBuf *sb, AstNode *node) {
     break;
 
   case NODE_RETURN:
-    TRACELN("---ast printNode NODE_RETURN ---");
     sb_append(sb, "(return");
     if (node->as.return_.value != NULL) {
       sb_append(sb, " ");
@@ -338,7 +308,6 @@ static void printNode(StrBuf *sb, AstNode *node) {
     break;
 
   case NODE_FUNCTION:
-    TRACELN("---ast printNode NODE_FUNCTION ---");
     sb_append(sb, node->as.function.isLambda ? "(lambda (" : "(fun ");
     if (!node->as.function.isLambda) {
       sbAppendToken(sb, node->as.function.name);
@@ -359,7 +328,6 @@ static void printNode(StrBuf *sb, AstNode *node) {
     break;
 
   case NODE_CLASS:
-    TRACELN("---ast printNode NODE_CLASS ---");
     sb_append(sb, "(class ");
     sbAppendToken(sb, node->as.class_.name);
     if (node->as.class_.superclass != NULL) {
@@ -386,8 +354,6 @@ static void printNode(StrBuf *sb, AstNode *node) {
     break;
 
   case NODE_ARRAY:
-    TRACELN("---ast printNode NODE_ARRAY---");
-
     sb_append(sb, "(array");
     for (int i = 0; i < node->as.array.count; i++) {
       sb_append(sb, " ");
@@ -400,15 +366,11 @@ static void printNode(StrBuf *sb, AstNode *node) {
     sb_append(sb, "<invalid>");
     break;
   }
-
-  TRACELN("---ast printNode end---");
 }
 
 const char *print_ast(AstNode *ast) {
-  TRACELN("--- print_ast start ---");
   StrBuf sb;
   sb_init(&sb);
   printNode(&sb, ast);
-  TRACELN("--- print_ast end ---");
-  return sb.data; // caller owns this heap string — must free() it
+  return sb.data; // TODO: caller owns this heap string — must free() it
 }

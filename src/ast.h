@@ -5,36 +5,32 @@
 #include "token.h"
 #include "value.h"
 
-// ── Node kind tags ───────────────────────────────────────────────────────────
-
 typedef enum {
-  // Expressions
-  NODE_LITERAL,   // number, string, true, false, nil
-  NODE_UNARY,     // -expr  !expr
-  NODE_BINARY,    // expr op expr
-  NODE_GROUPING,  // ( expr )
-  NODE_VARIABLE,  // identifier
-  NODE_ASSIGN,    // name = expr
-  NODE_AND,       // expr and expr
-  NODE_OR,        // expr or  expr
-  NODE_NULLISH,   // expr ?? expr
-  NODE_CALL,      // callee(args...)
-  NODE_GET,       // object.name
-  NODE_SET,       // object.name = value
-  NODE_THIS,      // this
-  NODE_SUPER,     // super.method
-  NODE_INDEX_GET, // object[index]
-  NODE_INDEX_SET, // object[index] = value
-  // Statements
-  NODE_EXPR_STMT, // expression ;
-  NODE_PRINT,     // print expr ;
-  NODE_VAR_DECL,  // var name = init ;
-  NODE_BLOCK,     // { statements }
-  NODE_IF,        // if (cond) then else?
-  NODE_WHILE,     // while (cond) body
-  NODE_RETURN,    // return expr? ;
-  NODE_FUNCTION,  // fun name(params) body
-  NODE_CLASS,     // class Name (< Super)? { methods }
+  NODE_LITERAL,
+  NODE_UNARY,
+  NODE_BINARY,
+  NODE_GROUPING,
+  NODE_VARIABLE,
+  NODE_ASSIGN,
+  NODE_AND,
+  NODE_OR,
+  NODE_NULLISH,
+  NODE_CALL,
+  NODE_GET,
+  NODE_SET,
+  NODE_THIS,
+  NODE_SUPER,
+  NODE_INDEX_GET,
+  NODE_INDEX_SET,
+  NODE_EXPR_STMT,
+  NODE_PRINT,
+  NODE_VAR_DECL,
+  NODE_BLOCK,
+  NODE_IF,
+  NODE_WHILE,
+  NODE_RETURN,
+  NODE_FUNCTION,
+  NODE_CLASS,
   NODE_ARRAY,
   // Sentinel
   NODE_COUNT
@@ -43,8 +39,6 @@ typedef enum {
 typedef struct AstNode AstNode;
 
 const char *print_ast(AstNode *ast);
-
-// ── Per-kind payload structs ─────────────────────────────────────────────────
 
 typedef struct {
   Value value;
@@ -121,15 +115,15 @@ typedef struct {
 
 typedef struct {
   Token name;
-  AstNode *initializer; // NULL if `var x;` (no initializer)
-  int declEndLine;      // line of the trailing ';' -- see compiler.c
+  AstNode *initializer;
+  int declEndLine;
 } VarDeclNode;
 
 typedef struct {
   AstNode **stmts;
   int count;
   AstNode *value;
-  int endLine; // line of the closing '}' — see compiler.c's endScope() sites
+  int endLine;
 } BlockNode;
 
 typedef struct {
@@ -152,7 +146,7 @@ typedef struct {
   AstNode *condition;
   AstNode *body;
   AstNode *increment;
-} WhileNode;
+} WhileNode; // TODO: The right naming?
 
 typedef struct {
   Token name;    // unused/empty when isLambda is true

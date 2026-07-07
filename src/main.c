@@ -95,7 +95,7 @@ int main(int argc, char *argv[]) {
 
       for (int i = 0; i < outCount; i++) {
         const char *ast_str = print_ast(ast[i]);
-        printf("AST: %s\n", ast_str);
+        printf("%s\n", ast_str);
         free((void *)ast_str);
       }
 
