@@ -1,0 +1,21 @@
+== <script> ==
+0000    1 OP_NIL
+0001    | OP_RETURN
+== sum ==
+0000    3 OP_GET_LOCAL        1
+0002    | OP_GET_LOCAL        2
+0004    | OP_ADD
+0005    | OP_CLOSE_BLOCK      0
+0007    | OP_RETURN
+== <script> ==
+0000    1 OP_GET_GLOBAL       0 'sum'
+0002    | OP_CONSTANT         1 '1.000000'
+0004    | OP_CONSTANT         2 '2.000000'
+0006    | OP_CALL             2
+0008    | OP_PRINT
+0009    3 OP_CLOSURE          4 <fn sum>
+0011    | OP_DEFINE_GLOBAL    3 'sum'
+0013    4 OP_NIL
+0014    | OP_RETURN
+Undefined variable 'sum'.
+[line 1] in script
