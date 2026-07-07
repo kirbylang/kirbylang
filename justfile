@@ -47,9 +47,6 @@ install:
 test *args: build
     ./scripts/tests.sh {{ args }}
 
-unit: build-tests
-    ./scripts/unit.sh
-
 # Run the tests with coverage enabled
 coverage *args:
     ./scripts/coverage.sh {{ args }}
@@ -57,6 +54,13 @@ coverage *args:
 # Update the test snapshots
 test-update: build
     ./scripts/tests.sh --update
+
+# Run unit tests
+unit: build-tests
+    ./scripts/unit.sh
+
+verify:
+    ./scripts/verify.sh
 
 # Build the docker image
 docker-build:
