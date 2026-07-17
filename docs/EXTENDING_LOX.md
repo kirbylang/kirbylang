@@ -34,7 +34,7 @@ These are the documented changes to the language/syntax from the original Lox la
   - Introduce `lex` function which produces `TokenStream`
   - Introduce `parse` function which consumes `TokenStream` and produces `AstNode**`
   - Update `compile` function to consume `AstNode**` to produce bytecode
-  - [ ] The ability to call functions before declaration
+  - Forward referencing functions (use before declaring)
 
 ## 0.2.0
 

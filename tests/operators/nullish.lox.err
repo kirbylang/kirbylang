@@ -10,47 +10,47 @@
 0000   18 OP_NIL
 0001    | OP_RETURN
 == <script> ==
-0000    1 OP_NIL
-0001    | OP_JUMP_IF_NOT_NIL    1 -> 7
-0004    | OP_POP
-0005    | OP_CONSTANT         0 '123.000000'
-0007    | OP_PRINT
-0008    2 OP_NIL
-0009    | OP_JUMP_IF_NOT_NIL    9 -> 20
+0000    7 OP_CLOSURE          1 <fn should_not_call>
+0002    | OP_DEFINE_GLOBAL    0 'should_not_call'
+0004   19 OP_CLOSURE          3 <fn returns_nil>
+0006    | OP_DEFINE_GLOBAL    2 'returns_nil'
+0008    1 OP_NIL
+0009    | OP_JUMP_IF_NOT_NIL    9 -> 15
 0012    | OP_POP
-0013    | OP_NIL
-0014    | OP_JUMP_IF_NOT_NIL   14 -> 20
-0017    | OP_POP
-0018    | OP_CONSTANT         1 '456.000000'
-0020    | OP_PRINT
-0021    3 OP_CONSTANT         2 '789.000000'
-0023    | OP_JUMP_IF_NOT_NIL   23 -> 29
-0026    | OP_POP
-0027    | OP_CONSTANT         3 '0.000000'
-0029    | OP_PRINT
-0030    7 OP_CLOSURE          5 <fn should_not_call>
-0032    | OP_DEFINE_GLOBAL    4 'should_not_call'
-0034    9 OP_CONSTANT         6 'Hello World'
-0036    | OP_JUMP_IF_NOT_NIL   36 -> 44
-0039    | OP_POP
-0040    | OP_GET_GLOBAL       7 'should_not_call'
-0042    | OP_CALL             0
-0044    | OP_PRINT
-0045   11 OP_FALSE
-0046    | OP_JUMP_IF_NOT_NIL   46 -> 54
-0049    | OP_POP
-0050    | OP_GET_GLOBAL       8 'should_not_call'
-0052    | OP_CALL             0
-0054    | OP_JUMP_IF_FALSE   54 -> 64
-0057    | OP_POP
-0058   12 OP_CONSTANT         9 'True condition met'
-0060    | OP_PRINT
-0061   13 OP_JUMP            61 -> 68
-0064    | OP_POP
-0065   14 OP_CONSTANT        10 'False condition met'
-0067    | OP_PRINT
-0068   19 OP_CLOSURE         12 <fn returns_nil>
-0070    | OP_DEFINE_GLOBAL   11 'returns_nil'
+0013    | OP_CONSTANT         4 '123.000000'
+0015    | OP_PRINT
+0016    2 OP_NIL
+0017    | OP_JUMP_IF_NOT_NIL   17 -> 28
+0020    | OP_POP
+0021    | OP_NIL
+0022    | OP_JUMP_IF_NOT_NIL   22 -> 28
+0025    | OP_POP
+0026    | OP_CONSTANT         5 '456.000000'
+0028    | OP_PRINT
+0029    3 OP_CONSTANT         6 '789.000000'
+0031    | OP_JUMP_IF_NOT_NIL   31 -> 37
+0034    | OP_POP
+0035    | OP_CONSTANT         7 '0.000000'
+0037    | OP_PRINT
+0038    9 OP_CONSTANT         8 'Hello World'
+0040    | OP_JUMP_IF_NOT_NIL   40 -> 48
+0043    | OP_POP
+0044    | OP_GET_GLOBAL       9 'should_not_call'
+0046    | OP_CALL             0
+0048    | OP_PRINT
+0049   11 OP_FALSE
+0050    | OP_JUMP_IF_NOT_NIL   50 -> 58
+0053    | OP_POP
+0054    | OP_GET_GLOBAL      10 'should_not_call'
+0056    | OP_CALL             0
+0058    | OP_JUMP_IF_FALSE   58 -> 68
+0061    | OP_POP
+0062   12 OP_CONSTANT        11 'True condition met'
+0064    | OP_PRINT
+0065   13 OP_JUMP            65 -> 72
+0068    | OP_POP
+0069   14 OP_CONSTANT        12 'False condition met'
+0071    | OP_PRINT
 0072   21 OP_GET_GLOBAL      13 'returns_nil'
 0074    | OP_CALL             0
 0076    | OP_JUMP_IF_NOT_NIL   76 -> 81

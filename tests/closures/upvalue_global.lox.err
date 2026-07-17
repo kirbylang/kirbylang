@@ -27,12 +27,12 @@
 0020   12 OP_NIL
 0021    | OP_RETURN
 == <script> ==
-0000    1 OP_NIL
-0001    | OP_DEFINE_GLOBAL    0 'globalSet'
-0003    2 OP_NIL
-0004    | OP_DEFINE_GLOBAL    1 'globalGet'
-0006   12 OP_CLOSURE          3 <fn main>
-0008    | OP_DEFINE_GLOBAL    2 'main'
+0000   12 OP_CLOSURE          1 <fn main>
+0002    | OP_DEFINE_GLOBAL    0 'main'
+0004    1 OP_NIL
+0005    | OP_DEFINE_GLOBAL    2 'globalSet'
+0007    2 OP_NIL
+0008    | OP_DEFINE_GLOBAL    3 'globalGet'
 0010   14 OP_GET_GLOBAL       4 'main'
 0012    | OP_CALL             0
 0014    | OP_POP

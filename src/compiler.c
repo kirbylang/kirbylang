@@ -1122,8 +1122,18 @@ ObjFunction *compile(AstNode **ast, int count, int endLine) {
   Compiler compiler;
   initCompiler(&compiler, TYPE_SCRIPT, NULL);
 
+  // Pass 1: hoist top-level function declarations.
   for (int i = 0; i < count; i++) {
-    compileStmt(ast[i]);
+    if (ast[i]->kind == NODE_FUNCTION) {
+      compileStmt(ast[i]);
+    }
+  }
+
+  // Pass 2: everything else, in source order.
+  for (int i = 0; i < count; i++) {
+    if (ast[i]->kind != NODE_FUNCTION) {
+      compileStmt(ast[i]);
+    }
   }
 
   // Matches the original: the top-level loop always ends by consuming the
