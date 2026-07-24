@@ -53,25 +53,13 @@ typedef struct ClassCompiler {
 
 typedef struct LoopCompiler {
   struct LoopCompiler *enclosing;
-  int scopeDepth; // depth *inside* the loop, for locals cleanup
+  int scopeDepth;
   int breakJumps[UINT8_COUNT];
   int breakCount;
 } LoopCompiler;
 
 /**
- * Compile a fully-parsed AST into a compiled function object.
- *
- * `ast`/`count` are exactly what parse() (see parser.h) returns: the
- * top-level declaration nodes. `endLine` is parse()'s *outEndLine --
- * needed to tag the script's trailing implicit return with the same line
- * the original single-pass compiler would have (the line of the last
- * token in the file), rather than whatever line was last visited while
- * compiling the final statement. compile() does not take ownership of the
- * AST -- the caller still frees it via astFreeAll(), same as before.
- *
- * This compiled object can be run by the VM.
- *
- * Returns NULL if any compile-time error was reported.
+ * Compile a AST node into a compiled function object.
  */
 ObjFunction *compile(AstNode **ast, int count, int endLine);
 

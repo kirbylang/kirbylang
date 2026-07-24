@@ -87,7 +87,10 @@ typedef struct {
 
 typedef struct {
   AstNode *callee;
-  Token paren; // closing ')' — used for error location
+  /**
+   * closing ')' — used for error location
+   */
+  Token paren;
   AstNode **args;
   int argCount;
 } CallNode;
@@ -105,7 +108,10 @@ typedef struct {
 typedef struct {
   AstNode *object;
   AstNode *index;
-  Token bracket; // opening '[' — used for error location
+  /**
+   * opening '[' — used for error location
+   */
+  Token bracket;
 } IndexGetNode;
 
 typedef struct {
@@ -131,7 +137,10 @@ typedef struct {
 typedef struct {
   AstNode *condition;
   AstNode *thenBranch;
-  AstNode *elseBranch; // NULL if no else clause
+  /**
+   * NULL if no else clause
+   */
+  AstNode *elseBranch;
 } IfNode;
 
 typedef struct {
@@ -151,23 +160,22 @@ typedef struct {
 } ForNode;
 
 typedef struct {
-  Token name;    // unused/empty when isLambda is true
-  Token *params; // arena-allocated array of Token
+  Token name; // TODO: NULL if a lambda
+  /**
+   * arena-allocated array of Token
+   */
+  Token *params;
   int arity;
-  BlockNode body;    // used when exprBody == NULL
+  BlockNode body; // used when exprBody == NULL; TODO: Merge body and exprBody
+                  // as a tagged union?
   AstNode *exprBody; // non-NULL for `fun name(...) = expr;` bodies
-  int bodyEndLine;   // line of the body's closing '}' or trailing ';'
+  int bodyEndLine;
   bool isMethod;
-  bool isLambda; // true for anonymous `fun (...) {...}` expressions
+  bool isLambda; // TODO: Remove
 } FunctionNode;
 
 typedef enum { CLASS_MEMBER_FIELD, CLASS_MEMBER_METHOD } ClassMemberKind;
 
-// A single class-body member (`var x = expr;` or `name(params) {...}`),
-// tagged by kind. Class bodies keep members in a single array in source
-// order (rather than separate fields[]/methods[] arrays) so the compiler
-// can emit OP_FIELD/OP_METHOD in exactly the order they were declared,
-// matching what a single interleaved pass over the source would produce.
 typedef struct {
   ClassMemberKind kind;
   union {
@@ -178,18 +186,24 @@ typedef struct {
 
 typedef struct {
   Token name;
-  Token *superclass;    // NULL if no superclass; pointer to Token in arena
-  ClassMember *members; // arena-allocated array, in source order
+  Token *superclass; // NULL if no superclass; pointer to Token in arena; TODO:
+                     // Remove this
+  ClassMember *members;
   int memberCount;
-  int endLine; // line of the closing '}' of the class body
+  /**
+   * line of the closing '}' of the class body
+   */
+  int endLine;
 } ClassNode;
 
-// ArrayNodeData is a *temporary builder* used only while parsing an array
-// literal (elements are collected one at a time as they're parsed, before
-// the final count is known). It is heap-allocated via realloc and must be
-// freed with arrayNodeDataFree() once its contents have been copied into
-// the AST arena — it does not live inside AstNode itself. See ArrayNode
-// below, which holds the arena-owned copy.
+/**
+ * Called in the parser's arrayLiteral function
+ *
+ * It is heap-allocated via realloc and must be
+ * freed with arrayNodeDataFree() once its contents have been copied into
+ * the AST arena — it does not live inside AstNode itself. See ArrayNode
+ * below, which holds the arena-owned copy.
+ */
 typedef struct {
   AstNode **data;
   int count;
@@ -197,15 +211,16 @@ typedef struct {
 } ArrayNodeData;
 
 typedef struct {
-  AstNode **items; // arena-allocated array of element node pointers
+  /**
+   * arena-allocated array of element node pointers
+   */
+  AstNode **items;
   int count;
 } ArrayNode;
 
 void arrayNodeDataInit(ArrayNodeData *and);
 void arrayNodeDataWrite(ArrayNodeData *and, AstNode *item);
 void arrayNodeDataFree(ArrayNodeData *and);
-
-// ── The tagged-union node ────────────────────────────────────────────────────
 
 struct AstNode {
   NodeKind kind;
@@ -241,7 +256,7 @@ struct AstNode {
 };
 
 AstNode *astAlloc(NodeKind kind, int line);
-void *astAllocRaw(size_t size); // for param arrays, arg arrays, etc.
+void *astAllocRaw(size_t size);
 void astFreeAll(void);
 
 #endif
