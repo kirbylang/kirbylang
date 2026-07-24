@@ -45,41 +45,52 @@ const char *print_ast(AstNode *ast);
 typedef struct {
   Value value;
 } LiteralNode;
+
 typedef struct {
   Token op;
   AstNode *operand;
 } UnaryNode;
+
 typedef struct {
   Token op;
   AstNode *left;
   AstNode *right;
 } BinaryNode;
+
 typedef struct {
   AstNode *inner;
 } GroupingNode;
+
 typedef struct {
   Token name;
 } VariableNode;
+
 typedef struct {
   Token name;
   AstNode *value;
 } AssignNode;
+
 typedef struct {
   AstNode *left;
   AstNode *right;
 } LogicalNode;
+
 typedef struct {
   AstNode *expr;
 } ExprStmtNode;
+
 typedef struct {
   AstNode *expr;
 } PrintNode;
+
 typedef struct {
   AstNode *value;
 } ReturnNode;
+
 typedef struct {
   Token keyword;
 } ThisNode;
+
 typedef struct {
   Token keyword;
   Token method;
