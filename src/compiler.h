@@ -46,9 +46,6 @@ typedef struct {
 
 typedef struct ClassCompiler {
   struct ClassCompiler *enclosing;
-
-  Field fields[256];
-  int fieldCount;
 } ClassCompiler;
 
 typedef struct LoopCompiler {

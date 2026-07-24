@@ -823,8 +823,6 @@ static void compileClassDecl(AstNode *node) {
 
   ClassCompiler classCompiler;
   classCompiler.enclosing = currentClass;
-  classCompiler.fieldCount =
-      0; // TODO: unused -- nothing reads ClassCompiler.fields
   currentClass = &classCompiler;
 
   // Push the class back onto the stack so fields/methods can be bound to it
