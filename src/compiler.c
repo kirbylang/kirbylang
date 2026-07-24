@@ -1020,16 +1020,10 @@ static void compileBlockContents(BlockNode *block) {
   if (block->value != NULL) {
     compileExpr(block->value);
 
-    // TODO: Matches the original quirk exactly: this implicit-return path emits
-    // a bare OP_RETURN, *not* emitValueReturn() -- so (like the original) it
-    // does not special-case TYPE_INITIALIZER the way an explicit
-    // `return expr;` does. A tail expression is only valid inside some
-    // function; at true top-level (TYPE_SCRIPT) it's the same error the
-    // original raised at compile time for a dangling expression.
     if (current->type == TYPE_SCRIPT) {
       errorAtNode(block->value, "Expect ';' after expression.");
     } else {
-      emitByte(OP_RETURN);
+      emitValueReturn();
     }
   }
 }
