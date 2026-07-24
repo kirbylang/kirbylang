@@ -2,6 +2,7 @@
 #define clox_ast_h
 #include <stdlib.h>
 
+#include "strbuf.h"
 #include "token.h"
 #include "value.h"
 
@@ -39,7 +40,7 @@ typedef enum {
 
 typedef struct AstNode AstNode;
 
-const char *print_ast(AstNode *ast);
+void print_ast(StrBuf *sb, AstNode *ast);
 
 typedef struct {
   Value value;

@@ -44,23 +44,41 @@ void assert_ast(const char *path, const char *expected, int argc,
 
   AstNode **ast = parse(source, &outCount, &hadError, &endLineOut);
 
-  StrBuf sb = {0};
-  sb_init(&sb);
+  StrBuf ast_sb = {0};
+  sb_init(&ast_sb);
 
   for (int i = 0; i < outCount; i++) {
-    const char *ast_str = print_ast(ast[i]);
-    sb_appendf(&sb, "%s\n", ast_str);
-    free((void *)ast_str);
+    StrBuf ast_node_sb;
+    sb_init(&ast_node_sb);
+
+    print_ast(&ast_node_sb, ast[i]);
+    sb_appendf(&ast_sb, "%s\n", ast_node_sb.data);
+    sb_free(&ast_node_sb);
   }
 
-  bool passed = strcmp(expected, sb.data) == 0;
+  bool passed = strcmp(expected, ast_sb.data) == 0;
 
-  assert(passed && "AST didn't match expected AST");
+  StrBuf sb_diff = {0};
+  sb_init(&sb_diff);
 
-  sb_free(&sb);
+  sb_appendf(
+      &sb_diff,
+      "AST didn't match expected AST\n\nExpected:\n%s\n\nActual:\n%s\n\n",
+      expected, ast_sb.data);
+
+  if (!passed) {
+    fprintf(stderr, "%s", sb_diff.data);
+  }
+
+  assert(passed);
+
+  sb_free(&sb_diff);
+  sb_free(&ast_sb);
   astFreeAll();
   free(ast);
+
   freeVM();
+
   free(saved_argv);
 }
 
@@ -116,10 +134,11 @@ int main(int argc, char *argv[]) {
              "\"Hello World\"))\n",
              argc, argv);
 
-  assert_ast("../tests/flow_control/for.lox",
-             ""
-             "(while (< i 10) (block (print \"done\")))\n",
-             argc, argv);
+  assert_ast(
+      "../tests/flow_control/for.lox",
+      ""
+      "(for (var i 0) (< i 10) (assign i (+ i 1)) (block (print \"done\")))\n",
+      argc, argv);
 
   assert_ast("../tests/flow_control/if_and_then_false.lox",
              ""

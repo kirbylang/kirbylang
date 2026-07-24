@@ -10,6 +10,7 @@
 #include "debug.h"
 #include "lexer.h"
 #include "parser.h"
+#include "strbuf.h"
 #include "token_stream.h"
 #include "version.h"
 #include "vm.h"
@@ -90,9 +91,13 @@ int main(int argc, char *argv[]) {
       AstNode **ast = parse(source, &outCount, &hadError, &endLine);
 
       for (int i = 0; i < outCount; i++) {
-        const char *ast_str = print_ast(ast[i]);
-        printf("%s\n", ast_str);
-        free((void *)ast_str);
+        StrBuf ast_node_sb;
+        sb_init(&ast_node_sb);
+
+        print_ast(&ast_node_sb, ast[i]);
+        printf("%s\n", ast_node_sb.data);
+
+        sb_free(&ast_node_sb);
       }
 
       astFreeAll();

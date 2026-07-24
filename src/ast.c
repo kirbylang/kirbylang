@@ -1,10 +1,11 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
 #include "ast.h"
 #include "memory.h"
 #include "object.h"
 #include "strbuf.h"
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
 
 #define SLAB_SIZE 8192
 
@@ -299,6 +300,18 @@ static void printNode(StrBuf *sb, AstNode *node) {
     sb_append(sb, ")");
     break;
 
+  case NODE_FOR:
+    sb_append(sb, "(for ");
+    printNode(sb, node->as.for_.init);
+    sb_append(sb, " ");
+    printNode(sb, node->as.for_.condition);
+    sb_append(sb, " ");
+    printNode(sb, node->as.for_.increment);
+    sb_append(sb, " ");
+    printNode(sb, node->as.for_.body);
+    sb_append(sb, ")");
+    break;
+
   case NODE_RETURN:
     sb_append(sb, "(return");
 
@@ -383,9 +396,4 @@ static void printNode(StrBuf *sb, AstNode *node) {
   }
 }
 
-const char *print_ast(AstNode *ast) {
-  StrBuf sb;
-  sb_init(&sb);
-  printNode(&sb, ast);
-  return sb.data; // TODO: caller owns this heap string — must free() it
-}
+void print_ast(StrBuf *sb, AstNode *ast) { printNode(sb, ast); }
