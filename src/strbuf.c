@@ -25,11 +25,20 @@ void sb_append(StrBuf *sb, const char *text) {
 }
 
 void sb_appendf(StrBuf *sb, const char *fmt, ...) {
-  char tmp[256];
-
   va_list args;
   va_start(args, fmt);
-  vsnprintf(tmp, sizeof(tmp), fmt, args);
+  va_list args_copy;
+  va_copy(args_copy, args);
+  int needed = vsnprintf(NULL, 0, fmt, args_copy);
+  va_end(args_copy);
+
+  if (needed < 0) {
+    va_end(args);
+    return; // encoding error
+  }
+
+  char *tmp = (char *)malloc((size_t)needed + 1);
+  vsnprintf(tmp, (size_t)needed + 1, fmt, args);
   va_end(args);
 
   sb_append(sb, tmp);
