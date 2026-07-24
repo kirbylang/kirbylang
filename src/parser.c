@@ -36,9 +36,6 @@ typedef enum {
   PREC_PRIMARY
 } Precedence;
 
-// Prefix parsers never have a left-hand node yet (nothing precedes them),
-// so they take one fewer argument than infix parsers, which always
-// receive the already-parsed left operand.
 typedef AstNode *(*PrefixParseFn)(Parser *p, bool canAssign);
 typedef AstNode *(*InfixParseFn)(Parser *p, AstNode *left, bool canAssign);
 
@@ -62,9 +59,6 @@ static AstNode *lambda(Parser *p, bool canAssign);
 static AstNode *ifExpr(Parser *p, bool canAssign);
 static AstNode *nullish_(Parser *p, AstNode *left, bool canAssign);
 
-// ── Token helpers
-// ────────────────────────────────────────────────────────────
-
 static void advance(Parser *parser) {
   parser->previous = parser->current;
 
@@ -73,6 +67,7 @@ static void advance(Parser *parser) {
 
     if (parser->current.type != TOKEN_ERROR)
       break;
+
     error_at_current(parser, parser->current.start);
   }
 }
@@ -84,7 +79,9 @@ static bool check(Parser *parser, TokenType type) {
 static bool match(Parser *parser, TokenType type) {
   if (!check(parser, type))
     return false;
+
   advance(parser);
+
   return true;
 }
 
@@ -93,6 +90,7 @@ static void consume(Parser *parser, TokenType type, const char *message) {
     advance(parser);
     return;
   }
+
   error_at_current(parser, message);
 }
 
@@ -103,6 +101,7 @@ static bool is_at_end(Parser *parser) {
 // Discards tokens until a statement boundary is found (panic-mode recovery).
 static void synchronize(Parser *p) {
   p->panicMode = false;
+
   while (!is_at_end(p)) {
     if (p->previous.type == TOKEN_SEMICOLON)
       return;
@@ -118,11 +117,10 @@ static void synchronize(Parser *p) {
       return;
     default:;
     }
+
     advance(p);
   }
 }
-
-// ── Pratt core ───────────────────────────────────────────────────────────────
 
 static AstNode *parse_precedence(Parser *parser, Precedence precedence) {
   TRACELN("parser.parse_precedence(%d)", precedence);
@@ -130,6 +128,7 @@ static AstNode *parse_precedence(Parser *parser, Precedence precedence) {
   advance(parser);
 
   PrefixParseFn prefixRule = get_rule(parser->previous.type)->prefix;
+
   if (prefixRule == NULL) {
     parse_error(parser, "Expect expression.");
     return NULL;
@@ -158,26 +157,25 @@ static AstNode *expression(Parser *parser) {
   return parse_precedence(parser, PREC_ASSIGNMENT);
 }
 
-// ── Prefix rules ─────────────────────────────────────────────────────────────
-
 static AstNode *number(Parser *parser, bool canAssign) {
   (void)canAssign;
+
   double v = strtod(parser->previous.start, NULL);
+
   AstNode *node = astAlloc(NODE_LITERAL, parser->previous.line);
   node->as.literal.value = NUMBER_VAL(v);
+
   return node;
 }
 
 static AstNode *string_(Parser *parser, bool canAssign) {
   (void)canAssign;
+
   AstNode *node = astAlloc(NODE_LITERAL, parser->previous.line);
 
   const char *chars = parser->previous.start + 1;
   int length = parser->previous.length - 2;
 
-  // Scratch buffer for decoding escapes -- plain malloc/free since it never
-  // outlives this function; copyString() below makes its own copy of the
-  // decoded bytes, so there's nothing for the GC to track here.
   char *buffer = (char *)malloc((size_t)length + 1);
   int out = 0;
 
@@ -214,12 +212,15 @@ static AstNode *string_(Parser *parser, bool canAssign) {
 
   node->as.literal.value = OBJ_VAL(copyString(buffer, out));
   free(buffer);
+
   return node;
 }
 
 static AstNode *literal(Parser *parser, bool canAssign) {
   (void)canAssign;
+
   AstNode *node = astAlloc(NODE_LITERAL, parser->previous.line);
+
   switch (parser->previous.type) {
   case TOKEN_TRUE:
     node->as.literal.value = BOOL_VAL(true);
@@ -233,26 +234,34 @@ static AstNode *literal(Parser *parser, bool canAssign) {
   default:
     break; // unreachable
   }
+
   return node;
 }
 
 static AstNode *grouping(Parser *p, bool canAssign) {
   (void)canAssign;
+
   int line = p->previous.line;
+
   AstNode *inner = expression(p);
   consume(p, TOKEN_RIGHT_PAREN, "Expect ')' after expression.");
+
   AstNode *node = astAlloc(NODE_GROUPING, line);
   node->as.grouping.inner = inner;
+
   return node;
 }
 
 static AstNode *unary(Parser *p, bool canAssign) {
   (void)canAssign;
+
   Token op = p->previous;
   AstNode *operand = parse_precedence(p, PREC_UNARY);
+
   AstNode *node = astAlloc(NODE_UNARY, op.line);
   node->as.unary.op = op;
   node->as.unary.operand = operand;
+
   return node;
 }
 
@@ -264,45 +273,56 @@ static AstNode *variable(Parser *p, bool canAssign) {
     AstNode *node = astAlloc(NODE_ASSIGN, name.line);
     node->as.assign.name = name;
     node->as.assign.value = value;
+
     return node;
   }
 
   AstNode *node = astAlloc(NODE_VARIABLE, name.line);
   node->as.variable.name = name;
+
   return node;
 }
 
 static AstNode *this_(Parser *p, bool canAssign) {
   (void)canAssign;
+
   AstNode *node = astAlloc(NODE_THIS, p->previous.line);
   node->as.this_.keyword = p->previous;
+
   return node;
 }
 
 static AstNode *super_(Parser *p, bool canAssign) {
   (void)canAssign;
+
   Token keyword = p->previous;
+
   consume(p, TOKEN_DOT, "Expect '.' after 'super'.");
   consume(p, TOKEN_IDENTIFIER, "Expect superclass method name.");
+
   Token method = p->previous;
+
   AstNode *node = astAlloc(NODE_SUPER, keyword.line);
   node->as.super_.keyword = keyword;
   node->as.super_.method = method;
+
   return node;
 }
 
-// `if` used as an EXPRESSION: `if (cond) thenExpr else elseExpr`. Unlike
-// ifStatement(), both arms are parsed via expression() rather than
-// statement(), and a missing `else` just means "value is nil" at compile
-// time (see compileExpr's NODE_IF case) rather than "no else branch".
 static AstNode *ifExpr(Parser *p, bool canAssign) {
   (void)canAssign;
+
   int line = p->previous.line;
+
   consume(p, TOKEN_LEFT_PAREN, "Expect '(' after 'if'.");
+
   AstNode *cond = expression(p);
+
   consume(p, TOKEN_RIGHT_PAREN, "Expect ')' after condition.");
+
   AstNode *thenBranch = expression(p);
   AstNode *elseBranch = NULL;
+
   if (match(p, TOKEN_ELSE)) {
     elseBranch = expression(p);
   }
@@ -311,18 +331,15 @@ static AstNode *ifExpr(Parser *p, bool canAssign) {
   node->as.if_.condition = cond;
   node->as.if_.thenBranch = thenBranch;
   node->as.if_.elseBranch = elseBranch;
+
   return node;
 }
 
 static AstNode *arrayLiteral(Parser *p, bool canAssign) {
   (void)canAssign;
-  TRACELN("---arrayLiteral start---");
 
   Token bracket = p->previous;
 
-  // `and` is just a temporary builder — its heap buffer is copied into the
-  // AST arena below and then released, so the node itself never points into
-  // it.
   ArrayNodeData and;
   arrayNodeDataInit(&and);
 
@@ -344,6 +361,7 @@ static AstNode *arrayLiteral(Parser *p, bool canAssign) {
 
   AstNode *node = astAlloc(NODE_ARRAY, bracket.line);
   node->as.array.count = and.count;
+
   if (and.count > 0) {
     AstNode **items = (AstNode **)astAllocRaw(and.count * sizeof(AstNode *));
     memcpy(items, and.data, and.count * sizeof(AstNode *));
@@ -352,51 +370,60 @@ static AstNode *arrayLiteral(Parser *p, bool canAssign) {
     node->as.array.items = NULL;
   }
 
-  arrayNodeDataFree(&and); // release the temporary heap buffer
-
-  TRACELN("---arrayLiteral end---");
+  arrayNodeDataFree(&and);
 
   return node;
 }
 
-// ── Infix rules ──────────────────────────────────────────────────────────────
-
 static AstNode *binary(Parser *p, AstNode *left, bool canAssign) {
   (void)canAssign;
+
   Token op = p->previous;
+
   ParseRule *rule = get_rule(op.type);
   AstNode *right = parse_precedence(p, (Precedence)(rule->precedence + 1));
+
   AstNode *node = astAlloc(NODE_BINARY, op.line);
   node->as.binary.op = op;
   node->as.binary.left = left;
   node->as.binary.right = right;
+
   return node;
 }
 
 static AstNode *and_(Parser *p, AstNode *left, bool canAssign) {
   (void)canAssign;
+
   AstNode *right = parse_precedence(p, PREC_AND);
+
   AstNode *node = astAlloc(NODE_AND, p->previous.line);
   node->as.logical.left = left;
   node->as.logical.right = right;
+
   return node;
 }
 
 static AstNode *or_(Parser *p, AstNode *left, bool canAssign) {
   (void)canAssign;
+
   AstNode *right = parse_precedence(p, PREC_OR);
+
   AstNode *node = astAlloc(NODE_OR, p->previous.line);
   node->as.logical.left = left;
   node->as.logical.right = right;
+
   return node;
 }
 
 static AstNode *nullish_(Parser *p, AstNode *left, bool canAssign) {
   (void)canAssign;
+
   AstNode *right = parse_precedence(p, PREC_OR);
+
   AstNode *node = astAlloc(NODE_NULLISH, p->previous.line);
   node->as.logical.left = left;
   node->as.logical.right = right;
+
   return node;
 }
 
@@ -412,13 +439,17 @@ static AstNode *call(Parser *p, AstNode *left, bool canAssign) {
       if (argCount >= 255) {
         error_at_current(p, "Can't have more than 255 arguments.");
       }
+
       argBuf[argCount++] = expression(p);
     } while (match(p, TOKEN_COMMA));
   }
+
   Token paren = p->current;
+
   consume(p, TOKEN_RIGHT_PAREN, "Expect ')' after arguments.");
 
   AstNode **args = NULL;
+
   if (argCount > 0) {
     args = (AstNode **)astAllocRaw(argCount * sizeof(AstNode *));
     memcpy(args, argBuf, argCount * sizeof(AstNode *));
@@ -429,6 +460,7 @@ static AstNode *call(Parser *p, AstNode *left, bool canAssign) {
   node->as.call.paren = paren;
   node->as.call.args = args;
   node->as.call.argCount = argCount;
+
   return node;
 }
 
@@ -472,8 +504,6 @@ static AstNode *index_(Parser *p, AstNode *left, bool canAssign) {
   node->as.indexGet.bracket = bracket;
   return node;
 }
-
-// ── Pratt dispatch table ─────────────────────────────────────────────────────
 
 static ParseRule rules[] = {
     [TOKEN_LEFT_PAREN] = {grouping, call, PREC_CALL},
@@ -525,8 +555,6 @@ static ParseRule rules[] = {
 
 static ParseRule *get_rule(TokenType type) { return &rules[type]; }
 
-// ── Statement parsers ────────────────────────────────────────────────────────
-
 static BlockNode parseBlock(Parser *p) {
   int capacity = 8, count = 0;
   AstNode **buf = (AstNode **)malloc(capacity * sizeof(AstNode *));
@@ -552,10 +580,12 @@ static BlockNode parseBlock(Parser *p) {
   consume(p, TOKEN_RIGHT_BRACE, "Expect '}' after block.");
 
   AstNode **stmts = NULL;
+
   if (count > 0) {
     stmts = (AstNode **)astAllocRaw(count * sizeof(AstNode *));
     memcpy(stmts, buf, count * sizeof(AstNode *));
   }
+
   free(buf);
 
   BlockNode block;
@@ -563,32 +593,42 @@ static BlockNode parseBlock(Parser *p) {
   block.count = count;
   block.value = tailNode;
   block.endLine = p->previous.line; // the '}' just consumed above
+
   return block;
 }
 
 static AstNode *blockStatement(Parser *p) {
   int line = p->previous.line;
+
   BlockNode block = parseBlock(p);
+
   AstNode *node = astAlloc(NODE_BLOCK, line);
   node->as.block = block;
+
   return node;
 }
 
 static AstNode *printStatement(Parser *p) {
   int line = p->previous.line;
   AstNode *expr = expression(p);
+
   consume(p, TOKEN_SEMICOLON, "Expect ';' after value.");
+
   AstNode *node = astAlloc(NODE_PRINT, line);
   node->as.print.expr = expr;
+
   return node;
 }
 
 static AstNode *breakStatement(Parser *p) {
   Token token = p->previous;
   int line = token.line;
+
   consume(p, TOKEN_SEMICOLON, "Expect ';' after break.");
+
   AstNode *node = astAlloc(NODE_BREAK, line);
   node->as.break_.token = token;
+
   return node;
 }
 
@@ -601,17 +641,14 @@ static AstNode *expressionStatement(Parser *p, bool *isTail) {
     return expr;
   }
 
-  // Deliberately match(), not consume(): the original's inline fallback in
-  // statement() reports a missing semicolon at the expression's own last
-  // token (parser.previous) via error(), not at whatever token comes next
-  // (parser.current) via errorAtCurrent() -- e.g. for a bare `1` with no
-  // trailing ';', this reports "at '1'", not "at end".
   if (!match(p, TOKEN_SEMICOLON)) {
     parse_error(p, "Expect ';' after expression.");
   }
+
   *isTail = false;
   AstNode *node = astAlloc(NODE_EXPR_STMT, line);
   node->as.exprStmt.expr = expr;
+
   return node;
 }
 
@@ -824,8 +861,6 @@ static AstNode *statement(Parser *p, bool *isTail) {
   return expressionStatement(p, isTail);
 }
 
-// ── Declaration parsers ──────────────────────────────────────────────────────
-
 static AstNode *varDeclaration(Parser *p) {
   consume(p, TOKEN_IDENTIFIER, "Expect variable name.");
   Token name = p->previous;
@@ -1031,8 +1066,6 @@ static void initParser(Parser *parser, TokenStream *tokens) {
   advance(parser);
 }
 
-// ── Entry point ──────────────────────────────────────────────────────────────
-
 AstNode **parse(const char *source, int *outCount, bool *hadError,
                 int *outEndLine) {
   TRACELN("parse!");
@@ -1065,22 +1098,10 @@ AstNode **parse(const char *source, int *outCount, bool *hadError,
   return ast;
 }
 
-// ── Error reporting ──────────────────────────────────────────────────────────
-
 static void parse_error_at(Parser *p, Token *token, const char *message) {
   if (p->panicMode)
     return;
-  // NOTE: the original never actually sets panicMode = true anywhere in its
-  // error-reporting function (only checks it) -- so in practice, panic-mode
-  // suppression never engages, and cascading errors after a syntax error
-  // are NOT suppressed, and declaration()'s `if (p->panicMode) synchronize()`
-  // never fires either (parsing just continues token-by-token as if
-  // nothing happened). That's surprising, but it's the actual observed
-  // behavior of the reference compiler and other code depends on it
-  // (e.g. a later statement that happens to look like a valid
-  // implicit-return tail expression will compile fine even after an
-  // earlier sibling statement had a syntax error) -- so it's replicated
-  // here deliberately, not fixed.
+
   p->hadError = true;
 
   fprintf(stderr, "[line %d] Error", token->line);

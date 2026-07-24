@@ -4,8 +4,6 @@
 #include <stdio.h>
 
 TokenStream lex(const char *source) {
-  TRACELN("---lexing start---");
-
   TokenStream ts;
   tsInit(&ts);
 
@@ -18,8 +16,6 @@ TokenStream lex(const char *source) {
     if (token.type == TOKEN_EOF)
       break;
   }
-
-  TRACELN("---lexing end---");
 
   return ts;
 }

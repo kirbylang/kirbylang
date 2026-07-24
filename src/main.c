@@ -86,12 +86,8 @@ int main(int argc, char *argv[]) {
 
       const char *source = readFile(argv[optind]);
 
-      TRACELN("--- START PARSE ---");
-
       int endLine = 0;
       AstNode **ast = parse(source, &outCount, &hadError, &endLine);
-
-      TRACELN("--- END PARSE ---");
 
       for (int i = 0; i < outCount; i++) {
         const char *ast_str = print_ast(ast[i]);
