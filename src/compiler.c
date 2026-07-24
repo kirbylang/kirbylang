@@ -366,9 +366,12 @@ static void emitConstant(Value value) {
 static void beginScope(void) { current->scopeDepth++; }
 
 /**
- * TODO
+ * Called at the end of a scope
+ *
+ * This either pops locals off the stack or makes them upvalues if they were
+ * captured by a lambda
  */
-static void handleLocalsInScope(void) {
+static void captureOrCleanLocalsGoingOutOfScope(void) {
   while (current->localCount > 0 &&
          current->locals[current->localCount - 1].depth > current->scopeDepth) {
 
@@ -386,7 +389,7 @@ static void handleLocalsInScope(void) {
 static void endScope(void) {
   current->scopeDepth--;
 
-  handleLocalsInScope();
+  captureOrCleanLocalsGoingOutOfScope();
 }
 
 /**
