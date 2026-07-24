@@ -114,6 +114,7 @@ static void synchronize(Parser *p) {
     case TOKEN_WHILE:
     case TOKEN_PRINT:
     case TOKEN_RETURN:
+    case TOKEN_RIGHT_BRACE:
       return;
     default:;
     }
@@ -1074,6 +1075,7 @@ static void parse_error_at(Parser *p, Token *token, const char *message) {
   if (p->panicMode)
     return;
 
+  p->panicMode = true;
   p->hadError = true;
 
   fprintf(stderr, "[line %d] Error", token->line);

@@ -1,0 +1,25 @@
+// Error 1: missing expression after '='
+var a = ;
+
+print "still parsing fine";
+
+// Error 2: missing ';' after expression
+var b = 1 + 2
+
+var c = 10;
+print c;
+
+// Error 3: malformed function declaration (missing parameter list)
+fun broken {
+  print "oops";
+}
+
+fun greet(name) {
+  print "hello " + name;
+}
+greet("world");
+
+// Error 4: stray token at statement position
+)
+
+print "end of file reached";
