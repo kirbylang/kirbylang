@@ -1042,8 +1042,6 @@ static void initParser(Parser *parser, TokenStream *tokens) {
 
 AstNode **parse(const char *source, int *outCount, bool *hadError,
                 int *outEndLine) {
-  TRACELN("parse!");
-
   TokenStream tokens = lex(source);
 
   Parser parser;
