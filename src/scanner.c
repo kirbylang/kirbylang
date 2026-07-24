@@ -204,6 +204,8 @@ static TokenType identifierType(Scanner *scanner) {
   switch (scanner->start[0]) {
   case 'a':
     return checkKeyword(scanner, 1, 2, "nd", TOKEN_AND);
+  case 'b':
+    return checkKeyword(scanner, 1, 4, "reak", TOKEN_BREAK);
   case 'c':
     return checkKeyword(scanner, 1, 4, "lass", TOKEN_CLASS);
   case 'e':

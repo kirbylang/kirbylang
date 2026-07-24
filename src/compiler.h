@@ -35,6 +35,8 @@ struct Compiler {
   int localCount;
   Upvalue upvalues[UINT8_COUNT];
   int scopeDepth;
+
+  struct LoopCompiler *enclosingLoop;
 };
 
 typedef struct {
@@ -48,6 +50,13 @@ typedef struct ClassCompiler {
   Field fields[256];
   int fieldCount;
 } ClassCompiler;
+
+typedef struct LoopCompiler {
+  struct LoopCompiler *enclosing;
+  int scopeDepth; // depth *inside* the loop, for locals cleanup
+  int breakJumps[UINT8_COUNT];
+  int breakCount;
+} LoopCompiler;
 
 /**
  * Compile a fully-parsed AST into a compiled function object.

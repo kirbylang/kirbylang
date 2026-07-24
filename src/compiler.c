@@ -33,6 +33,7 @@
 
 Compiler *current = NULL;
 ClassCompiler *currentClass = NULL;
+LoopCompiler *currentLoop = NULL;
 
 static bool hadError = false;
 
@@ -123,7 +124,10 @@ static void initCompiler(Compiler *compiler, FunctionType functionType,
   compiler->localCount = 0;
   compiler->scopeDepth = 0;
   compiler->function = newFunction();
+  compiler->enclosingLoop = currentLoop;
   current = compiler;
+
+  currentLoop = NULL;
 
   // nameToken is NULL for the top-level TYPE_SCRIPT compiler (stays
   // unnamed, like the book's <script>) and for lambdas (TYPE_FUNCTION with
@@ -400,14 +404,12 @@ static void beginScope(void) { current->scopeDepth++; }
 static void handleLocalsInScope(void) {
   while (current->localCount > 0 &&
          current->locals[current->localCount - 1].depth > current->scopeDepth) {
-    emitByte(OP_POP);
-    current->localCount--;
-
-    if (current->locals[current->localCount - 1].isCaptured) {
+    if (current->locals[current->localCount - 1]
+            .isCaptured) // now reads the NEXT local down
       emitByte(OP_CLOSE_UPVALUE);
-    } else {
-      emitByte(OP_POP);
-    }
+    else
+      emitByte(OP_POP); // second opcode for the same local
+    current->localCount--;
   }
 }
 
@@ -415,6 +417,33 @@ static void endScope(void) {
   current->scopeDepth--;
 
   handleLocalsInScope();
+}
+
+// Emits the pops needed to discard every local declared deeper than
+// `targetDepth`, WITHOUT touching current->localCount or scopeDepth.
+//
+// This is handleLocalsInScope()'s counterpart for `break`: a break jumps
+// out of the loop from the middle of a scope that is still open, so the
+// locals must be popped at runtime while remaining declared at compile
+// time (statements after the `break` are still in that scope and still
+// address those slots). Mutating localCount here would corrupt every
+// subsequent slot index in the loop body.
+//
+// It emits the same sequence as handleLocalsInScope() -- one opcode per
+// local, OP_CLOSE_UPVALUE for captured ones -- but walks a local copy of
+// the index instead of mutating the compiler's.
+static void emitPopsToDepth(int targetDepth) {
+  int i = current->localCount;
+
+  while (i > 0 && current->locals[i - 1].depth > targetDepth) {
+    if (current->locals[i - 1].isCaptured) {
+      emitByte(OP_CLOSE_UPVALUE);
+    } else {
+      emitByte(OP_POP);
+    }
+
+    i--;
+  }
 }
 
 // Closes the scope for a block used in EXPRESSION position: unlike
@@ -462,6 +491,10 @@ static void emitValueReturn(void) {
 
 static ObjFunction *endCompiler(void) {
   TRACELN("  compiler.endCompiler()");
+
+  // Restore the loop context this function was declared inside of (see
+  // initCompiler).
+  currentLoop = current->enclosingLoop;
 
   if (previousOpCode() != OP_RETURN) {
     emitImplicitReturn();
@@ -953,6 +986,45 @@ static void compileReturn(AstNode *node) {
   emitValueReturn();
 }
 
+static void compileBreak(AstNode *node) {
+  if (currentLoop == NULL) {
+    errorAtNode(node, "Can't use 'break' outside of a loop.");
+    return;
+  }
+
+  if (currentLoop->breakCount == UINT8_COUNT) {
+    errorAtNode(node, "Too many breaks in one loop.");
+    return;
+  }
+
+  emitPopsToDepth(currentLoop->scopeDepth); // non-destructive
+  currentLoop->breakJumps[currentLoop->breakCount++] = emitJump(OP_JUMP);
+}
+
+// Pushes a LoopCompiler for a loop whose body is about to be compiled.
+// `scopeDepth` is the depth breaks must unwind back down to.
+static void beginLoop(LoopCompiler *loop, int scopeDepth) {
+  loop->enclosing = currentLoop;
+  loop->scopeDepth = scopeDepth;
+  loop->breakCount = 0;
+  currentLoop = loop;
+}
+
+// Patches every `break` in this loop to jump here, then pops the loop.
+//
+// This must be called at the loop's *post-condition-pop* exit point: the
+// normal exit path falls out of OP_JUMP_IF_FALSE with the condition value
+// still on the stack and pops it, but a `break` jumps from inside the body
+// where that value is already gone. Patching here (rather than at the
+// OP_JUMP_IF_FALSE target) keeps both paths stack-balanced.
+static void endLoop(void) {
+  for (int i = 0; i < currentLoop->breakCount; i++) {
+    patchJump(currentLoop->breakJumps[i]);
+  }
+
+  currentLoop = currentLoop->enclosing;
+}
+
 static void compileIf(AstNode *node) {
   IfNode *f = &node->as.if_;
 
@@ -974,23 +1046,8 @@ static void compileIf(AstNode *node) {
   patchJump(elseJump);
 }
 
-// Compiles a `while` statement -- or, if init/increment are set (see
-// WhileNode in ast.h), a desugared `for` loop. For the latter, this
-// reproduces the original forStatement()'s exact structure: its own
-// beginScope()/endScope() around the init variable (spanning the whole
-// loop, not just the body), and the classic "jump over the increment on
-// the first pass through, then loop back through it after the body on
-// every subsequent pass" pattern -- which is a genuinely different
-// bytecode layout than naively compiling `while (cond) { body; incr; }`
-// (body then increment in a straight line), even though both are
-// observably equivalent at runtime.
 static void compileWhile(AstNode *node) {
   WhileNode *w = &node->as.while_;
-
-  if (w->init != NULL) {
-    beginScope();
-    compileStmt(w->init);
-  }
 
   int loopStart = currentChunk()->count;
 
@@ -999,15 +1056,8 @@ static void compileWhile(AstNode *node) {
   int exitJump = emitJump(OP_JUMP_IF_FALSE);
   emitByte(OP_POP);
 
-  if (w->increment != NULL) {
-    int bodyJump = emitJump(OP_JUMP);
-    int incrementStart = currentChunk()->count;
-    compileExpr(w->increment);
-    emitByte(OP_POP);
-    emitLoop(loopStart);
-    loopStart = incrementStart;
-    patchJump(bodyJump);
-  }
+  LoopCompiler loop;
+  beginLoop(&loop, current->scopeDepth);
 
   compileStmt(w->body);
 
@@ -1016,9 +1066,51 @@ static void compileWhile(AstNode *node) {
   patchJump(exitJump);
   emitByte(OP_POP);
 
-  if (w->init != NULL) {
+  endLoop();
+}
+
+static void compileFor(AstNode *node) {
+  ForNode *f = &node->as.for_;
+
+  int outerDepth = current->scopeDepth;
+
+  if (f->init != NULL) {
+    beginScope();
+    compileStmt(f->init);
+  }
+
+  int loopStart = currentChunk()->count;
+
+  compileExpr(f->condition);
+
+  int exitJump = emitJump(OP_JUMP_IF_FALSE);
+  emitByte(OP_POP);
+
+  if (f->increment != NULL) {
+    int bodyJump = emitJump(OP_JUMP);
+    int incrementStart = currentChunk()->count;
+    compileExpr(f->increment);
+    emitByte(OP_POP);
+    emitLoop(loopStart);
+    loopStart = incrementStart;
+    patchJump(bodyJump);
+  }
+
+  LoopCompiler loop;
+  beginLoop(&loop, outerDepth);
+
+  compileStmt(f->body);
+
+  emitLoop(loopStart);
+
+  patchJump(exitJump);
+  emitByte(OP_POP);
+
+  if (f->init != NULL) {
     endScope();
   }
+
+  endLoop();
 }
 
 // Compiles the contents of a block: its statements, then -- if the block
@@ -1094,8 +1186,16 @@ static void compileStmt(AstNode *node) {
     compileWhile(node);
     break;
 
+  case NODE_FOR:
+    compileFor(node);
+    break;
+
   case NODE_RETURN:
     compileReturn(node);
+    break;
+
+  case NODE_BREAK:
+    compileBreak(node);
     break;
 
   case NODE_FUNCTION:

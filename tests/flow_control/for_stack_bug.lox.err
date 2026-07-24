@@ -4,9 +4,9 @@
 == <script> ==
 0000    1 OP_CONSTANT         0 '0.000000'
 0002    | OP_GET_LOCAL        1
-0004    | OP_CONSTANT         1 '10.000000'
+0004    | OP_CONSTANT         1 '3.000000'
 0006    | OP_LESS
-0007    | OP_JUMP_IF_FALSE    7 -> 31
+0007    | OP_JUMP_IF_FALSE    7 -> 34
 0010    | OP_POP
 0011    | OP_JUMP            11 -> 25
 0014    | OP_GET_LOCAL        1
@@ -15,10 +15,14 @@
 0019    | OP_SET_LOCAL        1
 0021    | OP_POP
 0022    | OP_LOOP            22 -> 2
-0025    2 OP_CONSTANT         3 'done'
-0027    | OP_PRINT
-0028    3 OP_LOOP            28 -> 14
-0031    | OP_POP
-0032    | OP_POP
-0033    4 OP_NIL
-0034    | OP_RETURN
+0025    | OP_CONSTANT         3 'a'
+0027    | OP_GET_LOCAL        2
+0029    | OP_PRINT
+0030    | OP_POP
+0031    | OP_LOOP            31 -> 14
+0034    | OP_POP
+0035    | OP_POP
+0036    2 OP_CONSTANT         4 'done'
+0038    | OP_PRINT
+0039    3 OP_NIL
+0040    | OP_RETURN

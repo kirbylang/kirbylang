@@ -518,6 +518,7 @@ static ParseRule rules[] = {
     [TOKEN_VAR] = {NULL, NULL, PREC_NONE},
     [TOKEN_WHILE] = {NULL, NULL, PREC_NONE},
     [TOKEN_MODULO] = {NULL, binary, PREC_FACTOR},
+    [TOKEN_BREAK] = {NULL, NULL, PREC_NONE},
     [TOKEN_ERROR] = {NULL, NULL, PREC_NONE},
     [TOKEN_EOF] = {NULL, NULL, PREC_NONE},
 };
@@ -582,6 +583,15 @@ static AstNode *printStatement(Parser *p) {
   return node;
 }
 
+static AstNode *breakStatement(Parser *p) {
+  Token token = p->previous;
+  int line = token.line;
+  consume(p, TOKEN_SEMICOLON, "Expect ';' after break.");
+  AstNode *node = astAlloc(NODE_BREAK, line);
+  node->as.break_.token = token;
+  return node;
+}
+
 static AstNode *expressionStatement(Parser *p, bool *isTail) {
   int line = p->current.line;
   AstNode *expr = expression(p);
@@ -630,12 +640,25 @@ static AstNode *whileStatement(Parser *p, bool *isTail) {
   AstNode *body = statement(p, isTail);
 
   AstNode *node = astAlloc(NODE_WHILE, line);
-  node->as.while_.init = NULL;
   node->as.while_.condition = cond;
   node->as.while_.body = body;
-  node->as.while_.increment = NULL;
   return node;
 }
+
+// static AstNode *forStatement(Parser *p, bool *isTail) {
+//   int line = p->previous.line;
+//   consume(p, TOKEN_LEFT_PAREN, "Expect '(' after 'for'.");
+//   AstNode *cond = expression(p);
+//   consume(p, TOKEN_RIGHT_PAREN, "Expect ')' after condition.");
+//   AstNode *body = statement(p, isTail);
+
+//   AstNode *node = astAlloc(NODE_WHILE, line);
+//   node->as.for_.init = NULL;
+//   node->as.for_.condition = cond;
+//   node->as.for_.body = body;
+//   node->as.for_.increment = NULL;
+//   return node;
+// }
 
 // A `for` loop is desugared into a single NODE_WHILE at parse time, with
 // its init/increment clauses kept as distinct fields (see WhileNode in
@@ -681,11 +704,11 @@ static AstNode *forStatement(Parser *p, bool *isTail) {
     cond->as.literal.value = BOOL_VAL(true);
   }
 
-  AstNode *loop = astAlloc(NODE_WHILE, line);
-  loop->as.while_.init = init;
-  loop->as.while_.condition = cond;
-  loop->as.while_.body = body;
-  loop->as.while_.increment = incr;
+  AstNode *loop = astAlloc(NODE_FOR, line);
+  loop->as.for_.init = init;
+  loop->as.for_.condition = cond;
+  loop->as.for_.body = body;
+  loop->as.for_.increment = incr;
   return loop;
 }
 
@@ -796,6 +819,8 @@ static AstNode *statement(Parser *p, bool *isTail) {
     return returnStatement(p);
   if (match(p, TOKEN_LEFT_BRACE))
     return blockStatement(p);
+  if (match(p, TOKEN_BREAK))
+    return breakStatement(p);
   return expressionStatement(p, isTail);
 }
 

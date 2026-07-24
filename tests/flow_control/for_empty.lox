@@ -1,0 +1,4 @@
+for (;;) {
+    print "done";
+    break;
+}

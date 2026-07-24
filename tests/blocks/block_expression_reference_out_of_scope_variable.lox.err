@@ -4,10 +4,9 @@
 == <script> ==
 0000    2 OP_CONSTANT         0 '123.000000'
 0002    3 OP_POP
-0003    | OP_POP
-0004    5 OP_GET_GLOBAL       1 'a'
-0006    | OP_PRINT
-0007    6 OP_NIL
-0008    | OP_RETURN
+0003    5 OP_GET_GLOBAL       1 'a'
+0005    | OP_PRINT
+0006    6 OP_NIL
+0007    | OP_RETURN
 Undefined variable 'a'.
 [line 5] in script

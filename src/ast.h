@@ -28,10 +28,12 @@ typedef enum {
   NODE_BLOCK,
   NODE_IF,
   NODE_WHILE,
+  NODE_FOR,
   NODE_RETURN,
   NODE_FUNCTION,
   NODE_CLASS,
   NODE_ARRAY,
+  NODE_BREAK,
   // Sentinel
   NODE_COUNT
 } NodeKind;
@@ -133,20 +135,20 @@ typedef struct {
 } IfNode;
 
 typedef struct {
-  // init/increment are non-NULL only when this WhileNode came from
-  // desugaring a `for` loop; both NULL for a genuine `while` statement.
-  // Kept as distinct fields (rather than splicing the increment into body,
-  // and the init into a wrapping block, which is how an earlier version of
-  // this desugaring worked) so the compiler can reproduce the original
-  // forStatement()'s exact structure -- its own beginScope()/endScope()
-  // around the init variable, and the classic "jump over the increment on
-  // the first pass, then loop back through it after the body" bytecode
-  // pattern. See compileWhile() in compiler.c.
+  AstNode *condition;
+  AstNode *body;
+} WhileNode;
+
+typedef struct {
+  Token token;
+} BreakNode;
+
+typedef struct {
   AstNode *init;
   AstNode *condition;
   AstNode *body;
   AstNode *increment;
-} WhileNode; // TODO: The right naming?
+} ForNode;
 
 typedef struct {
   Token name;    // unused/empty when isLambda is true
@@ -229,10 +231,12 @@ struct AstNode {
     BlockNode block;
     IfNode if_;
     WhileNode while_;
+    ForNode for_;
     ReturnNode return_;
     FunctionNode function;
     ClassNode class_;
     ArrayNode array;
+    BreakNode break_;
   } as;
 };
 

@@ -365,6 +365,10 @@ static void printNode(StrBuf *sb, AstNode *node) {
   case NODE_COUNT:
     sb_append(sb, "<invalid>");
     break;
+
+  case NODE_BREAK:
+    sb_append(sb, "(break)");
+    break;
   }
 }
 
