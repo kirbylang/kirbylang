@@ -738,6 +738,11 @@ static InterpretResult run(void) {
 
       int i = AS_NUMBER(index);
 
+      if (i < 0 || i >= array->count) {
+        runtimeError(&vm, "Array index out of bounds.");
+        return INTERPRET_RUNTIME_ERROR;
+      }
+
       array->values[i] = value;
 
       pushOnStack(value);
