@@ -292,23 +292,6 @@ static AstNode *this_(Parser *p, bool canAssign) {
   return node;
 }
 
-static AstNode *super_(Parser *p, bool canAssign) {
-  (void)canAssign;
-
-  Token keyword = p->previous;
-
-  consume(p, TOKEN_DOT, "Expect '.' after 'super'.");
-  consume(p, TOKEN_IDENTIFIER, "Expect superclass method name.");
-
-  Token method = p->previous;
-
-  AstNode *node = astAlloc(NODE_SUPER, keyword.line);
-  node->as.super_.keyword = keyword;
-  node->as.super_.method = method;
-
-  return node;
-}
-
 static AstNode *ifExpr(Parser *p, bool canAssign) {
   (void)canAssign;
 
@@ -542,7 +525,6 @@ static ParseRule rules[] = {
     [TOKEN_QUESTION_QUESTION] = {NULL, nullish_, PREC_OR},
     [TOKEN_PRINT] = {NULL, NULL, PREC_NONE},
     [TOKEN_RETURN] = {NULL, NULL, PREC_NONE},
-    [TOKEN_SUPER] = {super_, NULL, PREC_NONE},
     [TOKEN_THIS] = {this_, NULL, PREC_NONE},
     [TOKEN_TRUE] = {literal, NULL, PREC_NONE},
     [TOKEN_VAR] = {NULL, NULL, PREC_NONE},

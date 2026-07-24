@@ -73,8 +73,6 @@ const char *tokenTypeToString(TokenType type) {
     return "TOKEN_PRINT";
   case TOKEN_RETURN:
     return "TOKEN_RETURN";
-  case TOKEN_SUPER:
-    return "TOKEN_SUPER";
   case TOKEN_THIS:
     return "TOKEN_THIS";
   case TOKEN_TRUE:

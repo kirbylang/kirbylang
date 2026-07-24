@@ -672,12 +672,6 @@ static void compileExpr(AstNode *node) {
     break;
   }
 
-  // TODO: Remove this
-  case NODE_SUPER:
-    errorAtToken(&node->as.super_.keyword, "Superclasses aren't supported.");
-    emitByte(OP_NIL);
-    break;
-
   case NODE_INDEX_GET: {
     IndexGetNode *ig = &node->as.indexGet;
     compileExpr(ig->object);

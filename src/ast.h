@@ -19,7 +19,6 @@ typedef enum {
   NODE_GET,
   NODE_SET,
   NODE_THIS,
-  NODE_SUPER,
   NODE_INDEX_GET,
   NODE_INDEX_SET,
   NODE_EXPR_STMT,
@@ -90,11 +89,6 @@ typedef struct {
 typedef struct {
   Token keyword;
 } ThisNode;
-
-typedef struct {
-  Token keyword;
-  Token method;
-} SuperNode;
 
 typedef struct {
   AstNode *callee;
@@ -248,7 +242,6 @@ struct AstNode {
     IndexGetNode indexGet;
     IndexSetNode indexSet;
     ThisNode this_;
-    SuperNode super_;
     ExprStmtNode exprStmt;
     PrintNode print;
     VarDeclNode varDecl;

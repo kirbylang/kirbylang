@@ -251,12 +251,6 @@ static void printNode(StrBuf *sb, AstNode *node) {
     sb_append(sb, "this");
     break;
 
-  case NODE_SUPER:
-    sb_append(sb, "(super ");
-    sbAppendToken(sb, node->as.super_.method);
-    sb_append(sb, ")");
-    break;
-
   case NODE_EXPR_STMT:
     printNode(sb, node->as.exprStmt.expr);
     break;
