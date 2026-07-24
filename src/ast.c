@@ -37,11 +37,6 @@ void *astAllocRaw(size_t size) {
   size = (size + 7) & ~(size_t)7;
 
   if (arenaHead == NULL || arenaOffset + size > arenaHead->capacity) {
-    // A request bigger than the normal slab size gets a slab sized exactly
-    // to fit it, so it doesn't spill past the allocated buffer. That slab is
-    // then "full" (arenaOffset will equal its capacity), so the next request
-    // correctly falls through to a fresh normal-sized slab rather than
-    // trying to pack more into the oversized one.
     size_t capacity = size > SLAB_SIZE ? size : SLAB_SIZE;
     allocSlab(capacity);
   }
