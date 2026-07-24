@@ -345,11 +345,6 @@ static void printNode(StrBuf *sb, AstNode *node) {
     sb_append(sb, "(class ");
     sbAppendToken(sb, node->as.class_.name);
 
-    if (node->as.class_.superclass != NULL) {
-      sb_append(sb, " < ");
-      sbAppendToken(sb, *node->as.class_.superclass);
-    }
-
     for (int i = 0; i < node->as.class_.memberCount; i++) {
       ClassMember *m = &node->as.class_.members[i];
 

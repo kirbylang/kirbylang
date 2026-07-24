@@ -822,10 +822,6 @@ static void compileFunctionDeclStmt(AstNode *node) {
 static void compileClassDecl(AstNode *node) {
   ClassNode *cn = &node->as.class_;
 
-  if (cn->superclass != NULL) {
-    errorAtToken(cn->superclass, "Superclasses aren't supported.");
-  }
-
   uint8_t nameConstant = identifierConstant(&cn->name);
   declareVariable(&cn->name);
   emitBytes(OP_CLASS, nameConstant);

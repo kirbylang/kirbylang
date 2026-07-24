@@ -197,8 +197,6 @@ typedef struct {
 
 typedef struct {
   Token name;
-  Token *superclass; // NULL if no superclass; pointer to Token in arena; TODO:
-                     // Remove this
   ClassMember *members;
   int memberCount;
   /**

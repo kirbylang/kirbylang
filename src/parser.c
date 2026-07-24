@@ -967,13 +967,6 @@ static AstNode *classDeclaration(Parser *p) {
   Token name = p->previous;
   int line = name.line;
 
-  Token *superclass = NULL;
-  if (match(p, TOKEN_LESS)) {
-    consume(p, TOKEN_IDENTIFIER, "Expect superclass name.");
-    superclass = (Token *)astAllocRaw(sizeof(Token));
-    *superclass = p->previous;
-  }
-
   consume(p, TOKEN_LEFT_BRACE, "Expect '{' before class body.");
 
   // Fields and methods are kept in a single array, in source order --
@@ -1033,7 +1026,6 @@ static AstNode *classDeclaration(Parser *p) {
 
   AstNode *node = astAlloc(NODE_CLASS, line);
   node->as.class_.name = name;
-  node->as.class_.superclass = superclass;
   node->as.class_.members = members;
   node->as.class_.memberCount = memberCount;
   node->as.class_.endLine = endLine;
