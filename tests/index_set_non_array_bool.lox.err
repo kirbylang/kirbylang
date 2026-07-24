@@ -1,0 +1,14 @@
+== <script> ==
+0000    1 OP_NIL
+0001    | OP_RETURN
+== <script> ==
+0000    1 OP_FALSE
+0001    | OP_DEFINE_GLOBAL    0 'value'
+0003    3 OP_GET_GLOBAL       1 'value'
+0005    | OP_CONSTANT         2 '0.000000'
+0007    | OP_GET_INDEX
+0008    | OP_PRINT
+0009    4 OP_NIL
+0010    | OP_RETURN
+Can only index arrays.
+[line 3] in script

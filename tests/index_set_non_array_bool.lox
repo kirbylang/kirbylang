@@ -1,0 +1,3 @@
+var value = false;
+
+print value[0];
