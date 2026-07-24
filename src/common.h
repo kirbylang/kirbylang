@@ -17,7 +17,11 @@
 
 #ifdef DEBUG_TRACE_EXECUTION
 #define TRACE(...) fprintf(stderr, __VA_ARGS__)
-#define TRACELN(...) fprintf(stderr, __VA_ARGS__, "\n")
+#define TRACELN(...)                                                           \
+  do {                                                                         \
+    fprintf(stderr, __VA_ARGS__);                                              \
+    fprintf(stderr, "\n");                                                     \
+  } while (0)
 #else
 #define TRACE(...)                                                             \
   do {                                                                         \

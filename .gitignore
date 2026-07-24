@@ -3,3 +3,4 @@ build
 tests/.tmp
 src/version.c
 lcov.info
+*.tmp

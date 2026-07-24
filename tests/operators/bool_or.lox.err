@@ -7,56 +7,56 @@
 0003   15 OP_NIL
 0004    | OP_RETURN
 == <script> ==
-0000    1 OP_FALSE
-0001    | OP_JUMP_IF_FALSE    1 -> 7
-0004    | OP_JUMP             4 -> 9
-0007    | OP_POP
-0008    | OP_TRUE
-0009    | OP_PRINT
-0010    2 OP_FALSE
-0011    | OP_JUMP_IF_FALSE   11 -> 17
-0014    | OP_JUMP            14 -> 19
-0017    | OP_POP
-0018    | OP_TRUE
-0019    | OP_PRINT
-0020    4 OP_TRUE
-0021    | OP_JUMP_IF_FALSE   21 -> 27
-0024    | OP_JUMP            24 -> 29
-0027    | OP_POP
-0028    | OP_FALSE
-0029    | OP_PRINT
-0030    5 OP_TRUE
-0031    | OP_JUMP_IF_FALSE   31 -> 37
-0034    | OP_JUMP            34 -> 39
-0037    | OP_POP
-0038    | OP_FALSE
-0039    | OP_PRINT
-0040    7 OP_TRUE
-0041    | OP_JUMP_IF_FALSE   41 -> 47
-0044    | OP_JUMP            44 -> 49
-0047    | OP_POP
-0048    | OP_TRUE
-0049    | OP_PRINT
-0050    8 OP_TRUE
-0051    | OP_JUMP_IF_FALSE   51 -> 57
-0054    | OP_JUMP            54 -> 59
-0057    | OP_POP
-0058    | OP_TRUE
-0059    | OP_PRINT
-0060   10 OP_FALSE
-0061    | OP_JUMP_IF_FALSE   61 -> 67
-0064    | OP_JUMP            64 -> 69
-0067    | OP_POP
-0068    | OP_FALSE
-0069    | OP_PRINT
-0070   11 OP_FALSE
-0071    | OP_JUMP_IF_FALSE   71 -> 77
-0074    | OP_JUMP            74 -> 79
-0077    | OP_POP
-0078    | OP_FALSE
-0079    | OP_PRINT
-0080   15 OP_CLOSURE          1 <fn should_not_call>
-0082    | OP_DEFINE_GLOBAL    0 'should_not_call'
+0000   15 OP_CLOSURE          1 <fn should_not_call>
+0002    | OP_DEFINE_GLOBAL    0 'should_not_call'
+0004    1 OP_FALSE
+0005    | OP_JUMP_IF_FALSE    5 -> 11
+0008    | OP_JUMP             8 -> 13
+0011    | OP_POP
+0012    | OP_TRUE
+0013    | OP_PRINT
+0014    2 OP_FALSE
+0015    | OP_JUMP_IF_FALSE   15 -> 21
+0018    | OP_JUMP            18 -> 23
+0021    | OP_POP
+0022    | OP_TRUE
+0023    | OP_PRINT
+0024    4 OP_TRUE
+0025    | OP_JUMP_IF_FALSE   25 -> 31
+0028    | OP_JUMP            28 -> 33
+0031    | OP_POP
+0032    | OP_FALSE
+0033    | OP_PRINT
+0034    5 OP_TRUE
+0035    | OP_JUMP_IF_FALSE   35 -> 41
+0038    | OP_JUMP            38 -> 43
+0041    | OP_POP
+0042    | OP_FALSE
+0043    | OP_PRINT
+0044    7 OP_TRUE
+0045    | OP_JUMP_IF_FALSE   45 -> 51
+0048    | OP_JUMP            48 -> 53
+0051    | OP_POP
+0052    | OP_TRUE
+0053    | OP_PRINT
+0054    8 OP_TRUE
+0055    | OP_JUMP_IF_FALSE   55 -> 61
+0058    | OP_JUMP            58 -> 63
+0061    | OP_POP
+0062    | OP_TRUE
+0063    | OP_PRINT
+0064   10 OP_FALSE
+0065    | OP_JUMP_IF_FALSE   65 -> 71
+0068    | OP_JUMP            68 -> 73
+0071    | OP_POP
+0072    | OP_FALSE
+0073    | OP_PRINT
+0074   11 OP_FALSE
+0075    | OP_JUMP_IF_FALSE   75 -> 81
+0078    | OP_JUMP            78 -> 83
+0081    | OP_POP
+0082    | OP_FALSE
+0083    | OP_PRINT
 0084   17 OP_TRUE
 0085    | OP_JUMP_IF_FALSE   85 -> 91
 0088    | OP_JUMP            88 -> 96

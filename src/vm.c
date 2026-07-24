@@ -12,6 +12,7 @@
 #include "memory.h"
 #include "native.h"
 #include "object.h"
+#include "parser.h"
 #include "string.h"
 #include "version.h"
 #include "vm.h"
@@ -45,10 +46,21 @@ InterpretResult interpretFunction(ObjFunction *function) {
 InterpretResult interpret(const char *source) {
   TRACELN("vm.interpret()");
 
-  Scanner scanner;
-  initScanner(&scanner, source);
+  int count = 0;
+  bool parseHadError = false;
+  int endLine = 0;
+  AstNode **ast = parse(source, &count, &parseHadError, &endLine);
 
-  ObjFunction *function = compile(&scanner);
+  if (parseHadError) {
+    astFreeAll();
+    free(ast);
+    return INTERPRET_COMPILE_ERROR;
+  }
+
+  ObjFunction *function = compile(ast, count, endLine);
+
+  astFreeAll();
+  free(ast);
 
   return interpretFunction(function);
 }

@@ -1,38 +1,10 @@
 #ifndef clox_compiler_h
 #define clox_compiler_h
 
+#include "ast.h"
 #include "chunk.h"
 #include "object.h"
-#include "scanner.h"
-
-typedef struct {
-  Token current;
-  Token previous;
-  bool hadError;
-  bool panicMode;
-} Parser;
-
-typedef enum {
-  PREC_NONE,
-  PREC_ASSIGNMENT, // =
-  PREC_OR,         // or || ??
-  PREC_AND,        // and &&
-  PREC_EQUALITY,   // == !=
-  PREC_COMPARISON, // < > <= >=
-  PREC_TERM,       // + -
-  PREC_FACTOR,     // * /
-  PREC_UNARY,      // ! -
-  PREC_CALL,       // . ()
-  PREC_PRIMARY
-} Precedence;
-
-typedef void (*ParseFn)(Scanner *scanner, bool canAssign);
-
-typedef struct {
-  ParseFn prefix;
-  ParseFn infix;
-  Precedence precedence;
-} ParseRule;
+#include "token.h"
 
 typedef struct {
   Token name;
@@ -63,6 +35,8 @@ struct Compiler {
   int localCount;
   Upvalue upvalues[UINT8_COUNT];
   int scopeDepth;
+
+  struct LoopCompiler *enclosingLoop;
 };
 
 typedef struct {
@@ -72,17 +46,19 @@ typedef struct {
 
 typedef struct ClassCompiler {
   struct ClassCompiler *enclosing;
-
-  Field fields[256];
-  int fieldCount;
 } ClassCompiler;
 
+typedef struct LoopCompiler {
+  struct LoopCompiler *enclosing;
+  int scopeDepth;
+  int breakJumps[UINT8_COUNT];
+  int breakCount;
+} LoopCompiler;
+
 /**
- * Compile source code in to a compiled function object.
- *
- * This compiled object can be ran by the VM.
+ * Compile a AST node into a compiled function object.
  */
-ObjFunction *compile(Scanner *scanner);
+ObjFunction *compile(AstNode **ast, int count, int endLine);
 
 /**
  * Mark all objects that are referenced by the compiler as roots

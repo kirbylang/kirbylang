@@ -1,0 +1,3 @@
+print sum(1, 2);
+
+fun sum (a, b) = { a + b };

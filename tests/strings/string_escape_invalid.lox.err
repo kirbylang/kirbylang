@@ -1,4 +1,4 @@
 == <script> ==
 0000    1 OP_NIL
 0001    | OP_RETURN
-[line 1] Error at '"Hello\kWorld"' (TOKEN_STRING): Invalid escape sequence: k
+[line 1] Error at '"Hello\kWorld"': Invalid escape sequence: \k

@@ -20,6 +20,5 @@
 0028    3 OP_LOOP            28 -> 14
 0031    | OP_POP
 0032    | OP_POP
-0033    | OP_POP
-0034    4 OP_NIL
-0035    | OP_RETURN
+0033    4 OP_NIL
+0034    | OP_RETURN

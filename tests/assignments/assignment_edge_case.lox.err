@@ -1,5 +1,5 @@
 == <script> ==
 0000    1 OP_NIL
 0001    | OP_RETURN
-[line 6] Error at '=' (TOKEN_EQUAL): Invalid assignment target.
-[line 6] Error at '=' (TOKEN_EQUAL): Expect ';' after expression.
+[line 6] Error at '=': Invalid assignment target.
+[line 6] Error at '=': Expect ';' after expression.

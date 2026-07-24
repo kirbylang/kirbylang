@@ -1,4 +1,4 @@
 == <script> ==
 0000    1 OP_NIL
 0001    | OP_RETURN
-[line 4] Error at 'a' (TOKEN_IDENTIFIER): Can't read local variable in its own initializer
+[line 4] Error at 'a': Can't read local variable in its own initializer
