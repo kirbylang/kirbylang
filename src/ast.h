@@ -165,18 +165,17 @@ typedef struct {
 } ForNode;
 
 typedef struct {
-  Token name; // TODO: NULL if a lambda
+  Token name;
   /**
    * arena-allocated array of Token
    */
   Token *params;
   int arity;
-  BlockNode body; // used when exprBody == NULL; TODO: Merge body and exprBody
-                  // as a tagged union?
+  BlockNode body;    // used when exprBody == NULL;
   AstNode *exprBody; // non-NULL for `fun name(...) = expr;` bodies
   int bodyEndLine;
   bool isMethod;
-  bool isLambda; // TODO: Remove
+  bool isLambda;
 } FunctionNode;
 
 typedef enum { CLASS_MEMBER_FIELD, CLASS_MEMBER_METHOD } ClassMemberKind;
