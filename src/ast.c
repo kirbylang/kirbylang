@@ -29,6 +29,7 @@ static Slab *allocSlab(size_t capacity) {
   slab->capacity = capacity;
   arenaHead = slab;
   arenaOffset = 0;
+
   return slab;
 }
 
@@ -43,6 +44,7 @@ void *astAllocRaw(size_t size) {
 
   void *ptr = &arenaHead->data[arenaOffset];
   arenaOffset += size;
+
   return ptr;
 }
 
@@ -73,6 +75,7 @@ AstNode *astAlloc(NodeKind kind, int line) {
   memset(node, 0, sizeof(AstNode));
   node->kind = kind;
   node->line = line;
+
   return node;
 }
 
@@ -103,15 +106,18 @@ static void printAstValue(StrBuf *sb, Value value) {
 
 static void printBlock(StrBuf *sb, BlockNode *block) {
   sb_append(sb, "(block");
+
   for (int i = 0; i < block->count; i++) {
     sb_append(sb, " ");
     printNode(sb, block->stmts[i]);
   }
+
   if (block->value != NULL) {
     sb_append(sb, " (value ");
     printNode(sb, block->value);
     sb_append(sb, ")");
   }
+
   sb_append(sb, ")");
 }
 
@@ -196,10 +202,12 @@ static void printNode(StrBuf *sb, AstNode *node) {
   case NODE_CALL:
     sb_append(sb, "(call ");
     printNode(sb, node->as.call.callee);
+
     for (int i = 0; i < node->as.call.argCount; i++) {
       sb_append(sb, " ");
       printNode(sb, node->as.call.args[i]);
     }
+
     sb_append(sb, ")");
     break;
 
@@ -262,10 +270,12 @@ static void printNode(StrBuf *sb, AstNode *node) {
   case NODE_VAR_DECL:
     sb_append(sb, "(var ");
     sbAppendToken(sb, node->as.varDecl.name);
+
     if (node->as.varDecl.initializer != NULL) {
       sb_append(sb, " ");
       printNode(sb, node->as.varDecl.initializer);
     }
+
     sb_append(sb, ")");
     break;
 
@@ -278,10 +288,12 @@ static void printNode(StrBuf *sb, AstNode *node) {
     printNode(sb, node->as.if_.condition);
     sb_append(sb, " ");
     printNode(sb, node->as.if_.thenBranch);
+
     if (node->as.if_.elseBranch != NULL) {
       sb_append(sb, " ");
       printNode(sb, node->as.if_.elseBranch);
     }
+
     sb_append(sb, ")");
     break;
 
@@ -295,42 +307,52 @@ static void printNode(StrBuf *sb, AstNode *node) {
 
   case NODE_RETURN:
     sb_append(sb, "(return");
+
     if (node->as.return_.value != NULL) {
       sb_append(sb, " ");
       printNode(sb, node->as.return_.value);
     }
+
     sb_append(sb, ")");
     break;
 
   case NODE_FUNCTION:
     sb_append(sb, node->as.function.isLambda ? "(lambda (" : "(fun ");
+
     if (!node->as.function.isLambda) {
       sbAppendToken(sb, node->as.function.name);
       sb_append(sb, " (");
     }
+
     for (int i = 0; i < node->as.function.arity; i++) {
       if (i > 0)
         sb_append(sb, " ");
       sbAppendToken(sb, node->as.function.params[i]);
     }
+
     sb_append(sb, ") ");
+
     if (node->as.function.exprBody != NULL) {
       printNode(sb, node->as.function.exprBody);
     } else {
       printBlock(sb, &node->as.function.body);
     }
+
     sb_append(sb, ")");
     break;
 
   case NODE_CLASS:
     sb_append(sb, "(class ");
     sbAppendToken(sb, node->as.class_.name);
+
     if (node->as.class_.superclass != NULL) {
       sb_append(sb, " < ");
       sbAppendToken(sb, *node->as.class_.superclass);
     }
+
     for (int i = 0; i < node->as.class_.memberCount; i++) {
       ClassMember *m = &node->as.class_.members[i];
+
       if (m->kind == CLASS_MEMBER_METHOD) {
         sb_append(sb, " (method ");
         sbAppendToken(sb, m->as.method->name);
@@ -338,22 +360,27 @@ static void printNode(StrBuf *sb, AstNode *node) {
       } else {
         sb_append(sb, " (field ");
         sbAppendToken(sb, m->as.field.name);
+
         if (m->as.field.initializer != NULL) {
           sb_append(sb, " ");
           printNode(sb, m->as.field.initializer);
         }
+
         sb_append(sb, ")");
       }
     }
+
     sb_append(sb, ")");
     break;
 
   case NODE_ARRAY:
     sb_append(sb, "(array");
+
     for (int i = 0; i < node->as.array.count; i++) {
       sb_append(sb, " ");
       printNode(sb, node->as.array.items[i]);
     }
+
     sb_append(sb, ")");
     break;
 
