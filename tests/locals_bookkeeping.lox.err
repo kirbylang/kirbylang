@@ -1,0 +1,39 @@
+== <script> ==
+0000    1 OP_NIL
+0001    | OP_RETURN
+== <script> ==
+0000    1 OP_CONSTANT         1 '0.000000'
+0002    | OP_DEFINE_GLOBAL    0 'i'
+0004    2 OP_GET_GLOBAL       2 'i'
+0006    | OP_CONSTANT         3 '5.000000'
+0008    | OP_LESS
+0009    | OP_JUMP_IF_FALSE    9 -> 50
+0012    | OP_POP
+0013    3 OP_GET_GLOBAL       4 'i'
+0015    | OP_CONSTANT         5 '2.000000'
+0017    | OP_MULTIPLY
+0018    4 OP_GET_GLOBAL       6 'i'
+0020    | OP_CONSTANT         7 '3.000000'
+0022    | OP_EQUAL
+0023    | OP_JUMP_IF_FALSE   23 -> 34
+0026    | OP_POP
+0027    | OP_POP
+0028    | OP_JUMP            28 -> 51
+0031    | OP_JUMP            31 -> 35
+0034    | OP_POP
+0035    5 OP_GET_LOCAL        1
+0037    | OP_PRINT
+0038    6 OP_GET_GLOBAL       9 'i'
+0040    | OP_CONSTANT        10 '1.000000'
+0042    | OP_ADD
+0043    | OP_SET_GLOBAL       8 'i'
+0045    | OP_POP
+0046    7 OP_POP
+0047    | OP_LOOP            47 -> 4
+0050    | OP_POP
+0051    8 OP_CONSTANT        12 'still alive'
+0053    | OP_DEFINE_GLOBAL   11 'after'
+0055    9 OP_GET_GLOBAL      13 'after'
+0057    | OP_PRINT
+0058   10 OP_NIL
+0059    | OP_RETURN
