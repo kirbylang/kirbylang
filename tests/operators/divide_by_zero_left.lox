@@ -1,1 +1,14 @@
-print 0 / 2;
+fun check(name, actual, expected) {
+  if (actual == expected) {
+    print "PASS " + name;
+  } else {
+    print "FAIL " + name + ": expected " + numberToString(expected) +
+        " got " + numberToString(actual);
+  }
+}
+
+check("zero / positive", 0 / 5, 0);
+check("zero / negative", 0 / -3, 0);
+check("negative zero-valued expr / positive", (2 - 2) / 7, 0);
+check("zero / positive, non-integer divisor", 0 / 2.5, 0);
+check("ordinary division still works", 10 / 4, 2.5);

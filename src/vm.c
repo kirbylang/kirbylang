@@ -386,7 +386,6 @@ static InterpretResult run(void) {
       break;
     case OP_DIVIDE: {
       assertNonZero(&vm, "/", peekStack(0).as.number, 1);
-      assertNonZero(&vm, "/", peekStack(1).as.number, 0);
       BINARY_OP(NUMBER_VAL, /);
       break;
     }
