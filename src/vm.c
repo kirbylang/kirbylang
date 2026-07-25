@@ -681,13 +681,19 @@ static InterpretResult run(void) {
 
       ObjArray *array = newArray();
 
+      pushOnStack(OBJ_VAL(array));
+
       for (int i = count - 1; i >= 0; i--) {
-        writeValueToArrayObj(array, peekStack(i));
+        // Stack layout right now: [..., elem_{count-1}, ..., elem_0, array]
+        // so the i-th element (counting from the end) sits one slot further
+        // from the top than it did before `array` was pushed.
+        writeValueToArrayObj(array, peekStack(i + 1));
       }
 
+      Value arrayValue = popFromStack();
       popNFromStack(count);
 
-      pushOnStack(OBJ_VAL(array));
+      pushOnStack(arrayValue);
 
       break;
     }
