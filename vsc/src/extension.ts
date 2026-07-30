@@ -9,7 +9,13 @@ export function activate(context: vscode.ExtensionContext) {
 
   vscode.languages.registerHoverProvider("clox", {
     provideHover(doc, position) {
-      const currentWord = doc.getText(doc.getWordRangeAtPosition(position));
+      const wordRange = doc.getWordRangeAtPosition(position);
+
+      if (!wordRange) {
+        return;
+      }
+
+      const currentWord = doc.getText(wordRange);
 
       if (hoverCache[currentWord]) {
         return new vscode.Hover(
