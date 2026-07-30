@@ -1,0 +1,7 @@
+struct Struct {}
+
+var instance = Struct {};
+
+fun test() {}
+
+print instanceOf(instance, test);

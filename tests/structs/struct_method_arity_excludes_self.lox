@@ -1,0 +1,11 @@
+struct Greeter {}
+
+impl Greeter {
+    fun greet(self, name) {
+        print "Hello " + name;
+    }
+}
+
+var greeter = Greeter();
+
+greeter.greet("World", "Extra");

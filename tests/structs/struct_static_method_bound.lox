@@ -1,0 +1,11 @@
+struct Struct {}
+
+impl Struct {
+    fun hello() {
+        print "Hello World";
+    }
+}
+
+var hello = Struct.hello;
+
+hello();

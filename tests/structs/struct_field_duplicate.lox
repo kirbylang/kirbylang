@@ -1,0 +1,8 @@
+struct Struct {
+    var value = "Hello";
+    var value = "World";
+}
+
+var instance = Struct {};
+
+print instance.value;

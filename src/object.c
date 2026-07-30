@@ -32,26 +32,37 @@ ObjBoundMethod *newBoundMethod(Value receiver, ObjClosure *method) {
   return bound;
 }
 
-ObjClass *newClass(ObjString *name) {
-  ObjClass *klass = ALLOCATE_OBJ(ObjClass, OBJ_CLASS);
-  klass->name = name;
-  initTable(&klass->methods);
-  initTable(&klass->fields);
-  klass->fieldCount = 0;
+ObjStruct *newStruct(ObjString *name) {
+  ObjStruct *struct_ = ALLOCATE_OBJ(ObjStruct, OBJ_STRUCT);
+  struct_->name = name;
+  initTable(&struct_->methods);
+  initTable(&struct_->fields);
+  struct_->fieldCount = 0;
 
   for (int i = 0; i < 256; i++) {
-    klass->fieldDefaults[i] = NIL_VAL;
+    struct_->fieldDefaults[i] = NIL_VAL;
   }
 
-  return klass;
+  return struct_;
 }
 
-bool classFieldSlot(ObjClass *klass, ObjString *name, int *slot) {
+bool structFieldSlot(ObjStruct *struct_, ObjString *name, int *slot) {
   Value value;
-  if (!tableGet(&klass->fields, name, &value))
+  if (!tableGet(&struct_->fields, name, &value))
     return false;
   *slot = (int)AS_NUMBER(value);
   return true;
+}
+
+ObjString *structFieldName(ObjStruct *struct_, int slot) {
+  for (int i = 0; i < struct_->fields.capacity; i++) {
+    Entry *entry = &struct_->fields.entries[i];
+
+    if (entry->key != NULL && (int)AS_NUMBER(entry->value) == slot)
+      return entry->key;
+  }
+
+  return NULL;
 }
 
 ObjClosure *newClosure(ObjFunction *function) {
@@ -72,20 +83,21 @@ ObjFunction *newFunction(void) {
   function->arity = 0;
   function->upvalueCount = 0;
   function->name = NULL;
+  function->isStatic = false;
   initChunk(&function->chunk);
   return function;
 }
 
-ObjInstance *newInstance(ObjClass *klass) {
+ObjInstance *newInstance(ObjStruct *struct_) {
   ObjInstance *instance = ALLOCATE_OBJ(ObjInstance, OBJ_INSTANCE);
-  instance->klass = klass;
+  instance->struct_ = struct_;
 
-  if (klass->fieldCount == 0) {
+  if (struct_->fieldCount == 0) {
     instance->fields = NULL;
   } else {
-    instance->fields = ALLOCATE(Value, klass->fieldCount);
-    for (int i = 0; i < klass->fieldCount; i++) {
-      instance->fields[i] = klass->fieldDefaults[i];
+    instance->fields = ALLOCATE(Value, struct_->fieldCount);
+    for (int i = 0; i < struct_->fieldCount; i++) {
+      instance->fields[i] = struct_->fieldDefaults[i];
     }
   }
 
@@ -231,13 +243,13 @@ void objectToString(Value value, char *buffer, size_t size) {
     snprintf(buffer, size, "upvalue");
     break;
   }
-  case OBJ_CLASS: {
-    snprintf(buffer, size, "%s", AS_CLASS(value)->name->chars);
+  case OBJ_STRUCT: {
+    snprintf(buffer, size, "%s", AS_STRUCT(value)->name->chars);
     break;
   }
   case OBJ_INSTANCE: {
     snprintf(buffer, size, "%s instance",
-             AS_INSTANCE(value)->klass->name->chars);
+             AS_INSTANCE(value)->struct_->name->chars);
     break;
   }
   case OBJ_BOUND_METHOD: {
@@ -285,8 +297,8 @@ void objectTypeToString(ObjType type, char *buffer, size_t size) {
     snprintf(buffer, size, "upvalue");
     break;
   }
-  case OBJ_CLASS: {
-    snprintf(buffer, size, "class");
+  case OBJ_STRUCT: {
+    snprintf(buffer, size, "struct");
     break;
   }
   case OBJ_INSTANCE: {
@@ -306,11 +318,11 @@ void objectTypeToString(ObjType type, char *buffer, size_t size) {
 
 void printObject(Value value) {
   switch (OBJ_TYPE(value)) {
-  case OBJ_CLASS:
-    printf("%s", AS_CLASS(value)->name->chars);
+  case OBJ_STRUCT:
+    printf("%s", AS_STRUCT(value)->name->chars);
     break;
   case OBJ_INSTANCE:
-    printf("%s instance", AS_INSTANCE(value)->klass->name->chars);
+    printf("%s instance", AS_INSTANCE(value)->struct_->name->chars);
     break;
   case OBJ_BOUND_METHOD:
     printFunction(AS_BOUND_METHOD(value)->method->function);
@@ -374,13 +386,13 @@ void printObjectToErr(Value value) {
   case OBJ_UPVALUE:
     fprintf(stderr, "upvalue");
     break;
-  case OBJ_CLASS:
-    fprintf(stderr, "%s", AS_CLASS(value)->name->chars);
+  case OBJ_STRUCT:
+    fprintf(stderr, "%s", AS_STRUCT(value)->name->chars);
     break;
   case OBJ_INSTANCE: {
     char buf[512];
     objectToString(value, buf, 1024);
-    fprintf(stderr, "%s instance", AS_INSTANCE(value)->klass->name->chars);
+    fprintf(stderr, "%s instance", AS_INSTANCE(value)->struct_->name->chars);
     break;
   }
   case OBJ_BOUND_METHOD:

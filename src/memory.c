@@ -88,18 +88,18 @@ static void blackenObject(Obj *object) {
 #endif
 
   switch (object->type) {
-  case OBJ_CLASS: {
-    ObjClass *klass = (ObjClass *)object;
-    markObject((Obj *)klass->name);
-    markTable(&klass->methods);
-    markTable(&klass->fields);
+  case OBJ_STRUCT: {
+    ObjStruct *struct_ = (ObjStruct *)object;
+    markObject((Obj *)struct_->name);
+    markTable(&struct_->methods);
+    markTable(&struct_->fields);
     break;
   }
   case OBJ_INSTANCE: {
     ObjInstance *instance = (ObjInstance *)object;
-    markObject((Obj *)instance->klass);
+    markObject((Obj *)instance->struct_);
 
-    for (int i = 0; i < instance->klass->fieldCount; i++) {
+    for (int i = 0; i < instance->struct_->fieldCount; i++) {
       markValue(instance->fields[i]);
     }
 
@@ -149,16 +149,16 @@ static void freeObject(Obj *object) {
 #endif
 
   switch (object->type) {
-  case OBJ_CLASS: {
-    ObjClass *klass = (ObjClass *)object;
-    freeTable(&klass->methods);
-    freeTable(&klass->fields);
-    FREE(ObjClass, object);
+  case OBJ_STRUCT: {
+    ObjStruct *struct_ = (ObjStruct *)object;
+    freeTable(&struct_->methods);
+    freeTable(&struct_->fields);
+    FREE(ObjStruct, object);
     break;
   }
   case OBJ_INSTANCE: {
     ObjInstance *instance = (ObjInstance *)object;
-    FREE_ARRAY(Value, instance->fields, instance->klass->fieldCount);
+    FREE_ARRAY(Value, instance->fields, instance->struct_->fieldCount);
     FREE(ObjInstance, object);
     break;
   }
@@ -216,7 +216,6 @@ static void markRoots(void) {
 
   markTable(&vm.globals);
   markCompilerRoots();
-  markObject((Obj *)vm.initString);
 }
 
 static void traceReferences(void) {

@@ -1,0 +1,25 @@
+== <script> ==
+0000    1 OP_NIL
+0001    | OP_RETURN
+== hello ==
+0000    4 OP_NIL
+0001    | OP_RETURN
+== <script> ==
+0000    1 OP_STRUCT           0 'Struct'
+0002    | OP_DEFINE_GLOBAL    0 'Struct'
+0004    | OP_GET_GLOBAL       1 'Struct'
+0006    | OP_POP
+0007    3 OP_GET_GLOBAL       2 'Struct'
+0009    4 OP_CLOSURE          4 <fn hello>
+0011    | OP_METHOD           3 'hello'
+0013    5 OP_POP
+0014    7 OP_GET_GLOBAL       6 'Struct'
+0016    | OP_STRUCT_INIT      0
+0018    | OP_DEFINE_GLOBAL    5 'instance'
+0020    9 OP_GET_GLOBAL       7 'instance'
+0022    | OP_GET_PROPERTY     8 'hello'
+0024    | OP_PRINT
+0025   10 OP_NIL
+0026    | OP_RETURN
+'hello' is a static method. Access it on 'Struct' instead of on an instance.
+[line 9] in script

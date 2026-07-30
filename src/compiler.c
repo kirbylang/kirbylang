@@ -14,7 +14,6 @@
 #endif
 
 Compiler *current = NULL;
-ClassCompiler *currentClass = NULL;
 LoopCompiler *currentLoop = NULL;
 
 static bool hadError = false;
@@ -99,6 +98,7 @@ static void initCompiler(Compiler *compiler, FunctionType functionType,
   compiler->localCount = 0;
   compiler->scopeDepth = 0;
   compiler->function = newFunction();
+  compiler->function->isStatic = (functionType == TYPE_STATIC_METHOD);
   compiler->enclosingLoop = currentLoop;
   current = compiler;
 
@@ -123,8 +123,8 @@ static void initCompiler(Compiler *compiler, FunctionType functionType,
   local->depth = 0;
   local->isCaptured = false;
 
-  if (functionType != TYPE_FUNCTION) {
-    local->name.start = "this";
+  if (functionType == TYPE_METHOD) {
+    local->name.start = "self";
     local->name.length = 4;
   } else {
     local->name.start = "";
@@ -446,24 +446,12 @@ static void compileBlockExprClose(void) {
 static void emitImplicitReturn(void) {
   TRACELN("  compiler.emitImplicitReturn()");
 
-  if (current->type == TYPE_INITIALIZER) {
-    emitBytes(OP_GET_LOCAL, 0);
-  } else {
-    emitByte(OP_NIL);
-  }
-
+  emitByte(OP_NIL);
   emitByte(OP_RETURN);
 }
 
 static void emitValueReturn(void) {
   TRACELN("  compiler.emitValueReturn()");
-
-  if (current->type == TYPE_INITIALIZER) {
-    // Disreguard the return value.
-    emitByte(OP_POP);
-    // Return 'this' instead.
-    emitBytes(OP_GET_LOCAL, 0);
-  }
 
   emitByte(OP_RETURN);
 }
@@ -511,6 +499,21 @@ static void compileCall(CallNode *c) {
     compileExpr(c->args[i]);
   }
   emitBytes(OP_CALL, (uint8_t)c->argCount);
+}
+
+/**
+ * Is there a receiver in scope for `self` to refer to?
+ *
+ * True inside an instance method, and inside any closure nested within one
+ * (where `self` is reached as an upvalue). False at the top level, inside a
+ * plain function, and inside a static method.
+ */
+static bool selfInScope(void) {
+  for (Compiler *c = current; c != NULL; c = c->enclosing) {
+    if (c->type == TYPE_METHOD)
+      return true;
+  }
+  return false;
 }
 
 static void compileExpr(AstNode *node) {
@@ -646,6 +649,26 @@ static void compileExpr(AstNode *node) {
     compileCall(&node->as.call);
     break;
 
+  case NODE_STRUCT_INIT: {
+    StructInitNode *si = &node->as.structInit;
+
+    VarRef ref = resolveVariable(&si->name);
+    emitBytes(ref.getOp, ref.arg);
+
+    for (int i = 0; i < si->fieldCount; i++) {
+      StructInitFieldNode *field = &si->fields[i];
+
+      currentLine = field->name.line;
+      emitBytes(OP_CONSTANT, identifierConstant(&field->name));
+
+      compileExpr(field->value);
+    }
+
+    currentLine = si->endLine;
+    emitBytes(OP_STRUCT_INIT, (uint8_t)si->fieldCount);
+    break;
+  }
+
   case NODE_GET: {
     GetNode *g = &node->as.get;
     compileExpr(g->object);
@@ -663,14 +686,20 @@ static void compileExpr(AstNode *node) {
     break;
   }
 
-  case NODE_THIS: {
-    if (currentClass == NULL) {
-      errorAtToken(&node->as.this_.keyword,
-                   "Can't use 'this' outside of a class.");
+  case NODE_SELF: {
+    if (!selfInScope()) {
+      if (current->type == TYPE_STATIC_METHOD) {
+        errorAtToken(&node->as.self_.keyword,
+                     "Can't use 'self' in a static method. Add 'self' as the "
+                     "first parameter to make it an instance method.");
+      } else {
+        errorAtToken(&node->as.self_.keyword,
+                     "Can't use 'self' outside of an instance method.");
+      }
       emitByte(OP_NIL);
       break;
     }
-    VarRef ref = resolveVariable(&node->as.this_.keyword);
+    VarRef ref = resolveVariable(&node->as.self_.keyword);
     emitBytes(ref.getOp, ref.arg);
     break;
   }
@@ -816,57 +845,59 @@ static void compileFunctionDeclStmt(AstNode *node) {
   defineVariable(global);
 }
 
-static void compileClassDecl(AstNode *node) {
-  ClassNode *cn = &node->as.class_;
+static void compileStructDecl(AstNode *node) {
+  StructNode *sn = &node->as.struct_;
 
-  uint8_t nameConstant = identifierConstant(&cn->name);
-  declareVariable(&cn->name);
-  emitBytes(OP_CLASS, nameConstant);
+  uint8_t nameConstant = identifierConstant(&sn->name);
+  declareVariable(&sn->name);
+  emitBytes(OP_STRUCT, nameConstant);
   defineVariable(nameConstant);
 
-  ClassCompiler classCompiler;
-  classCompiler.enclosing = currentClass;
-  currentClass = &classCompiler;
-
-  // Push the class back onto the stack so fields/methods can be bound to it
-  VarRef ref = resolveVariable(&cn->name);
+  // Push the struct back onto the stack so the fields can be bound to it
+  VarRef ref = resolveVariable(&sn->name);
   emitBytes(ref.getOp, ref.arg);
 
-  for (int i = 0; i < cn->memberCount; i++) {
-    ClassMember *m = &cn->members[i];
+  for (int i = 0; i < sn->fieldCount; i++) {
+    VarDeclNode *field = &sn->fields[i];
 
-    if (m->kind == CLASS_MEMBER_FIELD) {
-      currentLine = m->as.field.name.line;
-      uint8_t constant = identifierConstant(&m->as.field.name);
+    currentLine = field->name.line;
+    uint8_t constant = identifierConstant(&field->name);
 
-      if (m->as.field.initializer != NULL) {
-        compileExpr(m->as.field.initializer);
-      } else {
-        emitByte(OP_NIL);
-      }
-
-      currentLine = m->as.field.declEndLine;
-      emitBytes(OP_FIELD, constant);
+    if (field->initializer != NULL) {
+      compileExpr(field->initializer);
     } else {
-      FunctionNode *method = m->as.method;
-      uint8_t constant = identifierConstant(&method->name);
-
-      FunctionType type = TYPE_METHOD;
-
-      if (method->name.length == 4 &&
-          memcmp(method->name.start, "init", 4) == 0) {
-        type = TYPE_INITIALIZER;
-      }
-
-      compileFunction(method, type);
-      emitBytes(OP_METHOD, constant);
+      emitByte(OP_NIL);
     }
+
+    currentLine = field->declEndLine;
+    emitBytes(OP_FIELD, constant);
   }
 
-  currentLine = cn->endLine;
-  emitByte(OP_POP); // pop the class off the stack
+  currentLine = sn->endLine;
+  emitByte(OP_POP);
+}
 
-  currentClass = currentClass->enclosing;
+static void compileImplDecl(AstNode *node) {
+  ImplNode *in = &node->as.impl;
+
+  currentLine = in->name.line;
+
+  // Push the struct onto the stack so the methods can be bound to it
+  VarRef ref = resolveVariable(&in->name);
+  emitBytes(ref.getOp, ref.arg);
+
+  for (int i = 0; i < in->methodCount; i++) {
+    FunctionNode *method = in->methods[i];
+    uint8_t constant = identifierConstant(&method->name);
+
+    FunctionType type = method->hasSelf ? TYPE_METHOD : TYPE_STATIC_METHOD;
+
+    compileFunction(method, type);
+    emitBytes(OP_METHOD, constant);
+  }
+
+  currentLine = in->endLine;
+  emitByte(OP_POP); // pop the struct off the stack
 }
 
 static void compileReturn(AstNode *node) {
@@ -879,9 +910,6 @@ static void compileReturn(AstNode *node) {
   if (r->value == NULL) {
     emitByte(OP_NIL);
   } else {
-    if (current->type == TYPE_INITIALIZER) {
-      errorAtNode(node, "Can't return a value from an initializer.");
-    }
     compileExpr(r->value);
   }
 
@@ -1083,8 +1111,12 @@ static void compileStmt(AstNode *node) {
     compileFunctionDeclStmt(node);
     break;
 
-  case NODE_CLASS:
-    compileClassDecl(node);
+  case NODE_STRUCT:
+    compileStructDecl(node);
+    break;
+
+  case NODE_IMPL:
+    compileImplDecl(node);
     break;
 
   default:

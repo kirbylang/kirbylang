@@ -1,6 +1,0 @@
-class Class {
-}
-
-var instance = Class();
-
-instance.value = 123;

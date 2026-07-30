@@ -248,8 +248,8 @@ static void printNode(StrBuf *sb, AstNode *node) {
     sb_append(sb, ")");
     break;
 
-  case NODE_THIS:
-    sb_append(sb, "this");
+  case NODE_SELF:
+    sb_append(sb, "self");
     break;
 
   case NODE_EXPR_STMT:
@@ -331,6 +331,12 @@ static void printNode(StrBuf *sb, AstNode *node) {
       sb_append(sb, " (");
     }
 
+    if (node->as.function.hasSelf) {
+      sb_append(sb, "self");
+      if (node->as.function.arity > 0)
+        sb_append(sb, " ");
+    }
+
     for (int i = 0; i < node->as.function.arity; i++) {
       if (i > 0)
         sb_append(sb, " ");
@@ -348,28 +354,54 @@ static void printNode(StrBuf *sb, AstNode *node) {
     sb_append(sb, ")");
     break;
 
-  case NODE_CLASS:
-    sb_append(sb, "(class ");
-    sbAppendToken(sb, node->as.class_.name);
+  case NODE_STRUCT:
+    sb_append(sb, "(struct ");
+    sbAppendToken(sb, node->as.struct_.name);
 
-    for (int i = 0; i < node->as.class_.memberCount; i++) {
-      ClassMember *m = &node->as.class_.members[i];
+    for (int i = 0; i < node->as.struct_.fieldCount; i++) {
+      VarDeclNode *field = &node->as.struct_.fields[i];
 
-      if (m->kind == CLASS_MEMBER_METHOD) {
-        sb_append(sb, " (method ");
-        sbAppendToken(sb, m->as.method->name);
-        sb_append(sb, ")");
-      } else {
-        sb_append(sb, " (field ");
-        sbAppendToken(sb, m->as.field.name);
+      sb_append(sb, " (field ");
+      sbAppendToken(sb, field->name);
 
-        if (m->as.field.initializer != NULL) {
-          sb_append(sb, " ");
-          printNode(sb, m->as.field.initializer);
-        }
-
-        sb_append(sb, ")");
+      if (field->initializer != NULL) {
+        sb_append(sb, " ");
+        printNode(sb, field->initializer);
       }
+
+      sb_append(sb, ")");
+    }
+
+    sb_append(sb, ")");
+    break;
+
+  case NODE_STRUCT_INIT:
+    sb_append(sb, "(struct-init ");
+    sbAppendToken(sb, node->as.structInit.name);
+
+    for (int i = 0; i < node->as.structInit.fieldCount; i++) {
+      StructInitFieldNode *field = &node->as.structInit.fields[i];
+
+      sb_append(sb, " (field ");
+      sbAppendToken(sb, field->name);
+      sb_append(sb, " ");
+      printNode(sb, field->value);
+      sb_append(sb, ")");
+    }
+
+    sb_append(sb, ")");
+    break;
+
+  case NODE_IMPL:
+    sb_append(sb, "(impl ");
+    sbAppendToken(sb, node->as.impl.name);
+
+    for (int i = 0; i < node->as.impl.methodCount; i++) {
+      FunctionNode *method = node->as.impl.methods[i];
+
+      sb_append(sb, method->hasSelf ? " (method " : " (static ");
+      sbAppendToken(sb, method->name);
+      sb_append(sb, ")");
     }
 
     sb_append(sb, ")");

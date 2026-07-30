@@ -4,6 +4,39 @@
 
 Yet another clox implementation.
 
+```lox
+struct StringBuilder {
+    var string = "";
+}
+
+impl StringBuilder {
+    fun new() {
+        StringBuilder {}
+    }
+
+    fun new_with_init(init) {
+        StringBuilder { string: init }
+    }
+
+    fun add(self, string) {
+        self.string = self.string + string;
+
+        self
+    }
+
+    fun to_string(self) {
+        self.string
+    }
+}
+
+var builder = StringBuilder.new()
+    .add("Hello")
+    .add(" ")
+    .add("World");
+
+print builder.to_string();
+```
+
 ## Documentation
 
 - [CLI](./docs/CLI.md)

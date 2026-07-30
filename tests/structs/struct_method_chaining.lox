@@ -1,0 +1,23 @@
+struct Chain {
+    var value;
+}
+
+impl Chain {
+    fun new(value) {
+        var chain = Chain();
+
+        chain.value = value;
+
+        return chain;
+    }
+
+    fun plus(self, n) {
+        return Chain.new(self.value + n);
+    }
+
+    fun get(self) {
+        return self.value;
+    }
+}
+
+print Chain.new(1).plus(2).plus(3).get();

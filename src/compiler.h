@@ -15,7 +15,7 @@ typedef struct {
 typedef enum {
   TYPE_FUNCTION,
   TYPE_METHOD,
-  TYPE_INITIALIZER,
+  TYPE_STATIC_METHOD,
   TYPE_SCRIPT
 } FunctionType;
 
@@ -43,10 +43,6 @@ typedef struct {
   ObjString *name;
   uint8_t slot;
 } Field;
-
-typedef struct ClassCompiler {
-  struct ClassCompiler *enclosing;
-} ClassCompiler;
 
 typedef struct LoopCompiler {
   struct LoopCompiler *enclosing;

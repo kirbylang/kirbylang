@@ -7,13 +7,13 @@
 == <script> ==
 0000    3 OP_CLOSURE          1 <fn test>
 0002    | OP_DEFINE_GLOBAL    0 'test'
-0004    1 OP_CLASS            2 'Class'
-0006    | OP_DEFINE_GLOBAL    2 'Class'
-0008    | OP_GET_GLOBAL       3 'Class'
+0004    1 OP_STRUCT           2 'Struct'
+0006    | OP_DEFINE_GLOBAL    2 'Struct'
+0008    | OP_GET_GLOBAL       3 'Struct'
 0010    | OP_POP
 0011    5 OP_GET_GLOBAL       4 'instanceOf'
 0013    | OP_GET_GLOBAL       5 'test'
-0015    | OP_GET_GLOBAL       6 'Class'
+0015    | OP_GET_GLOBAL       6 'Struct'
 0017    | OP_CALL             2
 0019    | OP_PRINT
 0020    6 OP_NIL

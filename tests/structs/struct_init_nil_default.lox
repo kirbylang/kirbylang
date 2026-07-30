@@ -1,0 +1,9 @@
+struct Struct {
+    var implicit;
+    var explicit = nil;
+}
+
+var instance = Struct { implicit: 1, explicit: nil };
+
+print instance.implicit;
+print instance.explicit;

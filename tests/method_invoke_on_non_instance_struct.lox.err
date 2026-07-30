@@ -1,0 +1,15 @@
+== <script> ==
+0000    1 OP_NIL
+0001    | OP_RETURN
+== <script> ==
+0000    1 OP_STRUCT           0 'Struct'
+0002    | OP_DEFINE_GLOBAL    0 'Struct'
+0004    | OP_GET_GLOBAL       1 'Struct'
+0006    | OP_POP
+0007    3 OP_GET_GLOBAL       2 'Struct'
+0009    | OP_INVOKE        (0 args)    3 'fn'
+0012    | OP_POP
+0013    4 OP_NIL
+0014    | OP_RETURN
+Undefined property 'fn'.
+[line 3] in script

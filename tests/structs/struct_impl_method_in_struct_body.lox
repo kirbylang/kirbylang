@@ -1,0 +1,5 @@
+struct Struct {
+    fun greet(self) {
+        print "Hello World";
+    }
+}

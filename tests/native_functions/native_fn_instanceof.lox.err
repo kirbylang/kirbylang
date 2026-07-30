@@ -2,38 +2,38 @@
 0000    1 OP_NIL
 0001    | OP_RETURN
 == <script> ==
-0000    1 OP_CLASS            0 'ClassA'
-0002    | OP_DEFINE_GLOBAL    0 'ClassA'
-0004    | OP_GET_GLOBAL       1 'ClassA'
+0000    1 OP_STRUCT           0 'StructA'
+0002    | OP_DEFINE_GLOBAL    0 'StructA'
+0004    | OP_GET_GLOBAL       1 'StructA'
 0006    | OP_POP
-0007    2 OP_CLASS            2 'ClassB'
-0009    | OP_DEFINE_GLOBAL    2 'ClassB'
-0011    | OP_GET_GLOBAL       3 'ClassB'
+0007    2 OP_STRUCT           2 'StructB'
+0009    | OP_DEFINE_GLOBAL    2 'StructB'
+0011    | OP_GET_GLOBAL       3 'StructB'
 0013    | OP_POP
-0014    4 OP_GET_GLOBAL       5 'ClassA'
+0014    4 OP_GET_GLOBAL       5 'StructA'
 0016    | OP_CALL             0
 0018    | OP_DEFINE_GLOBAL    4 'instanceA'
-0020    5 OP_GET_GLOBAL       7 'ClassB'
+0020    5 OP_GET_GLOBAL       7 'StructB'
 0022    | OP_CALL             0
 0024    | OP_DEFINE_GLOBAL    6 'instanceB'
 0026    7 OP_GET_GLOBAL       8 'instanceOf'
 0028    | OP_GET_GLOBAL       9 'instanceA'
-0030    | OP_GET_GLOBAL      10 'ClassA'
+0030    | OP_GET_GLOBAL      10 'StructA'
 0032    | OP_CALL             2
 0034    | OP_PRINT
 0035    8 OP_GET_GLOBAL      11 'instanceOf'
 0037    | OP_GET_GLOBAL      12 'instanceB'
-0039    | OP_GET_GLOBAL      13 'ClassB'
+0039    | OP_GET_GLOBAL      13 'StructB'
 0041    | OP_CALL             2
 0043    | OP_PRINT
 0044    9 OP_GET_GLOBAL      14 'instanceOf'
 0046    | OP_GET_GLOBAL      15 'instanceA'
-0048    | OP_GET_GLOBAL      16 'ClassB'
+0048    | OP_GET_GLOBAL      16 'StructB'
 0050    | OP_CALL             2
 0052    | OP_PRINT
 0053   10 OP_GET_GLOBAL      17 'instanceOf'
 0055    | OP_GET_GLOBAL      18 'instanceB'
-0057    | OP_GET_GLOBAL      19 'ClassA'
+0057    | OP_GET_GLOBAL      19 'StructA'
 0059    | OP_CALL             2
 0061    | OP_PRINT
 0062   11 OP_NIL

@@ -1,0 +1,5 @@
+struct Greeter {}
+
+var greeter = Greeter();
+
+greeter.greet("World");

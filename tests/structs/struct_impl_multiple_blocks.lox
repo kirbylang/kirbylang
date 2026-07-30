@@ -1,0 +1,22 @@
+struct Counter {
+    var count = 0;
+}
+
+impl Counter {
+    fun increment(self) {
+        self.count = self.count + 1;
+    }
+}
+
+impl Counter {
+    fun get(self) {
+        return self.count;
+    }
+}
+
+var counter = Counter();
+
+counter.increment();
+counter.increment();
+
+print counter.get();

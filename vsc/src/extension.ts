@@ -1,32 +1,46 @@
 import * as vscode from "vscode";
 import { readFileSync, existsSync } from "node:fs";
-import { join } from "node:path";
+import { isAbsolute, join } from "node:path";
 
-const hoverCache: Record<string, string> = {};
+const hoverCache = new Map<string, string | null>();
+
+function shellQuote(value: string) {
+  return `"${value.replace(/(["$`\\])/g, "\\$1")}"`;
+}
 
 export function activate(context: vscode.ExtensionContext) {
   const EXT_ROOT = context.extensionPath;
 
-  vscode.languages.registerHoverProvider("clox", {
+  const hoverProvider = vscode.languages.registerHoverProvider("clox", {
     provideHover(doc, position) {
-      const currentWord = doc.getText(doc.getWordRangeAtPosition(position));
+      const wordRange = doc.getWordRangeAtPosition(position);
 
-      if (hoverCache[currentWord]) {
-        return new vscode.Hover(
-          new vscode.MarkdownString(hoverCache[currentWord]),
-        );
-      } else {
-        let hoverText: string = "";
-
-        const hoverFilePath = join(EXT_ROOT, "hovers", `${currentWord}.md`);
-
-        if (existsSync(hoverFilePath)) {
-          hoverText = readFileSync(hoverFilePath, "utf8");
-          hoverCache[currentWord] = hoverText;
-        }
-
-        return new vscode.Hover(new vscode.MarkdownString(hoverText));
+      if (!wordRange) {
+        return;
       }
+
+      const currentWord = doc.getText(wordRange);
+
+      if (hoverCache.has(currentWord)) {
+        const cached = hoverCache.get(currentWord);
+
+        return cached
+          ? new vscode.Hover(new vscode.MarkdownString(cached))
+          : undefined;
+      }
+
+      const hoverFilePath = join(EXT_ROOT, "hovers", `${currentWord}.md`);
+
+      if (!existsSync(hoverFilePath)) {
+        hoverCache.set(currentWord, null);
+
+        return;
+      }
+
+      const hoverText = readFileSync(hoverFilePath, "utf8");
+      hoverCache.set(currentWord, hoverText);
+
+      return new vscode.Hover(new vscode.MarkdownString(hoverText));
     },
   });
 
@@ -34,13 +48,31 @@ export function activate(context: vscode.ExtensionContext) {
     const editor = vscode.window.activeTextEditor;
     if (!editor) return;
 
-    const file = editor.document.fileName;
+    const document = editor.document;
+    const workspaceFolder = vscode.workspace.getWorkspaceFolder(document.uri);
 
-    const terminal = vscode.window.createTerminal("Clox");
+    const configured = vscode.workspace
+      .getConfiguration("clox")
+      .get<string>("executablePath", "./build/clox");
+
+    const executable =
+      isAbsolute(configured) || !workspaceFolder
+        ? configured
+        : join(workspaceFolder.uri.fsPath, configured);
+
+    const terminalOptions: vscode.TerminalOptions = { name: "Clox" };
+
+    if (workspaceFolder) {
+      terminalOptions.cwd = workspaceFolder.uri;
+    }
+
+    const terminal = vscode.window.createTerminal(terminalOptions);
     terminal.show();
 
-    terminal.sendText(`./build/clox -f "${file}"`);
+    terminal.sendText(
+      `${shellQuote(executable)} -f ${shellQuote(document.uri.fsPath)}`,
+    );
   });
 
-  context.subscriptions.push(runCommand);
+  context.subscriptions.push(hoverProvider, runCommand);
 }

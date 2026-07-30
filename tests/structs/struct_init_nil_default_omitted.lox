@@ -1,0 +1,5 @@
+struct Struct {
+    var value = nil;
+}
+
+var instance = Struct {};

@@ -1,63 +1,208 @@
 {
-  "fun name (a, ...): R => { ... }": {
+  "Function declaration": {
     "prefix": "fun",
     "body": [
-      "fun ${1:name} (${2}) { $3 }$0"
+      "fun ${1:name}(${2}) {",
+      "\t$0",
+      "}"
     ],
     "description": "Declare a function"
   },
-  "var a;": {
-    "prefix": "var",
-    "body": [
-      "var ${1:a};$0"
+  "Function with expression body": {
+    "prefix": [
+      "fun",
+      "funx"
     ],
-    "description": "Declare a variable"
+    "body": [
+      "fun ${1:name}(${2}) = ${3:expression};$0"
+    ],
+    "description": "Declare a function whose body is a single expression"
   },
-  "var a = ...;": {
+  "Lambda": {
+    "prefix": [
+      "fun",
+      "lambda"
+    ],
+    "body": [
+      "fun (${1}) { ${2} }$0"
+    ],
+    "description": "Create an anonymous function"
+  },
+  "Struct declaration": {
+    "prefix": "struct",
+    "body": [
+      "struct ${1:Name} {",
+      "\tvar ${2:field};$0",
+      "}"
+    ],
+    "description": "Declare a struct"
+  },
+  "Impl block": {
+    "prefix": "impl",
+    "body": [
+      "impl ${1:Name} {",
+      "\tfun ${2:method}(self) {",
+      "\t\t$0",
+      "\t}",
+      "}"
+    ],
+    "description": "Declare an impl block for a struct"
+  },
+  "Instance method": {
+    "prefix": [
+      "fun",
+      "method"
+    ],
+    "body": [
+      "fun ${1:name}(self${2}) {",
+      "\t$0",
+      "}"
+    ],
+    "description": "Declare an instance method inside an impl block"
+  },
+  "Static method": {
+    "prefix": [
+      "fun",
+      "static"
+    ],
+    "body": [
+      "fun ${1:name}(${2}) {",
+      "\t$0",
+      "}"
+    ],
+    "description": "Declare a static method inside an impl block"
+  },
+  "Constructor": {
+    "prefix": [
+      "new",
+      "constructor"
+    ],
+    "body": [
+      "fun new(${2:value}) {",
+      "\treturn ${1:Name} { ${3:field}: ${2:value} };",
+      "}$0"
+    ],
+    "description": "Declare a static method that builds and returns an instance"
+  },
+  "Struct initializer": {
+    "prefix": [
+      "init",
+      "new"
+    ],
+    "body": [
+      "${1:Name} { ${2:field}: ${3:value} }$0"
+    ],
+    "description": "Initialize a struct"
+  },
+  "Struct initializer (multi-line)": {
+    "prefix": [
+      "init",
+      "initm"
+    ],
+    "body": [
+      "${1:Name} {",
+      "\t${2:field}: ${3:value},$0",
+      "}"
+    ],
+    "description": "Initialize a struct across multiple lines"
+  },
+  "Variable declaration": {
     "prefix": "var",
     "body": [
-      "var ${1:a} = ${2:nil};$0"
+      "var ${1:name} = ${2:nil};$0"
     ],
     "description": "Declare a variable with a value"
   },
-  "if else (expression)": {
+  "Variable declaration (no value)": {
+    "prefix": "var",
+    "body": [
+      "var ${1:name};$0"
+    ],
+    "description": "Declare a variable"
+  },
+  "If statement": {
+    "prefix": "if",
+    "body": [
+      "if (${1:condition}) {",
+      "\t$0",
+      "}"
+    ],
+    "description": "Create an if statement"
+  },
+  "If/else statement": {
     "prefix": [
       "if",
       "ifelse"
     ],
     "body": [
-      "if (${1:cond}) { $2 } else { $3 }$0"
-    ],
-    "description": "Create an if/else expression"
-  },
-  "if (statement)": {
-    "prefix": "if",
-    "body": [
-      "if (${1:cond}) {",
-      "  $2",
-      "};$0"
-    ],
-    "description": "Create an if statement"
-  },
-  "if else (statement)": {
-    "prefix": "ifelse",
-    "body": [
-      "if (${1:cond}) {",
-      "  $2",
-      "} else $3 {",
-      "  $4",
-      "};$0"
+      "if (${1:condition}) {",
+      "\t$2",
+      "} else {",
+      "\t$3",
+      "}$0"
     ],
     "description": "Create an if/else statement"
   },
-  "return": {
+  "If/else expression": {
+    "prefix": [
+      "if",
+      "ifexpr"
+    ],
+    "body": [
+      "if (${1:condition}) { ${2} } else { ${3} }$0"
+    ],
+    "description": "Create an if/else expression"
+  },
+  "While loop": {
+    "prefix": "while",
+    "body": [
+      "while (${1:condition}) {",
+      "\t$0",
+      "}"
+    ],
+    "description": "Create a while loop"
+  },
+  "For loop": {
+    "prefix": "for",
+    "body": [
+      "for (var ${1:i} = 0; ${1:i} < ${2:count}; ${1:i} = ${1:i} + 1) {",
+      "\t$0",
+      "}"
+    ],
+    "description": "Create a for loop"
+  },
+  "Block expression": {
+    "prefix": "block",
+    "body": [
+      "{",
+      "\t$1",
+      "\t${2:value}",
+      "}$0"
+    ],
+    "description": "Create a block expression whose last expression is its value"
+  },
+  "Print": {
+    "prefix": "print",
+    "body": [
+      "print ${1};$0"
+    ],
+    "description": "Create a print statement"
+  },
+  "Return": {
     "prefix": [
       "ret",
       "return"
     ],
     "body": [
-      "return $1;$0"
+      "return ${1};$0"
     ],
     "description": "Create a return statement"
+  },
+  "Break": {
+    "prefix": "break",
+    "body": [
+      "break;$0"
+    ],
+    "description": "Break out of a loop"
   }
 }

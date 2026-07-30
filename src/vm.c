@@ -112,9 +112,6 @@ void initVM(int argc, char *argv[]) {
   initTable(&vm.globals);
   initTable(&vm.strings);
 
-  vm.initString = NULL;
-  vm.initString = copyString("init", 4);
-
   defineAllNatives(&vm);
 }
 
@@ -122,7 +119,6 @@ void freeVM(void) {
   TRACELN("vm.freeVM()");
   freeTable(&vm.globals);
   freeTable(&vm.strings);
-  vm.initString = NULL;
   freeObjects();
 }
 
@@ -162,17 +158,14 @@ static bool call(ObjClosure *closure, int argCount) {
 static bool callValue(Value callee, int argCount) {
   if (IS_OBJ(callee)) {
     switch (OBJ_TYPE(callee)) {
-    case OBJ_CLASS: {
-      ObjClass *klass = AS_CLASS(callee);
-      vm.stackTop[-argCount - 1] = OBJ_VAL(newInstance(klass));
-
-      Value initializer;
-      if (tableGet(&klass->methods, vm.initString, &initializer)) {
-        return call(AS_CLOSURE(initializer), argCount);
-      } else if (argCount != 0) {
+    case OBJ_STRUCT: {
+      if (argCount != 0) {
         runtimeError(&vm, "Expected 0 arguments but got %d.", argCount);
         return false;
       }
+
+      ObjStruct *struct_ = AS_STRUCT(callee);
+      vm.stackTop[-argCount - 1] = OBJ_VAL(newInstance(struct_));
 
       return true;
     }
@@ -196,23 +189,56 @@ static bool callValue(Value callee, int argCount) {
     }
     }
   }
-  runtimeError(&vm, "Can only call functions and classes.");
+  runtimeError(&vm, "Can only call functions and structs.");
   return false;
 }
 
-static bool invokeFromClass(ObjClass *klass, ObjString *name, int argCount) {
+static bool invokeFromStruct(ObjStruct *struct_, ObjString *name,
+                             int argCount) {
   Value method;
-  if (!tableGet(&klass->methods, name, &method)) {
+  if (!tableGet(&struct_->methods, name, &method)) {
     runtimeError(&vm, "Undefined property '%s'.", name->chars);
     return false;
   }
+
+  if (AS_CLOSURE(method)->function->isStatic) {
+    runtimeError(&vm,
+                 "'%s' is a static method. Call it on '%s' instead of on an "
+                 "instance.",
+                 name->chars, struct_->name->chars);
+    return false;
+  }
+
+  return call(AS_CLOSURE(method), argCount);
+}
+
+static bool invokeStatic(ObjStruct *struct_, ObjString *name, int argCount) {
+  Value method;
+  if (!tableGet(&struct_->methods, name, &method)) {
+    runtimeError(&vm, "Undefined property '%s'.", name->chars);
+    return false;
+  }
+
+  if (!AS_CLOSURE(method)->function->isStatic) {
+    runtimeError(&vm,
+                 "'%s' is an instance method and needs an instance of '%s' to "
+                 "be called on.",
+                 name->chars, struct_->name->chars);
+    return false;
+  }
+
   return call(AS_CLOSURE(method), argCount);
 }
 
 static bool invoke(ObjString *name, int argCount) {
   Value caller = peekStack(argCount);
 
+  if (IS_STRUCT(caller)) {
+    return invokeStatic(AS_STRUCT(caller), name, argCount);
+  }
+
   if (!IS_INSTANCE(caller)) {
+    // TODO: Reword?
     runtimeError(&vm, "Only instances have methods.");
     return false;
   }
@@ -221,26 +247,43 @@ static bool invoke(ObjString *name, int argCount) {
 
   int slot;
 
-  if (classFieldSlot(instance->klass, name, &slot)) {
+  if (structFieldSlot(instance->struct_, name, &slot)) {
     Value fieldValue = instance->fields[slot];
 
     vm.stackTop[argCount - 1] = fieldValue;
     return callValue(fieldValue, argCount);
   }
 
-  return invokeFromClass(instance->klass, name, argCount);
+  return invokeFromStruct(instance->struct_, name, argCount);
 }
 
-static bool bindMethod(ObjClass *klass, ObjString *name) {
+typedef enum {
+  // Method is not defined
+  BIND_NOT_FOUND,
+  BIND_OK,
+  // Indicates the method was accessed incorrectly (static methods called on
+  // instance)
+  BIND_ERROR,
+} BindResult;
+
+static BindResult bindMethod(ObjStruct *struct_, ObjString *name) {
   Value method;
-  if (!tableGet(&klass->methods, name, &method)) {
-    return false;
+  if (!tableGet(&struct_->methods, name, &method)) {
+    return BIND_NOT_FOUND;
+  }
+
+  if (AS_CLOSURE(method)->function->isStatic) {
+    runtimeError(&vm,
+                 "'%s' is a static method. Access it on '%s' instead of on an "
+                 "instance.",
+                 name->chars, struct_->name->chars);
+    return BIND_ERROR;
   }
 
   ObjBoundMethod *bound = newBoundMethod(peekStack(0), AS_CLOSURE(method));
   popFromStack();
   pushOnStack(OBJ_VAL(bound));
-  return true;
+  return BIND_OK;
 }
 
 static ObjUpvalue *captureUpvalue(Value *local) {
@@ -277,11 +320,19 @@ static void closeUpvalues(Value *last) {
   }
 }
 
-static void defineMethod(ObjString *name) {
+static bool defineMethod(ObjString *name) {
   Value method = peekStack(0);
-  ObjClass *klass = AS_CLASS(peekStack(1));
-  tableSet(&klass->methods, name, method);
+  Value target = peekStack(1);
+
+  if (!IS_STRUCT(target)) {
+    runtimeError(&vm, "Only structs can have implementations");
+    return false;
+  }
+
+  ObjStruct *struct_ = AS_STRUCT(target);
+  tableSet(&struct_->methods, name, method);
   popFromStack();
+  return true;
 }
 
 static bool isFalsey(Value value) {
@@ -572,10 +623,95 @@ static InterpretResult run(void) {
       closeUpvalues(vm.stackTop - 1);
       popFromStack();
       break;
-    case OP_CLASS:
-      pushOnStack(OBJ_VAL(newClass(READ_STRING())));
+    case OP_STRUCT:
+      pushOnStack(OBJ_VAL(newStruct(READ_STRING())));
       break;
+    case OP_STRUCT_INIT: {
+      int fieldCount = READ_BYTE();
+      // [ Point ][ y ][ 20.000000 ][ x ][ 10.000000 ]
+      //          ^ pairs
+      // ^ pairs - 1
+      Value *pairs = vm.stackTop - 2 * fieldCount;
+      Value structValue = pairs[-1];
+
+      if (!IS_STRUCT(structValue)) {
+        runtimeError(&vm, "Only structs can be initialized with '{}'.");
+        return INTERPRET_RUNTIME_ERROR;
+      }
+
+      ObjStruct *struct_ = AS_STRUCT(structValue);
+
+      bool provided[256];
+      for (int i = 0; i < struct_->fieldCount; i++) {
+        provided[i] = false;
+      }
+
+      ObjInstance *instance = newInstance(struct_);
+
+      // Handle any `field: value,` passed
+
+      // i=0:  pairs[2*0]   = pairs[0] = 'y'      pairs[2*0+1] = pairs[1] = 10
+      // i=1:  pairs[2*1]   = pairs[2] = 'x'      pairs[2*1+1] = pairs[3] = 30
+      // i=2:  pairs[2*2]   = pairs[0] = 'a'      pairs[2*2+1] = pairs[5] = 50
+      // i=3:  pairs[2*3]   = pairs[2] = 'b'      pairs[2*3+1] = pairs[7] = 70
+      for (int i = 0; i < fieldCount; i++) {
+
+        ObjString *field = AS_STRING(pairs[2 * i]);
+
+        int slot;
+
+        if (!structFieldSlot(struct_, field, &slot)) {
+          runtimeError(&vm, "Undefined field '%s'.", field->chars);
+          return INTERPRET_RUNTIME_ERROR;
+        }
+
+        provided[slot] = true;
+        instance->fields[slot] = pairs[2 * i + 1];
+      }
+
+      // Validate all fields without default values were passed
+      for (int i = 0; i < struct_->fieldCount; i++) {
+        if (provided[i] || !IS_NIL(struct_->fieldDefaults[i]))
+          continue;
+
+        ObjString *missing = structFieldName(struct_, i);
+
+        runtimeError(&vm, "Missing required field '%s'.",
+                     missing == NULL ? "?" : missing->chars);
+        return INTERPRET_RUNTIME_ERROR;
+      }
+
+      // Swap the struct for the instance on the stack
+      vm.stackTop = pairs - 1;
+      pushOnStack(OBJ_VAL(instance));
+
+      break;
+    }
     case OP_GET_PROPERTY: {
+      if (IS_STRUCT(peekStack(0))) {
+        ObjStruct *struct_ = AS_STRUCT(peekStack(0));
+        ObjString *name = READ_STRING();
+
+        Value method;
+
+        if (!tableGet(&struct_->methods, name, &method)) {
+          runtimeError(&vm, "Undefined property '%s'.", name->chars);
+          return INTERPRET_RUNTIME_ERROR;
+        }
+
+        if (!AS_CLOSURE(method)->function->isStatic) {
+          runtimeError(&vm,
+                       "'%s' is an instance method and needs an instance of "
+                       "'%s' to be called on.",
+                       name->chars, struct_->name->chars);
+          return INTERPRET_RUNTIME_ERROR;
+        }
+
+        popFromStack(); // struct
+        pushOnStack(method);
+        break;
+      }
+
       if (!IS_INSTANCE(peekStack(0))) {
         runtimeError(&vm, "Only instances have properties.");
         return INTERPRET_RUNTIME_ERROR;
@@ -586,7 +722,7 @@ static InterpretResult run(void) {
 
       int slot;
 
-      if (classFieldSlot(instance->klass, name, &slot)) {
+      if (structFieldSlot(instance->struct_, name, &slot)) {
         Value value = instance->fields[slot];
 
         popFromStack(); // instance
@@ -594,12 +730,17 @@ static InterpretResult run(void) {
         break;
       }
 
-      if (bindMethod(instance->klass, name)) {
+      switch (bindMethod(instance->struct_, name)) {
+      case BIND_OK:
         break;
+      case BIND_ERROR:
+        return INTERPRET_RUNTIME_ERROR;
+      case BIND_NOT_FOUND:
+        runtimeError(&vm, "Undefined property '%s'.", name->chars);
+        return INTERPRET_RUNTIME_ERROR;
       }
 
-      runtimeError(&vm, "Undefined property '%s'.", name->chars);
-      return INTERPRET_RUNTIME_ERROR;
+      break;
     }
     case OP_SET_PROPERTY: {
       if (!IS_INSTANCE(peekStack(1))) {
@@ -612,7 +753,7 @@ static InterpretResult run(void) {
 
       int slot;
 
-      if (!classFieldSlot(instance->klass, name, &slot)) {
+      if (!structFieldSlot(instance->struct_, name, &slot)) {
         runtimeError(&vm, "Undefined field '%s'.", name->chars);
         return INTERPRET_RUNTIME_ERROR;
       }
@@ -629,31 +770,31 @@ static InterpretResult run(void) {
 
       Value value = peekStack(1);
 
-      if (!IS_CLASS(value)) {
-        runtimeError(&vm, "Field declaration outside class.");
+      if (!IS_STRUCT(value)) {
+        runtimeError(&vm, "Field declaration outside struct.");
         return INTERPRET_RUNTIME_ERROR;
       }
 
-      ObjClass *klass = AS_CLASS(value);
+      ObjStruct *struct_ = AS_STRUCT(value);
 
       Value existing;
 
-      if (tableGet(&klass->fields, field_name, &existing)) {
+      if (tableGet(&struct_->fields, field_name, &existing)) {
         runtimeError(&vm, "Duplicate field '%s'.", field_name->chars);
         return INTERPRET_RUNTIME_ERROR;
       }
 
-      tableSet(&klass->fields, field_name, NUMBER_VAL(klass->fieldCount));
+      tableSet(&struct_->fields, field_name, NUMBER_VAL(struct_->fieldCount));
 
       Value initializer = peekStack(0);
 
-      if (klass->fieldCount >= 256) {
-        runtimeError(&vm, "A class can't have more than 256 fields");
+      if (struct_->fieldCount >= 256) {
+        runtimeError(&vm, "A struct can't have more than 256 fields");
       }
 
-      klass->fieldDefaults[klass->fieldCount] = initializer;
+      struct_->fieldDefaults[struct_->fieldCount] = initializer;
 
-      klass->fieldCount++;
+      struct_->fieldCount++;
 
       popFromStack(); // initializer
 
@@ -664,7 +805,10 @@ static InterpretResult run(void) {
       // Read constant value as a string
       ObjString *method_name = READ_STRING();
 
-      defineMethod(method_name);
+      if (!defineMethod(method_name)) {
+        return INTERPRET_RUNTIME_ERROR;
+      }
+
       break;
     }
     case OP_INVOKE: {

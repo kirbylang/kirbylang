@@ -10,7 +10,7 @@ typedef struct VM VM;
 
 #define OBJ_TYPE(value) (AS_OBJ(value)->type)
 
-#define IS_CLASS(value) isObjType(value, OBJ_CLASS)
+#define IS_STRUCT(value) isObjType(value, OBJ_STRUCT)
 #define IS_INSTANCE(value) isObjType(value, OBJ_INSTANCE)
 #define IS_BOUND_METHOD(value) isObjType(value, OBJ_BOUND_METHOD)
 #define IS_STRING(value) isObjType(value, OBJ_STRING)
@@ -19,7 +19,7 @@ typedef struct VM VM;
 #define IS_CLOSURE(value) isObjType(value, OBJ_CLOSURE)
 #define IS_ARRAY(value) isObjType(value, OBJ_ARRAY)
 
-#define AS_CLASS(value) ((ObjClass *)AS_OBJ(value))
+#define AS_STRUCT(value) ((ObjStruct *)AS_OBJ(value))
 #define AS_INSTANCE(value) ((ObjInstance *)AS_OBJ(value))
 #define AS_BOUND_METHOD(value) ((ObjBoundMethod *)AS_OBJ(value))
 #define AS_STRING(value) ((ObjString *)AS_OBJ(value))
@@ -30,7 +30,7 @@ typedef struct VM VM;
 #define AS_ARRAY(value) ((ObjArray *)AS_OBJ(value))
 
 typedef enum {
-  OBJ_CLASS,
+  OBJ_STRUCT,
   OBJ_INSTANCE,
   OBJ_BOUND_METHOD,
   OBJ_CLOSURE,
@@ -74,6 +74,7 @@ typedef struct {
   int upvalueCount;
   Chunk chunk;
   ObjString *name;
+  bool isStatic;
 } ObjFunction;
 
 typedef struct {
@@ -90,11 +91,11 @@ typedef struct {
   Table fields;
   int fieldCount;
   Value fieldDefaults[256];
-} ObjClass;
+} ObjStruct;
 
 typedef struct {
   Obj obj;
-  ObjClass *klass;
+  ObjStruct *struct_;
   Value *fields;
 } ObjInstance;
 
@@ -107,11 +108,16 @@ typedef struct {
 ObjArray *newArray(void);
 
 /**
- * Allocate a new class
+ * Allocate a new struct
  */
-ObjClass *newClass(ObjString *name);
+ObjStruct *newStruct(ObjString *name);
 
-bool classFieldSlot(ObjClass *klass, ObjString *name, int *slot);
+bool structFieldSlot(ObjStruct *struct_, ObjString *name, int *slot);
+
+/**
+ * The name of the field occupying `slot`, or NULL if there is no such field.
+ */
+ObjString *structFieldName(ObjStruct *struct_, int slot);
 
 /**
  * Allocate a new closure
@@ -131,9 +137,9 @@ typedef struct {
 ObjFunction *newFunction(void);
 
 /**
- * Allocate a new class instance
+ * Allocate a new struct instance
  */
-ObjInstance *newInstance(ObjClass *klass);
+ObjInstance *newInstance(ObjStruct *struct_);
 ObjNative *newNative(NativeFn function);
 ObjString *takeString(char *chars, int length);
 ObjString *copyString(const char *chars, int length);

@@ -1,0 +1,5 @@
+struct Struct {}
+
+impl Struct {
+    fun hello(name, self) {}
+}

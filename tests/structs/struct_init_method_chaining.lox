@@ -1,0 +1,22 @@
+struct StringBuilder {
+    var string = "";
+}
+
+impl StringBuilder {
+    fun add(self, string) {
+        self.string = self.string + string;
+
+        self
+    }
+
+    fun to_string(self) {
+        return self.string;
+    }
+}
+
+var builder = StringBuilder { string: "" }
+    .add("Hello")
+    .add(" ")
+    .add("World");
+
+print builder.to_string();

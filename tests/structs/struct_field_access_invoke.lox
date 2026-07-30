@@ -1,0 +1,13 @@
+struct Struct {
+    var fn;
+}
+
+var instance = Struct {};
+
+fun fn() {
+    print "Hello World";
+}
+
+instance.fn = fn;
+
+instance.fn();

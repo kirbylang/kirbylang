@@ -1,0 +1,9 @@
+struct Struct {}
+
+impl Struct {
+    fun hello() {}
+}
+
+var instance = Struct {};
+
+instance.hello();

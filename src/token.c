@@ -17,6 +17,8 @@ const char *tokenTypeToString(TokenType type) {
     return "TOKEN_RIGHT_BRACKET";
   case TOKEN_COMMA:
     return "TOKEN_COMMA";
+  case TOKEN_COLON:
+    return "TOKEN_COLON";
   case TOKEN_DOT:
     return "TOKEN_DOT";
   case TOKEN_MINUS:
@@ -53,8 +55,10 @@ const char *tokenTypeToString(TokenType type) {
     return "TOKEN_NUMBER";
   case TOKEN_AND:
     return "TOKEN_AND";
-  case TOKEN_CLASS:
-    return "TOKEN_CLASS";
+  case TOKEN_STRUCT:
+    return "TOKEN_STRUCT";
+  case TOKEN_IMPL:
+    return "TOKEN_IMPL";
   case TOKEN_ELSE:
     return "TOKEN_ELSE";
   case TOKEN_FALSE:
@@ -73,8 +77,8 @@ const char *tokenTypeToString(TokenType type) {
     return "TOKEN_PRINT";
   case TOKEN_RETURN:
     return "TOKEN_RETURN";
-  case TOKEN_THIS:
-    return "TOKEN_THIS";
+  case TOKEN_SELF:
+    return "TOKEN_SELF";
   case TOKEN_TRUE:
     return "TOKEN_TRUE";
   case TOKEN_VAR:

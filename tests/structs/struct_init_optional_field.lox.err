@@ -1,0 +1,48 @@
+== <script> ==
+0000    1 OP_NIL
+0001    | OP_RETURN
+== <script> ==
+0000    1 OP_STRUCT           0 'Config'
+0002    | OP_DEFINE_GLOBAL    0 'Config'
+0004    | OP_GET_GLOBAL       1 'Config'
+0006    2 OP_NIL
+0007    | OP_FIELD            2 'name'
+0009    3 OP_FALSE
+0010    | OP_FIELD            3 'debug'
+0012    4 OP_CONSTANT         5 '3.000000'
+0014    | OP_FIELD            4 'retries'
+0016    5 OP_POP
+0017    7 OP_GET_GLOBAL       7 'Config'
+0019    | OP_CONSTANT         8 'name'
+0021    | OP_CONSTANT         9 'Hello'
+0023    | OP_STRUCT_INIT      1
+0025    | OP_DEFINE_GLOBAL    6 'defaults'
+0027    9 OP_GET_GLOBAL      10 'defaults'
+0029    | OP_GET_PROPERTY    11 'name'
+0031    | OP_PRINT
+0032   10 OP_GET_GLOBAL      12 'defaults'
+0034    | OP_GET_PROPERTY    13 'debug'
+0036    | OP_PRINT
+0037   11 OP_GET_GLOBAL      14 'defaults'
+0039    | OP_GET_PROPERTY    15 'retries'
+0041    | OP_PRINT
+0042   13 OP_GET_GLOBAL      17 'Config'
+0044    | OP_CONSTANT        18 'name'
+0046    | OP_CONSTANT        19 'World'
+0048    | OP_CONSTANT        20 'debug'
+0050    | OP_TRUE
+0051    | OP_CONSTANT        21 'retries'
+0053    | OP_CONSTANT        22 '9.000000'
+0055    | OP_STRUCT_INIT      3
+0057    | OP_DEFINE_GLOBAL   16 'overridden'
+0059   15 OP_GET_GLOBAL      23 'overridden'
+0061    | OP_GET_PROPERTY    24 'name'
+0063    | OP_PRINT
+0064   16 OP_GET_GLOBAL      25 'overridden'
+0066    | OP_GET_PROPERTY    26 'debug'
+0068    | OP_PRINT
+0069   17 OP_GET_GLOBAL      27 'overridden'
+0071    | OP_GET_PROPERTY    28 'retries'
+0073    | OP_PRINT
+0074   18 OP_NIL
+0075    | OP_RETURN

@@ -1,37 +1,153 @@
 {
   "scopeName": "source.clox",
   "patterns": [
-    {
-      "name": "keyword.control.clox",
-      "match": "\\b(if|else|for|while|fun|return|var|print|true|false|nil|class|this)\\b"
+    { "include": "#comments" },
+    { "include": "#strings" },
+    { "include": "#numbers" },
+    { "include": "#struct-declaration" },
+    { "include": "#impl-declaration" },
+    { "include": "#function-declaration" },
+    { "include": "#keywords" },
+    { "include": "#constants" },
+    { "include": "#natives" },
+    { "include": "#struct-initializer" },
+    { "include": "#field-name" },
+    { "include": "#method-call" },
+    { "include": "#property" },
+    { "include": "#function-call" },
+    { "include": "#operators" }
+  ],
+  "repository": {
+    "comments": {
+      "name": "comment.line.double-slash.clox",
+      "match": "//.*$"
     },
-    {
-      "name": "entity.name.function.native.clox",
-      "match": "\\b(clock|len|argv|argc|typeof|rand|rand01|randBetween|ceil|readFileToString|writeStringToFile|fileExists|getenv|setenv|__version__|exit|instanceOf|prompt|stdin|parseNumber|numberToString|arrPush|arrPop|arrInsert|arrRemove|arrClear|arrContains|arrCopy|arrEqual|arrIsEmpty|arrSlice|arrConcat|arrReverse)\\b"
-    },
-    {
-      "name": "entity.name.function.native.clox",
-      "match": "\\b(is|isNumber|isString|isNil|isFunction|isBool|strIsEmpty)\\b"
-    },
-    {
-      "name": "entity.name.function.method.clox",
-      "match": "(?<=[A-Za-z_][A-Za-z0-9_]*\\s*\\.\\s*)\\b[A-Za-z_][A-Za-z0-9_]*\\b(?=\\s*\\()"
-    },
-    {
-      "name": "variable.name.property.clox",
-      "match": "(?<=[A-Za-z_][A-Za-z0-9_]*\\s*\\.\\s*)\\b[A-Za-z_][A-Za-z0-9_]*\\b(?!\\s*\\()"
-    },
-    {
+    "strings": {
       "name": "string.quoted.double.clox",
-      "match": "\".*?\""
+      "begin": "\"",
+      "end": "\"",
+      "patterns": [
+        {
+          "name": "constant.character.escape.clox",
+          "match": "\\\\[nrt\"\\\\]"
+        },
+        {
+          "name": "invalid.illegal.unknown-escape.clox",
+          "match": "\\\\."
+        }
+      ]
     },
-    {
+    "numbers": {
       "name": "constant.numeric.clox",
       "match": "\\b\\d+(\\.\\d+)?\\b"
     },
-    {
-      "name": "comment.line.double-slash.clox",
-      "match": "//.*$"
+    "struct-declaration": {
+      "match": "\\b(struct)\\s+([A-Za-z_][A-Za-z0-9_]*)",
+      "captures": {
+        "1": { "name": "keyword.declaration.struct.clox" },
+        "2": { "name": "entity.name.type.struct.clox" }
+      }
+    },
+    "impl-declaration": {
+      "match": "\\b(impl)\\s+([A-Za-z_][A-Za-z0-9_]*)",
+      "captures": {
+        "1": { "name": "keyword.declaration.impl.clox" },
+        "2": { "name": "entity.name.type.struct.clox" }
+      }
+    },
+    "function-declaration": {
+      "match": "\\b(fun)\\s+([A-Za-z_][A-Za-z0-9_]*)",
+      "captures": {
+        "1": { "name": "keyword.declaration.function.clox" },
+        "2": { "name": "entity.name.function.clox" }
+      }
+    },
+    "keywords": {
+      "patterns": [
+        {
+          "name": "keyword.control.clox",
+          "match": "\\b(if|else|for|while|return|break)\\b"
+        },
+        {
+          "name": "keyword.declaration.clox",
+          "match": "\\b(var|fun|struct|impl)\\b"
+        },
+        {
+          "name": "keyword.operator.logical.clox",
+          "match": "\\b(and|or)\\b"
+        },
+        {
+          "name": "keyword.other.print.clox",
+          "match": "\\bprint\\b"
+        },
+        {
+          "name": "variable.language.self.clox",
+          "match": "\\bself\\b"
+        }
+      ]
+    },
+    "constants": {
+      "name": "constant.language.clox",
+      "match": "\\b(true|false|nil)\\b"
+    },
+    "natives": {
+      "patterns": [
+        {
+          "name": "entity.name.function.native.clox",
+          "match": "\\b(clock|len|argv|argc|typeof|rand|rand01|randBetween|ceil|readFileToString|writeStringToFile|fileExists|getenv|setenv|__version__|exit|instanceOf|prompt|stdin|parseNumber|numberToString|arrPush|arrPop|arrInsert|arrRemove|arrClear|arrContains|arrCopy|arrEqual|arrIsEmpty|arrSlice|arrConcat|arrReverse)\\b"
+        },
+        {
+          "name": "entity.name.function.native.clox",
+          "match": "\\b(is|isNumber|isString|isNil|isFunction|isBool|strIsEmpty)\\b"
+        }
+      ]
+    },
+    "struct-initializer": {
+      "name": "entity.name.type.struct.clox",
+      "match": "\\b[A-Za-z_][A-Za-z0-9_]*\\b(?=\\s*\\{)"
+    },
+    "field-name": {
+      "match": "\\b([A-Za-z_][A-Za-z0-9_]*)\\s*(:)",
+      "captures": {
+        "1": { "name": "variable.other.property.clox" },
+        "2": { "name": "punctuation.separator.key-value.clox" }
+      }
+    },
+    "method-call": {
+      "name": "entity.name.function.method.clox",
+      "match": "(?<=[A-Za-z_][A-Za-z0-9_]*\\s*\\.\\s*)\\b[A-Za-z_][A-Za-z0-9_]*\\b(?=\\s*\\()"
+    },
+    "property": {
+      "name": "variable.name.property.clox",
+      "match": "(?<=[A-Za-z_][A-Za-z0-9_]*\\s*\\.\\s*)\\b[A-Za-z_][A-Za-z0-9_]*\\b(?!\\s*\\()"
+    },
+    "function-call": {
+      "name": "entity.name.function.clox",
+      "match": "\\b[A-Za-z_][A-Za-z0-9_]*\\b(?=\\s*\\()"
+    },
+    "operators": {
+      "patterns": [
+        {
+          "name": "keyword.operator.comparison.clox",
+          "match": "(==|!=|<=|>=|<|>)"
+        },
+        {
+          "name": "keyword.operator.logical.clox",
+          "match": "(&&|\\|\\||!)"
+        },
+        {
+          "name": "keyword.operator.nullish.clox",
+          "match": "\\?\\?"
+        },
+        {
+          "name": "keyword.operator.assignment.clox",
+          "match": "="
+        },
+        {
+          "name": "keyword.operator.arithmetic.clox",
+          "match": "(\\+|-|\\*|/|%)"
+        }
+      ]
     }
-  ]
+  }
 }

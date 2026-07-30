@@ -1,0 +1,31 @@
+== <script> ==
+0000    1 OP_NIL
+0001    | OP_RETURN
+== greet ==
+0000    5 OP_CONSTANT         0 'Hello '
+0002    | OP_GET_LOCAL        1
+0004    | OP_ADD
+0005    | OP_PRINT
+0006    6 OP_NIL
+0007    | OP_RETURN
+== <script> ==
+0000    1 OP_STRUCT           0 'Greeter'
+0002    | OP_DEFINE_GLOBAL    0 'Greeter'
+0004    | OP_GET_GLOBAL       1 'Greeter'
+0006    | OP_POP
+0007    3 OP_GET_GLOBAL       2 'Greeter'
+0009    6 OP_CLOSURE          4 <fn greet>
+0011    | OP_METHOD           3 'greet'
+0013    7 OP_POP
+0014    9 OP_GET_GLOBAL       6 'Greeter'
+0016    | OP_CALL             0
+0018    | OP_DEFINE_GLOBAL    5 'greeter'
+0020   11 OP_GET_GLOBAL       7 'greeter'
+0022    | OP_CONSTANT         9 'World'
+0024    | OP_CONSTANT        10 'Extra'
+0026    | OP_INVOKE        (2 args)    8 'greet'
+0029    | OP_POP
+0030   12 OP_NIL
+0031    | OP_RETURN
+Expected 1 arguments but got 2.
+[line 11] in script

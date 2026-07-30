@@ -37,8 +37,6 @@ struct VM {
   Table globals;
   Table strings;
 
-  ObjString *initString;
-
   ObjUpvalue *openUpvalues;
 
   size_t bytesAllocated;
@@ -68,7 +66,7 @@ typedef enum {
  * - Garbage Collector
  * - Globals Table
  * - Internerned String Table
- * - Intern Class Initializer String
+ * - Intern Struct Initializer String
  * - Define Native Functions
  */
 void initVM(int argc, char *argv[]);
@@ -78,7 +76,6 @@ void initVM(int argc, char *argv[]);
  *
  * - Free globals
  * - Free interned strings
- * - Garbage collect class initializer string
  * - Free all objects
  */
 void freeVM(void);

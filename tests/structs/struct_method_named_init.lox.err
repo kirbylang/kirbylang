@@ -1,0 +1,31 @@
+== <script> ==
+0000    1 OP_NIL
+0001    | OP_RETURN
+== init ==
+0000    5 OP_CONSTANT         0 'instance method'
+0002    | OP_RETURN
+== init2 ==
+0000    9 OP_CONSTANT         0 'static method'
+0002    | OP_RETURN
+== <script> ==
+0000    1 OP_STRUCT           0 'Struct'
+0002    | OP_DEFINE_GLOBAL    0 'Struct'
+0004    | OP_GET_GLOBAL       1 'Struct'
+0006    | OP_POP
+0007    3 OP_GET_GLOBAL       2 'Struct'
+0009    6 OP_CLOSURE          4 <fn init>
+0011    | OP_METHOD           3 'init'
+0013   10 OP_CLOSURE          6 <fn init2>
+0015    | OP_METHOD           5 'init2'
+0017   11 OP_POP
+0018   13 OP_GET_GLOBAL       8 'Struct'
+0020    | OP_STRUCT_INIT      0
+0022    | OP_DEFINE_GLOBAL    7 'instance'
+0024   15 OP_GET_GLOBAL       9 'instance'
+0026    | OP_INVOKE        (0 args)   10 'init'
+0029    | OP_PRINT
+0030   16 OP_GET_GLOBAL      11 'Struct'
+0032    | OP_INVOKE        (0 args)   12 'init2'
+0035    | OP_PRINT
+0036   17 OP_NIL
+0037    | OP_RETURN

@@ -1,0 +1,17 @@
+struct Config {
+    var name;
+    var debug = false;
+    var retries = 3;
+}
+
+var defaults = Config { name: "Hello" };
+
+print defaults.name;
+print defaults.debug;
+print defaults.retries;
+
+var overridden = Config { name: "World", debug: true, retries: 9 };
+
+print overridden.name;
+print overridden.debug;
+print overridden.retries;
