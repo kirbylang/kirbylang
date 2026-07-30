@@ -16,23 +16,22 @@ export function activate(context: vscode.ExtensionContext) {
       }
 
       const currentWord = doc.getText(wordRange);
+      const cached = hoverCache[currentWord];
 
-      if (hoverCache[currentWord]) {
-        return new vscode.Hover(
-          new vscode.MarkdownString(hoverCache[currentWord]),
-        );
-      } else {
-        let hoverText: string = "";
-
-        const hoverFilePath = join(EXT_ROOT, "hovers", `${currentWord}.md`);
-
-        if (existsSync(hoverFilePath)) {
-          hoverText = readFileSync(hoverFilePath, "utf8");
-          hoverCache[currentWord] = hoverText;
-        }
-
-        return new vscode.Hover(new vscode.MarkdownString(hoverText));
+      if (cached) {
+        return new vscode.Hover(new vscode.MarkdownString(cached));
       }
+
+      const hoverFilePath = join(EXT_ROOT, "hovers", `${currentWord}.md`);
+
+      if (!existsSync(hoverFilePath)) {
+        return;
+      }
+
+      const hoverText = readFileSync(hoverFilePath, "utf8");
+      hoverCache[currentWord] = hoverText;
+
+      return new vscode.Hover(new vscode.MarkdownString(hoverText));
     },
   });
 
