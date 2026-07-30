@@ -7,7 +7,7 @@ const hoverCache = new Map<string, string | null>();
 export function activate(context: vscode.ExtensionContext) {
   const EXT_ROOT = context.extensionPath;
 
-  vscode.languages.registerHoverProvider("clox", {
+  const hoverProvider = vscode.languages.registerHoverProvider("clox", {
     provideHover(doc, position) {
       const wordRange = doc.getWordRangeAtPosition(position);
 
@@ -52,5 +52,5 @@ export function activate(context: vscode.ExtensionContext) {
     terminal.sendText(`./build/clox -f "${file}"`);
   });
 
-  context.subscriptions.push(runCommand);
+  context.subscriptions.push(hoverProvider, runCommand);
 }
