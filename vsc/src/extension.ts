@@ -2,7 +2,7 @@ import * as vscode from "vscode";
 import { readFileSync, existsSync } from "node:fs";
 import { join } from "node:path";
 
-const hoverCache: Record<string, string> = {};
+const hoverCache = new Map<string, string | null>();
 
 export function activate(context: vscode.ExtensionContext) {
   const EXT_ROOT = context.extensionPath;
@@ -16,20 +16,25 @@ export function activate(context: vscode.ExtensionContext) {
       }
 
       const currentWord = doc.getText(wordRange);
-      const cached = hoverCache[currentWord];
 
-      if (cached) {
-        return new vscode.Hover(new vscode.MarkdownString(cached));
+      if (hoverCache.has(currentWord)) {
+        const cached = hoverCache.get(currentWord);
+
+        return cached
+          ? new vscode.Hover(new vscode.MarkdownString(cached))
+          : undefined;
       }
 
       const hoverFilePath = join(EXT_ROOT, "hovers", `${currentWord}.md`);
 
       if (!existsSync(hoverFilePath)) {
+        hoverCache.set(currentWord, null);
+
         return;
       }
 
       const hoverText = readFileSync(hoverFilePath, "utf8");
-      hoverCache[currentWord] = hoverText;
+      hoverCache.set(currentWord, hoverText);
 
       return new vscode.Hover(new vscode.MarkdownString(hoverText));
     },
