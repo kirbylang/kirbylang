@@ -8,7 +8,9 @@ impl StringBuilder {
     }
 
     fun new_with_init(init) {
-        StringBuilder { string: init }
+        StringBuilder {
+            string: init
+        }
     }
 
     fun add(self, string) {
