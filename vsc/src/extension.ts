@@ -1,8 +1,12 @@
 import * as vscode from "vscode";
 import { readFileSync, existsSync } from "node:fs";
-import { join } from "node:path";
+import { isAbsolute, join } from "node:path";
 
 const hoverCache = new Map<string, string | null>();
+
+function shellQuote(value: string) {
+  return `"${value.replace(/(["$`\\])/g, "\\$1")}"`;
+}
 
 export function activate(context: vscode.ExtensionContext) {
   const EXT_ROOT = context.extensionPath;
@@ -44,12 +48,30 @@ export function activate(context: vscode.ExtensionContext) {
     const editor = vscode.window.activeTextEditor;
     if (!editor) return;
 
-    const file = editor.document.fileName;
+    const document = editor.document;
+    const workspaceFolder = vscode.workspace.getWorkspaceFolder(document.uri);
 
-    const terminal = vscode.window.createTerminal("Clox");
+    const configured = vscode.workspace
+      .getConfiguration("clox")
+      .get<string>("executablePath", "./build/clox");
+
+    const executable =
+      isAbsolute(configured) || !workspaceFolder
+        ? configured
+        : join(workspaceFolder.uri.fsPath, configured);
+
+    const terminalOptions: vscode.TerminalOptions = { name: "Clox" };
+
+    if (workspaceFolder) {
+      terminalOptions.cwd = workspaceFolder.uri;
+    }
+
+    const terminal = vscode.window.createTerminal(terminalOptions);
     terminal.show();
 
-    terminal.sendText(`./build/clox -f "${file}"`);
+    terminal.sendText(
+      `${shellQuote(executable)} -f ${shellQuote(document.uri.fsPath)}`,
+    );
   });
 
   context.subscriptions.push(hoverProvider, runCommand);

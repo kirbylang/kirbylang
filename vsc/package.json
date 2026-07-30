@@ -41,7 +41,17 @@
         "command": "clox.run",
         "title": "Run Clox File"
       }
-    ]
+    ],
+    "configuration": {
+      "title": "Clox",
+      "properties": {
+        "clox.executablePath": {
+          "type": "string",
+          "default": "./build/clox",
+          "description": "Path to the clox executable. A relative path is resolved against the workspace folder."
+        }
+      }
+    }
   },
   "scripts": {
     "tsc": "tsc",
