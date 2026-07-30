@@ -36,6 +36,18 @@ These are the documented changes to the language/syntax from the original Lox la
   - Update `compile` function to consume `AstNode**` to produce bytecode
   - Forward referencing functions (use before declaring)
   - Add `break` statement in `for` and `while` loops
+- Replace `class` with `struct` + `impl`
+  - Struct initializers e.g. `Point { x: 1, y: 0 }`
+  - All methods for structs are defined in the `impl` block
+  - Instance methods accept `self` as the first argument. Otherwise it's a static method.
+  - Constructors are declared as static methods. No more `init` constructor.
+  - New function type: `TYPE_STATIC_METHOD` (Removes old `TYPE_INITIALIZER`)
+  - New tokens: `TOKEN_IMPL`, `TOKEN_COLON`
+  - Renamed token: `TOKEN_STRUCT` -> `TOKEN_CLASS`
+  - Renamed token: `TOKEN_THIS` -> `TOKEN_SELF`
+  - Renamed bytecode OP: `OP_CLASS` -> `OP_STRUCT`
+  - [ ] Deprecate the call syntax e.g. `Point()`
+  - [ ] Implicitly private fields/methods. Explicit public using `pub`
 
 ## 0.2.0
 

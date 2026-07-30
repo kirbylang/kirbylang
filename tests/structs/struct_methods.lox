@@ -1,0 +1,11 @@
+struct Struct {}
+
+impl Struct {
+    fun hello(self) {}
+    fun world(self) {}
+}
+
+var instance = Struct {};
+
+print instance.hello;
+print instance.world;

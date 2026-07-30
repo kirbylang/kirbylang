@@ -1,0 +1,9 @@
+struct Point {
+    var x;
+    var y;
+}
+
+var point = Point { y: 2, x: 1 };
+
+print point.x;
+print point.y;

@@ -1,5 +1,0 @@
-class Class {
-    init () {
-        return this;
-    }
-}

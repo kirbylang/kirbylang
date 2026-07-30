@@ -1,8 +1,0 @@
-class Class {
-    var value = "Hello";
-    var value = "World";
-}
-
-var instance = Class();
-
-print instance.value;

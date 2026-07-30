@@ -1,0 +1,16 @@
+struct Struct {}
+
+impl Struct {
+    fun init(self) {
+        return "instance method";
+    }
+
+    fun init2() {
+        return "static method";
+    }
+}
+
+var instance = Struct {};
+
+print instance.init();
+print Struct.init2();

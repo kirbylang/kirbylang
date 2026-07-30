@@ -1,10 +1,10 @@
-class ClassA {}
-class ClassB {}
+struct StructA {}
+struct StructB {}
 
-var instanceA = ClassA();
-var instanceB = ClassB();
+var instanceA = StructA();
+var instanceB = StructB();
 
-print instanceOf(instanceA, ClassA);
-print instanceOf(instanceB, ClassB);
-print instanceOf(instanceA, ClassB);
-print instanceOf(instanceB, ClassA);
+print instanceOf(instanceA, StructA);
+print instanceOf(instanceB, StructB);
+print instanceOf(instanceA, StructB);
+print instanceOf(instanceB, StructA);

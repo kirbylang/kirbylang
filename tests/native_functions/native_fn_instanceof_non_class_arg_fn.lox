@@ -1,7 +1,0 @@
-class Class {}
-
-var instance = Class();
-
-fun test() {}
-
-print instanceOf(instance, test);

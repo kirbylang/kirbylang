@@ -29,9 +29,9 @@ void assertArgIsBool(VM *vm, const char *function, Value *args, int index) {
   }
 }
 
-void assertArgIsClass(VM *vm, const char *function, Value *args, int index) {
-  if (!IS_CLASS(args[index])) {
-    runtimeError(vm, "function %s expects argument %d to be a class.", function,
+void assertArgIsStruct(VM *vm, const char *function, Value *args, int index) {
+  if (!IS_STRUCT(args[index])) {
+    runtimeError(vm, "function %s expects argument %d to be a struct.", function,
                  index + 1);
     exit(70);
   }

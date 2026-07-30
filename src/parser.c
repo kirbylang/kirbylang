@@ -58,6 +58,7 @@ static BlockNode parseBlock(Parser *p);
 static AstNode *lambda(Parser *p, bool canAssign);
 static AstNode *ifExpr(Parser *p, bool canAssign);
 static AstNode *nullish_(Parser *p, AstNode *left, bool canAssign);
+static AstNode *struct_(Parser *p, AstNode *left, bool canAssign);
 
 static void advance(Parser *parser) {
   parser->previous = parser->current;
@@ -106,7 +107,8 @@ static void synchronize(Parser *p) {
     if (p->previous.type == TOKEN_SEMICOLON)
       return;
     switch (p->current.type) {
-    case TOKEN_CLASS:
+    case TOKEN_STRUCT:
+    case TOKEN_IMPL:
     case TOKEN_FUN:
     case TOKEN_VAR:
     case TOKEN_FOR:
@@ -284,11 +286,11 @@ static AstNode *variable(Parser *p, bool canAssign) {
   return node;
 }
 
-static AstNode *this_(Parser *p, bool canAssign) {
+static AstNode *self_(Parser *p, bool canAssign) {
   (void)canAssign;
 
-  AstNode *node = astAlloc(NODE_THIS, p->previous.line);
-  node->as.this_.keyword = p->previous;
+  AstNode *node = astAlloc(NODE_SELF, p->previous.line);
+  node->as.self_.keyword = p->previous;
 
   return node;
 }
@@ -467,6 +469,75 @@ static AstNode *dot(Parser *p, AstNode *left, bool canAssign) {
   return node;
 }
 
+static AstNode *struct_(Parser *p, AstNode *name, bool canAssign) {
+  (void)canAssign;
+
+  bool isStructName = name != NULL && name->kind == NODE_VARIABLE;
+
+  if (!isStructName) {
+    parse_error(p, "Only a struct name can be initialized with '{'.");
+  }
+
+  StructInitFieldNode fieldBuf[256];
+  int fieldCount = 0;
+
+  if (!check(p, TOKEN_RIGHT_BRACE)) {
+    do {
+      // Trailing comma
+      if (check(p, TOKEN_RIGHT_BRACE))
+        break;
+
+      if (fieldCount >= 255) {
+        error_at_current(p, "Can't have more than 255 fields.");
+      }
+
+      consume(p, TOKEN_IDENTIFIER, "Expect field name.");
+      Token fieldName = p->previous;
+
+      for (int i = 0; i < fieldCount; i++) {
+        if (fieldBuf[i].name.length == fieldName.length &&
+            memcmp(fieldBuf[i].name.start, fieldName.start,
+                   (size_t)fieldName.length) == 0) {
+          parse_error(p, "Duplicate field in struct initializer.");
+          break;
+        }
+      }
+
+      consume(p, TOKEN_COLON, "Expect ':' after field name.");
+
+      AstNode *value = expression(p);
+
+      if (fieldCount < 255) {
+        fieldBuf[fieldCount].name = fieldName;
+        fieldBuf[fieldCount].value = value;
+        fieldCount++;
+      }
+    } while (match(p, TOKEN_COMMA));
+  }
+
+  consume(p, TOKEN_RIGHT_BRACE, "Expect '}' after struct initializer.");
+
+  if (!isStructName)
+    return name;
+
+  Token name_token = name->as.variable.name;
+
+  StructInitFieldNode *fields = NULL;
+  if (fieldCount > 0) {
+    fields = (StructInitFieldNode *)astAllocRaw(fieldCount *
+                                                sizeof(StructInitFieldNode));
+    memcpy(fields, fieldBuf, fieldCount * sizeof(StructInitFieldNode));
+  }
+
+  AstNode *node = astAlloc(NODE_STRUCT_INIT, name_token.line);
+  node->as.structInit.name = name_token;
+  node->as.structInit.fields = fields;
+  node->as.structInit.fieldCount = fieldCount;
+  node->as.structInit.endLine = p->previous.line;
+
+  return node;
+}
+
 static AstNode *index_(Parser *p, AstNode *left, bool canAssign) {
   Token bracket = p->previous;
   AstNode *index = expression(p);
@@ -492,11 +563,12 @@ static AstNode *index_(Parser *p, AstNode *left, bool canAssign) {
 static ParseRule rules[] = {
     [TOKEN_LEFT_PAREN] = {grouping, call, PREC_CALL},
     [TOKEN_RIGHT_PAREN] = {NULL, NULL, PREC_NONE},
-    [TOKEN_LEFT_BRACE] = {blockExpr, NULL, PREC_NONE},
+    [TOKEN_LEFT_BRACE] = {blockExpr, struct_, PREC_CALL},
     [TOKEN_RIGHT_BRACE] = {NULL, NULL, PREC_NONE},
     [TOKEN_LEFT_BRACKET] = {arrayLiteral, index_, PREC_CALL},
     [TOKEN_RIGHT_BRACKET] = {NULL, NULL, PREC_NONE},
     [TOKEN_COMMA] = {NULL, NULL, PREC_NONE},
+    [TOKEN_COLON] = {NULL, NULL, PREC_NONE},
     [TOKEN_DOT] = {NULL, dot, PREC_CALL},
     [TOKEN_MINUS] = {unary, binary, PREC_TERM},
     [TOKEN_PLUS] = {NULL, binary, PREC_TERM},
@@ -515,7 +587,8 @@ static ParseRule rules[] = {
     [TOKEN_STRING] = {string_, NULL, PREC_NONE},
     [TOKEN_NUMBER] = {number, NULL, PREC_NONE},
     [TOKEN_AND] = {NULL, and_, PREC_AND},
-    [TOKEN_CLASS] = {NULL, NULL, PREC_NONE},
+    [TOKEN_STRUCT] = {NULL, NULL, PREC_NONE},
+    [TOKEN_IMPL] = {NULL, NULL, PREC_NONE},
     [TOKEN_ELSE] = {NULL, NULL, PREC_NONE},
     [TOKEN_FALSE] = {literal, NULL, PREC_NONE},
     [TOKEN_FOR] = {NULL, NULL, PREC_NONE},
@@ -526,7 +599,7 @@ static ParseRule rules[] = {
     [TOKEN_QUESTION_QUESTION] = {NULL, nullish_, PREC_OR},
     [TOKEN_PRINT] = {NULL, NULL, PREC_NONE},
     [TOKEN_RETURN] = {NULL, NULL, PREC_NONE},
-    [TOKEN_THIS] = {this_, NULL, PREC_NONE},
+    [TOKEN_SELF] = {self_, NULL, PREC_NONE},
     [TOKEN_TRUE] = {literal, NULL, PREC_NONE},
     [TOKEN_VAR] = {NULL, NULL, PREC_NONE},
     [TOKEN_WHILE] = {NULL, NULL, PREC_NONE},
@@ -750,7 +823,8 @@ static bool isExpressionStart(TokenType type) {
 // classified: if the next token can start an expression, it's parsed as an
 // expression -- POP'd once compiled, unless it's the last item before `}`,
 // in which case it becomes the block's value (BlockNode.value); otherwise
-// it's parsed as a full declaration (var/class/for/while/print/return/fun).
+// it's parsed as a full declaration
+// (var/struct/impl/for/while/print/return/fun).
 static BlockNode parseBlockExprContents(Parser *p) {
   int capacity = 8, count = 0;
   AstNode **buf = (AstNode **)malloc(capacity * sizeof(AstNode *));
@@ -861,8 +935,9 @@ static AstNode *varDeclaration(Parser *p) {
 }
 
 // Parses the "(params) { body }" or "(params) = expr;" tail shared by
-// function declarations, methods, and lambdas -- the `fun` keyword (or, for
-// a method, the name identifier) has already been consumed by the caller.
+// function declarations, methods, and lambdas -- the `fun` keyword (and, for
+// a function or method, the name identifier) has already been consumed by
+// the caller.
 // `name` is stored on the node but is otherwise unused when isLambda is
 // true (there's no real name token for an anonymous function -- the
 // compiler generates one, matching the original's `lambda0x...` naming).
@@ -872,10 +947,25 @@ static AstNode *functionTail(Parser *p, Token name, int line, bool isMethod,
 
   Token paramBuf[256];
   int arity = 0;
-  if (!check(p, TOKEN_RIGHT_PAREN)) {
+
+  bool hasSelf = false;
+  if (check(p, TOKEN_SELF)) {
+    if (!isMethod) {
+      error_at_current(
+          p, "Only methods in an 'impl' block can declare a 'self' parameter.");
+    }
+    advance(p);
+    hasSelf = true;
+  }
+
+  if (!check(p, TOKEN_RIGHT_PAREN) && (!hasSelf || match(p, TOKEN_COMMA))) {
     do {
       if (arity >= 255) {
         error_at_current(p, "Can't have more than 255 parameters.");
+      }
+
+      if (check(p, TOKEN_SELF)) {
+        error_at_current(p, "'self' must be the first parameter.");
       }
       consume(p, TOKEN_IDENTIFIER, "Expect parameter name.");
       paramBuf[arity++] = p->previous;
@@ -894,6 +984,7 @@ static AstNode *functionTail(Parser *p, Token name, int line, bool isMethod,
   node->as.function.params = params;
   node->as.function.arity = arity;
   node->as.function.isMethod = isMethod;
+  node->as.function.hasSelf = hasSelf;
   node->as.function.isLambda = isLambda;
   node->as.function.exprBody = NULL;
   node->as.function.body.stmts = NULL;
@@ -923,9 +1014,6 @@ static AstNode *functionTail(Parser *p, Token name, int line, bool isMethod,
   return node;
 }
 
-// Parses `fun` or a method inside a class. When isMethod is true, the caller
-// (classDeclaration) has already consumed the name identifier — it's sitting
-// in p->previous — so this skips consuming it again.
 static AstNode *functionDeclaration(Parser *p, bool isMethod) {
   if (!isMethod)
     consume(p, TOKEN_IDENTIFIER, "Expect function name.");
@@ -945,25 +1033,21 @@ static AstNode *lambda(Parser *p, bool canAssign) {
                       /*isLambda=*/true);
 }
 
-static AstNode *classDeclaration(Parser *p) {
-  consume(p, TOKEN_IDENTIFIER, "Expect class name.");
+static AstNode *structDeclaration(Parser *p) {
+  consume(p, TOKEN_IDENTIFIER, "Expect struct name.");
   Token name = p->previous;
   int line = name.line;
 
-  consume(p, TOKEN_LEFT_BRACE, "Expect '{' before class body.");
+  consume(p, TOKEN_LEFT_BRACE, "Expect '{' before struct body.");
 
-  // Fields and methods are kept in a single array, in source order --
-  // `var x; foo() {} var y;` must compile its OP_FIELD/OP_METHOD bytecode
-  // in that same interleaved order, not "all fields then all methods".
-  int memberCap = 8, memberCount = 0;
-  ClassMember *memberBuf =
-      (ClassMember *)malloc(memberCap * sizeof(ClassMember));
+  int fieldCap = 8, fieldCount = 0;
+  VarDeclNode *fieldBuf = (VarDeclNode *)malloc(fieldCap * sizeof(VarDeclNode));
 
   while (!check(p, TOKEN_RIGHT_BRACE) && !is_at_end(p)) {
-    if (memberCount >= memberCap) {
-      memberCap *= 2;
-      memberBuf =
-          (ClassMember *)realloc(memberBuf, memberCap * sizeof(ClassMember));
+    if (fieldCount >= fieldCap) {
+      fieldCap *= 2;
+      fieldBuf =
+          (VarDeclNode *)realloc(fieldBuf, fieldCap * sizeof(VarDeclNode));
     }
 
     if (match(p, TOKEN_VAR)) {
@@ -975,18 +1059,21 @@ static AstNode *classDeclaration(Parser *p) {
       }
       consume(p, TOKEN_SEMICOLON, "Expect ';' after field.");
 
-      memberBuf[memberCount].kind = CLASS_MEMBER_FIELD;
-      memberBuf[memberCount].as.field.name = fieldName;
-      memberBuf[memberCount].as.field.initializer = init;
-      memberBuf[memberCount].as.field.declEndLine = p->previous.line; // the ';'
-      memberCount++;
+      fieldBuf[fieldCount].name = fieldName;
+      fieldBuf[fieldCount].initializer = init;
+      fieldBuf[fieldCount].declEndLine = p->previous.line; // the ';'
+      fieldCount++;
+    } else if (check(p, TOKEN_FUN)) {
+      error_at_current(p, "Expect field declaration. Methods belong in an "
+                          "'impl' block.");
+      advance(p); // 'fun'
+      if (check(p, TOKEN_IDENTIFIER)) {
+        advance(p); // the method name
+        functionDeclaration(p, /*isMethod=*/true);
+      }
+      p->panicMode = false;
     } else {
-      consume(p, TOKEN_IDENTIFIER, "Expect method name.");
-      AstNode *method = functionDeclaration(p, /*isMethod=*/true);
-
-      memberBuf[memberCount].kind = CLASS_MEMBER_METHOD;
-      memberBuf[memberCount].as.method = &method->as.function;
-      memberCount++;
+      error_at_current(p, "Expect field declaration.");
     }
 
     // Without this, a malformed member (e.g. a missing '}') leaves the
@@ -997,21 +1084,80 @@ static AstNode *classDeclaration(Parser *p) {
       synchronize(p);
     }
   }
-  consume(p, TOKEN_RIGHT_BRACE, "Expect '}' after class body.");
+  consume(p, TOKEN_RIGHT_BRACE, "Expect '}' after struct body.");
   int endLine = p->previous.line;
 
-  ClassMember *members = NULL;
-  if (memberCount > 0) {
-    members = (ClassMember *)astAllocRaw(memberCount * sizeof(ClassMember));
-    memcpy(members, memberBuf, memberCount * sizeof(ClassMember));
+  VarDeclNode *fields = NULL;
+  if (fieldCount > 0) {
+    fields = (VarDeclNode *)astAllocRaw(fieldCount * sizeof(VarDeclNode));
+    memcpy(fields, fieldBuf, fieldCount * sizeof(VarDeclNode));
   }
-  free(memberBuf);
+  free(fieldBuf);
 
-  AstNode *node = astAlloc(NODE_CLASS, line);
-  node->as.class_.name = name;
-  node->as.class_.members = members;
-  node->as.class_.memberCount = memberCount;
-  node->as.class_.endLine = endLine;
+  AstNode *node = astAlloc(NODE_STRUCT, line);
+  node->as.struct_.name = name;
+  node->as.struct_.fields = fields;
+  node->as.struct_.fieldCount = fieldCount;
+  node->as.struct_.endLine = endLine;
+  return node;
+}
+
+static AstNode *implDeclaration(Parser *p) {
+  consume(p, TOKEN_IDENTIFIER, "Expect struct name after 'impl'.");
+  Token name = p->previous;
+  int line = name.line;
+
+  consume(p, TOKEN_LEFT_BRACE, "Expect '{' before impl body.");
+
+  int methodCap = 8, methodCount = 0;
+  FunctionNode **methodBuf =
+      (FunctionNode **)malloc(methodCap * sizeof(FunctionNode *));
+
+  while (!check(p, TOKEN_RIGHT_BRACE) && !is_at_end(p)) {
+    if (methodCount >= methodCap) {
+      methodCap *= 2;
+      methodBuf = (FunctionNode **)realloc(methodBuf,
+                                           methodCap * sizeof(FunctionNode *));
+    }
+
+    if (check(p, TOKEN_VAR)) {
+      error_at_current(p, "Expect method declaration. Fields belong in the "
+                          "'struct' declaration.");
+      advance(p); // 'var'
+      if (check(p, TOKEN_IDENTIFIER)) {
+        advance(p);
+        if (match(p, TOKEN_EQUAL))
+          expression(p);
+        match(p, TOKEN_SEMICOLON);
+      }
+      p->panicMode = false;
+    } else {
+      consume(p, TOKEN_FUN, "Expect 'fun' before method declaration.");
+      consume(p, TOKEN_IDENTIFIER, "Expect method name.");
+      AstNode *method = functionDeclaration(p, /*isMethod=*/true);
+      methodBuf[methodCount++] = &method->as.function;
+    }
+
+    if (p->panicMode) {
+      synchronize(p);
+    }
+  }
+  consume(p, TOKEN_RIGHT_BRACE, "Expect '}' after impl body.");
+  int endLine = p->previous.line;
+
+  FunctionNode **methods = NULL;
+  if (methodCount > 0) {
+    methods =
+        (FunctionNode **)astAllocRaw(methodCount * sizeof(FunctionNode *));
+    memcpy(methods, methodBuf, methodCount * sizeof(FunctionNode *));
+  }
+  free(methodBuf);
+
+  AstNode *node = astAlloc(NODE_IMPL, line);
+  node->as.impl.name = name;
+  node->as.impl.methods = methods;
+  node->as.impl.methodCount = methodCount;
+  node->as.impl.endLine = endLine;
   return node;
 }
 
@@ -1019,8 +1165,10 @@ static AstNode *declaration(Parser *p, bool *isTail) {
   AstNode *node = NULL;
   *isTail = false;
 
-  if (match(p, TOKEN_CLASS)) {
-    node = classDeclaration(p);
+  if (match(p, TOKEN_STRUCT)) {
+    node = structDeclaration(p);
+  } else if (match(p, TOKEN_IMPL)) {
+    node = implDeclaration(p);
   } else if (match(p, TOKEN_FUN)) {
     node = functionDeclaration(p, /*isMethod=*/false);
   } else if (match(p, TOKEN_VAR)) {

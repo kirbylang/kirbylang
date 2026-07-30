@@ -1,5 +1,0 @@
-class Class {}
-
-var instance = Class();
-
-print instanceOf(instance, 123);

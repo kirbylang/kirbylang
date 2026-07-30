@@ -1,0 +1,24 @@
+struct Point {
+    var x;
+    var y;
+}
+
+impl Point {
+    fun new(x, y) {
+        var point = Point();
+
+        point.x = x;
+        point.y = y;
+
+        return point;
+    }
+
+    fun origin() {
+        return Point.new(0, 0);
+    }
+}
+
+var point = Point.origin();
+
+print point.x;
+print point.y;

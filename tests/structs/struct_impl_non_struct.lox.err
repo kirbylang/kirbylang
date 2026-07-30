@@ -1,0 +1,17 @@
+== <script> ==
+0000    1 OP_NIL
+0001    | OP_RETURN
+== hello ==
+0000    4 OP_NIL
+0001    | OP_RETURN
+== <script> ==
+0000    1 OP_CONSTANT         1 '123.000000'
+0002    | OP_DEFINE_GLOBAL    0 'value'
+0004    3 OP_GET_GLOBAL       2 'value'
+0006    4 OP_CLOSURE          4 <fn hello>
+0008    | OP_METHOD           3 'hello'
+0010    5 OP_POP
+0011    6 OP_NIL
+0012    | OP_RETURN
+Only structs can have implementations
+[line 4] in script

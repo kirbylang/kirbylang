@@ -19,7 +19,7 @@ typedef enum {
   NODE_CALL,
   NODE_GET,
   NODE_SET,
-  NODE_THIS,
+  NODE_SELF,
   NODE_INDEX_GET,
   NODE_INDEX_SET,
   NODE_EXPR_STMT,
@@ -31,7 +31,9 @@ typedef enum {
   NODE_FOR,
   NODE_RETURN,
   NODE_FUNCTION,
-  NODE_CLASS,
+  NODE_STRUCT,
+  NODE_STRUCT_INIT,
+  NODE_IMPL,
   NODE_ARRAY,
   NODE_BREAK,
   // Sentinel
@@ -89,7 +91,7 @@ typedef struct {
 
 typedef struct {
   Token keyword;
-} ThisNode;
+} SelfNode;
 
 typedef struct {
   AstNode *callee;
@@ -176,28 +178,35 @@ typedef struct {
   AstNode *exprBody; // non-NULL for `fun name(...) = expr;` bodies
   int bodyEndLine;
   bool isMethod;
+  bool hasSelf;
   bool isLambda;
 } FunctionNode;
 
-typedef enum { CLASS_MEMBER_FIELD, CLASS_MEMBER_METHOD } ClassMemberKind;
-
 typedef struct {
-  ClassMemberKind kind;
-  union {
-    FunctionNode *method;
-    VarDeclNode field;
-  } as;
-} ClassMember;
+  Token name;
+  VarDeclNode *fields;
+  int fieldCount;
+  int endLine;
+} StructNode;
 
 typedef struct {
   Token name;
-  ClassMember *members;
-  int memberCount;
-  /**
-   * line of the closing '}' of the class body
-   */
+  AstNode *value;
+} StructInitFieldNode;
+
+typedef struct {
+  Token name;
+  StructInitFieldNode *fields;
+  int fieldCount;
   int endLine;
-} ClassNode;
+} StructInitNode;
+
+typedef struct {
+  Token name;
+  FunctionNode **methods;
+  int methodCount;
+  int endLine;
+} ImplNode;
 
 /**
  * Called in the parser's arrayLiteral function
@@ -241,7 +250,7 @@ struct AstNode {
     SetNode set;
     IndexGetNode indexGet;
     IndexSetNode indexSet;
-    ThisNode this_;
+    SelfNode self_;
     ExprStmtNode exprStmt;
     PrintNode print;
     VarDeclNode varDecl;
@@ -251,7 +260,9 @@ struct AstNode {
     ForNode for_;
     ReturnNode return_;
     FunctionNode function;
-    ClassNode class_;
+    StructNode struct_;
+    StructInitNode structInit;
+    ImplNode impl;
     ArrayNode array;
     BreakNode break_;
   } as;

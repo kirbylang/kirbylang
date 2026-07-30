@@ -1,0 +1,13 @@
+fun makePoint(x) {
+    struct Point {
+        var x;
+        var y = 0;
+    }
+
+    return Point { x: x };
+}
+
+var point = makePoint(7);
+
+print point.x;
+print point.y;

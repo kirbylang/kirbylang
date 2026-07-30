@@ -1,0 +1,6 @@
+struct Struct {
+}
+
+var instance = Struct {};
+
+instance.value = 123;

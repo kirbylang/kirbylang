@@ -1,0 +1,19 @@
+== <script> ==
+0000    1 OP_NIL
+0001    | OP_RETURN
+== <script> ==
+0000    1 OP_STRUCT           0 'Greeter'
+0002    | OP_DEFINE_GLOBAL    0 'Greeter'
+0004    | OP_GET_GLOBAL       1 'Greeter'
+0006    | OP_POP
+0007    3 OP_GET_GLOBAL       3 'Greeter'
+0009    | OP_CALL             0
+0011    | OP_DEFINE_GLOBAL    2 'greeter'
+0013    5 OP_GET_GLOBAL       4 'greeter'
+0015    | OP_CONSTANT         6 'World'
+0017    | OP_INVOKE        (1 args)    5 'greet'
+0020    | OP_POP
+0021    6 OP_NIL
+0022    | OP_RETURN
+Undefined property 'greet'.
+[line 5] in script

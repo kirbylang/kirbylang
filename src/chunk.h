@@ -36,7 +36,8 @@ typedef enum {
   OP_LESS,
   OP_CALL,
   OP_CLOSURE,
-  OP_CLASS,
+  OP_STRUCT,
+  OP_STRUCT_INIT, // The struct's { field: value, } intializer
   OP_FIELD,
   OP_GET_PROPERTY,
   OP_SET_PROPERTY,

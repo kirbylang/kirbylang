@@ -1,0 +1,17 @@
+struct Struct {
+    var value;
+}
+
+impl Struct {
+    fun new(value) {
+        var instance = Struct {};
+
+        instance.value = value;
+
+        return instance;
+    }
+}
+
+var instance = Struct.new(123);
+
+print instance.value;

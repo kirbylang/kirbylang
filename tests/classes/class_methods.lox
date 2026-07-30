@@ -1,9 +1,0 @@
-class Class {
-    hello() {}
-    world() {}
-}
-
-var instance = Class();
-
-print instance.hello;
-print instance.world;

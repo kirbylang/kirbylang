@@ -1,0 +1,17 @@
+struct Struct {}
+
+impl Struct {
+    fun printSelf(self) {
+        fun innerClosure() {
+            print self;
+        }
+
+        return innerClosure;
+    }
+}
+
+var instance = Struct {};
+
+var closure = instance.printSelf();
+
+closure();

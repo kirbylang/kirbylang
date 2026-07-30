@@ -347,7 +347,7 @@ static Value isNilNative(VM *vm, int argCount, Value *args) {
 
 static Value instanceOfNative(VM *vm, int argCount, Value *args) {
   assertArgCount(vm, "instanceOf", 2, argCount);
-  assertArgIsClass(vm, "instanceOf", args, 1);
+  assertArgIsStruct(vm, "instanceOf", args, 1);
 
   Value value = args[0];
 
@@ -355,12 +355,12 @@ static Value instanceOfNative(VM *vm, int argCount, Value *args) {
     return BOOL_VAL(false);
   }
 
-  Value klass = args[1];
+  Value struct1 = args[1];
 
   ObjInstance *instance = AS_INSTANCE(value);
-  ObjClass *klass2 = AS_CLASS(klass);
+  ObjStruct *struct2 = AS_STRUCT(struct1);
 
-  return BOOL_VAL(instance->klass == klass2);
+  return BOOL_VAL(instance->struct_ == struct2);
 }
 
 static Value arrPushNative(VM *vm, int argCount, Value *args) {

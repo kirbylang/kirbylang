@@ -1,5 +1,5 @@
-class Class {}
+struct Struct {}
 
 fun test() {}
 
-print instanceOf(test, Class);
+print instanceOf(test, Struct);
