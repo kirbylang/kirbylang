@@ -8,7 +8,7 @@
       "name": "(lldb) Launch",
       "type": "cppdbg",
       "request": "launch",
-      "program": "${workspaceFolder}/build/kirby",
+      "program": "${workspaceFolder}/build/krb",
       "args": [
         "${workspaceFolder}/tests/native_functions/native_fn_exit_call_no_args_passed.krb"
       ],

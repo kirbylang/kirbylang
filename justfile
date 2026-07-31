@@ -1,4 +1,4 @@
-cli := "build/kirby"
+cli := "build/krb"
 docker_image := "kirby"
 
 default:
@@ -82,4 +82,4 @@ examples file *args:
     ./scripts/run-example.sh {{ file }} {{ args }}
 
 man:
-    man ./docs/man/man1/kirby.1
+    man ./docs/man/man1/krb.1

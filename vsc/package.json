@@ -47,7 +47,7 @@
       "properties": {
         "kirby.executablePath": {
           "type": "string",
-          "default": "./build/kirby",
+          "default": "./build/krb",
           "description": "Path to the kirby executable. A relative path is resolved against the workspace folder."
         }
       }

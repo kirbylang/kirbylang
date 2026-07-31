@@ -21,7 +21,7 @@ static void runFile(const char *path);
 static void runCode(const char *source);
 
 const char *help_message =
-    "Usage: kirby [-h] [-v] [-r|-f [path]|-c [source]|-l [path]|-p [path]] \n";
+    "Usage: krb [-h] [-v] [-r|-f [path]|-c [source]|-l [path]|-p [path]] \n";
 
 const char *short_options = "hvrfclp";
 static struct option long_options[] = {

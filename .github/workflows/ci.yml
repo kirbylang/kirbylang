@@ -34,8 +34,8 @@ jobs:
       - name: Upload binary as artifact
         uses: actions/upload-artifact@v4
         with:
-          name: kirby
-          path: ./build/kirby
+          name: krb
+          path: ./build/krb
           if-no-files-found: error
           overwrite: true
 
@@ -84,4 +84,4 @@ jobs:
           gh release create "${TAG}" \
             --title "${RELEASE_NAME}" \
             --notes "${NOTES}" \
-            ./release/kirby
+            ./release/krb

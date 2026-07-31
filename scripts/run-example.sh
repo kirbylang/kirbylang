@@ -2,4 +2,4 @@
 
 set -euo pipefail
 
-./build/kirby -f examples/$1.krb -- ${@:2}
+./build/krb -f examples/$1.krb -- ${@:2}

@@ -53,7 +53,7 @@ export function activate(context: vscode.ExtensionContext) {
 
     const configured = vscode.workspace
       .getConfiguration("kirby")
-      .get<string>("executablePath", "./build/kirby");
+      .get<string>("executablePath", "./build/krb");
 
     const executable =
       isAbsolute(configured) || !workspaceFolder

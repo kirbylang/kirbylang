@@ -1,5 +1,5 @@
 if (argc() != 5) {
-  print "Usage: kirby -f examples/cat.krb <file>";
+  print "Usage: krb -f examples/cat.krb <file>";
   exit(1);
 }
 

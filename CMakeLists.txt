@@ -167,17 +167,17 @@ enable_coverage(kirby_core_debug)
 # Main executable
 # -----------------------------------------------------------------------------
 
-add_executable(kirby
+add_executable(krb
     src/main.c
 )
 
-target_link_libraries(kirby
+target_link_libraries(krb
     PRIVATE
         kirby_core
 )
 
-configure_kirby_target(kirby)
-enable_coverage(kirby)
+configure_kirby_target(krb)
+enable_coverage(krb)
 
 # Optional debug flags
 # target_compile_definitions(kirby PRIVATE DEBUG_TRACE_EXECUTION)
