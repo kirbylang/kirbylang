@@ -1,6 +1,6 @@
 Returns if an array is empty or not
 
-```clox
+```kirby
 print arrIsEmpty([]);
 print arrIsEmpty([1, 2, 3]);
 ```

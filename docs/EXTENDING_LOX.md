@@ -7,7 +7,7 @@ These are the documented changes to the language/syntax from the original Lox la
 - Support to escape characters in strings: `\n`, `\r`, `\t`, `\"`, `\\`
 - Function body expressions: `fun sum(a, b) = a + b;`
 - Function implicit returns: `fun sum(a, b) { a + b }`
-- Move all functions in stdlib.lox to native functions
+- Move all functions in stdlib.krb to native functions
   - `is`
   - `isBool`
   - `isNumber`
@@ -29,7 +29,7 @@ These are the documented changes to the language/syntax from the original Lox la
   - [ ] `arrSort(array, fn)`
   - [ ] `arrMap(array, fn)`
   - [ ] `arrJoinToString(array, separator)`
-- A shared library is now generated on build: `libclox.{so,dylib,dll}`
+- A shared library is now generated on build: `libkirby.{so,dylib,dll}`
 - Transition from a single-pass to a multi-pass compiler
   - Introduce `lex` function which produces `TokenStream`
   - Introduce `parse` function which consumes `TokenStream` and produces `AstNode**`

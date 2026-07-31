@@ -1,5 +1,5 @@
-#ifndef clox_parser_h
-#define clox_parser_h
+#ifndef kirby_parser_h
+#define kirby_parser_h
 
 #include <stdbool.h>
 

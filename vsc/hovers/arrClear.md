@@ -1,6 +1,6 @@
 Clears all values from an array.
 
-```clox
+```kirby
 var array = [1, 2, 3];
 
 arrClear(array);

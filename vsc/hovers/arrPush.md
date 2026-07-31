@@ -1,6 +1,6 @@
 Push a value onto the end of an array
 
-```clox
+```kirby
 var array = [];
 
 arrPush(array, "Hello");

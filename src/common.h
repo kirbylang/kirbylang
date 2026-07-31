@@ -1,5 +1,5 @@
-#ifndef clox_common_h
-#define clox_common_h
+#ifndef kirby_common_h
+#define kirby_common_h
 
 #include <stdbool.h>
 #include <stddef.h>

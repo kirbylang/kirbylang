@@ -25,7 +25,7 @@ static char *readFile(const char *path) {
 
 int main(int argc, char *argv[]) {
   const char *source =
-      readFile("/Users/kylee/bench/cproj/tests/arrays/array_empty.lox");
+      readFile("/Users/kylee/bench/cproj/tests/arrays/array_empty.krb");
 
   TokenStream tokens = lex(source);
 

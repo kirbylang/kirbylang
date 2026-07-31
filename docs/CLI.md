@@ -3,34 +3,34 @@
 ## Language Version
 
 ```sh
-clox -v
-clox --version
+kirby -v
+kirby --version
 ```
 
 ## REPL
 
 ```sh
-clox -r
-clox --repl
+kirby -r
+kirby --repl
 ```
 
 ## Run File
 
 ```sh
-clox -f path/to/file.lox
-clox --file path/to/file.lox
+kirby -f path/to/file.krb
+kirby --file path/to/file.krb
 ```
 
 ## Run Code
 
 ```sh
-clox -c 'print "Hello, World!";'
-clox --code 'print "Hello, World!";'
+kirby -c 'print "Hello, World!";'
+kirby --code 'print "Hello, World!";'
 ```
 
 ## Help
 
 ```sh
-clox -h
-clox --help
+kirby -h
+kirby --help
 ```

@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.22)
 
-project(clox LANGUAGES C)
+project(kirby LANGUAGES C)
 
 enable_testing()
 
@@ -45,7 +45,7 @@ add_custom_command(
 # Shared source list
 # -----------------------------------------------------------------------------
 
-set(CLOX_SOURCES
+set(KIRBY_SOURCES
     src/asserts.c
     src/ast.c
     src/chunk.c
@@ -70,7 +70,7 @@ set(CLOX_SOURCES
 # Shared configuration helpers
 # -----------------------------------------------------------------------------
 
-function(configure_clox_target TARGET_NAME)
+function(configure_kirby_target TARGET_NAME)
 
     target_include_directories(${TARGET_NAME}
         PUBLIC
@@ -117,88 +117,88 @@ endfunction()
 # Main runtime library (static)
 # -----------------------------------------------------------------------------
 
-add_library(clox_core STATIC
-    ${CLOX_SOURCES}
+add_library(kirby_core STATIC
+    ${KIRBY_SOURCES}
 )
 
-target_compile_definitions(clox_core
+target_compile_definitions(kirby_core
     PRIVATE
         # DEBUG_TRACE_EXECUTION
 )
 
 
-configure_clox_target(clox_core)
-enable_coverage(clox_core)
+configure_kirby_target(kirby_core)
+enable_coverage(kirby_core)
 
 # -----------------------------------------------------------------------------
 # Shared runtime library
 # -----------------------------------------------------------------------------
 
-add_library(cloxlib SHARED
-    ${CLOX_SOURCES}
+add_library(kirbylib SHARED
+    ${KIRBY_SOURCES}
 )
 
-set_target_properties(cloxlib PROPERTIES
-    OUTPUT_NAME clox
+set_target_properties(kirbylib PROPERTIES
+    OUTPUT_NAME kirby
 )
 
-configure_clox_target(cloxlib)
-enable_coverage(cloxlib)
+configure_kirby_target(kirbylib)
+enable_coverage(kirbylib)
 
 # -----------------------------------------------------------------------------
 # Debug runtime library
 # -----------------------------------------------------------------------------
 
-add_library(clox_core_debug STATIC
-    ${CLOX_SOURCES}
+add_library(kirby_core_debug STATIC
+    ${KIRBY_SOURCES}
 )
 
-target_compile_definitions(clox_core_debug
+target_compile_definitions(kirby_core_debug
     PRIVATE
         DEBUG_PRINT_CODE
         DEBUG_STRESS_GC
         # DEBUG_TRACE_EXECUTION
 )
 
-configure_clox_target(clox_core_debug)
-enable_coverage(clox_core_debug)
+configure_kirby_target(kirby_core_debug)
+enable_coverage(kirby_core_debug)
 
 # -----------------------------------------------------------------------------
 # Main executable
 # -----------------------------------------------------------------------------
 
-add_executable(clox
+add_executable(kirby
     src/main.c
 )
 
-target_link_libraries(clox
+target_link_libraries(kirby
     PRIVATE
-        clox_core
+        kirby_core
 )
 
-configure_clox_target(clox)
-enable_coverage(clox)
+configure_kirby_target(kirby)
+enable_coverage(kirby)
 
 # Optional debug flags
-# target_compile_definitions(clox PRIVATE DEBUG_TRACE_EXECUTION)
-# target_compile_definitions(clox PRIVATE DEBUG_STRESS_GC)
-# target_compile_definitions(clox PRIVATE DEBUG_LOG_GC)
+# target_compile_definitions(kirby PRIVATE DEBUG_TRACE_EXECUTION)
+# target_compile_definitions(kirby PRIVATE DEBUG_STRESS_GC)
+# target_compile_definitions(kirby PRIVATE DEBUG_LOG_GC)
 
 # -----------------------------------------------------------------------------
 # Debug executable
 # -----------------------------------------------------------------------------
 
-add_executable(clox-test
+add_executable(kirby-test
     src/main.c
 )
 
-target_link_libraries(clox-test
+target_link_libraries(kirby-test
     PRIVATE
-        clox_core_debug
+        kirby_core_debug
 )
 
-configure_clox_target(clox-test)
-enable_coverage(clox-test)
+configure_kirby_target(kirby-test)
+enable_coverage(kirby-test)
 
 # -----------------------------------------------------------------------------
 # Unit tests
@@ -206,90 +206,90 @@ enable_coverage(clox-test)
 
 if(BUILD_TESTS)
 
-    add_executable(clox-version-unit-test
+    add_executable(kirby-version-unit-test
         unit/version.c
     )
 
-    target_link_libraries(clox-version-unit-test
+    target_link_libraries(kirby-version-unit-test
         PRIVATE
-            clox_core_debug
+            kirby_core_debug
     )
 
-    configure_clox_target(clox-version-unit-test)
-    enable_coverage(clox-version-unit-test)
+    configure_kirby_target(kirby-version-unit-test)
+    enable_coverage(kirby-version-unit-test)
 
     add_test(
-        NAME clox-version-unit-test
-        COMMAND clox-version-unit-test
+        NAME kirby-version-unit-test
+        COMMAND kirby-version-unit-test
     )
 
-    add_executable(clox-token-unit-test
+    add_executable(kirby-token-unit-test
         unit/token.c
         src/token.c
     )
 
-    target_link_libraries(clox-token-unit-test
+    target_link_libraries(kirby-token-unit-test
         PRIVATE
-            clox_core_debug
+            kirby_core_debug
     )
 
-    configure_clox_target(clox-token-unit-test)
-    enable_coverage(clox-token-unit-test)
+    configure_kirby_target(kirby-token-unit-test)
+    enable_coverage(kirby-token-unit-test)
 
     add_test(
-        NAME clox-token-unit-test
-        COMMAND clox-token-unit-test
+        NAME kirby-token-unit-test
+        COMMAND kirby-token-unit-test
     )
 
-    add_executable(clox-value-unit-test
+    add_executable(kirby-value-unit-test
         unit/value.c
     )
 
-    target_link_libraries(clox-value-unit-test
+    target_link_libraries(kirby-value-unit-test
         PRIVATE
-            clox_core_debug
+            kirby_core_debug
     )
 
-    configure_clox_target(clox-value-unit-test)
-    enable_coverage(clox-value-unit-test)
+    configure_kirby_target(kirby-value-unit-test)
+    enable_coverage(kirby-value-unit-test)
 
     add_test(
-        NAME clox-value-unit-test
-        COMMAND clox-value-unit-test
+        NAME kirby-value-unit-test
+        COMMAND kirby-value-unit-test
     )
 
-    add_executable(clox-parser-unit-test
+    add_executable(kirby-parser-unit-test
         unit/parser.c
     )
 
-    target_link_libraries(clox-parser-unit-test
+    target_link_libraries(kirby-parser-unit-test
         PRIVATE
-            clox_core_debug
+            kirby_core_debug
     )
 
-    configure_clox_target(clox-parser-unit-test)
-    enable_coverage(clox-parser-unit-test)
+    configure_kirby_target(kirby-parser-unit-test)
+    enable_coverage(kirby-parser-unit-test)
 
     add_test(
-        NAME clox-parser-unit-test
-        COMMAND clox-parser-unit-test
+        NAME kirby-parser-unit-test
+        COMMAND kirby-parser-unit-test
     )
 
-    add_executable(clox-lexer-unit-test
+    add_executable(kirby-lexer-unit-test
         unit/lexer.c
     )
 
-    target_link_libraries(clox-lexer-unit-test
+    target_link_libraries(kirby-lexer-unit-test
         PRIVATE
-            clox_core_debug
+            kirby_core_debug
     )
 
-    configure_clox_target(clox-lexer-unit-test)
-    enable_coverage(clox-lexer-unit-test)
+    configure_kirby_target(kirby-lexer-unit-test)
+    enable_coverage(kirby-lexer-unit-test)
 
     add_test(
-        NAME clox-lexer-unit-test
-        COMMAND clox-lexer-unit-test
+        NAME kirby-lexer-unit-test
+        COMMAND kirby-lexer-unit-test
     )
 
 endif()

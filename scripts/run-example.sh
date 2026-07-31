@@ -2,4 +2,4 @@
 
 set -euo pipefail
 
-./build/clox -f examples/$1.lox -- ${@:2}
+./build/kirby -f examples/$1.krb -- ${@:2}

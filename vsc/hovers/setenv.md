@@ -1,6 +1,6 @@
 Set an environment variable to a string value
 
-```clox
+```kirby
 setenv("NAME", "WORLD");
 
 print "Hello " + getenv("NAME");

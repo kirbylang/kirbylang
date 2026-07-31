@@ -1,5 +1,5 @@
-#ifndef clox_object_h
-#define clox_object_h
+#ifndef kirby_object_h
+#define kirby_object_h
 
 #include "chunk.h"
 #include "common.h"

@@ -34,8 +34,8 @@ jobs:
       - name: Upload binary as artifact
         uses: actions/upload-artifact@v4
         with:
-          name: clox
-          path: ./build/clox
+          name: kirby
+          path: ./build/kirby
           if-no-files-found: error
           overwrite: true
 
@@ -70,7 +70,7 @@ jobs:
       - name: Download binary artifact from verify job
         uses: actions/download-artifact@v4
         with:
-          name: clox
+          name: kirby
           path: ./release
 
       - name: Create GitHub Release
@@ -84,4 +84,4 @@ jobs:
           gh release create "${TAG}" \
             --title "${RELEASE_NAME}" \
             --notes "${NOTES}" \
-            ./release/clox
+            ./release/kirby

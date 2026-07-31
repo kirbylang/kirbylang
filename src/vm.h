@@ -1,5 +1,5 @@
-#ifndef clox_vm_h
-#define clox_vm_h
+#ifndef kirby_vm_h
+#define kirby_vm_h
 
 #include "chunk.h"
 #include "hashtable.h"

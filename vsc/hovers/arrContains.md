@@ -1,6 +1,6 @@
 Returns if an array contains a value.
 
-```clox
+```kirby
 var array = [1, 2, 3];
 
 arrRemove(array, 0);

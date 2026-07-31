@@ -1,5 +1,5 @@
 Get an environment variable's value
 
-```clox
+```kirby
 print getenv("PATH");
 ```

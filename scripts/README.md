@@ -66,9 +66,9 @@ Run `./scripts/clean.sh` or `just clean` to remove build artifacts.
 ## Increment Language Version
 
 - Updates [`VERSION.txt`](../VERSION.txt)
-- Updates [`tests/native_functions/native_fn_version_call.lox.out`](../tests/native_functions/native_fn_version_call.lox.out) test snapshot
+- Updates [`tests/native_functions/native_fn_version_call.krb.out`](../tests/native_functions/native_fn_version_call.krb.out) test snapshot
 - Creates `vVERSION` tag e.g. `v0.1.0`, `v2.5.0`
-- Commits updated `VERSION.txt` and `tests/native_functions/native_fn_version_call.lox.out`
+- Commits updated `VERSION.txt` and `tests/native_functions/native_fn_version_call.krb.out`
 - Push tag and commits
 
 ```shell

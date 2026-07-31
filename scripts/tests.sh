@@ -4,7 +4,7 @@ set -euo pipefail
 
 shopt -s globstar
 
-BIN="${BIN:-./build/clox-test}"
+BIN="${BIN:-./build/kirby-test}"
 DIFF="diff -u"
 
 UPDATE=0
@@ -110,26 +110,26 @@ run_exit_test() {
     fi
 }
 
-for file_in in ./tests/**/*.lox; do
+for file_in in ./tests/**/*.krb; do
     rel_path="${file_in#./tests/}"
 
-    base="${rel_path%.lox}"
+    base="${rel_path%.krb}"
 
     should_run "$base" || continue
 
     SUITES=$((SUITES + 1))
 
-    expected_out="./tests/$base.lox.out"
-    expected_err="./tests/$base.lox.err"
-    expected_exit="./tests/$base.lox.exit"
-    argv_file="./tests/$base.lox.argv"
-    env_file="./tests/$base.lox.env"
-    input_file="./tests/$base.lox.in"
+    expected_out="./tests/$base.krb.out"
+    expected_err="./tests/$base.krb.err"
+    expected_exit="./tests/$base.krb.exit"
+    argv_file="./tests/$base.krb.argv"
+    env_file="./tests/$base.krb.env"
+    input_file="./tests/$base.krb.in"
 
-    actual_out="$TMP_DIR/$base.lox.out"
+    actual_out="$TMP_DIR/$base.krb.out"
     mkdir -p "$(dirname "$actual_out")"
 
-    actual_err="$TMP_DIR/$base.lox.err"
+    actual_err="$TMP_DIR/$base.krb.err"
     mkdir -p "$(dirname "$actual_err")"
 
     extra_args=()

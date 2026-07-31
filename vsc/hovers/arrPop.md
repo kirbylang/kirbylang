@@ -1,6 +1,6 @@
 Pop a value onto the end of an array and return it
 
-```clox
+```kirby
 var array = ["Hello", "World"];
 
 var poppedValue = arrPop(array);

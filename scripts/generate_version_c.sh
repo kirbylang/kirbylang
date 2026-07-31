@@ -20,9 +20,9 @@ VERSION=$(tr -d '\n' < "$VERSION_FILE")
     echo "// Generated from VERSION.txt"
     echo "// $NOW"
     echo
-    echo "// clox $VERSION"
+    echo "// kirby $VERSION"
     echo
 
-    printf 'const char CLOX_VERSION[] = "%s";\n' "$VERSION"
-    printf 'const unsigned int CLOX_VERSION_len = %d;\n' "${#VERSION}"
+    printf 'const char KIRBY_VERSION[] = "%s";\n' "$VERSION"
+    printf 'const unsigned int KIRBY_VERSION_len = %d;\n' "${#VERSION}"
 } > "$OUT"

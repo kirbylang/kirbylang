@@ -1,5 +1,5 @@
 Access the arguments passed to the program by index
 
-```clox
+```kirby
 print argv(1);
 ```

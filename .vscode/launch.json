@@ -8,9 +8,9 @@
       "name": "(lldb) Launch",
       "type": "cppdbg",
       "request": "launch",
-      "program": "${workspaceFolder}/build/clox",
+      "program": "${workspaceFolder}/build/kirby",
       "args": [
-        "${workspaceFolder}/tests/native_functions/native_fn_exit_call_no_args_passed.lox"
+        "${workspaceFolder}/tests/native_functions/native_fn_exit_call_no_args_passed.krb"
       ],
       "stopAtEntry": false,
       "cwd": "${fileDirname}",

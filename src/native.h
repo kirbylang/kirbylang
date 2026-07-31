@@ -1,5 +1,5 @@
-#ifndef clox_native_h
-#define clox_native_h
+#ifndef kirby_native_h
+#define kirby_native_h
 
 #include "hashtable.h"
 #include "object.h"
