@@ -26,7 +26,6 @@ for (var i = 1; i <= limit; i = i + 1) {
 
 - [CLI](./docs/CLI.md)
 - [Development](./docs/DEVELOPMENT.md)
-- [Goals](./docs/GOALSV1.md)
 - [Tests](./tests/README.md)
 - [Scripts](./scripts/README.md)
 - [Important Files](./docs/DEVELOPMENT.md#important-files)
