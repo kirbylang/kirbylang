@@ -4,7 +4,9 @@
 
 An aspiring embeddable scripting language.
 
-```
+```kirby
+#!/usr/bin/env krb -f
+
 // Function with an expression body
 fun fizzbuzz(n) =
     if (n % 5 == 0 and n % 3 == 0) "FizzBuzz"
