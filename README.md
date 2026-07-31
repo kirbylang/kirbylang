@@ -2,7 +2,7 @@
 
 [![Verify](https://github.com/kirbylang/kirbylang/actions/workflows/ci.yml/badge.svg)](https://github.com/kirbylang/kirbylang/actions/workflows/ci.yml)
 
-Yet another kirby implementation.
+An aspiring embeddable scripting language.
 
 ```
 // Function with an expression body
