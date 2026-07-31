@@ -2,6 +2,7 @@
   "scopeName": "source.krb",
   "patterns": [
     { "include": "#comments" },
+    { "include": "#shebang" },
     { "include": "#strings" },
     { "include": "#numbers" },
     { "include": "#struct-declaration" },
@@ -21,6 +22,10 @@
     "comments": {
       "name": "comment.line.double-slash.krb",
       "match": "//.*$"
+    },
+    "shebang": {
+      "name": "comment.line.double-slash.krb",
+      "match": "#!.*$"
     },
     "strings": {
       "name": "string.quoted.double.krb",
