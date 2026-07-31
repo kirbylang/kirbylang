@@ -1,7 +1,0 @@
-// Read in text from stdin. Reads until EOF.
-//
-// cat path/to/file.txt | kirby stdin.krb
-
-var text = stdin();
-
-print text;

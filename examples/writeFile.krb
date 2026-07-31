@@ -1,3 +1,5 @@
+#!/usr/bin/env krb -f
+
 var path = prompt("File: ");
 var text = prompt("Text: ");
 

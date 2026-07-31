@@ -1,3 +1,5 @@
+#!/usr/bin/env krb -f
+
 struct StringBuilder {
     var string = "";
 }

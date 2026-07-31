@@ -1,3 +1,5 @@
+#!/usr/bin/env krb -f
+
 var name = argv(4);
 
 if (name == nil) {

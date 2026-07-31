@@ -1,3 +1,5 @@
+#!/usr/bin/env krb -f
+
 fun fib(n) {
   if (n < 2) return n;
 

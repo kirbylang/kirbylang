@@ -1,3 +1,5 @@
+#!/usr/bin/env krb -f
+
 var name = prompt("What's your name? ");
 
 print "Hello " + name;

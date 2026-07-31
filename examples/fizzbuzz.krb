@@ -1,3 +1,5 @@
+#!/usr/bin/env krb -f
+
 var limit = parseNumber(prompt("limit: "));
 
 fun fizzbuzz(n) =

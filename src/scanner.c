@@ -325,6 +325,14 @@ static void skipWhitespace(Scanner *scanner) {
       scanner->line++;
       advance(scanner);
       break;
+    case '#':
+      if (peekNext(scanner) == '!') {
+        while (peek(scanner) != '\n' && !isAtEnd(scanner))
+          advance(scanner);
+      } else {
+        return;
+      }
+      break;
     case '/':
       if (peekNext(scanner) == '/') {
         while (peek(scanner) != '\n' && !isAtEnd(scanner))
