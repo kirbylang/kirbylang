@@ -26,7 +26,7 @@
     "grammars": [
       {
         "language": "kirby",
-        "scopeName": "source.kirby",
+        "scopeName": "source.krb",
         "path": "./syntaxes/kirby.tmLanguage.json"
       }
     ],

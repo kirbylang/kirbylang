@@ -1,5 +1,5 @@
 {
-  "scopeName": "source.kirby",
+  "scopeName": "source.krb",
   "patterns": [
     { "include": "#comments" },
     { "include": "#strings" },
@@ -19,132 +19,132 @@
   ],
   "repository": {
     "comments": {
-      "name": "comment.line.double-slash.kirby",
+      "name": "comment.line.double-slash.krb",
       "match": "//.*$"
     },
     "strings": {
-      "name": "string.quoted.double.kirby",
+      "name": "string.quoted.double.krb",
       "begin": "\"",
       "end": "\"",
       "patterns": [
         {
-          "name": "constant.character.escape.kirby",
+          "name": "constant.character.escape.krb",
           "match": "\\\\[nrt\"\\\\]"
         },
         {
-          "name": "invalid.illegal.unknown-escape.kirby",
+          "name": "invalid.illegal.unknown-escape.krb",
           "match": "\\\\."
         }
       ]
     },
     "numbers": {
-      "name": "constant.numeric.kirby",
+      "name": "constant.numeric.krb",
       "match": "\\b\\d+(\\.\\d+)?\\b"
     },
     "struct-declaration": {
       "match": "\\b(struct)\\s+([A-Za-z_][A-Za-z0-9_]*)",
       "captures": {
-        "1": { "name": "keyword.declaration.struct.kirby" },
-        "2": { "name": "entity.name.type.struct.kirby" }
+        "1": { "name": "keyword.declaration.struct.krb" },
+        "2": { "name": "entity.name.type.struct.krb" }
       }
     },
     "impl-declaration": {
       "match": "\\b(impl)\\s+([A-Za-z_][A-Za-z0-9_]*)",
       "captures": {
-        "1": { "name": "keyword.declaration.impl.kirby" },
-        "2": { "name": "entity.name.type.struct.kirby" }
+        "1": { "name": "keyword.declaration.impl.krb" },
+        "2": { "name": "entity.name.type.struct.krb" }
       }
     },
     "function-declaration": {
       "match": "\\b(fun)\\s+([A-Za-z_][A-Za-z0-9_]*)",
       "captures": {
-        "1": { "name": "keyword.declaration.function.kirby" },
-        "2": { "name": "entity.name.function.kirby" }
+        "1": { "name": "keyword.declaration.function.krb" },
+        "2": { "name": "entity.name.function.krb" }
       }
     },
     "keywords": {
       "patterns": [
         {
-          "name": "keyword.control.kirby",
+          "name": "keyword.control.krb",
           "match": "\\b(if|else|for|while|return|break)\\b"
         },
         {
-          "name": "keyword.declaration.kirby",
+          "name": "keyword.declaration.krb",
           "match": "\\b(var|fun|struct|impl)\\b"
         },
         {
-          "name": "keyword.operator.logical.kirby",
+          "name": "keyword.operator.logical.krb",
           "match": "\\b(and|or)\\b"
         },
         {
-          "name": "keyword.other.print.kirby",
+          "name": "keyword.other.print.krb",
           "match": "\\bprint\\b"
         },
         {
-          "name": "variable.language.self.kirby",
+          "name": "variable.language.self.krb",
           "match": "\\bself\\b"
         }
       ]
     },
     "constants": {
-      "name": "constant.language.kirby",
+      "name": "constant.language.krb",
       "match": "\\b(true|false|nil)\\b"
     },
     "natives": {
       "patterns": [
         {
-          "name": "entity.name.function.native.kirby",
+          "name": "entity.name.function.native.krb",
           "match": "\\b(clock|len|argv|argc|typeof|rand|rand01|randBetween|ceil|readFileToString|writeStringToFile|fileExists|getenv|setenv|__version__|exit|instanceOf|prompt|stdin|parseNumber|numberToString|arrPush|arrPop|arrInsert|arrRemove|arrClear|arrContains|arrCopy|arrEqual|arrIsEmpty|arrSlice|arrConcat|arrReverse)\\b"
         },
         {
-          "name": "entity.name.function.native.kirby",
+          "name": "entity.name.function.native.krb",
           "match": "\\b(is|isNumber|isString|isNil|isFunction|isBool|strIsEmpty)\\b"
         }
       ]
     },
     "struct-initializer": {
-      "name": "entity.name.type.struct.kirby",
+      "name": "entity.name.type.struct.krb",
       "match": "\\b[A-Za-z_][A-Za-z0-9_]*\\b(?=\\s*\\{)"
     },
     "field-name": {
       "match": "\\b([A-Za-z_][A-Za-z0-9_]*)\\s*(:)",
       "captures": {
-        "1": { "name": "variable.other.property.kirby" },
-        "2": { "name": "punctuation.separator.key-value.kirby" }
+        "1": { "name": "variable.other.property.krb" },
+        "2": { "name": "punctuation.separator.key-value.krb" }
       }
     },
     "method-call": {
-      "name": "entity.name.function.method.kirby",
+      "name": "entity.name.function.method.krb",
       "match": "(?<=[A-Za-z_][A-Za-z0-9_]*\\s*\\.\\s*)\\b[A-Za-z_][A-Za-z0-9_]*\\b(?=\\s*\\()"
     },
     "property": {
-      "name": "variable.name.property.kirby",
+      "name": "variable.name.property.krb",
       "match": "(?<=[A-Za-z_][A-Za-z0-9_]*\\s*\\.\\s*)\\b[A-Za-z_][A-Za-z0-9_]*\\b(?!\\s*\\()"
     },
     "function-call": {
-      "name": "entity.name.function.kirby",
+      "name": "entity.name.function.krb",
       "match": "\\b[A-Za-z_][A-Za-z0-9_]*\\b(?=\\s*\\()"
     },
     "operators": {
       "patterns": [
         {
-          "name": "keyword.operator.comparison.kirby",
+          "name": "keyword.operator.comparison.krb",
           "match": "(==|!=|<=|>=|<|>)"
         },
         {
-          "name": "keyword.operator.logical.kirby",
+          "name": "keyword.operator.logical.krb",
           "match": "(&&|\\|\\||!)"
         },
         {
-          "name": "keyword.operator.nullish.kirby",
+          "name": "keyword.operator.nullish.krb",
           "match": "\\?\\?"
         },
         {
-          "name": "keyword.operator.assignment.kirby",
+          "name": "keyword.operator.assignment.krb",
           "match": "="
         },
         {
-          "name": "keyword.operator.arithmetic.kirby",
+          "name": "keyword.operator.arithmetic.krb",
           "match": "(\\+|-|\\*|/|%)"
         }
       ]
