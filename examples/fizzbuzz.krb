@@ -1,12 +1,12 @@
 #!/usr/bin/env krb -f
 
-var limit = parseNumber(prompt("limit: "));
-
 fun fizzbuzz(n) =
     if (n % 5 == 0 and n % 3 == 0) "FizzBuzz"
     else if (n % 3 == 0) "Fizz"
     else if (n % 5 == 0) "Buzz"
     else n;
+
+var limit = parseNumber(prompt("limit: "));
 
 for (var i = 1; i <= limit; i = i + 1) {
     print fizzbuzz(i);
