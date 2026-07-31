@@ -1,5 +1,5 @@
-#ifndef clox_ast_h
-#define clox_ast_h
+#ifndef kirby_ast_h
+#define kirby_ast_h
 #include <stdlib.h>
 
 #include "strbuf.h"

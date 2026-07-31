@@ -1,5 +1,5 @@
 The number of arguments passed to the program
 
-```clox
+```kirby
 print argc();
 ```

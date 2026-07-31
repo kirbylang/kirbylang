@@ -21,7 +21,7 @@ static void runFile(const char *path);
 static void runCode(const char *source);
 
 const char *help_message =
-    "Usage: clox [-h] [-v] [-r|-f [path]|-c [source]|-l [path]|-p [path]] \n";
+    "Usage: kirby [-h] [-v] [-r|-f [path]|-c [source]|-l [path]|-p [path]] \n";
 
 const char *short_options = "hvrfclp";
 static struct option long_options[] = {
@@ -49,18 +49,18 @@ int main(int argc, char *argv[]) {
       return 0;
 
     case 'v':
-      printf("%s\n", CLOX_VERSION);
+      printf("%s\n", KIRBY_VERSION);
       return 0;
     case 'r':
       initVM(saved_argc, saved_argv);
-      runFile("stdlib/stdlib.lox");
+      runFile("stdlib/stdlib.krb");
       repl();
       freeVM();
       free(saved_argv);
       return 0;
     case 'f':
       initVM(saved_argc, saved_argv);
-      runFile("stdlib/stdlib.lox");
+      runFile("stdlib/stdlib.krb");
       runFile(argv[optind]);
       freeVM();
       free(saved_argv);
@@ -108,7 +108,7 @@ int main(int argc, char *argv[]) {
     }
     case 'c':
       initVM(saved_argc, saved_argv);
-      runFile("stdlib/stdlib.lox");
+      runFile("stdlib/stdlib.krb");
       char *source = argv[optind];
       runCode(source);
       freeVM();
@@ -123,7 +123,7 @@ int main(int argc, char *argv[]) {
 
 static void repl(void) {
   fprintf(stderr, "========================================\n");
-  fprintf(stderr, "REPL %30s clox\n\n", CLOX_VERSION);
+  fprintf(stderr, "REPL %30s kirby\n\n", KIRBY_VERSION);
   fprintf(stderr, "Enter code or type 'exit' to quit.\n\n");
   for (;;) {
     char *line = readline("> ");

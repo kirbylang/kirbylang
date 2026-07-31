@@ -89,7 +89,7 @@ static Value versionNative(VM *vm, int argCount, Value *args) {
 
   assertArgCount(vm, "__version__", 0, argCount);
 
-  return OBJ_VAL(copyString(CLOX_VERSION, CLOX_VERSION_len));
+  return OBJ_VAL(copyString(KIRBY_VERSION, KIRBY_VERSION_len));
 }
 
 static Value exitNative(VM *vm, int argCount, Value *args) {
@@ -735,9 +735,9 @@ static Value argvNative(VM *vm, int argCount, Value *args) {
   }
 
   const char *c_arg = vm->argv[idx];
-  ObjString *cloxStr = copyString(c_arg, (int)strlen(c_arg));
+  ObjString *kirbyStr = copyString(c_arg, (int)strlen(c_arg));
 
-  return OBJ_VAL(cloxStr);
+  return OBJ_VAL(kirbyStr);
 }
 
 static Value argcNative(VM *vm, int argCount, Value *args) {

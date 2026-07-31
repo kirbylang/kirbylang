@@ -11,7 +11,7 @@ function shellQuote(value: string) {
 export function activate(context: vscode.ExtensionContext) {
   const EXT_ROOT = context.extensionPath;
 
-  const hoverProvider = vscode.languages.registerHoverProvider("clox", {
+  const hoverProvider = vscode.languages.registerHoverProvider("kirby", {
     provideHover(doc, position) {
       const wordRange = doc.getWordRangeAtPosition(position);
 
@@ -44,7 +44,7 @@ export function activate(context: vscode.ExtensionContext) {
     },
   });
 
-  const runCommand = vscode.commands.registerCommand("clox.run", () => {
+  const runCommand = vscode.commands.registerCommand("kirby.run", () => {
     const editor = vscode.window.activeTextEditor;
     if (!editor) return;
 
@@ -52,15 +52,15 @@ export function activate(context: vscode.ExtensionContext) {
     const workspaceFolder = vscode.workspace.getWorkspaceFolder(document.uri);
 
     const configured = vscode.workspace
-      .getConfiguration("clox")
-      .get<string>("executablePath", "./build/clox");
+      .getConfiguration("kirby")
+      .get<string>("executablePath", "./build/kirby");
 
     const executable =
       isAbsolute(configured) || !workspaceFolder
         ? configured
         : join(workspaceFolder.uri.fsPath, configured);
 
-    const terminalOptions: vscode.TerminalOptions = { name: "Clox" };
+    const terminalOptions: vscode.TerminalOptions = { name: "Kirby" };
 
     if (workspaceFolder) {
       terminalOptions.cwd = workspaceFolder.uri;

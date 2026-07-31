@@ -1,6 +1,6 @@
 Exit with an exit code
 
-```clox
+```kirby
 var exitCode = 1;
 exit(exitCode);
 ```

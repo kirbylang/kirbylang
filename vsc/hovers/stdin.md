@@ -1,5 +1,5 @@
 Read in text from \`stdin\` until end of file (EOF) is encountered
 
-```clox
+```kirby
 var text = stdin();
 ```

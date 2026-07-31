@@ -1,6 +1,6 @@
 Returns if value is a nil or not.
 
-```clox
+```kirby
 print isNil(nil); // true
 print isNil(123); // false
 ```

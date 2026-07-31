@@ -1,0 +1,1 @@
+print getenv("KIRBY_TEST");

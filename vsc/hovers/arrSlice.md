@@ -1,6 +1,6 @@
 Pop a value onto the end of an array and return it
 
-```clox
+```kirby
 var array = [10, 20, 30, 40, 50];
 
 var slice = arrSlice(array, 1, 4);

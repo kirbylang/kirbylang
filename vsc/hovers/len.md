@@ -1,6 +1,6 @@
 Get the length of a string or array
 
-```clox
+```kirby
 print len("Hello, World!");
 print len([1, 2 ,3]);
 ```

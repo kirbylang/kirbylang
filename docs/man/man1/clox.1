@@ -1,17 +1,17 @@
-.\" Man page for clox (main.c)
-.TH CLOX 1 "May 2026" "0.2.0" "Clox Manual"
+.\" Man page for kirby (main.c)
+.TH KIRBY 1 "May 2026" "0.2.0" "Kirby Manual"
 .SH NAME
-clox \- a simple Lox language interpreter
+kirby \- a language interpreter
 .SH SYNOPSIS
-.B clox
+.B kirby
 .RB [ -h ]
 .RB [ -v ]
 .RB [ -r ]
 .RB [ -f \fIfile\fR ]
 .RB [ -c \fIsource\fR ]
 .SH DESCRIPTION
-.B clox
-is the command‑line driver for a Lox interpreter written in C.  It
+.B kirby
+is the command‑line driver for a Kirby interpreter written in C.  It
 initialises the virtual machine, loads the standard library, and then
 executes code according to the selected mode.
 
@@ -24,7 +24,7 @@ Print a short usage summary and exit.
 .TP
 .BR \-v ", " \-\-version
 Print the interpreter version (the value of
-.BR CLOX_VERSION )
+.BR KIRBY_VERSION )
 and exit.
 
 .TP
@@ -40,14 +40,14 @@ or sending EOF terminates the REPL.
 
 .TP
 .BR \-f " " \fIfile\fR ", " \-\-file=\fIfile\fR
-Execute the Lox source file
+Execute the Kirby source file
 .I file
 after the standard library has been loaded.  The file path must be
 provided as the next command‑line argument after the option.
 
 .TP
 .BR \-c " " \fIsource\fR ", " \-\-code=\fIsource\fR
-Interpret the literal Lox source code supplied on the command line
+Interpret the literal Kirby source code supplied on the command line
 in
 .I source,
 again after loading the standard library.

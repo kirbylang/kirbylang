@@ -4,6 +4,6 @@
 #include "../src/version.h"
 
 int main(void) {
-  assert(strcmp(CLOX_VERSION, "0.2.0") == 0);
+  assert(strcmp(KIRBY_VERSION, "0.2.0") == 0);
   return 0;
 }

@@ -1,5 +1,5 @@
 {
-  "scopeName": "source.clox",
+  "scopeName": "source.kirby",
   "patterns": [
     { "include": "#comments" },
     { "include": "#strings" },
@@ -19,132 +19,132 @@
   ],
   "repository": {
     "comments": {
-      "name": "comment.line.double-slash.clox",
+      "name": "comment.line.double-slash.kirby",
       "match": "//.*$"
     },
     "strings": {
-      "name": "string.quoted.double.clox",
+      "name": "string.quoted.double.kirby",
       "begin": "\"",
       "end": "\"",
       "patterns": [
         {
-          "name": "constant.character.escape.clox",
+          "name": "constant.character.escape.kirby",
           "match": "\\\\[nrt\"\\\\]"
         },
         {
-          "name": "invalid.illegal.unknown-escape.clox",
+          "name": "invalid.illegal.unknown-escape.kirby",
           "match": "\\\\."
         }
       ]
     },
     "numbers": {
-      "name": "constant.numeric.clox",
+      "name": "constant.numeric.kirby",
       "match": "\\b\\d+(\\.\\d+)?\\b"
     },
     "struct-declaration": {
       "match": "\\b(struct)\\s+([A-Za-z_][A-Za-z0-9_]*)",
       "captures": {
-        "1": { "name": "keyword.declaration.struct.clox" },
-        "2": { "name": "entity.name.type.struct.clox" }
+        "1": { "name": "keyword.declaration.struct.kirby" },
+        "2": { "name": "entity.name.type.struct.kirby" }
       }
     },
     "impl-declaration": {
       "match": "\\b(impl)\\s+([A-Za-z_][A-Za-z0-9_]*)",
       "captures": {
-        "1": { "name": "keyword.declaration.impl.clox" },
-        "2": { "name": "entity.name.type.struct.clox" }
+        "1": { "name": "keyword.declaration.impl.kirby" },
+        "2": { "name": "entity.name.type.struct.kirby" }
       }
     },
     "function-declaration": {
       "match": "\\b(fun)\\s+([A-Za-z_][A-Za-z0-9_]*)",
       "captures": {
-        "1": { "name": "keyword.declaration.function.clox" },
-        "2": { "name": "entity.name.function.clox" }
+        "1": { "name": "keyword.declaration.function.kirby" },
+        "2": { "name": "entity.name.function.kirby" }
       }
     },
     "keywords": {
       "patterns": [
         {
-          "name": "keyword.control.clox",
+          "name": "keyword.control.kirby",
           "match": "\\b(if|else|for|while|return|break)\\b"
         },
         {
-          "name": "keyword.declaration.clox",
+          "name": "keyword.declaration.kirby",
           "match": "\\b(var|fun|struct|impl)\\b"
         },
         {
-          "name": "keyword.operator.logical.clox",
+          "name": "keyword.operator.logical.kirby",
           "match": "\\b(and|or)\\b"
         },
         {
-          "name": "keyword.other.print.clox",
+          "name": "keyword.other.print.kirby",
           "match": "\\bprint\\b"
         },
         {
-          "name": "variable.language.self.clox",
+          "name": "variable.language.self.kirby",
           "match": "\\bself\\b"
         }
       ]
     },
     "constants": {
-      "name": "constant.language.clox",
+      "name": "constant.language.kirby",
       "match": "\\b(true|false|nil)\\b"
     },
     "natives": {
       "patterns": [
         {
-          "name": "entity.name.function.native.clox",
+          "name": "entity.name.function.native.kirby",
           "match": "\\b(clock|len|argv|argc|typeof|rand|rand01|randBetween|ceil|readFileToString|writeStringToFile|fileExists|getenv|setenv|__version__|exit|instanceOf|prompt|stdin|parseNumber|numberToString|arrPush|arrPop|arrInsert|arrRemove|arrClear|arrContains|arrCopy|arrEqual|arrIsEmpty|arrSlice|arrConcat|arrReverse)\\b"
         },
         {
-          "name": "entity.name.function.native.clox",
+          "name": "entity.name.function.native.kirby",
           "match": "\\b(is|isNumber|isString|isNil|isFunction|isBool|strIsEmpty)\\b"
         }
       ]
     },
     "struct-initializer": {
-      "name": "entity.name.type.struct.clox",
+      "name": "entity.name.type.struct.kirby",
       "match": "\\b[A-Za-z_][A-Za-z0-9_]*\\b(?=\\s*\\{)"
     },
     "field-name": {
       "match": "\\b([A-Za-z_][A-Za-z0-9_]*)\\s*(:)",
       "captures": {
-        "1": { "name": "variable.other.property.clox" },
-        "2": { "name": "punctuation.separator.key-value.clox" }
+        "1": { "name": "variable.other.property.kirby" },
+        "2": { "name": "punctuation.separator.key-value.kirby" }
       }
     },
     "method-call": {
-      "name": "entity.name.function.method.clox",
+      "name": "entity.name.function.method.kirby",
       "match": "(?<=[A-Za-z_][A-Za-z0-9_]*\\s*\\.\\s*)\\b[A-Za-z_][A-Za-z0-9_]*\\b(?=\\s*\\()"
     },
     "property": {
-      "name": "variable.name.property.clox",
+      "name": "variable.name.property.kirby",
       "match": "(?<=[A-Za-z_][A-Za-z0-9_]*\\s*\\.\\s*)\\b[A-Za-z_][A-Za-z0-9_]*\\b(?!\\s*\\()"
     },
     "function-call": {
-      "name": "entity.name.function.clox",
+      "name": "entity.name.function.kirby",
       "match": "\\b[A-Za-z_][A-Za-z0-9_]*\\b(?=\\s*\\()"
     },
     "operators": {
       "patterns": [
         {
-          "name": "keyword.operator.comparison.clox",
+          "name": "keyword.operator.comparison.kirby",
           "match": "(==|!=|<=|>=|<|>)"
         },
         {
-          "name": "keyword.operator.logical.clox",
+          "name": "keyword.operator.logical.kirby",
           "match": "(&&|\\|\\||!)"
         },
         {
-          "name": "keyword.operator.nullish.clox",
+          "name": "keyword.operator.nullish.kirby",
           "match": "\\?\\?"
         },
         {
-          "name": "keyword.operator.assignment.clox",
+          "name": "keyword.operator.assignment.kirby",
           "match": "="
         },
         {
-          "name": "keyword.operator.arithmetic.clox",
+          "name": "keyword.operator.arithmetic.kirby",
           "match": "(\\+|-|\\*|/|%)"
         }
       ]

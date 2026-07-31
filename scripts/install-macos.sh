@@ -2,9 +2,9 @@
 
 set -euo pipefail
 
-cp ./build/clox /usr/local/bin/clox
+cp ./build/kirby /usr/local/bin/kirby
 
-echo "Installed at: '/usr/local/bin/clox'"
+echo "Installed at: '/usr/local/bin/kirby'"
 
 mkdir -p /usr/local/share/man/man1
-cp ./docs/man/man1/clox.1 /usr/local/share/man/man1/clox.1
+cp ./docs/man/man1/kirby.1 /usr/local/share/man/man1/kirby.1

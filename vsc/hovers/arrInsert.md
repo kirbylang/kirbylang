@@ -1,6 +1,6 @@
 Insert a value into an array at a specific index.
 
-```clox
+```kirby
 var array = [];
 
 arrInsert(array, 0, "Hello");

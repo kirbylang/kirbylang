@@ -1,7 +1,7 @@
 {
-  "name": "clox-vscode-extension",
+  "name": "kirby-vscode-extension",
   "version": "1.0.0",
-  "description": "VS Code extension for clox language",
+  "description": "VS Code extension for kirby language",
   "engines": {
     "vscode": "^1.85.0"
   },
@@ -13,42 +13,42 @@
   "contributes": {
     "languages": [
       {
-        "id": "clox",
+        "id": "kirby",
         "aliases": [
-          "Clox"
+          "Kirby"
         ],
         "extensions": [
-          ".lox"
+          ".krb"
         ],
         "configuration": "./language-configuration.json"
       }
     ],
     "grammars": [
       {
-        "language": "clox",
-        "scopeName": "source.clox",
-        "path": "./syntaxes/clox.tmLanguage.json"
+        "language": "kirby",
+        "scopeName": "source.kirby",
+        "path": "./syntaxes/kirby.tmLanguage.json"
       }
     ],
     "snippets": [
       {
-        "language": "clox",
+        "language": "kirby",
         "path": "./snippets.json"
       }
     ],
     "commands": [
       {
-        "command": "clox.run",
-        "title": "Run Clox File"
+        "command": "kirby.run",
+        "title": "Run Kirby File"
       }
     ],
     "configuration": {
-      "title": "Clox",
+      "title": "Kirby",
       "properties": {
-        "clox.executablePath": {
+        "kirby.executablePath": {
           "type": "string",
-          "default": "./build/clox",
-          "description": "Path to the clox executable. A relative path is resolved against the workspace folder."
+          "default": "./build/kirby",
+          "description": "Path to the kirby executable. A relative path is resolved against the workspace folder."
         }
       }
     }

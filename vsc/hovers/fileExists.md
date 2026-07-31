@@ -1,6 +1,6 @@
 Return if a file or path exists at a given path
 
-```clox
+```kirby
 var path = prompt("File Path: ");
 
 if (!fileExists(path)) {

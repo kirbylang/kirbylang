@@ -25,7 +25,7 @@ printf '%s\n' "${VERSION}" > VERSION.txt
 # This updates the __version__ native function call test
 ./scripts/tests.sh --update
 
-git add VERSION.txt tests/native_functions/native_fn_version_call.lox.out
+git add VERSION.txt tests/native_functions/native_fn_version_call.krb.out
 git commit -m "Increment version to ${TAG}"
 
 # Create new tag. This will prompt for the tag's message

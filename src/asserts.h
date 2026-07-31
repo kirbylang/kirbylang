@@ -1,5 +1,5 @@
-#ifndef clox_assert_h
-#define clox_assert_h
+#ifndef kirby_assert_h
+#define kirby_assert_h
 
 #include "common.h"
 #include "value.h"

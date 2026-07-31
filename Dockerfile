@@ -33,8 +33,8 @@ RUN locale-gen en_US.UTF-8 && update-locale LANG=en_US.UTF-8
 ENV LANG=en_US.UTF-8
 ENV LC_ALL=en_US.UTF-8
 
-COPY --from=builder /app/build/clox .
-COPY --from=builder /app/stdlib/stdlib.lox ./stdlib/stdlib.lox
+COPY --from=builder /app/build/kirby .
+COPY --from=builder /app/stdlib/stdlib.krb ./stdlib/stdlib.krb
 COPY --from=builder /app/examples ./examples
 
 CMD ["bash"]

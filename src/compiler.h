@@ -1,5 +1,5 @@
-#ifndef clox_compiler_h
-#define clox_compiler_h
+#ifndef kirby_compiler_h
+#define kirby_compiler_h
 
 #include "ast.h"
 #include "chunk.h"

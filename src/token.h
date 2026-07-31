@@ -1,5 +1,5 @@
-#ifndef clox_token_h
-#define clox_token_h
+#ifndef kirby_token_h
+#define kirby_token_h
 
 typedef enum {
   // Single-character tokens.

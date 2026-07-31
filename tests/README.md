@@ -4,19 +4,19 @@ The language's E2E tests are file based:
 
 | Example File    | Description              |
 | --------------- | ------------------------ |
-| `test.lox`      | Source test file         |
-| `test.lox.out`  | Expected `stdout` output |
-| `test.lox.err`  | Expected `stderr` output |
-| `test.lox.exit` | Expected exit code       |
-| `test.lox.in`   | Text sent to `stdin`     |
-| `test.lox.env`  | Environment Variables    |
+| `test.krb`      | Source test file         |
+| `test.krb.out`  | Expected `stdout` output |
+| `test.krb.err`  | Expected `stderr` output |
+| `test.krb.exit` | Expected exit code       |
+| `test.krb.in`   | Text sent to `stdin`     |
+| `test.krb.env`  | Environment Variables    |
 
 ## Writing A Test
 
-1. Create a new file in the [`tests`](./) directory: `./tests/new_test.lox`
-2. Add test lox code
+1. Create a new file in the [`tests`](./) directory: `./tests/new_test.krb`
+2. Add test kirby code
 3. Implement feature being tested
-4. [Update snapshots](#update-snapshots) which will create `./tests/new_test.lox.out`, `./tests/new_test.lox.err`, `./tests/new_test.lox.exit` files
+4. [Update snapshots](#update-snapshots) which will create `./tests/new_test.krb.out`, `./tests/new_test.krb.err`, `./tests/new_test.krb.exit` files
 5. Validate new snapshots. Confirm no other snapshots updated.
 6. Commit snapshots if everything is verified
 

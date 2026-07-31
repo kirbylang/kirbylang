@@ -1,5 +1,5 @@
-Get the current version of the clox language
+Get the current version of the kirby language
 
-```clox
+```kirby
 print __version__();
 ```

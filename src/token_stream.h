@@ -1,5 +1,5 @@
-#ifndef clox_token_stream_h
-#define clox_token_stream_h
+#ifndef kirby_token_stream_h
+#define kirby_token_stream_h
 
 #include <stdbool.h>
 
@@ -20,4 +20,4 @@ Token tsPeekNext(TokenStream *ts);
 Token tsAdvance(TokenStream *ts);
 bool tsIsAtEnd(TokenStream *ts);
 
-#endif // clox_token_stream_h
+#endif // kirby_token_stream_h

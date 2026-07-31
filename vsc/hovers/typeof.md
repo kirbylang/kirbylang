@@ -1,5 +1,5 @@
 Get a value's type
 
-```clox
+```kirby
 print typeof(true);
 ```

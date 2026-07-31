@@ -1,5 +1,5 @@
-cli := "build/clox"
-docker_image := "clox"
+cli := "build/kirby"
+docker_image := "kirby"
 
 default:
     just --list
@@ -12,7 +12,7 @@ build-vsc:
 open-vsc: build-vsc
     ./scripts/open-vsc.sh
 
-# Run the clox CLI
+# Run the kirby CLI
 run *args: build
     ./{{ cli }} {{ args }}
 
@@ -66,7 +66,7 @@ verify:
 docker-build:
     docker build -t {{ docker_image }} .
 
-# Run clox CLI in docker container
+# Run kirby CLI in docker container
 docker-run:
     docker run -it --init --name {{ docker_image }} --rm {{ docker_image }} 
 
@@ -82,4 +82,4 @@ examples file *args:
     ./scripts/run-example.sh {{ file }} {{ args }}
 
 man:
-    man ./docs/man/man1/clox.1
+    man ./docs/man/man1/kirby.1

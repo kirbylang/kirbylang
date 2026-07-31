@@ -1,6 +1,6 @@
 Returns if value is a number or not.
 
-```clox
+```kirby
 print isNumber(123); // true
 print isNumber("Hello World"); // false
 ```
