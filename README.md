@@ -4,37 +4,20 @@
 
 Yet another kirby implementation.
 
-```kirby
-struct StringBuilder {
-    var string = "";
+```
+// Function with an expression body
+fun fizzbuzz(n) =
+    if (n % 5 == 0 and n % 3 == 0) "FizzBuzz"
+    else if (n % 3 == 0) "Fizz"
+    else if (n % 5 == 0) "Buzz"
+    else n;
+
+// Read from stdin
+var limit = parseNumber(prompt("limit: "));
+
+for (var i = 1; i <= limit; i = i + 1) {
+    print fizzbuzz(i);
 }
-
-impl StringBuilder {
-    fun new() {
-        StringBuilder {}
-    }
-
-    fun new_with_init(init) {
-        StringBuilder { string: init }
-    }
-
-    fun add(self, string) {
-        self.string = self.string + string;
-
-        self
-    }
-
-    fun to_string(self) {
-        self.string
-    }
-}
-
-var builder = StringBuilder.new()
-    .add("Hello")
-    .add(" ")
-    .add("World");
-
-print builder.to_string();
 ```
 
 ## Documentation
