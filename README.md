@@ -1,6 +1,6 @@
 # kirby
 
-[![Verify](https://github.com/kyleect/kirby/actions/workflows/ci.yml/badge.svg)](https://github.com/kyleect/kirby/actions/workflows/ci.yml)
+[![Verify](https://github.com/kirbylang/kirbylang/actions/workflows/ci.yml/badge.svg)](https://github.com/kirbylang/kirbylang/actions/workflows/ci.yml)
 
 Yet another kirby implementation.
 
