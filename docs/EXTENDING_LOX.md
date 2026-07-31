@@ -48,6 +48,7 @@ These are the documented changes to the language/syntax from the original Lox la
   - Renamed bytecode OP: `OP_CLASS` -> `OP_STRUCT`
   - [ ] Deprecate the call syntax e.g. `Point()`
   - [ ] Implicitly private fields/methods. Explicit public using `pub`
+- Add support for shebangs `#!/usr/bin/env krb -f`
 
 ## 0.2.0
 
