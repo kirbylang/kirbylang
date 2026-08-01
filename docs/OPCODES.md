@@ -37,7 +37,8 @@
 | **OP_SET_UPVALUE**      | `slot`                             |       |                                                                      |
 | **OP_GET_PROPERTY**     | `index`                            |       |                                                                      |
 | **OP_SET_PROPERTY**     | `index`, `index`                   |       |                                                                      |
-| **OP_CLASS**            | `index`                            |       |                                                                      |
+| **OP_STRUCT**           | `index`                            |       |                                                                      |
+| **OP_STRUCT_INIT**      | f                                  |       |                                                                      |
 | **OP_METHOD**           | `index`                            |       |                                                                      |
 | **OP_INVOKE**           | `index`, `argCount`                |       |                                                                      |
 | **OP_CALL**             | `argCount`                         |       |                                                                      |

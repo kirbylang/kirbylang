@@ -55,6 +55,7 @@ These are the documented changes to the language/syntax from the original Lox la
   - Renamed token: `TOKEN_STRUCT` -> `TOKEN_CLASS`
   - Renamed token: `TOKEN_THIS` -> `TOKEN_SELF`
   - Renamed bytecode OP: `OP_CLASS` -> `OP_STRUCT`
+  - New bytecode OP: `OP_STRUCT_INIT`
 - Add support for shebangs `#!/usr/bin/env krb -f`
 - Add immutable bindings `let`
 
