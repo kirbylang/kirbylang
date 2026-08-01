@@ -14,22 +14,22 @@ Run `just install` or the OS specific script:
 
 ## Test
 
-Run `./scripts/test.sh` or `just test` to run the tests in `./test` folder.
+Run `./scripts/tests.sh` or `just test` to run the tests in `./test` folder.
 
 ### Filtering Tests
 
 ```sh
-./scripts/test.sh PATTERN
+./scripts/tests.sh PATTERN
 ```
 
 ## Test (Update Snapshots)
 
-Run `./scripts/test.sh --update` or `just test-update` to run the tests and update the snapshot files.
+Run `./scripts/tests.sh --update` or `just test-update` to run the tests and update the snapshot files.
 
 ### Filtering Updates
 
 ```sh
-./scripts/test.sh PATTERN --update
+./scripts/tests.sh PATTERN --update
 ```
 
 ## Coverage

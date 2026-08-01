@@ -141,6 +141,9 @@ REMOTE_HEAD="$(git rev-parse "${REMOTE}/${RELEASE_BRANCH}")"
 [[ "$LOCAL_HEAD" == "$REMOTE_HEAD" ]] ||
     die "Local ${RELEASE_BRANCH} differs from ${REMOTE}/${RELEASE_BRANCH}. Pull or push first."
 
+echo "==> Verifying test suite"
+run ./scripts/tests.sh
+
 # -----------------------------------------------------------------------------
 # Compute the new version
 # -----------------------------------------------------------------------------
@@ -191,10 +194,10 @@ echo "==> Building"
 run ./scripts/build.sh
 
 echo "==> Updating snapshots"
-run ./scripts/test.sh --update
+run ./scripts/tests.sh --update
 
 echo "==> Verifying test suite"
-run ./scripts/test.sh
+run ./scripts/tests.sh
 
 # Stage everything the update touched, not just the one known file.
 echo "==> Committing"
