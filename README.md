@@ -2,6 +2,8 @@
 
 [![Verify](https://github.com/kirbylang/kirbylang/actions/workflows/ci.yml/badge.svg)](https://github.com/kirbylang/kirbylang/actions/workflows/ci.yml)
 
+[![Release](https://github.com/kirbylang/kirbylang/actions/workflows/release.yml/badge.svg)](https://github.com/kirbylang/kirbylang/actions/workflows/release.yml)
+
 An aspiring embeddable scripting language.
 
 ```kirby
