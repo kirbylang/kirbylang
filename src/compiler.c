@@ -6,6 +6,7 @@
 #include "ast.h"
 #include "chunk.h"
 #include "common.h"
+#include "hashtable.h"
 #include "memory.h"
 #include "object.h"
 
@@ -36,6 +37,7 @@ typedef struct {
   uint8_t getOp;
   uint8_t setOp;
   uint8_t arg;
+  bool isMutable;
 } VarRef;
 
 static void compileExpr(AstNode *node);
@@ -45,7 +47,7 @@ static void compileFunction(FunctionNode *fn, FunctionType type);
 static uint8_t makeConstant(Value value, Token *tok);
 static void emitByte(uint8_t byte);
 static void emitBytes(uint8_t byte1, uint8_t byte2);
-static void declareVariable(Token *name);
+static void declareVariable(Token *name, bool isMutable);
 static void defineVariable(uint8_t global);
 static void markInitialized(void);
 static void beginScope(void);
@@ -122,6 +124,7 @@ static void initCompiler(Compiler *compiler, FunctionType functionType,
   Local *local = &current->locals[current->localCount++];
   local->depth = 0;
   local->isCaptured = false;
+  local->isMutable = false;
 
   if (functionType == TYPE_METHOD) {
     local->name.start = "self";
@@ -195,7 +198,8 @@ static int resolveLocal(Compiler *compiler, Token *identifier) {
   return -1;
 }
 
-static int addUpvalue(Compiler *compiler, uint8_t index, bool isLocal) {
+static int addUpvalue(Compiler *compiler, uint8_t index, bool isLocal,
+                      bool isMutable) {
   int upvalueCount = compiler->function->upvalueCount;
 
   for (int i = 0; i < upvalueCount; i++) {
@@ -212,6 +216,7 @@ static int addUpvalue(Compiler *compiler, uint8_t index, bool isLocal) {
 
   compiler->upvalues[upvalueCount].isLocal = isLocal;
   compiler->upvalues[upvalueCount].index = index;
+  compiler->upvalues[upvalueCount].isMutable = isMutable;
   return compiler->function->upvalueCount++;
 }
 
@@ -222,18 +227,20 @@ static int resolveUpvalue(Compiler *compiler, Token *name) {
   int local = resolveLocal(compiler->enclosing, name);
   if (local != -1) {
     compiler->enclosing->locals[local].isCaptured = true;
-    return addUpvalue(compiler, (uint8_t)local, true);
+    return addUpvalue(compiler, (uint8_t)local, true,
+                      compiler->enclosing->locals[local].isMutable);
   }
 
   int upvalue = resolveUpvalue(compiler->enclosing, name);
   if (upvalue != -1) {
-    return addUpvalue(compiler, (uint8_t)upvalue, false);
+    return addUpvalue(compiler, (uint8_t)upvalue, false,
+                      compiler->enclosing->upvalues[upvalue].isMutable);
   }
 
   return -1;
 }
 
-static void addLocal(Token name) {
+static void addLocal(Token name, bool isMutable) {
   if (current->localCount == UINT8_COUNT) {
     errorAtToken(&name, "Too many local variables in function.");
     return;
@@ -244,12 +251,34 @@ static void addLocal(Token name) {
   local->depth = -1;
 
   local->isCaptured = false;
+  local->isMutable = isMutable;
 }
 
-static void declareVariable(Token *name) {
+static void declareVariable(Token *name, bool isMutable) {
   if (current->scopeDepth == 0)
     return;
-  addLocal(*name);
+
+  addLocal(*name, isMutable);
+}
+
+/**
+ * Names of globals declared with `let`.
+ *
+ * Globals have no compile-time slot, so immutability is tracked by name in a
+ * table that outlives a single compile() call -- the REPL compiles each line
+ * separately but shares one set of globals.
+ */
+static Table immutableGlobals;
+
+static void markGlobalImmutable(Token *name) {
+  tableSet(&immutableGlobals, copyString(name->start, name->length),
+           BOOL_VAL(true));
+}
+
+static bool isGlobalImmutable(Token *name) {
+  Value ignored;
+  return tableGet(&immutableGlobals, copyString(name->start, name->length),
+                  &ignored);
 }
 
 // Resolves `name` as a local, then an upvalue, then falls back to treating
@@ -263,26 +292,35 @@ static VarRef resolveVariable(Token *name) {
     ref.getOp = OP_GET_LOCAL;
     ref.setOp = OP_SET_LOCAL;
     ref.arg = (uint8_t)arg;
+    ref.isMutable = current->locals[arg].isMutable;
   } else if ((arg = resolveUpvalue(current, name)) != -1) {
     ref.getOp = OP_GET_UPVALUE;
     ref.setOp = OP_SET_UPVALUE;
     ref.arg = (uint8_t)arg;
+    ref.isMutable = current->upvalues[arg].isMutable;
   } else {
     ref.arg = identifierConstant(name);
     ref.getOp = OP_GET_GLOBAL;
     ref.setOp = OP_SET_GLOBAL;
+    ref.isMutable = !isGlobalImmutable(name);
   }
 
   return ref;
 }
 
-static uint8_t parseVariableFromToken(Token *name) {
-  declareVariable(name);
+static uint8_t parseVariableFromToken(Token *name, bool isMutable) {
+  declareVariable(name, isMutable);
   if (current->scopeDepth > 0)
     return 0;
 
   currentLine = name->line;
-  return identifierConstant(name);
+
+  // identifierConstant() interns the name into the chunk's constant table,
+  // which keeps it reachable for the GC before it is stored below.
+  uint8_t constant = identifierConstant(name);
+  if (!isMutable)
+    markGlobalImmutable(name);
+  return constant;
 }
 
 /**
@@ -608,6 +646,9 @@ static void compileExpr(AstNode *node) {
   case NODE_ASSIGN: {
     AssignNode *a = &node->as.assign;
     VarRef ref = resolveVariable(&a->name);
+    if (!ref.isMutable) {
+      errorAtToken(&a->name, "Cannot assign to immutable binding");
+    }
     compileExpr(a->value);
     emitBytes(ref.setOp, ref.arg);
     break;
@@ -790,7 +831,7 @@ static void compileExpr(AstNode *node) {
 
 static void compileVarDecl(AstNode *node) {
   VarDeclNode *vd = &node->as.varDecl;
-  uint8_t global = parseVariableFromToken(&vd->name);
+  uint8_t global = parseVariableFromToken(&vd->name, vd->isMutable);
 
   if (vd->initializer != NULL) {
     compileExpr(vd->initializer);
@@ -812,7 +853,7 @@ static void compileFunction(FunctionNode *fn, FunctionType type) {
     errorAtToken(&fn->name, "Can't have more than 255 parameters.");
   }
   for (int i = 0; i < fn->arity; i++) {
-    declareVariable(&fn->params[i]);
+    declareVariable(&fn->params[i], /*isMutable=*/true);
     markInitialized();
   }
 
@@ -837,7 +878,7 @@ static void compileFunction(FunctionNode *fn, FunctionType type) {
 
 static void compileFunctionDeclStmt(AstNode *node) {
   FunctionNode *fn = &node->as.function;
-  uint8_t global = parseVariableFromToken(&fn->name);
+  uint8_t global = parseVariableFromToken(&fn->name, /*isMutable=*/true);
   // Marked initialized *before* compiling the body so the function can call
   // itself recursively through its own local slot.
   markInitialized();
@@ -849,7 +890,7 @@ static void compileStructDecl(AstNode *node) {
   StructNode *sn = &node->as.struct_;
 
   uint8_t nameConstant = identifierConstant(&sn->name);
-  declareVariable(&sn->name);
+  declareVariable(&sn->name, /*isMutable=*/true);
   emitBytes(OP_STRUCT, nameConstant);
   defineVariable(nameConstant);
 
@@ -1159,4 +1200,8 @@ void markCompilerRoots(void) {
     markObject((Obj *)compiler->function);
     compiler = compiler->enclosing;
   }
+
+  markTable(&immutableGlobals);
 }
+
+void freeCompilerState(void) { freeTable(&immutableGlobals); }

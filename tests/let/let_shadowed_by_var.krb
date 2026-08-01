@@ -1,0 +1,9 @@
+let b = 10;
+
+{
+  var b = 20;
+  b = 21;
+  print b;
+}
+
+print b;

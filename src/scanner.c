@@ -232,6 +232,8 @@ static TokenType identifierType(Scanner *scanner) {
       }
     }
     break;
+  case 'l':
+    return checkKeyword(scanner, 1, 2, "et", TOKEN_LET);
   case 'n':
     return checkKeyword(scanner, 1, 2, "il", TOKEN_NIL);
   case 'o':

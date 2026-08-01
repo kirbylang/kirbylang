@@ -117,6 +117,7 @@ void initVM(int argc, char *argv[]) {
 
 void freeVM(void) {
   TRACELN("vm.freeVM()");
+  freeCompilerState();
   freeTable(&vm.globals);
   freeTable(&vm.strings);
   freeObjects();

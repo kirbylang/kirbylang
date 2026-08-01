@@ -83,6 +83,8 @@ const char *tokenTypeToString(TokenType type) {
     return "TOKEN_TRUE";
   case TOKEN_VAR:
     return "TOKEN_VAR";
+  case TOKEN_LET:
+    return "TOKEN_LET";
   case TOKEN_WHILE:
     return "TOKEN_WHILE";
   case TOKEN_MODULO:

@@ -1,0 +1,8 @@
+let value = 10;
+
+var value = 20; 
+value = 21;
+print value;
+
+let value = 30;
+print value;

@@ -10,6 +10,7 @@ typedef struct {
   Token name;
   int depth;
   bool isCaptured;
+  bool isMutable;
 } Local;
 
 typedef enum {
@@ -22,6 +23,7 @@ typedef enum {
 typedef struct {
   uint8_t index;
   bool isLocal;
+  bool isMutable;
 } Upvalue;
 
 typedef struct Compiler Compiler;
@@ -60,5 +62,10 @@ ObjFunction *compile(AstNode **ast, int count, int endLine);
  * Mark all objects that are referenced by the compiler as roots
  */
 void markCompilerRoots(void);
+
+/**
+ * Free compiler-owned tables (called from freeVM)
+ */
+void freeCompilerState(void);
 
 #endif

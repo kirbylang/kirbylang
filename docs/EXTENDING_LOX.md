@@ -49,6 +49,7 @@ These are the documented changes to the language/syntax from the original Lox la
   - [ ] Deprecate the call syntax e.g. `Point()`
   - [ ] Implicitly private fields/methods. Explicit public using `pub`
 - Add support for shebangs `#!/usr/bin/env krb -f`
+- Add immutable bindings `let`
 
 ## 0.2.0
 

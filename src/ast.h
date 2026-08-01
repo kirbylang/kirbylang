@@ -25,6 +25,7 @@ typedef enum {
   NODE_EXPR_STMT,
   NODE_PRINT,
   NODE_VAR_DECL,
+  NODE_LET_DECL,
   NODE_BLOCK,
   NODE_IF,
   NODE_WHILE,
@@ -133,6 +134,7 @@ typedef struct {
   Token name;
   AstNode *initializer;
   int declEndLine;
+  bool isMutable;
 } VarDeclNode;
 
 typedef struct {

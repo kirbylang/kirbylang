@@ -1,0 +1,9 @@
+fun outer() {
+  let k = 1;
+
+  fun inner() {
+    k = 2;
+  }
+
+  return inner;
+}

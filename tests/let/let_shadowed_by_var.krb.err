@@ -1,0 +1,17 @@
+== <script> ==
+0000    1 OP_NIL
+0001    | OP_RETURN
+== <script> ==
+0000    1 OP_CONSTANT         1 '10.000000'
+0002    | OP_DEFINE_GLOBAL    0 'b'
+0004    4 OP_CONSTANT         2 '20.000000'
+0006    5 OP_CONSTANT         3 '21.000000'
+0008    | OP_SET_LOCAL        1
+0010    | OP_POP
+0011    6 OP_GET_LOCAL        1
+0013    | OP_PRINT
+0014    7 OP_POP
+0015    9 OP_GET_GLOBAL       4 'b'
+0017    | OP_PRINT
+0018   10 OP_NIL
+0019    | OP_RETURN

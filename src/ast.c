@@ -263,7 +263,7 @@ static void printNode(StrBuf *sb, AstNode *node) {
     break;
 
   case NODE_VAR_DECL:
-    sb_append(sb, "(var ");
+    sb_append(sb, node->as.varDecl.isMutable ? "(var " : "(let ");
     sbAppendToken(sb, node->as.varDecl.name);
 
     if (node->as.varDecl.initializer != NULL) {

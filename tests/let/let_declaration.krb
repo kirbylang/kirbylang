@@ -1,0 +1,8 @@
+let name = "John";
+print name;
+
+let n = 42;
+print n;
+
+let flag = true;
+print flag;

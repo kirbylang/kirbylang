@@ -59,6 +59,7 @@ static AstNode *lambda(Parser *p, bool canAssign);
 static AstNode *ifExpr(Parser *p, bool canAssign);
 static AstNode *nullish_(Parser *p, AstNode *left, bool canAssign);
 static AstNode *struct_(Parser *p, AstNode *left, bool canAssign);
+static AstNode *varDeclaration(Parser *p, bool isMutable);
 
 static void advance(Parser *parser) {
   parser->previous = parser->current;
@@ -111,6 +112,7 @@ static void synchronize(Parser *p) {
     case TOKEN_IMPL:
     case TOKEN_FUN:
     case TOKEN_VAR:
+    case TOKEN_LET:
     case TOKEN_FOR:
     case TOKEN_IF:
     case TOKEN_WHILE:
@@ -602,6 +604,7 @@ static ParseRule rules[] = {
     [TOKEN_SELF] = {self_, NULL, PREC_NONE},
     [TOKEN_TRUE] = {literal, NULL, PREC_NONE},
     [TOKEN_VAR] = {NULL, NULL, PREC_NONE},
+    [TOKEN_LET] = {NULL, NULL, PREC_NONE},
     [TOKEN_WHILE] = {NULL, NULL, PREC_NONE},
     [TOKEN_MODULO] = {NULL, binary, PREC_FACTOR},
     [TOKEN_BREAK] = {NULL, NULL, PREC_NONE},
@@ -765,17 +768,9 @@ static AstNode *forStatement(Parser *p, bool *isTail) {
   if (match(p, TOKEN_SEMICOLON)) {
     // no initialiser
   } else if (match(p, TOKEN_VAR)) {
-    consume(p, TOKEN_IDENTIFIER, "Expect variable name.");
-    Token name = p->previous;
-    AstNode *initializer = NULL;
-    if (match(p, TOKEN_EQUAL))
-      initializer = expression(p);
-    consume(p, TOKEN_SEMICOLON, "Expect ';' after variable declaration.");
-    AstNode *vd = astAlloc(NODE_VAR_DECL, name.line);
-    vd->as.varDecl.name = name;
-    vd->as.varDecl.initializer = initializer;
-    vd->as.varDecl.declEndLine = p->previous.line; // the ';' just consumed
-    init = vd;
+    init = varDeclaration(p, /*isMutable=*/true);
+  } else if (match(p, TOKEN_LET)) {
+    init = varDeclaration(p, /*isMutable=*/false);
   } else {
     init = expressionStatement(p, isTail);
   }
@@ -918,18 +913,23 @@ static AstNode *statement(Parser *p, bool *isTail) {
   return expressionStatement(p, isTail);
 }
 
-static AstNode *varDeclaration(Parser *p) {
+static AstNode *varDeclaration(Parser *p, bool isMutable) {
   consume(p, TOKEN_IDENTIFIER, "Expect variable name.");
   Token name = p->previous;
 
   AstNode *initializer = NULL;
   if (match(p, TOKEN_EQUAL))
     initializer = expression(p);
+
+  if (!isMutable && initializer == NULL)
+    parse_error(p, "'let' binding requires an initializer.");
+
   consume(p, TOKEN_SEMICOLON, "Expect ';' after variable declaration.");
 
   AstNode *node = astAlloc(NODE_VAR_DECL, name.line);
   node->as.varDecl.name = name;
   node->as.varDecl.initializer = initializer;
+  node->as.varDecl.isMutable = isMutable;
   node->as.varDecl.declEndLine = p->previous.line; // the ';' just consumed
   return node;
 }
@@ -1061,6 +1061,7 @@ static AstNode *structDeclaration(Parser *p) {
 
       fieldBuf[fieldCount].name = fieldName;
       fieldBuf[fieldCount].initializer = init;
+      fieldBuf[fieldCount].isMutable = true;
       fieldBuf[fieldCount].declEndLine = p->previous.line; // the ';'
       fieldCount++;
     } else if (check(p, TOKEN_FUN)) {
@@ -1172,7 +1173,9 @@ static AstNode *declaration(Parser *p, bool *isTail) {
   } else if (match(p, TOKEN_FUN)) {
     node = functionDeclaration(p, /*isMethod=*/false);
   } else if (match(p, TOKEN_VAR)) {
-    node = varDeclaration(p);
+    node = varDeclaration(p, /*isMutable=*/true);
+  } else if (match(p, TOKEN_LET)) {
+    node = varDeclaration(p, /*isMutable=*/false);
   } else {
     node = statement(p, isTail);
   }
