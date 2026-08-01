@@ -83,3 +83,12 @@ examples file *args:
 
 man:
     man ./docs/man/man1/krb.1
+
+# Cut a new release. bump = major | minor | patch
+release bump: (_release bump "")
+
+# Preview a release without changing anything
+release-dry bump: (_release bump "--dry-run")
+
+_release bump *flags:
+    ./scripts/increment-version.sh {{ bump }} {{ flags }}

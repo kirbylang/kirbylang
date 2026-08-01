@@ -1,0 +1,99 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v[0-9]+.[0-9]+.[0-9]+"
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    name: Build ${{ matrix.asset }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-latest
+            asset: krb-linux-x86_64
+          - os: macos-latest
+            asset: krb-macos-arm64
+
+    steps:
+      - uses: actions/checkout@v4
+
+      # Guards against a tag whose VERSION.txt doesn't match — the single most
+      # likely way for this release process to silently go wrong.
+      - name: Verify tag matches VERSION.txt
+        shell: bash
+        run: |
+          expected="v$(cat VERSION.txt)"
+          if [[ "${GITHUB_REF_NAME}" != "$expected" ]]; then
+            echo "::error::Tag ${GITHUB_REF_NAME} does not match VERSION.txt (${expected})"
+            exit 1
+          fi
+
+      - name: Install dependencies (Linux)
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libreadline-dev
+
+      - name: Install dependencies (macOS)
+        if: runner.os == 'macOS'
+        run: brew install readline
+
+      - name: Configure
+        shell: bash
+        run: |
+          args=(-S . -B build -DCMAKE_BUILD_TYPE=Release)
+          if [[ "$RUNNER_OS" == "macOS" ]]; then
+            args+=(-DCMAKE_PREFIX_PATH="$(brew --prefix readline)")
+          fi
+          cmake "${args[@]}"
+
+      - name: Build
+        run: cmake --build build -j
+
+      - name: Test
+        run: ./scripts/test.sh
+
+      - name: Package
+        shell: bash
+        run: |
+          mkdir -p dist
+          tar -czf "dist/${{ matrix.asset }}-${GITHUB_REF_NAME}.tar.gz" \
+            -C build krb
+          cd dist && shasum -a 256 *.tar.gz > "${{ matrix.asset }}.sha256"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.asset }}
+          path: dist/*
+
+  release:
+    name: Publish release
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # --generate-notes needs history back to the previous tag.
+          fetch-depth: 0
+
+      - uses: actions/download-artifact@v4
+        with:
+          path: dist
+          merge-multiple: true
+
+      - name: Create GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "${GITHUB_REF_NAME}" \
+            --title "${GITHUB_REF_NAME}" \
+            --generate-notes \
+            --verify-tag \
+            dist/*
