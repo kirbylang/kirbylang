@@ -2,7 +2,19 @@
 
 These are the documented changes to the language/syntax from the original Lox language.
 
-## Next: 0.3.0
+## Next: 0.4.0
+
+- Lambdas
+  - [ ] Lambda body expressions `var sum = fun (a, b) a + b;`
+- Native Functions
+  - [ ] `arrSort(array, fn)`
+  - [ ] `arrMap(array, fn)`
+  - [ ] `arrJoinToString(array, separator)`
+- Structs
+  - [ ] Deprecate the call syntax e.g. `Point()`
+  - [ ] Implicitly private fields/methods. Explicit public using `pub`
+
+## 0.3.0
 
 - Support to escape characters in strings: `\n`, `\r`, `\t`, `\"`, `\\`
 - Function body expressions: `fun sum(a, b) = a + b;`
@@ -17,18 +29,12 @@ These are the documented changes to the language/syntax from the original Lox la
   - `strIsEmpty`
 - Block expressions: `var sum = { 5 + 10 };`
   - New bytecode op: `OP_CLOSE_BLOCK_EXPR n`
-  - [ ] **Question:** keep both block statements and expressions?
 - If expressions
   - `print if (true) "Hello" else "World"; // Hello`
   - `print if (value > 9000) "Over 9000!" else if (value == 42) "Life, Universe, Everything" else "Error"; // Error`
   - `print if (false) 123; // nil`
 - Lambdas
   - `var sum = fun (a, b) { a + b };`
-  - [ ] Lambda body expressions `var sum = fun (a, b) a + b;`
-- Native Functions
-  - [ ] `arrSort(array, fn)`
-  - [ ] `arrMap(array, fn)`
-  - [ ] `arrJoinToString(array, separator)`
 - A shared library is now generated on build: `libkirby.{so,dylib,dll}`
 - Transition from a single-pass to a multi-pass compiler
   - Introduce `lex` function which produces `TokenStream`
@@ -46,8 +52,6 @@ These are the documented changes to the language/syntax from the original Lox la
   - Renamed token: `TOKEN_STRUCT` -> `TOKEN_CLASS`
   - Renamed token: `TOKEN_THIS` -> `TOKEN_SELF`
   - Renamed bytecode OP: `OP_CLASS` -> `OP_STRUCT`
-  - [ ] Deprecate the call syntax e.g. `Point()`
-  - [ ] Implicitly private fields/methods. Explicit public using `pub`
 - Add support for shebangs `#!/usr/bin/env krb -f`
 - Add immutable bindings `let`
 
