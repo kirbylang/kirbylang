@@ -2,8 +2,6 @@
 
 set -euo pipefail
 
-shopt -s globstar
-
 BIN="${BIN:-./build/kirby-test}"
 DIFF="diff -u"
 
@@ -110,8 +108,21 @@ run_exit_test() {
     fi
 }
 
-for file_in in ./tests/**/*.krb; do
-    rel_path="${file_in#./tests/}"
+# Collect first — don't pipe into the loop. krb reads stdin (prompt(), the
+# `-f` tests), and a while-read loop would let it swallow the file list.
+files=()
+while IFS= read -r file; do
+    files+=("$file")
+done < <(find ./tests -type f -name '*.krb' | LC_ALL=C sort)
+
+if [[ ${#files[@]} -eq 0 ]]; then
+    echo "No tests found" >&2
+    exit 1
+fi
+
+for file_in in "${files[@]}"; do
+    rel_path="${file_in#./}"
+    rel_path="${rel_path#tests/}"
 
     base="${rel_path%.krb}"
 
