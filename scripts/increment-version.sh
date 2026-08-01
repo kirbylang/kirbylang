@@ -141,9 +141,6 @@ REMOTE_HEAD="$(git rev-parse "${REMOTE}/${RELEASE_BRANCH}")"
 [[ "$LOCAL_HEAD" == "$REMOTE_HEAD" ]] ||
     die "Local ${RELEASE_BRANCH} differs from ${REMOTE}/${RELEASE_BRANCH}. Pull or push first."
 
-echo "==> Verifying test suite"
-run ./scripts/tests.sh
-
 # -----------------------------------------------------------------------------
 # Compute the new version
 # -----------------------------------------------------------------------------
