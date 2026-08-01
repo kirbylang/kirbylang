@@ -4,15 +4,18 @@ These are the documented changes to the language/syntax from the original Lox la
 
 ## Next: 0.4.0
 
+- [ ] [String interpolation](https://github.com/kirbylang/kirbylang/issues/15)
+- [ ] [`continue` keyword](https://github.com/kirbylang/kirbylang/issues/13)
 - Lambdas
   - [ ] Lambda body expressions `var sum = fun (a, b) a + b;`
 - Native Functions
+  - [ ] `print`, `println`, `eprint`, `eprintln`
   - [ ] `arrSort(array, fn)`
   - [ ] `arrMap(array, fn)`
   - [ ] `arrJoinToString(array, separator)`
 - Structs
+  - [ ] [Accessibility modifiers `pub`](https://github.com/kirbylang/kirbylang/issues/9)
   - [ ] Deprecate the call syntax e.g. `Point()`
-  - [ ] Implicitly private fields/methods. Explicit public using `pub`
 
 ## 0.3.0
 
