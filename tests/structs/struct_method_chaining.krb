@@ -3,7 +3,7 @@ struct Chain {
 }
 
 impl Chain {
-    fun new(value) {
+    pub fun new(value) {
         var chain = Chain();
 
         chain.value = value;
@@ -11,11 +11,11 @@ impl Chain {
         return chain;
     }
 
-    fun plus(self, n) {
+    pub fun plus(self, n) {
         return Chain.new(self.value + n);
     }
 
-    fun get(self) {
+    pub fun get(self) {
         return self.value;
     }
 }

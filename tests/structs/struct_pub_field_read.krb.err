@@ -1,0 +1,23 @@
+== <script> ==
+0000    1 OP_NIL
+0001    | OP_RETURN
+== <script> ==
+0000    1 OP_STRUCT           0 'Point'
+0002    | OP_DEFINE_GLOBAL    0 'Point'
+0004    | OP_GET_GLOBAL       1 'Point'
+0006    2 OP_CONSTANT         3 '1.000000'
+0008    | OP_FIELD            2 'x' pub
+0011    3 OP_CONSTANT         5 '2.000000'
+0013    | OP_FIELD            4 'y' pub
+0016    4 OP_POP
+0017    6 OP_GET_GLOBAL       7 'Point'
+0019    | OP_STRUCT_INIT      0
+0021    | OP_DEFINE_GLOBAL    6 'p'
+0023    8 OP_GET_GLOBAL       8 'p'
+0025    | OP_GET_PROPERTY     9 'x'
+0027    | OP_PRINT
+0028    9 OP_GET_GLOBAL      10 'p'
+0030    | OP_GET_PROPERTY    11 'y'
+0032    | OP_PRINT
+0033   10 OP_NIL
+0034    | OP_RETURN

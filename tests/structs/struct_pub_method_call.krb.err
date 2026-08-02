@@ -1,0 +1,21 @@
+== <script> ==
+0000    1 OP_NIL
+0001    | OP_RETURN
+== greet ==
+0000    4 OP_CONSTANT         0 'Hello World'
+0002    | OP_RETURN
+== <script> ==
+0000    1 OP_STRUCT           0 'Greeter'
+0002    | OP_DEFINE_GLOBAL    0 'Greeter'
+0004    | OP_GET_GLOBAL       1 'Greeter'
+0006    | OP_POP
+0007    3 OP_GET_GLOBAL       2 'Greeter'
+0009    4 OP_CLOSURE          4 <fn greet>
+0011    | OP_METHOD           3 'greet'
+0013    5 OP_POP
+0014    7 OP_GET_GLOBAL       5 'Greeter'
+0016    | OP_STRUCT_INIT      0
+0018    | OP_INVOKE        (0 args)    6 'greet'
+0021    | OP_PRINT
+0022    8 OP_NIL
+0023    | OP_RETURN

@@ -1,0 +1,10 @@
+// The `pub` on `label` must not leak to the field declared after it.
+struct Config {
+    pub var label = "visible";
+    var token = "hidden";
+}
+
+var c = Config {};
+
+print c.label;
+print c.token;

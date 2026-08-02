@@ -6,12 +6,12 @@
 0002    | OP_DEFINE_GLOBAL    0 'Struct'
 0004    | OP_GET_GLOBAL       1 'Struct'
 0006    2 OP_NIL
-0007    | OP_FIELD            2 'value'
-0009    3 OP_POP
-0010    5 OP_GET_GLOBAL       4 'Struct'
-0012    | OP_STRUCT_INIT      0
-0014    | OP_DEFINE_GLOBAL    3 'instance'
-0016    6 OP_NIL
-0017    | OP_RETURN
+0007    | OP_FIELD            2 'value' priv
+0010    3 OP_POP
+0011    5 OP_GET_GLOBAL       4 'Struct'
+0013    | OP_STRUCT_INIT      0
+0015    | OP_DEFINE_GLOBAL    3 'instance'
+0017    6 OP_NIL
+0018    | OP_RETURN
 Missing required field 'value'.
 [line 5] in script

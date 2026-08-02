@@ -14,7 +14,8 @@ These are the documented changes to the language/syntax from the original Lox la
   - [ ] `arrMap(array, fn)`
   - [ ] `arrJoinToString(array, separator)`
 - Structs
-  - [ ] [Accessibility modifiers `pub`](https://github.com/kirbylang/kirbylang/issues/9)
+  - [Accessibility modifiers `pub`](https://github.com/kirbylang/kirbylang/issues/9)
+    - New token: `TOKEN_PUB`
   - [ ] Deprecate the call syntax e.g. `Point()`
 
 ## 0.3.0

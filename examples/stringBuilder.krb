@@ -5,18 +5,18 @@ struct StringBuilder {
 }
 
 impl StringBuilder {
-    fun new() = StringBuilder {};
+    pub fun new() = StringBuilder {};
 
-    fun new_with_init(init) =
+    pub fun new_with_init(init) =
         StringBuilder { string: init };
 
-    fun add(self, string) {
+    pub fun add(self, string) {
         self.string = self.string + string;
 
         self
     }
 
-    fun to_string(self) = self.string;
+    pub fun to_string(self) = self.string;
 }
 
 var builder = StringBuilder.new()

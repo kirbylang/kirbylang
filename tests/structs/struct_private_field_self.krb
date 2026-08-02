@@ -1,0 +1,16 @@
+struct Account {
+    var balance = 100;
+}
+
+impl Account {
+    pub fun new() = Account {};
+
+    pub fun deposit(self, amount) {
+        self.balance = self.balance + amount;
+        self
+    }
+
+    pub fun balance(self) = self.balance;
+}
+
+print Account.new().deposit(50).balance();

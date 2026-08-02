@@ -4,12 +4,12 @@ fun makeCounter() {
     }
 
     impl Counter {
-        fun increment(self) {
+        pub fun increment(self) {
             self.count = self.count + 1;
             return self.count;
         }
 
-        fun new() {
+        pub fun new() {
             return Counter();
         }
     }

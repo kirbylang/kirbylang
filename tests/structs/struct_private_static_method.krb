@@ -1,0 +1,7 @@
+struct Point {}
+
+impl Point {
+    fun origin() = Point {};
+}
+
+print Point.origin();

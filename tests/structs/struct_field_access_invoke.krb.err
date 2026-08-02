@@ -13,19 +13,19 @@
 0006    | OP_DEFINE_GLOBAL    2 'Struct'
 0008    | OP_GET_GLOBAL       3 'Struct'
 0010    2 OP_NIL
-0011    | OP_FIELD            4 'fn'
-0013    3 OP_POP
-0014    5 OP_GET_GLOBAL       6 'Struct'
-0016    | OP_STRUCT_INIT      0
-0018    | OP_DEFINE_GLOBAL    5 'instance'
-0020   11 OP_GET_GLOBAL       7 'instance'
-0022    | OP_GET_GLOBAL       9 'fn'
-0024    | OP_SET_PROPERTY     8 'fn'
-0026    | OP_POP
-0027   13 OP_GET_GLOBAL      10 'instance'
-0029    | OP_INVOKE        (0 args)   11 'fn'
-0032    | OP_POP
-0033   14 OP_NIL
-0034    | OP_RETURN
+0011    | OP_FIELD            4 'fn' priv
+0014    3 OP_POP
+0015    5 OP_GET_GLOBAL       6 'Struct'
+0017    | OP_STRUCT_INIT      0
+0019    | OP_DEFINE_GLOBAL    5 'instance'
+0021   11 OP_GET_GLOBAL       7 'instance'
+0023    | OP_GET_GLOBAL       9 'fn'
+0025    | OP_SET_PROPERTY     8 'fn'
+0027    | OP_POP
+0028   13 OP_GET_GLOBAL      10 'instance'
+0030    | OP_INVOKE        (0 args)   11 'fn'
+0033    | OP_POP
+0034   14 OP_NIL
+0035    | OP_RETURN
 Missing required field 'fn'.
 [line 5] in script

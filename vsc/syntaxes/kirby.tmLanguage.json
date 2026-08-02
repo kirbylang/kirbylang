@@ -75,7 +75,7 @@
         },
         {
           "name": "keyword.declaration.krb",
-          "match": "\\b(var|fun|struct|impl)\\b"
+          "match": "\\b(var|let|pub|fun|struct|impl)\\b"
         },
         {
           "name": "keyword.operator.logical.krb",

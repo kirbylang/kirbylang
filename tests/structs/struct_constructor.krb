@@ -3,7 +3,7 @@ struct Struct {
 }
 
 impl Struct {
-    fun new(value) {
+    pub fun new(value) {
         var instance = Struct {};
 
         instance.value = value;

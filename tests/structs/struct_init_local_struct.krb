@@ -1,7 +1,7 @@
 fun makePoint(x) {
     struct Point {
-        var x;
-        var y = 0;
+        pub var x;
+        pub var y = 0;
     }
 
     return Point { x: x };

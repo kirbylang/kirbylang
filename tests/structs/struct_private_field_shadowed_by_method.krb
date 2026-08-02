@@ -1,0 +1,13 @@
+// A private field must not hide a public accessor that shares its name.
+struct Counter {
+    var count = 5;
+}
+
+impl Counter {
+    pub fun count(self) = self.count;
+}
+
+var c = Counter {};
+
+print c.count();
+print c.count;

@@ -6,20 +6,20 @@
 0002    | OP_DEFINE_GLOBAL    0 'Point'
 0004    | OP_GET_GLOBAL       1 'Point'
 0006    2 OP_NIL
-0007    | OP_FIELD            2 'x'
-0009    3 OP_NIL
-0010    | OP_FIELD            3 'y'
-0012    4 OP_POP
-0013    6 OP_GET_GLOBAL       5 'Point'
-0015    | OP_CONSTANT         6 'x'
-0017    | OP_CONSTANT         7 '1.000000'
-0019    | OP_CONSTANT         8 'y'
-0021    | OP_CONSTANT         9 '2.000000'
-0023    | OP_CONSTANT        10 'z'
-0025    | OP_CONSTANT        11 '3.000000'
-0027    | OP_STRUCT_INIT      3
-0029    | OP_DEFINE_GLOBAL    4 'point'
-0031    7 OP_NIL
-0032    | OP_RETURN
-Undefined field 'z'.
+0007    | OP_FIELD            2 'x' priv
+0010    3 OP_NIL
+0011    | OP_FIELD            3 'y' priv
+0014    4 OP_POP
+0015    6 OP_GET_GLOBAL       5 'Point'
+0017    | OP_CONSTANT         6 'x'
+0019    | OP_CONSTANT         7 '1.000000'
+0021    | OP_CONSTANT         8 'y'
+0023    | OP_CONSTANT         9 '2.000000'
+0025    | OP_CONSTANT        10 'z'
+0027    | OP_CONSTANT        11 '3.000000'
+0029    | OP_STRUCT_INIT      3
+0031    | OP_DEFINE_GLOBAL    4 'point'
+0033    7 OP_NIL
+0034    | OP_RETURN
+Field 'x' is private to 'Point'.
 [line 6] in script

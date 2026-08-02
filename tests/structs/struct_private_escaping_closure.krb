@@ -1,0 +1,16 @@
+struct Counter {
+    var count = 7;
+}
+
+impl Counter {
+    // Access travels with the closure, so it survives leaving the method.
+    pub fun reader(self) {
+        var reader = fun () { self.count };
+
+        reader
+    }
+}
+
+var read = Counter {}.reader();
+
+print read();

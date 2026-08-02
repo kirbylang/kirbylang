@@ -1,0 +1,31 @@
+== <script> ==
+0000    1 OP_NIL
+0001    | OP_RETURN
+== callIt ==
+0000    7 OP_GET_LOCAL        1
+0002    | OP_INVOKE        (0 args)    0 'greet'
+0005    | OP_RETURN
+== greet ==
+0000    4 OP_CONSTANT         0 'Hello'
+0002    | OP_RETURN
+== <script> ==
+0000    7 OP_CLOSURE          1 <fn callIt>
+0002    | OP_DEFINE_GLOBAL    0 'callIt'
+0004    1 OP_STRUCT           2 'Greeter'
+0006    | OP_DEFINE_GLOBAL    2 'Greeter'
+0008    | OP_GET_GLOBAL       3 'Greeter'
+0010    | OP_POP
+0011    3 OP_GET_GLOBAL       4 'Greeter'
+0013    4 OP_CLOSURE          6 <fn greet>
+0015    | OP_METHOD           5 'greet'
+0017    5 OP_POP
+0018    9 OP_GET_GLOBAL       7 'callIt'
+0020    | OP_GET_GLOBAL       8 'Greeter'
+0022    | OP_STRUCT_INIT      0
+0024    | OP_CALL             1
+0026    | OP_PRINT
+0027   10 OP_NIL
+0028    | OP_RETURN
+Method 'greet' is private to 'Greeter'.
+[line 7] in callIt()
+[line 9] in script

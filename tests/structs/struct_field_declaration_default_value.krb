@@ -1,5 +1,5 @@
 struct Struct {
-    var value = "Hello World";
+    pub var value = "Hello World";
 }
 
 var instance = Struct {};

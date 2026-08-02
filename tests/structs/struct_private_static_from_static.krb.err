@@ -1,0 +1,39 @@
+== <script> ==
+0000    1 OP_NIL
+0001    | OP_RETURN
+== make ==
+0000    6 OP_GET_GLOBAL       0 'Point'
+0002    | OP_CONSTANT         1 'x'
+0004    | OP_GET_LOCAL        1
+0006    | OP_STRUCT_INIT      1
+0008    | OP_RETURN
+== origin ==
+0000    8 OP_GET_GLOBAL       0 'Point'
+0002    | OP_CONSTANT         2 '0.000000'
+0004    | OP_INVOKE        (1 args)    1 'make'
+0007    | OP_RETURN
+== x ==
+0000   10 OP_GET_LOCAL        0
+0002    | OP_GET_PROPERTY     0 'x'
+0004    | OP_RETURN
+== <script> ==
+0000    1 OP_STRUCT           0 'Point'
+0002    | OP_DEFINE_GLOBAL    0 'Point'
+0004    | OP_GET_GLOBAL       1 'Point'
+0006    2 OP_CONSTANT         3 '0.000000'
+0008    | OP_FIELD            2 'x' priv
+0011    3 OP_POP
+0012    5 OP_GET_GLOBAL       4 'Point'
+0014    6 OP_CLOSURE          6 <fn make>
+0016    | OP_METHOD           5 'make'
+0018    8 OP_CLOSURE          8 <fn origin>
+0020    | OP_METHOD           7 'origin'
+0022   10 OP_CLOSURE         10 <fn x>
+0024    | OP_METHOD           9 'x'
+0026   11 OP_POP
+0027   13 OP_GET_GLOBAL      11 'Point'
+0029    | OP_INVOKE        (0 args)   12 'origin'
+0032    | OP_INVOKE        (0 args)   13 'x'
+0035    | OP_PRINT
+0036   14 OP_NIL
+0037    | OP_RETURN

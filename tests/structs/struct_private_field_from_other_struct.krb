@@ -1,0 +1,11 @@
+struct Secret {
+    var value = 42;
+}
+
+struct Thief {}
+
+impl Thief {
+    pub fun steal(self, secret) = secret.value;
+}
+
+print Thief {}.steal(Secret {});

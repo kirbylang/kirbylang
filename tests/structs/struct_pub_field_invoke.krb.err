@@ -1,0 +1,21 @@
+== <script> ==
+0000    1 OP_NIL
+0001    | OP_RETURN
+== lambda0x1 ==
+0000    2 OP_CONSTANT         0 'called'
+0002    | OP_RETURN
+== <script> ==
+0000    1 OP_STRUCT           0 'Holder'
+0002    | OP_DEFINE_GLOBAL    0 'Holder'
+0004    | OP_GET_GLOBAL       1 'Holder'
+0006    2 OP_CLOSURE          3 <fn lambda0x1>
+0008    | OP_FIELD            2 'callback' pub
+0011    3 OP_POP
+0012    5 OP_GET_GLOBAL       5 'Holder'
+0014    | OP_STRUCT_INIT      0
+0016    | OP_DEFINE_GLOBAL    4 'h'
+0018    7 OP_GET_GLOBAL       6 'h'
+0020    | OP_INVOKE        (0 args)    7 'callback'
+0023    | OP_PRINT
+0024    8 OP_NIL
+0025    | OP_RETURN

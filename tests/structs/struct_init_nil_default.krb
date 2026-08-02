@@ -1,6 +1,6 @@
 struct Struct {
-    var implicit;
-    var explicit = nil;
+    pub var implicit;
+    pub var explicit = nil;
 }
 
 var instance = Struct { implicit: 1, explicit: nil };

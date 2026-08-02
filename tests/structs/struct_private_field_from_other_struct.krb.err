@@ -1,0 +1,33 @@
+== <script> ==
+0000    1 OP_NIL
+0001    | OP_RETURN
+== steal ==
+0000    8 OP_GET_LOCAL        1
+0002    | OP_GET_PROPERTY     0 'value'
+0004    | OP_RETURN
+== <script> ==
+0000    1 OP_STRUCT           0 'Secret'
+0002    | OP_DEFINE_GLOBAL    0 'Secret'
+0004    | OP_GET_GLOBAL       1 'Secret'
+0006    2 OP_CONSTANT         3 '42.000000'
+0008    | OP_FIELD            2 'value' priv
+0011    3 OP_POP
+0012    5 OP_STRUCT           4 'Thief'
+0014    | OP_DEFINE_GLOBAL    4 'Thief'
+0016    | OP_GET_GLOBAL       5 'Thief'
+0018    | OP_POP
+0019    7 OP_GET_GLOBAL       6 'Thief'
+0021    8 OP_CLOSURE          8 <fn steal>
+0023    | OP_METHOD           7 'steal'
+0025    9 OP_POP
+0026   11 OP_GET_GLOBAL       9 'Thief'
+0028    | OP_STRUCT_INIT      0
+0030    | OP_GET_GLOBAL      11 'Secret'
+0032    | OP_STRUCT_INIT      0
+0034    | OP_INVOKE        (1 args)   10 'steal'
+0037    | OP_PRINT
+0038   12 OP_NIL
+0039    | OP_RETURN
+Field 'value' is private to 'Secret'.
+[line 8] in steal()
+[line 11] in script

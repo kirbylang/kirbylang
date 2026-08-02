@@ -1,6 +1,6 @@
 struct Point {
-    var x;
-    var y;
+    pub var x;
+    pub var y;
 }
 
 impl Point {
@@ -13,7 +13,7 @@ impl Point {
         return point;
     }
 
-    fun origin() {
+    pub fun origin() {
         return Point.new(0, 0);
     }
 }

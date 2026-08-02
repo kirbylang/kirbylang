@@ -135,6 +135,7 @@ typedef struct {
   AstNode *initializer;
   int declEndLine;
   bool isMutable;
+  bool isPublic;
 } VarDeclNode;
 
 typedef struct {
@@ -182,6 +183,7 @@ typedef struct {
   bool isMethod;
   bool hasSelf;
   bool isLambda;
+  bool isPublic;
 } FunctionNode;
 
 typedef struct {

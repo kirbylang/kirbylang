@@ -1,0 +1,9 @@
+struct Point {
+    pub var x = 0;
+}
+
+impl Point {
+    pub fun origin() = Point {};
+}
+
+print Point.origin().x;

@@ -39,7 +39,7 @@
 |    30 | **OP_CLOSURE**          | `index`, `isLocal`, `upvalueIndex` |       |                                                   |
 |    31 | **OP_STRUCT**           | `index`                            |       |                                                   |
 |    32 | **OP_STRUCT_INIT**      | f                                  |       |                                                   |
-|    33 | **OP_FIELD**            | `index`                            |       |                                                   |
+|    33 | **OP_FIELD**            | `index`, `flag`                    |       |                                                   |
 |    34 | **OP_GET_PROPERTY**     | `index`                            |       |                                                   |
 |    35 | **OP_SET_PROPERTY**     | `index`, `index`                   |       |                                                   |
 |    36 | **OP_METHOD**           | `index`                            |       |                                                   |
@@ -61,6 +61,7 @@
 | **isLocal**      | `uint8_t`  | (0 or 1) For `OP_CLOSURE` only: tells whether the captured variable lives in the immediate surrounding function (`1`) or is itself an upvalue (`0`). |
 | **upvalueIndex** | `uint8_t`  | Index of the local or upvalue being captured (used together with the byte above).                                                                    |
 | **jumpOffset**   | `uint16_t` | Relative jump distance measured from the **next instruction** after the offset field. (big‑endian: high byte first)                                  |
+| **flag**         | `uint8_t`  | 0 = false, 1 = true                                                                                                                                  |
 
 ---
 

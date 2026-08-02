@@ -1,0 +1,23 @@
+struct Counter {
+    var count = 0;
+}
+
+impl Counter {
+    pub fun new() = Counter {};
+
+    pub fun increment(self) {
+        self.count = self.count + 1;
+    }
+}
+
+// A second impl block is also "inside" the struct.
+impl Counter {
+    pub fun get(self) = self.count;
+}
+
+var counter = Counter.new();
+
+counter.increment();
+counter.increment();
+
+print counter.get();
