@@ -13,7 +13,7 @@
 0006    | OP_DEFINE_GLOBAL    2 'Struct'
 0008    | OP_GET_GLOBAL       3 'Struct'
 0010    2 OP_NIL
-0011    | OP_FIELD            4 'fn' priv
+0011    | OP_FIELD            4 'fn' private
 0014    3 OP_POP
 0015    5 OP_GET_GLOBAL       6 'Struct'
 0017    | OP_STRUCT_INIT      0

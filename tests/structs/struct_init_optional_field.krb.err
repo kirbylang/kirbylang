@@ -6,11 +6,11 @@
 0002    | OP_DEFINE_GLOBAL    0 'Config'
 0004    | OP_GET_GLOBAL       1 'Config'
 0006    2 OP_NIL
-0007    | OP_FIELD            2 'name' pub
+0007    | OP_FIELD            2 'name' public
 0010    3 OP_FALSE
-0011    | OP_FIELD            3 'debug' pub
+0011    | OP_FIELD            3 'debug' public
 0014    4 OP_CONSTANT         5 '3.000000'
-0016    | OP_FIELD            4 'retries' pub
+0016    | OP_FIELD            4 'retries' public
 0019    5 OP_POP
 0020    7 OP_GET_GLOBAL       7 'Config'
 0022    | OP_CONSTANT         8 'name'

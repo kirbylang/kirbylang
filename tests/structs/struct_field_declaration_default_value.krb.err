@@ -6,7 +6,7 @@
 0002    | OP_DEFINE_GLOBAL    0 'Struct'
 0004    | OP_GET_GLOBAL       1 'Struct'
 0006    2 OP_CONSTANT         3 'Hello World'
-0008    | OP_FIELD            2 'value' pub
+0008    | OP_FIELD            2 'value' public
 0011    3 OP_POP
 0012    5 OP_GET_GLOBAL       5 'Struct'
 0014    | OP_STRUCT_INIT      0

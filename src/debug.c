@@ -46,7 +46,7 @@ static int constantFlagInstruction(const char *name, Chunk *chunk, int offset) {
   uint8_t flag = chunk->code[offset + 2];
   fprintf(stderr, "%-16s %4d '", name, constant);
   printValueToErr(chunk->constants.values[constant]);
-  fprintf(stderr, "' %s\n", flag ? "pub" : "priv");
+  fprintf(stderr, "' %s\n", flag ? "public" : "private");
   return offset + 3;
 }
 

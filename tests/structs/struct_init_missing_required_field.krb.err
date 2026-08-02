@@ -6,9 +6,9 @@
 0002    | OP_DEFINE_GLOBAL    0 'Point'
 0004    | OP_GET_GLOBAL       1 'Point'
 0006    2 OP_NIL
-0007    | OP_FIELD            2 'x' pub
+0007    | OP_FIELD            2 'x' public
 0010    3 OP_NIL
-0011    | OP_FIELD            3 'y' priv
+0011    | OP_FIELD            3 'y' private
 0014    4 OP_POP
 0015    6 OP_GET_GLOBAL       5 'Point'
 0017    | OP_CONSTANT         6 'x'

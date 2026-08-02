@@ -6,7 +6,7 @@
 0002    | OP_DEFINE_GLOBAL    0 'Account'
 0004    | OP_GET_GLOBAL       1 'Account'
 0006    2 OP_CONSTANT         3 '100.000000'
-0008    | OP_FIELD            2 'balance' priv
+0008    | OP_FIELD            2 'balance' private
 0011    3 OP_POP
 0012    5 OP_GET_GLOBAL       5 'Account'
 0014    | OP_STRUCT_INIT      0
