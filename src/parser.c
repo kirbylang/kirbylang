@@ -20,6 +20,11 @@ typedef struct {
   Token current;
   bool hadError;
   bool panicMode;
+  /**
+   * How many `{ }` bodies we are inside. `struct` and `impl` are declarations
+   * and are only legal where this is 0.
+   */
+  int blockDepth;
 } Parser;
 
 typedef enum {
@@ -617,6 +622,7 @@ static ParseRule rules[] = {
 static ParseRule *get_rule(TokenType type) { return &rules[type]; }
 
 static BlockNode parseBlock(Parser *p) {
+  p->blockDepth++;
   int capacity = 8, count = 0;
   AstNode **buf = (AstNode **)malloc(capacity * sizeof(AstNode *));
   AstNode *tailNode = NULL;
@@ -654,6 +660,8 @@ static BlockNode parseBlock(Parser *p) {
   block.count = count;
   block.value = tailNode;
   block.endLine = p->previous.line; // the '}' just consumed above
+
+  p->blockDepth--;
 
   return block;
 }
@@ -823,6 +831,7 @@ static bool isExpressionStart(TokenType type) {
 // it's parsed as a full declaration
 // (var/struct/impl/for/while/print/return/fun).
 static BlockNode parseBlockExprContents(Parser *p) {
+  p->blockDepth++;
   int capacity = 8, count = 0;
   AstNode **buf = (AstNode **)malloc(capacity * sizeof(AstNode *));
   AstNode *tailNode = NULL;
@@ -872,6 +881,9 @@ static BlockNode parseBlockExprContents(Parser *p) {
   block.count = count;
   block.value = tailNode;
   block.endLine = p->previous.line; // the '}' just consumed above
+
+  p->blockDepth--;
+
   return block;
 }
 
@@ -1184,6 +1196,11 @@ static AstNode *declaration(Parser *p, bool *isTail) {
     advance(p); // 'pub', so the rest of the declaration still parses
   }
 
+  if (p->blockDepth > 0 && (check(p, TOKEN_STRUCT) || check(p, TOKEN_IMPL))) {
+    error_at_current(p, "'struct' and 'impl' are declarations and can only "
+                        "appear at the top level.");
+  }
+
   if (match(p, TOKEN_STRUCT)) {
     node = structDeclaration(p);
   } else if (match(p, TOKEN_IMPL)) {
@@ -1207,6 +1224,7 @@ static void initParser(Parser *parser, TokenStream *tokens) {
   parser->tokens = tokens;
   parser->hadError = false;
   parser->panicMode = false;
+  parser->blockDepth = 0;
   advance(parser);
 }
 
