@@ -51,6 +51,8 @@ const char *tokenTypeToString(TokenType type) {
     return "TOKEN_IDENTIFIER";
   case TOKEN_STRING:
     return "TOKEN_STRING";
+  case TOKEN_INTERPOLATED_STRING:
+    return "TOKEN_INTERPOLATED_STRING";
   case TOKEN_NUMBER:
     return "TOKEN_NUMBER";
   case TOKEN_AND:
