@@ -4,50 +4,50 @@
 
 ## Opcode Table
 
-| Opcode                  | Operand(s)                         | Stack | Notes                                                                |
-| ----------------------- | ---------------------------------- | ----: | -------------------------------------------------------------------- |
-| **OP_CONSTANT**         | `index`                            |    +1 |                                                                      |
-| **OP_NIL**              |                                    |    +1 |                                                                      |
-| **OP_TRUE**             |                                    |    +1 |                                                                      |
-| **OP_FALSE**            |                                    |    +1 |                                                                      |
-| **OP_ADD**              |                                    | -2 +1 |                                                                      |
-| **OP_SUBTRACT**         |                                    | -2 +1 |                                                                      |
-| **OP_MULTIPLY**         |                                    | -2 +1 |                                                                      |
-| **OP_DIVIDE**           |                                    | -2 +1 |                                                                      |
-| **OP_MODULO**           |                                    | -2 +1 |                                                                      |
-| **OP_NEGATE**           |                                    | -1 +1 |                                                                      |
-| **OP_NOT**              |                                    | -1 +1 |                                                                      |
-| **OP_PRINT**            |                                    |       |                                                                      |
-| **OP_RETURN**           |                                    |       |                                                                      |
-| **OP_EQUAL**            |                                    | -2 +1 |                                                                      |
-| **OP_GREATER**          |                                    | -2 +1 |                                                                      |
-| **OP_LESS**             |                                    | -2 +1 |                                                                      |
-| **OP_POP**              |                                    |    -1 |                                                                      |
-| **OP_DEFINE_GLOBAL**    | `index`                            |       |                                                                      |
-| **OP_GET_GLOBAL**       | `index`                            |       |                                                                      |
-| **OP_SET_GLOBAL**       | `index`                            |       |                                                                      |
-| **OP_GET_LOCAL**        | `slot`                             |       |                                                                      |
-| **OP_SET_LOCAL**        | `slot`                             |       |                                                                      |
-| **OP_JUMP_IF_FALSE**    | `jumpOffset`                       |       |                                                                      |
-| **OP_JUMP_IF_NOT_NIL**  | `jumpOffset`                       |       |                                                                      |
-| **OP_JUMP**             | `jumpOffset`                       |       |                                                                      |
-| **OP_LOOP**             | `jumpOffset`                       |       |                                                                      |
-| **OP_CLOSE_UPVALUE**    |                                    |       |                                                                      |
-| **OP_GET_UPVALUE**      | `slot`                             |       |                                                                      |
-| **OP_SET_UPVALUE**      | `slot`                             |       |                                                                      |
-| **OP_GET_PROPERTY**     | `index`                            |       |                                                                      |
-| **OP_SET_PROPERTY**     | `index`, `index`                   |       |                                                                      |
-| **OP_STRUCT**           | `index`                            |       |                                                                      |
-| **OP_STRUCT_INIT**      | f                                  |       |                                                                      |
-| **OP_METHOD**           | `index`                            |       |                                                                      |
-| **OP_INVOKE**           | `index`, `argCount`                |       |                                                                      |
-| **OP_CALL**             | `argCount`                         |       |                                                                      |
-| **OP_CLOSURE**          | `index`, `isLocal`, `upvalueIndex` |       |                                                                      |
-| **OP_FIELD**            | `index`                            |       |                                                                      |
-| **OP_ARRAY**            | `itemCount`                        | -n +1 |                                                                      |
-| **OP_INDEX_GET**        |                                    | -2 +1 |                                                                      |
-| **OP_INDEX_SET**        |                                    | -3 +1 |                                                                      |
-| **OP_CLOSE_BLOCK_EXPR** | `upvalueCount`                     | -n +1 | Cleans upvalues while leaving block expression return value on stack |
+| Index | Opcode                  | Operand(s)                         | Stack | Notes                                             |
+| ----: | ----------------------- | ---------------------------------- | ----: | ------------------------------------------------- |
+|     0 | **OP_CONSTANT**         | `index`                            |    +1 |                                                   |
+|     1 | **OP_NIL**              |                                    |    +1 |                                                   |
+|     2 | **OP_TRUE**             |                                    |    +1 |                                                   |
+|     3 | **OP_FALSE**            |                                    |    +1 |                                                   |
+|     4 | **OP_ADD**              |                                    | -2 +1 |                                                   |
+|     5 | **OP_SUBTRACT**         |                                    | -2 +1 |                                                   |
+|     6 | **OP_MULTIPLY**         |                                    | -2 +1 |                                                   |
+|     7 | **OP_DIVIDE**           |                                    | -2 +1 |                                                   |
+|     8 | **OP_MODULO**           |                                    | -2 +1 |                                                   |
+|     9 | **OP_NEGATE**           |                                    | -1 +1 |                                                   |
+|    10 | **OP_PRINT**            |                                    |       |                                                   |
+|    11 | **OP_RETURN**           |                                    |       |                                                   |
+|    12 | **OP_EQUAL**            |                                    | -2 +1 |                                                   |
+|    13 | **OP_NOT**              |                                    | -1 +1 |                                                   |
+|    14 | **OP_POP**              |                                    |    -1 |                                                   |
+|    15 | **OP_CLOSE_UPVALUE**    |                                    |       |                                                   |
+|    16 | **OP_DEFINE_GLOBAL**    | `index`                            |       |                                                   |
+|    17 | **OP_GET_GLOBAL**       | `index`                            |       |                                                   |
+|    18 | **OP_SET_GLOBAL**       | `index`                            |       |                                                   |
+|    19 | **OP_GET_UPVALUE**      | `slot`                             |       |                                                   |
+|    20 | **OP_SET_UPVALUE**      | `slot`                             |       |                                                   |
+|    21 | **OP_GET_LOCAL**        | `slot`                             |       |                                                   |
+|    22 | **OP_SET_LOCAL**        | `slot`                             |       |                                                   |
+|    23 | **OP_JUMP_IF_FALSE**    | `jumpOffset`                       |       |                                                   |
+|    24 | **OP_JUMP_IF_NOT_NIL**  | `jumpOffset`                       |       |                                                   |
+|    25 | **OP_JUMP**             | `jumpOffset`                       |       |                                                   |
+|    26 | **OP_LOOP**             | `jumpOffset`                       |       |                                                   |
+|    27 | **OP_GREATER**          |                                    | -2 +1 |                                                   |
+|    28 | **OP_LESS**             |                                    | -2 +1 |                                                   |
+|    29 | **OP_CALL**             | `argCount`                         |       |                                                   |
+|    30 | **OP_CLOSURE**          | `index`, `isLocal`, `upvalueIndex` |       |                                                   |
+|    31 | **OP_STRUCT**           | `index`                            |       |                                                   |
+|    32 | **OP_STRUCT_INIT**      | f                                  |       |                                                   |
+|    33 | **OP_FIELD**            | `index`                            |       |                                                   |
+|    34 | **OP_GET_PROPERTY**     | `index`                            |       |                                                   |
+|    35 | **OP_SET_PROPERTY**     | `index`, `index`                   |       |                                                   |
+|    36 | **OP_METHOD**           | `index`                            |       |                                                   |
+|    37 | **OP_INVOKE**           | `index`, `argCount`                |       |                                                   |
+|    38 | **OP_ARRAY**            | `itemCount`                        | -n +1 |                                                   |
+|    39 | **OP_GET_INDEX**        |                                    | -2 +1 |                                                   |
+|    40 | **OP_SET_INDEX**        |                                    | -3 +1 |                                                   |
+|    41 | **OP_CLOSE_BLOCK_EXPR** | `upvalueCount`                     | -n +1 | Cleans up upvalues. Leaves return value on stack. |
 
 ### Operand Encodings
 
