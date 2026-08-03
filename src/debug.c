@@ -170,7 +170,7 @@ int disassembleInstruction(Chunk *chunk, int offset) {
   case OP_SET_INDEX:
     return simpleInstruction("OP_SET_INDEX", offset);
   case OP_CLOSE_BLOCK_EXPR:
-    return byteInstruction("OP_CLOSE_BLOCK", chunk, offset);
+    return byteInstruction("OP_CLOSE_BLOCK_EXPR", chunk, offset);
   default:
     fprintf(stderr, "Unknown opcode %d\n", instruction);
     return offset + 1;
