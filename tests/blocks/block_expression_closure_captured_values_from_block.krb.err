@@ -9,7 +9,7 @@
 0002    4 OP_CLOSURE          2 <fn inner>
 0004      |                     local 1
 0006    6 OP_GET_LOCAL        2
-0008    7 OP_CLOSE_BLOCK      2
+0008    7 OP_CLOSE_BLOCK_EXPR    2
 0010    | OP_DEFINE_GLOBAL    0 'closure'
 0012    9 OP_GET_GLOBAL       3 'closure'
 0014    | OP_CALL             0

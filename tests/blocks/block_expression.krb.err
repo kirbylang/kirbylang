@@ -9,9 +9,9 @@
 0007    | OP_CONSTANT         0 '0.500000'
 0009    | OP_MULTIPLY
 0010    6 OP_GET_LOCAL        5
-0012    7 OP_CLOSE_BLOCK      2
+0012    7 OP_CLOSE_BLOCK_EXPR    2
 0014    9 OP_GET_LOCAL        3
-0016   10 OP_CLOSE_BLOCK      1
+0016   10 OP_CLOSE_BLOCK_EXPR    1
 0018    | OP_RETURN
 == <script> ==
 0000   10 OP_CLOSURE          1 <fn process>

@@ -5,7 +5,7 @@
 0000    3 OP_GET_LOCAL        1
 0002    | OP_GET_LOCAL        2
 0004    | OP_ADD
-0005    | OP_CLOSE_BLOCK      0
+0005    | OP_CLOSE_BLOCK_EXPR    0
 0007    | OP_RETURN
 == <script> ==
 0000    3 OP_CLOSURE          1 <fn sum>

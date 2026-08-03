@@ -4,7 +4,7 @@
 == <script> ==
 0000    1 OP_CONSTANT         0 '10.000000'
 0002    2 OP_CONSTANT         1 '20.000000'
-0004    3 OP_CLOSE_BLOCK      0
+0004    3 OP_CLOSE_BLOCK_EXPR    0
 0006    | OP_ADD
 0007    | OP_PRINT
 0008    4 OP_NIL

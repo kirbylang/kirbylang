@@ -18,7 +18,7 @@
 0006    | OP_CONSTANT         3 '10.000000'
 0008    | OP_GET_LOCAL        2
 0010    | OP_CALL             2
-0012    6 OP_CLOSE_BLOCK      2
+0012    6 OP_CLOSE_BLOCK_EXPR    2
 0014    | OP_DEFINE_GLOBAL    0 'result'
 0016    8 OP_GET_GLOBAL       4 'result'
 0018    | OP_PRINT
