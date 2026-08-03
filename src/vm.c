@@ -194,6 +194,21 @@ static bool callValue(Value callee, int argCount) {
   return false;
 }
 
+// The struct whose private members the currently executing code may touch, or
+// NULL at the top level / inside a plain function.
+static ObjStruct *currentOwner(void) {
+  if (vm.frameCount == 0)
+    return NULL;
+
+  return vm.frames[vm.frameCount - 1].closure->owner;
+}
+
+// Visibility is per-struct, not per-instance: a method of struct T may read the
+// private fields of any T struct, not only its own `self`.
+static bool canAccess(ObjStruct *struct_, bool isPublic) {
+  return isPublic || currentOwner() == struct_;
+}
+
 static bool invokeFromStruct(ObjStruct *struct_, ObjString *name,
                              int argCount) {
   Value method;
@@ -207,6 +222,12 @@ static bool invokeFromStruct(ObjStruct *struct_, ObjString *name,
                  "'%s' is a static method. Call it on '%s' instead of on an "
                  "instance.",
                  name->chars, struct_->name->chars);
+    return false;
+  }
+
+  if (!canAccess(struct_, AS_CLOSURE(method)->function->isPublic)) {
+    runtimeError(&vm, "Method '%s' is private to '%s'.", name->chars,
+                 struct_->name->chars);
     return false;
   }
 
@@ -225,6 +246,12 @@ static bool invokeStatic(ObjStruct *struct_, ObjString *name, int argCount) {
                  "'%s' is an instance method and needs an instance of '%s' to "
                  "be called on.",
                  name->chars, struct_->name->chars);
+    return false;
+  }
+
+  if (!canAccess(struct_, AS_CLOSURE(method)->function->isPublic)) {
+    runtimeError(&vm, "Method '%s' is private to '%s'.", name->chars,
+                 struct_->name->chars);
     return false;
   }
 
@@ -249,6 +276,19 @@ static bool invoke(ObjString *name, int argCount) {
   int slot;
 
   if (structFieldSlot(instance->struct_, name, &slot)) {
+    if (!canAccess(instance->struct_, instance->struct_->fieldPublic[slot])) {
+      // Fields normally shadow methods, but a field you can't see shouldn't
+      // hide an accessor that shares its name (`var count` + `fun count()`).
+      // TODO: Clean this up
+      Value method;
+      if (tableGet(&instance->struct_->methods, name, &method))
+        return invokeFromStruct(instance->struct_, name, argCount);
+
+      runtimeError(&vm, "Field '%s' is private to '%s'.", name->chars,
+                   instance->struct_->name->chars);
+      return false;
+    }
+
     Value fieldValue = instance->fields[slot];
 
     vm.stackTop[argCount - 1] = fieldValue;
@@ -278,6 +318,12 @@ static BindResult bindMethod(ObjStruct *struct_, ObjString *name) {
                  "'%s' is a static method. Access it on '%s' instead of on an "
                  "instance.",
                  name->chars, struct_->name->chars);
+    return BIND_ERROR;
+  }
+
+  if (!canAccess(struct_, AS_CLOSURE(method)->function->isPublic)) {
+    runtimeError(&vm, "Method '%s' is private to '%s'.", name->chars,
+                 struct_->name->chars);
     return BIND_ERROR;
   }
 
@@ -331,6 +377,12 @@ static bool defineMethod(ObjString *name) {
   }
 
   ObjStruct *struct_ = AS_STRUCT(target);
+
+  // Membership is recorded per closure rather than per function so that a
+  // struct declared inside a function (a fresh ObjStruct on every call) still
+  // pairs with the closures created alongside it.
+  AS_CLOSURE(method)->owner = struct_;
+
   tableSet(&struct_->methods, name, method);
   popFromStack();
   return true;
@@ -596,6 +648,11 @@ static InterpretResult run(void) {
     case OP_CLOSURE: {
       ObjFunction *function = AS_FUNCTION(READ_CONSTANT());
       ObjClosure *closure = newClosure(function);
+
+      // A lambda or nested function written inside a method keeps that
+      // method's access. OP_METHOD overwrites this for the method itself.
+      closure->owner = frame->closure->owner;
+
       pushOnStack(OBJ_VAL(closure));
 
       for (int i = 0; i < closure->upvalueCount; i++) {
@@ -650,7 +707,7 @@ static InterpretResult run(void) {
       ObjInstance *instance = newInstance(struct_);
 
       // Handle any `field: value,` passed
-
+      //
       // i=0:  pairs[2*0]   = pairs[0] = 'y'      pairs[2*0+1] = pairs[1] = 10
       // i=1:  pairs[2*1]   = pairs[2] = 'x'      pairs[2*1+1] = pairs[3] = 30
       // i=2:  pairs[2*2]   = pairs[0] = 'a'      pairs[2*2+1] = pairs[5] = 50
@@ -663,6 +720,12 @@ static InterpretResult run(void) {
 
         if (!structFieldSlot(struct_, field, &slot)) {
           runtimeError(&vm, "Undefined field '%s'.", field->chars);
+          return INTERPRET_RUNTIME_ERROR;
+        }
+
+        if (!canAccess(struct_, struct_->fieldPublic[slot])) {
+          runtimeError(&vm, "Field '%s' is private to '%s'.", field->chars,
+                       struct_->name->chars);
           return INTERPRET_RUNTIME_ERROR;
         }
 
@@ -708,6 +771,12 @@ static InterpretResult run(void) {
           return INTERPRET_RUNTIME_ERROR;
         }
 
+        if (!canAccess(struct_, AS_CLOSURE(method)->function->isPublic)) {
+          runtimeError(&vm, "Method '%s' is private to '%s'.", name->chars,
+                       struct_->name->chars);
+          return INTERPRET_RUNTIME_ERROR;
+        }
+
         popFromStack(); // struct
         pushOnStack(method);
         break;
@@ -724,11 +793,24 @@ static InterpretResult run(void) {
       int slot;
 
       if (structFieldSlot(instance->struct_, name, &slot)) {
-        Value value = instance->fields[slot];
+        Value shadowed;
 
-        popFromStack(); // instance
-        pushOnStack(value);
-        break;
+        if (!canAccess(instance->struct_,
+                       instance->struct_->fieldPublic[slot]) &&
+            !tableGet(&instance->struct_->methods, name, &shadowed)) {
+          runtimeError(&vm, "Field '%s' is private to '%s'.", name->chars,
+                       instance->struct_->name->chars);
+          return INTERPRET_RUNTIME_ERROR;
+        }
+
+        if (canAccess(instance->struct_,
+                      instance->struct_->fieldPublic[slot])) {
+          Value value = instance->fields[slot];
+
+          popFromStack(); // instance
+          pushOnStack(value);
+          break;
+        }
       }
 
       switch (bindMethod(instance->struct_, name)) {
@@ -759,6 +841,12 @@ static InterpretResult run(void) {
         return INTERPRET_RUNTIME_ERROR;
       }
 
+      if (!canAccess(instance->struct_, instance->struct_->fieldPublic[slot])) {
+        runtimeError(&vm, "Field '%s' is private to '%s'.", name->chars,
+                     instance->struct_->name->chars);
+        return INTERPRET_RUNTIME_ERROR;
+      }
+
       instance->fields[slot] = peekStack(0);
 
       Value value = popFromStack(); // value
@@ -768,6 +856,7 @@ static InterpretResult run(void) {
     }
     case OP_FIELD: {
       ObjString *field_name = READ_STRING();
+      bool isPublic = READ_BYTE() != 0;
 
       Value value = peekStack(1);
 
@@ -794,6 +883,7 @@ static InterpretResult run(void) {
       }
 
       struct_->fieldDefaults[struct_->fieldCount] = initializer;
+      struct_->fieldPublic[struct_->fieldCount] = isPublic;
 
       struct_->fieldCount++;
 

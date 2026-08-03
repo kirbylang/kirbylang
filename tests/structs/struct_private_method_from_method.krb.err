@@ -1,0 +1,32 @@
+== <script> ==
+0000    1 OP_NIL
+0001    | OP_RETURN
+== subject ==
+0000    6 OP_GET_LOCAL        0
+0002    | OP_GET_PROPERTY     0 'name'
+0004    | OP_RETURN
+== greet ==
+0000    8 OP_CONSTANT         0 'Hello '
+0002    | OP_GET_LOCAL        0
+0004    | OP_INVOKE        (0 args)    1 'subject'
+0007    | OP_ADD
+0008    | OP_RETURN
+== <script> ==
+0000    1 OP_STRUCT           0 'Greeter'
+0002    | OP_DEFINE_GLOBAL    0 'Greeter'
+0004    | OP_GET_GLOBAL       1 'Greeter'
+0006    2 OP_CONSTANT         3 'World'
+0008    | OP_FIELD            2 'name' private
+0011    3 OP_POP
+0012    5 OP_GET_GLOBAL       4 'Greeter'
+0014    6 OP_CLOSURE          6 <fn subject>
+0016    | OP_METHOD           5 'subject'
+0018    8 OP_CLOSURE          8 <fn greet>
+0020    | OP_METHOD           7 'greet'
+0022    9 OP_POP
+0023   11 OP_GET_GLOBAL       9 'Greeter'
+0025    | OP_STRUCT_INIT      0
+0027    | OP_INVOKE        (0 args)   10 'greet'
+0030    | OP_PRINT
+0031   12 OP_NIL
+0032    | OP_RETURN

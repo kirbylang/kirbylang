@@ -1,0 +1,13 @@
+struct Point {
+    var x = 0;
+}
+
+impl Point {
+    fun make(x) = Point { x: x };
+
+    pub fun origin() = Point.make(0);
+
+    pub fun x(self) = self.x;
+}
+
+print Point.origin().x();

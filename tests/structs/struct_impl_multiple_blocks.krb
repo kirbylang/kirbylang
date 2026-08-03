@@ -3,13 +3,13 @@ struct Counter {
 }
 
 impl Counter {
-    fun increment(self) {
+    pub fun increment(self) {
         self.count = self.count + 1;
     }
 }
 
 impl Counter {
-    fun get(self) {
+    pub fun get(self) {
         return self.count;
     }
 }

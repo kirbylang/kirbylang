@@ -1,0 +1,39 @@
+== <script> ==
+0000    1 OP_NIL
+0001    | OP_RETURN
+== at ==
+0000    6 OP_GET_GLOBAL       0 'Point'
+0002    | OP_CONSTANT         1 'x'
+0004    | OP_GET_LOCAL        1
+0006    | OP_STRUCT_INIT      1
+0008    | OP_RETURN
+== sum ==
+0000   10 OP_GET_LOCAL        0
+0002    | OP_GET_PROPERTY     0 'x'
+0004    | OP_GET_LOCAL        1
+0006    | OP_GET_PROPERTY     1 'x'
+0008    | OP_ADD
+0009    | OP_RETURN
+== <script> ==
+0000    1 OP_STRUCT           0 'Point'
+0002    | OP_DEFINE_GLOBAL    0 'Point'
+0004    | OP_GET_GLOBAL       1 'Point'
+0006    2 OP_CONSTANT         3 '0.000000'
+0008    | OP_FIELD            2 'x' private
+0011    3 OP_POP
+0012    5 OP_GET_GLOBAL       4 'Point'
+0014    6 OP_CLOSURE          6 <fn at>
+0016    | OP_METHOD           5 'at'
+0018   10 OP_CLOSURE          8 <fn sum>
+0020    | OP_METHOD           7 'sum'
+0022   11 OP_POP
+0023   13 OP_GET_GLOBAL       9 'Point'
+0025    | OP_CONSTANT        11 '3.000000'
+0027    | OP_INVOKE        (1 args)   10 'at'
+0030    | OP_GET_GLOBAL      13 'Point'
+0032    | OP_CONSTANT        15 '4.000000'
+0034    | OP_INVOKE        (1 args)   14 'at'
+0037    | OP_INVOKE        (1 args)   12 'sum'
+0040    | OP_PRINT
+0041   14 OP_NIL
+0042    | OP_RETURN

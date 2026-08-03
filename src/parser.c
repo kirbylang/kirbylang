@@ -20,6 +20,11 @@ typedef struct {
   Token current;
   bool hadError;
   bool panicMode;
+  /**
+   * How many `{ }` bodies we are inside. `struct` and `impl` are declarations
+   * and are only legal where this is 0.
+   */
+  int blockDepth;
 } Parser;
 
 typedef enum {
@@ -113,6 +118,7 @@ static void synchronize(Parser *p) {
     case TOKEN_FUN:
     case TOKEN_VAR:
     case TOKEN_LET:
+    case TOKEN_PUB:
     case TOKEN_FOR:
     case TOKEN_IF:
     case TOKEN_WHILE:
@@ -605,6 +611,7 @@ static ParseRule rules[] = {
     [TOKEN_TRUE] = {literal, NULL, PREC_NONE},
     [TOKEN_VAR] = {NULL, NULL, PREC_NONE},
     [TOKEN_LET] = {NULL, NULL, PREC_NONE},
+    [TOKEN_PUB] = {NULL, NULL, PREC_NONE},
     [TOKEN_WHILE] = {NULL, NULL, PREC_NONE},
     [TOKEN_MODULO] = {NULL, binary, PREC_FACTOR},
     [TOKEN_BREAK] = {NULL, NULL, PREC_NONE},
@@ -615,6 +622,7 @@ static ParseRule rules[] = {
 static ParseRule *get_rule(TokenType type) { return &rules[type]; }
 
 static BlockNode parseBlock(Parser *p) {
+  p->blockDepth++;
   int capacity = 8, count = 0;
   AstNode **buf = (AstNode **)malloc(capacity * sizeof(AstNode *));
   AstNode *tailNode = NULL;
@@ -652,6 +660,8 @@ static BlockNode parseBlock(Parser *p) {
   block.count = count;
   block.value = tailNode;
   block.endLine = p->previous.line; // the '}' just consumed above
+
+  p->blockDepth--;
 
   return block;
 }
@@ -821,6 +831,7 @@ static bool isExpressionStart(TokenType type) {
 // it's parsed as a full declaration
 // (var/struct/impl/for/while/print/return/fun).
 static BlockNode parseBlockExprContents(Parser *p) {
+  p->blockDepth++;
   int capacity = 8, count = 0;
   AstNode **buf = (AstNode **)malloc(capacity * sizeof(AstNode *));
   AstNode *tailNode = NULL;
@@ -870,6 +881,9 @@ static BlockNode parseBlockExprContents(Parser *p) {
   block.count = count;
   block.value = tailNode;
   block.endLine = p->previous.line; // the '}' just consumed above
+
+  p->blockDepth--;
+
   return block;
 }
 
@@ -930,6 +944,7 @@ static AstNode *varDeclaration(Parser *p, bool isMutable) {
   node->as.varDecl.name = name;
   node->as.varDecl.initializer = initializer;
   node->as.varDecl.isMutable = isMutable;
+  node->as.varDecl.isPublic = false; // only struct fields can be private/public
   node->as.varDecl.declEndLine = p->previous.line; // the ';' just consumed
   return node;
 }
@@ -986,6 +1001,7 @@ static AstNode *functionTail(Parser *p, Token name, int line, bool isMethod,
   node->as.function.isMethod = isMethod;
   node->as.function.hasSelf = hasSelf;
   node->as.function.isLambda = isLambda;
+  node->as.function.isPublic = false; // set by implDeclaration when `pub`
   node->as.function.exprBody = NULL;
   node->as.function.body.stmts = NULL;
   node->as.function.body.count = 0;
@@ -1050,6 +1066,8 @@ static AstNode *structDeclaration(Parser *p) {
           (VarDeclNode *)realloc(fieldBuf, fieldCap * sizeof(VarDeclNode));
     }
 
+    bool isPublic = match(p, TOKEN_PUB);
+
     if (match(p, TOKEN_VAR)) {
       consume(p, TOKEN_IDENTIFIER, "Expect field name.");
       Token fieldName = p->previous;
@@ -1062,6 +1080,7 @@ static AstNode *structDeclaration(Parser *p) {
       fieldBuf[fieldCount].name = fieldName;
       fieldBuf[fieldCount].initializer = init;
       fieldBuf[fieldCount].isMutable = true;
+      fieldBuf[fieldCount].isPublic = isPublic;
       fieldBuf[fieldCount].declEndLine = p->previous.line; // the ';'
       fieldCount++;
     } else if (check(p, TOKEN_FUN)) {
@@ -1073,6 +1092,8 @@ static AstNode *structDeclaration(Parser *p) {
         functionDeclaration(p, /*isMethod=*/true);
       }
       p->panicMode = false;
+    } else if (isPublic) {
+      error_at_current(p, "Expect field declaration after 'pub'.");
     } else {
       error_at_current(p, "Expect field declaration.");
     }
@@ -1121,6 +1142,8 @@ static AstNode *implDeclaration(Parser *p) {
                                            methodCap * sizeof(FunctionNode *));
     }
 
+    bool isPublic = match(p, TOKEN_PUB);
+
     if (check(p, TOKEN_VAR)) {
       error_at_current(p, "Expect method declaration. Fields belong in the "
                           "'struct' declaration.");
@@ -1136,6 +1159,7 @@ static AstNode *implDeclaration(Parser *p) {
       consume(p, TOKEN_FUN, "Expect 'fun' before method declaration.");
       consume(p, TOKEN_IDENTIFIER, "Expect method name.");
       AstNode *method = functionDeclaration(p, /*isMethod=*/true);
+      method->as.function.isPublic = isPublic;
       methodBuf[methodCount++] = &method->as.function;
     }
 
@@ -1166,6 +1190,17 @@ static AstNode *declaration(Parser *p, bool *isTail) {
   AstNode *node = NULL;
   *isTail = false;
 
+  if (check(p, TOKEN_PUB)) {
+    error_at_current(p, "'pub' is only valid on struct fields and 'impl' "
+                        "methods.");
+    advance(p); // 'pub', so the rest of the declaration still parses
+  }
+
+  if (p->blockDepth > 0 && (check(p, TOKEN_STRUCT) || check(p, TOKEN_IMPL))) {
+    error_at_current(p, "'struct' and 'impl' are declarations and can only "
+                        "appear at the top level.");
+  }
+
   if (match(p, TOKEN_STRUCT)) {
     node = structDeclaration(p);
   } else if (match(p, TOKEN_IMPL)) {
@@ -1189,6 +1224,7 @@ static void initParser(Parser *parser, TokenStream *tokens) {
   parser->tokens = tokens;
   parser->hadError = false;
   parser->panicMode = false;
+  parser->blockDepth = 0;
   advance(parser);
 }
 

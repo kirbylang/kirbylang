@@ -1,0 +1,13 @@
+struct Point {
+    var x = 0;
+}
+
+impl Point {
+    pub fun at(x) = Point { x: x };
+
+    // Visibility is per-struct, not per-instance: `other` is a different
+    // object but the same struct.
+    pub fun sum(self, other) = self.x + other.x;
+}
+
+print Point.at(3).sum(Point.at(4));

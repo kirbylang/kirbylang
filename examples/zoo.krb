@@ -10,7 +10,7 @@ struct Zoo {
 }
 
 impl Zoo {
-  fun init() = Zoo {
+  pub fun init() = Zoo {
     aardvark: 1,
     baboon: 1,
     cat: 1,
@@ -19,12 +19,12 @@ impl Zoo {
     fox: 1,
   };
 
-  fun ant(self) = self.aardvark;
-  fun banana(self) = self.baboon;
-  fun tuna(self) = self.cat;
-  fun hay(self) = self.donkey;
-  fun grass(self) = self.elephant;
-  fun mouse(self) = self.fox;
+  pub fun ant(self) = self.aardvark;
+  pub fun banana(self) = self.baboon;
+  pub fun tuna(self) = self.cat;
+  pub fun hay(self) = self.donkey;
+  pub fun grass(self) = self.elephant;
+  pub fun mouse(self) = self.fox;
 }
 
 var zoo = Zoo.init();

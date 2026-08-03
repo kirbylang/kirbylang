@@ -1,0 +1,11 @@
+fun makeStruct() {
+    struct Point {}
+
+    impl Point {}
+}
+
+{
+    struct Point {}
+
+    impl Point {}
+}

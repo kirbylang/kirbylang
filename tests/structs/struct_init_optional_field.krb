@@ -1,7 +1,7 @@
 struct Config {
-    var name;
-    var debug = false;
-    var retries = 3;
+    pub var name;
+    pub var debug = false;
+    pub var retries = 3;
 }
 
 var defaults = Config { name: "Hello" };

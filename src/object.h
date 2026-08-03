@@ -75,6 +75,7 @@ typedef struct {
   Chunk chunk;
   ObjString *name;
   bool isStatic;
+  bool isPublic;
 } ObjFunction;
 
 typedef struct {
@@ -82,15 +83,22 @@ typedef struct {
   ObjFunction *function;
   ObjUpvalue **upvalues;
   int upvalueCount;
+  /**
+   * The struct this closure is allowed to see the private members of, or NULL
+   * for closures compiled outside any `impl` block. Set when the method is
+   * bound by OP_METHOD, and inherited by nested closures/lambdas.
+   */
+  struct ObjStruct *owner;
 } ObjClosure;
 
-typedef struct {
+typedef struct ObjStruct {
   Obj obj;
   ObjString *name;
   Table methods;
   Table fields;
   int fieldCount;
   Value fieldDefaults[256];
+  bool fieldPublic[256];
 } ObjStruct;
 
 typedef struct {

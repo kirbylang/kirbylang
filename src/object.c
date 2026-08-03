@@ -41,6 +41,7 @@ ObjStruct *newStruct(ObjString *name) {
 
   for (int i = 0; i < 256; i++) {
     struct_->fieldDefaults[i] = NIL_VAL;
+    struct_->fieldPublic[i] = false;
   }
 
   return struct_;
@@ -75,6 +76,7 @@ ObjClosure *newClosure(ObjFunction *function) {
   closure->function = function;
   closure->upvalues = upvalues;
   closure->upvalueCount = function->upvalueCount;
+  closure->owner = NULL;
   return closure;
 }
 
@@ -84,6 +86,7 @@ ObjFunction *newFunction(void) {
   function->upvalueCount = 0;
   function->name = NULL;
   function->isStatic = false;
+  function->isPublic = false;
   initChunk(&function->chunk);
   return function;
 }

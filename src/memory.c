@@ -117,9 +117,12 @@ static void blackenObject(Obj *object) {
   case OBJ_CLOSURE: {
     ObjClosure *closure = (ObjClosure *)object;
     markObject((Obj *)closure->function);
+    markObject((Obj *)closure->owner);
+
     for (int i = 0; i < closure->upvalueCount; i++) {
       markObject((Obj *)closure->upvalues[i]);
     }
+
     break;
   }
   case OBJ_FUNCTION: {

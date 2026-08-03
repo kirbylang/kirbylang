@@ -361,7 +361,7 @@ static void printNode(StrBuf *sb, AstNode *node) {
     for (int i = 0; i < node->as.struct_.fieldCount; i++) {
       VarDeclNode *field = &node->as.struct_.fields[i];
 
-      sb_append(sb, " (field ");
+      sb_append(sb, field->isPublic ? " (pub-field " : " (field ");
       sbAppendToken(sb, field->name);
 
       if (field->initializer != NULL) {
@@ -399,7 +399,12 @@ static void printNode(StrBuf *sb, AstNode *node) {
     for (int i = 0; i < node->as.impl.methodCount; i++) {
       FunctionNode *method = node->as.impl.methods[i];
 
-      sb_append(sb, method->hasSelf ? " (method " : " (static ");
+      if (method->isPublic) {
+        sb_append(sb, method->hasSelf ? " (pub-method " : " (pub-static ");
+      } else {
+        sb_append(sb, method->hasSelf ? " (method " : " (static ");
+      }
+
       sbAppendToken(sb, method->name);
       sb_append(sb, ")");
     }

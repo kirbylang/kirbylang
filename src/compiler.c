@@ -846,6 +846,7 @@ static void compileVarDecl(AstNode *node) {
 static void compileFunction(FunctionNode *fn, FunctionType type) {
   Compiler compiler;
   initCompiler(&compiler, type, fn->isLambda ? NULL : &fn->name);
+  current->function->isPublic = fn->isPublic;
   beginScope();
 
   current->function->arity = fn->arity;
@@ -912,6 +913,7 @@ static void compileStructDecl(AstNode *node) {
 
     currentLine = field->declEndLine;
     emitBytes(OP_FIELD, constant);
+    emitByte(field->isPublic ? 1 : 0);
   }
 
   currentLine = sn->endLine;

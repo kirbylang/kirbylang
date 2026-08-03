@@ -1,0 +1,11 @@
+struct Account {
+    var balance;
+}
+
+impl Account {
+    pub fun withBalance(amount) = Account { balance: amount };
+
+    pub fun balance(self) = self.balance;
+}
+
+print Account.withBalance(250).balance();

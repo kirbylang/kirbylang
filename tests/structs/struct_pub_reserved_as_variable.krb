@@ -1,0 +1,2 @@
+// `pub` is a reserved word and can no longer be used as an identifier.
+var pub = 1;

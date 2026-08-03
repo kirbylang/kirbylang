@@ -1,6 +1,6 @@
 struct Point {
-    var x;
-    var y;
+    pub var x;
+    pub var y;
 }
 
 var point = Point { y: 2, x: 1 };

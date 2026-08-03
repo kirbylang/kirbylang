@@ -1,7 +1,7 @@
 struct Struct {}
 
 impl Struct {
-    fun printSelf(self) {
+    pub fun printSelf(self) {
         fun innerClosure() {
             print self;
         }

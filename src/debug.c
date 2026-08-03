@@ -40,6 +40,16 @@ static int constantInstruction(const char *name, Chunk *chunk, int offset) {
   return offset + 2;
 }
 
+// A constant index followed by a one-byte flag, e.g. OP_FIELD.
+static int constantFlagInstruction(const char *name, Chunk *chunk, int offset) {
+  uint8_t constant = chunk->code[offset + 1];
+  uint8_t flag = chunk->code[offset + 2];
+  fprintf(stderr, "%-16s %4d '", name, constant);
+  printValueToErr(chunk->constants.values[constant]);
+  fprintf(stderr, "' %s\n", flag ? "public" : "private");
+  return offset + 3;
+}
+
 static int invokeInstruction(const char *name, Chunk *chunk, int offset) {
   uint8_t constant = chunk->code[offset + 1];
   uint8_t argCount = chunk->code[offset + 2];
@@ -148,7 +158,7 @@ int disassembleInstruction(Chunk *chunk, int offset) {
   case OP_STRUCT_INIT:
     return byteInstruction("OP_STRUCT_INIT", chunk, offset);
   case OP_FIELD:
-    return constantInstruction("OP_FIELD", chunk, offset);
+    return constantFlagInstruction("OP_FIELD", chunk, offset);
   case OP_METHOD:
     return constantInstruction("OP_METHOD", chunk, offset);
   case OP_INVOKE:

@@ -1,0 +1,25 @@
+== <script> ==
+0000    1 OP_NIL
+0001    | OP_RETURN
+== <script> ==
+0000    2 OP_STRUCT           0 'Config'
+0002    | OP_DEFINE_GLOBAL    0 'Config'
+0004    | OP_GET_GLOBAL       1 'Config'
+0006    3 OP_CONSTANT         3 'visible'
+0008    | OP_FIELD            2 'label' public
+0011    4 OP_CONSTANT         5 'hidden'
+0013    | OP_FIELD            4 'token' private
+0016    5 OP_POP
+0017    7 OP_GET_GLOBAL       7 'Config'
+0019    | OP_STRUCT_INIT      0
+0021    | OP_DEFINE_GLOBAL    6 'c'
+0023    9 OP_GET_GLOBAL       8 'c'
+0025    | OP_GET_PROPERTY     9 'label'
+0027    | OP_PRINT
+0028   10 OP_GET_GLOBAL      10 'c'
+0030    | OP_GET_PROPERTY    11 'token'
+0032    | OP_PRINT
+0033   11 OP_NIL
+0034    | OP_RETURN
+Field 'token' is private to 'Config'.
+[line 10] in script

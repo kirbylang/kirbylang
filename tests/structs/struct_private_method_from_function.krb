@@ -1,0 +1,9 @@
+struct Greeter {}
+
+impl Greeter {
+    fun greet(self) = "Hello";
+}
+
+fun callIt(g) = g.greet();
+
+print callIt(Greeter {});

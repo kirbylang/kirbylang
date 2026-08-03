@@ -20,27 +20,27 @@
 0002    | OP_DEFINE_GLOBAL    0 'StringBuilder'
 0004    | OP_GET_GLOBAL       1 'StringBuilder'
 0006    2 OP_CONSTANT         3 ''
-0008    | OP_FIELD            2 'string'
-0010    3 OP_POP
-0011    5 OP_GET_GLOBAL       4 'StringBuilder'
-0013   10 OP_CLOSURE          6 <fn add>
-0015    | OP_METHOD           5 'add'
-0017   14 OP_CLOSURE          8 <fn to_string>
-0019    | OP_METHOD           7 'to_string'
-0021   15 OP_POP
-0022   17 OP_GET_GLOBAL      10 'StringBuilder'
-0024    | OP_CONSTANT        11 'string'
-0026    | OP_CONSTANT        12 ''
-0028    | OP_STRUCT_INIT      1
-0030   18 OP_CONSTANT        14 'Hello'
-0032    | OP_INVOKE        (1 args)   13 'add'
-0035   19 OP_CONSTANT        16 ' '
-0037    | OP_INVOKE        (1 args)   15 'add'
-0040   20 OP_CONSTANT        18 'World'
-0042    | OP_INVOKE        (1 args)   17 'add'
-0045    | OP_DEFINE_GLOBAL    9 'builder'
-0047   22 OP_GET_GLOBAL      19 'builder'
-0049    | OP_INVOKE        (0 args)   20 'to_string'
-0052    | OP_PRINT
-0053   23 OP_NIL
-0054    | OP_RETURN
+0008    | OP_FIELD            2 'string' public
+0011    3 OP_POP
+0012    5 OP_GET_GLOBAL       4 'StringBuilder'
+0014   10 OP_CLOSURE          6 <fn add>
+0016    | OP_METHOD           5 'add'
+0018   14 OP_CLOSURE          8 <fn to_string>
+0020    | OP_METHOD           7 'to_string'
+0022   15 OP_POP
+0023   17 OP_GET_GLOBAL      10 'StringBuilder'
+0025    | OP_CONSTANT        11 'string'
+0027    | OP_CONSTANT        12 ''
+0029    | OP_STRUCT_INIT      1
+0031   18 OP_CONSTANT        14 'Hello'
+0033    | OP_INVOKE        (1 args)   13 'add'
+0036   19 OP_CONSTANT        16 ' '
+0038    | OP_INVOKE        (1 args)   15 'add'
+0041   20 OP_CONSTANT        18 'World'
+0043    | OP_INVOKE        (1 args)   17 'add'
+0046    | OP_DEFINE_GLOBAL    9 'builder'
+0048   22 OP_GET_GLOBAL      19 'builder'
+0050    | OP_INVOKE        (0 args)   20 'to_string'
+0053    | OP_PRINT
+0054   23 OP_NIL
+0055    | OP_RETURN

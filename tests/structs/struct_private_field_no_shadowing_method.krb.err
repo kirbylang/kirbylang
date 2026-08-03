@@ -1,0 +1,18 @@
+== <script> ==
+0000    1 OP_NIL
+0001    | OP_RETURN
+== <script> ==
+0000    2 OP_STRUCT           0 'Counter'
+0002    | OP_DEFINE_GLOBAL    0 'Counter'
+0004    | OP_GET_GLOBAL       1 'Counter'
+0006    3 OP_CONSTANT         3 '5.000000'
+0008    | OP_FIELD            2 'count' private
+0011    4 OP_POP
+0012    6 OP_GET_GLOBAL       4 'Counter'
+0014    | OP_STRUCT_INIT      0
+0016    | OP_INVOKE        (0 args)    5 'count'
+0019    | OP_PRINT
+0020    7 OP_NIL
+0021    | OP_RETURN
+Field 'count' is private to 'Counter'.
+[line 6] in script
