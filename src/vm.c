@@ -203,8 +203,8 @@ static ObjStruct *currentOwner(void) {
   return vm.frames[vm.frameCount - 1].closure->owner;
 }
 
-// Visibility is per-struct, not per-instance: a method of `Point` may read the
-// private fields of any `Point`, not only its own `self`.
+// Visibility is per-struct, not per-instance: a method of struct T may read the
+// private fields of any T struct, not only its own `self`.
 static bool canAccess(ObjStruct *struct_, bool isPublic) {
   return isPublic || currentOwner() == struct_;
 }
@@ -279,6 +279,7 @@ static bool invoke(ObjString *name, int argCount) {
     if (!canAccess(instance->struct_, instance->struct_->fieldPublic[slot])) {
       // Fields normally shadow methods, but a field you can't see shouldn't
       // hide an accessor that shares its name (`var count` + `fun count()`).
+      // TODO: Clean this up
       Value method;
       if (tableGet(&instance->struct_->methods, name, &method))
         return invokeFromStruct(instance->struct_, name, argCount);
@@ -706,7 +707,7 @@ static InterpretResult run(void) {
       ObjInstance *instance = newInstance(struct_);
 
       // Handle any `field: value,` passed
-
+      //
       // i=0:  pairs[2*0]   = pairs[0] = 'y'      pairs[2*0+1] = pairs[1] = 10
       // i=1:  pairs[2*1]   = pairs[2] = 'x'      pairs[2*1+1] = pairs[3] = 30
       // i=2:  pairs[2*2]   = pairs[0] = 'a'      pairs[2*2+1] = pairs[5] = 50
