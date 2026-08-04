@@ -4,6 +4,8 @@ project(kirby LANGUAGES C)
 
 enable_testing()
 
+option(ENABLE_MEMCHECK "Enable AddressSanitizer memory checking" OFF)
+
 # -----------------------------------------------------------------------------
 # Options
 # -----------------------------------------------------------------------------
@@ -163,6 +165,11 @@ target_compile_definitions(kirby_core_debug
 configure_kirby_target(kirby_core_debug)
 enable_coverage(kirby_core_debug)
 
+if(ENABLE_MEMCHECK)
+    target_compile_options(kirby_core_debug PRIVATE -fsanitize=address)
+    target_link_options(kirby_core_debug PRIVATE -fsanitize=address)
+endif()
+
 # -----------------------------------------------------------------------------
 # Main executable
 # -----------------------------------------------------------------------------
@@ -199,6 +206,11 @@ target_link_libraries(kirby-test
 
 configure_kirby_target(kirby-test)
 enable_coverage(kirby-test)
+
+if(ENABLE_MEMCHECK)
+    target_compile_options(kirby-test PRIVATE -fsanitize=address)
+    target_link_options(kirby-test PRIVATE -fsanitize=address)
+endif()
 
 # -----------------------------------------------------------------------------
 # Unit tests

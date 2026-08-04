@@ -24,6 +24,10 @@ cmake:
 build: generate_version_c
     ./scripts/build.sh
 
+# Build the code with memory checking enabled
+build-memcheck: generate_version_c
+    ./scripts/build-memcheck.sh
+
 build-tests: generate_version_c
     ./scripts/build-tests.sh
 
@@ -45,6 +49,10 @@ install:
 
 # Run the tests
 test *args: build
+    ./scripts/tests.sh {{ args }}
+
+# Run the tests with memory checking enabled
+test-with-memcheck *args: build-memcheck
     ./scripts/tests.sh {{ args }}
 
 # Run the tests with coverage enabled
