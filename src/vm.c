@@ -291,7 +291,7 @@ static bool invoke(ObjString *name, int argCount) {
 
     Value fieldValue = instance->fields[slot];
 
-    vm.stackTop[argCount - 1] = fieldValue;
+    vm.stackTop[-argCount - 1] = fieldValue;
     return callValue(fieldValue, argCount);
   }
 
