@@ -874,13 +874,14 @@ static InterpretResult run(void) {
         return INTERPRET_RUNTIME_ERROR;
       }
 
+      if (struct_->fieldCount >= 256) {
+        runtimeError(&vm, "A struct can't have more than 256 fields.");
+        return INTERPRET_RUNTIME_ERROR;
+      }
+
       tableSet(&struct_->fields, field_name, NUMBER_VAL(struct_->fieldCount));
 
       Value initializer = peekStack(0);
-
-      if (struct_->fieldCount >= 256) {
-        runtimeError(&vm, "A struct can't have more than 256 fields");
-      }
 
       struct_->fieldDefaults[struct_->fieldCount] = initializer;
       struct_->fieldPublic[struct_->fieldCount] = isPublic;
