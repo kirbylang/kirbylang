@@ -109,6 +109,10 @@ void initVM(int argc, char *argv[]) {
   vm.grayCapacity = 0;
   vm.grayStack = NULL;
 
+  // See the comment on VM.gcEnabled. The collector does not currently work;
+  // this must stay false until its root gap is fixed.
+  vm.gcEnabled = false;
+
   initTable(&vm.globals);
   initTable(&vm.strings);
 
@@ -291,7 +295,7 @@ static bool invoke(ObjString *name, int argCount) {
 
     Value fieldValue = instance->fields[slot];
 
-    vm.stackTop[argCount - 1] = fieldValue;
+    vm.stackTop[-argCount - 1] = fieldValue;
     return callValue(fieldValue, argCount);
   }
 
@@ -874,13 +878,14 @@ static InterpretResult run(void) {
         return INTERPRET_RUNTIME_ERROR;
       }
 
+      if (struct_->fieldCount >= 256) {
+        runtimeError(&vm, "A struct can't have more than 256 fields.");
+        return INTERPRET_RUNTIME_ERROR;
+      }
+
       tableSet(&struct_->fields, field_name, NUMBER_VAL(struct_->fieldCount));
 
       Value initializer = peekStack(0);
-
-      if (struct_->fieldCount >= 256) {
-        runtimeError(&vm, "A struct can't have more than 256 fields");
-      }
 
       struct_->fieldDefaults[struct_->fieldCount] = initializer;
       struct_->fieldPublic[struct_->fieldCount] = isPublic;

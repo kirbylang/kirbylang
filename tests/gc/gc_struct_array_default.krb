@@ -1,0 +1,10 @@
+// ObjStruct.fieldDefaults must be traced by the GC.
+// The ObjArray is built at runtime by OP_ARRAY and, once OP_FIELD pops it,
+// is reachable only through fieldDefaults. Instantiating S allocates, which
+// collects under DEBUG_STRESS_GC.
+struct S {
+    pub var items = [1, 2, 3];
+}
+
+var a = S {};
+print a.items;

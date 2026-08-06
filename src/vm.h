@@ -47,6 +47,16 @@ struct VM {
   int grayCount;
   int grayCapacity;
   Obj **grayStack;
+
+  /**
+   * Master switch for the collector.
+   *
+   * Currently always false. The collector has an unresolved root gap that
+   * frees reachable objects as soon as it runs, so enabling it turns a leak
+   * into a crash. Flip this to true in interpret(), before
+   * interpretFunction(), once that is fixed.
+   */
+  bool gcEnabled;
 };
 
 extern VM vm;
