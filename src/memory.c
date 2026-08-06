@@ -16,12 +16,12 @@ void *reallocate(void *pointer, size_t oldSize, size_t newSize) {
 
   if (newSize > oldSize) {
 #ifdef DEBUG_STRESS_GC
-    if (vm.grayStack != NULL) {
+    if (vm.gcEnabled) {
       collectGarbage();
     }
 #endif
 
-    if (vm.bytesAllocated > vm.nextGC && vm.grayStack != NULL) {
+    if (vm.bytesAllocated > vm.nextGC && vm.gcEnabled) {
       collectGarbage();
     }
   }
@@ -93,6 +93,14 @@ static void blackenObject(Obj *object) {
     markObject((Obj *)struct_->name);
     markTable(&struct_->methods);
     markTable(&struct_->fields);
+
+    // fields maps name -> slot index; its values are numbers, so marking it
+    // does not reach the defaults. They live in a parallel array and are the
+    // only root for any default built at runtime, e.g. `var items = [1, 2];`.
+    for (int i = 0; i < struct_->fieldCount; i++) {
+      markValue(struct_->fieldDefaults[i]);
+    }
+
     break;
   }
   case OBJ_INSTANCE: {

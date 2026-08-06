@@ -109,6 +109,10 @@ void initVM(int argc, char *argv[]) {
   vm.grayCapacity = 0;
   vm.grayStack = NULL;
 
+  // See the comment on VM.gcEnabled. The collector does not currently work;
+  // this must stay false until its root gap is fixed.
+  vm.gcEnabled = false;
+
   initTable(&vm.globals);
   initTable(&vm.strings);
 
