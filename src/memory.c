@@ -261,6 +261,12 @@ static void sweep(void) {
 void collectGarbage(void) {
 #ifdef DEBUG_LOG_GC
   printf("-- gc begin\n");
+  // Phase of the collection, for localising the outstanding root gap.
+  //   frames=0 compiler=no  -> between compile() and interpretFunction()
+  //   frames=0 compiler=yes -> during compilation
+  //   frames>0              -> during execution
+  printf("   phase: frames=%d stack=%ld compiler=%s\n", vm.frameCount,
+         (long)(vm.stackTop - vm.stack), compilerIsActive() ? "yes" : "no");
   size_t before = vm.bytesAllocated;
 #endif
 

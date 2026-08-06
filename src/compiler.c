@@ -1196,6 +1196,8 @@ ObjFunction *compile(AstNode **ast, int count, int endLine) {
   return hadError ? NULL : function;
 }
 
+bool compilerIsActive(void) { return current != NULL; }
+
 void markCompilerRoots(void) {
   Compiler *compiler = current;
   while (compiler != NULL) {
