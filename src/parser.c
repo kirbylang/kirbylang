@@ -174,7 +174,8 @@ static AstNode *number(Parser *parser, bool canAssign) {
   double v = strtod(parser->previous.start, NULL);
 
   AstNode *node = astAlloc(NODE_LITERAL, parser->previous.line);
-  node->as.literal.value = NUMBER_VAL(v);
+  node->as.literal.kind = LITERAL_NUMBER;
+  node->as.literal.as.number = v;
 
   return node;
 }
@@ -187,7 +188,7 @@ static AstNode *string_(Parser *parser, bool canAssign) {
   const char *chars = parser->previous.start + 1;
   int length = parser->previous.length - 2;
 
-  char *buffer = (char *)malloc((size_t)length + 1);
+  char *buffer = (char *)astAllocRaw((size_t)length + 1);
   int out = 0;
 
   for (int i = 0; i < length; i++) {
@@ -221,8 +222,10 @@ static AstNode *string_(Parser *parser, bool canAssign) {
     }
   }
 
-  node->as.literal.value = OBJ_VAL(copyString(buffer, out));
-  free(buffer);
+  buffer[out] = '\0';
+  node->as.literal.kind = LITERAL_STRING;
+  node->as.literal.as.string.chars = buffer;
+  node->as.literal.as.string.length = out;
 
   return node;
 }
@@ -234,13 +237,15 @@ static AstNode *literal(Parser *parser, bool canAssign) {
 
   switch (parser->previous.type) {
   case TOKEN_TRUE:
-    node->as.literal.value = BOOL_VAL(true);
+    node->as.literal.kind = LITERAL_BOOL;
+    node->as.literal.as.boolean = true;
     break;
   case TOKEN_FALSE:
-    node->as.literal.value = BOOL_VAL(false);
+    node->as.literal.kind = LITERAL_BOOL;
+    node->as.literal.as.boolean = false;
     break;
   case TOKEN_NIL:
-    node->as.literal.value = NIL_VAL;
+    node->as.literal.kind = LITERAL_NIL;
     break;
   default:
     break; // unreachable
@@ -799,7 +804,8 @@ static AstNode *forStatement(Parser *p, bool *isTail) {
 
   if (cond == NULL) {
     cond = astAlloc(NODE_LITERAL, line);
-    cond->as.literal.value = BOOL_VAL(true);
+    cond->as.literal.kind = LITERAL_BOOL;
+    cond->as.literal.as.boolean = true;
   }
 
   AstNode *loop = astAlloc(NODE_FOR, line);
