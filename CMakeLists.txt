@@ -321,5 +321,20 @@ if(BUILD_TESTS)
         COMMAND kirby-vm-field-limit-unit-test
     )
 
+    add_executable(kirby-vm-invoke-unit-test
+        unit/vm_invoke.c
+    )
 
+    target_link_libraries(kirby-vm-invoke-unit-test
+        PRIVATE
+            kirby_core_debug
+    )
+
+    configure_kirby_target(kirby-vm-invoke-unit-test)
+    enable_coverage(kirby-vm-invoke-unit-test)
+
+    add_test(
+        NAME kirby-vm-invoke-unit-test
+        COMMAND kirby-vm-invoke-unit-test
+    )
 endif()
