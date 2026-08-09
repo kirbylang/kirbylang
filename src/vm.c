@@ -62,6 +62,10 @@ InterpretResult interpret(const char *source) {
   astFreeAll();
   free(ast);
 
+  // See the comment on VM.gcEnabled. The collector does not currently work;
+  // this must stay false until its root gap is fixed.
+  vm.gcEnabled = true;
+
   return interpretFunction(function);
 }
 
@@ -109,9 +113,9 @@ void initVM(int argc, char *argv[]) {
   vm.grayCapacity = 0;
   vm.grayStack = NULL;
 
-  // See the comment on VM.gcEnabled. The collector does not currently work;
-  // this must stay false until its root gap is fixed.
-  vm.gcEnabled = true;
+  // Off during parsing and compilation; interpret() turns it on before
+  // execution. See the comment on VM.gcEnabled.
+  vm.gcEnabled = false;
 
   initTable(&vm.globals);
   initTable(&vm.strings);

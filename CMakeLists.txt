@@ -166,8 +166,8 @@ configure_kirby_target(kirby_core_debug)
 enable_coverage(kirby_core_debug)
 
 if(ENABLE_MEMCHECK)
-    target_compile_options(kirby_core_debug PRIVATE -fsanitize=address)
-    target_link_options(kirby_core_debug PRIVATE -fsanitize=address)
+    target_compile_options(kirby_core_debug PUBLIC -fsanitize=address)
+    target_link_options(kirby_core_debug PUBLIC -fsanitize=address)
 endif()
 
 # -----------------------------------------------------------------------------
@@ -208,8 +208,8 @@ configure_kirby_target(kirby-test)
 enable_coverage(kirby-test)
 
 if(ENABLE_MEMCHECK)
-    target_compile_options(kirby-test PRIVATE -fsanitize=address)
-    target_link_options(kirby-test PRIVATE -fsanitize=address)
+    target_compile_options(kirby-test PUBLIC -fsanitize=address)
+    target_link_options(kirby-test PUBLIC -fsanitize=address)
 endif()
 
 # -----------------------------------------------------------------------------
@@ -303,5 +303,23 @@ if(BUILD_TESTS)
         NAME kirby-lexer-unit-test
         COMMAND kirby-lexer-unit-test
     )
+
+    add_executable(kirby-vm-field-limit-unit-test
+        unit/vm_field_limit.c
+    )
+
+    target_link_libraries(kirby-vm-field-limit-unit-test
+        PRIVATE
+            kirby_core_debug
+    )
+
+    configure_kirby_target(kirby-vm-field-limit-unit-test)
+    enable_coverage(kirby-vm-field-limit-unit-test)
+
+    add_test(
+        NAME kirby-vm-field-limit-unit-test
+        COMMAND kirby-vm-field-limit-unit-test
+    )
+
 
 endif()
