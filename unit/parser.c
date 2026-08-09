@@ -67,7 +67,7 @@ void assert_ast(const char *path, const char *expected) {
   free(ast);
 }
 
-int main(int argc, char *argv[]) {
+int main(void) {
   assert_ast("../tests/empty.krb", "");
 
   assert_ast("../tests/arrays/array_empty.krb", "(array)\n");
