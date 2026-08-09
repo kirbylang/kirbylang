@@ -276,9 +276,9 @@ static bool isHelper(Value value, char *type) {
 
   valueTypeToString(value, buffer, 9);
 
-  // free(buffer);
-
   bool equals = strcmp(type, buffer) == 0;
+
+  free(buffer);
 
   return equals;
 }
