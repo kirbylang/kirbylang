@@ -107,8 +107,12 @@ static void blackenObject(Obj *object) {
     ObjInstance *instance = (ObjInstance *)object;
     markObject((Obj *)instance->struct_);
 
-    for (int i = 0; i < instance->struct_->fieldCount; i++) {
-      markValue(instance->fields[i]);
+    // fields is NULL between the instance's allocation and its field array's;
+    // a collection can land in that window.
+    if (instance->fields != NULL) {
+      for (int i = 0; i < instance->struct_->fieldCount; i++) {
+        markValue(instance->fields[i]);
+      }
     }
 
     break;

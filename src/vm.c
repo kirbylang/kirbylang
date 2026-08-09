@@ -111,7 +111,7 @@ void initVM(int argc, char *argv[]) {
 
   // See the comment on VM.gcEnabled. The collector does not currently work;
   // this must stay false until its root gap is fixed.
-  vm.gcEnabled = false;
+  vm.gcEnabled = true;
 
   initTable(&vm.globals);
   initTable(&vm.strings);
