@@ -2,8 +2,7 @@
 #include <stdbool.h>
 #include <stdio.h>
 
-// invoke() is static, so the translation unit is pulled in directly rather
-// than linked. Do not also list src/vm.c for this target in CMakeLists.txt.
+// Importing *.c file to access the static `invoke` function
 #include "../src/vm.c"
 
 /**
