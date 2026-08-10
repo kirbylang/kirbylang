@@ -237,7 +237,6 @@ if(BUILD_TESTS)
 
     add_executable(kirby-token-unit-test
         unit/token.c
-        src/token.c
     )
 
     target_link_libraries(kirby-token-unit-test
