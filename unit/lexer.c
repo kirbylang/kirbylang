@@ -8,34 +8,23 @@
 #include "../src/token.h"
 #include "../src/token_stream.h"
 
-static char *readFile(const char *path) {
-  FILE *file = fopen(path, "rb");
-
-  fseek(file, 0L, SEEK_END);
-  size_t fileSize = ftell(file);
-  rewind(file);
-
-  char *buffer = (char *)malloc(fileSize + 1);
-  size_t bytesRead = fread(buffer, sizeof(char), fileSize, file);
-  buffer[bytesRead] = '\0';
-
-  fclose(file);
-  return buffer;
-}
-
-int main(int argc, char *argv[]) {
-  const char *source =
-      readFile("/Users/kylee/bench/cproj/tests/arrays/array_empty.krb");
+int main(void) {
+  const char *source = "[];";
 
   TokenStream tokens = lex(source);
 
+  TokenType expected[] = {
+      TOKEN_LEFT_BRACKET,
+      TOKEN_RIGHT_BRACKET,
+      TOKEN_SEMICOLON,
+      TOKEN_EOF,
+  };
+
+  assert(tokens.count == (int)(sizeof(expected) / sizeof(expected[0])));
+
   for (int i = 0; i < tokens.count; i++) {
-    Token token = tsAdvance(&tokens);
-
-    printf("%s\n", tokenTypeToString(token.type));
+    assert(tsAdvance(&tokens).type == expected[i]);
   }
-
-  free(source);
 
   return 0;
 }

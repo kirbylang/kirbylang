@@ -4,6 +4,8 @@ project(kirby LANGUAGES C)
 
 enable_testing()
 
+option(ENABLE_MEMCHECK "Enable AddressSanitizer memory checking" OFF)
+
 # -----------------------------------------------------------------------------
 # Options
 # -----------------------------------------------------------------------------
@@ -163,6 +165,11 @@ target_compile_definitions(kirby_core_debug
 configure_kirby_target(kirby_core_debug)
 enable_coverage(kirby_core_debug)
 
+if(ENABLE_MEMCHECK)
+    target_compile_options(kirby_core_debug PUBLIC -fsanitize=address)
+    target_link_options(kirby_core_debug PUBLIC -fsanitize=address)
+endif()
+
 # -----------------------------------------------------------------------------
 # Main executable
 # -----------------------------------------------------------------------------
@@ -200,6 +207,11 @@ target_link_libraries(kirby-test
 configure_kirby_target(kirby-test)
 enable_coverage(kirby-test)
 
+if(ENABLE_MEMCHECK)
+    target_compile_options(kirby-test PUBLIC -fsanitize=address)
+    target_link_options(kirby-test PUBLIC -fsanitize=address)
+endif()
+
 # -----------------------------------------------------------------------------
 # Unit tests
 # -----------------------------------------------------------------------------
@@ -225,7 +237,6 @@ if(BUILD_TESTS)
 
     add_executable(kirby-token-unit-test
         unit/token.c
-        src/token.c
     )
 
     target_link_libraries(kirby-token-unit-test
@@ -292,4 +303,37 @@ if(BUILD_TESTS)
         COMMAND kirby-lexer-unit-test
     )
 
+    add_executable(kirby-vm-field-limit-unit-test
+        unit/vm_field_limit.c
+    )
+
+    target_link_libraries(kirby-vm-field-limit-unit-test
+        PRIVATE
+            kirby_core_debug
+    )
+
+    configure_kirby_target(kirby-vm-field-limit-unit-test)
+    enable_coverage(kirby-vm-field-limit-unit-test)
+
+    add_test(
+        NAME kirby-vm-field-limit-unit-test
+        COMMAND kirby-vm-field-limit-unit-test
+    )
+
+    add_executable(kirby-vm-invoke-unit-test
+        unit/vm_invoke.c
+    )
+
+    target_link_libraries(kirby-vm-invoke-unit-test
+        PRIVATE
+            kirby_core_debug
+    )
+
+    configure_kirby_target(kirby-vm-invoke-unit-test)
+    enable_coverage(kirby-vm-invoke-unit-test)
+
+    add_test(
+        NAME kirby-vm-invoke-unit-test
+        COMMAND kirby-vm-invoke-unit-test
+    )
 endif()

@@ -562,14 +562,24 @@ static void compileExpr(AstNode *node) {
 
   switch (node->kind) {
   case NODE_LITERAL: {
-    Value v = node->as.literal.value;
-    if (IS_NIL(v)) {
+    LiteralNode *literal = &node->as.literal;
+
+    switch (literal->kind) {
+    case LITERAL_NIL:
       emitByte(OP_NIL);
-    } else if (IS_BOOL(v)) {
-      emitByte(AS_BOOL(v) ? OP_TRUE : OP_FALSE);
-    } else {
-      emitConstant(v);
+      break;
+    case LITERAL_BOOL:
+      emitByte(literal->as.boolean ? OP_TRUE : OP_FALSE);
+      break;
+    case LITERAL_NUMBER:
+      emitConstant(NUMBER_VAL(literal->as.number));
+      break;
+    case LITERAL_STRING:
+      emitConstant(OBJ_VAL(
+          copyString(literal->as.string.chars, literal->as.string.length)));
+      break;
     }
+
     break;
   }
 
@@ -1195,6 +1205,8 @@ ObjFunction *compile(AstNode **ast, int count, int endLine) {
 
   return hadError ? NULL : function;
 }
+
+bool compilerIsActive(void) { return current != NULL; }
 
 void markCompilerRoots(void) {
   Compiler *compiler = current;

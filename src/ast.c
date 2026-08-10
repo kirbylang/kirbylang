@@ -91,17 +91,20 @@ void astFreeAll(void) {
   arenaOffset = 0;
 }
 
-static void printAstValue(StrBuf *sb, Value value) {
-  if (IS_BOOL(value)) {
-    sb_append(sb, AS_BOOL(value) ? "true" : "false");
-  } else if (IS_NIL(value)) {
+static void printAstLiteral(StrBuf *sb, LiteralNode *lit) {
+  switch (lit->kind) {
+  case LITERAL_NIL:
     sb_append(sb, "nil");
-  } else if (IS_NUMBER(value)) {
-    sb_appendf(sb, "%g", AS_NUMBER(value));
-  } else if (IS_STRING(value)) {
-    sb_appendf(sb, "\"%s\"", AS_CSTRING(value));
-  } else {
-    sb_append(sb, "<value>");
+    break;
+  case LITERAL_BOOL:
+    sb_append(sb, lit->as.boolean ? "true" : "false");
+    break;
+  case LITERAL_NUMBER:
+    sb_appendf(sb, "%g", lit->as.number);
+    break;
+  case LITERAL_STRING:
+    sb_appendf(sb, "\"%s\"", lit->as.string.chars);
+    break;
   }
 }
 
@@ -137,7 +140,7 @@ static void printNode(StrBuf *sb, AstNode *node) {
 
   switch (node->kind) {
   case NODE_LITERAL:
-    printAstValue(sb, node->as.literal.value);
+    printAstLiteral(sb, &node->as.literal);
     break;
 
   case NODE_UNARY:

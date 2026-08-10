@@ -80,8 +80,6 @@ int main(int argc, char *argv[]) {
       return 0;
     }
     case 'p': {
-      TRACELN("PARSE TIME");
-      initVM(saved_argc, saved_argv);
       int outCount = 0;
       bool hadError = false;
 
@@ -102,8 +100,6 @@ int main(int argc, char *argv[]) {
 
       astFreeAll();
       free(ast);
-      freeVM();
-      free(saved_argv);
       return 0;
     }
     case 'c':

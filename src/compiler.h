@@ -63,6 +63,9 @@ ObjFunction *compile(AstNode **ast, int count, int endLine);
  */
 void markCompilerRoots(void);
 
+/** Diagnostic: true while a compiler is on the stack (see collectGarbage). */
+bool compilerIsActive(void);
+
 /**
  * Free compiler-owned tables (called from freeVM)
  */

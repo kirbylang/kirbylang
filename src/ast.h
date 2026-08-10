@@ -1,10 +1,10 @@
 #ifndef kirby_ast_h
 #define kirby_ast_h
+#include <stdbool.h>
 #include <stdlib.h>
 
 #include "strbuf.h"
 #include "token.h"
-#include "value.h"
 
 typedef enum {
   NODE_LITERAL,
@@ -25,7 +25,6 @@ typedef enum {
   NODE_EXPR_STMT,
   NODE_PRINT,
   NODE_VAR_DECL,
-  NODE_LET_DECL,
   NODE_BLOCK,
   NODE_IF,
   NODE_WHILE,
@@ -45,8 +44,23 @@ typedef struct AstNode AstNode;
 
 void print_ast(StrBuf *sb, AstNode *ast);
 
+typedef enum {
+  LITERAL_NIL,
+  LITERAL_BOOL,
+  LITERAL_NUMBER,
+  LITERAL_STRING
+} LiteralKind;
+
 typedef struct {
-  Value value;
+  LiteralKind kind;
+  union {
+    bool boolean;
+    double number;
+    struct {
+      const char *chars;
+      int length;
+    } string;
+  } as;
 } LiteralNode;
 
 typedef struct {

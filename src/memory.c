@@ -16,12 +16,12 @@ void *reallocate(void *pointer, size_t oldSize, size_t newSize) {
 
   if (newSize > oldSize) {
 #ifdef DEBUG_STRESS_GC
-    if (vm.grayStack != NULL) {
+    if (vm.gcEnabled) {
       collectGarbage();
     }
 #endif
 
-    if (vm.bytesAllocated > vm.nextGC && vm.grayStack != NULL) {
+    if (vm.bytesAllocated > vm.nextGC && vm.gcEnabled) {
       collectGarbage();
     }
   }
@@ -93,14 +93,21 @@ static void blackenObject(Obj *object) {
     markObject((Obj *)struct_->name);
     markTable(&struct_->methods);
     markTable(&struct_->fields);
+
+    for (int i = 0; i < struct_->fieldCount; i++) {
+      markValue(struct_->fieldDefaults[i]);
+    }
+
     break;
   }
   case OBJ_INSTANCE: {
     ObjInstance *instance = (ObjInstance *)object;
     markObject((Obj *)instance->struct_);
 
-    for (int i = 0; i < instance->struct_->fieldCount; i++) {
-      markValue(instance->fields[i]);
+    if (instance->fields != NULL) {
+      for (int i = 0; i < instance->struct_->fieldCount; i++) {
+        markValue(instance->fields[i]);
+      }
     }
 
     break;
@@ -253,6 +260,12 @@ static void sweep(void) {
 void collectGarbage(void) {
 #ifdef DEBUG_LOG_GC
   printf("-- gc begin\n");
+  // Phase of the collection, for localising the outstanding root gap.
+  //   frames=0 compiler=no  -> between compile() and interpretFunction()
+  //   frames=0 compiler=yes -> during compilation
+  //   frames>0              -> during execution
+  printf("   phase: frames=%d stack=%ld compiler=%s\n", vm.frameCount,
+         (long)(vm.stackTop - vm.stack), compilerIsActive() ? "yes" : "no");
   size_t before = vm.bytesAllocated;
 #endif
 

@@ -47,6 +47,7 @@ struct VM {
   int grayCount;
   int grayCapacity;
   Obj **grayStack;
+  bool gcEnabled;
 };
 
 extern VM vm;

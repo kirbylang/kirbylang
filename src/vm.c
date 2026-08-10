@@ -62,6 +62,8 @@ InterpretResult interpret(const char *source) {
   astFreeAll();
   free(ast);
 
+  vm.gcEnabled = true;
+
   return interpretFunction(function);
 }
 
@@ -108,6 +110,10 @@ void initVM(int argc, char *argv[]) {
   vm.grayCount = 0;
   vm.grayCapacity = 0;
   vm.grayStack = NULL;
+
+  // Off during parsing and compilation; interpret() turns it on before
+  // execution
+  vm.gcEnabled = false;
 
   initTable(&vm.globals);
   initTable(&vm.strings);
@@ -291,7 +297,17 @@ static bool invoke(ObjString *name, int argCount) {
 
     Value fieldValue = instance->fields[slot];
 
-    vm.stackTop[argCount - 1] = fieldValue;
+    // Swap the receiver with the field value where the field value is a
+    // function
+    //
+    // | argCount |          -argCount - 1 |
+    // |----------|------------------------|
+    // |        0 |                     -1 |
+    // |        1 |                     -2 |
+    // |        2 |                     -3 |
+    // |        3 |                     -4 |
+    vm.stackTop[-argCount - 1] = fieldValue;
+
     return callValue(fieldValue, argCount);
   }
 
@@ -874,13 +890,14 @@ static InterpretResult run(void) {
         return INTERPRET_RUNTIME_ERROR;
       }
 
+      if (struct_->fieldCount >= 256) {
+        runtimeError(&vm, "A struct can't have more than 256 fields.");
+        return INTERPRET_RUNTIME_ERROR;
+      }
+
       tableSet(&struct_->fields, field_name, NUMBER_VAL(struct_->fieldCount));
 
       Value initializer = peekStack(0);
-
-      if (struct_->fieldCount >= 256) {
-        runtimeError(&vm, "A struct can't have more than 256 fields");
-      }
 
       struct_->fieldDefaults[struct_->fieldCount] = initializer;
       struct_->fieldPublic[struct_->fieldCount] = isPublic;

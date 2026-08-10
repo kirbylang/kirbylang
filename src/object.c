@@ -94,15 +94,19 @@ ObjFunction *newFunction(void) {
 ObjInstance *newInstance(ObjStruct *struct_) {
   ObjInstance *instance = ALLOCATE_OBJ(ObjInstance, OBJ_INSTANCE);
   instance->struct_ = struct_;
+  instance->fields = NULL;
 
-  if (struct_->fieldCount == 0) {
-    instance->fields = NULL;
-  } else {
+  pushOnStack(OBJ_VAL(instance));
+
+  if (struct_->fieldCount > 0) {
     instance->fields = ALLOCATE(Value, struct_->fieldCount);
+
     for (int i = 0; i < struct_->fieldCount; i++) {
       instance->fields[i] = struct_->fieldDefaults[i];
     }
   }
+
+  popFromStack();
 
   return instance;
 }
