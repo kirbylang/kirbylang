@@ -94,9 +94,6 @@ static void blackenObject(Obj *object) {
     markTable(&struct_->methods);
     markTable(&struct_->fields);
 
-    // fields maps name -> slot index; its values are numbers, so marking it
-    // does not reach the defaults. They live in a parallel array and are the
-    // only root for any default built at runtime, e.g. `var items = [1, 2];`.
     for (int i = 0; i < struct_->fieldCount; i++) {
       markValue(struct_->fieldDefaults[i]);
     }
@@ -107,8 +104,6 @@ static void blackenObject(Obj *object) {
     ObjInstance *instance = (ObjInstance *)object;
     markObject((Obj *)instance->struct_);
 
-    // fields is NULL between the instance's allocation and its field array's;
-    // a collection can land in that window.
     if (instance->fields != NULL) {
       for (int i = 0; i < instance->struct_->fieldCount; i++) {
         markValue(instance->fields[i]);
