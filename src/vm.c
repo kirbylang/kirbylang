@@ -297,9 +297,17 @@ static bool invoke(ObjString *name, int argCount) {
 
     Value fieldValue = instance->fields[slot];
 
-    // Swap the receiver with the field value
-    // Where the field value is a function
+    // Swap the receiver with the field value where the field value is a
+    // function
+    //
+    // | argCount |          -argCount - 1 |
+    // |----------|------------------------|
+    // |        0 |                     -1 |
+    // |        1 |                     -2 |
+    // |        2 |                     -3 |
+    // |        3 |                     -4 |
     vm.stackTop[-argCount - 1] = fieldValue;
+
     return callValue(fieldValue, argCount);
   }
 
