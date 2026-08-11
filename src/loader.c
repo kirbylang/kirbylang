@@ -95,7 +95,7 @@ static void pass1(GC *gc, const CompiledUnit *compiledUnit,
 static void writeByteCodeOpToChunk(GC *gc, const CompiledFn *compiledFn,
                                    Chunk *chunk, int byteCodeIndex) {
   uint8_t byte = compiledFn->code[byteCodeIndex];
-  int line = compiledFn->lines[byteCodeIndex];
+  int line = compiledFn->codeLines[byteCodeIndex];
 
   writeChunk(gc, chunk, byte, line);
 }

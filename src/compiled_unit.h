@@ -47,52 +47,67 @@ typedef struct {
 } CompiledUpvalue;
 
 /**
- * The flat, heap-free counterpart of ObjFunction. The loader materializes one
- * ObjFunction per CompiledFn.
+ * A compiled function.
+ *
+ * This is translated to an ObjFunction at runtime in the VM.
  */
 typedef struct {
   int arity;
   int upvalueCount;
 
-  uint8_t *code;
+  // Function Bytecode
+
+  uint8_t *code; // Bytecode opcodes
   int codeCount;
   int codeCapacity;
+  int *codeLines; // Which line is a bytecode op on?
 
-  int *lines;
+  // Function Constants
 
   CompiledConst *constants;
   int constantCount;
   int constantCapacity;
 
+  // Function Upvalues
+
   CompiledUpvalue *upvalues;
   int upvalueDescCount;
   int upvalueDescCapacity;
 
-  // Slice into the unit's string blob; nameLength < 0 means anonymous/unnamed.
-  int nameOffset;
-  int nameLength;
+  // Function Name
+
+  int nameOffset; // Offset in to the compiled unit's string blob
+  int nameLength; // Negative length is a lambda
+
+  // Function Modifiers
 
   bool isStatic;
   bool isPublic;
 } CompiledFn;
 
 /**
- * The whole-unit artifact. functions[0] is always the top-level script.
- *
- * Reserved-but-unused fields (types/imports) are intentionally absent here;
- * they slot in additively when the type system and module system land.
+ * A compiled program. A *.krb file.
  */
 typedef struct {
-  char *strings;
+  // Interned Strings Blob
+
+  char *strings; // Interned strings stored contigously.  No duplicate checks
+                 // in place at this time
   int stringsLen;
   int stringsCapacity;
 
-  CompiledFn *functions;
+  // Functions
+
+  CompiledFn *functions; // functions[0] is always the implict top-level script
+                         // function of the file.
   int functionCount;
   int functionCapacity;
 
   // Order in which functions finished compiling (innermost-first), used only to
   // reproduce debug disassembly order. Same length as functionCount.
+  //
+  // TODO: I don't understand how this works
+
   int *finishOrder;
   int finishOrderCount;
   int finishOrderCapacity;

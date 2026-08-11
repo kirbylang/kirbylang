@@ -88,13 +88,13 @@ void cuWriteByte(CompiledFn *compiledFn, uint8_t byte, int line) {
 
     compiledFn->code =
         (uint8_t *)xrealloc(compiledFn->code, sizeof(uint8_t) * (size_t)cap);
-    compiledFn->lines =
-        (int *)xrealloc(compiledFn->lines, sizeof(int) * (size_t)cap);
+    compiledFn->codeLines =
+        (int *)xrealloc(compiledFn->codeLines, sizeof(int) * (size_t)cap);
     compiledFn->codeCapacity = cap;
   }
 
   compiledFn->code[compiledFn->codeCount] = byte;
-  compiledFn->lines[compiledFn->codeCount] = line;
+  compiledFn->codeLines[compiledFn->codeCount] = line;
   compiledFn->codeCount++;
 }
 
@@ -136,7 +136,7 @@ static void freeCompiledUnitFns(CompiledUnit *compiledUnit) {
   for (int i = 0; i < compiledUnit->functionCount; i++) {
     CompiledFn *fn = &compiledUnit->functions[i];
     free(fn->code);
-    free(fn->lines);
+    free(fn->codeLines);
     free(fn->constants);
     free(fn->upvalues);
   }
@@ -168,7 +168,7 @@ static void cuInitFn(CompiledFn *compiledFn) {
   compiledFn->code = NULL;
   compiledFn->codeCount = 0;
   compiledFn->codeCapacity = 0;
-  compiledFn->lines = NULL;
+  compiledFn->codeLines = NULL;
   compiledFn->constants = NULL;
   compiledFn->constantCount = 0;
   compiledFn->constantCapacity = 0;
