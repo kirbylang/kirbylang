@@ -9,7 +9,8 @@
 #include "common.h"
 #include "compiler.h"
 #include "debug.h"
-#include "memory.h"
+#include "gc.h"
+#include "loader.h"
 #include "native.h"
 #include "object.h"
 #include "parser.h"
@@ -26,6 +27,33 @@ static bool call(ObjClosure *function, int argCount);
 static InterpretResult run(void);
 
 VM vm;
+GC gcInstance;
+
+/**
+ * Marks the VM's runtime roots plus (while a compile is active) the compiler's
+ * roots. Registered with the GC in initVM so the collector never has to know
+ * about VM or compiler internals directly.
+ */
+static void markVMRoots(GC *gc, void *ctx) {
+  (void)ctx;
+
+  for (Value *slot = vm.stack; slot < vm.stackTop; slot++) {
+    markValue(gc, *slot);
+  }
+
+  for (int i = 0; i < vm.frameCount; i++) {
+    markObject(gc, (Obj *)vm.frames[i].closure);
+  }
+
+  for (ObjUpvalue *upvalue = vm.openUpvalues; upvalue != NULL;
+       upvalue = upvalue->next) {
+    markObject(gc, (Obj *)upvalue);
+  }
+
+  markTable(gc, &vm.globals);
+
+  // The compiler no longer allocates GC objects, so it has no roots to mark.
+}
 
 InterpretResult interpretFunction(ObjFunction *function) {
   TRACELN("vm.interpretFunction()");
@@ -34,7 +62,7 @@ InterpretResult interpretFunction(ObjFunction *function) {
     return INTERPRET_COMPILE_ERROR;
 
   pushOnStack(OBJ_VAL(function));
-  ObjClosure *closure = newClosure(function);
+  ObjClosure *closure = newClosure(vm.gc, function);
   popFromStack();
 
   pushOnStack(OBJ_VAL(closure));
@@ -57,12 +85,25 @@ InterpretResult interpret(const char *source) {
     return INTERPRET_COMPILE_ERROR;
   }
 
-  ObjFunction *function = compile(ast, count, endLine);
+  // The compiler produces a flat, heap-free CompiledUnit -- no GC involved.
+  CompiledUnit *unit = compile(ast, count, endLine);
 
   astFreeAll();
   free(ast);
 
-  vm.gcEnabled = true;
+  if (unit == NULL) {
+    return INTERPRET_COMPILE_ERROR;
+  }
+
+  // The loader is the sole heap client: it materializes the unit into live
+  // ObjFunctions. GC is enabled from here on.
+  vm.gc->gcEnabled = true;
+
+  ObjFunction *function = loadUnit(&vm, unit);
+
+  // TODO: Should free be merged in to freeCompiledUnit?
+  freeCompiledUnit(unit);
+  free(unit);
 
   return interpretFunction(function);
 }
@@ -103,30 +144,35 @@ void initVM(int argc, char *argv[]) {
   resetStack();
   vm.argc = argc;
   vm.argv = argv;
-  vm.objects = NULL;
-  vm.bytesAllocated = 0;
-  vm.nextGC = 1024 * 1024;
 
-  vm.grayCount = 0;
-  vm.grayCapacity = 0;
-  vm.grayStack = NULL;
+  vm.gc = &gcInstance;
+  vm.gc->objects = NULL;
+  vm.gc->bytesAllocated = 0;
+  vm.gc->nextGC = 1024 * 1024;
+
+  vm.gc->grayCount = 0;
+  vm.gc->grayCapacity = 0;
+  vm.gc->grayStack = NULL;
 
   // Off during parsing and compilation; interpret() turns it on before
   // execution
-  vm.gcEnabled = false;
+  vm.gc->gcEnabled = false;
+
+  initTable(&vm.gc->strings);
+
+  vm.gc->rootMarker = markVMRoots;
+  vm.gc->rootMarkerCtx = NULL;
 
   initTable(&vm.globals);
-  initTable(&vm.strings);
 
   defineAllNatives(&vm);
 }
 
 void freeVM(void) {
   TRACELN("vm.freeVM()");
-  freeCompilerState();
-  freeTable(&vm.globals);
-  freeTable(&vm.strings);
-  freeObjects();
+  freeTable(vm.gc, &vm.globals);
+  freeTable(vm.gc, &vm.gc->strings);
+  freeObjects(vm.gc);
 }
 
 void pushOnStack(Value value) {
@@ -172,7 +218,7 @@ static bool callValue(Value callee, int argCount) {
       }
 
       ObjStruct *struct_ = AS_STRUCT(callee);
-      vm.stackTop[-argCount - 1] = OBJ_VAL(newInstance(struct_));
+      vm.stackTop[-argCount - 1] = OBJ_VAL(newInstance(vm.gc, struct_));
 
       return true;
     }
@@ -343,7 +389,8 @@ static BindResult bindMethod(ObjStruct *struct_, ObjString *name) {
     return BIND_ERROR;
   }
 
-  ObjBoundMethod *bound = newBoundMethod(peekStack(0), AS_CLOSURE(method));
+  ObjBoundMethod *bound =
+      newBoundMethod(vm.gc, peekStack(0), AS_CLOSURE(method));
   popFromStack();
   pushOnStack(OBJ_VAL(bound));
   return BIND_OK;
@@ -361,7 +408,7 @@ static ObjUpvalue *captureUpvalue(Value *local) {
     return upvalue;
   }
 
-  ObjUpvalue *createdUpvalue = newUpvalue(local);
+  ObjUpvalue *createdUpvalue = newUpvalue(vm.gc, local);
 
   createdUpvalue->next = upvalue;
 
@@ -399,7 +446,7 @@ static bool defineMethod(ObjString *name) {
   // pairs with the closures created alongside it.
   AS_CLOSURE(method)->owner = struct_;
 
-  tableSet(&struct_->methods, name, method);
+  tableSet(vm.gc, &struct_->methods, name, method);
   popFromStack();
   return true;
 }
@@ -413,12 +460,12 @@ static void concatenate(void) {
   ObjString *a = AS_STRING(peekStack(1));
 
   int length = a->length + b->length;
-  char *chars = ALLOCATE(char, length + 1);
+  char *chars = ALLOCATE(vm.gc, char, length + 1);
   memcpy(chars, a->chars, a->length);
   memcpy(chars + a->length, b->chars, b->length);
   chars[length] = '\0';
 
-  ObjString *result = takeString(chars, length);
+  ObjString *result = takeString(vm.gc, chars, length);
   popFromStack();
   popFromStack();
   pushOnStack(OBJ_VAL(result));
@@ -610,7 +657,7 @@ static InterpretResult run(void) {
       ObjString *name = READ_STRING();
       Value value = peekStack(0);
 
-      bool isNewKey = tableSet(&vm.globals, name, value);
+      bool isNewKey = tableSet(vm.gc, &vm.globals, name, value);
 
       if (isNewKey) {
         tableDelete(&vm.globals, name);
@@ -623,7 +670,7 @@ static InterpretResult run(void) {
     case OP_DEFINE_GLOBAL: {
       ObjString *name = READ_STRING();
       Value value = peekStack(0);
-      tableSet(&vm.globals, name, value);
+      tableSet(vm.gc, &vm.globals, name, value);
       popFromStack();
       break;
     }
@@ -663,7 +710,7 @@ static InterpretResult run(void) {
     }
     case OP_CLOSURE: {
       ObjFunction *function = AS_FUNCTION(READ_CONSTANT());
-      ObjClosure *closure = newClosure(function);
+      ObjClosure *closure = newClosure(vm.gc, function);
 
       // A lambda or nested function written inside a method keeps that
       // method's access. OP_METHOD overwrites this for the method itself.
@@ -698,7 +745,7 @@ static InterpretResult run(void) {
       popFromStack();
       break;
     case OP_STRUCT:
-      pushOnStack(OBJ_VAL(newStruct(READ_STRING())));
+      pushOnStack(OBJ_VAL(newStruct(vm.gc, READ_STRING())));
       break;
     case OP_STRUCT_INIT: {
       int fieldCount = READ_BYTE();
@@ -720,7 +767,7 @@ static InterpretResult run(void) {
         provided[i] = false;
       }
 
-      ObjInstance *instance = newInstance(struct_);
+      ObjInstance *instance = newInstance(vm.gc, struct_);
 
       // Handle any `field: value,` passed
       //
@@ -895,7 +942,8 @@ static InterpretResult run(void) {
         return INTERPRET_RUNTIME_ERROR;
       }
 
-      tableSet(&struct_->fields, field_name, NUMBER_VAL(struct_->fieldCount));
+      tableSet(vm.gc, &struct_->fields, field_name,
+               NUMBER_VAL(struct_->fieldCount));
 
       Value initializer = peekStack(0);
 
@@ -931,7 +979,7 @@ static InterpretResult run(void) {
     case OP_ARRAY: {
       int count = READ_BYTE();
 
-      ObjArray *array = newArray();
+      ObjArray *array = newArray(vm.gc);
 
       pushOnStack(OBJ_VAL(array));
 
@@ -939,7 +987,7 @@ static InterpretResult run(void) {
         // Stack layout right now: [..., elem_{count-1}, ..., elem_0, array]
         // so the i-th element (counting from the end) sits one slot further
         // from the top than it did before `array` was pushed.
-        writeValueToArrayObj(array, peekStack(i + 1));
+        writeValueToArrayObj(vm.gc, array, peekStack(i + 1));
       }
 
       Value arrayValue = popFromStack();

@@ -7,6 +7,7 @@
 #include "value.h"
 
 typedef struct VM VM;
+#include "gc.h"
 
 #define OBJ_TYPE(value) (AS_OBJ(value)->type)
 
@@ -113,12 +114,12 @@ typedef struct {
   ObjClosure *method;
 } ObjBoundMethod;
 
-ObjArray *newArray(void);
+ObjArray *newArray(GC *gc);
 
 /**
  * Allocate a new struct
  */
-ObjStruct *newStruct(ObjString *name);
+ObjStruct *newStruct(GC *gc, ObjString *name);
 
 bool structFieldSlot(ObjStruct *struct_, ObjString *name, int *slot);
 
@@ -130,7 +131,7 @@ ObjString *structFieldName(ObjStruct *struct_, int slot);
 /**
  * Allocate a new closure
  */
-ObjClosure *newClosure(ObjFunction *function);
+ObjClosure *newClosure(GC *gc, ObjFunction *function);
 
 typedef Value (*NativeFn)(struct VM *vm, int argCount, Value *args);
 
@@ -142,27 +143,27 @@ typedef struct {
 /**
  * Allocate a new function
  */
-ObjFunction *newFunction(void);
+ObjFunction *newFunction(GC *gc);
 
 /**
  * Allocate a new struct instance
  */
-ObjInstance *newInstance(ObjStruct *struct_);
-ObjNative *newNative(NativeFn function);
-ObjString *takeString(char *chars, int length);
-ObjString *copyString(const char *chars, int length);
+ObjInstance *newInstance(GC *gc, ObjStruct *struct_);
+ObjNative *newNative(GC *gc, NativeFn function);
+ObjString *takeString(GC *gc, char *chars, int length);
+ObjString *copyString(GC *gc, const char *chars, int length);
 
 /**
  * Allocate a new closure upvalue
  */
-ObjUpvalue *newUpvalue(Value *slot);
-ObjBoundMethod *newBoundMethod(Value receiver, ObjClosure *method);
+ObjUpvalue *newUpvalue(GC *gc, Value *slot);
+ObjBoundMethod *newBoundMethod(GC *gc, Value receiver, ObjClosure *method);
 
 void objectToString(Value value, char *buffer, size_t size);
 void objectTypeToString(ObjType type, char *buffer, size_t size);
 void printObject(Value value);
 void printObjectToErr(Value value);
-void writeValueToArrayObj(ObjArray *array, Value value);
+void writeValueToArrayObj(GC *gc, ObjArray *array, Value value);
 
 static inline bool isObjType(Value value, ObjType type) {
   return IS_OBJ(value) && AS_OBJ(value)->type == type;

@@ -2,7 +2,7 @@
 #include <stdlib.h>
 
 #include "chunk.h"
-#include "memory.h"
+#include "gc.h"
 #include "vm.h"
 
 void initChunk(Chunk *chunk) {
@@ -13,13 +13,14 @@ void initChunk(Chunk *chunk) {
   initValueArray(&chunk->constants);
 }
 
-void writeChunk(Chunk *chunk, uint8_t byte, int line) {
+void writeChunk(GC *gc, Chunk *chunk, uint8_t byte, int line) {
   if (chunk->capacity < chunk->count + 1) {
     int oldCapacity = chunk->capacity;
     chunk->capacity = GROW_CAPACITY(oldCapacity);
     chunk->code =
-        GROW_ARRAY(uint8_t, chunk->code, oldCapacity, chunk->capacity);
-    chunk->lines = GROW_ARRAY(int, chunk->lines, oldCapacity, chunk->capacity);
+        GROW_ARRAY(gc, uint8_t, chunk->code, oldCapacity, chunk->capacity);
+    chunk->lines =
+        GROW_ARRAY(gc, int, chunk->lines, oldCapacity, chunk->capacity);
   }
 
   chunk->code[chunk->count] = byte;
@@ -27,20 +28,18 @@ void writeChunk(Chunk *chunk, uint8_t byte, int line) {
   chunk->count++;
 }
 
-void freeChunk(Chunk *chunk) {
-  FREE_ARRAY(uint8_t, chunk->code, chunk->capacity);
-  FREE_ARRAY(int, chunk->lines, chunk->capacity);
-  freeValueArray(&chunk->constants);
+void freeChunk(GC *gc, Chunk *chunk) {
+  FREE_ARRAY(gc, uint8_t, chunk->code, chunk->capacity);
+  FREE_ARRAY(gc, int, chunk->lines, chunk->capacity);
+  freeValueArray(gc, &chunk->constants);
   initChunk(chunk);
 }
 
-int addConstantToChunk(Chunk *chunk, Value value) {
-  // The value is pushed on to the stack to protect it from garbage collection
-  // This would happen if constant table is out of room and needs to reallocate
+int addConstantToChunk(GC *gc, Chunk *chunk, Value value) {
   pushOnStack(value);
-  writeValueArray(&chunk->constants, value);
-  // Clean up the pushed value from the stack
+  writeValueArray(gc, &chunk->constants, value);
   popFromStack();
+
   int newIndex = chunk->constants.count - 1;
 
   return newIndex;

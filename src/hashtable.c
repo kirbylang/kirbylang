@@ -2,7 +2,7 @@
 #include <string.h>
 
 #include "hashtable.h"
-#include "memory.h"
+#include "gc.h"
 #include "object.h"
 #include "value.h"
 
@@ -14,8 +14,8 @@ void initTable(Table *table) {
   table->entries = NULL;
 }
 
-void freeTable(Table *table) {
-  FREE_ARRAY(Entry, table->entries, table->capacity);
+void freeTable(GC *gc, Table *table) {
+  FREE_ARRAY(gc, Entry, table->entries, table->capacity);
   initTable(table);
 }
 
@@ -41,8 +41,8 @@ static Entry *findEntry(Entry *entries, int capacity, ObjString *key) {
   }
 }
 
-static void adjustCapacity(Table *table, int capacity) {
-  Entry *entries = ALLOCATE(Entry, capacity);
+static void adjustCapacity(GC *gc, Table *table, int capacity) {
+  Entry *entries = ALLOCATE(gc, Entry, capacity);
 
   table->count = 0;
 
@@ -62,7 +62,7 @@ static void adjustCapacity(Table *table, int capacity) {
     table->count++;
   }
 
-  FREE_ARRAY(Entry, table->entries, table->capacity);
+  FREE_ARRAY(gc, Entry, table->entries, table->capacity);
 
   table->entries = entries;
   table->capacity = capacity;
@@ -81,10 +81,10 @@ bool tableGet(Table *table, ObjString *key, Value *value) {
   return true;
 }
 
-bool tableSet(Table *table, ObjString *key, Value value) {
+bool tableSet(GC *gc, Table *table, ObjString *key, Value value) {
   if (table->count + 1 > table->capacity * TABLE_MAX_LOAD) {
     int capacity = GROW_CAPACITY(table->capacity);
-    adjustCapacity(table, capacity);
+    adjustCapacity(gc, table, capacity);
   }
 
   Entry *entry = findEntry(table->entries, table->capacity, key);
@@ -115,12 +115,12 @@ bool tableDelete(Table *table, ObjString *key) {
   return true;
 }
 
-void tableAddAll(Table *from, Table *to) {
+void tableAddAll(GC *gc, Table *from, Table *to) {
   for (int i = 0; i < from->capacity; i++) {
     Entry *entry = &from->entries[i];
 
     if (entry->key != NULL) {
-      tableSet(to, entry->key, entry->value);
+      tableSet(gc, to, entry->key, entry->value);
     }
   }
 }
@@ -156,10 +156,10 @@ void tableRemoveWhite(Table *table) {
   }
 }
 
-void markTable(Table *table) {
+void markTable(GC *gc, Table *table) {
   for (int i = 0; i < table->capacity; i++) {
     Entry *entry = &table->entries[i];
-    markObject((Obj *)entry->key);
-    markValue(entry->value);
+    markObject(gc, (Obj *)entry->key);
+    markValue(gc, entry->value);
   }
 }

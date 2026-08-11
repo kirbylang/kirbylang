@@ -26,29 +26,29 @@
 static void assertReceiverReplaced(int argCount) {
   initVM(0, NULL);
 
-  ObjString *fieldName = copyString("f", 1);
+  ObjString *fieldName = copyString(vm.gc, "f", 1);
   pushOnStack(OBJ_VAL(fieldName));
 
-  ObjString *structName = copyString("Box", 3);
+  ObjString *structName = copyString(vm.gc, "Box", 3);
   pushOnStack(OBJ_VAL(structName));
 
   // newStruct allocates, so structName must already be rooted.
-  ObjStruct *struct_ = newStruct(structName);
+  ObjStruct *struct_ = newStruct(vm.gc, structName);
   pushOnStack(OBJ_VAL(struct_));
 
   // tableSet can grow the table and collect, so fieldName must stay rooted.
-  tableSet(&struct_->fields, fieldName, NUMBER_VAL(0));
+  tableSet(vm.gc, &struct_->fields, fieldName, NUMBER_VAL(0));
   struct_->fieldCount = 1;
   struct_->fieldPublic[0] = true;
 
-  ObjFunction *function = newFunction();
+  ObjFunction *function = newFunction(vm.gc);
   function->arity = argCount;
   pushOnStack(OBJ_VAL(function));
 
-  ObjClosure *closure = newClosure(function);
+  ObjClosure *closure = newClosure(vm.gc, function);
   pushOnStack(OBJ_VAL(closure));
 
-  ObjInstance *instance = newInstance(struct_);
+  ObjInstance *instance = newInstance(vm.gc, struct_);
   pushOnStack(OBJ_VAL(instance));
 
   instance->fields[0] = OBJ_VAL(closure);

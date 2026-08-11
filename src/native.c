@@ -7,7 +7,7 @@
 #include <time.h>
 
 #include "asserts.h"
-#include "memory.h"
+#include "gc.h"
 #include "native.h"
 #include "object.h"
 #include "version.h"
@@ -52,7 +52,7 @@ static ObjString *readFile(VM *vm, const char *path) {
 
   fclose(file);
 
-  return takeString(buffer, size);
+  return takeString(vm->gc, buffer, size);
 }
 
 static void writeFile(VM *vm, const char *path, const char *text) {
@@ -69,9 +69,9 @@ static void writeFile(VM *vm, const char *path, const char *text) {
 }
 
 void defineNative(VM *vm, const char *name, NativeFn function) {
-  pushOnStack(OBJ_VAL(copyString(name, (int)strlen(name))));
-  pushOnStack(OBJ_VAL(newNative(function)));
-  tableSet(&vm->globals, AS_STRING(vm->stack[0]), vm->stack[1]);
+  pushOnStack(OBJ_VAL(copyString(vm->gc, name, (int)strlen(name))));
+  pushOnStack(OBJ_VAL(newNative(vm->gc, function)));
+  tableSet(vm->gc, &vm->globals, AS_STRING(vm->stack[0]), vm->stack[1]);
   popFromStack();
   popFromStack();
 }
@@ -89,7 +89,7 @@ static Value versionNative(VM *vm, int argCount, Value *args) {
 
   assertArgCount(vm, "__version__", 0, argCount);
 
-  return OBJ_VAL(copyString(KIRBY_VERSION, KIRBY_VERSION_len));
+  return OBJ_VAL(copyString(vm->gc, KIRBY_VERSION, KIRBY_VERSION_len));
 }
 
 static Value exitNative(VM *vm, int argCount, Value *args) {
@@ -207,7 +207,7 @@ static Value getEnvNative(VM *vm, int argCount, Value *args) {
     exit(70); // INTERPRET_RUNTIME_ERROR
   }
 
-  return OBJ_VAL(copyString(env_value, (int)strlen(env_value)));
+  return OBJ_VAL(copyString(vm->gc, env_value, (int)strlen(env_value)));
 }
 
 static Value setEnvNative(VM *vm, int argCount, Value *args) {
@@ -264,7 +264,7 @@ static Value typeofNative(VM *vm, int argCount, Value *args) {
 
   valueTypeToString(value, buffer, 9);
 
-  return OBJ_VAL(takeString(buffer, strlen(buffer)));
+  return OBJ_VAL(takeString(vm->gc, buffer, strlen(buffer)));
 }
 
 static bool isHelper(Value value, char *type) {
@@ -370,7 +370,7 @@ static Value arrPushNative(VM *vm, int argCount, Value *args) {
   ObjArray *array = AS_ARRAY(args[0]);
   Value value = args[1];
 
-  writeValueToArrayObj(array, value);
+  writeValueToArrayObj(vm->gc, array, value);
 
   return NIL_VAL;
 }
@@ -404,7 +404,7 @@ static Value arrInsertNative(VM *vm, int argCount, Value *args) {
 
   assertIsInArrayBounds(vm, array, index);
 
-  writeValueToArrayObj(array, NIL_VAL);
+  writeValueToArrayObj(vm->gc, array, NIL_VAL);
 
   for (int i = array->count - 1; i > index; i--) {
     array->values[i] = array->values[i - 1];
@@ -468,12 +468,12 @@ static Value arrCopyNative(VM *vm, int argCount, Value *args) {
   assertArgIsArray(vm, "arrayCopy", args, 0);
 
   ObjArray *array = AS_ARRAY(args[0]);
-  ObjArray *result = newArray();
+  ObjArray *result = newArray(vm->gc);
 
   pushOnStack(OBJ_VAL(result)); // Protect from GC
 
   for (int i = 0; i < array->count; i++) {
-    writeValueToArrayObj(result, array->values[i]);
+    writeValueToArrayObj(vm->gc, result, array->values[i]);
   }
 
   popFromStack(); // Clean up after GC protection
@@ -551,12 +551,12 @@ static Value arrSliceNative(VM *vm, int argCount, Value *args) {
     exit(70);
   }
 
-  ObjArray *result = newArray();
+  ObjArray *result = newArray(vm->gc);
 
   pushOnStack(OBJ_VAL(result));
 
   for (int i = start; i < end; i++) {
-    writeValueToArrayObj(result, array->values[i]);
+    writeValueToArrayObj(vm->gc, result, array->values[i]);
   }
 
   popFromStack();
@@ -572,16 +572,16 @@ static Value arrConcatNative(VM *vm, int argCount, Value *args) {
   ObjArray *array_a = AS_ARRAY(args[0]);
   ObjArray *array_b = AS_ARRAY(args[1]);
 
-  ObjArray *new_array = newArray();
+  ObjArray *new_array = newArray(vm->gc);
 
   pushOnStack(OBJ_VAL(new_array)); // Protect from GC
 
   for (int i = 0; i < array_a->count; i++) {
-    writeValueToArrayObj(new_array, array_a->values[i]);
+    writeValueToArrayObj(vm->gc, new_array, array_a->values[i]);
   }
 
   for (int i = 0; i < array_b->count; i++) {
-    writeValueToArrayObj(new_array, array_b->values[i]);
+    writeValueToArrayObj(vm->gc, new_array, array_b->values[i]);
   }
 
   popFromStack(); // Clean up after GC protection
@@ -595,12 +595,12 @@ static Value arrReverseNative(VM *vm, int argCount, Value *args) {
 
   ObjArray *array_a = AS_ARRAY(args[0]);
 
-  ObjArray *new_array = newArray();
+  ObjArray *new_array = newArray(vm->gc);
 
   pushOnStack(OBJ_VAL(new_array)); // Protect from GC
 
   for (int i = array_a->count - 1; i >= 0; i--) {
-    writeValueToArrayObj(new_array, array_a->values[i]);
+    writeValueToArrayObj(vm->gc, new_array, array_a->values[i]);
   }
 
   popFromStack(); // Clean up after GC protection
@@ -627,7 +627,7 @@ static Value stdinNative(VM *vm, int argCount, Value *args) {
 
   size_t capacity = 64;
   size_t length = 0;
-  char *buffer = ALLOCATE(char, capacity);
+  char *buffer = ALLOCATE(vm->gc, char, capacity);
 
   int c;
   while ((c = getchar()) != EOF) {
@@ -643,12 +643,12 @@ static Value stdinNative(VM *vm, int argCount, Value *args) {
       }
 
       if (capacity == MAX_INPUT) {
-        FREE_ARRAY(char, buffer, capacity);
+        FREE_ARRAY(vm->gc, char, buffer, capacity);
         runtimeError(vm, "stdin() exceeded maximum length.");
         return NIL_VAL;
       }
 
-      buffer = GROW_ARRAY(char, buffer, capacity, newCapacity);
+      buffer = GROW_ARRAY(vm->gc, char, buffer, capacity, newCapacity);
       capacity = newCapacity;
     }
 
@@ -656,13 +656,13 @@ static Value stdinNative(VM *vm, int argCount, Value *args) {
   }
 
   if (c == EOF && length == 0) {
-    FREE_ARRAY(char, buffer, capacity);
+    FREE_ARRAY(vm->gc, char, buffer, capacity);
     return NIL_VAL;
   }
 
   buffer[length] = '\0';
 
-  return OBJ_VAL(takeString(buffer, length));
+  return OBJ_VAL(takeString(vm->gc, buffer, length));
 }
 
 static Value promptNative(VM *vm, int argCount, Value *args) {
@@ -685,7 +685,7 @@ static Value promptNative(VM *vm, int argCount, Value *args) {
 
   size_t capacity = 64;
   size_t length = 0;
-  char *buffer = ALLOCATE(char, capacity);
+  char *buffer = ALLOCATE(vm->gc, char, capacity);
 
   int c;
   while ((c = getchar()) != '\n' && c != EOF) {
@@ -701,12 +701,12 @@ static Value promptNative(VM *vm, int argCount, Value *args) {
       }
 
       if (capacity == MAX_INPUT) {
-        FREE_ARRAY(char, buffer, capacity);
+        FREE_ARRAY(vm->gc, char, buffer, capacity);
         runtimeError(vm, "input() exceeded maximum length.");
         return NIL_VAL;
       }
 
-      buffer = GROW_ARRAY(char, buffer, capacity, newCapacity);
+      buffer = GROW_ARRAY(vm->gc, char, buffer, capacity, newCapacity);
       capacity = newCapacity;
     }
 
@@ -714,13 +714,13 @@ static Value promptNative(VM *vm, int argCount, Value *args) {
   }
 
   if (c == EOF && length == 0) {
-    FREE_ARRAY(char, buffer, capacity);
+    FREE_ARRAY(vm->gc, char, buffer, capacity);
     return NIL_VAL;
   }
 
   buffer[length] = '\0';
 
-  return OBJ_VAL(takeString(buffer, length));
+  return OBJ_VAL(takeString(vm->gc, buffer, length));
 }
 
 static Value argvNative(VM *vm, int argCount, Value *args) {
@@ -735,7 +735,7 @@ static Value argvNative(VM *vm, int argCount, Value *args) {
   }
 
   const char *c_arg = vm->argv[idx];
-  ObjString *kirbyStr = copyString(c_arg, (int)strlen(c_arg));
+  ObjString *kirbyStr = copyString(vm->gc, c_arg, (int)strlen(c_arg));
 
   return OBJ_VAL(kirbyStr);
 }
@@ -772,7 +772,7 @@ static Value numberToStringNative(VM *vm, int argCount, Value *args) {
 
   int length = snprintf(buffer, sizeof(buffer), "%.15g", value.as.number);
 
-  return OBJ_VAL(copyString(buffer, length));
+  return OBJ_VAL(copyString(vm->gc, buffer, length));
 }
 
 void defineAllNatives(VM *vm) {

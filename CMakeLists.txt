@@ -55,7 +55,9 @@ set(KIRBY_SOURCES
     src/debug.c
     src/hashtable.c
     src/lexer.c
-    src/memory.c
+    src/compiled_unit.c
+    src/gc.c
+    src/loader.c
     src/native.c
     src/object.c
     src/parser.c

@@ -2,8 +2,8 @@
 #define kirby_compiler_h
 
 #include "ast.h"
-#include "chunk.h"
-#include "object.h"
+#include "compiled_unit.h"
+#include "opcode.h"
 #include "token.h"
 
 typedef struct {
@@ -26,11 +26,24 @@ typedef struct {
   bool isMutable;
 } Upvalue;
 
+/**
+ * A function compiler
+ */
 typedef struct Compiler Compiler;
 
 struct Compiler {
+  /**
+   * The outer function that this compiler is compiling for.
+   */
   Compiler *enclosing;
-  ObjFunction *function;
+
+  // Index of this function's CompiledFn within the unit being built, and a
+  // cached pointer to it.
+  int fnIndex;
+  CompiledFn *fn;
+
+  int upvalueCount;
+
   FunctionType type;
 
   Local locals[UINT8_COUNT];
@@ -41,11 +54,6 @@ struct Compiler {
   struct LoopCompiler *enclosingLoop;
 };
 
-typedef struct {
-  ObjString *name;
-  uint8_t slot;
-} Field;
-
 typedef struct LoopCompiler {
   struct LoopCompiler *enclosing;
   int scopeDepth;
@@ -54,21 +62,15 @@ typedef struct LoopCompiler {
 } LoopCompiler;
 
 /**
- * Compile a AST node into a compiled function object.
+ * Compile an AST into a CompiledUnit.
+ *
+ * Returns NULL on error. TODO: Should it?
+ *
+ * Caller owns the unit (freeCompiledUnit).
  */
-ObjFunction *compile(AstNode **ast, int count, int endLine);
+CompiledUnit *compile(AstNode **ast, int count, int endLine);
 
-/**
- * Mark all objects that are referenced by the compiler as roots
- */
-void markCompilerRoots(void);
-
-/** Diagnostic: true while a compiler is on the stack (see collectGarbage). */
+/** Diagnostic: true while a compiler is on the stack. */
 bool compilerIsActive(void);
-
-/**
- * Free compiler-owned tables (called from freeVM)
- */
-void freeCompilerState(void);
 
 #endif

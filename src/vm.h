@@ -2,6 +2,7 @@
 #define kirby_vm_h
 
 #include "chunk.h"
+#include "gc.h"
 #include "hashtable.h"
 #include "object.h"
 #include "value.h"
@@ -35,19 +36,10 @@ struct VM {
   Value *stackTop;
 
   Table globals;
-  Table strings;
 
   ObjUpvalue *openUpvalues;
 
-  size_t bytesAllocated;
-  size_t nextGC;
-
-  Obj *objects;
-
-  int grayCount;
-  int grayCapacity;
-  Obj **grayStack;
-  bool gcEnabled;
+  GC *gc; // heap context (borrowed)
 };
 
 extern VM vm;

@@ -9,7 +9,7 @@
 
 static ObjFunction *buildFieldChunk(ObjString *structName,
                                     ObjString *fieldName) {
-  ObjFunction *function = newFunction();
+  ObjFunction *function = newFunction(vm.gc);
 
   // addConstantToChunk and writeChunk both allocate, and either can trigger a
   // collection. Until interpretFunction pushes it, this function is reachable
@@ -18,22 +18,22 @@ static ObjFunction *buildFieldChunk(ObjString *structName,
 
   Chunk *chunk = &function->chunk;
 
-  int structConst = addConstantToChunk(chunk, OBJ_VAL(structName));
-  int fieldConst = addConstantToChunk(chunk, OBJ_VAL(fieldName));
+  int structConst = addConstantToChunk(vm.gc, chunk, OBJ_VAL(structName));
+  int fieldConst = addConstantToChunk(vm.gc, chunk, OBJ_VAL(fieldName));
 
   // Stack shape OP_FIELD expects: struct at peek(1), initializer at peek(0).
-  writeChunk(chunk, OP_GET_GLOBAL, 1);
-  writeChunk(chunk, (uint8_t)structConst, 1);
+  writeChunk(vm.gc, chunk, OP_GET_GLOBAL, 1);
+  writeChunk(vm.gc, chunk, (uint8_t)structConst, 1);
 
-  writeChunk(chunk, OP_NIL, 1);
+  writeChunk(vm.gc, chunk, OP_NIL, 1);
 
-  writeChunk(chunk, OP_FIELD, 1);
-  writeChunk(chunk, (uint8_t)fieldConst, 1);
-  writeChunk(chunk, 1, 1); // public
+  writeChunk(vm.gc, chunk, OP_FIELD, 1);
+  writeChunk(vm.gc, chunk, (uint8_t)fieldConst, 1);
+  writeChunk(vm.gc, chunk, 1, 1); // public
 
-  writeChunk(chunk, OP_POP, 1);
-  writeChunk(chunk, OP_NIL, 1);
-  writeChunk(chunk, OP_RETURN, 1);
+  writeChunk(vm.gc, chunk, OP_POP, 1);
+  writeChunk(vm.gc, chunk, OP_NIL, 1);
+  writeChunk(vm.gc, chunk, OP_RETURN, 1);
 
   // Safe to drop: interpretFunction pushes it again before anything allocates.
   popFromStack();
@@ -44,21 +44,21 @@ static ObjFunction *buildFieldChunk(ObjString *structName,
 static void test_field_limit_is_a_runtime_error(void) {
   initVM(0, NULL);
 
-  ObjString *structName = copyString("Big", 3);
+  ObjString *structName = copyString(vm.gc, "Big", 3);
 
   pushOnStack(OBJ_VAL(structName));
-  ObjStruct *struct_ = newStruct(structName);
+  ObjStruct *struct_ = newStruct(vm.gc, structName);
   popFromStack();
 
   pushOnStack(OBJ_VAL(struct_));
-  tableSet(&vm.globals, structName, OBJ_VAL(struct_));
+  tableSet(vm.gc, &vm.globals, structName, OBJ_VAL(struct_));
   popFromStack();
 
   // Reaching this by executing 256 OP_FIELDs is not possible from a single
   // chunk -- OP_FIELD's operand is one byte.
   struct_->fieldCount = 256;
 
-  ObjString *fieldName = copyString("overflow", 8);
+  ObjString *fieldName = copyString(vm.gc, "overflow", 8);
   pushOnStack(OBJ_VAL(fieldName));
   ObjFunction *function = buildFieldChunk(structName, fieldName);
   popFromStack();

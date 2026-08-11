@@ -3,11 +3,12 @@
 #include <string.h>
 
 #include "ast.h"
-#include "memory.h"
-#include "object.h"
+#include "common.h"
 #include "strbuf.h"
 
 #define SLAB_SIZE 8192
+#define SLAB_AND_MIN_SIZE 8
+#define SLAB_AND_GROW_SIZE 2
 
 static void printNode(StrBuf *sb, AstNode *node);
 
@@ -57,9 +58,16 @@ void arrayNodeDataInit(ArrayNodeData *and) {
 
 void arrayNodeDataWrite(ArrayNodeData *and, AstNode *item) {
   if (and->capacity < and->count + 1) {
-    int oldCapacity = and->capacity;
-    and->capacity = GROW_CAPACITY(oldCapacity);
-    and->data = GROW_ARRAY(AstNode *, and->data, oldCapacity, and->capacity);
+    // The AST is not GC-managed memory (it is freed wholesale by astFreeAll),
+    // so it uses plain realloc rather than the collector's allocator.
+    and->capacity = and->capacity < SLAB_AND_MIN_SIZE
+                        ? SLAB_AND_MIN_SIZE
+                        : and->capacity * SLAB_AND_GROW_SIZE;
+    and->data = realloc(and->data, sizeof(AstNode *) * and->capacity);
+    if (and->data == NULL) {
+      fprintf(stderr, "realloc failed in arrayNodeDataWrite");
+      exit(1);
+    }
   }
 
   and->data[and->count] = item;
