@@ -3,18 +3,6 @@
 
 #include "common.h"
 
-/**
- * A CompiledUnit is the flat, heap-free, serializable artifact produced by the
- * compiler. It contains no pointers into any GC heap and no Obj headers: every
- * cross-reference is either an inline scalar, a slice into the string blob, or
- * an index into a table. The loader (loader.c) is the sole consumer that turns
- * a CompiledUnit into live runtime objects.
- *
- * This is the mechanism that fully decouples the compiler from the runtime,
- * GC, and VM: compile() builds a CompiledUnit with plain malloc and never
- * touches a GC.
- */
-
 typedef enum {
   CONST_NUMBER,
   CONST_BOOL,
@@ -37,9 +25,7 @@ typedef struct {
 } CompiledConst;
 
 /**
- * Flat upvalue capture descriptor (same information the compiler already
- * tracks: whether the captured variable is a local of the enclosing function
- * and its slot/index).
+ * An upvalue captured in a compiled function
  */
 typedef struct {
   bool isLocal;

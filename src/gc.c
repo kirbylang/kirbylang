@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "common.h"
 #include "gc.h"
 #include "object.h"
 
@@ -34,7 +35,7 @@ void *reallocate(GC *gc, void *pointer, size_t oldSize, size_t newSize) {
 
   if (result == NULL) {
     fprintf(stderr, "Realloc failed");
-    exit(1);
+    exit(EXIT_CODE_OS_ERR);
   }
 
   return result;
@@ -61,7 +62,7 @@ void markObject(GC *gc, Obj *object) {
 
     if (gc->grayStack == NULL) {
       fprintf(stderr, "gc->grayStack == NULL");
-      exit(1);
+      exit(EXIT_CODE_OS_ERR);
     }
   }
 

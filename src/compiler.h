@@ -29,13 +29,13 @@ typedef struct {
 /**
  * A function compiler
  */
-typedef struct Compiler Compiler;
+typedef struct FnCompiler FnCompiler;
 
-struct Compiler {
+struct FnCompiler {
   /**
    * The outer function that this compiler is compiling for.
    */
-  Compiler *enclosing;
+  FnCompiler *enclosing;
 
   // Index of this function's CompiledFn within the unit being built, and a
   // cached pointer to it.
@@ -63,8 +63,6 @@ typedef struct LoopCompiler {
 
 /**
  * Compile an AST into a CompiledUnit.
- *
- * Returns NULL on error. TODO: Should it?
  *
  * Caller owns the unit (freeCompiledUnit).
  */

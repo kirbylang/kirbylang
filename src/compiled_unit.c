@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "common.h"
 #include "compiled_unit.h"
 
 #define CU_FN_GROW_SIZE 2
@@ -164,7 +165,7 @@ static void *xrealloc(void *ptr, size_t size) {
   void *result = realloc(ptr, size);
   if (result == NULL && size != 0) {
     fprintf(stderr, "realloc failed in compiled_unit");
-    exit(1);
+    exit(EXIT_CODE_OS_ERR);
   }
   return result;
 }

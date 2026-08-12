@@ -18,7 +18,7 @@ static ObjString *readFile(VM *vm, const char *path) {
 
   if (!file) {
     runtimeError(vm, "File does not exist: '%s'", path);
-    exit(70); // INTERPRET_RUNTIME_ERROR
+    exit(EXIT_CODE_RUNTIME_ERR); // INTERPRET_RUNTIME_ERROR
   }
 
   if (fseek(file, 0, SEEK_END) != 0) {
@@ -60,7 +60,7 @@ static void writeFile(VM *vm, const char *path, const char *text) {
 
   if (!file) {
     runtimeError(vm, "File does not exist: '%s'", path);
-    exit(70); // INTERPRET_RUNTIME_ERROR
+    exit(EXIT_CODE_RUNTIME_ERR); // INTERPRET_RUNTIME_ERROR
   }
 
   fprintf(file, "%s", text);
@@ -204,7 +204,7 @@ static Value getEnvNative(VM *vm, int argCount, Value *args) {
 
   if (env_value == NULL) {
     runtimeError(vm, "Environment variable not found: '%s'", name_str);
-    exit(70); // INTERPRET_RUNTIME_ERROR
+    exit(EXIT_CODE_RUNTIME_ERR); // INTERPRET_RUNTIME_ERROR
   }
 
   return OBJ_VAL(copyString(vm->gc, env_value, (int)strlen(env_value)));
@@ -224,7 +224,7 @@ static Value setEnvNative(VM *vm, int argCount, Value *args) {
   if (result != 0) {
     runtimeError(vm, "setenv unable to set environment variable: '%s'",
                  name->chars);
-    exit(70); // INTERPRET_RUNTIME_ERROR
+    exit(EXIT_CODE_RUNTIME_ERR); // INTERPRET_RUNTIME_ERROR
   }
 
   return NIL_VAL; // or you could return true if you prefer
@@ -246,7 +246,7 @@ static Value lenNative(VM *vm, int argCount, Value *args) {
   } else {
     runtimeError(vm,
                  "function len expects argument 1 to be a string or array.");
-    exit(70);
+    exit(EXIT_CODE_RUNTIME_ERR);
   }
 }
 
@@ -383,7 +383,7 @@ static Value arrPopNative(VM *vm, int argCount, Value *args) {
 
   if (array->count == 0) {
     runtimeError(vm, "Cannot pop empty array.");
-    exit(70);
+    exit(EXIT_CODE_RUNTIME_ERR);
   }
 
   Value value = array->values[array->count - 1];
@@ -548,7 +548,7 @@ static Value arrSliceNative(VM *vm, int argCount, Value *args) {
   if (start >= end) {
     runtimeError(
         vm, "function arrSlice expects argument 1 to be less than argument 2.");
-    exit(70);
+    exit(EXIT_CODE_RUNTIME_ERR);
   }
 
   ObjArray *result = newArray(vm->gc);

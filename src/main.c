@@ -172,20 +172,20 @@ static void runFile(const char *path) {
   free(source);
 
   if (result == INTERPRET_COMPILE_ERROR) {
-    exit(65);
+    exit(EXIT_CODE_COMPILER_ERR);
   }
 
   if (result == INTERPRET_RUNTIME_ERROR)
-    exit(70);
+    exit(EXIT_CODE_RUNTIME_ERR);
 }
 
 static void runCode(const char *source) {
   InterpretResult result = interpret(source);
 
   if (result == INTERPRET_COMPILE_ERROR) {
-    exit(65);
+    exit(EXIT_CODE_COMPILER_ERR);
   }
 
   if (result == INTERPRET_RUNTIME_ERROR)
-    exit(70);
+    exit(EXIT_CODE_RUNTIME_ERR);
 }

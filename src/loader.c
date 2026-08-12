@@ -2,6 +2,7 @@
 #include <stdlib.h>
 
 #include "chunk.h"
+#include "common.h"
 #include "gc.h"
 #include "loader.h"
 #include "object.h"
@@ -35,10 +36,9 @@ ObjFunction *loadUnit(VM *vm, const CompiledUnit *compiledUnit) {
   ObjFunction **byIndex =
       (ObjFunction **)malloc(sizeof(ObjFunction *) * (size_t)functionCount);
 
-  // TODO: This should be a runtime error?
   if (byIndex == NULL) {
     fprintf(stderr, "malloc failed in loadUnit");
-    exit(1);
+    exit(EXIT_CODE_OS_ERR);
   }
 
   pass1(vm->gc, compiledUnit, byIndex, functionCount);

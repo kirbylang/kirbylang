@@ -9,7 +9,7 @@
 #include "compiled_unit.h"
 #include "token.h"
 
-Compiler *current = NULL;
+FnCompiler *current = NULL;
 LoopCompiler *currentLoop = NULL;
 
 static CompiledUnit *compilingUnit = NULL;
@@ -90,7 +90,7 @@ static void error(const char *message) {
 /**
  * Initialize compiler to compile a function
  */
-static void initCompiler(Compiler *compiler, FunctionType functionType,
+static void initCompiler(FnCompiler *compiler, FunctionType functionType,
                          Token *nameToken) {
   TRACELN("  compiler.initCompiler()");
 
@@ -109,7 +109,7 @@ static void initCompiler(Compiler *compiler, FunctionType functionType,
 
   // cuAddFunction may realloc the functions array, invalidating cached fn
   // pointers on enclosing compilers. Refresh them from their indices.
-  for (Compiler *c2 = current->enclosing; c2 != NULL; c2 = c2->enclosing) {
+  for (FnCompiler *c2 = current->enclosing; c2 != NULL; c2 = c2->enclosing) {
     c2->fn = cuGetFnByIndex(compilingUnit, c2->fnIndex);
   }
 
@@ -185,7 +185,7 @@ static bool identifiersEqual(Token *a, Token *b) {
  * @returns -1 if not found, otherwise the index of the local from the
  * function's locals
  */
-static int resolveLocal(Compiler *compiler, Token *identifier) {
+static int resolveLocal(FnCompiler *compiler, Token *identifier) {
   // Loop through the locals in reverse order to find by identifier
   for (int i = compiler->localCount - 1; i >= 0; i--) {
     Local *local = &compiler->locals[i];
@@ -207,7 +207,7 @@ static int resolveLocal(Compiler *compiler, Token *identifier) {
   return -1;
 }
 
-static int addUpvalue(Compiler *compiler, uint8_t index, bool isLocal,
+static int addUpvalue(FnCompiler *compiler, uint8_t index, bool isLocal,
                       bool isMutable) {
   int upvalueCount = compiler->upvalueCount;
 
@@ -229,7 +229,7 @@ static int addUpvalue(Compiler *compiler, uint8_t index, bool isLocal,
   return compiler->upvalueCount++;
 }
 
-static int resolveUpvalue(Compiler *compiler, Token *name) {
+static int resolveUpvalue(FnCompiler *compiler, Token *name) {
   if (compiler->enclosing == NULL)
     return -1;
 
@@ -309,7 +309,7 @@ static void nameSetAdd(NameSet *set, const char *chars, int length) {
     set->lengths = realloc(set->lengths, sizeof(int) * set->capacity);
     if (set->names == NULL || set->lengths == NULL) {
       fprintf(stderr, "realloc failed in nameSetAdd");
-      exit(1);
+      exit(EXIT_CODE_OS_ERR);
     }
   }
   char *copy = malloc((size_t)length);
@@ -613,7 +613,7 @@ static void compileCall(CallNode *c) {
  * plain function, and inside a static method.
  */
 static bool selfInScope(void) {
-  for (Compiler *c = current; c != NULL; c = c->enclosing) {
+  for (FnCompiler *c = current; c != NULL; c = c->enclosing) {
     if (c->type == TYPE_METHOD)
       return true;
   }
@@ -919,7 +919,7 @@ static void compileVarDecl(AstNode *node) {
 }
 
 static void compileFunction(FunctionNode *fn, FunctionType type) {
-  Compiler compiler;
+  FnCompiler compiler;
   initCompiler(&compiler, type, fn->isLambda ? NULL : &fn->name);
   current->fn->isPublic = fn->isPublic;
   beginScope();
@@ -1254,14 +1254,14 @@ CompiledUnit *compile(AstNode **ast, int count, int endLine) {
   CompiledUnit *unit = malloc(sizeof(CompiledUnit));
   if (unit == NULL) {
     fprintf(stderr, "malloc failed in compile");
-    exit(1);
+    exit(EXIT_CODE_OS_ERR);
   }
   cuInit(unit);
 
   compilingUnit = unit;
   hadError = false;
 
-  Compiler compiler;
+  FnCompiler compiler;
   initCompiler(&compiler, TYPE_SCRIPT, NULL);
 
   // Hoist top-level function declarations.

@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "common.h"
 #include "token.h"
 #include "token_stream.h"
 
@@ -27,7 +28,7 @@ void tsWrite(TokenStream *ts, Token token) {
 
     if (ts->tokens == NULL) {
       fprintf(stderr, "realloc failed in tsWrite");
-      exit(1);
+      exit(EXIT_CODE_OS_ERR);
     }
   }
 
