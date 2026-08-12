@@ -579,8 +579,6 @@ static int endCompiler(void) {
   current->fn->upvalueCount = current->upvalueCount;
   int index = current->fnIndex;
 
-  cuMarkFinished(compilingUnit, index);
-
   current = current->enclosing;
 
   return index;

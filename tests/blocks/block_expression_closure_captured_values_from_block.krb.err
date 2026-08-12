@@ -1,9 +1,6 @@
 == <script> ==
 0000    1 OP_NIL
 0001    | OP_RETURN
-== inner ==
-0000    4 OP_GET_UPVALUE      0
-0002    | OP_RETURN
 == <script> ==
 0000    2 OP_CONSTANT         1 'hello'
 0002    4 OP_CLOSURE          2 <fn inner>
@@ -16,3 +13,6 @@
 0016    | OP_PRINT
 0017   10 OP_NIL
 0018    | OP_RETURN
+== inner ==
+0000    4 OP_GET_UPVALUE      0
+0002    | OP_RETURN

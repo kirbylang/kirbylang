@@ -45,8 +45,7 @@ ObjFunction *loadUnit(VM *vm, const CompiledUnit *compiledUnit) {
   pass2(vm->gc, compiledUnit, byIndex, functionCount);
 
 #ifdef DEBUG_PRINT_CODE
-  for (int oi = 0; oi < compiledUnit->finishOrderCount; oi++) {
-    int i = compiledUnit->finishOrder[oi];
+  for (int i = 0; i < functionCount; i++) {
     ObjFunction *fn = byIndex[i];
     disassembleChunk(&fn->chunk,
                      fn->name != NULL ? fn->name->chars : "<script>");

@@ -24,22 +24,6 @@ void cuInit(CompiledUnit *compiledUnit) {
   compiledUnit->functions = NULL;
   compiledUnit->functionCount = 0;
   compiledUnit->functionCapacity = 0;
-
-  compiledUnit->finishOrder = NULL;
-  compiledUnit->finishOrderCount = 0;
-  compiledUnit->finishOrderCapacity = 0;
-}
-
-void cuMarkFinished(CompiledUnit *compiledUnit, int index) {
-  if (compiledUnit->finishOrderCount + 1 > compiledUnit->finishOrderCapacity) {
-    int cap = compiledUnit->finishOrderCapacity < 8
-                  ? 8
-                  : compiledUnit->finishOrderCapacity * 2;
-    compiledUnit->finishOrder =
-        (int *)xrealloc(compiledUnit->finishOrder, sizeof(int) * (size_t)cap);
-    compiledUnit->finishOrderCapacity = cap;
-  }
-  compiledUnit->finishOrder[compiledUnit->finishOrderCount++] = index;
 }
 
 int cuInternString(CompiledUnit *compiledUnit, const char *chars, int length) {
@@ -148,14 +132,9 @@ static void freeCompiledUnitStrings(CompiledUnit *compiledUnit) {
   free(compiledUnit->strings);
 }
 
-static void freeCompiledUnitFinishOrder(CompiledUnit *compiledUnit) {
-  free(compiledUnit->finishOrder);
-}
-
 void freeCompiledUnit(CompiledUnit *compiledUnit) {
   freeCompiledUnitFns(compiledUnit);
   freeCompiledUnitStrings(compiledUnit);
-  freeCompiledUnitFinishOrder(compiledUnit);
   cuInit(compiledUnit);
 }
 

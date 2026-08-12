@@ -102,15 +102,6 @@ typedef struct {
                          // function of the file.
   int functionCount;
   int functionCapacity;
-
-  // Order in which functions finished compiling (innermost-first), used only to
-  // reproduce debug disassembly order. Same length as functionCount.
-  //
-  // TODO: I don't understand how this works
-
-  int *finishOrder;
-  int finishOrderCount;
-  int finishOrderCapacity;
 } CompiledUnit;
 
 /**
@@ -153,11 +144,5 @@ void cuWriteByte(CompiledFn *compiledFn, uint8_t byte, int line);
 int cuAddConstant(CompiledFn *compiledFn, CompiledConst compiledConst);
 
 int cuAddUpvalue(CompiledFn *compiledFn, bool isLocal, uint8_t index);
-
-/**
- * Record that function `index` has finished compiling. The loader replays this
- * order to reproduce debug disassembly output.
- */
-void cuMarkFinished(CompiledUnit *compiledUnit, int index);
 
 #endif

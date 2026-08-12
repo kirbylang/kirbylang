@@ -1,16 +1,6 @@
 == <script> ==
 0000    1 OP_NIL
 0001    | OP_RETURN
-== subject ==
-0000    6 OP_GET_LOCAL        0
-0002    | OP_GET_PROPERTY     0 'name'
-0004    | OP_RETURN
-== greet ==
-0000    8 OP_CONSTANT         0 'Hello '
-0002    | OP_GET_LOCAL        0
-0004    | OP_INVOKE        (0 args)    1 'subject'
-0007    | OP_ADD
-0008    | OP_RETURN
 == <script> ==
 0000    1 OP_STRUCT           0 'Greeter'
 0002    | OP_DEFINE_GLOBAL    0 'Greeter'
@@ -30,3 +20,13 @@
 0030    | OP_PRINT
 0031   12 OP_NIL
 0032    | OP_RETURN
+== subject ==
+0000    6 OP_GET_LOCAL        0
+0002    | OP_GET_PROPERTY     0 'name'
+0004    | OP_RETURN
+== greet ==
+0000    8 OP_CONSTANT         0 'Hello '
+0002    | OP_GET_LOCAL        0
+0004    | OP_INVOKE        (0 args)    1 'subject'
+0007    | OP_ADD
+0008    | OP_RETURN

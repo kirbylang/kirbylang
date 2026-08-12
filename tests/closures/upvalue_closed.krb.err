@@ -1,17 +1,6 @@
 == <script> ==
 0000    1 OP_NIL
 0001    | OP_RETURN
-== inner ==
-0000    4 OP_GET_UPVALUE      0
-0002    | OP_PRINT
-0003    5 OP_NIL
-0004    | OP_RETURN
-== outer ==
-0000    2 OP_CONSTANT         0 'outside'
-0002    5 OP_CLOSURE          1 <fn inner>
-0004      |                     local 1
-0006    7 OP_GET_LOCAL        2
-0008    | OP_RETURN
 == <script> ==
 0000    8 OP_CLOSURE          1 <fn outer>
 0002    | OP_DEFINE_GLOBAL    0 'outer'
@@ -23,3 +12,14 @@
 0014    | OP_POP
 0015   12 OP_NIL
 0016    | OP_RETURN
+== outer ==
+0000    2 OP_CONSTANT         0 'outside'
+0002    5 OP_CLOSURE          1 <fn inner>
+0004      |                     local 1
+0006    7 OP_GET_LOCAL        2
+0008    | OP_RETURN
+== inner ==
+0000    4 OP_GET_UPVALUE      0
+0002    | OP_PRINT
+0003    5 OP_NIL
+0004    | OP_RETURN

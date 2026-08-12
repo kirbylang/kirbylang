@@ -1,14 +1,6 @@
 == <script> ==
 0000    1 OP_NIL
 0001    | OP_RETURN
-== should_not_call ==
-0000    6 OP_CONSTANT         0 'Should not print'
-0002    | OP_PRINT
-0003    7 OP_NIL
-0004    | OP_RETURN
-== returns_nil ==
-0000   18 OP_NIL
-0001    | OP_RETURN
 == <script> ==
 0000    7 OP_CLOSURE          1 <fn should_not_call>
 0002    | OP_DEFINE_GLOBAL    0 'should_not_call'
@@ -66,3 +58,11 @@
 0094    | OP_PRINT
 0095   25 OP_NIL
 0096    | OP_RETURN
+== should_not_call ==
+0000    6 OP_CONSTANT         0 'Should not print'
+0002    | OP_PRINT
+0003    7 OP_NIL
+0004    | OP_RETURN
+== returns_nil ==
+0000   18 OP_NIL
+0001    | OP_RETURN

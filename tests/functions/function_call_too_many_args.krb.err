@@ -1,11 +1,6 @@
 == <script> ==
 0000    1 OP_NIL
 0001    | OP_RETURN
-== sum ==
-0000    2 OP_GET_LOCAL        1
-0002    | OP_GET_LOCAL        2
-0004    | OP_ADD
-0005    | OP_RETURN
 == <script> ==
 0000    3 OP_CLOSURE          1 <fn sum>
 0002    | OP_DEFINE_GLOBAL    0 'sum'
@@ -17,5 +12,10 @@
 0014    | OP_PRINT
 0015    6 OP_NIL
 0016    | OP_RETURN
+== sum ==
+0000    2 OP_GET_LOCAL        1
+0002    | OP_GET_LOCAL        2
+0004    | OP_ADD
+0005    | OP_RETURN
 Expected 2 arguments but got 3.
 [line 5] in script
