@@ -1,5 +1,6 @@
 #include "compiler.h"
 
+#include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -52,7 +53,6 @@ static void defineVariable(uint8_t global);
 static void markInitialized(void);
 static void beginScope(void);
 static void endScope(void);
-
 static void errorAt(int line, const char *lexeme, int lexemeLen,
                     const char *message) {
   hadError = true;
@@ -274,8 +274,10 @@ static void declareVariable(Token *name, bool isMutable) {
  * Names of globals declared with `let`.
  *
  * Globals have no compile-time slot, so immutability is tracked by name in a
- * table that outlives a single compile() call -- the REPL compiles each line
- * separately but shares one set of globals.
+ * table that outlives a single compile() call -- it persists for the life of
+ * a compiler session (see compilerSessionBegin()/compilerSessionEnd() below),
+ * since the REPL compiles each line separately but shares one set of
+ * globals across the whole session.
  *
  * This is a plain (non-GC) set of names: the compiler must not allocate heap
  * objects.
@@ -287,7 +289,14 @@ typedef struct {
   int capacity;
 } NameSet;
 
+static void nameSetFree(NameSet *set);
+
 static NameSet immutableGlobals;
+
+/**
+ * End a compiler session, freeing everything tracked during it.
+ */
+void compilerSessionEnd(void) { nameSetFree(&immutableGlobals); }
 
 static bool nameSetContains(NameSet *set, const char *chars, int length) {
   for (int i = 0; i < set->count; i++) {
@@ -1283,7 +1292,6 @@ CompiledUnit *compile(AstNode **ast, int count, int endLine) {
 
   bool ok = !hadError;
   compilingUnit = NULL;
-  nameSetFree(&immutableGlobals);
 
   if (!ok) {
     freeCompiledUnit(unit);

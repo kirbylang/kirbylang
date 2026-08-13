@@ -2,6 +2,7 @@
 #define kirby_vm_h
 
 #include "chunk.h"
+#include "compiled_unit.h"
 #include "gc.h"
 #include "hashtable.h"
 #include "object.h"
@@ -81,9 +82,14 @@ void freeVM(void);
 InterpretResult interpretFunction(ObjFunction *function);
 
 /**
- * Compile and interpret source code
+ * Load and run a compiled unit.
+ *
+ * Takes ownership of `unit`: it is materialized into live ObjFunctions via
+ * loadUnit(), then freed. The caller is responsible for producing `unit` via
+ * parse()+compile() first -- interpret() no longer does that itself, so the
+ * VM has no dependency on the compiler.
  */
-InterpretResult interpret(const char *source);
+InterpretResult interpret(CompiledUnit *unit);
 
 void runtimeError(VM *vm, const char *format, ...);
 

@@ -7,13 +7,11 @@
 
 #include "asserts.h"
 #include "common.h"
-#include "compiler.h"
 #include "debug.h"
 #include "gc.h"
 #include "loader.h"
 #include "native.h"
 #include "object.h"
-#include "parser.h"
 #include "string.h"
 #include "version.h"
 #include "vm.h"
@@ -71,29 +69,8 @@ InterpretResult interpretFunction(ObjFunction *function) {
   return run();
 }
 
-InterpretResult interpret(const char *source) {
+InterpretResult interpret(CompiledUnit *unit) {
   TRACELN("vm.interpret()");
-
-  int count = 0;
-  bool parseHadError = false;
-  int endLine = 0;
-  AstNode **ast = parse(source, &count, &parseHadError, &endLine);
-
-  if (parseHadError) {
-    astFreeAll();
-    free(ast);
-    return INTERPRET_COMPILE_ERROR;
-  }
-
-  // The compiler produces a flat, heap-free CompiledUnit -- no GC involved.
-  CompiledUnit *unit = compile(ast, count, endLine);
-
-  astFreeAll();
-  free(ast);
-
-  if (unit == NULL) {
-    return INTERPRET_COMPILE_ERROR;
-  }
 
   // The loader is the sole heap client: it materializes the unit into live
   // ObjFunctions. GC is enabled from here on.

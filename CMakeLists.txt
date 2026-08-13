@@ -338,4 +338,21 @@ if(BUILD_TESTS)
         NAME kirby-vm-invoke-unit-test
         COMMAND kirby-vm-invoke-unit-test
     )
+
+    add_executable(kirby-vm-repl-immutability-unit-test
+        unit/vm_repl_immutability.c
+    )
+
+    target_link_libraries(kirby-vm-repl-immutability-unit-test
+        PRIVATE
+            kirby_core_debug
+    )
+
+    configure_kirby_target(kirby-vm-repl-immutability-unit-test)
+    enable_coverage(kirby-vm-repl-immutability-unit-test)
+
+    add_test(
+        NAME kirby-vm-repl-immutability-unit-test
+        COMMAND kirby-vm-repl-immutability-unit-test
+    )
 endif()
