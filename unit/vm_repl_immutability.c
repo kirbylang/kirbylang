@@ -25,18 +25,8 @@ static InterpretResult run(const char *source) {
 }
 
 /**
- * Regression test: immutableGlobals must persist for the life of a compiler
- * session, not just for the duration of a single compile() call.
- *
- * `let` bindings are tracked as immutable purely by name, at compile time,
- * in a table scoped to a compilerSessionBegin()/compilerSessionEnd() pair.
- * The REPL compiles each line as its own compile() call within one session
- * -- a `let` declared on one line must still be rejected for reassignment on
- * a later line in the same session.
- *
- * A single-file `.krb` E2E test can't exercise this: it's one compile()
- * call, so the bug never triggers there. This has to be driven with
- * multiple compile() calls in the same session, the way repl() does.
+ * Regression test: global let bindings must be immutable across multiple
+ * compiler calls
  */
 static void test_let_reassign_rejected_across_separate_compile_calls(void) {
   initVM(0, NULL);
