@@ -24,6 +24,10 @@ cmake:
 build: generate_version_c
     ./scripts/build.sh
 
+# Build the code for release
+build-release: generate_version_c
+    ./scripts/build-release.sh
+
 # Build the code with memory checking enabled
 build-memcheck: generate_version_c
     ./scripts/build-memcheck.sh
