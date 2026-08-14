@@ -26,7 +26,6 @@ typedef struct GC {
   int grayCount;
   int grayCapacity;
   struct Obj **grayStack;
-  bool gcEnabled;
 
   RootMarkerCallback
       rootMarkerCallback; // Function that marks runtime roots (set in initVM)

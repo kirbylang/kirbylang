@@ -16,12 +16,10 @@ void *reallocate(GC *gc, void *pointer, size_t oldSize, size_t newSize) {
 
   if (newSize > oldSize) {
 #ifdef DEBUG_STRESS_GC
-    if (gc->gcEnabled) {
-      collectGarbage(gc);
-    }
+    collectGarbage(gc);
 #endif
 
-    if (gc->bytesAllocated > gc->nextGC && gc->gcEnabled) {
+    if (gc->bytesAllocated > gc->nextGC) {
       collectGarbage(gc);
     }
   }

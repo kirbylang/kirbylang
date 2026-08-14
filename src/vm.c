@@ -68,8 +68,6 @@ InterpretResult interpretFunction(ObjFunction *function) {
 InterpretResult interpret(CompiledUnit *unit) {
   TRACELN("vm.interpret()");
 
-  vm.gc->gcEnabled = true;
-
   ObjFunction *function = loadUnit(&vm, unit);
 
   freeCompiledUnit(unit);
@@ -123,8 +121,6 @@ void initVM(int argc, char *argv[]) {
   vm.gc->grayCount = 0;
   vm.gc->grayCapacity = 0;
   vm.gc->grayStack = NULL;
-
-  vm.gc->gcEnabled = false;
 
   initTable(&vm.gc->strings);
 
