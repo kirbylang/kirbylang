@@ -28,6 +28,7 @@ for (var i = 1; i <= limit; i = i + 1) {
 
 - [CLI](./docs/CLI.md)
 - [Development](./docs/DEVELOPMENT.md)
+- [Change Log](./docs/CHANGELOG.md)
 - [Tests](./tests/README.md)
 - [Scripts](./scripts/README.md)
 - [Important Files](./docs/DEVELOPMENT.md#important-files)

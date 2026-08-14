@@ -1,6 +1,4 @@
-# Extending Lox
-
-These are the documented changes to the language/syntax from the original Lox language.
+# Change Log
 
 ## Next: 0.4.0
 
@@ -94,6 +92,8 @@ These are the documented changes to the language/syntax from the original Lox la
   - Update `len` native function to return array lengths as well
 
 ## 0.1.0
+
+These are the documented changes to the language/syntax from the original Lox language.
 
 - No class inheritance
 - Native functions added
