@@ -69,23 +69,6 @@ typedef struct LoopCompiler {
  */
 CompiledUnit *compile(AstNode **ast, int count, int endLine);
 
-/** Diagnostic: true while a compiler is on the stack. */
-bool compilerIsActive(void);
-
-/**
- * Begin a compiler session: compile() calls made until the matching
- * compilerSessionEnd() share immutable-global (`let`) tracking. Call once
- * before any related sequence of compile() calls -- e.g. once per VM
- * lifetime in the CLI, bracketing both the stdlib compile and every REPL
- * line, so a `let` declared on one line is still protected on the next.
- *
- * The compiler has no dependency on the VM or GC, so this is not tied to
- * initVM()/freeVM() -- the caller orchestrating a sequence of compiles (e.g.
- * main.c) owns the session boundary explicitly, independent of any other
- * module's lifecycle.
- */
-void compilerSessionBegin(void);
-
 /**
  * End a compiler session, freeing everything tracked during it. Must be
  * called before the process exits or before starting an unrelated session

@@ -1242,5 +1242,3 @@ CompiledUnit *compile(AstNode **ast, int count, int endLine) {
 
   return unit;
 }
-
-bool compilerIsActive(void) { return current != NULL; }
