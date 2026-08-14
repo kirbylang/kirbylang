@@ -23,7 +23,7 @@ static void resolveConstsInFunctionsToValues(GC *gc,
 static Value resolveConstToValue(GC *gc, const CompiledUnit *compiledUnit,
                                  const CompiledConst *compiledConst,
                                  ObjFunction **byIndex);
-static void cleanup(int n);
+static void cleanupFromAllocatingFunctions(int n);
 
 /**
  * Load a CompiledUnit as a ObjFunction
@@ -54,7 +54,7 @@ ObjFunction *loadUnit(VM *vm, const CompiledUnit *compiledUnit) {
   }
 #endif
 
-  cleanup(functionCount);
+  cleanupFromAllocatingFunctions(functionCount);
 
   ObjFunction *script = byIndex[0];
   free(byIndex);
@@ -99,6 +99,15 @@ static void writeByteCodeOpToChunk(GC *gc, const CompiledFn *compiledFn,
   int line = compiledFn->codeLines[byteCodeIndex];
 
   writeChunk(gc, chunk, byte, line);
+}
+
+/**
+ * Clean up all the ObjFunction objects pushed on the stack allocating functions
+ */
+static void cleanupFromAllocatingFunctions(int n) {
+  for (int i = 0; i < n; i++) {
+    popFromStack();
+  }
 }
 
 /**
@@ -155,10 +164,4 @@ static Value resolveConstToValue(GC *gc, const CompiledUnit *compiledUnit,
   }
 
   return NIL_VAL; // unreachable
-}
-
-static void cleanup(int n) {
-  for (int i = 0; i < n; i++) {
-    popFromStack();
-  }
 }
