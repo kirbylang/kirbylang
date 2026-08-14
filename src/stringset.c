@@ -108,7 +108,7 @@ bool stringSetContains(StringSet *set, const char *chars, int length) {
   return entry->length != -1;
 }
 
-void stringSetAdd(StringSet *set, const char *chars, int length) {
+int stringSetIntern(StringSet *set, const char *chars, int length) {
   if (set->count + 1 > (int)(set->capacity * STRINGSET_MAX_LOAD)) {
     int newCapacity = set->capacity < STRINGSET_INITIAL_CAPACITY
                           ? STRINGSET_INITIAL_CAPACITY
@@ -121,7 +121,7 @@ void stringSetAdd(StringSet *set, const char *chars, int length) {
       findSlot(set->entries, set->capacity, set->arena, chars, length, hash);
 
   if (entry->length != -1) {
-    return; // already present
+    return entry->offset; // already present
   }
 
   int offset = arenaAppend(set, chars, length);
@@ -129,6 +129,11 @@ void stringSetAdd(StringSet *set, const char *chars, int length) {
   entry->length = length;
   entry->hash = hash;
   set->count++;
+  return offset;
+}
+
+void stringSetAdd(StringSet *set, const char *chars, int length) {
+  stringSetIntern(set, chars, length);
 }
 
 void stringSetFree(StringSet *set) {

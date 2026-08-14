@@ -77,7 +77,7 @@ static void pass1(GC *gc, const CompiledUnit *compiledUnit,
 
     if (compiledFn->nameLength >= 0) {
       fnObj->name =
-          copyString(gc, compiledUnit->strings + compiledFn->nameOffset,
+          copyString(gc, compiledUnit->strings.arena + compiledFn->nameOffset,
                      compiledFn->nameLength);
     } else {
       fnObj->name = NULL;
@@ -139,7 +139,7 @@ static Value resolveConstToValue(GC *gc, const CompiledUnit *compiledUnit,
   case CONST_NIL:
     return NIL_VAL;
   case CONST_STRING: {
-    char *chars = compiledUnit->strings + compiledConst->as.string.offset;
+    char *chars = compiledUnit->strings.arena + compiledConst->as.string.offset;
     int length = compiledConst->as.string.length;
     ObjString *strObj = copyString(gc, chars, length);
     return OBJ_VAL(strObj);

@@ -30,6 +30,15 @@ void stringSetInit(StringSet *set);
 void stringSetAdd(StringSet *set, const char *chars, int length);
 
 /**
+ * Add `chars`/`length` to the set if not already present, and return the
+ * offset into the set's arena where its bytes live -- whether they were
+ * just added, or were already there. Use this instead of stringSetAdd()
+ * when the caller needs to reference the (deduplicated) stored copy
+ * afterward, not just test membership.
+ */
+int stringSetIntern(StringSet *set, const char *chars, int length);
+
+/**
  * True if `chars`/`length` is in the set.
  */
 bool stringSetContains(StringSet *set, const char *chars, int length);

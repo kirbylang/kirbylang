@@ -221,9 +221,7 @@ static void test_free_on_empty_set_is_safe(void) {
 }
 
 /**
- * Freeing an already-freed set must be safe and idempotent -- matching the
- * same guarantee the old NameSet implementation relied on (compilerSessionEnd
- * being callable without a preceding "session started" check).
+ * Freeing an already-freed set must be safe and idempotent.
  */
 static void test_double_free_is_safe(void) {
   StringSet set;
@@ -262,6 +260,79 @@ static void test_count_accounting_with_interleaved_duplicates(void) {
   stringSetFree(&set);
 }
 
+/**
+ * stringSetIntern must return the same offset for a duplicate add as it did
+ * the first time -- this is what lets a caller like cuInternString hand back
+ * a previously-stored copy's location instead of appending a new one.
+ */
+static void test_intern_returns_same_offset_for_duplicate(void) {
+  StringSet set;
+  stringSetInit(&set);
+
+  int off1 = stringSetIntern(&set, "hello", 5);
+  int off2 = stringSetIntern(&set, "hello", 5);
+
+  assert(off1 == off2);
+  assert(set.count == 1);
+  assert(memcmp(set.arena + off1, "hello", 5) == 0);
+
+  stringSetFree(&set);
+}
+
+static void test_intern_distinct_strings_get_distinct_offsets(void) {
+  StringSet set;
+  stringSetInit(&set);
+
+  int offA = stringSetIntern(&set, "aaa", 3);
+  int offB = stringSetIntern(&set, "bbb", 3);
+
+  assert(offA != offB);
+  assert(memcmp(set.arena + offA, "aaa", 3) == 0);
+  assert(memcmp(set.arena + offB, "bbb", 3) == 0);
+  assert(set.count == 2);
+
+  stringSetFree(&set);
+}
+
+/**
+ * An offset returned before several table growths must still be correct
+ * (and still point at unmoved, correct content) after those growths --
+ * growth only touches the entries table, never the arena, but this
+ * confirms that end-to-end from the caller's point of view.
+ */
+static void test_intern_offset_stable_across_growth(void) {
+  StringSet set;
+  stringSetInit(&set);
+
+  int firstOffset = stringSetIntern(&set, "first", 5);
+
+  char names[300][8];
+  int lengths[300];
+  for (int i = 0; i < 300; i++) {
+    lengths[i] = snprintf(names[i], sizeof(names[i]), "n%d", i);
+    stringSetIntern(&set, names[i], lengths[i]);
+  }
+
+  int again = stringSetIntern(&set, "first", 5);
+  assert(again == firstOffset);
+  assert(memcmp(set.arena + firstOffset, "first", 5) == 0);
+
+  stringSetFree(&set);
+}
+
+static void test_stringSetAdd_still_works_via_intern(void) {
+  StringSet set;
+  stringSetInit(&set);
+
+  stringSetAdd(&set, "x", 1);
+  stringSetAdd(&set, "x", 1);
+
+  assert(set.count == 1);
+  assert(stringSetContains(&set, "x", 1));
+
+  stringSetFree(&set);
+}
+
 int main(void) {
   test_empty_set_contains_nothing();
   test_add_then_contains();
@@ -276,6 +347,10 @@ int main(void) {
   test_free_on_empty_set_is_safe();
   test_double_free_is_safe();
   test_count_accounting_with_interleaved_duplicates();
+  test_intern_returns_same_offset_for_duplicate();
+  test_intern_distinct_strings_get_distinct_offsets();
+  test_intern_offset_stable_across_growth();
+  test_stringSetAdd_still_works_via_intern();
 
   printf("stringset: ok\n");
   return 0;

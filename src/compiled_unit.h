@@ -2,6 +2,7 @@
 #define kirby_compiled_unit_h
 
 #include "common.h"
+#include "stringset.h"
 
 typedef enum {
   CONST_NUMBER,
@@ -75,12 +76,9 @@ typedef struct {
  * A compiled program. A *.krb file.
  */
 typedef struct {
-  // Interned Strings Blob
+  // Interned Strings
 
-  char *strings; // Interned strings stored contigously.  No duplicate checks
-                 // in place at this time
-  int stringsLen;
-  int stringsCapacity;
+  StringSet strings;
 
   // Functions
 

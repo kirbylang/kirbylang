@@ -256,6 +256,23 @@ if(BUILD_TESTS)
         COMMAND kirby-token-unit-test
     )
 
+    add_executable(kirby-stringset-unit-test
+        unit/stringset.c
+    )
+
+    target_link_libraries(kirby-stringset-unit-test
+        PRIVATE
+            kirby_core_debug
+    )
+
+    configure_kirby_target(kirby-stringset-unit-test)
+    enable_coverage(kirby-stringset-unit-test)
+
+    add_test(
+        NAME kirby-stringset-unit-test
+        COMMAND kirby-stringset-unit-test
+    )
+
     add_executable(kirby-value-unit-test
         unit/value.c
     )

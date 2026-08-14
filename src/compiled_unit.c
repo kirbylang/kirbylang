@@ -1,9 +1,9 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
 
 #include "common.h"
 #include "compiled_unit.h"
+#include "stringset.h"
 
 #define CU_FN_GROW_SIZE 2
 #define CU_FN_MIN_SIZE 8
@@ -18,9 +18,7 @@ static void *xrealloc(void *ptr, size_t size);
 static void cuInitFn(CompiledFn *compiledfn);
 
 void cuInit(CompiledUnit *compiledUnit) {
-  compiledUnit->strings = NULL;
-  compiledUnit->stringsLen = 0;
-  compiledUnit->stringsCapacity = 0;
+  stringSetInit(&compiledUnit->strings);
 
   compiledUnit->functions = NULL;
   compiledUnit->functionCount = 0;
@@ -28,21 +26,7 @@ void cuInit(CompiledUnit *compiledUnit) {
 }
 
 int cuInternString(CompiledUnit *compiledUnit, const char *chars, int length) {
-  if (compiledUnit->stringsLen + length > compiledUnit->stringsCapacity) {
-    int needed = compiledUnit->stringsLen + length;
-    int cap =
-        compiledUnit->stringsCapacity < 16 ? 16 : compiledUnit->stringsCapacity;
-    while (cap < needed)
-      cap *= 2;
-    compiledUnit->strings =
-        (char *)xrealloc(compiledUnit->strings, (size_t)cap);
-    compiledUnit->stringsCapacity = cap;
-  }
-
-  int offset = compiledUnit->stringsLen;
-  memcpy(compiledUnit->strings + offset, chars, (size_t)length);
-  compiledUnit->stringsLen += length;
-  return offset;
+  return stringSetIntern(&compiledUnit->strings, chars, length);
 }
 
 int cuAddFunction(CompiledUnit *compiledUnit) {
@@ -130,7 +114,7 @@ static void freeCompiledUnitFns(CompiledUnit *compiledUnit) {
 }
 
 static void freeCompiledUnitStrings(CompiledUnit *compiledUnit) {
-  free(compiledUnit->strings);
+  stringSetFree(&compiledUnit->strings);
 }
 
 void freeCompiledUnit(CompiledUnit *compiledUnit) {
