@@ -122,7 +122,7 @@ static void pass2(GC *gc, const CompiledUnit *compiledUnit,
 }
 
 /**
- * Resolve one flat CompiledConst into a runtime Value.
+ * Resolve a CompiledConst into a runtime Value.
  *
  * Strings are interned into the GC's string table here (the compiler never
  * interns). Nested-function references (CONST_FUNCTION) resolve to the
