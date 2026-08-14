@@ -8,6 +8,7 @@
 #include "ast.h"
 #include "common.h"
 #include "compiled_unit.h"
+#include "stringset.h"
 #include "token.h"
 
 FnCompiler *current = NULL;
@@ -272,80 +273,20 @@ static void declareVariable(Token *name, bool isMutable) {
 
 /**
  * Names of globals declared with `let`.
- *
- * Globals have no compile-time slot, so immutability is tracked by name in a
- * table that outlives a single compile() call -- it persists for the life of
- * a compiler session (see compilerSessionBegin()/compilerSessionEnd() below),
- * since the REPL compiles each line separately but shares one set of
- * globals across the whole session.
- *
- * This is a plain (non-GC) set of names: the compiler must not allocate heap
- * objects.
  */
-typedef struct {
-  char **names;
-  int *lengths;
-  int count;
-  int capacity;
-} NameSet;
-
-static void nameSetFree(NameSet *set);
-
-static NameSet immutableGlobals;
+static StringSet immutableGlobals;
 
 /**
  * End a compiler session, freeing everything tracked during it.
  */
-void compilerSessionEnd(void) { nameSetFree(&immutableGlobals); }
-
-static bool nameSetContains(NameSet *set, const char *chars, int length) {
-  for (int i = 0; i < set->count; i++) {
-    if (set->lengths[i] == length &&
-        memcmp(set->names[i], chars, (size_t)length) == 0) {
-      return true;
-    }
-  }
-  return false;
-}
-
-static void nameSetAdd(NameSet *set, const char *chars, int length) {
-  if (nameSetContains(set, chars, length)) {
-    return;
-  }
-  if (set->count + 1 > set->capacity) {
-    set->capacity = set->capacity < 8 ? 8 : set->capacity * 2;
-    set->names = realloc(set->names, sizeof(char *) * set->capacity);
-    set->lengths = realloc(set->lengths, sizeof(int) * set->capacity);
-    if (set->names == NULL || set->lengths == NULL) {
-      fprintf(stderr, "realloc failed in nameSetAdd");
-      exit(EXIT_CODE_OS_ERR);
-    }
-  }
-  char *copy = malloc((size_t)length);
-  memcpy(copy, chars, (size_t)length);
-  set->names[set->count] = copy;
-  set->lengths[set->count] = length;
-  set->count++;
-}
-
-static void nameSetFree(NameSet *set) {
-  for (int i = 0; i < set->count; i++) {
-    free(set->names[i]);
-  }
-  free(set->names);
-  free(set->lengths);
-  set->names = NULL;
-  set->lengths = NULL;
-  set->count = 0;
-  set->capacity = 0;
-}
+void compilerSessionEnd(void) { stringSetFree(&immutableGlobals); }
 
 static void markGlobalImmutable(Token *name) {
-  nameSetAdd(&immutableGlobals, name->start, name->length);
+  stringSetAdd(&immutableGlobals, name->start, name->length);
 }
 
 static bool isGlobalImmutable(Token *name) {
-  return nameSetContains(&immutableGlobals, name->start, name->length);
+  return stringSetContains(&immutableGlobals, name->start, name->length);
 }
 
 // Resolves `name` as a local, then an upvalue, then falls back to treating

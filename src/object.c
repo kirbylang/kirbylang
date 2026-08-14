@@ -1,8 +1,9 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "hashtable.h"
+#include "common.h"
 #include "gc.h"
+#include "hashtable.h"
 #include "object.h"
 #include "value.h"
 #include "vm.h"
@@ -152,17 +153,8 @@ static ObjString *allocateString(GC *gc, char *chars, int length,
   return string;
 }
 
-static uint32_t hashString(const char *key, int length) {
-  uint32_t hash = 2166136261u;
-  for (int i = 0; i < length; i++) {
-    hash ^= (uint8_t)key[i];
-    hash *= 16777619;
-  }
-  return hash;
-}
-
 ObjString *takeString(GC *gc, char *chars, int length) {
-  uint32_t hash = hashString(chars, length);
+  uint32_t hash = hashBytes(chars, length);
 
   ObjString *interned = tableFindString(&gc->strings, chars, length, hash);
   if (interned != NULL) {
@@ -174,7 +166,7 @@ ObjString *takeString(GC *gc, char *chars, int length) {
 }
 
 ObjString *copyString(GC *gc, const char *chars, int length) {
-  uint32_t hash = hashString(chars, length);
+  uint32_t hash = hashBytes(chars, length);
 
   ObjString *interned = tableFindString(&gc->strings, chars, length, hash);
   if (interned != NULL) {

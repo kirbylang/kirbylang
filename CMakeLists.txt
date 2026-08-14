@@ -51,6 +51,7 @@ set(KIRBY_SOURCES
     src/asserts.c
     src/ast.c
     src/chunk.c
+    src/common.c
     src/compiler.c
     src/debug.c
     src/hashtable.c
@@ -63,6 +64,7 @@ set(KIRBY_SOURCES
     src/parser.c
     src/scanner.c
     src/strbuf.c
+    src/stringset.c
     src/token_stream.c
     src/token.c
     src/value.c

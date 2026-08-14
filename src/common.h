@@ -35,4 +35,6 @@
   } while (0)
 #endif
 
+uint32_t hashBytes(const char *key, int length);
+
 #endif
