@@ -122,9 +122,13 @@ int main(int argc, char *argv[]) {
 }
 
 static void repl(void) {
-  fprintf(stderr, "========================================\n");
-  fprintf(stderr, "REPL %30s kirby\n\n", KIRBY_VERSION);
-  fprintf(stderr, "Enter code or type 'exit' to quit.\n\n");
+  fprintf(stderr, "============================================================"
+                  "====================\n");
+  fprintf(stderr, "kirby %74s\n", KIRBY_VERSION);
+  fprintf(stderr, "============================================================"
+                  "====================\n\n");
+  fprintf(stderr,
+          "Enter some code or type 'help' for help or 'exit' to quit.\n\n");
   for (;;) {
     char *line = readline("> ");
 
@@ -138,6 +142,11 @@ static void repl(void) {
 
     if (strcmp(line, "exit") == 0)
       exit(0);
+
+    if (strcmp(line, "help") == 0) {
+      printf("\nhttps://github.com/kirbylang/kirbylang#documentation\n\n");
+      continue;
+    }
 
     CompiledUnit *unit = compileSource(line);
 
