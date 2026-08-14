@@ -1,5 +1,55 @@
 # Development
 
+## Architecture
+
+```mermaid
+graph LR
+    SRC["source<br/>.krb"]
+
+    subgraph FRONT["front end — no GC"]
+        SCAN["scanner + lexer<br/>chars → TokenStream"]
+        PARSE["parser<br/>tokens → AST"]
+        COMP["compiler<br/>AST → bytecode"]
+    end
+
+    subgraph UNIT["CompiledUnit — flat, GC-free artifact"]
+        STR["string blob<br/>deduplicated"]
+        FNS["CompiledFn[]<br/>[0] = top-level script<br/>code, lines, constants, upvalues"]
+    end
+
+    subgraph RT["runtime — GC-managed"]
+        LOAD["loader<br/>the only bridge"]
+        OBJ["ObjFunction + Chunk<br/>ObjString interned here"]
+        VM["VM<br/>dispatch loop"]
+    end
+
+    GC["GC<br/>mark & sweep"]
+
+    SRC --> SCAN --> PARSE --> COMP
+    COMP --> FNS
+    COMP --> STR
+    FNS -. "constants reference<br/>strings by offset,<br/>functions by index" .-> STR
+
+    FNS --> LOAD
+    STR --> LOAD
+    LOAD --> OBJ
+    OBJ -- "wrap [0] in a closure, call it" --> VM
+
+    OBJ -. allocated through .-> GC
+    VM <-. "roots · reallocate()" .-> GC
+    UNIT -. "plain free() once loaded" .-> X["discarded"]
+
+    classDef plain fill:#e8f4ea,stroke:#4a7c59,color:#1b3a24
+    classDef art fill:#fdf3e0,stroke:#b8860b,color:#4a3505
+    classDef managed fill:#fbe8e8,stroke:#a84a4a,color:#4a1212
+    classDef gone fill:#eee,stroke:#999,color:#444
+
+    class SCAN,PARSE,COMP plain
+    class STR,FNS art
+    class LOAD,OBJ,VM,GC managed
+    class X gone
+```
+
 ## Reference
 
 - [Bytecode](./OPCODES.md)
