@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "assert.h"
+#include "asserts.h"
 #include "vm.h"
 
 void raiseError(VM *vm, const char *message) {
