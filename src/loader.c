@@ -13,12 +13,13 @@
 #include "debug.h"
 #endif
 
-static void pass1(GC *gc, const CompiledUnit *compiledUnit,
-                  ObjFunction **byIndex, int n);
+static void allocateFunctions(GC *gc, const CompiledUnit *compiledUnit,
+                              ObjFunction **byIndex, int n);
 static void writeByteCodeOpToChunk(GC *gc, const CompiledFn *compiledFn,
                                    Chunk *chunk, int byteCodeIndex);
-static void pass2(GC *gc, const CompiledUnit *compiledUnit,
-                  ObjFunction **byIndex, int n);
+static void resolveConstsInFunctionsToValues(GC *gc,
+                                             const CompiledUnit *compiledUnit,
+                                             ObjFunction **byIndex, int n);
 static Value resolveConstToValue(GC *gc, const CompiledUnit *compiledUnit,
                                  const CompiledConst *compiledConst,
                                  ObjFunction **byIndex);
@@ -41,8 +42,9 @@ ObjFunction *loadUnit(VM *vm, const CompiledUnit *compiledUnit) {
     exit(EXIT_CODE_OS_ERR);
   }
 
-  pass1(vm->gc, compiledUnit, byIndex, functionCount);
-  pass2(vm->gc, compiledUnit, byIndex, functionCount);
+  allocateFunctions(vm->gc, compiledUnit, byIndex, functionCount);
+  resolveConstsInFunctionsToValues(vm->gc, compiledUnit, byIndex,
+                                   functionCount);
 
 #ifdef DEBUG_PRINT_CODE
   for (int i = 0; i < functionCount; i++) {
@@ -63,8 +65,8 @@ ObjFunction *loadUnit(VM *vm, const CompiledUnit *compiledUnit) {
  * Map every compiled unit's compiled function in to function objects
  * Allocate every function and copy its bytecode/lines verbatim.
  */
-static void pass1(GC *gc, const CompiledUnit *compiledUnit,
-                  ObjFunction **byIndex, int functionCount) {
+static void allocateFunctions(GC *gc, const CompiledUnit *compiledUnit,
+                              ObjFunction **byIndex, int functionCount) {
   for (int i = 0; i < functionCount; i++) {
     const CompiledFn *compiledFn = &compiledUnit->functions[i];
     ObjFunction *fnObj = newFunction(gc);
@@ -104,9 +106,13 @@ static void writeByteCodeOpToChunk(GC *gc, const CompiledFn *compiledFn,
  *
  * Done after all functions exist so CONST_FUNCTION indices resolve to real
  * pointers.
+ *
+ * Constants inserted in to ObjFunction's chunk constants.
  */
-static void pass2(GC *gc, const CompiledUnit *compiledUnit,
-                  ObjFunction **byIndex, int functionCount) {
+static void resolveConstsInFunctionsToValues(GC *gc,
+                                             const CompiledUnit *compiledUnit,
+                                             ObjFunction **byIndex,
+                                             int functionCount) {
   for (int i = 0; i < functionCount; i++) {
     const CompiledFn *cfn = &compiledUnit->functions[i];
     ObjFunction *fn = byIndex[i];
@@ -151,10 +157,6 @@ static Value resolveConstToValue(GC *gc, const CompiledUnit *compiledUnit,
   return NIL_VAL; // unreachable
 }
 
-/**
- * Everything is now reachable through byIndex[0]'s constant graph; drop the
- * stack parking (functions were pushed in pass 1).
- */
 static void cleanup(int n) {
   for (int i = 0; i < n; i++) {
     popFromStack();

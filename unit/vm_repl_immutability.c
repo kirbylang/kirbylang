@@ -6,11 +6,6 @@
 #include "../src/parser.h"
 #include "../src/vm.h"
 
-/**
- * Parse + compile source and run it, mirroring what main.c's compileSource()
- * + interpret() do. Must be called within a compilerSessionBegin()/
- * compilerSessionEnd() session.
- */
 static InterpretResult run(const char *source) {
   int count = 0;
   bool hadError = false;

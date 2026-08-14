@@ -2,11 +2,7 @@
 #define kirby_opcode_h
 
 /**
- * Bytecode instruction set.
- *
- * Shared by the compiler (which emits opcodes into CompiledFn.code) and the
- * runtime (which dispatches on them in the VM). Kept separate from chunk.h so
- * the compiler can include it without pulling in the runtime Chunk type.
+ * Kirby's bytecode instruction set.
  */
 typedef enum {
   OP_CONSTANT,        // 0

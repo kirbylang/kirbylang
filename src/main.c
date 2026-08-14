@@ -172,13 +172,6 @@ static char *readFile(const char *path) {
   return buffer;
 }
 
-/**
- * Lex, parse, and compile source into a CompiledUnit, or NULL on any parse
- * or compile error. Frees the AST arena either way -- the caller only owns
- * the returned CompiledUnit (or nothing, on failure).
- *
- * Must be called between a compilerSessionBegin()/compilerSessionEnd() pair.
- */
 static CompiledUnit *compileSource(const char *source) {
   int count = 0;
   bool hadError = false;

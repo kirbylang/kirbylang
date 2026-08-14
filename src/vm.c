@@ -28,9 +28,7 @@ VM vm;
 GC gcInstance;
 
 /**
- * Marks the VM's runtime roots plus (while a compile is active) the compiler's
- * roots. Registered with the GC in initVM so the collector never has to know
- * about VM or compiler internals directly.
+ * Mark the VM's roots in the garbage collector
  */
 static void markVMRoots(GC *gc, void *ctx) {
   (void)ctx;
@@ -49,8 +47,6 @@ static void markVMRoots(GC *gc, void *ctx) {
   }
 
   markTable(gc, &vm.globals);
-
-  // The compiler no longer allocates GC objects, so it has no roots to mark.
 }
 
 InterpretResult interpretFunction(ObjFunction *function) {
@@ -72,13 +68,10 @@ InterpretResult interpretFunction(ObjFunction *function) {
 InterpretResult interpret(CompiledUnit *unit) {
   TRACELN("vm.interpret()");
 
-  // The loader is the sole heap client: it materializes the unit into live
-  // ObjFunctions. GC is enabled from here on.
   vm.gc->gcEnabled = true;
 
   ObjFunction *function = loadUnit(&vm, unit);
 
-  // TODO: Should free be merged in to freeCompiledUnit?
   freeCompiledUnit(unit);
   free(unit);
 
@@ -131,13 +124,11 @@ void initVM(int argc, char *argv[]) {
   vm.gc->grayCapacity = 0;
   vm.gc->grayStack = NULL;
 
-  // Off during parsing and compilation; interpret() turns it on before
-  // execution
   vm.gc->gcEnabled = false;
 
   initTable(&vm.gc->strings);
 
-  vm.gc->rootMarker = markVMRoots;
+  vm.gc->rootMarkerCallback = markVMRoots;
   vm.gc->rootMarkerCtx = NULL;
 
   initTable(&vm.globals);
@@ -306,9 +297,6 @@ static bool invoke(ObjString *name, int argCount) {
 
   if (structFieldSlot(instance->struct_, name, &slot)) {
     if (!canAccess(instance->struct_, instance->struct_->fieldPublic[slot])) {
-      // Fields normally shadow methods, but a field you can't see shouldn't
-      // hide an accessor that shares its name (`var count` + `fun count()`).
-      // TODO: Clean this up
       Value method;
       if (tableGet(&instance->struct_->methods, name, &method))
         return invokeFromStruct(instance->struct_, name, argCount);

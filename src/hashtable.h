@@ -16,6 +16,11 @@ typedef struct {
   Value value;
 } Entry;
 
+/**
+ * A hash table implementation used at during Kirby runtime.
+ *
+ * It's memory is managed by the Kirby GC.
+ */
 typedef struct {
   int count;
   int capacity;

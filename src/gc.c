@@ -211,8 +211,8 @@ static void freeObject(GC *gc, Obj *object) {
 }
 
 static void markRoots(GC *gc) {
-  if (gc->rootMarker != NULL) {
-    gc->rootMarker(gc, gc->rootMarkerCtx);
+  if (gc->rootMarkerCallback != NULL) {
+    gc->rootMarkerCallback(gc, gc->rootMarkerCtx);
   }
 }
 

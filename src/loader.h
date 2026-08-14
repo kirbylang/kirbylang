@@ -6,10 +6,8 @@
 #include "vm.h"
 
 /**
- * Materialize a flat CompiledUnit into live runtime objects on the VM's heap.
- * This is the ONLY code that turns the compiler's heap-free artifact into
- * ObjFunctions/ObjStrings: it is the sole bridge between the decoupled compiler
- * and the GC.
+ * Load a CompiledUnit's function and constants into runtime Obj instances on
+ * the VM's heap.
  *
  * Returns the top-level script function (functions[0]).
  */
