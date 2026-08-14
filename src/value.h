@@ -5,6 +5,13 @@
 
 #define VALUE_STRING_MAX 128
 
+/**
+ * Forward declaration of the GC struct.
+ *
+ * gc.h uses this file. This avoid circular dependencies.
+ */
+struct GC;
+
 typedef struct Obj Obj;
 typedef struct ObjString ObjString;
 
@@ -41,8 +48,8 @@ typedef struct {
 
 bool valuesEqual(Value a, Value b);
 void initValueArray(ValueArray *array);
-void writeValueArray(ValueArray *array, Value value);
-void freeValueArray(ValueArray *array);
+void writeValueArray(struct GC *gc, ValueArray *array, Value value);
+void freeValueArray(struct GC *gc, ValueArray *array);
 
 void valueToString(Value value, char *buffer, size_t size);
 void valueTypeToString(Value value, char *buffer, size_t size);

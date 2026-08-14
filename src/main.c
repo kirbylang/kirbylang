@@ -5,8 +5,8 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "chunk.h"
 #include "common.h"
+#include "compiler.h"
 #include "debug.h"
 #include "lexer.h"
 #include "parser.h"
@@ -17,6 +17,7 @@
 
 static void repl(void);
 static char *readFile(const char *path);
+static CompiledUnit *compileSource(const char *source);
 static void runFile(const char *path);
 static void runCode(const char *source);
 
@@ -55,6 +56,7 @@ int main(int argc, char *argv[]) {
       initVM(saved_argc, saved_argv);
       runFile("stdlib/stdlib.krb");
       repl();
+      compilerSessionEnd();
       freeVM();
       free(saved_argv);
       return 0;
@@ -62,6 +64,7 @@ int main(int argc, char *argv[]) {
       initVM(saved_argc, saved_argv);
       runFile("stdlib/stdlib.krb");
       runFile(argv[optind]);
+      compilerSessionEnd();
       freeVM();
       free(saved_argv);
       return 0;
@@ -107,6 +110,7 @@ int main(int argc, char *argv[]) {
       runFile("stdlib/stdlib.krb");
       char *source = argv[optind];
       runCode(source);
+      compilerSessionEnd();
       freeVM();
       free(saved_argv);
       return 0;
@@ -135,17 +139,18 @@ static void repl(void) {
     if (strcmp(line, "exit") == 0)
       exit(0);
 
-    InterpretResult result = interpret(line);
+    CompiledUnit *unit = compileSource(line);
 
-    switch (result) {
-    case INTERPRET_COMPILE_ERROR:
+    if (unit == NULL) {
       fprintf(stderr, "Compiler Error!\n");
-      break;
-    case INTERPRET_RUNTIME_ERROR:
+      free(line);
+      continue;
+    }
+
+    InterpretResult result = interpret(unit);
+
+    if (result == INTERPRET_RUNTIME_ERROR) {
       fprintf(stderr, "Runtime Error!\n");
-      break;
-    default:
-      break;
     }
 
     free(line);
@@ -167,26 +172,44 @@ static char *readFile(const char *path) {
   return buffer;
 }
 
+static CompiledUnit *compileSource(const char *source) {
+  int count = 0;
+  bool hadError = false;
+  int endLine = 0;
+  AstNode **ast = parse(source, &count, &hadError, &endLine);
+
+  CompiledUnit *unit = hadError ? NULL : compile(ast, count, endLine);
+
+  astFreeAll();
+  free(ast);
+
+  return unit;
+}
+
 static void runFile(const char *path) {
   char *source = readFile(path);
-  InterpretResult result = interpret(source);
+  CompiledUnit *unit = compileSource(source);
   free(source);
 
-  if (result == INTERPRET_COMPILE_ERROR) {
-    exit(65);
+  if (unit == NULL) {
+    exit(EXIT_CODE_COMPILER_ERR);
   }
 
+  InterpretResult result = interpret(unit);
+
   if (result == INTERPRET_RUNTIME_ERROR)
-    exit(70);
+    exit(EXIT_CODE_RUNTIME_ERR);
 }
 
 static void runCode(const char *source) {
-  InterpretResult result = interpret(source);
+  CompiledUnit *unit = compileSource(source);
 
-  if (result == INTERPRET_COMPILE_ERROR) {
-    exit(65);
+  if (unit == NULL) {
+    exit(EXIT_CODE_COMPILER_ERR);
   }
 
+  InterpretResult result = interpret(unit);
+
   if (result == INTERPRET_RUNTIME_ERROR)
-    exit(70);
+    exit(EXIT_CODE_RUNTIME_ERR);
 }

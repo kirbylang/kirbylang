@@ -1,11 +1,6 @@
 == <script> ==
 0000    1 OP_NIL
 0001    | OP_RETURN
-== fn ==
-0000    8 OP_CONSTANT         0 'Hello World'
-0002    | OP_PRINT
-0003    9 OP_NIL
-0004    | OP_RETURN
 == <script> ==
 0000    9 OP_CLOSURE          1 <fn fn>
 0002    | OP_DEFINE_GLOBAL    0 'fn'
@@ -27,5 +22,10 @@
 0033    | OP_POP
 0034   14 OP_NIL
 0035    | OP_RETURN
+== fn ==
+0000    8 OP_CONSTANT         0 'Hello World'
+0002    | OP_PRINT
+0003    9 OP_NIL
+0004    | OP_RETURN
 Missing required field 'fn'.
 [line 5] in script

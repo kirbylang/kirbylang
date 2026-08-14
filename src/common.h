@@ -7,6 +7,10 @@
 
 #define UINT8_COUNT (UINT8_MAX + 1)
 
+#define EXIT_CODE_COMPILER_ERR 65 // INTERPRET_COMPILE_ERROR
+#define EXIT_CODE_RUNTIME_ERR 70  // INTERPRET_RUNTIME_ERROR
+#define EXIT_CODE_OS_ERR 71
+
 #define ANSI_COLOR_RED "\x1b[31m"
 #define ANSI_COLOR_GREEN "\x1b[32m"
 #define ANSI_COLOR_YELLOW "\x1b[33m"
@@ -30,5 +34,7 @@
   do {                                                                         \
   } while (0)
 #endif
+
+uint32_t hashBytes(const char *key, int length);
 
 #endif

@@ -3,11 +3,12 @@
 #include <string.h>
 
 #include "ast.h"
-#include "memory.h"
-#include "object.h"
+#include "common.h"
 #include "strbuf.h"
 
 #define SLAB_SIZE 8192
+#define SLAB_AND_MIN_SIZE 8
+#define SLAB_AND_GROW_SIZE 2
 
 static void printNode(StrBuf *sb, AstNode *node);
 
@@ -24,7 +25,7 @@ static Slab *allocSlab(size_t capacity) {
   Slab *slab = (Slab *)malloc(sizeof(Slab) + capacity);
   if (slab == NULL) {
     fprintf(stderr, "Out of memory allocating AST arena slab.\n");
-    exit(1);
+    exit(EXIT_CODE_OS_ERR);
   }
   slab->next = arenaHead;
   slab->capacity = capacity;
@@ -57,9 +58,15 @@ void arrayNodeDataInit(ArrayNodeData *and) {
 
 void arrayNodeDataWrite(ArrayNodeData *and, AstNode *item) {
   if (and->capacity < and->count + 1) {
-    int oldCapacity = and->capacity;
-    and->capacity = GROW_CAPACITY(oldCapacity);
-    and->data = GROW_ARRAY(AstNode *, and->data, oldCapacity, and->capacity);
+    and->capacity = and->capacity < SLAB_AND_MIN_SIZE
+                        ? SLAB_AND_MIN_SIZE
+                        : and->capacity * SLAB_AND_GROW_SIZE;
+    and->data = realloc(and->data, sizeof(AstNode *) * and->capacity);
+
+    if (and->data == NULL) {
+      fprintf(stderr, "realloc failed in arrayNodeDataWrite");
+      exit(EXIT_CODE_OS_ERR);
+    }
   }
 
   and->data[and->count] = item;

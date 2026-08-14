@@ -8,47 +8,33 @@
 /**
  * Regression test for invoke() replacing the receiver when an instance field
  * holds a callable.
- *
- * peekStack(d) is vm.stackTop[-1 - d], so the receiver sits at
- * vm.stackTop[-argCount - 1]. Writing to vm.stackTop[argCount - 1] instead is
- * correct only when argCount == 0; for argCount >= 1 it writes above the stack
- * top and leaves the receiver in place.
- *
- * call() derives frame->slots from stackTop independently, so slot 0 of the new
- * frame is exactly the slot invoke() was supposed to overwrite. Asserting on it
- * observes the bug directly -- no kirby program can, because lambdas never read
- * slot 0.
- *
- * Every intermediate below is pushed onto the stack before the next allocation,
- * because a C local is not a GC root and DEBUG_STRESS_GC collects on every
- * growing allocation.
  */
 static void assertReceiverReplaced(int argCount) {
   initVM(0, NULL);
 
-  ObjString *fieldName = copyString("f", 1);
+  ObjString *fieldName = copyString(vm.gc, "f", 1);
   pushOnStack(OBJ_VAL(fieldName));
 
-  ObjString *structName = copyString("Box", 3);
+  ObjString *structName = copyString(vm.gc, "Box", 3);
   pushOnStack(OBJ_VAL(structName));
 
   // newStruct allocates, so structName must already be rooted.
-  ObjStruct *struct_ = newStruct(structName);
+  ObjStruct *struct_ = newStruct(vm.gc, structName);
   pushOnStack(OBJ_VAL(struct_));
 
   // tableSet can grow the table and collect, so fieldName must stay rooted.
-  tableSet(&struct_->fields, fieldName, NUMBER_VAL(0));
+  tableSet(vm.gc, &struct_->fields, fieldName, NUMBER_VAL(0));
   struct_->fieldCount = 1;
   struct_->fieldPublic[0] = true;
 
-  ObjFunction *function = newFunction();
+  ObjFunction *function = newFunction(vm.gc);
   function->arity = argCount;
   pushOnStack(OBJ_VAL(function));
 
-  ObjClosure *closure = newClosure(function);
+  ObjClosure *closure = newClosure(vm.gc, function);
   pushOnStack(OBJ_VAL(closure));
 
-  ObjInstance *instance = newInstance(struct_);
+  ObjInstance *instance = newInstance(vm.gc, struct_);
   pushOnStack(OBJ_VAL(instance));
 
   instance->fields[0] = OBJ_VAL(closure);

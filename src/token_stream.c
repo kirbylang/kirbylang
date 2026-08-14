@@ -1,8 +1,12 @@
+#include <stdio.h>
 #include <stdlib.h>
 
-#include "memory.h"
+#include "common.h"
 #include "token.h"
 #include "token_stream.h"
+
+#define TS_GROW_SIZE 2
+#define TS_MIN_SIZE 8
 
 void tsInit(TokenStream *ts) {
   ts->count = 0;
@@ -18,9 +22,14 @@ void tsFree(TokenStream *ts) {
 
 void tsWrite(TokenStream *ts, Token token) {
   if (ts->capacity < ts->count + 1) {
-    int oldCapacity = ts->capacity;
-    ts->capacity = GROW_CAPACITY(oldCapacity);
-    ts->tokens = GROW_ARRAY(Token, ts->tokens, oldCapacity, ts->capacity);
+    ts->capacity =
+        ts->capacity < TS_MIN_SIZE ? TS_MIN_SIZE : ts->capacity * TS_GROW_SIZE;
+    ts->tokens = realloc(ts->tokens, sizeof(Token) * ts->capacity);
+
+    if (ts->tokens == NULL) {
+      fprintf(stderr, "realloc failed in tsWrite");
+      exit(EXIT_CODE_OS_ERR);
+    }
   }
 
   ts->tokens[ts->count] = token;

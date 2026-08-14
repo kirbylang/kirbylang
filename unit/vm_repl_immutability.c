@@ -1,0 +1,107 @@
+#include <assert.h>
+#include <stdio.h>
+
+#include "../src/ast.h"
+#include "../src/compiler.h"
+#include "../src/parser.h"
+#include "../src/vm.h"
+
+static InterpretResult run(const char *source) {
+  int count = 0;
+  bool hadError = false;
+  int endLine = 0;
+  AstNode **ast = parse(source, &count, &hadError, &endLine);
+
+  CompiledUnit *unit = hadError ? NULL : compile(ast, count, endLine);
+
+  astFreeAll();
+  free(ast);
+
+  if (unit == NULL) {
+    return INTERPRET_COMPILE_ERROR;
+  }
+
+  return interpret(unit);
+}
+
+/**
+ * Regression test: global let bindings must be immutable across multiple
+ * compiler calls
+ */
+static void test_let_reassign_rejected_across_separate_compile_calls(void) {
+  initVM(0, NULL);
+
+  assert(run("let x = 1;") == INTERPRET_OK);
+
+  // Before the fix: immutableGlobals was cleared when the first compile()
+  // returned, so this second, separate compile() call had no record that
+  // 'x' was declared immutable, and let the assignment through.
+  assert(run("x = 2;") == INTERPRET_COMPILE_ERROR);
+
+  compilerSessionEnd();
+  freeVM();
+}
+
+/**
+ * Guards against an overcorrection: the fix must not make every global look
+ * immutable across calls -- only names actually declared with `let`.
+ */
+static void test_var_reassign_allowed_across_separate_compile_calls(void) {
+  initVM(0, NULL);
+
+  assert(run("var y = 1;") == INTERPRET_OK);
+  assert(run("y = 2;") == INTERPRET_OK);
+
+  compilerSessionEnd();
+  freeVM();
+}
+
+/**
+ * Multiple `let` names declared across separate calls must each stay
+ * individually protected -- not just the most recently declared one.
+ */
+static void test_multiple_immutable_names_all_persist(void) {
+  initVM(0, NULL);
+
+  assert(run("let a = 1;") == INTERPRET_OK);
+  assert(run("let b = 2;") == INTERPRET_OK);
+  assert(run("let c = 3;") == INTERPRET_OK);
+
+  assert(run("a = 10;") == INTERPRET_COMPILE_ERROR);
+  assert(run("b = 20;") == INTERPRET_COMPILE_ERROR);
+  assert(run("c = 30;") == INTERPRET_COMPILE_ERROR);
+
+  compilerSessionEnd();
+  freeVM();
+}
+
+/**
+ * A session must not leak into a later, unrelated session -- e.g. two
+ * separate REPL runs (or two separate VM lifetimes) in the same process must
+ * not share immutable-global state just because they share a process.
+ */
+static void test_session_state_does_not_leak_into_next_session(void) {
+  initVM(0, NULL);
+  assert(run("let x = 1;") == INTERPRET_OK);
+  compilerSessionEnd();
+  freeVM();
+
+  initVM(0, NULL);
+  // Fresh session, fresh VM -- 'x' was never declared here. If
+  // compilerSessionEnd() failed to reset immutableGlobals, this would
+  // incorrectly report a compile error reassigning an immutable 'x' instead
+  // of running the declaration cleanly.
+  assert(run("var x = 1; x = 2;") == INTERPRET_OK);
+  compilerSessionEnd();
+  freeVM();
+}
+
+int main(void) {
+  test_let_reassign_rejected_across_separate_compile_calls();
+  test_var_reassign_allowed_across_separate_compile_calls();
+  test_multiple_immutable_names_all_persist();
+  test_session_state_does_not_leak_into_next_session();
+
+  printf("vm_repl_immutability: ok\n");
+  return 0;
+}

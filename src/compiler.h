@@ -2,8 +2,8 @@
 #define kirby_compiler_h
 
 #include "ast.h"
-#include "chunk.h"
-#include "object.h"
+#include "compiled_unit.h"
+#include "opcode.h"
 #include "token.h"
 
 typedef struct {
@@ -26,11 +26,24 @@ typedef struct {
   bool isMutable;
 } Upvalue;
 
-typedef struct Compiler Compiler;
+/**
+ * A function compiler
+ */
+typedef struct FnCompiler FnCompiler;
 
-struct Compiler {
-  Compiler *enclosing;
-  ObjFunction *function;
+struct FnCompiler {
+  /**
+   * The outer function that this compiler is compiling for.
+   */
+  FnCompiler *enclosing;
+
+  // Index of this function's CompiledFn within the unit being built, and a
+  // cached pointer to it.
+  int fnIndex;
+  CompiledFn *fn;
+
+  int upvalueCount;
+
   FunctionType type;
 
   Local locals[UINT8_COUNT];
@@ -41,11 +54,6 @@ struct Compiler {
   struct LoopCompiler *enclosingLoop;
 };
 
-typedef struct {
-  ObjString *name;
-  uint8_t slot;
-} Field;
-
 typedef struct LoopCompiler {
   struct LoopCompiler *enclosing;
   int scopeDepth;
@@ -54,21 +62,18 @@ typedef struct LoopCompiler {
 } LoopCompiler;
 
 /**
- * Compile a AST node into a compiled function object.
+ * Compile an AST into a CompiledUnit.
+ *
+ * Caller owns the unit (freeCompiledUnit()). Must be called between a
+ * matching compilerSessionBegin()/compilerSessionEnd() pair.
  */
-ObjFunction *compile(AstNode **ast, int count, int endLine);
+CompiledUnit *compile(AstNode **ast, int count, int endLine);
 
 /**
- * Mark all objects that are referenced by the compiler as roots
+ * End a compiler session, freeing everything tracked during it. Must be
+ * called before the process exits or before starting an unrelated session
+ * that should not see this one's `let` names.
  */
-void markCompilerRoots(void);
-
-/** Diagnostic: true while a compiler is on the stack (see collectGarbage). */
-bool compilerIsActive(void);
-
-/**
- * Free compiler-owned tables (called from freeVM)
- */
-void freeCompilerState(void);
+void compilerSessionEnd(void);
 
 #endif

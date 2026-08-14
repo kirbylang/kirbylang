@@ -1,21 +1,20 @@
 #include "compiler.h"
 
+#include <assert.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 
 #include "ast.h"
-#include "chunk.h"
 #include "common.h"
-#include "hashtable.h"
-#include "memory.h"
-#include "object.h"
+#include "compiled_unit.h"
+#include "stringset.h"
+#include "token.h"
 
-#ifdef DEBUG_PRINT_CODE
-#include "debug.h"
-#endif
-
-Compiler *current = NULL;
+FnCompiler *current = NULL;
 LoopCompiler *currentLoop = NULL;
+
+static CompiledUnit *compilingUnit = NULL;
 
 static bool hadError = false;
 
@@ -44,7 +43,10 @@ static void compileExpr(AstNode *node);
 static void compileStmt(AstNode *node);
 static void compileBlockContents(BlockNode *block);
 static void compileFunction(FunctionNode *fn, FunctionType type);
-static uint8_t makeConstant(Value value, Token *tok);
+static uint8_t makeConstant(CompiledConst value, Token *tok);
+static uint8_t stringConstant(const char *chars, int length, Token *tok);
+static void emitNumberConstant(double number);
+static void emitStringConstant(const char *chars, int length);
 static void emitByte(uint8_t byte);
 static void emitBytes(uint8_t byte1, uint8_t byte2);
 static void declareVariable(Token *name, bool isMutable);
@@ -52,7 +54,6 @@ static void defineVariable(uint8_t global);
 static void markInitialized(void);
 static void beginScope(void);
 static void endScope(void);
-
 static void errorAt(int line, const char *lexeme, int lexemeLen,
                     const char *message) {
   hadError = true;
@@ -90,24 +91,33 @@ static void error(const char *message) {
 /**
  * Initialize compiler to compile a function
  */
-static void initCompiler(Compiler *compiler, FunctionType functionType,
+static void initCompiler(FnCompiler *compiler, FunctionType functionType,
                          Token *nameToken) {
   TRACELN("  compiler.initCompiler()");
 
   compiler->enclosing = current;
-  compiler->function = NULL;
   compiler->type = functionType;
   compiler->localCount = 0;
   compiler->scopeDepth = 0;
-  compiler->function = newFunction();
-  compiler->function->isStatic = (functionType == TYPE_STATIC_METHOD);
+  compiler->upvalueCount = 0;
+  compiler->fnIndex = cuAddFunction(compilingUnit);
+  compiler->fn = cuGetFnByIndex(compilingUnit, compiler->fnIndex);
+  compiler->fn->isStatic = (functionType == TYPE_STATIC_METHOD);
   compiler->enclosingLoop = currentLoop;
   current = compiler;
 
   currentLoop = NULL;
 
+  // cuAddFunction may realloc the functions array, invalidating cached fn
+  // pointers on enclosing compilers. Refresh them from their indices.
+  for (FnCompiler *c2 = current->enclosing; c2 != NULL; c2 = c2->enclosing) {
+    c2->fn = cuGetFnByIndex(compilingUnit, c2->fnIndex);
+  }
+
   if (nameToken != NULL) {
-    current->function->name = copyString(nameToken->start, nameToken->length);
+    current->fn->nameOffset =
+        cuInternString(compilingUnit, nameToken->start, nameToken->length);
+    current->fn->nameLength = nameToken->length;
   } else if (functionType == TYPE_FUNCTION) {
     lambdaCount++;
     char lambdaName[32];
@@ -118,7 +128,8 @@ static void initCompiler(Compiler *compiler, FunctionType functionType,
     } else if (len >= (int)sizeof(lambdaName)) {
       len = (int)sizeof(lambdaName) - 1;
     }
-    current->function->name = copyString(lambdaName, len);
+    current->fn->nameOffset = cuInternString(compilingUnit, lambdaName, len);
+    current->fn->nameLength = len;
   }
 
   Local *local = &current->locals[current->localCount++];
@@ -136,29 +147,28 @@ static void initCompiler(Compiler *compiler, FunctionType functionType,
 }
 
 /**
- * Get the current chunk being compiled
+ * Get the current function being compiled
  */
-static Chunk *currentChunk(void) { return &current->function->chunk; }
+static CompiledFn *currentFn(void) { return current->fn; }
 
 /**
  * Get the last emitted opcode
  */
 static uint8_t previousOpCode(void) {
-  Chunk *chunk = currentChunk();
+  CompiledFn *fn = currentFn();
 
-  if (chunk->count == 0) {
+  if (fn->codeCount == 0) {
     return 0;
   }
 
-  return chunk->code[chunk->count - 1];
+  return fn->code[fn->codeCount - 1];
 }
 
 /**
  * Make a new constant from an identifier token
  */
 static uint8_t identifierConstant(Token *identifier) {
-  return makeConstant(
-      OBJ_VAL(copyString(identifier->start, identifier->length)), identifier);
+  return stringConstant(identifier->start, identifier->length, identifier);
 }
 
 /**
@@ -176,7 +186,7 @@ static bool identifiersEqual(Token *a, Token *b) {
  * @returns -1 if not found, otherwise the index of the local from the
  * function's locals
  */
-static int resolveLocal(Compiler *compiler, Token *identifier) {
+static int resolveLocal(FnCompiler *compiler, Token *identifier) {
   // Loop through the locals in reverse order to find by identifier
   for (int i = compiler->localCount - 1; i >= 0; i--) {
     Local *local = &compiler->locals[i];
@@ -198,9 +208,9 @@ static int resolveLocal(Compiler *compiler, Token *identifier) {
   return -1;
 }
 
-static int addUpvalue(Compiler *compiler, uint8_t index, bool isLocal,
+static int addUpvalue(FnCompiler *compiler, uint8_t index, bool isLocal,
                       bool isMutable) {
-  int upvalueCount = compiler->function->upvalueCount;
+  int upvalueCount = compiler->upvalueCount;
 
   for (int i = 0; i < upvalueCount; i++) {
     Upvalue *upvalue = &compiler->upvalues[i];
@@ -217,10 +227,10 @@ static int addUpvalue(Compiler *compiler, uint8_t index, bool isLocal,
   compiler->upvalues[upvalueCount].isLocal = isLocal;
   compiler->upvalues[upvalueCount].index = index;
   compiler->upvalues[upvalueCount].isMutable = isMutable;
-  return compiler->function->upvalueCount++;
+  return compiler->upvalueCount++;
 }
 
-static int resolveUpvalue(Compiler *compiler, Token *name) {
+static int resolveUpvalue(FnCompiler *compiler, Token *name) {
   if (compiler->enclosing == NULL)
     return -1;
 
@@ -263,22 +273,20 @@ static void declareVariable(Token *name, bool isMutable) {
 
 /**
  * Names of globals declared with `let`.
- *
- * Globals have no compile-time slot, so immutability is tracked by name in a
- * table that outlives a single compile() call -- the REPL compiles each line
- * separately but shares one set of globals.
  */
-static Table immutableGlobals;
+static StringSet immutableGlobals;
+
+/**
+ * End a compiler session, freeing everything tracked during it.
+ */
+void compilerSessionEnd(void) { stringSetFree(&immutableGlobals); }
 
 static void markGlobalImmutable(Token *name) {
-  tableSet(&immutableGlobals, copyString(name->start, name->length),
-           BOOL_VAL(true));
+  stringSetAdd(&immutableGlobals, name->start, name->length);
 }
 
 static bool isGlobalImmutable(Token *name) {
-  Value ignored;
-  return tableGet(&immutableGlobals, copyString(name->start, name->length),
-                  &ignored);
+  return stringSetContains(&immutableGlobals, name->start, name->length);
 }
 
 // Resolves `name` as a local, then an upvalue, then falls back to treating
@@ -344,7 +352,7 @@ static void defineVariable(uint8_t global) {
 }
 
 static void emitByte(uint8_t byte) {
-  writeChunk(currentChunk(), byte, currentLine);
+  cuWriteByte(currentFn(), byte, currentLine);
 }
 
 static void emitBytes(uint8_t byte1, uint8_t byte2) {
@@ -355,7 +363,7 @@ static void emitBytes(uint8_t byte1, uint8_t byte2) {
 static void emitLoop(int loopStart) {
   emitByte(OP_LOOP);
 
-  int offset = currentChunk()->count - loopStart + 2;
+  int offset = currentFn()->codeCount - loopStart + 2;
   if (offset > UINT16_MAX)
     error("Loop body too large.");
 
@@ -368,22 +376,22 @@ static int emitJump(uint8_t instruction) {
 
   emitByte(instruction);
   emitBytes(0xff, 0xff);
-  return currentChunk()->count - 2;
+  return currentFn()->codeCount - 2;
 }
 
 static void patchJump(int offset) {
-  int jump = currentChunk()->count - offset - 2;
+  int jump = currentFn()->codeCount - offset - 2;
 
   if (jump > UINT16_MAX) {
     error("Too much code to jump over");
   }
 
-  currentChunk()->code[offset] = (jump >> 8) & 0xff;
-  currentChunk()->code[offset + 1] = jump & 0xff;
+  currentFn()->code[offset] = (jump >> 8) & 0xff;
+  currentFn()->code[offset + 1] = jump & 0xff;
 }
 
-static uint8_t makeConstant(Value value, Token *tok) {
-  int constant = addConstantToChunk(currentChunk(), value);
+static uint8_t makeConstant(CompiledConst value, Token *tok) {
+  int constant = cuAddConstant(currentFn(), value);
 
   if (constant > UINT8_MAX) {
     if (tok != NULL) {
@@ -397,8 +405,23 @@ static uint8_t makeConstant(Value value, Token *tok) {
   return (uint8_t)constant;
 }
 
-static void emitConstant(Value value) {
-  emitBytes(OP_CONSTANT, makeConstant(value, NULL));
+static uint8_t stringConstant(const char *chars, int length, Token *tok) {
+  CompiledConst k;
+  k.kind = CONST_STRING;
+  k.as.string.offset = cuInternString(compilingUnit, chars, length);
+  k.as.string.length = length;
+  return makeConstant(k, tok);
+}
+
+static void emitNumberConstant(double number) {
+  CompiledConst k;
+  k.kind = CONST_NUMBER;
+  k.as.number = number;
+  emitBytes(OP_CONSTANT, makeConstant(k, NULL));
+}
+
+static void emitStringConstant(const char *chars, int length) {
+  emitBytes(OP_CONSTANT, stringConstant(chars, length, NULL));
 }
 
 static void beginScope(void) { current->scopeDepth++; }
@@ -494,7 +517,7 @@ static void emitValueReturn(void) {
   emitByte(OP_RETURN);
 }
 
-static ObjFunction *endCompiler(void) {
+static int endCompiler(void) {
   TRACELN("  compiler.endCompiler()");
 
   currentLoop = current->enclosingLoop;
@@ -503,19 +526,12 @@ static ObjFunction *endCompiler(void) {
     emitImplicitReturn();
   }
 
-  ObjFunction *function = current->function;
-
-#ifdef DEBUG_PRINT_CODE
-  if (!hadError) {
-    disassembleChunk(currentChunk(), function->name != NULL
-                                         ? function->name->chars
-                                         : "<script>");
-  }
-#endif
+  current->fn->upvalueCount = current->upvalueCount;
+  int index = current->fnIndex;
 
   current = current->enclosing;
 
-  return function;
+  return index;
 }
 
 static void compileCall(CallNode *c) {
@@ -547,7 +563,7 @@ static void compileCall(CallNode *c) {
  * plain function, and inside a static method.
  */
 static bool selfInScope(void) {
-  for (Compiler *c = current; c != NULL; c = c->enclosing) {
+  for (FnCompiler *c = current; c != NULL; c = c->enclosing) {
     if (c->type == TYPE_METHOD)
       return true;
   }
@@ -572,11 +588,10 @@ static void compileExpr(AstNode *node) {
       emitByte(literal->as.boolean ? OP_TRUE : OP_FALSE);
       break;
     case LITERAL_NUMBER:
-      emitConstant(NUMBER_VAL(literal->as.number));
+      emitNumberConstant(literal->as.number);
       break;
     case LITERAL_STRING:
-      emitConstant(OBJ_VAL(
-          copyString(literal->as.string.chars, literal->as.string.length)));
+      emitStringConstant(literal->as.string.chars, literal->as.string.length);
       break;
     }
 
@@ -854,12 +869,12 @@ static void compileVarDecl(AstNode *node) {
 }
 
 static void compileFunction(FunctionNode *fn, FunctionType type) {
-  Compiler compiler;
+  FnCompiler compiler;
   initCompiler(&compiler, type, fn->isLambda ? NULL : &fn->name);
-  current->function->isPublic = fn->isPublic;
+  current->fn->isPublic = fn->isPublic;
   beginScope();
 
-  current->function->arity = fn->arity;
+  current->fn->arity = fn->arity;
   if (fn->arity > 255) {
     errorAtToken(&fn->name, "Can't have more than 255 parameters.");
   }
@@ -877,11 +892,16 @@ static void compileFunction(FunctionNode *fn, FunctionType type) {
 
   currentLine = fn->bodyEndLine;
 
-  ObjFunction *compiled = endCompiler();
+  int compiledIndex = endCompiler();
+  int compiledUpvalueCount =
+      cuGetFnByIndex(compilingUnit, compiledIndex)->upvalueCount;
 
-  emitBytes(OP_CLOSURE, makeConstant(OBJ_VAL(compiled), NULL));
+  CompiledConst k;
+  k.kind = CONST_FUNCTION;
+  k.as.functionIndex = compiledIndex;
+  emitBytes(OP_CLOSURE, makeConstant(k, NULL));
 
-  for (int i = 0; i < compiled->upvalueCount; i++) {
+  for (int i = 0; i < compiledUpvalueCount; i++) {
     emitByte(compiler.upvalues[i].isLocal ? 1 : 0);
     emitByte(compiler.upvalues[i].index);
   }
@@ -1030,7 +1050,7 @@ static void compileIf(AstNode *node) {
 static void compileWhile(AstNode *node) {
   WhileNode *w = &node->as.while_;
 
-  int loopStart = currentChunk()->count;
+  int loopStart = currentFn()->codeCount;
 
   compileExpr(w->condition);
 
@@ -1060,7 +1080,7 @@ static void compileFor(AstNode *node) {
     compileStmt(f->init);
   }
 
-  int loopStart = currentChunk()->count;
+  int loopStart = currentFn()->codeCount;
 
   compileExpr(f->condition);
 
@@ -1069,7 +1089,7 @@ static void compileFor(AstNode *node) {
 
   if (f->increment != NULL) {
     int bodyJump = emitJump(OP_JUMP);
-    int incrementStart = currentChunk()->count;
+    int incrementStart = currentFn()->codeCount;
     compileExpr(f->increment);
     emitByte(OP_POP);
     emitLoop(loopStart);
@@ -1178,12 +1198,20 @@ static void compileStmt(AstNode *node) {
   }
 }
 
-ObjFunction *compile(AstNode **ast, int count, int endLine) {
+CompiledUnit *compile(AstNode **ast, int count, int endLine) {
   TRACELN("  compiler.compile()");
 
+  CompiledUnit *unit = malloc(sizeof(CompiledUnit));
+  if (unit == NULL) {
+    fprintf(stderr, "malloc failed in compile");
+    exit(EXIT_CODE_OS_ERR);
+  }
+  cuInit(unit);
+
+  compilingUnit = unit;
   hadError = false;
 
-  Compiler compiler;
+  FnCompiler compiler;
   initCompiler(&compiler, TYPE_SCRIPT, NULL);
 
   // Hoist top-level function declarations.
@@ -1201,21 +1229,16 @@ ObjFunction *compile(AstNode **ast, int count, int endLine) {
 
   currentLine = endLine;
 
-  ObjFunction *function = endCompiler();
+  endCompiler();
 
-  return hadError ? NULL : function;
-}
+  bool ok = !hadError;
+  compilingUnit = NULL;
 
-bool compilerIsActive(void) { return current != NULL; }
-
-void markCompilerRoots(void) {
-  Compiler *compiler = current;
-  while (compiler != NULL) {
-    markObject((Obj *)compiler->function);
-    compiler = compiler->enclosing;
+  if (!ok) {
+    freeCompiledUnit(unit);
+    free(unit);
+    return NULL;
   }
 
-  markTable(&immutableGlobals);
+  return unit;
 }
-
-void freeCompilerState(void) { freeTable(&immutableGlobals); }

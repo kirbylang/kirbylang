@@ -1,13 +1,6 @@
 == <script> ==
 0000    1 OP_NIL
 0001    | OP_RETURN
-== greet ==
-0000    5 OP_CONSTANT         0 'Hello '
-0002    | OP_GET_LOCAL        1
-0004    | OP_ADD
-0005    | OP_PRINT
-0006    6 OP_NIL
-0007    | OP_RETURN
 == <script> ==
 0000    1 OP_STRUCT           0 'Greeter'
 0002    | OP_DEFINE_GLOBAL    0 'Greeter'
@@ -27,3 +20,10 @@
 0028    | OP_PRINT
 0029   12 OP_NIL
 0030    | OP_RETURN
+== greet ==
+0000    5 OP_CONSTANT         0 'Hello '
+0002    | OP_GET_LOCAL        1
+0004    | OP_ADD
+0005    | OP_PRINT
+0006    6 OP_NIL
+0007    | OP_RETURN

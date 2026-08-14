@@ -4,7 +4,7 @@
 #include <string.h>
 
 #include "../src/ast.h"
-#include "../src/memory.h"
+#include "../src/gc.h"
 #include "../src/parser.h"
 #include "../src/strbuf.h"
 #include "../src/token.h"

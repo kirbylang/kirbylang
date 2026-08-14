@@ -1,9 +1,6 @@
 == <script> ==
 0000    1 OP_NIL
 0001    | OP_RETURN
-== hello ==
-0000    2 OP_NIL
-0001    | OP_RETURN
 == <script> ==
 0000    1 OP_GET_GLOBAL       0 'Struct'
 0002    2 OP_CLOSURE          2 <fn hello>
@@ -11,5 +8,8 @@
 0006    3 OP_POP
 0007    4 OP_NIL
 0008    | OP_RETURN
+== hello ==
+0000    2 OP_NIL
+0001    | OP_RETURN
 Undefined variable 'Struct'.
 [line 1] in script

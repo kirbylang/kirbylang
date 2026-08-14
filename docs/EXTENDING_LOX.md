@@ -6,6 +6,7 @@ These are the documented changes to the language/syntax from the original Lox la
 
 - [ ] [String interpolation](https://github.com/kirbylang/kirbylang/issues/15)
 - [ ] [`continue` keyword](https://github.com/kirbylang/kirbylang/issues/13)
+- Decouple compiler, GC, and VM
 - Lambdas
   - [ ] Lambda body expressions `var sum = fun (a, b) a + b;`
 - Native Functions

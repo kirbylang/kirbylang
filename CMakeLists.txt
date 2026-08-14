@@ -51,16 +51,20 @@ set(KIRBY_SOURCES
     src/asserts.c
     src/ast.c
     src/chunk.c
+    src/common.c
     src/compiler.c
     src/debug.c
     src/hashtable.c
     src/lexer.c
-    src/memory.c
+    src/compiled_unit.c
+    src/gc.c
+    src/loader.c
     src/native.c
     src/object.c
     src/parser.c
     src/scanner.c
     src/strbuf.c
+    src/stringset.c
     src/token_stream.c
     src/token.c
     src/value.c
@@ -252,6 +256,23 @@ if(BUILD_TESTS)
         COMMAND kirby-token-unit-test
     )
 
+    add_executable(kirby-stringset-unit-test
+        unit/stringset.c
+    )
+
+    target_link_libraries(kirby-stringset-unit-test
+        PRIVATE
+            kirby_core_debug
+    )
+
+    configure_kirby_target(kirby-stringset-unit-test)
+    enable_coverage(kirby-stringset-unit-test)
+
+    add_test(
+        NAME kirby-stringset-unit-test
+        COMMAND kirby-stringset-unit-test
+    )
+
     add_executable(kirby-value-unit-test
         unit/value.c
     )
@@ -335,5 +356,22 @@ if(BUILD_TESTS)
     add_test(
         NAME kirby-vm-invoke-unit-test
         COMMAND kirby-vm-invoke-unit-test
+    )
+
+    add_executable(kirby-vm-repl-immutability-unit-test
+        unit/vm_repl_immutability.c
+    )
+
+    target_link_libraries(kirby-vm-repl-immutability-unit-test
+        PRIVATE
+            kirby_core_debug
+    )
+
+    configure_kirby_target(kirby-vm-repl-immutability-unit-test)
+    enable_coverage(kirby-vm-repl-immutability-unit-test)
+
+    add_test(
+        NAME kirby-vm-repl-immutability-unit-test
+        COMMAND kirby-vm-repl-immutability-unit-test
     )
 endif()
