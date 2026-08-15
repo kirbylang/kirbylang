@@ -256,6 +256,14 @@ static void addLocal(Token name, bool isMutable) {
     return;
   }
 
+  for (int i = 0; i < current->localCount; i++) {
+    Local *existing = &current->locals[i];
+    if (identifiersEqual(&name, &existing->name) && !existing->isMutable) {
+      errorAtToken(&name, "Already declared in this scope.");
+      return;
+    }
+  }
+
   Local *local = &current->locals[current->localCount++];
   local->name = name;
   local->depth = -1;
@@ -277,9 +285,17 @@ static void declareVariable(Token *name, bool isMutable) {
 static StringSet immutableGlobals;
 
 /**
+ * Names of any global declarations e.g. structs, functions, let bindings
+ */
+static StringSet declaredGlobals;
+
+/**
  * End a compiler session, freeing everything tracked during it.
  */
-void compilerSessionEnd(void) { stringSetFree(&immutableGlobals); }
+void compilerSessionEnd(void) {
+  stringSetFree(&immutableGlobals);
+  stringSetFree(&declaredGlobals);
+}
 
 static void markGlobalImmutable(Token *name) {
   stringSetAdd(&immutableGlobals, name->start, name->length);
@@ -287,6 +303,15 @@ static void markGlobalImmutable(Token *name) {
 
 static bool isGlobalImmutable(Token *name) {
   return stringSetContains(&immutableGlobals, name->start, name->length);
+}
+
+static void checkGlobalRedeclaration(Token *name) {
+  if (stringSetContains(&declaredGlobals, name->start, name->length) &&
+      isGlobalImmutable(name)) {
+    errorAtToken(name, "Already declared in this scope.");
+  }
+
+  stringSetAdd(&declaredGlobals, name->start, name->length);
 }
 
 // Resolves `name` as a local, then an upvalue, then falls back to treating
@@ -322,6 +347,8 @@ static uint8_t parseVariableFromToken(Token *name, bool isMutable) {
     return 0;
 
   currentLine = name->line;
+
+  checkGlobalRedeclaration(name);
 
   // identifierConstant() interns the name into the chunk's constant table,
   // which keeps it reachable for the GC before it is stored below.
@@ -909,7 +936,7 @@ static void compileFunction(FunctionNode *fn, FunctionType type) {
 
 static void compileFunctionDeclStmt(AstNode *node) {
   FunctionNode *fn = &node->as.function;
-  uint8_t global = parseVariableFromToken(&fn->name, /*isMutable=*/true);
+  uint8_t global = parseVariableFromToken(&fn->name, /*isMutable=*/false);
   // Marked initialized *before* compiling the body so the function can call
   // itself recursively through its own local slot.
   markInitialized();
@@ -921,7 +948,14 @@ static void compileStructDecl(AstNode *node) {
   StructNode *sn = &node->as.struct_;
 
   uint8_t nameConstant = identifierConstant(&sn->name);
-  declareVariable(&sn->name, /*isMutable=*/true);
+
+  if (current->scopeDepth == 0) {
+    checkGlobalRedeclaration(&sn->name);
+    markGlobalImmutable(&sn->name);
+  }
+
+  declareVariable(&sn->name, /*isMutable=*/false);
+
   emitBytes(OP_STRUCT, nameConstant);
   defineVariable(nameConstant);
 
