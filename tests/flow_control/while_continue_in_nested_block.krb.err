@@ -14,10 +14,10 @@
 0017    | OP_ADD
 0018    | OP_SET_GLOBAL       4 'i'
 0020    | OP_POP
-0021    5 OP_GET_GLOBAL       7 'i'
+0021    6 OP_GET_GLOBAL       7 'i'
 0023    | OP_CONSTANT         8 '100.000000'
 0025    | OP_MULTIPLY
-0026    6 OP_GET_GLOBAL       9 'i'
+0026    7 OP_GET_GLOBAL       9 'i'
 0028    | OP_CONSTANT        10 '2.000000'
 0030    | OP_EQUAL
 0031    | OP_JUMP_IF_FALSE   31 -> 42
@@ -26,12 +26,12 @@
 0036    | OP_LOOP            36 -> 4
 0039    | OP_JUMP            39 -> 43
 0042    | OP_POP
-0043    7 OP_GET_LOCAL        1
+0043    8 OP_GET_LOCAL        1
 0045    | OP_PRINT
-0046    8 OP_POP
-0047    9 OP_LOOP            47 -> 4
+0046    9 OP_POP
+0047   10 OP_LOOP            47 -> 4
 0050    | OP_POP
-0051   10 OP_CONSTANT        11 'done'
+0051   11 OP_CONSTANT        11 'done'
 0053    | OP_PRINT
-0054   11 OP_NIL
+0054   12 OP_NIL
 0055    | OP_RETURN
