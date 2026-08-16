@@ -19,6 +19,7 @@
   - [ ] `arrSort(array, fn)`
   - [ ] `arrMap(array, fn)`
   - [ ] `arrJoinToString(array, separator)`
+- Macros
 
 ## Next: 0.4.0
 
