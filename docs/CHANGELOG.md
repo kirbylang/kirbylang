@@ -2,13 +2,17 @@
 
 ## Future State
 
-- List comprehensions
-- Modules
+- [Array comprehensions](https://github.com/kirbylang/kirbylang/issues/18)
+- [Modules](https://github.com/kirbylang/kirbylang/issues/14)
+- Documentation Comments
 - Tooling
-  - Linter
-  - Formatter
-  - Test Runner
+  - Version Manager `krb version use 1.2.3`
+  - Linter `krb lint`
+  - Formatter `krb format`
+  - [Test Framework/Runner](https://github.com/kirbylang/kirbylang/issues/34) /w Code Coverage `krb test`
+- Debugger (compatible with VS Code)
 - Tuples
+- [Type System](https://github.com/kirbylang/kirbylang/issues/17)
 - Number types
   - `u#` (e.g. `123u8`), `i#`, `f#`, `number`
 - [String interpolation](https://github.com/kirbylang/kirbylang/issues/15)
