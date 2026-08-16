@@ -71,7 +71,7 @@
       "patterns": [
         {
           "name": "keyword.control.krb",
-          "match": "\\b(if|else|for|while|return|break)\\b"
+          "match": "\\b(if|else|for|while|return|break|continue)\\b"
         },
         {
           "name": "keyword.declaration.krb",

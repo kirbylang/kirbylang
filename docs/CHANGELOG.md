@@ -2,17 +2,20 @@
 
 ## Future State
 
-- List comprehensions
-- Modules
+- [Array comprehensions](https://github.com/kirbylang/kirbylang/issues/18)
+- [Modules](https://github.com/kirbylang/kirbylang/issues/14)
+- Documentation Comments
 - Tooling
-  - Linter
-  - Formatter
-  - Test Runner
+  - Version Manager `krb version use 1.2.3`
+  - Linter `krb lint`
+  - Formatter `krb format`
+  - [Test Framework/Runner](https://github.com/kirbylang/kirbylang/issues/34) /w Code Coverage `krb test`
+- Debugger (compatible with VS Code)
 - Tuples
+- [Type System](https://github.com/kirbylang/kirbylang/issues/17)
 - Number types
   - `u#` (e.g. `123u8`), `i#`, `f#`, `number`
 - [String interpolation](https://github.com/kirbylang/kirbylang/issues/15)
-- [`continue` keyword](https://github.com/kirbylang/kirbylang/issues/13)
 - Lambda body expressions `var sum = fun (a, b) a + b;`
 - Native Functions
   - [ ] `print`, `println`, `eprint`, `eprintln`
@@ -30,6 +33,7 @@
     - New operand for `OP_FIELD`: `flag` where `0` is false, `1` is true
   - Hoist structs during compilation
   - Deprecate the call syntax e.g. `Point()`
+- [`continue` keyword](https://github.com/kirbylang/kirbylang/issues/13)
 - Refine shadow binding rules
 
   | Binding  | Shadowed By | Result                                              |

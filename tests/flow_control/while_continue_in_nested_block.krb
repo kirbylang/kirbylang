@@ -1,0 +1,11 @@
+var i = 0;
+while (i < 4) {
+    i = i + 1;
+    
+    {
+        var nested = i * 100;
+        if (i == 2) continue;
+        print nested;
+    }
+}
+print "done";

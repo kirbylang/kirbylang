@@ -208,6 +208,8 @@ static TokenType identifierType(Scanner *scanner) {
     return checkKeyword(scanner, 1, 2, "nd", TOKEN_AND);
   case 'b':
     return checkKeyword(scanner, 1, 4, "reak", TOKEN_BREAK);
+  case 'c':
+    return checkKeyword(scanner, 1, 7, "ontinue", TOKEN_CONTINUE);
   case 'e':
     return checkKeyword(scanner, 1, 3, "lse", TOKEN_ELSE);
   case 'f':

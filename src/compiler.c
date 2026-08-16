@@ -1029,6 +1029,16 @@ static void compileBreak(AstNode *node) {
   currentLoop->breakJumps[currentLoop->breakCount++] = emitJump(OP_JUMP);
 }
 
+static void compileContinue(AstNode *node) {
+  if (currentLoop == NULL) {
+    errorAtNode(node, "Can't use 'continue' outside of a loop.");
+    return;
+  }
+
+  emitPopsToDepth(currentLoop->continueDepth); // non-destructive
+  emitLoop(currentLoop->continueTarget);
+}
+
 /**
  * @param int The scope depth when entering the loop. This is what the break
  * statement will jump to.
@@ -1084,6 +1094,8 @@ static void compileWhile(AstNode *node) {
 
   LoopCompiler loop;
   beginLoop(&loop, current->scopeDepth);
+  loop.continueTarget = loopStart;
+  loop.continueDepth = current->scopeDepth;
 
   compileStmt(w->body);
 
@@ -1124,6 +1136,8 @@ static void compileFor(AstNode *node) {
 
   LoopCompiler loop;
   beginLoop(&loop, outerDepth);
+  loop.continueTarget = loopStart;
+  loop.continueDepth = current->scopeDepth;
 
   compileStmt(f->body);
 
@@ -1203,6 +1217,10 @@ static void compileStmt(AstNode *node) {
 
   case NODE_BREAK:
     compileBreak(node);
+    break;
+
+  case NODE_CONTINUE:
+    compileContinue(node);
     break;
 
   case NODE_FUNCTION:
