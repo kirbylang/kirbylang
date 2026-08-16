@@ -59,6 +59,23 @@ typedef struct LoopCompiler {
   int scopeDepth;
   int breakJumps[UINT8_COUNT];
   int breakCount;
+  /**
+   * Bytecode offset that `continue` jumps back to:
+   *
+   * while: the condition check
+   * for: the increment (falling back to the condition)
+   */
+  int continueTarget;
+  /**
+   * Scope depth `continue` pops locals down to.
+   *
+   * For Loops:
+   *
+   * Shallower than `scopeDepth` when a `for` loop's init clause declares a
+   * variable, since `continue` must keep that variable alive across iterations
+   * while `break` discards it on the way out of the loop.
+   */
+  int continueDepth;
 } LoopCompiler;
 
 /**

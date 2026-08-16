@@ -440,6 +440,10 @@ static void printNode(StrBuf *sb, AstNode *node) {
   case NODE_BREAK:
     sb_append(sb, "(break)");
     break;
+
+  case NODE_CONTINUE:
+    sb_append(sb, "(continue)");
+    break;
   }
 }
 

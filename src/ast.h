@@ -36,6 +36,7 @@ typedef enum {
   NODE_IMPL,
   NODE_ARRAY,
   NODE_BREAK,
+  NODE_CONTINUE,
   // Sentinel
   NODE_COUNT
 } NodeKind;
@@ -178,6 +179,10 @@ typedef struct {
 } BreakNode;
 
 typedef struct {
+  Token token;
+} ContinueNode;
+
+typedef struct {
   AstNode *init;
   AstNode *condition;
   AstNode *body;
@@ -283,6 +288,7 @@ struct AstNode {
     ImplNode impl;
     ArrayNode array;
     BreakNode break_;
+    ContinueNode continue_;
   } as;
 };
 

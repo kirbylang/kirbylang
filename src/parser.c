@@ -620,6 +620,7 @@ static ParseRule rules[] = {
     [TOKEN_WHILE] = {NULL, NULL, PREC_NONE},
     [TOKEN_MODULO] = {NULL, binary, PREC_FACTOR},
     [TOKEN_BREAK] = {NULL, NULL, PREC_NONE},
+    [TOKEN_CONTINUE] = {NULL, NULL, PREC_NONE},
     [TOKEN_ERROR] = {NULL, NULL, PREC_NONE},
     [TOKEN_EOF] = {NULL, NULL, PREC_NONE},
 };
@@ -702,6 +703,18 @@ static AstNode *breakStatement(Parser *p) {
 
   AstNode *node = astAlloc(NODE_BREAK, line);
   node->as.break_.token = token;
+
+  return node;
+}
+
+static AstNode *continueStatement(Parser *p) {
+  Token token = p->previous;
+  int line = token.line;
+
+  consume(p, TOKEN_SEMICOLON, "Expect ';' after continue.");
+
+  AstNode *node = astAlloc(NODE_CONTINUE, line);
+  node->as.continue_.token = token;
 
   return node;
 }
@@ -911,6 +924,8 @@ static AstNode *statement(Parser *p, bool *isTail) {
     return blockStatement(p);
   if (match(p, TOKEN_BREAK))
     return breakStatement(p);
+  if (match(p, TOKEN_CONTINUE))
+    return continueStatement(p);
   return expressionStatement(p, isTail);
 }
 
