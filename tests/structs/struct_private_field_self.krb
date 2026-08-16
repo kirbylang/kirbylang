@@ -1,9 +1,9 @@
 struct Account {
-    var balance = 100;
+    var balance;
 }
 
 impl Account {
-    pub fun new() = Account {};
+    pub fun new() = Account { balance: 100 };
 
     pub fun deposit(self, amount) {
         self.balance = self.balance + amount;

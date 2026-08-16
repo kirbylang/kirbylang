@@ -1,9 +1,0 @@
-// A field default built at runtime is not in the chunk constant
-// table, so fieldDefaults is its only root. A literal default would survive
-// even with the bug present and would not detect it.
-struct S {
-    pub var label = "a" + "b";
-}
-
-var a = S {};
-print a.label;

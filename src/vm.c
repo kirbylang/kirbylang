@@ -759,7 +759,7 @@ static InterpretResult run(void) {
 
       // Validate all fields without default values were passed
       for (int i = 0; i < struct_->fieldCount; i++) {
-        if (provided[i] || !IS_NIL(struct_->fieldDefaults[i]))
+        if (provided[i])
           continue;
 
         ObjString *missing = structFieldName(struct_, i);
@@ -906,9 +906,6 @@ static InterpretResult run(void) {
       tableSet(vm.gc, &struct_->fields, field_name,
                NUMBER_VAL(struct_->fieldCount));
 
-      Value initializer = peekStack(0);
-
-      struct_->fieldDefaults[struct_->fieldCount] = initializer;
       struct_->fieldPublic[struct_->fieldCount] = isPublic;
 
       struct_->fieldCount++;

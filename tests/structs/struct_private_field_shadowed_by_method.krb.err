@@ -5,25 +5,33 @@
 0000    2 OP_STRUCT           0 'Counter'
 0002    | OP_DEFINE_GLOBAL    0 'Counter'
 0004    | OP_GET_GLOBAL       1 'Counter'
-0006    3 OP_CONSTANT         3 '5.000000'
-0008    | OP_FIELD            2 'count' private
-0011    4 OP_POP
-0012    6 OP_GET_GLOBAL       4 'Counter'
-0014    7 OP_CLOSURE          6 <fn count>
-0016    | OP_METHOD           5 'count'
-0018    8 OP_POP
-0019   10 OP_GET_GLOBAL       8 'Counter'
-0021    | OP_STRUCT_INIT      0
-0023    | OP_DEFINE_GLOBAL    7 'c'
-0025   12 OP_GET_GLOBAL       9 'c'
-0027    | OP_INVOKE        (0 args)   10 'count'
-0030    | OP_PRINT
-0031   13 OP_GET_GLOBAL      11 'c'
-0033    | OP_GET_PROPERTY    12 'count'
-0035    | OP_PRINT
-0036   14 OP_NIL
-0037    | OP_RETURN
+0006    3 OP_NIL
+0007    | OP_FIELD            2 'count' private
+0010    4 OP_POP
+0011    6 OP_GET_GLOBAL       3 'Counter'
+0013    7 OP_CLOSURE          5 <fn new>
+0015    | OP_METHOD           4 'new'
+0017    8 OP_CLOSURE          7 <fn count>
+0019    | OP_METHOD           6 'count'
+0021    9 OP_POP
+0022   11 OP_GET_GLOBAL       9 'Counter'
+0024    | OP_INVOKE        (0 args)   10 'new'
+0027    | OP_DEFINE_GLOBAL    8 'c'
+0029   13 OP_GET_GLOBAL      11 'c'
+0031    | OP_INVOKE        (0 args)   12 'count'
+0034    | OP_PRINT
+0035   14 OP_GET_GLOBAL      13 'c'
+0037    | OP_GET_PROPERTY    14 'count'
+0039    | OP_PRINT
+0040   15 OP_NIL
+0041    | OP_RETURN
+== new ==
+0000    7 OP_GET_GLOBAL       0 'Counter'
+0002    | OP_CONSTANT         1 'count'
+0004    | OP_CONSTANT         2 '5.000000'
+0006    | OP_STRUCT_INIT      1
+0008    | OP_RETURN
 == count ==
-0000    7 OP_GET_LOCAL        0
+0000    8 OP_GET_LOCAL        0
 0002    | OP_GET_PROPERTY     0 'count'
 0004    | OP_RETURN

@@ -98,7 +98,6 @@ typedef struct ObjStruct {
   Table methods;
   Table fields;
   int fieldCount;
-  Value fieldDefaults[256];
   bool fieldPublic[256];
 } ObjStruct;
 

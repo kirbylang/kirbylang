@@ -756,25 +756,6 @@ static AstNode *whileStatement(Parser *p, bool *isTail) {
   return node;
 }
 
-// static AstNode *forStatement(Parser *p, bool *isTail) {
-//   int line = p->previous.line;
-//   consume(p, TOKEN_LEFT_PAREN, "Expect '(' after 'for'.");
-//   AstNode *cond = expression(p);
-//   consume(p, TOKEN_RIGHT_PAREN, "Expect ')' after condition.");
-//   AstNode *body = statement(p, isTail);
-
-//   AstNode *node = astAlloc(NODE_WHILE, line);
-//   node->as.for_.init = NULL;
-//   node->as.for_.condition = cond;
-//   node->as.for_.body = body;
-//   node->as.for_.increment = NULL;
-//   return node;
-// }
-
-// A `for` loop is desugared into a single NODE_WHILE at parse time, with
-// its init/increment clauses kept as distinct fields (see WhileNode in
-// ast.h) rather than spliced into surrounding blocks -- see compileWhile()
-// in compiler.c for why.
 static AstNode *forStatement(Parser *p, bool *isTail) {
   int line = p->previous.line;
   consume(p, TOKEN_LEFT_PAREN, "Expect '(' after 'for'.");
@@ -1077,14 +1058,15 @@ static AstNode *structDeclaration(Parser *p) {
     if (match(p, TOKEN_VAR)) {
       consume(p, TOKEN_IDENTIFIER, "Expect field name.");
       Token fieldName = p->previous;
-      AstNode *init = NULL;
+
       if (match(p, TOKEN_EQUAL)) {
-        init = expression(p);
+        parse_error(p, "Struct fields don't support default values");
       }
+
       consume(p, TOKEN_SEMICOLON, "Expect ';' after field.");
 
       fieldBuf[fieldCount].name = fieldName;
-      fieldBuf[fieldCount].initializer = init;
+      fieldBuf[fieldCount].initializer = NULL;
       fieldBuf[fieldCount].isMutable = true;
       fieldBuf[fieldCount].isPublic = isPublic;
       fieldBuf[fieldCount].declEndLine = p->previous.line; // the ';'

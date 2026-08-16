@@ -1,9 +1,0 @@
-// A nested array default: the outer ObjArray is rooted only by fieldDefaults,
-// and the inner ones only by the outer, so tracing must reach two levels.
-struct S {
-    pub var grid = [[1, 2], [3, 4]];
-}
-
-var a = S {};
-print a.grid;
-print a.grid[1];
