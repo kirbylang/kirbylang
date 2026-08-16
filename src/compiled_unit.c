@@ -25,10 +25,20 @@ void cuInit(CompiledUnit *compiledUnit) {
   compiledUnit->functionCapacity = 0;
 }
 
+/**
+ * Add a string in the compiled unit's iterned strings.
+ *
+ * Returns the interned string's index.
+ */
 int cuInternString(CompiledUnit *compiledUnit, const char *chars, int length) {
   return stringSetIntern(&compiledUnit->strings, chars, length);
 }
 
+/**
+ * Initialize a new compiled function.
+ *
+ * Returns the index of the new function in compiled unit's functions.
+ */
 int cuAddFunction(CompiledUnit *compiledUnit) {
   if (compiledUnit->functionCount + 1 > compiledUnit->functionCapacity) {
     int cap = compiledUnit->functionCapacity < CU_FN_MIN_SIZE
@@ -49,6 +59,9 @@ CompiledFn *cuGetFnByIndex(CompiledUnit *compiledUnit, int index) {
   return &compiledUnit->functions[index];
 }
 
+/**
+ * Write a single byte to a compiled function's bytecode.
+ */
 void cuWriteByte(CompiledFn *compiledFn, uint8_t byte, int line) {
   if (compiledFn->codeCount + 1 > compiledFn->codeCapacity) {
     int cap = compiledFn->codeCapacity < CU_FN_CODE_MIN_SIZE
@@ -67,6 +80,11 @@ void cuWriteByte(CompiledFn *compiledFn, uint8_t byte, int line) {
   compiledFn->codeCount++;
 }
 
+/**
+ * Add a constant to a compiled function.
+ *
+ * Returns the index of the constant in the function's constants.
+ */
 int cuAddConstant(CompiledFn *compiledFn, CompiledConst compiledConst) {
   if (compiledFn->constantCount + 1 > compiledFn->constantCapacity) {
     int cap = compiledFn->constantCapacity < CU_FN_CONST_MIN_SIZE

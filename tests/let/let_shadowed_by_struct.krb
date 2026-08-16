@@ -1,0 +1,3 @@
+let value = 10;
+
+struct value {}

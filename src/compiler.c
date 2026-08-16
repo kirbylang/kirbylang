@@ -256,6 +256,14 @@ static void addLocal(Token name, bool isMutable) {
     return;
   }
 
+  for (int i = 0; i < current->localCount; i++) {
+    Local *existing = &current->locals[i];
+    if (identifiersEqual(&name, &existing->name) && !existing->isMutable) {
+      errorAtToken(&name, "Already declared in this scope.");
+      return;
+    }
+  }
+
   Local *local = &current->locals[current->localCount++];
   local->name = name;
   local->depth = -1;
@@ -272,21 +280,27 @@ static void declareVariable(Token *name, bool isMutable) {
 }
 
 /**
- * Names of globals declared with `let`.
+ * Immutable bindings e.g. struct, fun, let
  */
-static StringSet immutableGlobals;
+static StringSet immutableBindings;
 
 /**
  * End a compiler session, freeing everything tracked during it.
  */
-void compilerSessionEnd(void) { stringSetFree(&immutableGlobals); }
+void compilerSessionEnd(void) { stringSetFree(&immutableBindings); }
 
-static void markGlobalImmutable(Token *name) {
-  stringSetAdd(&immutableGlobals, name->start, name->length);
+static void addImmutableBinding(Token *name) {
+  stringSetAdd(&immutableBindings, name->start, name->length);
 }
 
-static bool isGlobalImmutable(Token *name) {
-  return stringSetContains(&immutableGlobals, name->start, name->length);
+static bool isMutuableBinding(Token *name) {
+  return stringSetContains(&immutableBindings, name->start, name->length);
+}
+
+static void checkImmutableRedeclaration(Token *name) {
+  if (isMutuableBinding(name)) {
+    errorAtToken(name, "Already declared in this scope.");
+  }
 }
 
 // Resolves `name` as a local, then an upvalue, then falls back to treating
@@ -310,7 +324,7 @@ static VarRef resolveVariable(Token *name) {
     ref.arg = identifierConstant(name);
     ref.getOp = OP_GET_GLOBAL;
     ref.setOp = OP_SET_GLOBAL;
-    ref.isMutable = !isGlobalImmutable(name);
+    ref.isMutable = !isMutuableBinding(name);
   }
 
   return ref;
@@ -323,11 +337,15 @@ static uint8_t parseVariableFromToken(Token *name, bool isMutable) {
 
   currentLine = name->line;
 
+  checkImmutableRedeclaration(name);
+
   // identifierConstant() interns the name into the chunk's constant table,
   // which keeps it reachable for the GC before it is stored below.
   uint8_t constant = identifierConstant(name);
+
   if (!isMutable)
-    markGlobalImmutable(name);
+    addImmutableBinding(name);
+
   return constant;
 }
 
@@ -909,7 +927,7 @@ static void compileFunction(FunctionNode *fn, FunctionType type) {
 
 static void compileFunctionDeclStmt(AstNode *node) {
   FunctionNode *fn = &node->as.function;
-  uint8_t global = parseVariableFromToken(&fn->name, /*isMutable=*/true);
+  uint8_t global = parseVariableFromToken(&fn->name, /*isMutable=*/false);
   // Marked initialized *before* compiling the body so the function can call
   // itself recursively through its own local slot.
   markInitialized();
@@ -921,7 +939,14 @@ static void compileStructDecl(AstNode *node) {
   StructNode *sn = &node->as.struct_;
 
   uint8_t nameConstant = identifierConstant(&sn->name);
-  declareVariable(&sn->name, /*isMutable=*/true);
+
+  if (current->scopeDepth == 0) {
+    checkImmutableRedeclaration(&sn->name);
+    addImmutableBinding(&sn->name);
+  }
+
+  declareVariable(&sn->name, /*isMutable=*/false);
+
   emitBytes(OP_STRUCT, nameConstant);
   defineVariable(nameConstant);
 

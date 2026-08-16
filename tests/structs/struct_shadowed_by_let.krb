@@ -1,0 +1,3 @@
+struct Struct {}
+
+let Struct = 123;

@@ -2,9 +2,36 @@
 
 ## Next: 0.4.0
 
+- Decouple compiler, GC, and VM
+- Structs
+  - [Accessibility modifiers `pub`](https://github.com/kirbylang/kirbylang/issues/9)
+    - New token: `TOKEN_PUB`
+    - New operand for `OP_FIELD`: `flag` where `0` is false, `1` is true
+  - Hoist structs during compilation
+  - [ ] Deprecate the call syntax e.g. `Point()`
+- Refine shadow binding rules
+
+  | Binding  | Shadowed By | Result                                           |
+  | -------- | ----------- | ------------------------------------------------ |
+  | `var`    | `fun`       | Invalid. This is an effect of function hoisting. |
+  | `var`    | `let`       | Valid                                            |
+  | `var`    | `struct`    | Valid                                            |
+  | `var`    | `var`       | Valid                                            |
+  | `fun`    | `fun`       | Invalid                                          |
+  | `fun`    | `let`       | Invalid                                          |
+  | `fun`    | `struct`    | Invalid                                          |
+  | `fun`    | `var`       | Invalid                                          |
+  | `let`    | `let`       | Invalid                                          |
+  | `let`    | `var`       | Invalid                                          |
+  | `let`    | `fun`       | Invalid                                          |
+  | `let`    | `struct`    | Invalid                                          |
+  | `struct` | `let`       | Invalid                                          |
+  | `struct` | `var`       | Invalid                                          |
+  | `struct` | `fun`       | Invalid                                          |
+  | `struct` | `struct`    | Invalid                                          |
+
 - [ ] [String interpolation](https://github.com/kirbylang/kirbylang/issues/15)
 - [ ] [`continue` keyword](https://github.com/kirbylang/kirbylang/issues/13)
-- Decouple compiler, GC, and VM
 - Lambdas
   - [ ] Lambda body expressions `var sum = fun (a, b) a + b;`
 - Native Functions
@@ -12,11 +39,6 @@
   - [ ] `arrSort(array, fn)`
   - [ ] `arrMap(array, fn)`
   - [ ] `arrJoinToString(array, separator)`
-- Structs
-  - [Accessibility modifiers `pub`](https://github.com/kirbylang/kirbylang/issues/9)
-    - New token: `TOKEN_PUB`
-    - New operand for `OP_FIELD`: `flag` where `0` is false, `1` is true
-  - [ ] Deprecate the call syntax e.g. `Point()`
 
 ## 0.3.0
 
