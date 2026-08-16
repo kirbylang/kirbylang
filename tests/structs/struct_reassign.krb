@@ -1,0 +1,3 @@
+struct Point { pub var x; }
+
+Point = 42;
