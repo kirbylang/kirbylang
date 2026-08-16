@@ -1246,8 +1246,15 @@ CompiledUnit *compile(AstNode **ast, int count, int endLine) {
     }
   }
 
+  // Hoist top-level struct declarations.
   for (int i = 0; i < count; i++) {
-    if (ast[i]->kind != NODE_FUNCTION) {
+    if (ast[i]->kind == NODE_STRUCT) {
+      compileStmt(ast[i]);
+    }
+  }
+
+  for (int i = 0; i < count; i++) {
+    if (ast[i]->kind != NODE_FUNCTION && ast[i]->kind != NODE_STRUCT) {
       compileStmt(ast[i]);
     }
   }

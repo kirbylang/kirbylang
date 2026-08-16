@@ -11,24 +11,24 @@
   - [ ] Deprecate the call syntax e.g. `Point()`
 - Refine shadow binding rules
 
-  | Binding  | Shadowed By | Result                                           |
-  | -------- | ----------- | ------------------------------------------------ |
-  | `var`    | `fun`       | Invalid. This is an effect of function hoisting. |
-  | `var`    | `let`       | Valid                                            |
-  | `var`    | `struct`    | Valid                                            |
-  | `var`    | `var`       | Valid                                            |
-  | `fun`    | `fun`       | Invalid                                          |
-  | `fun`    | `let`       | Invalid                                          |
-  | `fun`    | `struct`    | Invalid                                          |
-  | `fun`    | `var`       | Invalid                                          |
-  | `let`    | `let`       | Invalid                                          |
-  | `let`    | `var`       | Invalid                                          |
-  | `let`    | `fun`       | Invalid                                          |
-  | `let`    | `struct`    | Invalid                                          |
-  | `struct` | `let`       | Invalid                                          |
-  | `struct` | `var`       | Invalid                                          |
-  | `struct` | `fun`       | Invalid                                          |
-  | `struct` | `struct`    | Invalid                                          |
+  | Binding  | Shadowed By | Result                                              |
+  | -------- | ----------- | --------------------------------------------------- |
+  | `var`    | `fun`       | Invalid.<br>This is an effect of function hoisting. |
+  | `var`    | `let`       | Valid                                               |
+  | `var`    | `struct`    | Invalid.<br>This is an effect of struct hoisting.   |
+  | `var`    | `var`       | Valid                                               |
+  | `fun`    | `fun`       | Invalid                                             |
+  | `fun`    | `let`       | Invalid                                             |
+  | `fun`    | `struct`    | Invalid                                             |
+  | `fun`    | `var`       | Invalid                                             |
+  | `let`    | `let`       | Invalid                                             |
+  | `let`    | `var`       | Invalid                                             |
+  | `let`    | `fun`       | Invalid                                             |
+  | `let`    | `struct`    | Invalid                                             |
+  | `struct` | `let`       | Invalid                                             |
+  | `struct` | `var`       | Invalid                                             |
+  | `struct` | `fun`       | Invalid                                             |
+  | `struct` | `struct`    | Invalid                                             |
 
 - [ ] [String interpolation](https://github.com/kirbylang/kirbylang/issues/15)
 - [ ] [`continue` keyword](https://github.com/kirbylang/kirbylang/issues/13)
