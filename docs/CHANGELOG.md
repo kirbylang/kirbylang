@@ -1,5 +1,25 @@
 # Change Log
 
+## Future State
+
+- List comprehensions
+- Modules
+- Tooling
+  - Linter
+  - Formatter
+  - Test Runner
+- Tuples
+- Number types
+  - `u#` (e.g. `123u8`), `i#`, `f#`, `number`
+- [String interpolation](https://github.com/kirbylang/kirbylang/issues/15)
+- [`continue` keyword](https://github.com/kirbylang/kirbylang/issues/13)
+- Lambda body expressions `var sum = fun (a, b) a + b;`
+- Native Functions
+  - [ ] `print`, `println`, `eprint`, `eprintln`
+  - [ ] `arrSort(array, fn)`
+  - [ ] `arrMap(array, fn)`
+  - [ ] `arrJoinToString(array, separator)`
+
 ## Next: 0.4.0
 
 - Decouple compiler, GC, and VM
@@ -29,16 +49,6 @@
   | `struct` | `var`       | Invalid                                             |
   | `struct` | `fun`       | Invalid                                             |
   | `struct` | `struct`    | Invalid                                             |
-
-- [ ] [String interpolation](https://github.com/kirbylang/kirbylang/issues/15)
-- [ ] [`continue` keyword](https://github.com/kirbylang/kirbylang/issues/13)
-- Lambdas
-  - [ ] Lambda body expressions `var sum = fun (a, b) a + b;`
-- Native Functions
-  - [ ] `print`, `println`, `eprint`, `eprintln`
-  - [ ] `arrSort(array, fn)`
-  - [ ] `arrMap(array, fn)`
-  - [ ] `arrJoinToString(array, separator)`
 
 ## 0.3.0
 
