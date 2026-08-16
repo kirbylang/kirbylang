@@ -6,6 +6,6 @@ impl Greeter {
     }
 }
 
-var greeter = Greeter();
+var greeter = Greeter {};
 
 print typeof(greeter.greet);

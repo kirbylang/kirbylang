@@ -11,7 +11,7 @@
 0011    | OP_METHOD           3 'greet'
 0013    7 OP_POP
 0014    9 OP_GET_GLOBAL       6 'Greeter'
-0016    | OP_CALL             0
+0016    | OP_STRUCT_INIT      0
 0018    | OP_DEFINE_GLOBAL    5 'greeter'
 0020   11 OP_GET_GLOBAL       8 'greeter'
 0022    | OP_GET_PROPERTY     9 'greet'

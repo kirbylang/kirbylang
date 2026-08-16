@@ -11,10 +11,10 @@
 0011    | OP_GET_GLOBAL       3 'StructB'
 0013    | OP_POP
 0014    4 OP_GET_GLOBAL       5 'StructA'
-0016    | OP_CALL             0
+0016    | OP_STRUCT_INIT      0
 0018    | OP_DEFINE_GLOBAL    4 'instanceA'
 0020    5 OP_GET_GLOBAL       7 'StructB'
-0022    | OP_CALL             0
+0022    | OP_STRUCT_INIT      0
 0024    | OP_DEFINE_GLOBAL    6 'instanceB'
 0026    7 OP_GET_GLOBAL       8 'instanceOf'
 0028    | OP_GET_GLOBAL       9 'instanceA'

@@ -175,17 +175,6 @@ static bool call(ObjClosure *closure, int argCount) {
 static bool callValue(Value callee, int argCount) {
   if (IS_OBJ(callee)) {
     switch (OBJ_TYPE(callee)) {
-    case OBJ_STRUCT: {
-      if (argCount != 0) {
-        runtimeError(&vm, "Expected 0 arguments but got %d.", argCount);
-        return false;
-      }
-
-      ObjStruct *struct_ = AS_STRUCT(callee);
-      vm.stackTop[-argCount - 1] = OBJ_VAL(newInstance(vm.gc, struct_));
-
-      return true;
-    }
     case OBJ_BOUND_METHOD: {
       ObjBoundMethod *bound = AS_BOUND_METHOD(callee);
       vm.stackTop[-argCount - 1] = bound->receiver;

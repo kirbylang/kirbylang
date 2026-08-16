@@ -1,8 +1,8 @@
 struct StructA {}
 struct StructB {}
 
-var instanceA = StructA();
-var instanceB = StructB();
+var instanceA = StructA {};
+var instanceB = StructB {};
 
 print instanceOf(instanceA, StructA);
 print instanceOf(instanceB, StructB);

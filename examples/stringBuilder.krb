@@ -1,11 +1,11 @@
 #!/usr/bin/env krb -f
 
 struct StringBuilder {
-    var string = "";
+    var string;
 }
 
 impl StringBuilder {
-    pub fun new() = StringBuilder {};
+    pub fun new() = StringBuilder { string: "" };
 
     pub fun new_with_init(init) =
         StringBuilder { string: init };
