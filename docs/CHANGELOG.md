@@ -8,7 +8,7 @@
     - New token: `TOKEN_PUB`
     - New operand for `OP_FIELD`: `flag` where `0` is false, `1` is true
   - Hoist structs during compilation
-  - [ ] Deprecate the call syntax e.g. `Point()`
+  - Deprecate the call syntax e.g. `Point()`
 - Refine shadow binding rules
 
   | Binding  | Shadowed By | Result                                              |

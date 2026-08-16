@@ -6,7 +6,7 @@ impl Greeter {
     }
 }
 
-var greeter = Greeter();
+var greeter = Greeter {};
 
 var greet = greeter.greet;
 

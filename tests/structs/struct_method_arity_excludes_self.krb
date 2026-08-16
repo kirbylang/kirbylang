@@ -6,6 +6,6 @@ impl Greeter {
     }
 }
 
-var greeter = Greeter();
+var greeter = Greeter {};
 
 greeter.greet("World", "Extra");

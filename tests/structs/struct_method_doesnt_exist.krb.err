@@ -7,7 +7,7 @@
 0004    | OP_GET_GLOBAL       1 'Greeter'
 0006    | OP_POP
 0007    3 OP_GET_GLOBAL       3 'Greeter'
-0009    | OP_CALL             0
+0009    | OP_STRUCT_INIT      0
 0011    | OP_DEFINE_GLOBAL    2 'greeter'
 0013    5 OP_GET_GLOBAL       4 'greeter'
 0015    | OP_CONSTANT         6 'World'
