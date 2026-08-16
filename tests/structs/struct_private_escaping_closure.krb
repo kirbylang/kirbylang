@@ -1,5 +1,5 @@
 struct Counter {
-    var count = 7;
+    pub var count;
 }
 
 impl Counter {
@@ -11,6 +11,6 @@ impl Counter {
     }
 }
 
-var read = Counter {}.reader();
+var read = Counter { count: 7 }.reader();
 
 print read();

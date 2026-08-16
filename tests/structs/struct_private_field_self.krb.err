@@ -5,29 +5,31 @@
 0000    1 OP_STRUCT           0 'Account'
 0002    | OP_DEFINE_GLOBAL    0 'Account'
 0004    | OP_GET_GLOBAL       1 'Account'
-0006    2 OP_CONSTANT         3 '100.000000'
-0008    | OP_FIELD            2 'balance' private
-0011    3 OP_POP
-0012    5 OP_GET_GLOBAL       4 'Account'
-0014    6 OP_CLOSURE          6 <fn new>
-0016    | OP_METHOD           5 'new'
-0018   11 OP_CLOSURE          8 <fn deposit>
-0020    | OP_METHOD           7 'deposit'
-0022   13 OP_CLOSURE         10 <fn balance>
-0024    | OP_METHOD           9 'balance'
-0026   14 OP_POP
-0027   16 OP_GET_GLOBAL      11 'Account'
-0029    | OP_INVOKE        (0 args)   12 'new'
-0032    | OP_CONSTANT        14 '50.000000'
-0034    | OP_INVOKE        (1 args)   13 'deposit'
-0037    | OP_INVOKE        (0 args)   15 'balance'
-0040    | OP_PRINT
-0041   17 OP_NIL
-0042    | OP_RETURN
+0006    2 OP_NIL
+0007    | OP_FIELD            2 'balance' private
+0010    3 OP_POP
+0011    5 OP_GET_GLOBAL       3 'Account'
+0013    6 OP_CLOSURE          5 <fn new>
+0015    | OP_METHOD           4 'new'
+0017   11 OP_CLOSURE          7 <fn deposit>
+0019    | OP_METHOD           6 'deposit'
+0021   13 OP_CLOSURE          9 <fn balance>
+0023    | OP_METHOD           8 'balance'
+0025   14 OP_POP
+0026   16 OP_GET_GLOBAL      10 'Account'
+0028    | OP_INVOKE        (0 args)   11 'new'
+0031    | OP_CONSTANT        13 '50.000000'
+0033    | OP_INVOKE        (1 args)   12 'deposit'
+0036    | OP_INVOKE        (0 args)   14 'balance'
+0039    | OP_PRINT
+0040   17 OP_NIL
+0041    | OP_RETURN
 == new ==
 0000    6 OP_GET_GLOBAL       0 'Account'
-0002    | OP_STRUCT_INIT      0
-0004    | OP_RETURN
+0002    | OP_CONSTANT         1 'balance'
+0004    | OP_CONSTANT         2 '100.000000'
+0006    | OP_STRUCT_INIT      1
+0008    | OP_RETURN
 == deposit ==
 0000    9 OP_GET_LOCAL        0
 0002    | OP_GET_LOCAL        0

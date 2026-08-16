@@ -1,8 +1,8 @@
 struct Point {
-    pub var x = 1;
+    pub var x;
 }
 
-var p = Point {};
+var p = Point { x: 1 };
 
 p.x = 9;
 

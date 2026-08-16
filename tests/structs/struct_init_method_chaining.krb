@@ -1,5 +1,5 @@
 struct StringBuilder {
-    pub var string = "";
+    pub var string;
 }
 
 impl StringBuilder {

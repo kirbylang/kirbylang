@@ -5,20 +5,22 @@
 0000    1 OP_STRUCT           0 'Point'
 0002    | OP_DEFINE_GLOBAL    0 'Point'
 0004    | OP_GET_GLOBAL       1 'Point'
-0006    2 OP_CONSTANT         3 '0.000000'
-0008    | OP_FIELD            2 'x' public
-0011    3 OP_POP
-0012    5 OP_GET_GLOBAL       4 'Point'
-0014    6 OP_CLOSURE          6 <fn origin>
-0016    | OP_METHOD           5 'origin'
-0018    7 OP_POP
-0019    9 OP_GET_GLOBAL       7 'Point'
-0021    | OP_INVOKE        (0 args)    8 'origin'
-0024    | OP_GET_PROPERTY     9 'x'
-0026    | OP_PRINT
-0027   10 OP_NIL
-0028    | OP_RETURN
+0006    2 OP_NIL
+0007    | OP_FIELD            2 'x' public
+0010    3 OP_POP
+0011    5 OP_GET_GLOBAL       3 'Point'
+0013    6 OP_CLOSURE          5 <fn origin>
+0015    | OP_METHOD           4 'origin'
+0017    7 OP_POP
+0018    9 OP_GET_GLOBAL       6 'Point'
+0020    | OP_INVOKE        (0 args)    7 'origin'
+0023    | OP_GET_PROPERTY     8 'x'
+0025    | OP_PRINT
+0026   10 OP_NIL
+0027    | OP_RETURN
 == origin ==
 0000    6 OP_GET_GLOBAL       0 'Point'
-0002    | OP_STRUCT_INIT      0
-0004    | OP_RETURN
+0002    | OP_CONSTANT         1 'x'
+0004    | OP_CONSTANT         2 '0.000000'
+0006    | OP_STRUCT_INIT      1
+0008    | OP_RETURN

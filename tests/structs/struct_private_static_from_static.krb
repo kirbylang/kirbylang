@@ -1,5 +1,5 @@
 struct Point {
-    var x = 0;
+    var x;
 }
 
 impl Point {

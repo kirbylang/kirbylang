@@ -1,7 +1,9 @@
 struct Holder {
-    pub var callback = fun () { "called" };
+    pub var callback;
 }
 
-var h = Holder {};
+var h = Holder {
+    callback: fun () { "called" }
+};
 
 print h.callback();

@@ -1,6 +1,6 @@
 // With no method to fall through to, the private field still reports.
 struct Counter {
-    var count = 5;
+    var count;
 }
 
 print Counter {}.count();

@@ -92,10 +92,6 @@ static void blackenObject(GC *gc, Obj *object) {
     markTable(gc, &struct_->methods);
     markTable(gc, &struct_->fields);
 
-    for (int i = 0; i < struct_->fieldCount; i++) {
-      markValue(gc, struct_->fieldDefaults[i]);
-    }
-
     break;
   }
   case OBJ_INSTANCE: {

@@ -1,7 +1,3 @@
 struct Struct {
     pub var value = "Hello World";
 }
-
-var instance = Struct {};
-
-print instance.value;

@@ -5,31 +5,33 @@
 0000    1 OP_STRUCT           0 'Counter'
 0002    | OP_DEFINE_GLOBAL    0 'Counter'
 0004    | OP_GET_GLOBAL       1 'Counter'
-0006    2 OP_CONSTANT         3 '0.000000'
-0008    | OP_FIELD            2 'count' private
-0011    3 OP_POP
-0012    5 OP_GET_GLOBAL       4 'Counter'
-0014    8 OP_CLOSURE          6 <fn increment>
-0016    | OP_METHOD           5 'increment'
-0018    9 OP_POP
-0019   11 OP_GET_GLOBAL       7 'Counter'
-0021   14 OP_CLOSURE          9 <fn get>
-0023    | OP_METHOD           8 'get'
-0025   15 OP_POP
-0026   17 OP_GET_GLOBAL      11 'Counter'
-0028    | OP_CALL             0
-0030    | OP_DEFINE_GLOBAL   10 'counter'
-0032   19 OP_GET_GLOBAL      12 'counter'
-0034    | OP_INVOKE        (0 args)   13 'increment'
-0037    | OP_POP
-0038   20 OP_GET_GLOBAL      14 'counter'
-0040    | OP_INVOKE        (0 args)   15 'increment'
-0043    | OP_POP
-0044   22 OP_GET_GLOBAL      16 'counter'
-0046    | OP_INVOKE        (0 args)   17 'get'
-0049    | OP_PRINT
-0050   23 OP_NIL
-0051    | OP_RETURN
+0006    2 OP_NIL
+0007    | OP_FIELD            2 'count' public
+0010    3 OP_POP
+0011    5 OP_GET_GLOBAL       3 'Counter'
+0013    8 OP_CLOSURE          5 <fn increment>
+0015    | OP_METHOD           4 'increment'
+0017    9 OP_POP
+0018   11 OP_GET_GLOBAL       6 'Counter'
+0020   14 OP_CLOSURE          8 <fn get>
+0022    | OP_METHOD           7 'get'
+0024   15 OP_POP
+0025   17 OP_GET_GLOBAL      10 'Counter'
+0027    | OP_CONSTANT        11 'count'
+0029    | OP_CONSTANT        12 '0.000000'
+0031    | OP_STRUCT_INIT      1
+0033    | OP_DEFINE_GLOBAL    9 'counter'
+0035   19 OP_GET_GLOBAL      13 'counter'
+0037    | OP_INVOKE        (0 args)   14 'increment'
+0040    | OP_POP
+0041   20 OP_GET_GLOBAL      15 'counter'
+0043    | OP_INVOKE        (0 args)   16 'increment'
+0046    | OP_POP
+0047   22 OP_GET_GLOBAL      17 'counter'
+0049    | OP_INVOKE        (0 args)   18 'get'
+0052    | OP_PRINT
+0053   23 OP_NIL
+0054    | OP_RETURN
 == increment ==
 0000    7 OP_GET_LOCAL        0
 0002    | OP_GET_LOCAL        0

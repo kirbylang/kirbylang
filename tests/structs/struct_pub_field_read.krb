@@ -1,9 +1,12 @@
 struct Point {
-    pub var x = 1;
-    pub var y = 2;
+    pub var x;
+    pub var y;
 }
 
-var p = Point {};
+var p = Point {
+    x: 1,
+    y: 2,
+};
 
 print p.x;
 print p.y;

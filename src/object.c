@@ -41,7 +41,6 @@ ObjStruct *newStruct(GC *gc, ObjString *name) {
   struct_->fieldCount = 0;
 
   for (int i = 0; i < 256; i++) {
-    struct_->fieldDefaults[i] = NIL_VAL;
     struct_->fieldPublic[i] = false;
   }
 
@@ -103,7 +102,7 @@ ObjInstance *newInstance(GC *gc, ObjStruct *struct_) {
     instance->fields = ALLOCATE(gc, Value, struct_->fieldCount);
 
     for (int i = 0; i < struct_->fieldCount; i++) {
-      instance->fields[i] = struct_->fieldDefaults[i];
+      instance->fields[i] = NIL_VAL;
     }
   }
 

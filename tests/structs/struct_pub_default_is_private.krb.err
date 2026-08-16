@@ -5,21 +5,35 @@
 0000    2 OP_STRUCT           0 'Config'
 0002    | OP_DEFINE_GLOBAL    0 'Config'
 0004    | OP_GET_GLOBAL       1 'Config'
-0006    3 OP_CONSTANT         3 'visible'
-0008    | OP_FIELD            2 'label' public
-0011    4 OP_CONSTANT         5 'hidden'
-0013    | OP_FIELD            4 'token' private
-0016    5 OP_POP
-0017    7 OP_GET_GLOBAL       7 'Config'
-0019    | OP_STRUCT_INIT      0
-0021    | OP_DEFINE_GLOBAL    6 'c'
-0023    9 OP_GET_GLOBAL       8 'c'
-0025    | OP_GET_PROPERTY     9 'label'
-0027    | OP_PRINT
-0028   10 OP_GET_GLOBAL      10 'c'
-0030    | OP_GET_PROPERTY    11 'token'
-0032    | OP_PRINT
-0033   11 OP_NIL
-0034    | OP_RETURN
+0006    3 OP_NIL
+0007    | OP_FIELD            2 'label' public
+0010    4 OP_NIL
+0011    | OP_FIELD            3 'token' private
+0014    5 OP_POP
+0015    7 OP_GET_GLOBAL       4 'Config'
+0017   11 OP_CLOSURE          6 <fn new>
+0019    | OP_METHOD           5 'new'
+0021   12 OP_POP
+0022   14 OP_GET_GLOBAL       8 'Config'
+0024    | OP_CONSTANT        10 'visible'
+0026    | OP_CONSTANT        11 'hidden'
+0028    | OP_INVOKE        (2 args)    9 'new'
+0031    | OP_DEFINE_GLOBAL    7 'c'
+0033   16 OP_GET_GLOBAL      12 'c'
+0035    | OP_GET_PROPERTY    13 'label'
+0037    | OP_PRINT
+0038   17 OP_GET_GLOBAL      14 'c'
+0040    | OP_GET_PROPERTY    15 'token'
+0042    | OP_PRINT
+0043   18 OP_NIL
+0044    | OP_RETURN
+== new ==
+0000    8 OP_GET_GLOBAL       0 'Config'
+0002    9 OP_CONSTANT         1 'label'
+0004    | OP_GET_LOCAL        1
+0006   10 OP_CONSTANT         2 'token'
+0008    | OP_GET_LOCAL        2
+0010   11 OP_STRUCT_INIT      2
+0012    | OP_RETURN
 Field 'token' is private to 'Config'.
-[line 10] in script
+[line 17] in script

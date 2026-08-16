@@ -1,10 +1,17 @@
 // The `pub` on `label` must not leak to the field declared after it.
 struct Config {
-    pub var label = "visible";
-    var token = "hidden";
+    pub var label;
+    var token;
 }
 
-var c = Config {};
+impl Config {
+    pub fun new(label, token) = Config {
+        label: label,
+        token: token,
+    };
+}
+
+var c = Config.new("visible", "hidden");
 
 print c.label;
 print c.token;
