@@ -1,0 +1,32 @@
+== <script> ==
+0000    1 OP_NIL
+0001    | OP_RETURN
+== <script> ==
+0000   12 OP_CLOSURE          1 <fn test>
+0002    | OP_DEFINE_GLOBAL    0 'test'
+0004    1 OP_GET_GLOBAL       2 'test'
+0006    | OP_TRUE
+0007    | OP_CALL             1
+0009    | OP_POP
+0010    2 OP_GET_GLOBAL       3 'test'
+0012    | OP_FALSE
+0013    | OP_CALL             1
+0015    | OP_POP
+0016   13 OP_NIL
+0017    | OP_RETURN
+== test ==
+0000    6 OP_CONSTANT         0 'before'
+0002    | OP_PRINT
+0003    8 OP_GET_LOCAL        1
+0005    | OP_JUMP_IF_FALSE    5 -> 14
+0008    | OP_POP
+0009    | OP_CONSTANT         1 'Hello'
+0011    | OP_JUMP            11 -> 17
+0014    | OP_POP
+0015    | OP_CONSTANT         2 'World'
+0017    9 OP_CLOSE_BLOCK_EXPR    0
+0019   11 OP_GET_LOCAL        2
+0021    | OP_PRINT
+0022   12 OP_NIL
+0023    | OP_CLOSE_BLOCK_EXPR    1
+0025    | OP_RETURN

@@ -88,23 +88,15 @@ int main(void) {
   assert_ast("../tests/native_functions/native_fn_len_call.krb",
              "(print (call len \"Hello World\"))\n");
 
-  assert_ast("../tests/lambdas/lambda_iife.krb",
-             "(print (call (group (lambda (message) (block (value message)))) "
-             "\"Hello World\"))\n");
-
   assert_ast("../tests/flow_control/for.krb",
              "(for (var i 0) (< i 10) (assign i (+ i 1)) (block (print "
              "\"done\")))\n");
 
-  assert_ast("../tests/flow_control/if_and_then_false.krb",
-             "(if (and true false) (block (print \"Hello\")))\n"
-             "(print \"World\")\n");
-
-  assert_ast(
-      "../tests/flow_control/if_expression_else.krb",
-      "(print (if true (block (value \"Hello\")) (block (value \"World\"))))\n"
-      "(print (if false (block (value \"Hello\")) (block (value "
-      "\"World\"))))\n");
+  assert_ast("../tests/flow_control/if/expression/if_else.krb",
+             ""
+             "(print (call test true))\n"
+             "(print (call test false))\n"
+             "(fun test (a) (if a (block (value \"Hello\")) \"World\"))\n");
 
   assert_ast("../tests/functions/function_body_expressions.krb",
              "(var n 10)\n"

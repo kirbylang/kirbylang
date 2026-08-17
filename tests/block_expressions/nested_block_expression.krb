@@ -1,0 +1,9 @@
+var x = {
+  {
+    print "nested";
+  };
+
+  5
+};
+
+print x;

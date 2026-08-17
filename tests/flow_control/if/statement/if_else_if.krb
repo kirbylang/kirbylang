@@ -1,0 +1,13 @@
+test(true, false);
+test(false, true);
+test(false, false);
+
+fun test (a, b) {
+    if (a) {
+        print "Hello";
+    } else if (b) {
+        print "World";
+    } else {
+        print "Goodbye";
+    }
+}

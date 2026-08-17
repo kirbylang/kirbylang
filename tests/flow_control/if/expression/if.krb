@@ -1,0 +1,5 @@
+print test(true);
+print test(false);
+
+fun test(value) =
+    if (value) "Hello";

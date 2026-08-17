@@ -1,0 +1,5 @@
+print test(true);
+print test(false);
+
+fun test (a) =
+    if (a) { "Hello" } else "World";
