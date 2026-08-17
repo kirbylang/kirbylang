@@ -1,5 +1,0 @@
-if (true and true) {
-    print "Hello";
-}
-
-print "World";

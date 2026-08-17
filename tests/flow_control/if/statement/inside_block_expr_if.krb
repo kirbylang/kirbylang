@@ -1,0 +1,15 @@
+test(true);
+test(false);
+
+fun test (value) {
+  var x = {
+    if (true) {
+      print "Hello";
+    }
+
+    "World"
+  };
+
+  print x;
+}
+

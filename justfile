@@ -71,7 +71,7 @@ test-update: build
 unit: build-tests
     ./scripts/unit.sh
 
-verify:
+verify: build build-tests
     ./scripts/verify.sh
 
 # Build the docker image

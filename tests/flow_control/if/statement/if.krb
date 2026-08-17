@@ -1,0 +1,10 @@
+test(true);
+test(false);
+
+fun test(value) {
+    if (value) {
+        print "Hello";
+    }
+
+    print "World";
+}

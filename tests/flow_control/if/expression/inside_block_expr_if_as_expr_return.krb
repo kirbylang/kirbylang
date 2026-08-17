@@ -1,0 +1,12 @@
+test(true);
+test(false);
+
+fun test (a) = {
+  var x = {
+    print "before";
+
+    if (a) "Hello" else "World"
+  };
+
+  print x;
+};

@@ -1,0 +1,6 @@
+print test(true, false);
+print test(false, true);
+print test(false, false);
+
+fun test (a, b) =
+    if (a) "Hello" else if (b) "World";

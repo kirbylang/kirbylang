@@ -83,6 +83,11 @@ static bool check(Parser *parser, TokenType type) {
   return parser->current.type == type;
 }
 
+/**
+ * Checks if the current token matches the given type.
+ *
+ * Advances to the next token if it does match
+ */
 static bool match(Parser *parser, TokenType type) {
   if (!check(parser, type))
     return false;
@@ -92,6 +97,11 @@ static bool match(Parser *parser, TokenType type) {
   return true;
 }
 
+/**
+ * Consumes the current token by type
+ *
+ * Throws an error if the current token type doesn't match
+ */
 static void consume(Parser *parser, TokenType type, const char *message) {
   if (parser->current.type == type) {
     advance(parser);
@@ -848,7 +858,15 @@ static BlockNode parseBlockExprContents(Parser *p) {
         break;
       }
 
-      consume(p, TOKEN_SEMICOLON, "Expect ';' after expression.");
+      if (p->previous.type == TOKEN_RIGHT_BRACE) {
+        // Special handling of if/block expressions and statements
+        // The semicolon becomes optional since they can be either statements
+        // or expressions
+        match(p, TOKEN_SEMICOLON);
+      } else {
+        consume(p, TOKEN_SEMICOLON, "Expect ';' after expression.");
+      }
+
       node = astAlloc(NODE_EXPR_STMT, line);
       node->as.exprStmt.expr = expr;
     } else {
