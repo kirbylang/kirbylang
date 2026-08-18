@@ -222,5 +222,19 @@ int main(void) {
              "(print (call apply (lambda (x) (block (value (+ x 1)))) "
              "5))\n");
 
+  assert_ast("../tests/types/generic_struct.krb",
+             "(struct Box[T] (pub-field value : T))\n"
+             "(impl Box[T] (pub-static new) (pub-method get))\n"
+             "(var b (call (get Box new) 5))\n"
+             "(print (call (get b get)))\n");
+
+  assert_ast("../tests/types/generic_function.krb",
+             "(fun sum[T] (a : T b : T) : T (+ a b))\n"
+             "(print (call sum 1 2))\n");
+
+  assert_ast("../tests/types/generic_function_multi_param.krb",
+             "(fun first[T U] (a : T b : U) : T a)\n"
+             "(print (call first 1 \"two\"))\n");
+
   return 0;
 }

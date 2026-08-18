@@ -343,6 +343,17 @@ static void printNode(StrBuf *sb, AstNode *node) {
 
     if (!node->as.function.isLambda) {
       sbAppendToken(sb, node->as.function.name);
+
+      if (node->as.function.genericParamCount > 0) {
+        sb_append(sb, "[");
+        for (int i = 0; i < node->as.function.genericParamCount; i++) {
+          if (i > 0)
+            sb_append(sb, " ");
+          sbAppendToken(sb, node->as.function.genericParams[i]);
+        }
+        sb_append(sb, "]");
+      }
+
       sb_append(sb, " (");
     }
 
@@ -386,6 +397,16 @@ static void printNode(StrBuf *sb, AstNode *node) {
     sb_append(sb, "(struct ");
     sbAppendToken(sb, node->as.struct_.name);
 
+    if (node->as.struct_.genericParamCount > 0) {
+      sb_append(sb, "[");
+      for (int i = 0; i < node->as.struct_.genericParamCount; i++) {
+        if (i > 0)
+          sb_append(sb, " ");
+        sbAppendToken(sb, node->as.struct_.genericParams[i]);
+      }
+      sb_append(sb, "]");
+    }
+
     for (int i = 0; i < node->as.struct_.fieldCount; i++) {
       VarDeclNode *field = &node->as.struct_.fields[i];
 
@@ -428,6 +449,16 @@ static void printNode(StrBuf *sb, AstNode *node) {
   case NODE_IMPL:
     sb_append(sb, "(impl ");
     sbAppendToken(sb, node->as.impl.name);
+
+    if (node->as.impl.genericParamCount > 0) {
+      sb_append(sb, "[");
+      for (int i = 0; i < node->as.impl.genericParamCount; i++) {
+        if (i > 0)
+          sb_append(sb, " ");
+        sbAppendToken(sb, node->as.impl.genericParams[i]);
+      }
+      sb_append(sb, "]");
+    }
 
     for (int i = 0; i < node->as.impl.methodCount; i++) {
       FunctionNode *method = node->as.impl.methods[i];

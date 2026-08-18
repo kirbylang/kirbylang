@@ -266,10 +266,23 @@ typedef struct {
   bool hasSelf;
   bool isLambda;
   bool isPublic;
+  /**
+   * arena-allocated array of bare generic parameter name tokens, e.g. the
+   * `T` in `fun sum[T](a: T, b: T): T`. NULL/0 for a non-generic function.
+   * Never set for lambdas -- there's no name slot to attach `[T]` to.
+   */
+  Token *genericParams;
+  int genericParamCount;
 } FunctionNode;
 
 typedef struct {
   Token name;
+  /**
+   * arena-allocated array of bare generic parameter name tokens, e.g. the
+   * `T` in `struct Box[T]`. NULL/0 for a non-generic struct.
+   */
+  Token *genericParams;
+  int genericParamCount;
   VarDeclNode *fields;
   int fieldCount;
   int endLine;
@@ -289,6 +302,14 @@ typedef struct {
 
 typedef struct {
   Token name;
+  /**
+   * arena-allocated array of bare generic parameter name tokens, e.g. the
+   * `T` in `impl Box[T]`. Written independently of the struct's own
+   * declared parameters for now (Phase 1 is grammar only -- nothing
+   * cross-checks these match the struct's `genericParams` yet).
+   */
+  Token *genericParams;
+  int genericParamCount;
   FunctionNode **methods;
   int methodCount;
   int endLine;

@@ -1126,6 +1126,8 @@ static AstNode *functionTail(Parser *p, Token name, int line, bool isMethod,
   node->as.function.body.value = NULL;
   node->as.function.body.endLine = line;
   node->as.function.bodyEndLine = line;
+  node->as.function.genericParams = NULL;
+  node->as.function.genericParamCount = 0;
 
   if (!isLambda && match(p, TOKEN_EQUAL)) {
     // Function body expression: `fun sum(a, b) = a + b;`. Only offered for
@@ -1148,12 +1150,50 @@ static AstNode *functionTail(Parser *p, Token name, int line, bool isMethod,
   return node;
 }
 
+/**
+ * Parse function and struct generic type param lists
+ *
+ * struct Struct[T, U] {}
+ * fun sum[T](a: T, b: T): T = a + b;
+ */
+static int parseGenericParamList(Parser *p, Token *paramBuf) {
+  int count = 0;
+
+  if (match(p, TOKEN_LEFT_BRACKET)) {
+    do {
+      if (count >= 255) {
+        error_at_current(p, "Can't have more than 255 generic parameters.");
+      }
+      consume(p, TOKEN_IDENTIFIER, "Expect generic parameter name.");
+      paramBuf[count++] = p->previous;
+    } while (match(p, TOKEN_COMMA));
+    consume(p, TOKEN_RIGHT_BRACKET, "Expect ']' after generic parameters.");
+  }
+  return count;
+}
+
 static AstNode *functionDeclaration(Parser *p, bool isMethod) {
   if (!isMethod)
     consume(p, TOKEN_IDENTIFIER, "Expect function name.");
   Token name = p->previous;
   int line = name.line;
-  return functionTail(p, name, line, isMethod, /*isLambda=*/false);
+
+  Token genericParamBuf[256];
+  int genericParamCount = parseGenericParamList(p, genericParamBuf);
+
+  AstNode *node = functionTail(p, name, line, isMethod, /*isLambda=*/false);
+
+  if (genericParamCount > 0) {
+    Token *genericParams =
+        (Token *)astAllocRaw(genericParamCount * sizeof(Token));
+    memcpy(genericParams, genericParamBuf, genericParamCount * sizeof(Token));
+    node->as.function.genericParams = genericParams;
+  } else {
+    node->as.function.genericParams = NULL;
+  }
+  node->as.function.genericParamCount = genericParamCount;
+
+  return node;
 }
 
 // A lambda expression: `fun (a, b) { a + b }` or `fun (a, b) = a + b;`,
@@ -1171,6 +1211,9 @@ static AstNode *structDeclaration(Parser *p) {
   consume(p, TOKEN_IDENTIFIER, "Expect struct name.");
   Token name = p->previous;
   int line = name.line;
+
+  Token genericParamBuf[256];
+  int genericParamCount = parseGenericParamList(p, genericParamBuf);
 
   consume(p, TOKEN_LEFT_BRACE, "Expect '{' before struct body.");
 
@@ -1243,6 +1286,17 @@ static AstNode *structDeclaration(Parser *p) {
 
   AstNode *node = astAlloc(NODE_STRUCT, line);
   node->as.struct_.name = name;
+
+  if (genericParamCount > 0) {
+    Token *genericParams =
+        (Token *)astAllocRaw(genericParamCount * sizeof(Token));
+    memcpy(genericParams, genericParamBuf, genericParamCount * sizeof(Token));
+    node->as.struct_.genericParams = genericParams;
+  } else {
+    node->as.struct_.genericParams = NULL;
+  }
+  node->as.struct_.genericParamCount = genericParamCount;
+
   node->as.struct_.fields = fields;
   node->as.struct_.fieldCount = fieldCount;
   node->as.struct_.endLine = endLine;
@@ -1253,6 +1307,9 @@ static AstNode *implDeclaration(Parser *p) {
   consume(p, TOKEN_IDENTIFIER, "Expect struct name after 'impl'.");
   Token name = p->previous;
   int line = name.line;
+
+  Token genericParamBuf[256];
+  int genericParamCount = parseGenericParamList(p, genericParamBuf);
 
   consume(p, TOKEN_LEFT_BRACE, "Expect '{' before impl body.");
 
@@ -1305,6 +1362,17 @@ static AstNode *implDeclaration(Parser *p) {
 
   AstNode *node = astAlloc(NODE_IMPL, line);
   node->as.impl.name = name;
+
+  if (genericParamCount > 0) {
+    Token *genericParams =
+        (Token *)astAllocRaw(genericParamCount * sizeof(Token));
+    memcpy(genericParams, genericParamBuf, genericParamCount * sizeof(Token));
+    node->as.impl.genericParams = genericParams;
+  } else {
+    node->as.impl.genericParams = NULL;
+  }
+  node->as.impl.genericParamCount = genericParamCount;
+
   node->as.impl.methods = methods;
   node->as.impl.methodCount = methodCount;
   node->as.impl.endLine = endLine;
@@ -1321,18 +1389,7 @@ static AstNode *typeAliasDeclaration(Parser *p) {
   int line = name.line;
 
   Token paramBuf[256];
-  int paramCount = 0;
-
-  if (match(p, TOKEN_LEFT_BRACKET)) {
-    do {
-      if (paramCount >= 255) {
-        error_at_current(p, "Can't have more than 255 generic parameters.");
-      }
-      consume(p, TOKEN_IDENTIFIER, "Expect generic parameter name.");
-      paramBuf[paramCount++] = p->previous;
-    } while (match(p, TOKEN_COMMA));
-    consume(p, TOKEN_RIGHT_BRACKET, "Expect ']' after generic parameters.");
-  }
+  int paramCount = parseGenericParamList(p, paramBuf);
 
   consume(p, TOKEN_EQUAL, "Expect '=' after type alias name.");
   AstNode *target = parseType(p);
