@@ -83,6 +83,8 @@ const char *tokenTypeToString(TokenType type) {
     return "TOKEN_SELF";
   case TOKEN_TRUE:
     return "TOKEN_TRUE";
+  case TOKEN_TYPE:
+    return "TOKEN_TYPE";
   case TOKEN_VAR:
     return "TOKEN_VAR";
   case TOKEN_LET:

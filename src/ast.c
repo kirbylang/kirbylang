@@ -481,6 +481,25 @@ static void printNode(StrBuf *sb, AstNode *node) {
       sb_append(sb, "]");
     }
     break;
+
+  case NODE_TYPE_ALIAS:
+    sb_append(sb, "(type ");
+    sbAppendToken(sb, node->as.typeAlias.name);
+
+    if (node->as.typeAlias.genericParamCount > 0) {
+      sb_append(sb, "[");
+      for (int i = 0; i < node->as.typeAlias.genericParamCount; i++) {
+        if (i > 0)
+          sb_append(sb, " ");
+        sbAppendToken(sb, node->as.typeAlias.genericParams[i]);
+      }
+      sb_append(sb, "]");
+    }
+
+    sb_append(sb, " ");
+    printNode(sb, node->as.typeAlias.target);
+    sb_append(sb, ")");
+    break;
   }
 }
 

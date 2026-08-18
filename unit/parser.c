@@ -200,5 +200,9 @@ int main(void) {
              "(fun identity (x : String) : List[String] x)\n"
              "(print (group (call identity (array \"Hello\" \"World\"))))\n");
 
+  assert_ast("../tests/types/type_alias_simple.krb", "(type Wrapper f64)\n");
+
+  assert_ast("../tests/types/type_alias_generic.krb", "(type Wrapper[T] T)\n");
+
   return 0;
 }

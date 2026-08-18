@@ -38,6 +38,7 @@ typedef enum {
   NODE_BREAK,
   NODE_CONTINUE,
   NODE_TYPE,
+  NODE_TYPE_ALIAS,
   // Sentinel
   NODE_COUNT
 } NodeKind;
@@ -154,6 +155,21 @@ typedef struct {
   AstNode **genericArgs;
   int genericArgCount;
 } TypeNode;
+
+typedef struct {
+  Token name;
+  /**
+   * arena-allocated array of bare generic parameter name tokens, e.g. the
+   * `T` in `type Wrapper[T] = T;`. Distinct from TypeNode.genericArgs --
+   * these are parameter *declarations* (bare names), not type arguments.
+   */
+  Token *genericParams;
+  int genericParamCount;
+  /**
+   * The type expression on the right of `=`.
+   */
+  AstNode *target;
+} TypeAliasNode;
 
 typedef struct {
   Token name;
@@ -318,6 +334,7 @@ struct AstNode {
     BreakNode break_;
     ContinueNode continue_;
     TypeNode type_;
+    TypeAliasNode typeAlias;
   } as;
 };
 

@@ -1274,6 +1274,47 @@ static AstNode *implDeclaration(Parser *p) {
   return node;
 }
 
+// Parses `type Name[T, U, ...] = Type;`. The generic parameter list (bare
+// names) is a different grammar position from `Type[T]` generic
+// *arguments* -- parseType() handles referencing an already-known type;
+// here we're declaring new parameter names instead.
+static AstNode *typeAliasDeclaration(Parser *p) {
+  consume(p, TOKEN_IDENTIFIER, "Expect type alias name.");
+  Token name = p->previous;
+  int line = name.line;
+
+  Token paramBuf[256];
+  int paramCount = 0;
+
+  if (match(p, TOKEN_LEFT_BRACKET)) {
+    do {
+      if (paramCount >= 255) {
+        error_at_current(p, "Can't have more than 255 generic parameters.");
+      }
+      consume(p, TOKEN_IDENTIFIER, "Expect generic parameter name.");
+      paramBuf[paramCount++] = p->previous;
+    } while (match(p, TOKEN_COMMA));
+    consume(p, TOKEN_RIGHT_BRACKET, "Expect ']' after generic parameters.");
+  }
+
+  consume(p, TOKEN_EQUAL, "Expect '=' after type alias name.");
+  AstNode *target = parseType(p);
+  consume(p, TOKEN_SEMICOLON, "Expect ';' after type alias.");
+
+  Token *genericParams = NULL;
+  if (paramCount > 0) {
+    genericParams = (Token *)astAllocRaw(paramCount * sizeof(Token));
+    memcpy(genericParams, paramBuf, paramCount * sizeof(Token));
+  }
+
+  AstNode *node = astAlloc(NODE_TYPE_ALIAS, line);
+  node->as.typeAlias.name = name;
+  node->as.typeAlias.genericParams = genericParams;
+  node->as.typeAlias.genericParamCount = paramCount;
+  node->as.typeAlias.target = target;
+  return node;
+}
+
 static AstNode *declaration(Parser *p, bool *isTail) {
   AstNode *node = NULL;
   *isTail = false;
@@ -1284,15 +1325,18 @@ static AstNode *declaration(Parser *p, bool *isTail) {
     advance(p); // 'pub', so the rest of the declaration still parses
   }
 
-  if (p->blockDepth > 0 && (check(p, TOKEN_STRUCT) || check(p, TOKEN_IMPL))) {
-    error_at_current(p, "'struct' and 'impl' are declarations and can only "
-                        "appear at the top level.");
+  if (p->blockDepth > 0 &&
+      (check(p, TOKEN_STRUCT) || check(p, TOKEN_IMPL) || check(p, TOKEN_TYPE))) {
+    error_at_current(p, "'struct', 'impl', and 'type' are declarations and "
+                        "can only appear at the top level.");
   }
 
   if (match(p, TOKEN_STRUCT)) {
     node = structDeclaration(p);
   } else if (match(p, TOKEN_IMPL)) {
     node = implDeclaration(p);
+  } else if (match(p, TOKEN_TYPE)) {
+    node = typeAliasDeclaration(p);
   } else if (match(p, TOKEN_FUN)) {
     node = functionDeclaration(p, /*isMethod=*/false);
   } else if (match(p, TOKEN_VAR)) {
