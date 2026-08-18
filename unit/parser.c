@@ -149,5 +149,19 @@ int main(void) {
              "(var x 5)\n"
              "(print x)\n");
 
+  assert_ast("../tests/types/struct_field_annotation.krb",
+             "(struct Point (pub-field x : i64) (pub-field y : i64))\n"
+             "(impl Point (pub-static new))\n"
+             "(var p (call (get Point new) 1 2))\n"
+             "(print (get p x))\n"
+             "(print (get p y))\n");
+
+  assert_ast("../tests/types/struct_field_no_annotation.krb",
+             "(struct Point (pub-field x) (pub-field y))\n"
+             "(impl Point (pub-static new))\n"
+             "(var p (call (get Point new) 1 2))\n"
+             "(print (get p x))\n"
+             "(print (get p y))\n");
+
   return 0;
 }

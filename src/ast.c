@@ -379,6 +379,11 @@ static void printNode(StrBuf *sb, AstNode *node) {
       sb_append(sb, field->isPublic ? " (pub-field " : " (field ");
       sbAppendToken(sb, field->name);
 
+      if (field->declaredType != NULL) {
+        sb_append(sb, " : ");
+        printNode(sb, field->declaredType);
+      }
+
       if (field->initializer != NULL) {
         sb_append(sb, " ");
         printNode(sb, field->initializer);

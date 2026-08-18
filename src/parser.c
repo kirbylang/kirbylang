@@ -1110,6 +1110,11 @@ static AstNode *structDeclaration(Parser *p) {
       consume(p, TOKEN_IDENTIFIER, "Expect field name.");
       Token fieldName = p->previous;
 
+      AstNode *fieldType = NULL;
+      if (match(p, TOKEN_COLON)) {
+        fieldType = parseType(p);
+      }
+
       if (match(p, TOKEN_EQUAL)) {
         parse_error(p, "Struct fields don't support default values");
       }
@@ -1118,8 +1123,7 @@ static AstNode *structDeclaration(Parser *p) {
 
       fieldBuf[fieldCount].name = fieldName;
       fieldBuf[fieldCount].initializer = NULL;
-      // Placeholder for struct field types
-      fieldBuf[fieldCount].declaredType = NULL;
+      fieldBuf[fieldCount].declaredType = fieldType;
       fieldBuf[fieldCount].isMutable = true;
       fieldBuf[fieldCount].isPublic = isPublic;
       fieldBuf[fieldCount].declEndLine = p->previous.line; // the ';'
