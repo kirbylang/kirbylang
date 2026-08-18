@@ -470,6 +470,16 @@ static void printNode(StrBuf *sb, AstNode *node) {
 
   case NODE_TYPE:
     sbAppendToken(sb, node->as.type_.name);
+
+    if (node->as.type_.genericArgCount > 0) {
+      sb_append(sb, "[");
+      for (int i = 0; i < node->as.type_.genericArgCount; i++) {
+        if (i > 0)
+          sb_append(sb, " ");
+        printNode(sb, node->as.type_.genericArgs[i]);
+      }
+      sb_append(sb, "]");
+    }
     break;
   }
 }

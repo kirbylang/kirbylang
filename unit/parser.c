@@ -141,13 +141,11 @@ int main(void) {
              "(var name : String \"Hello\")\n"
              "(print name)\n");
 
-  assert_ast("../tests/types/let_type_annotation.krb",
-             "(let count : u8 3)\n"
-             "(print count)\n");
+  assert_ast("../tests/types/let_type_annotation.krb", "(let count : u8 3)\n"
+                                                       "(print count)\n");
 
-  assert_ast("../tests/types/var_no_annotation.krb",
-             "(var x 5)\n"
-             "(print x)\n");
+  assert_ast("../tests/types/var_no_annotation.krb", "(var x 5)\n"
+                                                     "(print x)\n");
 
   assert_ast("../tests/types/struct_field_annotation.krb",
              "(struct Point (pub-field x : i64) (pub-field y : i64))\n"
@@ -183,6 +181,24 @@ int main(void) {
   assert_ast("../tests/types/function_no_annotation.krb",
              "(fun add (a b) (+ a b))\n"
              "(print (call add 1 2))\n");
+
+  assert_ast("../tests/types/generic_type_var.krb",
+             "(let value : Wrapper[f64] 123)\n"
+             "(print value)\n");
+
+  assert_ast(
+      "../tests/types/generic_type_nested.krb",
+      "(let value : List[List[i64]] (array (array 1) (array 2) (array 3)))\n"
+      "(print value)\n");
+
+  assert_ast("../tests/types/generic_type_struct.krb",
+             "(struct Box (pub-field value : Wrapper[f64]))\n"
+             "(let box (struct-init Box (field value 100)))\n"
+             "(print (get box value))\n");
+
+  assert_ast("../tests/types/generic_type_function.krb",
+             "(fun identity (x : String) : List[String] x)\n"
+             "(print (group (call identity (array \"Hello\" \"World\"))))\n");
 
   return 0;
 }

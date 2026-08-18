@@ -1,0 +1,7 @@
+struct Box {
+  pub var value: Wrapper[f64];
+}
+
+let box = Box { value: 100 };
+
+print box.value;

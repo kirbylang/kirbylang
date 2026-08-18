@@ -952,10 +952,34 @@ static AstNode *parseType(Parser *p) {
   consume(p, TOKEN_IDENTIFIER, "Expect type name.");
   Token name = p->previous;
 
-  AstNode *node = astAlloc(NODE_TYPE, name.line);
+  int line = name.line;
+
+  AstNode **genericArgs = NULL;
+  int genericArgCount = 0;
+
+  if (match(p, TOKEN_LEFT_BRACKET)) {
+    ArrayNodeData and;
+    arrayNodeDataInit(&and);
+
+    do {
+      arrayNodeDataWrite(&and, parseType(p));
+    } while (match(p, TOKEN_COMMA));
+
+    consume(p, TOKEN_RIGHT_BRACKET, "Expect ']' after generic arguments.");
+
+    genericArgCount = and.count;
+    if (and.count > 0) {
+      genericArgs = (AstNode **)astAllocRaw(and.count * sizeof(AstNode *));
+      memcpy(genericArgs, and.data, and.count * sizeof(AstNode *));
+    }
+
+    arrayNodeDataFree(&and);
+  }
+
+  AstNode *node = astAlloc(NODE_TYPE, line);
   node->as.type_.name = name;
-  node->as.type_.genericArgs = NULL;
-  node->as.type_.genericArgCount = 0;
+  node->as.type_.genericArgs = genericArgs;
+  node->as.type_.genericArgCount = genericArgCount;
   return node;
 }
 
