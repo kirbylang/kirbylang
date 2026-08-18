@@ -1,0 +1,7 @@
+var apply: fun (fun (i64) => i64, i64) => i64;
+
+fun run(f, x) = f(x);
+
+apply = run;
+
+print apply(fun (x) { x + 1 }, 5);

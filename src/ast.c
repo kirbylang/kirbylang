@@ -500,6 +500,18 @@ static void printNode(StrBuf *sb, AstNode *node) {
     printNode(sb, node->as.typeAlias.target);
     sb_append(sb, ")");
     break;
+
+  case NODE_TYPE_FUNCTION:
+    sb_append(sb, "(fun (");
+    for (int i = 0; i < node->as.typeFunction.paramCount; i++) {
+      if (i > 0)
+        sb_append(sb, " ");
+      printNode(sb, node->as.typeFunction.paramTypes[i]);
+    }
+    sb_append(sb, ") => ");
+    printNode(sb, node->as.typeFunction.returnType);
+    sb_append(sb, ")");
+    break;
   }
 }
 

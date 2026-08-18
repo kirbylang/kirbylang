@@ -5,7 +5,7 @@
 #include "../src/token.h"
 
 int main(void) {
-  assert(NumberOfDefinedTokens == 50);
+  assert(NumberOfDefinedTokens == 51);
   assert(strcmp(tokenTypeToString(TOKEN_AND), "TOKEN_AND") == 0);
   return 0;
 }

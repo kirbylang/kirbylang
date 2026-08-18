@@ -949,6 +949,43 @@ static AstNode *statement(Parser *p, bool *isTail) {
 }
 
 static AstNode *parseType(Parser *p) {
+  if (match(p, TOKEN_FUN)) {
+    int line = p->previous.line;
+    consume(p, TOKEN_LEFT_PAREN, "Expect '(' after 'fun' in function type.");
+
+    ArrayNodeData paramTypes;
+    arrayNodeDataInit(&paramTypes);
+
+    if (!check(p, TOKEN_RIGHT_PAREN)) {
+      do {
+        arrayNodeDataWrite(&paramTypes, parseType(p));
+      } while (match(p, TOKEN_COMMA));
+    }
+
+    consume(p, TOKEN_RIGHT_PAREN, "Expect ')' after function type parameters.");
+
+    consume(p, TOKEN_FAT_ARROW, "Expect '=>' after function type parameters.");
+
+    AstNode *returnType = parseType(p);
+
+    AstNode *node = astAlloc(NODE_TYPE_FUNCTION, line);
+    node->as.typeFunction.paramCount = paramTypes.count;
+
+    if (paramTypes.count > 0) {
+      AstNode **types =
+          (AstNode **)astAllocRaw(paramTypes.count * sizeof(AstNode *));
+      memcpy(types, paramTypes.data, paramTypes.count * sizeof(AstNode *));
+      node->as.typeFunction.paramTypes = types;
+    } else {
+      node->as.typeFunction.paramTypes = NULL;
+    }
+
+    node->as.typeFunction.returnType = returnType;
+
+    arrayNodeDataFree(&paramTypes);
+    return node;
+  }
+
   consume(p, TOKEN_IDENTIFIER, "Expect type name.");
   Token name = p->previous;
 
@@ -1325,8 +1362,8 @@ static AstNode *declaration(Parser *p, bool *isTail) {
     advance(p); // 'pub', so the rest of the declaration still parses
   }
 
-  if (p->blockDepth > 0 &&
-      (check(p, TOKEN_STRUCT) || check(p, TOKEN_IMPL) || check(p, TOKEN_TYPE))) {
+  if (p->blockDepth > 0 && (check(p, TOKEN_STRUCT) || check(p, TOKEN_IMPL) ||
+                            check(p, TOKEN_TYPE))) {
     error_at_current(p, "'struct', 'impl', and 'type' are declarations and "
                         "can only appear at the top level.");
   }

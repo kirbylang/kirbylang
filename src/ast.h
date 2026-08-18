@@ -39,6 +39,7 @@ typedef enum {
   NODE_CONTINUE,
   NODE_TYPE,
   NODE_TYPE_ALIAS,
+  NODE_TYPE_FUNCTION,
   // Sentinel
   NODE_COUNT
 } NodeKind;
@@ -170,6 +171,24 @@ typedef struct {
    */
   AstNode *target;
 } TypeAliasNode;
+
+/**
+ * A function-type expression, e.g. `fun (i64, i64) => i64`. Distinct from
+ * TypeNode -- a function type has no name to hang nominal identity on, it's
+ * compared structurally (params + return) instead.
+ */
+typedef struct {
+  /**
+   * arena-allocated array of NODE_TYPE(-like) nodes
+   */
+  AstNode **paramTypes;
+  int paramCount;
+  /**
+   * Never NULL -- the return type is mandatory on a function type, same as
+   * on a real function declaration.
+   */
+  AstNode *returnType;
+} TypeFunctionNode;
 
 typedef struct {
   Token name;
@@ -335,6 +354,7 @@ struct AstNode {
     ContinueNode continue_;
     TypeNode type_;
     TypeAliasNode typeAlias;
+    TypeFunctionNode typeFunction;
   } as;
 };
 

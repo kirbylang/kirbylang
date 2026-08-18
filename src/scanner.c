@@ -101,8 +101,13 @@ Token scanToken(Scanner *scanner) {
     return makeToken(scanner,
                      match(scanner, '=') ? TOKEN_BANG_EQUAL : TOKEN_BANG);
   case '=':
-    return makeToken(scanner,
-                     match(scanner, '=') ? TOKEN_EQUAL_EQUAL : TOKEN_EQUAL);
+    if (match(scanner, '=')) {
+      return makeToken(scanner, TOKEN_EQUAL_EQUAL);
+    }
+    if (match(scanner, '>')) {
+      return makeToken(scanner, TOKEN_FAT_ARROW);
+    }
+    return makeToken(scanner, TOKEN_EQUAL);
   case '<':
     return makeToken(scanner,
                      match(scanner, '=') ? TOKEN_LESS_EQUAL : TOKEN_LESS);

@@ -1,0 +1,28 @@
+== <script> ==
+0000    1 OP_NIL
+0001    | OP_RETURN
+== <script> ==
+0000    3 OP_CLOSURE          1 <fn run>
+0002    | OP_DEFINE_GLOBAL    0 'run'
+0004    1 OP_NIL
+0005    | OP_DEFINE_GLOBAL    2 'apply'
+0007    5 OP_GET_GLOBAL       4 'run'
+0009    | OP_SET_GLOBAL       3 'apply'
+0011    | OP_POP
+0012    7 OP_GET_GLOBAL       5 'apply'
+0014    | OP_CLOSURE          6 <fn lambda0x1>
+0016    | OP_CONSTANT         7 '5.000000'
+0018    | OP_CALL             2
+0020    | OP_PRINT
+0021    8 OP_NIL
+0022    | OP_RETURN
+== run ==
+0000    3 OP_GET_LOCAL        1
+0002    | OP_GET_LOCAL        2
+0004    | OP_CALL             1
+0006    | OP_RETURN
+== lambda0x1 ==
+0000    7 OP_GET_LOCAL        1
+0002    | OP_CONSTANT         0 '1.000000'
+0004    | OP_ADD
+0005    | OP_RETURN

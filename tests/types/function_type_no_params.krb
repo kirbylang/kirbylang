@@ -1,0 +1,7 @@
+var greeter: fun () => unit;
+
+fun greet() { print "hi"; }
+
+greeter = greet;
+
+greeter();

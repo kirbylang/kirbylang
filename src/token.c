@@ -39,6 +39,8 @@ const char *tokenTypeToString(TokenType type) {
     return "TOKEN_EQUAL";
   case TOKEN_EQUAL_EQUAL:
     return "TOKEN_EQUAL_EQUAL";
+  case TOKEN_FAT_ARROW:
+    return "TOKEN_FAT_ARROW";
   case TOKEN_GREATER:
     return "TOKEN_GREATER";
   case TOKEN_GREATER_EQUAL:

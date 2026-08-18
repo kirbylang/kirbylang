@@ -204,5 +204,23 @@ int main(void) {
 
   assert_ast("../tests/types/type_alias_generic.krb", "(type Wrapper[T] T)\n");
 
+  assert_ast("../tests/types/function_type_var.krb",
+             "(var handler : (fun (i64) => i64) (lambda (x) (block (value "
+             "(+ x 1)))))\n"
+             "(print (call handler 1))\n");
+
+  assert_ast("../tests/types/function_type_no_params.krb",
+             "(var greeter : (fun () => unit))\n"
+             "(fun greet () (block (print \"hi\")))\n"
+             "(assign greeter greet)\n"
+             "(call greeter)\n");
+
+  assert_ast("../tests/types/function_type_nested.krb",
+             "(var apply : (fun ((fun (i64) => i64) i64) => i64))\n"
+             "(fun run (f x) (call f x))\n"
+             "(assign apply run)\n"
+             "(print (call apply (lambda (x) (block (value (+ x 1)))) "
+             "5))\n");
+
   return 0;
 }

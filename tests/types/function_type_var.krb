@@ -1,0 +1,3 @@
+var handler: fun (i64) => i64 = fun (x) { x + 1 };
+
+print handler(1);
