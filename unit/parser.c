@@ -200,6 +200,12 @@ int main(void) {
              "(fun identity (x : String) : List[String] x)\n"
              "(print (group (call identity (array \"Hello\" \"World\"))))\n");
 
+  assert_ast("../tests/types/generic_type_and_array_brackets_dont_conflict.krb",
+             "(var typed : List[i64])\n"
+             "(var numbers (array 1 2 3))\n"
+             "(print (index-get numbers 0))\n"
+             "(print (index-get numbers 1))\n");
+
   assert_ast("../tests/types/type_alias_simple.krb", "(type Wrapper f64)\n");
 
   assert_ast("../tests/types/type_alias_generic.krb", "(type Wrapper[T] T)\n");
