@@ -276,6 +276,11 @@ static void printNode(StrBuf *sb, AstNode *node) {
     sb_append(sb, node->as.varDecl.isMutable ? "(var " : "(let ");
     sbAppendToken(sb, node->as.varDecl.name);
 
+    if (node->as.varDecl.declaredType != NULL) {
+      sb_append(sb, " : ");
+      printNode(sb, node->as.varDecl.declaredType);
+    }
+
     if (node->as.varDecl.initializer != NULL) {
       sb_append(sb, " ");
       printNode(sb, node->as.varDecl.initializer);
@@ -443,6 +448,10 @@ static void printNode(StrBuf *sb, AstNode *node) {
 
   case NODE_CONTINUE:
     sb_append(sb, "(continue)");
+    break;
+
+  case NODE_TYPE:
+    sbAppendToken(sb, node->as.type_.name);
     break;
   }
 }

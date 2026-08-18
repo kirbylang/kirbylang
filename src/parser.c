@@ -65,6 +65,7 @@ static AstNode *ifExpr(Parser *p, bool canAssign);
 static AstNode *nullish_(Parser *p, AstNode *left, bool canAssign);
 static AstNode *struct_(Parser *p, AstNode *left, bool canAssign);
 static AstNode *varDeclaration(Parser *p, bool isMutable);
+static AstNode *parseType(Parser *p);
 
 static void advance(Parser *parser) {
   parser->previous = parser->current;
@@ -947,9 +948,25 @@ static AstNode *statement(Parser *p, bool *isTail) {
   return expressionStatement(p, isTail);
 }
 
+static AstNode *parseType(Parser *p) {
+  consume(p, TOKEN_IDENTIFIER, "Expect type name.");
+  Token name = p->previous;
+
+  AstNode *node = astAlloc(NODE_TYPE, name.line);
+  node->as.type_.name = name;
+  node->as.type_.genericArgs = NULL;
+  node->as.type_.genericArgCount = 0;
+  return node;
+}
+
 static AstNode *varDeclaration(Parser *p, bool isMutable) {
   consume(p, TOKEN_IDENTIFIER, "Expect variable name.");
   Token name = p->previous;
+
+  AstNode *declaredType = NULL;
+  if (match(p, TOKEN_COLON)) {
+    declaredType = parseType(p);
+  }
 
   AstNode *initializer = NULL;
   if (match(p, TOKEN_EQUAL))
@@ -963,6 +980,7 @@ static AstNode *varDeclaration(Parser *p, bool isMutable) {
   AstNode *node = astAlloc(NODE_VAR_DECL, name.line);
   node->as.varDecl.name = name;
   node->as.varDecl.initializer = initializer;
+  node->as.varDecl.declaredType = declaredType;
   node->as.varDecl.isMutable = isMutable;
   node->as.varDecl.isPublic = false; // only struct fields can be private/public
   node->as.varDecl.declEndLine = p->previous.line; // the ';' just consumed
@@ -1100,6 +1118,8 @@ static AstNode *structDeclaration(Parser *p) {
 
       fieldBuf[fieldCount].name = fieldName;
       fieldBuf[fieldCount].initializer = NULL;
+      // Placeholder for struct field types
+      fieldBuf[fieldCount].declaredType = NULL;
       fieldBuf[fieldCount].isMutable = true;
       fieldBuf[fieldCount].isPublic = isPublic;
       fieldBuf[fieldCount].declEndLine = p->previous.line; // the ';'

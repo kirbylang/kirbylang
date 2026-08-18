@@ -137,5 +137,17 @@ int main(void) {
              "(print (index-get (index-get array 1) 0))\n"
              "(print (index-get (index-get array 1) 1))\n");
 
+  assert_ast("../tests/types/var_type_annotation.krb",
+             "(var name : String \"Hello\")\n"
+             "(print name)\n");
+
+  assert_ast("../tests/types/let_type_annotation.krb",
+             "(let count : u8 3)\n"
+             "(print count)\n");
+
+  assert_ast("../tests/types/var_no_annotation.krb",
+             "(var x 5)\n"
+             "(print x)\n");
+
   return 0;
 }

@@ -37,6 +37,7 @@ typedef enum {
   NODE_ARRAY,
   NODE_BREAK,
   NODE_CONTINUE,
+  NODE_TYPE,
   // Sentinel
   NODE_COUNT
 } NodeKind;
@@ -145,9 +146,32 @@ typedef struct {
   Token bracket;
 } IndexSetNode;
 
+/**
+ * A type expression, e.g. the `String` in `var name: String = "...";`.
+ *
+ * `genericArgs`/`genericArgCount` are always empty for now -- `Type[T]`
+ * generic argument syntax is parsed starting in a later commit, but the
+ * fields are declared here upfront so call sites don't need to change
+ * shape when that lands.
+ */
+typedef struct {
+  Token name;
+  /**
+   * NODE_TYPE nodes
+   */
+  AstNode **genericArgs;
+  int genericArgCount;
+} TypeNode;
+
 typedef struct {
   Token name;
   AstNode *initializer;
+  /**
+   * Type annotation, if present.
+   *
+   * NULL if not present.
+   */
+  AstNode *declaredType;
   int declEndLine;
   bool isMutable;
   bool isPublic;
@@ -289,6 +313,7 @@ struct AstNode {
     ArrayNode array;
     BreakNode break_;
     ContinueNode continue_;
+    TypeNode type_;
   } as;
 };
 
