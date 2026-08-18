@@ -211,9 +211,21 @@ typedef struct {
    * arena-allocated array of Token
    */
   Token *params;
+  /**
+   * Function parameter types, if present.
+   *
+   * NULL if not present on param.
+   */
+  AstNode **paramTypes;
   int arity;
   BlockNode body;    // used when exprBody == NULL;
   AstNode *exprBody; // non-NULL for `fun name(...) = expr;` bodies
+  /**
+   * Function return type, if present.
+   *
+   * NULL if not present.
+   */
+  AstNode *returnType;
   int bodyEndLine;
   bool isMethod;
   bool hasSelf;

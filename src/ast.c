@@ -356,9 +356,22 @@ static void printNode(StrBuf *sb, AstNode *node) {
       if (i > 0)
         sb_append(sb, " ");
       sbAppendToken(sb, node->as.function.params[i]);
+
+      if (node->as.function.paramTypes != NULL &&
+          node->as.function.paramTypes[i] != NULL) {
+        sb_append(sb, " : ");
+        printNode(sb, node->as.function.paramTypes[i]);
+      }
     }
 
-    sb_append(sb, ") ");
+    sb_append(sb, ")");
+
+    if (node->as.function.returnType != NULL) {
+      sb_append(sb, " : ");
+      printNode(sb, node->as.function.returnType);
+    }
+
+    sb_append(sb, " ");
 
     if (node->as.function.exprBody != NULL) {
       printNode(sb, node->as.function.exprBody);

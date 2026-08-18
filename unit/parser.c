@@ -163,5 +163,26 @@ int main(void) {
              "(print (get p x))\n"
              "(print (get p y))\n");
 
+  assert_ast("../tests/types/function_typed_params.krb",
+             "(fun add (a : i64 b : i64) (+ a b))\n"
+             "(print (call add 1 2))\n");
+
+  assert_ast("../tests/types/function_return_type.krb",
+             "(fun add (a b) : i64 (+ a b))\n"
+             "(print (call add 1 2))\n");
+
+  assert_ast("../tests/types/function_typed_params_and_return.krb",
+             "(fun add (a : i64 b : i64) : i64 (+ a b))\n"
+             "(print (call add 1 2))\n");
+
+  assert_ast("../tests/types/lambda_typed_params.krb",
+             "(var add (lambda (a : i64 b : i64) (block (value (+ a "
+             "b)))))\n"
+             "(print (call add 1 2))\n");
+
+  assert_ast("../tests/types/function_no_annotation.krb",
+             "(fun add (a b) (+ a b))\n"
+             "(print (call add 1 2))\n");
+
   return 0;
 }

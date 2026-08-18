@@ -999,6 +999,7 @@ static AstNode *functionTail(Parser *p, Token name, int line, bool isMethod,
   consume(p, TOKEN_LEFT_PAREN, "Expect '(' after function name.");
 
   Token paramBuf[256];
+  AstNode *typeBuf[256];
   int arity = 0;
 
   bool hasSelf = false;
@@ -1021,26 +1022,44 @@ static AstNode *functionTail(Parser *p, Token name, int line, bool isMethod,
         error_at_current(p, "'self' must be the first parameter.");
       }
       consume(p, TOKEN_IDENTIFIER, "Expect parameter name.");
-      paramBuf[arity++] = p->previous;
+      paramBuf[arity] = p->previous;
+
+      typeBuf[arity] = NULL;
+      if (match(p, TOKEN_COLON)) {
+        typeBuf[arity] = parseType(p);
+      }
+
+      arity++;
     } while (match(p, TOKEN_COMMA));
   }
   consume(p, TOKEN_RIGHT_PAREN, "Expect ')' after parameters.");
 
+  AstNode *returnType = NULL;
+  if (match(p, TOKEN_COLON)) {
+    returnType = parseType(p);
+  }
+
   Token *params = NULL;
+  AstNode **paramTypes = NULL;
   if (arity > 0) {
     params = (Token *)astAllocRaw(arity * sizeof(Token));
     memcpy(params, paramBuf, arity * sizeof(Token));
+
+    paramTypes = (AstNode **)astAllocRaw(arity * sizeof(AstNode *));
+    memcpy(paramTypes, typeBuf, arity * sizeof(AstNode *));
   }
 
   AstNode *node = astAlloc(NODE_FUNCTION, line);
   node->as.function.name = name;
   node->as.function.params = params;
+  node->as.function.paramTypes = paramTypes;
   node->as.function.arity = arity;
   node->as.function.isMethod = isMethod;
   node->as.function.hasSelf = hasSelf;
   node->as.function.isLambda = isLambda;
   node->as.function.isPublic = false; // set by implDeclaration when `pub`
   node->as.function.exprBody = NULL;
+  node->as.function.returnType = returnType;
   node->as.function.body.stmts = NULL;
   node->as.function.body.count = 0;
   node->as.function.body.value = NULL;
