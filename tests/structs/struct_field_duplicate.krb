@@ -1,6 +1,6 @@
 struct Struct {
-    var value;
-    var value;
+    var value: f64;
+    var value: f64;
 }
 
 var instance = Struct {};

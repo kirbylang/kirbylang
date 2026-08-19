@@ -1,8 +1,8 @@
 struct Struct {}
 
 impl Struct {
-    pub fun printSelf(self) {
-        fun innerClosure() {
+    pub fun printSelf(self): fun () => unit {
+        fun innerClosure(): unit {
             print self;
         }
 

@@ -1,6 +1,6 @@
-var apply: fun (fun (i64) => i64, i64) => i64;
+var apply: fun (fun (f64) => f64, f64) => f64;
 
-fun run(f, x) = f(x);
+fun run(f: fun (f64) => f64, x: f64): f64 = f(x);
 
 apply = run;
 

@@ -1,15 +1,15 @@
 struct StringBuilder {
-    pub var string;
+    pub var string: string;
 }
 
 impl StringBuilder {
-    pub fun add(self, string) {
+    pub fun add(self, string: string): StringBuilder {
         self.string = self.string + string;
 
         self
     }
 
-    pub fun to_string(self) {
+    pub fun to_string(self): string {
         return self.string;
     }
 }

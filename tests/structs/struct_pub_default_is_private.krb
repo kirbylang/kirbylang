@@ -1,11 +1,11 @@
 // The `pub` on `label` must not leak to the field declared after it.
 struct Config {
-    pub var label;
-    var token;
+    pub var label: string;
+    var token: string;
 }
 
 impl Config {
-    pub fun new(label, token) = Config {
+    pub fun new(label: string, token: string): Config = Config {
         label: label,
         token: token,
     };

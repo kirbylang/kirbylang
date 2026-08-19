@@ -10,7 +10,7 @@ print true || true;
 print false or false;
 print false || false;
 
-fun should_not_call () {
+fun should_not_call (): unit {
     print "Should not print";
 }
 

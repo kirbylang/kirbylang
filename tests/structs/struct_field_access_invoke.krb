@@ -1,10 +1,10 @@
 struct Struct {
-    var fn;
+    var fn: fun () => unit;
 }
 
 var instance = Struct {};
 
-fun fn() {
+fun fn(): unit {
     print "Hello World";
 }
 

@@ -1,7 +1,7 @@
 test(true);
 test(false);
 
-fun test (a) = {
+fun test (a: bool): unit = {
   var x = {
     print "before";
 

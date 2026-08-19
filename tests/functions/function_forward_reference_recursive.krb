@@ -1,5 +1,5 @@
-fun isEven(n) { if (n == 0) return true;  return isOdd(n - 1); }
-fun isOdd(n)  { if (n == 0) return false; return isEven(n - 1); }
+fun isEven(n: f64): bool { if (n == 0) return true;  return isOdd(n - 1); }
+fun isOdd(n: f64): bool  { if (n == 0) return false; return isEven(n - 1); }
 
 print isEven(10);
 print isOdd(7);

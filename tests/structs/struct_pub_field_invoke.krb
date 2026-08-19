@@ -1,5 +1,5 @@
 struct Holder {
-    pub var callback;
+    pub var callback: fun () => string;
 }
 
 var h = Holder {

@@ -1,13 +1,13 @@
 struct Chain {
-    var value;
+    var value: f64;
 }
 
 impl Chain {
-    pub fun new(value) = Chain { value: value };
+    pub fun new(value: f64): Chain = Chain { value: value };
 
-    pub fun plus(self, n) = Chain.new(self.value + n);
+    pub fun plus(self, n: f64): Chain = Chain.new(self.value + n);
 
-    pub fun get(self) = self.value;
+    pub fun get(self): f64 = self.value;
 }
 
 print Chain.new(1).plus(2).plus(3).get();

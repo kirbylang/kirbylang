@@ -1,7 +1,7 @@
 test(true);
 test(false);
 
-fun test(value) {
+fun test(value: bool): unit {
     if (value) {
         print "Hello";
     } else {

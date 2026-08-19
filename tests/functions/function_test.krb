@@ -1,6 +1,6 @@
-fun a() { b(); }
-fun b() { c(); }
-fun c() {
+fun a(): unit { b(); }
+fun b(): unit { c(); }
+fun c(): unit {
   c("too", "many");
 }
 

@@ -96,25 +96,26 @@ int main(void) {
              ""
              "(print (call test true))\n"
              "(print (call test false))\n"
-             "(fun test (a) (if a (block (value \"Hello\")) \"World\"))\n");
+             "(fun test (a : bool) : string (if a (block (value \"Hello\")) \"World\"))\n");
 
   assert_ast("../tests/functions/function_body_expressions.krb",
              "(var n 10)\n"
-             "(fun sum (a) (+ a n))\n"
+             "(fun sum (a : f64) : f64 (+ a n))\n"
              "(print (call sum 50))\n");
 
   assert_ast("../tests/functions/function_implicit_return.krb",
-             "(fun sum (a b) (block (value (+ a b))))\n"
+             "(fun sum (a : f64 b : f64) : f64 (block (value (+ a "
+             "b))))\n"
              "(print (call sum 1 2))\n");
 
   assert_ast("../tests/functions/function_return_semicolon.krb",
-             "(fun function () (block (return)))\n"
+             "(fun function () : unit (block (return)))\n"
              "(print function)\n"
              "(print (call function))\n");
 
   assert_ast("../tests/closures/upvalue_closed.krb",
-             "(fun outer () (block (var x \"outside\")"
-             " (fun inner () (block (print x))) (return inner)))\n"
+             "(fun outer () : (fun () => unit) (block (var x \"outside\")"
+             " (fun inner () : unit (block (print x))) (return inner)))\n"
              "(var closure (call outer))\n"
              "(call closure)\n");
 
@@ -148,7 +149,7 @@ int main(void) {
                                                      "(print x)\n");
 
   assert_ast("../tests/types/struct_field_annotation.krb",
-             "(struct Point (pub-field x : i64) (pub-field y : i64))\n"
+             "(struct Point (pub-field x : f64) (pub-field y : f64))\n"
              "(impl Point (pub-static new))\n"
              "(var p (call (get Point new) 1 2))\n"
              "(print (get p x))\n"
@@ -170,11 +171,11 @@ int main(void) {
              "(print (call add 1 2))\n");
 
   assert_ast("../tests/types/function_typed_params_and_return.krb",
-             "(fun add (a : i64 b : i64) : i64 (+ a b))\n"
+             "(fun add (a : f64 b : f64) : f64 (+ a b))\n"
              "(print (call add 1 2))\n");
 
   assert_ast("../tests/types/lambda_typed_params.krb",
-             "(var add (lambda (a : i64 b : i64) (block (value (+ a "
+             "(var add (lambda (a : f64 b : f64) (block (value (+ a "
              "b)))))\n"
              "(print (call add 1 2))\n");
 
@@ -211,19 +212,20 @@ int main(void) {
   assert_ast("../tests/types/type_alias_generic.krb", "(type Wrapper[T] T)\n");
 
   assert_ast("../tests/types/function_type_var.krb",
-             "(var handler : (fun (i64) => i64) (lambda (x) (block (value "
+             "(var handler : (fun (f64) => f64) (lambda (x) (block (value "
              "(+ x 1)))))\n"
              "(print (call handler 1))\n");
 
   assert_ast("../tests/types/function_type_no_params.krb",
              "(var greeter : (fun () => unit))\n"
-             "(fun greet () (block (print \"hi\")))\n"
+             "(fun greet () : unit (block (print \"hi\")))\n"
              "(assign greeter greet)\n"
              "(call greeter)\n");
 
   assert_ast("../tests/types/function_type_nested.krb",
-             "(var apply : (fun ((fun (i64) => i64) i64) => i64))\n"
-             "(fun run (f x) (call f x))\n"
+             "(var apply : (fun ((fun (f64) => f64) f64) => f64))\n"
+             "(fun run (f : (fun (f64) => f64) x : f64) : f64 (call f "
+             "x))\n"
              "(assign apply run)\n"
              "(print (call apply (lambda (x) (block (value (+ x 1)))) "
              "5))\n");

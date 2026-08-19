@@ -1,3 +1,3 @@
-fun map(value, fn) { fn(value) }
+fun map(value: f64, fn: fun (f64) => f64): f64 { fn(value) }
 
 print map(10, fun (value) { value * value });

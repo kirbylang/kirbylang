@@ -1,6 +1,6 @@
 #!/usr/bin/env krb -f
 
-fun fib(n) {
+fun fib(n: f64): f64 {
   if (n < 2) return n;
 
   fib(n - 2) + fib(n - 1)

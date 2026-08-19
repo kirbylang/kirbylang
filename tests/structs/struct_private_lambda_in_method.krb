@@ -1,12 +1,12 @@
 struct Counter {
-    var count;
+    var count: f64;
 }
 
 impl Counter {
-    pub fun new() = Counter { count: 7 };
+    pub fun new(): Counter = Counter { count: 7 };
 
     // A lambda written inside a method inherits that method's access.
-    pub fun read(self) {
+    pub fun read(self): f64 {
         var read = fun () { self.count };
 
         read()

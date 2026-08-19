@@ -1,7 +1,7 @@
 struct Point {}
 
 impl Point {
-    fun origin() = Point {};
+    fun origin(): Point = Point {};
 }
 
 var origin = Point.origin;

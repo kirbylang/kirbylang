@@ -1,7 +1,7 @@
 struct Struct {}
 
 impl Struct {
-    fun hello() {}
+    fun hello(): unit {}
 }
 
 var instance = Struct {};

@@ -1,16 +1,16 @@
 struct Account {
-    var balance;
+    var balance: f64;
 }
 
 impl Account {
-    pub fun new() = Account { balance: 100 };
+    pub fun new(): Account = Account { balance: 100 };
 
-    pub fun deposit(self, amount) {
+    pub fun deposit(self, amount: f64): Account {
         self.balance = self.balance + amount;
         self
     }
 
-    pub fun balance(self) = self.balance;
+    pub fun balance(self): f64 = self.balance;
 }
 
 print Account.new().deposit(50).balance();

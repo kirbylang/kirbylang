@@ -1,14 +1,14 @@
 {
   var a = 1;
-  fun f() {
+  fun f(): unit {
     print a;
   }
   var b = 2;
-  fun g() {
+  fun g(): unit {
     print b;
   }
   var c = 3;
-  fun h() {
+  fun h(): unit {
     print c;
   }
 

@@ -1,5 +1,5 @@
 struct Struct {}
 
-fun test() {}
+fun test(): unit {}
 
 print instanceOf(test, Struct);

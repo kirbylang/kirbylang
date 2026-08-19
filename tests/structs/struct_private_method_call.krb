@@ -1,7 +1,7 @@
 struct Greeter {}
 
 impl Greeter {
-    fun greet(self) = "Hello World";
+    fun greet(self): string = "Hello World";
 }
 
 print Greeter {}.greet();

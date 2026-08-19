@@ -1,9 +1,9 @@
 struct Point {
-    pub var x;
+    pub var x: f64;
 }
 
 impl Point {
-    pub fun origin() = Point { x: 0 };
+    pub fun origin(): Point = Point { x: 0 };
 }
 
 print Point.origin().x;
