@@ -34,6 +34,27 @@
   - Hoist structs during compilation
   - Deprecate the call syntax e.g. `Point()`
 - [`continue` keyword](https://github.com/kirbylang/kirbylang/issues/13)
+- Implement types in the parser. No type checking implemented.
+  - Primitive types
+    - `string`
+    - `bool`
+    - `unit`
+    - `f64`
+  - Complex Types
+    - `fun (f64) => f64`
+    - `fun [T, U] (T) => U`
+    - `Struct`
+    - `Struct[T]`
+  - Type aliases
+    - `type MapFn[T, U] = fun [T, U] (T) => U;`
+  - Bindings
+    - `var age: f64 = 100;`
+    - `let name = "Kirby";`
+  - functions
+    - `fun [T, U] map(value: T): U { ... }`
+  - struct fields
+    - `struct Box[T] { pub let value: T; }`
+
 - Refine shadow binding rules
 
   | Binding  | Shadowed By | Result                                              |

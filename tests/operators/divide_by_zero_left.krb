@@ -1,4 +1,4 @@
-fun check(name, actual, expected) {
+fun check(name: string, actual: f64, expected: f64): unit {
   if (actual == expected) {
     print "PASS " + name;
   } else {

@@ -1,0 +1,11 @@
+struct Box[T] {
+  pub var value: T;
+}
+
+impl Box[T] {
+  pub fun new(value: T): Box[T] = Box { value: value };
+  pub fun get(self): T = self.value;
+}
+
+var b = Box.new(5);
+print b.get();

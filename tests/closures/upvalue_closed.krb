@@ -1,6 +1,6 @@
-fun outer() {
+fun outer(): fun () => unit {
   var x = "outside";
-  fun inner() {
+  fun inner(): unit {
     print x;
   }
 

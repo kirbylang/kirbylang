@@ -1235,6 +1235,12 @@ static void compileStmt(AstNode *node) {
     compileImplDecl(node);
     break;
 
+  case NODE_TYPE_ALIAS:
+    // Type aliases have no runtime representation -- they're resolved and
+    // discarded by the type checker (not implemented yet). Compiles to
+    // nothing, same as a comment.
+    break;
+
   default:
     errorAtNode(node, "Internal error: not a valid statement node.");
     break;

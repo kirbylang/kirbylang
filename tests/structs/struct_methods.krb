@@ -1,8 +1,8 @@
 struct Struct {}
 
 impl Struct {
-    pub fun hello(self) {}
-    pub fun world(self) {}
+    pub fun hello(self): unit {}
+    pub fun world(self): unit {}
 }
 
 var instance = Struct {};

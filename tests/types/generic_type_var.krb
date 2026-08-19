@@ -1,0 +1,3 @@
+let value: Wrapper[f64] = 123;
+
+print value;

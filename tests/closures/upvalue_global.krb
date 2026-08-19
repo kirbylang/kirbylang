@@ -1,11 +1,11 @@
-var globalSet;
-var globalGet;
+var globalSet: fun () => unit;
+var globalGet: fun () => unit;
 
-fun main() {
+fun main(): unit {
   var a = "initial";
 
-  fun set() { a = "updated"; }
-  fun get() { print a; }
+  fun set(): unit { a = "updated"; }
+  fun get(): unit { print a; }
 
   globalSet = set;
   globalGet = get;

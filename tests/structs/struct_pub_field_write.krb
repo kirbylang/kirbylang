@@ -1,5 +1,5 @@
 struct Point {
-    pub var x;
+    pub var x: f64;
 }
 
 var p = Point { x: 1 };

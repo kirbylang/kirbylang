@@ -1,11 +1,11 @@
 struct Struct {}
 
 impl Struct {
-    pub fun init(self) {
+    pub fun init(self): string {
         return "instance method";
     }
 
-    pub fun init2() {
+    pub fun init2(): string {
         return "static method";
     }
 }

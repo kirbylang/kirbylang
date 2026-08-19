@@ -1,4 +1,4 @@
 struct Struct {}
 
-fun Struct () {}
+fun Struct (): unit {}
 

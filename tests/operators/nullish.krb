@@ -2,7 +2,7 @@ print nil ?? 123;
 print nil ?? nil ?? 456;
 print 789 ?? 000;
 
-fun should_not_call () {
+fun should_not_call (): unit {
     print "Should not print";
 }
 
@@ -14,7 +14,7 @@ if (false ?? should_not_call()) {
     print "False condition met";
 }
 
-fun returns_nil () {
+fun returns_nil (): unit {
     return nil;
 }
 

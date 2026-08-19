@@ -65,6 +65,7 @@ static AstNode *ifExpr(Parser *p, bool canAssign);
 static AstNode *nullish_(Parser *p, AstNode *left, bool canAssign);
 static AstNode *struct_(Parser *p, AstNode *left, bool canAssign);
 static AstNode *varDeclaration(Parser *p, bool isMutable);
+static AstNode *parseType(Parser *p);
 
 static void advance(Parser *parser) {
   parser->previous = parser->current;
@@ -822,11 +823,12 @@ static AstNode *forStatement(Parser *p, bool *isTail) {
 
 // Determines whether the upcoming token can start an EXPRESSION, for the
 // dynamic per-item dispatch a block used as an expression needs (see
-// parseBlockExprContents below). `fun` is special-cased to always mean a
-// (named) function declaration even inside a block-expression, matching
-// the original: `fun` has a prefix rule (lambda) too, but block-expressions
-// never want a bare `fun name() {...}` line to be parsed as a lambda
-// expression-statement.
+// parseBlockExprContents below).
+//
+// `fun` is special-cased to always mean a (named) function declaration even
+// inside a block-expression, matching the original: `fun` has a prefix rule
+// (lambda) too, but block-expressions never want a bare `fun name() {...}` line
+// to be parsed as a lambda expression-statement.
 static bool isExpressionStart(TokenType type) {
   if (type == TOKEN_FUN)
     return false;
@@ -947,9 +949,86 @@ static AstNode *statement(Parser *p, bool *isTail) {
   return expressionStatement(p, isTail);
 }
 
+static AstNode *parseType(Parser *p) {
+  if (match(p, TOKEN_FUN)) {
+    int line = p->previous.line;
+    consume(p, TOKEN_LEFT_PAREN, "Expect '(' after 'fun' in function type.");
+
+    ArrayNodeData paramTypes;
+    arrayNodeDataInit(&paramTypes);
+
+    if (!check(p, TOKEN_RIGHT_PAREN)) {
+      do {
+        arrayNodeDataWrite(&paramTypes, parseType(p));
+      } while (match(p, TOKEN_COMMA));
+    }
+
+    consume(p, TOKEN_RIGHT_PAREN, "Expect ')' after function type parameters.");
+
+    consume(p, TOKEN_FAT_ARROW, "Expect '=>' after function type parameters.");
+
+    AstNode *returnType = parseType(p);
+
+    AstNode *node = astAlloc(NODE_TYPE_FUNCTION, line);
+    node->as.typeFunction.paramCount = paramTypes.count;
+
+    if (paramTypes.count > 0) {
+      AstNode **types =
+          (AstNode **)astAllocRaw(paramTypes.count * sizeof(AstNode *));
+      memcpy(types, paramTypes.data, paramTypes.count * sizeof(AstNode *));
+      node->as.typeFunction.paramTypes = types;
+    } else {
+      node->as.typeFunction.paramTypes = NULL;
+    }
+
+    node->as.typeFunction.returnType = returnType;
+
+    arrayNodeDataFree(&paramTypes);
+    return node;
+  }
+
+  consume(p, TOKEN_IDENTIFIER, "Expect type name.");
+  Token name = p->previous;
+
+  int line = name.line;
+
+  AstNode **genericArgs = NULL;
+  int genericArgCount = 0;
+
+  if (match(p, TOKEN_LEFT_BRACKET)) {
+    ArrayNodeData and;
+    arrayNodeDataInit(&and);
+
+    do {
+      arrayNodeDataWrite(&and, parseType(p));
+    } while (match(p, TOKEN_COMMA));
+
+    consume(p, TOKEN_RIGHT_BRACKET, "Expect ']' after generic arguments.");
+
+    genericArgCount = and.count;
+    if (and.count > 0) {
+      genericArgs = (AstNode **)astAllocRaw(and.count * sizeof(AstNode *));
+      memcpy(genericArgs, and.data, and.count * sizeof(AstNode *));
+    }
+
+    arrayNodeDataFree(&and);
+  }
+
+  AstNode *node = astAlloc(NODE_TYPE, line);
+  node->as.type_.name = name;
+  node->as.type_.genericArgs = genericArgs;
+  node->as.type_.genericArgCount = genericArgCount;
+  return node;
+}
+
 static AstNode *varDeclaration(Parser *p, bool isMutable) {
   consume(p, TOKEN_IDENTIFIER, "Expect variable name.");
   Token name = p->previous;
+
+  AstNode *declaredType = NULL;
+  if (match(p, TOKEN_COLON)) {
+    declaredType = parseType(p);
+  }
 
   AstNode *initializer = NULL;
   if (match(p, TOKEN_EQUAL))
@@ -963,6 +1042,7 @@ static AstNode *varDeclaration(Parser *p, bool isMutable) {
   AstNode *node = astAlloc(NODE_VAR_DECL, name.line);
   node->as.varDecl.name = name;
   node->as.varDecl.initializer = initializer;
+  node->as.varDecl.declaredType = declaredType;
   node->as.varDecl.isMutable = isMutable;
   node->as.varDecl.isPublic = false; // only struct fields can be private/public
   node->as.varDecl.declEndLine = p->previous.line; // the ';' just consumed
@@ -970,17 +1050,13 @@ static AstNode *varDeclaration(Parser *p, bool isMutable) {
 }
 
 // Parses the "(params) { body }" or "(params) = expr;" tail shared by
-// function declarations, methods, and lambdas -- the `fun` keyword (and, for
-// a function or method, the name identifier) has already been consumed by
-// the caller.
-// `name` is stored on the node but is otherwise unused when isLambda is
-// true (there's no real name token for an anonymous function -- the
-// compiler generates one, matching the original's `lambda0x...` naming).
+// functions, methods, and lambdas
 static AstNode *functionTail(Parser *p, Token name, int line, bool isMethod,
                              bool isLambda) {
   consume(p, TOKEN_LEFT_PAREN, "Expect '(' after function name.");
 
   Token paramBuf[256];
+  AstNode *typeBuf[256];
   int arity = 0;
 
   bool hasSelf = false;
@@ -1003,41 +1079,54 @@ static AstNode *functionTail(Parser *p, Token name, int line, bool isMethod,
         error_at_current(p, "'self' must be the first parameter.");
       }
       consume(p, TOKEN_IDENTIFIER, "Expect parameter name.");
-      paramBuf[arity++] = p->previous;
+      paramBuf[arity] = p->previous;
+
+      typeBuf[arity] = NULL;
+      if (match(p, TOKEN_COLON)) {
+        typeBuf[arity] = parseType(p);
+      }
+
+      arity++;
     } while (match(p, TOKEN_COMMA));
   }
   consume(p, TOKEN_RIGHT_PAREN, "Expect ')' after parameters.");
 
+  AstNode *returnType = NULL;
+  if (match(p, TOKEN_COLON)) {
+    returnType = parseType(p);
+  }
+
   Token *params = NULL;
+  AstNode **paramTypes = NULL;
   if (arity > 0) {
     params = (Token *)astAllocRaw(arity * sizeof(Token));
     memcpy(params, paramBuf, arity * sizeof(Token));
+
+    paramTypes = (AstNode **)astAllocRaw(arity * sizeof(AstNode *));
+    memcpy(paramTypes, typeBuf, arity * sizeof(AstNode *));
   }
 
   AstNode *node = astAlloc(NODE_FUNCTION, line);
   node->as.function.name = name;
   node->as.function.params = params;
+  node->as.function.paramTypes = paramTypes;
   node->as.function.arity = arity;
   node->as.function.isMethod = isMethod;
   node->as.function.hasSelf = hasSelf;
   node->as.function.isLambda = isLambda;
   node->as.function.isPublic = false; // set by implDeclaration when `pub`
   node->as.function.exprBody = NULL;
+  node->as.function.returnType = returnType;
   node->as.function.body.stmts = NULL;
   node->as.function.body.count = 0;
   node->as.function.body.value = NULL;
   node->as.function.body.endLine = line;
   node->as.function.bodyEndLine = line;
+  node->as.function.genericParams = NULL;
+  node->as.function.genericParamCount = 0;
 
+  // Is the function body an expression or a block statement
   if (!isLambda && match(p, TOKEN_EQUAL)) {
-    // Function body expression: `fun sum(a, b) = a + b;`. Only offered for
-    // named functions/methods, which are always their own complete
-    // statement -- the ';' consumed here is that statement's own
-    // terminator. A lambda has no such guarantee (it's usually embedded in
-    // a larger statement, e.g. `var f = fun (x) = x;`), which would leave
-    // that enclosing statement's own ';' unconsumed; matches the
-    // changelog's "Lambda body expressions" item, which is intentionally
-    // still unchecked/unimplemented.
     node->as.function.exprBody = expression(p);
     consume(p, TOKEN_SEMICOLON, "Expect ';' after function body expression.");
     node->as.function.bodyEndLine = p->previous.line; // the ';' just consumed
@@ -1050,18 +1139,52 @@ static AstNode *functionTail(Parser *p, Token name, int line, bool isMethod,
   return node;
 }
 
+/**
+ * Parse function and struct generic type param lists
+ *
+ * struct Struct[T, U] {}
+ * fun sum[T](a: T, b: T): T = a + b;
+ */
+static int parseGenericParamList(Parser *p, Token *paramBuf) {
+  int count = 0;
+
+  if (match(p, TOKEN_LEFT_BRACKET)) {
+    do {
+      if (count >= 255) {
+        error_at_current(p, "Can't have more than 255 generic parameters.");
+      }
+      consume(p, TOKEN_IDENTIFIER, "Expect generic parameter name.");
+      paramBuf[count++] = p->previous;
+    } while (match(p, TOKEN_COMMA));
+    consume(p, TOKEN_RIGHT_BRACKET, "Expect ']' after generic parameters.");
+  }
+  return count;
+}
+
 static AstNode *functionDeclaration(Parser *p, bool isMethod) {
   if (!isMethod)
     consume(p, TOKEN_IDENTIFIER, "Expect function name.");
   Token name = p->previous;
   int line = name.line;
-  return functionTail(p, name, line, isMethod, /*isLambda=*/false);
+
+  Token genericParamBuf[256];
+  int genericParamCount = parseGenericParamList(p, genericParamBuf);
+
+  AstNode *node = functionTail(p, name, line, isMethod, /*isLambda=*/false);
+
+  if (genericParamCount > 0) {
+    Token *genericParams =
+        (Token *)astAllocRaw(genericParamCount * sizeof(Token));
+    memcpy(genericParams, genericParamBuf, genericParamCount * sizeof(Token));
+    node->as.function.genericParams = genericParams;
+  } else {
+    node->as.function.genericParams = NULL;
+  }
+  node->as.function.genericParamCount = genericParamCount;
+
+  return node;
 }
 
-// A lambda expression: `fun (a, b) { a + b }` or `fun (a, b) = a + b;`,
-// used anywhere an expression is expected (e.g. `var f = fun (x) { x };`).
-// The 'fun' keyword is already consumed (p->previous) -- there's no name to
-// consume next, just straight into the parameter list.
 static AstNode *lambda(Parser *p, bool canAssign) {
   (void)canAssign;
   Token funKeyword = p->previous;
@@ -1073,6 +1196,9 @@ static AstNode *structDeclaration(Parser *p) {
   consume(p, TOKEN_IDENTIFIER, "Expect struct name.");
   Token name = p->previous;
   int line = name.line;
+
+  Token genericParamBuf[256];
+  int genericParamCount = parseGenericParamList(p, genericParamBuf);
 
   consume(p, TOKEN_LEFT_BRACE, "Expect '{' before struct body.");
 
@@ -1092,6 +1218,11 @@ static AstNode *structDeclaration(Parser *p) {
       consume(p, TOKEN_IDENTIFIER, "Expect field name.");
       Token fieldName = p->previous;
 
+      AstNode *fieldType = NULL;
+      if (match(p, TOKEN_COLON)) {
+        fieldType = parseType(p);
+      }
+
       if (match(p, TOKEN_EQUAL)) {
         parse_error(p, "Struct fields don't support default values");
       }
@@ -1100,6 +1231,7 @@ static AstNode *structDeclaration(Parser *p) {
 
       fieldBuf[fieldCount].name = fieldName;
       fieldBuf[fieldCount].initializer = NULL;
+      fieldBuf[fieldCount].declaredType = fieldType;
       fieldBuf[fieldCount].isMutable = true;
       fieldBuf[fieldCount].isPublic = isPublic;
       fieldBuf[fieldCount].declEndLine = p->previous.line; // the ';'
@@ -1139,6 +1271,17 @@ static AstNode *structDeclaration(Parser *p) {
 
   AstNode *node = astAlloc(NODE_STRUCT, line);
   node->as.struct_.name = name;
+
+  if (genericParamCount > 0) {
+    Token *genericParams =
+        (Token *)astAllocRaw(genericParamCount * sizeof(Token));
+    memcpy(genericParams, genericParamBuf, genericParamCount * sizeof(Token));
+    node->as.struct_.genericParams = genericParams;
+  } else {
+    node->as.struct_.genericParams = NULL;
+  }
+  node->as.struct_.genericParamCount = genericParamCount;
+
   node->as.struct_.fields = fields;
   node->as.struct_.fieldCount = fieldCount;
   node->as.struct_.endLine = endLine;
@@ -1149,6 +1292,9 @@ static AstNode *implDeclaration(Parser *p) {
   consume(p, TOKEN_IDENTIFIER, "Expect struct name after 'impl'.");
   Token name = p->previous;
   int line = name.line;
+
+  Token genericParamBuf[256];
+  int genericParamCount = parseGenericParamList(p, genericParamBuf);
 
   consume(p, TOKEN_LEFT_BRACE, "Expect '{' before impl body.");
 
@@ -1201,9 +1347,46 @@ static AstNode *implDeclaration(Parser *p) {
 
   AstNode *node = astAlloc(NODE_IMPL, line);
   node->as.impl.name = name;
+
+  if (genericParamCount > 0) {
+    Token *genericParams =
+        (Token *)astAllocRaw(genericParamCount * sizeof(Token));
+    memcpy(genericParams, genericParamBuf, genericParamCount * sizeof(Token));
+    node->as.impl.genericParams = genericParams;
+  } else {
+    node->as.impl.genericParams = NULL;
+  }
+  node->as.impl.genericParamCount = genericParamCount;
+
   node->as.impl.methods = methods;
   node->as.impl.methodCount = methodCount;
   node->as.impl.endLine = endLine;
+  return node;
+}
+
+static AstNode *typeAliasDeclaration(Parser *p) {
+  consume(p, TOKEN_IDENTIFIER, "Expect type alias name.");
+  Token name = p->previous;
+  int line = name.line;
+
+  Token paramBuf[256];
+  int paramCount = parseGenericParamList(p, paramBuf);
+
+  consume(p, TOKEN_EQUAL, "Expect '=' after type alias name.");
+  AstNode *target = parseType(p);
+  consume(p, TOKEN_SEMICOLON, "Expect ';' after type alias.");
+
+  Token *genericParams = NULL;
+  if (paramCount > 0) {
+    genericParams = (Token *)astAllocRaw(paramCount * sizeof(Token));
+    memcpy(genericParams, paramBuf, paramCount * sizeof(Token));
+  }
+
+  AstNode *node = astAlloc(NODE_TYPE_ALIAS, line);
+  node->as.typeAlias.name = name;
+  node->as.typeAlias.genericParams = genericParams;
+  node->as.typeAlias.genericParamCount = paramCount;
+  node->as.typeAlias.target = target;
   return node;
 }
 
@@ -1217,15 +1400,18 @@ static AstNode *declaration(Parser *p, bool *isTail) {
     advance(p); // 'pub', so the rest of the declaration still parses
   }
 
-  if (p->blockDepth > 0 && (check(p, TOKEN_STRUCT) || check(p, TOKEN_IMPL))) {
-    error_at_current(p, "'struct' and 'impl' are declarations and can only "
-                        "appear at the top level.");
+  if (p->blockDepth > 0 && (check(p, TOKEN_STRUCT) || check(p, TOKEN_IMPL) ||
+                            check(p, TOKEN_TYPE))) {
+    error_at_current(p, "'struct', 'impl', and 'type' are declarations and "
+                        "can only appear at the top level.");
   }
 
   if (match(p, TOKEN_STRUCT)) {
     node = structDeclaration(p);
   } else if (match(p, TOKEN_IMPL)) {
     node = implDeclaration(p);
+  } else if (match(p, TOKEN_TYPE)) {
+    node = typeAliasDeclaration(p);
   } else if (match(p, TOKEN_FUN)) {
     node = functionDeclaration(p, /*isMethod=*/false);
   } else if (match(p, TOKEN_VAR)) {

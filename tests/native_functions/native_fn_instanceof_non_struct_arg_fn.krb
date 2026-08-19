@@ -2,6 +2,6 @@ struct Struct {}
 
 var instance = Struct {};
 
-fun test() {}
+fun test(): unit {}
 
 print instanceOf(instance, test);

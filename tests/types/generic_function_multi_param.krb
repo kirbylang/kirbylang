@@ -1,0 +1,2 @@
+fun first[T, U](a: T, b: U): T = a;
+print first(1, "two");

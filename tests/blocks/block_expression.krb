@@ -1,4 +1,4 @@
-fun process(a, b) = {
+fun process(a: f64, b: f64): f64 = {
     var result = {
         var total = a + b;
         var half = total * 0.5;

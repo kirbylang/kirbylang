@@ -1,0 +1,21 @@
+== <script> ==
+0000    1 OP_NIL
+0001    | OP_RETURN
+== <script> ==
+0000    4 OP_NIL
+0001    | OP_DEFINE_GLOBAL    0 'typed'
+0003    6 OP_CONSTANT         2 '1.000000'
+0005    | OP_CONSTANT         3 '2.000000'
+0007    | OP_CONSTANT         4 '3.000000'
+0009    | OP_ARRAY            3
+0011    | OP_DEFINE_GLOBAL    1 'numbers'
+0013    7 OP_GET_GLOBAL       5 'numbers'
+0015    | OP_CONSTANT         6 '0.000000'
+0017    | OP_GET_INDEX
+0018    | OP_PRINT
+0019    8 OP_GET_GLOBAL       7 'numbers'
+0021    | OP_CONSTANT         8 '1.000000'
+0023    | OP_GET_INDEX
+0024    | OP_PRINT
+0025    9 OP_NIL
+0026    | OP_RETURN

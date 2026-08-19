@@ -1,18 +1,18 @@
 struct Counter {
-    var count;
+    var count: f64;
 }
 
 impl Counter {
-    pub fun new() = Counter { count: 0 };
+    pub fun new(): Counter = Counter { count: 0 };
 
-    pub fun increment(self) {
+    pub fun increment(self): unit {
         self.count = self.count + 1;
     }
 }
 
 // A second impl block is also "inside" the struct.
 impl Counter {
-    pub fun get(self) = self.count;
+    pub fun get(self): f64 = self.count;
 }
 
 var counter = Counter.new();

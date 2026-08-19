@@ -1,15 +1,15 @@
 struct Counter {
-    pub var count;
+    pub var count: f64;
 }
 
 impl Counter {
-    pub fun increment(self) {
+    pub fun increment(self): unit {
         self.count = self.count + 1;
     }
 }
 
 impl Counter {
-    pub fun get(self) {
+    pub fun get(self): f64 {
         return self.count;
     }
 }

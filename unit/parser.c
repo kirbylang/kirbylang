@@ -96,25 +96,27 @@ int main(void) {
              ""
              "(print (call test true))\n"
              "(print (call test false))\n"
-             "(fun test (a) (if a (block (value \"Hello\")) \"World\"))\n");
+             "(fun test (a : bool) : string (if a (block (value \"Hello\")) "
+             "\"World\"))\n");
 
   assert_ast("../tests/functions/function_body_expressions.krb",
              "(var n 10)\n"
-             "(fun sum (a) (+ a n))\n"
+             "(fun sum (a : f64) : f64 (+ a n))\n"
              "(print (call sum 50))\n");
 
   assert_ast("../tests/functions/function_implicit_return.krb",
-             "(fun sum (a b) (block (value (+ a b))))\n"
+             "(fun sum (a : f64 b : f64) : f64 (block (value (+ a "
+             "b))))\n"
              "(print (call sum 1 2))\n");
 
   assert_ast("../tests/functions/function_return_semicolon.krb",
-             "(fun function () (block (return)))\n"
+             "(fun function () : unit (block (return)))\n"
              "(print function)\n"
              "(print (call function))\n");
 
   assert_ast("../tests/closures/upvalue_closed.krb",
-             "(fun outer () (block (var x \"outside\")"
-             " (fun inner () (block (print x))) (return inner)))\n"
+             "(fun outer () : (fun () => unit) (block (var x \"outside\")"
+             " (fun inner () : unit (block (print x))) (return inner)))\n"
              "(var closure (call outer))\n"
              "(call closure)\n");
 
@@ -136,6 +138,112 @@ int main(void) {
              "(print (index-get (index-get array 0) 1))\n"
              "(print (index-get (index-get array 1) 0))\n"
              "(print (index-get (index-get array 1) 1))\n");
+
+  assert_ast("../tests/types/var_type_annotation.krb",
+             "(var name : String \"Hello\")\n"
+             "(print name)\n");
+
+  assert_ast("../tests/types/let_type_annotation.krb", "(let count : f64 3)\n"
+                                                       "(print count)\n");
+
+  assert_ast("../tests/types/var_no_annotation.krb", "(var x 5)\n"
+                                                     "(print x)\n");
+
+  assert_ast("../tests/types/struct_field_annotation.krb",
+             "(struct Point (pub-field x : f64) (pub-field y : f64))\n"
+             "(impl Point (pub-static new))\n"
+             "(var p (call (get Point new) 1 2))\n"
+             "(print (get p x))\n"
+             "(print (get p y))\n");
+
+  assert_ast("../tests/types/struct_field_no_annotation.krb",
+             "(struct Point (pub-field x) (pub-field y))\n"
+             "(impl Point (pub-static new))\n"
+             "(var p (call (get Point new) 1 2))\n"
+             "(print (get p x))\n"
+             "(print (get p y))\n");
+
+  assert_ast("../tests/types/function_typed_params.krb",
+             "(fun add (a : i64 b : i64) (+ a b))\n"
+             "(print (call add 1 2))\n");
+
+  assert_ast("../tests/types/function_return_type.krb",
+             "(fun add (a b) : i64 (+ a b))\n"
+             "(print (call add 1 2))\n");
+
+  assert_ast("../tests/types/function_typed_params_and_return.krb",
+             "(fun add (a : f64 b : f64) : f64 (+ a b))\n"
+             "(print (call add 1 2))\n");
+
+  assert_ast("../tests/types/lambda_typed_params.krb",
+             "(var add (lambda (a : f64 b : f64) (block (value (+ a "
+             "b)))))\n"
+             "(print (call add 1 2))\n");
+
+  assert_ast("../tests/types/function_no_annotation.krb",
+             "(fun add (a b) (+ a b))\n"
+             "(print (call add 1 2))\n");
+
+  assert_ast("../tests/types/generic_type_var.krb",
+             "(let value : Wrapper[f64] 123)\n"
+             "(print value)\n");
+
+  assert_ast(
+      "../tests/types/generic_type_nested.krb",
+      "(let value : List[List[i64]] (array (array 1) (array 2) (array 3)))\n"
+      "(print value)\n");
+
+  assert_ast("../tests/types/generic_type_struct.krb",
+             "(struct Box (pub-field value : Wrapper[f64]))\n"
+             "(let box (struct-init Box (field value 100)))\n"
+             "(print (get box value))\n");
+
+  assert_ast("../tests/types/generic_type_function.krb",
+             "(fun identity (x : String) : List[String] x)\n"
+             "(print (group (call identity (array \"Hello\" \"World\"))))\n");
+
+  assert_ast("../tests/types/generic_type_and_array_brackets_dont_conflict.krb",
+             "(var typed : List[i64])\n"
+             "(var numbers (array 1 2 3))\n"
+             "(print (index-get numbers 0))\n"
+             "(print (index-get numbers 1))\n");
+
+  assert_ast("../tests/types/type_alias_simple.krb", "(type Wrapper f64)\n");
+
+  assert_ast("../tests/types/type_alias_generic.krb", "(type Wrapper[T] T)\n");
+
+  assert_ast("../tests/types/function_type_var.krb",
+             "(var handler : (fun (f64) => f64) (lambda (x) (block (value "
+             "(+ x 1)))))\n"
+             "(print (call handler 1))\n");
+
+  assert_ast("../tests/types/function_type_no_params.krb",
+             "(var greeter : (fun () => unit))\n"
+             "(fun greet () : unit (block (print \"hi\")))\n"
+             "(assign greeter greet)\n"
+             "(call greeter)\n");
+
+  assert_ast("../tests/types/function_type_nested.krb",
+             "(var apply : (fun ((fun (f64) => f64) f64) => f64))\n"
+             "(fun run (f : (fun (f64) => f64) x : f64) : f64 (call f "
+             "x))\n"
+             "(assign apply run)\n"
+             "(print (call apply (lambda (x) (block (value (+ x 1)))) "
+             "5))\n");
+
+  assert_ast("../tests/types/generic_struct.krb",
+             "(struct Box[T] (pub-field value : T))\n"
+             "(impl Box[T] (pub-static new) (pub-method get))\n"
+             "(var b (call (get Box new) 5))\n"
+             "(print (call (get b get)))\n");
+
+  assert_ast("../tests/types/generic_function.krb",
+             "(fun sum[T] (a : T b : T) : T (+ a b))\n"
+             "(print (call sum 1 2))\n");
+
+  assert_ast("../tests/types/generic_function_multi_param.krb",
+             "(fun first[T U] (a : T b : U) : T a)\n"
+             "(print (call first 1 \"two\"))\n");
 
   return 0;
 }

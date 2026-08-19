@@ -1,10 +1,10 @@
 struct Counter {
-    pub var count;
+    pub var count: f64;
 }
 
 impl Counter {
     // Access travels with the closure, so it survives leaving the method.
-    pub fun reader(self) {
+    pub fun reader(self): fun () => f64 {
         var reader = fun () { self.count };
 
         reader

@@ -1,5 +1,5 @@
 var value = 123;
 
 impl value {
-    fun hello(self) {}
+    fun hello(self): unit {}
 }

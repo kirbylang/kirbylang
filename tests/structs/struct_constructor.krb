@@ -1,9 +1,9 @@
 struct Struct {
-    var value;
+    var value: f64;
 }
 
 impl Struct {
-    pub fun new(value) {
+    pub fun new(value: f64): Struct {
         var instance = Struct {};
 
         instance.value = value;

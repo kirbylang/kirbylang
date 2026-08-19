@@ -1,16 +1,16 @@
 #!/usr/bin/env krb -f
 
 struct Zoo {
-  var aardvark;
-  var baboon;
-  var cat;
-  var donkey;
-  var elephant;
-  var fox;
+  var aardvark: f64;
+  var baboon: f64;
+  var cat: f64;
+  var donkey: f64;
+  var elephant: f64;
+  var fox: f64;
 }
 
 impl Zoo {
-  pub fun init() = Zoo {
+  pub fun init(): Zoo = Zoo {
     aardvark: 1,
     baboon: 1,
     cat: 1,
@@ -19,12 +19,12 @@ impl Zoo {
     fox: 1,
   };
 
-  pub fun ant(self) = self.aardvark;
-  pub fun banana(self) = self.baboon;
-  pub fun tuna(self) = self.cat;
-  pub fun hay(self) = self.donkey;
-  pub fun grass(self) = self.elephant;
-  pub fun mouse(self) = self.fox;
+  pub fun ant(self): f64 = self.aardvark;
+  pub fun banana(self): f64 = self.baboon;
+  pub fun tuna(self): f64 = self.cat;
+  pub fun hay(self): f64 = self.donkey;
+  pub fun grass(self): f64 = self.elephant;
+  pub fun mouse(self): f64 = self.fox;
 }
 
 var zoo = Zoo.init();

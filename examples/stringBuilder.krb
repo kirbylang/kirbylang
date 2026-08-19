@@ -1,25 +1,25 @@
 #!/usr/bin/env krb -f
 
 struct StringBuilder {
-    var string;
+    var string: string;
 }
 
 impl StringBuilder {
-    pub fun new() = StringBuilder { string: "" };
+    pub fun new(): StringBuilder = StringBuilder { string: "" };
 
-    pub fun new_with_init(init) =
+    pub fun new_with_init(init): StringBuilder =
         StringBuilder { string: init };
 
-    pub fun add(self, string) {
+    pub fun add(self, string): StringBuilder {
         self.string = self.string + string;
 
         self
     }
 
-    pub fun to_string(self) = self.string;
+    pub fun to_string(self): string = self.string;
 }
 
-var builder = StringBuilder.new()
+var builder: StringBuilder = StringBuilder.new()
     .add("Hello")
     .add(" ")
     .add("World");

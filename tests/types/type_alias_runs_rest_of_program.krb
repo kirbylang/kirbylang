@@ -1,0 +1,9 @@
+type Wrapper[T] = T;
+
+var x: Wrapper[Number] = 5;
+
+print x;
+
+fun add(a: f64, b: f64): f64 = a + b;
+
+print add(1, 2);

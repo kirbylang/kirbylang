@@ -37,6 +37,9 @@ typedef enum {
   NODE_ARRAY,
   NODE_BREAK,
   NODE_CONTINUE,
+  NODE_TYPE,
+  NODE_TYPE_ALIAS,
+  NODE_TYPE_FUNCTION,
   // Sentinel
   NODE_COUNT
 } NodeKind;
@@ -147,7 +150,55 @@ typedef struct {
 
 typedef struct {
   Token name;
+  /**
+   * NODE_TYPE nodes
+   */
+  AstNode **genericArgs;
+  int genericArgCount;
+} TypeNode;
+
+typedef struct {
+  Token name;
+  /**
+   * arena-allocated array of bare generic parameter name tokens, e.g. the
+   * `T` in `type Wrapper[T] = T;`. Distinct from TypeNode.genericArgs --
+   * these are parameter *declarations* (bare names), not type arguments.
+   */
+  Token *genericParams;
+  int genericParamCount;
+  /**
+   * The type expression on the right of `=`.
+   */
+  AstNode *target;
+} TypeAliasNode;
+
+/**
+ * A function-type expression, e.g. `fun (i64, i64) => i64`. Distinct from
+ * TypeNode -- a function type has no name to hang nominal identity on, it's
+ * compared structurally (params + return) instead.
+ */
+typedef struct {
+  /**
+   * arena-allocated array of NODE_TYPE(-like) nodes
+   */
+  AstNode **paramTypes;
+  int paramCount;
+  /**
+   * Never NULL -- the return type is mandatory on a function type, same as
+   * on a real function declaration.
+   */
+  AstNode *returnType;
+} TypeFunctionNode;
+
+typedef struct {
+  Token name;
   AstNode *initializer;
+  /**
+   * Type annotation, if present.
+   *
+   * NULL if not present.
+   */
+  AstNode *declaredType;
   int declEndLine;
   bool isMutable;
   bool isPublic;
@@ -195,18 +246,43 @@ typedef struct {
    * arena-allocated array of Token
    */
   Token *params;
+  /**
+   * Function parameter types, if present.
+   *
+   * NULL if not present on param.
+   */
+  AstNode **paramTypes;
   int arity;
   BlockNode body;    // used when exprBody == NULL;
   AstNode *exprBody; // non-NULL for `fun name(...) = expr;` bodies
+  /**
+   * Function return type, if present.
+   *
+   * NULL if not present.
+   */
+  AstNode *returnType;
   int bodyEndLine;
   bool isMethod;
   bool hasSelf;
   bool isLambda;
   bool isPublic;
+  /**
+   * arena-allocated array of bare generic parameter name tokens, e.g. the
+   * `T` in `fun sum[T](a: T, b: T): T`. NULL/0 for a non-generic function.
+   * Never set for lambdas -- there's no name slot to attach `[T]` to.
+   */
+  Token *genericParams;
+  int genericParamCount;
 } FunctionNode;
 
 typedef struct {
   Token name;
+  /**
+   * arena-allocated array of bare generic parameter name tokens, e.g. the
+   * `T` in `struct Box[T]`. NULL/0 for a non-generic struct.
+   */
+  Token *genericParams;
+  int genericParamCount;
   VarDeclNode *fields;
   int fieldCount;
   int endLine;
@@ -226,6 +302,14 @@ typedef struct {
 
 typedef struct {
   Token name;
+  /**
+   * arena-allocated array of bare generic parameter name tokens, e.g. the
+   * `T` in `impl Box[T]`. Written independently of the struct's own
+   * declared parameters for now (Phase 1 is grammar only -- nothing
+   * cross-checks these match the struct's `genericParams` yet).
+   */
+  Token *genericParams;
+  int genericParamCount;
   FunctionNode **methods;
   int methodCount;
   int endLine;
@@ -289,6 +373,9 @@ struct AstNode {
     ArrayNode array;
     BreakNode break_;
     ContinueNode continue_;
+    TypeNode type_;
+    TypeAliasNode typeAlias;
+    TypeFunctionNode typeFunction;
   } as;
 };
 

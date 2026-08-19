@@ -1,9 +1,9 @@
 struct Struct {
-    var value;
+    var value: string;
 }
 
 impl Struct {
-    fun set(self, value) {
+    fun set(self, value: string): unit {
         self.value = value;
     }
 }

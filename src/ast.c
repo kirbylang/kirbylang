@@ -276,6 +276,11 @@ static void printNode(StrBuf *sb, AstNode *node) {
     sb_append(sb, node->as.varDecl.isMutable ? "(var " : "(let ");
     sbAppendToken(sb, node->as.varDecl.name);
 
+    if (node->as.varDecl.declaredType != NULL) {
+      sb_append(sb, " : ");
+      printNode(sb, node->as.varDecl.declaredType);
+    }
+
     if (node->as.varDecl.initializer != NULL) {
       sb_append(sb, " ");
       printNode(sb, node->as.varDecl.initializer);
@@ -338,6 +343,17 @@ static void printNode(StrBuf *sb, AstNode *node) {
 
     if (!node->as.function.isLambda) {
       sbAppendToken(sb, node->as.function.name);
+
+      if (node->as.function.genericParamCount > 0) {
+        sb_append(sb, "[");
+        for (int i = 0; i < node->as.function.genericParamCount; i++) {
+          if (i > 0)
+            sb_append(sb, " ");
+          sbAppendToken(sb, node->as.function.genericParams[i]);
+        }
+        sb_append(sb, "]");
+      }
+
       sb_append(sb, " (");
     }
 
@@ -351,9 +367,22 @@ static void printNode(StrBuf *sb, AstNode *node) {
       if (i > 0)
         sb_append(sb, " ");
       sbAppendToken(sb, node->as.function.params[i]);
+
+      if (node->as.function.paramTypes != NULL &&
+          node->as.function.paramTypes[i] != NULL) {
+        sb_append(sb, " : ");
+        printNode(sb, node->as.function.paramTypes[i]);
+      }
     }
 
-    sb_append(sb, ") ");
+    sb_append(sb, ")");
+
+    if (node->as.function.returnType != NULL) {
+      sb_append(sb, " : ");
+      printNode(sb, node->as.function.returnType);
+    }
+
+    sb_append(sb, " ");
 
     if (node->as.function.exprBody != NULL) {
       printNode(sb, node->as.function.exprBody);
@@ -368,11 +397,26 @@ static void printNode(StrBuf *sb, AstNode *node) {
     sb_append(sb, "(struct ");
     sbAppendToken(sb, node->as.struct_.name);
 
+    if (node->as.struct_.genericParamCount > 0) {
+      sb_append(sb, "[");
+      for (int i = 0; i < node->as.struct_.genericParamCount; i++) {
+        if (i > 0)
+          sb_append(sb, " ");
+        sbAppendToken(sb, node->as.struct_.genericParams[i]);
+      }
+      sb_append(sb, "]");
+    }
+
     for (int i = 0; i < node->as.struct_.fieldCount; i++) {
       VarDeclNode *field = &node->as.struct_.fields[i];
 
       sb_append(sb, field->isPublic ? " (pub-field " : " (field ");
       sbAppendToken(sb, field->name);
+
+      if (field->declaredType != NULL) {
+        sb_append(sb, " : ");
+        printNode(sb, field->declaredType);
+      }
 
       if (field->initializer != NULL) {
         sb_append(sb, " ");
@@ -405,6 +449,16 @@ static void printNode(StrBuf *sb, AstNode *node) {
   case NODE_IMPL:
     sb_append(sb, "(impl ");
     sbAppendToken(sb, node->as.impl.name);
+
+    if (node->as.impl.genericParamCount > 0) {
+      sb_append(sb, "[");
+      for (int i = 0; i < node->as.impl.genericParamCount; i++) {
+        if (i > 0)
+          sb_append(sb, " ");
+        sbAppendToken(sb, node->as.impl.genericParams[i]);
+      }
+      sb_append(sb, "]");
+    }
 
     for (int i = 0; i < node->as.impl.methodCount; i++) {
       FunctionNode *method = node->as.impl.methods[i];
@@ -443,6 +497,51 @@ static void printNode(StrBuf *sb, AstNode *node) {
 
   case NODE_CONTINUE:
     sb_append(sb, "(continue)");
+    break;
+
+  case NODE_TYPE:
+    sbAppendToken(sb, node->as.type_.name);
+
+    if (node->as.type_.genericArgCount > 0) {
+      sb_append(sb, "[");
+      for (int i = 0; i < node->as.type_.genericArgCount; i++) {
+        if (i > 0)
+          sb_append(sb, " ");
+        printNode(sb, node->as.type_.genericArgs[i]);
+      }
+      sb_append(sb, "]");
+    }
+    break;
+
+  case NODE_TYPE_ALIAS:
+    sb_append(sb, "(type ");
+    sbAppendToken(sb, node->as.typeAlias.name);
+
+    if (node->as.typeAlias.genericParamCount > 0) {
+      sb_append(sb, "[");
+      for (int i = 0; i < node->as.typeAlias.genericParamCount; i++) {
+        if (i > 0)
+          sb_append(sb, " ");
+        sbAppendToken(sb, node->as.typeAlias.genericParams[i]);
+      }
+      sb_append(sb, "]");
+    }
+
+    sb_append(sb, " ");
+    printNode(sb, node->as.typeAlias.target);
+    sb_append(sb, ")");
+    break;
+
+  case NODE_TYPE_FUNCTION:
+    sb_append(sb, "(fun (");
+    for (int i = 0; i < node->as.typeFunction.paramCount; i++) {
+      if (i > 0)
+        sb_append(sb, " ");
+      printNode(sb, node->as.typeFunction.paramTypes[i]);
+    }
+    sb_append(sb, ") => ");
+    printNode(sb, node->as.typeFunction.returnType);
+    sb_append(sb, ")");
     break;
   }
 }

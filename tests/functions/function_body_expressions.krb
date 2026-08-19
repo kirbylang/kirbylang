@@ -1,5 +1,5 @@
 var n = 10;
 
-fun sum(a) = a + n;
+fun sum(a: f64): f64 = a + n;
 
 print sum(50);

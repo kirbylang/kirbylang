@@ -2,7 +2,7 @@ test(true, false);
 test(false, true);
 test(false, false);
 
-fun test (a, b) {
+fun test (a: bool, b: bool): unit {
     if (a) {
         print "Hello";
     } else if (b) {

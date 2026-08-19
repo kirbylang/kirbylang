@@ -39,6 +39,8 @@ const char *tokenTypeToString(TokenType type) {
     return "TOKEN_EQUAL";
   case TOKEN_EQUAL_EQUAL:
     return "TOKEN_EQUAL_EQUAL";
+  case TOKEN_FAT_ARROW:
+    return "TOKEN_FAT_ARROW";
   case TOKEN_GREATER:
     return "TOKEN_GREATER";
   case TOKEN_GREATER_EQUAL:
@@ -83,6 +85,8 @@ const char *tokenTypeToString(TokenType type) {
     return "TOKEN_SELF";
   case TOKEN_TRUE:
     return "TOKEN_TRUE";
+  case TOKEN_TYPE:
+    return "TOKEN_TYPE";
   case TOKEN_VAR:
     return "TOKEN_VAR";
   case TOKEN_LET:
