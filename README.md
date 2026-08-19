@@ -10,7 +10,7 @@ An aspiring embeddable scripting language.
 #!/usr/bin/env krb -f
 
 // Function with an expression body
-fun fizzbuzz(n: number): number =
+fun fizzbuzz(n: f64): string =
     if (n % 5 == 0 and n % 3 == 0) "FizzBuzz"
     else if (n % 3 == 0) "Fizz"
     else if (n % 5 == 0) "Buzz"

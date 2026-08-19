@@ -1,2 +1,2 @@
-let count: u8 = 3;
+let count: f64 = 3;
 print count;

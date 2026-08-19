@@ -1,12 +1,12 @@
 #!/usr/bin/env krb -f
 
 struct Zoo {
-  var aardvark: u8;
-  var baboon: u8;
-  var cat: u8;
-  var donkey: u8;
-  var elephant: u8;
-  var fox: u8;
+  var aardvark: f64;
+  var baboon: f64;
+  var cat: f64;
+  var donkey: f64;
+  var elephant: f64;
+  var fox: f64;
 }
 
 impl Zoo {

@@ -96,7 +96,8 @@ int main(void) {
              ""
              "(print (call test true))\n"
              "(print (call test false))\n"
-             "(fun test (a : bool) : string (if a (block (value \"Hello\")) \"World\"))\n");
+             "(fun test (a : bool) : string (if a (block (value \"Hello\")) "
+             "\"World\"))\n");
 
   assert_ast("../tests/functions/function_body_expressions.krb",
              "(var n 10)\n"
@@ -142,7 +143,7 @@ int main(void) {
              "(var name : String \"Hello\")\n"
              "(print name)\n");
 
-  assert_ast("../tests/types/let_type_annotation.krb", "(let count : u8 3)\n"
+  assert_ast("../tests/types/let_type_annotation.krb", "(let count : f64 3)\n"
                                                        "(print count)\n");
 
   assert_ast("../tests/types/var_no_annotation.krb", "(var x 5)\n"
