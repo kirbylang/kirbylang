@@ -823,11 +823,12 @@ static AstNode *forStatement(Parser *p, bool *isTail) {
 
 // Determines whether the upcoming token can start an EXPRESSION, for the
 // dynamic per-item dispatch a block used as an expression needs (see
-// parseBlockExprContents below). `fun` is special-cased to always mean a
-// (named) function declaration even inside a block-expression, matching
-// the original: `fun` has a prefix rule (lambda) too, but block-expressions
-// never want a bare `fun name() {...}` line to be parsed as a lambda
-// expression-statement.
+// parseBlockExprContents below).
+//
+// `fun` is special-cased to always mean a (named) function declaration even
+// inside a block-expression, matching the original: `fun` has a prefix rule
+// (lambda) too, but block-expressions never want a bare `fun name() {...}` line
+// to be parsed as a lambda expression-statement.
 static bool isExpressionStart(TokenType type) {
   if (type == TOKEN_FUN)
     return false;
@@ -1049,12 +1050,7 @@ static AstNode *varDeclaration(Parser *p, bool isMutable) {
 }
 
 // Parses the "(params) { body }" or "(params) = expr;" tail shared by
-// function declarations, methods, and lambdas -- the `fun` keyword (and, for
-// a function or method, the name identifier) has already been consumed by
-// the caller.
-// `name` is stored on the node but is otherwise unused when isLambda is
-// true (there's no real name token for an anonymous function -- the
-// compiler generates one, matching the original's `lambda0x...` naming).
+// functions, methods, and lambdas
 static AstNode *functionTail(Parser *p, Token name, int line, bool isMethod,
                              bool isLambda) {
   consume(p, TOKEN_LEFT_PAREN, "Expect '(' after function name.");
@@ -1129,15 +1125,8 @@ static AstNode *functionTail(Parser *p, Token name, int line, bool isMethod,
   node->as.function.genericParams = NULL;
   node->as.function.genericParamCount = 0;
 
+  // Is the function body an expression or a block statement
   if (!isLambda && match(p, TOKEN_EQUAL)) {
-    // Function body expression: `fun sum(a, b) = a + b;`. Only offered for
-    // named functions/methods, which are always their own complete
-    // statement -- the ';' consumed here is that statement's own
-    // terminator. A lambda has no such guarantee (it's usually embedded in
-    // a larger statement, e.g. `var f = fun (x) = x;`), which would leave
-    // that enclosing statement's own ';' unconsumed; matches the
-    // changelog's "Lambda body expressions" item, which is intentionally
-    // still unchecked/unimplemented.
     node->as.function.exprBody = expression(p);
     consume(p, TOKEN_SEMICOLON, "Expect ';' after function body expression.");
     node->as.function.bodyEndLine = p->previous.line; // the ';' just consumed
@@ -1196,10 +1185,6 @@ static AstNode *functionDeclaration(Parser *p, bool isMethod) {
   return node;
 }
 
-// A lambda expression: `fun (a, b) { a + b }` or `fun (a, b) = a + b;`,
-// used anywhere an expression is expected (e.g. `var f = fun (x) { x };`).
-// The 'fun' keyword is already consumed (p->previous) -- there's no name to
-// consume next, just straight into the parameter list.
 static AstNode *lambda(Parser *p, bool canAssign) {
   (void)canAssign;
   Token funKeyword = p->previous;
@@ -1379,10 +1364,6 @@ static AstNode *implDeclaration(Parser *p) {
   return node;
 }
 
-// Parses `type Name[T, U, ...] = Type;`. The generic parameter list (bare
-// names) is a different grammar position from `Type[T]` generic
-// *arguments* -- parseType() handles referencing an already-known type;
-// here we're declaring new parameter names instead.
 static AstNode *typeAliasDeclaration(Parser *p) {
   consume(p, TOKEN_IDENTIFIER, "Expect type alias name.");
   Token name = p->previous;
