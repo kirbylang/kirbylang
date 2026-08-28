@@ -12,6 +12,7 @@
 #include "parser.h"
 #include "strbuf.h"
 #include "token_stream.h"
+// #include "typecheck.h"
 #include "version.h"
 #include "vm.h"
 
@@ -186,6 +187,14 @@ static CompiledUnit *compileSource(const char *source) {
   bool hadError = false;
   int endLine = 0;
   AstNode **ast = parse(source, &count, &hadError, &endLine);
+
+  // bool ok = typecheckProgram(ast, count);
+
+  // if (!ok) {
+  //   astFreeAll();
+  //   free(ast);
+  //   return NULL;
+  // }
 
   CompiledUnit *unit = hadError ? NULL : compile(ast, count, endLine);
 

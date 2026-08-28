@@ -14,7 +14,7 @@ typedef struct {
 } Local;
 
 typedef enum {
-  TYPE_FUNCTION,
+  FNTYPE_FUNCTION,
   TYPE_METHOD,
   TYPE_STATIC_METHOD,
   TYPE_SCRIPT
