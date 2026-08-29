@@ -4,7 +4,7 @@ struct Point {
 }
 
 impl Point {
-  pub fun new(x, y) = Point { x: x, y: y };
+  pub fun new(x, y): Point = Point { x: x, y: y };
 }
 
 var p = Point.new(1, 2);

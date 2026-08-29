@@ -356,6 +356,18 @@ bool check(TypeEnv *env, AstNode *node, Type *expected) {
   return true;
 }
 
+// True if this struct's members shouldn't be trusted for a "no such
+// field/method" error -- either because it's generic (known before
+// resolution was even attempted) or because one or more of its actual
+// fields/methods failed to resolve for some other reason (a missing
+// annotation, an unknown type name, etc.). Either way, whatever specific
+// error already got reported explains the problem; a lookup miss here
+// shouldn't also cascade a second, misleading "doesn't exist" on top of
+// it.
+static bool structMembersUnreliable(Type *type) {
+  return typeStructIsGeneric(type) || typeStructHasUnresolvedMembers(type);
+}
+
 static Type *inferLiteral(AstNode *node) {
   LiteralNode *lit = &node->as.literal;
   switch (lit->kind) {
@@ -578,6 +590,9 @@ static Type *inferGet(TypeEnv *env, AstNode *node) {
     if (!shadowed) {
       Type *structType = typeEnvLookupStruct(env, *objectName);
       if (structType != NULL) {
+        if (structMembersUnreliable(structType))
+          return NULL; // already reported once
+
         Type *methodType = typeStructStaticMethodLookup(structType, g->name);
         if (methodType == NULL) {
           errorAtTokenFmt(&g->name, "%s has no static method '%.*s'.",
@@ -600,6 +615,9 @@ static Type *inferGet(TypeEnv *env, AstNode *node) {
     return NULL;
   }
 
+  if (structMembersUnreliable(objectType))
+    return NULL; // already reported once
+
   // Fields take priority over instance methods on a name collision --
   // correct for the common case. The runtime's actual precedence is more
   // nuanced than a fixed order (a private field inaccessible from the
@@ -613,6 +631,19 @@ static Type *inferGet(TypeEnv *env, AstNode *node) {
   Type *methodType = typeStructInstanceMethodLookup(objectType, g->name);
   if (methodType != NULL)
     return methodType;
+
+  // A more specific, helpful reason when we have one: the name exists,
+  // just not as an instance member.
+  Type *staticMethodType = typeStructStaticMethodLookup(objectType, g->name);
+  if (staticMethodType != NULL) {
+    errorAtTokenFmt(&g->name,
+                    "'%.*s' is a static method. Access it on '%.*s' "
+                    "instead of an instance.",
+                    g->name.length, g->name.start,
+                    objectType->as.struct_.name.length,
+                    objectType->as.struct_.name.start);
+    return NULL;
+  }
 
   errorAtTokenFmt(&g->name, "%s has no field or method '%.*s'.",
                   typeToString(objectType), g->name.length, g->name.start);
@@ -631,6 +662,11 @@ static Type *inferSet(TypeEnv *env, AstNode *node) {
     errorAtTokenFmt(&s->name, "Can't set '.%.*s' on a %s.", s->name.length,
                     s->name.start, typeToString(objectType));
     return NULL;
+  }
+
+  if (structMembersUnreliable(objectType)) {
+    infer(env, s->value); // still walk for internal errors
+    return NULL;          // already reported once
   }
 
   Type *fieldType = typeStructFieldLookup(objectType, s->name);
@@ -711,6 +747,13 @@ static Type *inferStructInit(TypeEnv *env, AstNode *node) {
     errorAtTokenFmt(&si->name, "Unknown struct '%.*s'.", si->name.length,
                     si->name.start);
     return NULL;
+  }
+
+  if (structMembersUnreliable(structType)) {
+    for (int i = 0; i < si->fieldCount; i++) {
+      infer(env, si->fields[i].value); // still walk for internal errors
+    }
+    return structType; // already reported once
   }
 
   // Deliberately not checking for *missing* required fields here --
@@ -1429,6 +1472,8 @@ static void resolveStructFields(TypeEnv *env, AstNode *node) {
   Type *structType = typeEnvLookupStruct(env, sn->name);
   if (structType == NULL)
     return; // shouldn't happen -- Pass A registers every NODE_STRUCT
+  if (typeStructIsGeneric(structType))
+    return; // already reported once at declaration; don't cascade
 
   TypeMember *fields =
       sn->fieldCount > 0
@@ -1458,6 +1503,8 @@ static void resolveStructFields(TypeEnv *env, AstNode *node) {
   // entries that hit `continue` above.
   if (ok) {
     typeStructSetFields(structType, fields, sn->fieldCount);
+  } else {
+    typeStructMarkUnresolvedMembers(structType);
   }
 }
 
@@ -1472,12 +1519,16 @@ static void registerImplMethods(TypeEnv *env, AstNode *node) {
     // runtime error unrelated to types, nothing to attach methods to.
     return;
   }
+  if (typeStructIsGeneric(structType))
+    return; // already reported once at the struct's declaration
 
   for (int i = 0; i < impl->methodCount; i++) {
     FunctionNode *method = impl->methods[i];
     Type *methodType = resolveFunctionSignature(env, method);
-    if (methodType == NULL)
-      continue; // error already reported
+    if (methodType == NULL) {
+      typeStructMarkUnresolvedMembers(structType); // error already reported
+      continue;
+    }
     if (method->hasSelf) {
       typeStructAddInstanceMethod(structType, method->name, methodType);
     } else {
@@ -1544,6 +1595,10 @@ bool typecheckProgram(AstNode **program, int count) {
     if (program[i]->kind == NODE_STRUCT) {
       StructNode *sn = &program[i]->as.struct_;
       Type *placeholder = typeStruct(sn->name, NULL, 0, NULL, 0, NULL, 0);
+      if (sn->genericParamCount > 0) {
+        typeStructMarkGeneric(placeholder);
+        errorAtToken(&sn->name, "Generic structs aren't supported yet.");
+      }
       typeEnvRegisterStruct(env, sn->name, placeholder);
     }
   }

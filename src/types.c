@@ -152,6 +152,22 @@ void typeStructAddInstanceMethod(Type *type, Token name, Type *methodType) {
                &type->as.struct_.instanceMethodCount, name, methodType);
 }
 
+void typeStructMarkGeneric(Type *type) { type->as.struct_.isGeneric = true; }
+
+bool typeStructIsGeneric(Type *type) {
+  return type != NULL && type->kind == TYPE_STRUCT &&
+         type->as.struct_.isGeneric;
+}
+
+void typeStructMarkUnresolvedMembers(Type *type) {
+  type->as.struct_.hasUnresolvedMembers = true;
+}
+
+bool typeStructHasUnresolvedMembers(Type *type) {
+  return type != NULL && type->kind == TYPE_STRUCT &&
+         type->as.struct_.hasUnresolvedMembers;
+}
+
 static bool tokensEqual(Token *a, Token *b) {
   if (a->length != b->length)
     return false;

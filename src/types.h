@@ -39,6 +39,23 @@ struct Type {
       // just "this struct," never worth spelling out per-method.
       TypeMember *instanceMethods;
       int instanceMethodCount;
+      // True if this struct's declaration uses generic parameters
+      // (struct Box[T] { ... }). Not yet supported -- fields/methods are
+      // deliberately left unresolved rather than reported member-by-
+      // member, since resolving them would just fail on the unresolvable
+      // generic parameter anyway. One clear error is reported once, at
+      // the struct's own declaration; lookups against a generic struct
+      // return "no opinion" rather than cascading a second, confusing
+      // "no such member" error on top of it.
+      bool isGeneric;
+      // True if one or more of this struct's fields/methods failed to
+      // resolve for *any* reason (a missing annotation, an unknown type
+      // name, etc.) -- distinct from isGeneric, which is known
+      // proactively before resolution is even attempted. Both mean the
+      // same thing downstream: whatever the specific per-member error
+      // already reported explains the problem well enough on its own;
+      // don't also cascade a "no such member" on top of it.
+      bool hasUnresolvedMembers;
     } struct_;
     // Structural Equality
     struct {
@@ -89,6 +106,17 @@ Type *typeArray(Type *elementType);
 void typeStructSetFields(Type *type, TypeMember *fields, int fieldCount);
 void typeStructAddStaticMethod(Type *type, Token name, Type *methodType);
 void typeStructAddInstanceMethod(Type *type, Token name, Type *methodType);
+
+// Marks a struct as using generic parameters in its own declaration. See
+// the isGeneric field's doc comment above for why this exists.
+void typeStructMarkGeneric(Type *type);
+bool typeStructIsGeneric(Type *type);
+
+// Marks a struct as having one or more fields/methods that failed to
+// resolve for any reason. See the hasUnresolvedMembers field's doc
+// comment above for why this exists, and how it differs from isGeneric.
+void typeStructMarkUnresolvedMembers(Type *type);
+bool typeStructHasUnresolvedMembers(Type *type);
 
 // Returns bool if two types are equal
 bool typesEqual(Type *a, Type *b);
