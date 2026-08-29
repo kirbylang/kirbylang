@@ -118,7 +118,7 @@ static void initCompiler(FnCompiler *compiler, FunctionType functionType,
     current->fn->nameOffset =
         cuInternString(compilingUnit, nameToken->start, nameToken->length);
     current->fn->nameLength = nameToken->length;
-  } else if (functionType == FNTYPE_FUNCTION) {
+  } else if (functionType == TYPE_FUNCTION) {
     lambdaCount++;
     char lambdaName[32];
     int len =
@@ -821,7 +821,7 @@ static void compileExpr(AstNode *node) {
   //
   // Compiles the closure and leaves it on the stack
   case NODE_FUNCTION:
-    compileFunction(&node->as.function, FNTYPE_FUNCTION);
+    compileFunction(&node->as.function, TYPE_FUNCTION);
     break;
 
   case NODE_IF: {
@@ -931,7 +931,7 @@ static void compileFunctionDeclStmt(AstNode *node) {
   // Marked initialized *before* compiling the body so the function can call
   // itself recursively through its own local slot.
   markInitialized();
-  compileFunction(fn, FNTYPE_FUNCTION);
+  compileFunction(fn, TYPE_FUNCTION);
   defineVariable(global);
 }
 
