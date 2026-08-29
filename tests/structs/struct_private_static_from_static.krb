@@ -1,13 +1,13 @@
 struct Point {
-    var x: f64;
+    var _x: f64;
 }
 
 impl Point {
-    fun make(x: f64): Point = Point { x: x };
+    fun make(x: f64): Point = Point { _x: x };
 
     pub fun origin(): Point = Point.make(0);
 
-    pub fun x(self): f64 = self.x;
+    pub fun x(self): f64 = self._x;
 }
 
 print Point.origin().x();

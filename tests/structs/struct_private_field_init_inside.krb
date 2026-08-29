@@ -1,11 +1,11 @@
 struct Account {
-    var balance: f64;
+    var _balance: f64;
 }
 
 impl Account {
-    pub fun withBalance(amount: f64): Account = Account { balance: amount };
+    pub fun withBalance(amount: f64): Account = Account { _balance: amount };
 
-    pub fun balance(self): f64 = self.balance;
+    pub fun balance(self): f64 = self._balance;
 }
 
 print Account.withBalance(250).balance();
