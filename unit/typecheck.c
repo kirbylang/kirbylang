@@ -130,7 +130,7 @@ static void test_resolve_function_type(void) {
   Type *result =
       resolveType(env, parseFirstVarType("var x: fun (f64, f64) => f64;"));
   assert(result != NULL);
-  assert(result->kind == TYPE_FUNCTION);
+  assert(result->kind == TYPE_FN);
   assert(result->as.function.paramCount == 2);
   assert(result->as.function.paramTypes[0] == typeF64());
   assert(result->as.function.paramTypes[1] == typeF64());
@@ -142,7 +142,7 @@ static void test_resolve_function_type(void) {
   assert(nested != NULL);
   assert(nested->as.function.paramCount == 1);
   Type *innerParam = nested->as.function.paramTypes[0];
-  assert(innerParam->kind == TYPE_FUNCTION);
+  assert(innerParam->kind == TYPE_FN);
   assert(innerParam->as.function.paramCount == 0);
   assert(innerParam->as.function.returnType == typeBool());
   assert(nested->as.function.returnType == typeUnit());

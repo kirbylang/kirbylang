@@ -140,7 +140,7 @@ int main(void) {
              "(print (index-get (index-get array 1) 1))\n");
 
   assert_ast("../tests/types/var_type_annotation.krb",
-             "(var name : String \"Hello\")\n"
+             "(var name : string \"Hello\")\n"
              "(print name)\n");
 
   assert_ast("../tests/types/let_type_annotation.krb", "(let count : f64 3)\n"
@@ -199,7 +199,7 @@ int main(void) {
              "(print (get box value))\n");
 
   assert_ast("../tests/types/generic_type_function.krb",
-             "(fun identity (x : String) : List[String] x)\n"
+             "(fun identity (x : string) : List[string] x)\n"
              "(print (group (call identity (array \"Hello\" \"World\"))))\n");
 
   assert_ast("../tests/types/generic_type_and_array_brackets_dont_conflict.krb",

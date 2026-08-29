@@ -1,2 +1,2 @@
-var name: String = "Hello";
+var name: string = "Hello";
 print name;

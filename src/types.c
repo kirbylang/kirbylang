@@ -111,7 +111,7 @@ Type *typeStruct(Token name, TypeMember *fields, int fieldCount,
 }
 
 Type *typeFunction(Type **paramTypes, int paramCount, Type *returnType) {
-  Type *type = allocType(TYPE_FUNCTION);
+  Type *type = allocType(TYPE_FN);
   type->as.function.paramTypes = paramTypes;
   type->as.function.paramCount = paramCount;
   type->as.function.returnType = returnType;
@@ -130,7 +130,7 @@ void typeStructSetFields(Type *type, TypeMember *fields, int fieldCount) {
 }
 
 static void appendMember(TypeMember **array, int *count, Token name,
-                        Type *memberType) {
+                         Type *memberType) {
   int newCount = *count + 1;
   TypeMember *newArray =
       (TypeMember *)typesAllocRaw(newCount * sizeof(TypeMember));
@@ -144,12 +144,12 @@ static void appendMember(TypeMember **array, int *count, Token name,
 
 void typeStructAddStaticMethod(Type *type, Token name, Type *methodType) {
   appendMember(&type->as.struct_.staticMethods,
-              &type->as.struct_.staticMethodCount, name, methodType);
+               &type->as.struct_.staticMethodCount, name, methodType);
 }
 
 void typeStructAddInstanceMethod(Type *type, Token name, Type *methodType) {
   appendMember(&type->as.struct_.instanceMethods,
-              &type->as.struct_.instanceMethodCount, name, methodType);
+               &type->as.struct_.instanceMethodCount, name, methodType);
 }
 
 static bool tokensEqual(Token *a, Token *b) {
@@ -177,7 +177,7 @@ bool typesEqual(Type *a, Type *b) {
     // Nominal Equality
     return tokensEqual(&a->as.struct_.name, &b->as.struct_.name);
 
-  case TYPE_FUNCTION:
+  case TYPE_FN:
     // Structural Equality
     if (a->as.function.paramCount != b->as.function.paramCount)
       return false;
@@ -250,7 +250,7 @@ static void appendTypeName(StrBuf *sb, Type *type) {
     sb_appendf(sb, "%.*s", type->as.struct_.name.length,
                type->as.struct_.name.start);
     break;
-  case TYPE_FUNCTION:
+  case TYPE_FN:
     sb_append(sb, "fun (");
     for (int i = 0; i < type->as.function.paramCount; i++) {
       if (i > 0)

@@ -542,7 +542,7 @@ static Type *checkCallAgainstFunctionType(TypeEnv *env, AstNode *node,
                                           Type *calleeType) {
   CallNode *c = &node->as.call;
 
-  if (calleeType->kind != TYPE_FUNCTION) {
+  if (calleeType->kind != TYPE_FN) {
     errorAtTokenFmt(&c->paren, "%s isn't callable.", typeToString(calleeType));
     return NULL;
   }
@@ -600,6 +600,12 @@ static Type *inferGet(TypeEnv *env, AstNode *node) {
     return NULL;
   }
 
+  // Fields take priority over instance methods on a name collision --
+  // correct for the common case. The runtime's actual precedence is more
+  // nuanced than a fixed order (a private field inaccessible from the
+  // current context falls back to a same-named public method instead),
+  // which needs field/method visibility tracked in the type system to
+  // replicate correctly -- not modeled here yet.
   Type *fieldType = typeStructFieldLookup(objectType, g->name);
   if (fieldType != NULL)
     return fieldType;
@@ -803,7 +809,7 @@ static Type *inferBlock(TypeEnv *env, AstNode *node) {
 }
 
 // expected may be NULL (infer() context -- every param must already have
-// an explicit type in that case) or a TYPE_FUNCTION (check() context --
+// an explicit type in that case) or a TYPE_FN (check() context --
 // any untyped param takes its type from the matching position in
 // expected). Shared by infer()'s NODE_FUNCTION case and check()'s lambda
 // special case, since the two only differ in where param types come from
@@ -811,7 +817,7 @@ static Type *inferBlock(TypeEnv *env, AstNode *node) {
 static Type *checkOrInferLambda(TypeEnv *env, AstNode *node, Type *expected) {
   FunctionNode *fn = &node->as.function;
 
-  if (expected != NULL && expected->kind != TYPE_FUNCTION) {
+  if (expected != NULL && expected->kind != TYPE_FN) {
     errorAtNodeFmt(node, "Expected %s here, not a function.",
                    typeToString(expected));
     return NULL;

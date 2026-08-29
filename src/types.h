@@ -12,7 +12,7 @@ typedef enum {
   TYPE_STRING,
   TYPE_F64,
   TYPE_STRUCT,
-  TYPE_FUNCTION,
+  TYPE_FN,
   TYPE_ARRAY,
 } TypeKind;
 

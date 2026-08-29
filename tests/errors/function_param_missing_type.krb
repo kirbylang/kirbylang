@@ -1,1 +1,1 @@
-fun add(a: , b: i64) = a + b;
+fun add(a: , b: f64) = a + b;

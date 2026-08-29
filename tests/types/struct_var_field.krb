@@ -1,3 +1,3 @@
 struct Struct {
-    pub var value: String;
+    pub var value: string;
 }

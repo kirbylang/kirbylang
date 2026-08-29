@@ -12,13 +12,13 @@
 #include "parser.h"
 #include "strbuf.h"
 #include "token_stream.h"
-// #include "typecheck.h"
+#include "typecheck.h"
 #include "version.h"
 #include "vm.h"
 
 static void repl(void);
 static char *readFile(const char *path);
-static CompiledUnit *compileSource(const char *source);
+static CompiledUnit *compileSource(const char *source, bool typecheck);
 static void runFile(const char *path);
 static void runCode(const char *source);
 
@@ -149,7 +149,13 @@ static void repl(void) {
       continue;
     }
 
-    CompiledUnit *unit = compileSource(line);
+    // Type-checking is deliberately skipped in the REPL: TypeEnv has no
+    // persistence across separate lines the way the compiler's own
+    // immutableBindings does, so a variable declared on one line would
+    // be invisible to the next line's check -- not wrong, just silently
+    // unchecked, which is worse than not checking at all. Revisit if/
+    // when TypeEnv gains real session persistence.
+    CompiledUnit *unit = compileSource(line, false);
 
     if (unit == NULL) {
       fprintf(stderr, "Compiler Error!\n");
@@ -182,19 +188,17 @@ static char *readFile(const char *path) {
   return buffer;
 }
 
-static CompiledUnit *compileSource(const char *source) {
+static CompiledUnit *compileSource(const char *source, bool typecheck) {
   int count = 0;
   bool hadError = false;
   int endLine = 0;
   AstNode **ast = parse(source, &count, &hadError, &endLine);
 
-  // bool ok = typecheckProgram(ast, count);
-
-  // if (!ok) {
-  //   astFreeAll();
-  //   free(ast);
-  //   return NULL;
-  // }
+  if (!hadError && typecheck) {
+    if (!typecheckProgram(ast, count)) {
+      hadError = true;
+    }
+  }
 
   CompiledUnit *unit = hadError ? NULL : compile(ast, count, endLine);
 
@@ -206,7 +210,7 @@ static CompiledUnit *compileSource(const char *source) {
 
 static void runFile(const char *path) {
   char *source = readFile(path);
-  CompiledUnit *unit = compileSource(source);
+  CompiledUnit *unit = compileSource(source, true);
   free(source);
 
   if (unit == NULL) {
@@ -220,7 +224,7 @@ static void runFile(const char *path) {
 }
 
 static void runCode(const char *source) {
-  CompiledUnit *unit = compileSource(source);
+  CompiledUnit *unit = compileSource(source, true);
 
   if (unit == NULL) {
     exit(EXIT_CODE_COMPILER_ERR);
