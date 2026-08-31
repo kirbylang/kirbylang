@@ -64,9 +64,6 @@ static Type *allocType(TypeKind kind) {
   return type;
 }
 
-// Primitives are singletons -- built once, reused forever. Simplifies
-// pointer-equality fast paths and avoids re-allocating the same value
-// repeatedly during a single check.
 static Type *unitSingleton = NULL;
 static Type *boolSingleton = NULL;
 static Type *stringSingleton = NULL;
@@ -242,9 +239,6 @@ Type *typeStructStaticMethodLookup(Type *type, Token methodName) {
 
 static void appendTypeName(StrBuf *sb, Type *type) {
   if (type == NULL) {
-    // The empty-array case ([] -- infer() has no element to learn a type
-    // from). Not a real type, just what shows up in a diagnostic if one's
-    // ever needed for it.
     sb_append(sb, "<unknown>");
     return;
   }

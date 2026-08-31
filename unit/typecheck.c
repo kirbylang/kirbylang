@@ -226,8 +226,8 @@ static void test_binary_arithmetic_requires_f64(void) {
 
 static void test_comparisons(void) {
   typecheckResetError();
-  TypeEnv *env = checkProgram(
-      "var a = 1 < 2; var b = 1 == 1; var c = true == false;");
+  TypeEnv *env =
+      checkProgram("var a = 1 < 2; var b = 1 == 1; var c = true == false;");
   assert(!typecheckHadError());
   assert(typeEnvLookup(env, makeToken("a")) == typeBool());
   assert(typeEnvLookup(env, makeToken("b")) == typeBool());
@@ -298,8 +298,8 @@ static void test_nullish_result_comes_from_fallback(void) {
 
 static void test_function_call_checked(void) {
   typecheckResetError();
-  TypeEnv *env = checkProgram(
-      "fun add(a: f64, b: f64): f64 = a + b; var x = add(1, 2);");
+  TypeEnv *env =
+      checkProgram("fun add(a: f64, b: f64): f64 = a + b; var x = add(1, 2);");
   assert(!typecheckHadError());
   assert(typeEnvLookup(env, makeToken("x")) == typeF64());
   typeEnvDestroy(env);
@@ -307,9 +307,8 @@ static void test_function_call_checked(void) {
 
 static void test_function_call_wrong_arg_type_errors(void) {
   typecheckResetError();
-  TypeEnv *env =
-      checkProgram("fun add(a: f64, b: f64): f64 = a + b; var x = "
-                   "add(1, \"two\");");
+  TypeEnv *env = checkProgram("fun add(a: f64, b: f64): f64 = a + b; var x = "
+                              "add(1, \"two\");");
   assert(typecheckHadError());
   typeEnvDestroy(env);
   typecheckResetError();
@@ -343,17 +342,16 @@ static void test_struct_instance_field_and_method_access(void) {
   Type *f64ToF64Params[] = {typeF64()};
   Type *depositType = typeFunction(f64ToF64Params, 1, typeF64());
   TypeMember instanceMethods[] = {{makeToken("deposit"), depositType}};
-  Type *account = typeStruct(makeToken("Account"), fields, 1, NULL, 0,
-                             instanceMethods, 1);
+  Type *account =
+      typeStruct(makeToken("Account"), fields, 1, NULL, 0, instanceMethods, 1);
   typeEnvRegisterStruct(env, makeToken("Account"), account);
   typeEnvDeclare(env, makeToken("a"), account);
 
   int outCount = 0;
   bool hadParseError = false;
   int endLine = 0;
-  AstNode **ast =
-      parse("var balance = a.balance; var result = a.deposit(50);",
-           &outCount, &hadParseError, &endLine);
+  AstNode **ast = parse("var balance = a.balance; var result = a.deposit(50);",
+                        &outCount, &hadParseError, &endLine);
   assert(!hadParseError);
   for (int i = 0; i < outCount; i++)
     checkStmt(env, ast[i]);
@@ -374,15 +372,15 @@ static void test_struct_static_method_access(void) {
   Type *newParams[] = {typeF64(), typeF64()};
   Type *newType = typeFunction(newParams, 2, pointType);
   TypeMember staticMethods[] = {{makeToken("new"), newType}};
-  Type *point = typeStruct(makeToken("Point"), NULL, 0, staticMethods, 1,
-                           NULL, 0);
+  Type *point =
+      typeStruct(makeToken("Point"), NULL, 0, staticMethods, 1, NULL, 0);
   typeEnvRegisterStruct(env, makeToken("Point"), point);
 
   int outCount = 0;
   bool hadParseError = false;
   int endLine = 0;
-  AstNode **ast = parse("var p = Point.new(1, 2);", &outCount,
-                       &hadParseError, &endLine);
+  AstNode **ast =
+      parse("var p = Point.new(1, 2);", &outCount, &hadParseError, &endLine);
   assert(!hadParseError);
   for (int i = 0; i < outCount; i++)
     checkStmt(env, ast[i]);
@@ -406,9 +404,8 @@ static void test_local_variable_shadows_struct_name_for_get(void) {
   // shadowing the struct name (matching how a local shadows a global of
   // the same name at the bytecode level today), not accidentally hit
   // static-method lookup against the real Point struct.
-  Type *originType =
-      typeFunction(NULL, 0, typeStruct(makeToken("Point"), NULL, 0, NULL, 0,
-                                       NULL, 0));
+  Type *originType = typeFunction(
+      NULL, 0, typeStruct(makeToken("Point"), NULL, 0, NULL, 0, NULL, 0));
   TypeMember staticMethods[] = {{makeToken("origin"), originType}};
   Type *pointStructType =
       typeStruct(makeToken("Point"), NULL, 0, staticMethods, 1, NULL, 0);
@@ -458,7 +455,7 @@ static void test_struct_init(void) {
   TypeEnv *env = typeEnvCreate();
   typeEnvBeginScope(env);
   TypeMember fields[] = {{makeToken("x"), typeF64()},
-                        {makeToken("y"), typeF64()}};
+                         {makeToken("y"), typeF64()}};
   Type *point = typeStruct(makeToken("Point"), fields, 2, NULL, 0, NULL, 0);
   typeEnvRegisterStruct(env, makeToken("Point"), point);
 
@@ -466,7 +463,7 @@ static void test_struct_init(void) {
   bool hadParseError = false;
   int endLine = 0;
   AstNode **ast = parse("var p = Point { x: 1, y: 2 };", &outCount,
-                       &hadParseError, &endLine);
+                        &hadParseError, &endLine);
   assert(!hadParseError);
   checkStmt(env, ast[0]);
 
@@ -487,7 +484,7 @@ static void test_struct_init_wrong_field_type_errors(void) {
   bool hadParseError = false;
   int endLine = 0;
   AstNode **ast = parse("var p = Point { x: \"wrong\" };", &outCount,
-                       &hadParseError, &endLine);
+                        &hadParseError, &endLine);
   assert(!hadParseError);
   checkStmt(env, ast[0]);
 
@@ -508,8 +505,7 @@ static void test_self_type(void) {
   int outCount = 0;
   bool hadParseError = false;
   int endLine = 0;
-  AstNode **ast =
-      parse("var x = self;", &outCount, &hadParseError, &endLine);
+  AstNode **ast = parse("var x = self;", &outCount, &hadParseError, &endLine);
   assert(!hadParseError);
   checkStmt(env, ast[0]);
 
@@ -532,8 +528,7 @@ static void test_self_outside_method_errors(void) {
   int outCount = 0;
   bool hadParseError = false;
   int endLine = 0;
-  AstNode **ast =
-      parse("var x = self;", &outCount, &hadParseError, &endLine);
+  AstNode **ast = parse("var x = self;", &outCount, &hadParseError, &endLine);
   assert(!hadParseError);
   checkStmt(env, ast[0]);
 
@@ -575,14 +570,13 @@ static void test_index_non_array_errors(void) {
 
 static void test_if_expression(void) {
   typecheckResetError();
-  TypeEnv *env = checkProgram(
-      "fun test(a: bool): string = if (a) \"yes\" else \"no\";");
+  TypeEnv *env =
+      checkProgram("fun test(a: bool): string = if (a) \"yes\" else \"no\";");
   assert(!typecheckHadError());
   typeEnvDestroy(env);
 }
 
-static void test_if_expression_missing_else_with_non_unit_branch_errors(
-    void) {
+static void test_if_expression_missing_else_with_non_unit_branch_errors(void) {
   typecheckResetError();
   // No else -- implicit else is unit, "yes" is string, mismatch.
   TypeEnv *env = checkProgram("fun test(a: bool): string = if (a) \"yes\";");
@@ -593,23 +587,21 @@ static void test_if_expression_missing_else_with_non_unit_branch_errors(
 
 static void test_if_statement_with_unit_branches_is_fine(void) {
   typecheckResetError();
-  TypeEnv *env = checkProgram(
-      "fun test(a: bool): unit { if (a) { print \"hi\"; } }");
+  TypeEnv *env =
+      checkProgram("fun test(a: bool): unit { if (a) { print \"hi\"; } }");
   assert(!typecheckHadError());
   typeEnvDestroy(env);
 }
 
 static void test_block_expression(void) {
   typecheckResetError();
-  TypeEnv *env =
-      checkProgram("var result = { var a = 1; var b = 2; a + b };");
+  TypeEnv *env = checkProgram("var result = { var a = 1; var b = 2; a + b };");
   assert(!typecheckHadError());
   assert(typeEnvLookup(env, makeToken("result")) == typeF64());
   typeEnvDestroy(env);
 }
 
-static void test_function_implicit_return_checked_against_declared_type(
-    void) {
+static void test_function_implicit_return_checked_against_declared_type(void) {
   typecheckResetError();
   TypeEnv *env = checkProgram("fun sum(a: f64, b: f64): f64 { a + b }");
   assert(!typecheckHadError());
@@ -626,8 +618,7 @@ static void test_function_wrong_implicit_return_type_errors(void) {
 
 static void test_return_statement_checked(void) {
   typecheckResetError();
-  TypeEnv *env =
-      checkProgram("fun sum(a: f64, b: f64): f64 { return a + b; }");
+  TypeEnv *env = checkProgram("fun sum(a: f64, b: f64): f64 { return a + b; }");
   assert(!typecheckHadError());
   typeEnvDestroy(env);
 }
@@ -661,8 +652,8 @@ static void test_lambda_with_explicit_types(void) {
 
 static void test_lambda_contextual_inference(void) {
   typecheckResetError();
-  TypeEnv *env = checkProgram(
-      "var handler: fun (f64) => f64 = fun (x) { x + 1 };");
+  TypeEnv *env =
+      checkProgram("var handler: fun (f64) => f64 = fun (x) { x + 1 };");
   assert(!typecheckHadError());
   typeEnvDestroy(env);
 }
@@ -693,8 +684,8 @@ static void test_while_condition_not_bool_errors(void) {
 
 static void test_for_loop_scopes_its_variable(void) {
   typecheckResetError();
-  TypeEnv *env = checkProgram(
-      "for (var i = 0; i < 10; i = i + 1) { print i; }");
+  TypeEnv *env =
+      checkProgram("for (var i = 0; i < 10; i = i + 1) { print i; }");
   assert(!typecheckHadError());
   typeEnvDestroy(env);
 }
@@ -745,7 +736,6 @@ static void test_nested_function_and_closure(void) {
   typeEnvDestroy(env);
 }
 
-
 // --- typecheckProgram: whole-program driver tests ---
 
 static bool typecheckSource(const char *source) {
@@ -793,53 +783,46 @@ static void test_program_missing_struct_field_type_fails(void) {
 
 static void test_program_self_referential_struct(void) {
   typecheckResetError();
-  bool ok = typecheckSource(
-      "struct Node {\n"
-      "  var value: f64;\n"
-      "  var next: Node;\n"
-      "}\n");
+  bool ok = typecheckSource("struct Node {\n"
+                            "  var value: f64;\n"
+                            "  var next: Node;\n"
+                            "}\n");
   assert(ok);
 }
 
 static void test_program_forward_referencing_struct_field(void) {
   typecheckResetError();
-  // A declared before B, but A's field names B -- B is registered in
-  // Pass A before Pass B resolves A's fields, so this isn't a
-  // declaration-order problem.
-  bool ok = typecheckSource(
-      "struct B { var value: f64; }\n"
-      "struct A { var b: B; }\n");
+  bool ok = typecheckSource("struct B { var value: f64; }\n"
+                            "struct A { var b: B; }\n");
   assert(ok);
 }
 
 static void test_program_multiple_impl_blocks(void) {
   typecheckResetError();
-  bool ok = typecheckSource(
-      "struct Counter {\n"
-      "  var count: f64;\n"
-      "}\n"
-      "impl Counter {\n"
-      "  pub fun new(): Counter = Counter { count: 0 };\n"
-      "}\n"
-      "impl Counter {\n"
-      "  pub fun get(self): f64 = self.count;\n"
-      "}\n"
-      "var c = Counter.new();\n"
-      "print c.get();\n");
+  bool ok = typecheckSource("struct Counter {\n"
+                            "  var count: f64;\n"
+                            "}\n"
+                            "impl Counter {\n"
+                            "  pub fun new(): Counter = Counter { count: 0 };\n"
+                            "}\n"
+                            "impl Counter {\n"
+                            "  pub fun get(self): f64 = self.count;\n"
+                            "}\n"
+                            "var c = Counter.new();\n"
+                            "print c.get();\n");
   assert(ok);
 }
 
 static void test_program_impl_before_struct_declaration(void) {
   typecheckResetError();
-  bool ok = typecheckSource(
-      "impl Point {\n"
-      "  pub fun origin(): Point = Point { x: 0 };\n"
-      "}\n"
-      "struct Point {\n"
-      "  pub var x: f64;\n"
-      "}\n"
-      "var p = Point.origin();\n"
-      "print p.x;\n");
+  bool ok = typecheckSource("impl Point {\n"
+                            "  pub fun origin(): Point = Point { x: 0 };\n"
+                            "}\n"
+                            "struct Point {\n"
+                            "  pub var x: f64;\n"
+                            "}\n"
+                            "var p = Point.origin();\n"
+                            "print p.x;\n");
   assert(ok);
 }
 
@@ -856,11 +839,10 @@ static void test_program_mutually_recursive_functions(void) {
 
 static void test_program_method_body_type_error_caught(void) {
   typecheckResetError();
-  bool ok = typecheckSource(
-      "struct Point { pub var x: f64; }\n"
-      "impl Point {\n"
-      "  pub fun bad(self): string = self.x;\n"
-      "}\n");
+  bool ok = typecheckSource("struct Point { pub var x: f64; }\n"
+                            "impl Point {\n"
+                            "  pub fun bad(self): string = self.x;\n"
+                            "}\n");
   assert(!ok);
 }
 
@@ -868,178 +850,15 @@ static void test_program_nested_closure_captures_self(void) {
   typecheckResetError();
   // A nested *function* (not a lambda) declared inside a method,
   // referencing self.
-  bool ok = typecheckSource(
-      "struct Struct { var value: f64; }\n"
-      "impl Struct {\n"
-      "  pub fun printSelf(self): fun () => f64 {\n"
-      "    fun innerClosure(): f64 { return self.value; }\n"
-      "    return innerClosure;\n"
-      "  }\n"
-      "}\n");
+  bool ok =
+      typecheckSource("struct Struct { var value: f64; }\n"
+                      "impl Struct {\n"
+                      "  pub fun printSelf(self): fun () => f64 {\n"
+                      "    fun innerClosure(): f64 { return self.value; }\n"
+                      "    return innerClosure;\n"
+                      "  }\n"
+                      "}\n");
   assert(ok);
-}
-
-// --- definite-assignment analysis tests ---
-
-static void test_definite_assignment_sequential(void) {
-  typecheckResetError();
-  bool ok = typecheckSource(
-      "fun f(): f64 { var x: f64; x = 5; return x; }");
-  assert(ok);
-}
-
-static void test_definite_assignment_read_before_assignment_errors(void) {
-  typecheckResetError();
-  bool ok = typecheckSource("fun f(): f64 { var x: f64; return x; }");
-  assert(!ok);
-}
-
-static void test_definite_assignment_self_reference_errors(void) {
-  typecheckResetError();
-  // x = x + 1 -- the RHS is evaluated before the assignment takes
-  // effect, so this must still be caught as a read-before-assignment.
-  bool ok = typecheckSource("fun f(): f64 { var x: f64; x = x + 1; return x; }");
-  assert(!ok);
-}
-
-static void test_definite_assignment_initialized_var_never_tracked(void) {
-  typecheckResetError();
-  // Has an initializer -- never pending, safe to read immediately.
-  bool ok = typecheckSource("fun f(): f64 { var x: f64 = 1; return x; }");
-  assert(ok);
-}
-
-static void test_definite_assignment_if_both_branches_assign(void) {
-  typecheckResetError();
-  bool ok = typecheckSource(
-      "fun f(cond: bool): f64 {\n"
-      "  var x: f64;\n"
-      "  if (cond) { x = 1; } else { x = 2; }\n"
-      "  return x;\n"
-      "}\n");
-  assert(ok);
-}
-
-static void test_definite_assignment_if_only_one_branch_assigns_errors(
-    void) {
-  typecheckResetError();
-  bool ok = typecheckSource(
-      "fun f(cond: bool): f64 {\n"
-      "  var x: f64;\n"
-      "  if (cond) { x = 1; }\n"
-      "  return x;\n"
-      "}\n");
-  assert(!ok);
-}
-
-static void test_definite_assignment_if_no_else_at_all_errors(void) {
-  typecheckResetError();
-  bool ok = typecheckSource(
-      "fun f(cond: bool): f64 {\n"
-      "  var x: f64;\n"
-      "  if (cond) { x = 1; }\n"
-      "  return x;\n"
-      "}\n");
-  assert(!ok);
-}
-
-static void test_definite_assignment_early_return_narrows_to_other_branch(
-    void) {
-  typecheckResetError();
-  // Only reachable via the else branch, which assigns -- the then
-  // branch's early return means it never falls through to `return x;`.
-  bool ok = typecheckSource(
-      "fun f(cond: bool): f64 {\n"
-      "  var x: f64;\n"
-      "  if (cond) { return 0; } else { x = 1; }\n"
-      "  return x;\n"
-      "}\n");
-  assert(ok);
-}
-
-static void test_definite_assignment_while_body_not_definite_after(void) {
-  typecheckResetError();
-  // The loop might run zero times -- its assignment isn't definite once
-  // the loop is done, even though it looks like it "obviously" runs.
-  bool ok = typecheckSource(
-      "fun f(cond: bool): f64 {\n"
-      "  var x: f64;\n"
-      "  while (cond) { x = 1; }\n"
-      "  return x;\n"
-      "}\n");
-  assert(!ok);
-}
-
-static void test_definite_assignment_for_body_not_definite_after(void) {
-  typecheckResetError();
-  bool ok = typecheckSource(
-      "fun f(): f64 {\n"
-      "  var x: f64;\n"
-      "  for (var i = 0; i < 10; i = i + 1) { x = i; }\n"
-      "  return x;\n"
-      "}\n");
-  assert(!ok);
-}
-
-static void test_definite_assignment_nested_function_independent_scope(
-    void) {
-  typecheckResetError();
-  // Intraprocedural by design: an assignment inside a *called* function
-  // isn't visible to the caller's own analysis (matches Java/C#/Rust's
-  // definite-assignment, none of which trace effects through a call).
-  // This specific shape doesn't produce a false positive -- outer()
-  // never itself reads x, and inner()'s own analysis doesn't track x at
-  // all (it's not declared there, just closed over) -- but it also
-  // doesn't *prove* the pattern safe; that's the documented limitation,
-  // not a bug.
-  bool ok = typecheckSource(
-      "fun outer(): unit {\n"
-      "  var x: f64;\n"
-      "  fun inner(): unit { x = 1; }\n"
-      "  inner();\n"
-      "}\n");
-  assert(ok);
-}
-
-static void test_definite_assignment_top_level_uninitialized_var(void) {
-  typecheckResetError();
-  // A top-level uninitialized var, assigned and read at the top level
-  // (not inside any function) -- the ordinary case, no cross-function
-  // reasoning involved. Should be provable safe on its own.
-  bool ok = typecheckSource(
-      "var x: f64;\n"
-      "x = 5;\n"
-      "print x;\n");
-  assert(ok);
-}
-
-static void test_definite_assignment_top_level_read_before_assign_errors(
-    void) {
-  typecheckResetError();
-  bool ok = typecheckSource(
-      "var x: f64;\n"
-      "print x;\n");
-  assert(!ok);
-}
-
-static void test_definite_assignment_cross_function_pattern_is_rejected(
-    void) {
-  typecheckResetError();
-  // The exact shape upvalue_global.krb uses: a top-level uninitialized
-  // var, assigned *inside* a function body, read at the top level after
-  // that function is called. A properly-scoped intraprocedural analysis
-  // can't trace the assignment through the call, so this is correctly
-  // rejected even though the runtime behavior is fine -- same documented
-  // limitation every mainstream language's version of this analysis has.
-  bool ok = typecheckSource(
-      "var globalSet: fun () => unit;\n"
-      "fun main(): unit {\n"
-      "  fun setIt(): unit {}\n"
-      "  globalSet = setIt;\n"
-      "}\n"
-      "main();\n"
-      "globalSet();\n");
-  assert(!ok);
 }
 
 int main(void) {
@@ -1112,21 +931,6 @@ int main(void) {
   test_program_mutually_recursive_functions();
   test_program_method_body_type_error_caught();
   test_program_nested_closure_captures_self();
-
-  test_definite_assignment_sequential();
-  test_definite_assignment_read_before_assignment_errors();
-  test_definite_assignment_self_reference_errors();
-  test_definite_assignment_initialized_var_never_tracked();
-  test_definite_assignment_if_both_branches_assign();
-  test_definite_assignment_if_only_one_branch_assigns_errors();
-  test_definite_assignment_if_no_else_at_all_errors();
-  test_definite_assignment_early_return_narrows_to_other_branch();
-  test_definite_assignment_while_body_not_definite_after();
-  test_definite_assignment_for_body_not_definite_after();
-  test_definite_assignment_nested_function_independent_scope();
-  test_definite_assignment_top_level_uninitialized_var();
-  test_definite_assignment_top_level_read_before_assign_errors();
-  test_definite_assignment_cross_function_pattern_is_rejected();
 
   typesFreeAll();
   astFreeAll();

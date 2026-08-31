@@ -149,13 +149,7 @@ static void repl(void) {
       continue;
     }
 
-    // Type-checking is deliberately skipped in the REPL: TypeEnv has no
-    // persistence across separate lines the way the compiler's own
-    // immutableBindings does, so a variable declared on one line would
-    // be invisible to the next line's check -- not wrong, just silently
-    // unchecked, which is worse than not checking at all. Revisit if/
-    // when TypeEnv gains real session persistence.
-    CompiledUnit *unit = compileSource(line, false);
+    CompiledUnit *unit = compileSource(line, /*typecheck=*/false);
 
     if (unit == NULL) {
       fprintf(stderr, "Compiler Error!\n");
@@ -210,7 +204,7 @@ static CompiledUnit *compileSource(const char *source, bool typecheck) {
 
 static void runFile(const char *path) {
   char *source = readFile(path);
-  CompiledUnit *unit = compileSource(source, true);
+  CompiledUnit *unit = compileSource(source, /*typecheck=*/true);
   free(source);
 
   if (unit == NULL) {
@@ -224,7 +218,7 @@ static void runFile(const char *path) {
 }
 
 static void runCode(const char *source) {
-  CompiledUnit *unit = compileSource(source, true);
+  CompiledUnit *unit = compileSource(source, /*typecheck=*/true);
 
   if (unit == NULL) {
     exit(EXIT_CODE_COMPILER_ERR);

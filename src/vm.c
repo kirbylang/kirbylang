@@ -271,7 +271,6 @@ static bool invoke(ObjString *name, int argCount) {
   }
 
   if (!IS_INSTANCE(caller)) {
-    // TODO: Reword?
     runtimeError(&vm, "Only instances have methods.");
     return false;
   }

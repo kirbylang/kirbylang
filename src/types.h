@@ -39,22 +39,9 @@ struct Type {
       // just "this struct," never worth spelling out per-method.
       TypeMember *instanceMethods;
       int instanceMethodCount;
-      // True if this struct's declaration uses generic parameters
-      // (struct Box[T] { ... }). Not yet supported -- fields/methods are
-      // deliberately left unresolved rather than reported member-by-
-      // member, since resolving them would just fail on the unresolvable
-      // generic parameter anyway. One clear error is reported once, at
-      // the struct's own declaration; lookups against a generic struct
-      // return "no opinion" rather than cascading a second, confusing
-      // "no such member" error on top of it.
       bool isGeneric;
-      // True if one or more of this struct's fields/methods failed to
-      // resolve for *any* reason (a missing annotation, an unknown type
-      // name, etc.) -- distinct from isGeneric, which is known
-      // proactively before resolution is even attempted. Both mean the
-      // same thing downstream: whatever the specific per-member error
-      // already reported explains the problem well enough on its own;
-      // don't also cascade a "no such member" on top of it.
+      // True if any field/method failed to resolve for any reason
+      // (missing annotation, unknown type, etc)
       bool hasUnresolvedMembers;
     } struct_;
     // Structural Equality
@@ -63,11 +50,6 @@ struct Type {
       int paramCount;
       Type *returnType;
     } function;
-    // Structural, single element type -- always the result of inference
-    // (array literal, or indexing into an already-known array), never of
-    // resolveType(). There's no `: Type` annotation syntax that produces
-    // this yet -- `List[T]`/`[T; N]` aren't supported. Recursion handles
-    // multidimensional arrays ([[1, 2], [3, 4]]) for free.
     struct {
       Type *elementType;
     } array;

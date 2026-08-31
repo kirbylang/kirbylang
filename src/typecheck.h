@@ -9,6 +9,10 @@
 
 typedef struct TypeEnv TypeEnv;
 
+// Shared diagnostic reporting, also used by definite_assignment.c.
+void errorAtToken(Token *token, const char *message);
+void errorAtTokenFmt(Token *token, const char *fmt, ...);
+
 TypeEnv *typeEnvCreate(void);
 void typeEnvDestroy(TypeEnv *env);
 

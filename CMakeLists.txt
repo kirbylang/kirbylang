@@ -57,6 +57,7 @@ set(KIRBY_SOURCES
     src/hashtable.c
     src/lexer.c
     src/compiled_unit.c
+    src/definite_assignment.c
     src/gc.c
     src/loader.c
     src/native.c
@@ -290,6 +291,23 @@ if(BUILD_TESTS)
     add_test(
         NAME kirby-typecheck-unit-test
         COMMAND kirby-typecheck-unit-test
+    )
+
+    add_executable(kirby-definite-assignment-unit-test
+        unit/definite_assignment.c
+    )
+
+    target_link_libraries(kirby-definite-assignment-unit-test
+        PRIVATE
+            kirby_core_debug
+    )
+
+    configure_kirby_target(kirby-definite-assignment-unit-test)
+    enable_coverage(kirby-definite-assignment-unit-test)
+
+    add_test(
+        NAME kirby-definite-assignment-unit-test
+        COMMAND kirby-definite-assignment-unit-test
     )
 
     add_executable(kirby-stringset-unit-test
