@@ -35,6 +35,10 @@
   - Deprecate the call syntax e.g. `Point()`
 - [`continue` keyword](https://github.com/kirbylang/kirbylang/issues/13)
 - Initial implementation of types and typechecker
+  - Limitations
+    - Native functions are not typechecked
+    - Generic types are ignored
+    - REPL has typechecking disabled
   - Primitive types
     - `string`
     - `bool`
