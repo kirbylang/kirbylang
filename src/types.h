@@ -31,12 +31,8 @@ struct Type {
       Token name;
       TypeMember *fields;
       int fieldCount;
-      // No self -- accessed on the struct name itself, e.g. Point.new(...).
       TypeMember *staticMethods;
       int staticMethodCount;
-      // self excluded from each Type*'s param list, same as FunctionNode's
-      // params/paramTypes already exclude it -- self's type is always
-      // just "this struct," never worth spelling out per-method.
       TypeMember *instanceMethods;
       int instanceMethodCount;
       bool isGeneric;
