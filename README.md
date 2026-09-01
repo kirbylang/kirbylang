@@ -17,7 +17,7 @@ fun fizzbuzz(n: f64): string =
     else numberToString(n);
 
 // Read from stdin
-var limit = parseNumber(prompt("limit: "));
+var limit: f64 = parseNumber(prompt("limit: "));
 
 for (var i = 1; i <= limit; i = i + 1) {
     print fizzbuzz(i);
@@ -26,6 +26,7 @@ for (var i = 1; i <= limit; i = i + 1) {
 
 ## Documentation
 
+- [Types](./docs/TYPES.md)
 - [CLI](./docs/CLI.md)
 - [Development](./docs/DEVELOPMENT.md)
 - [Change Log](./docs/CHANGELOG.md)
