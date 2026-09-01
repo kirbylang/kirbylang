@@ -55,8 +55,10 @@
   - Bindings
     - `var age: f64 = 100;`
     - `let name = "Kirby";`
-  - Dunctions
+  - Functions
     - `fun map(value: f64): f64 { ... }`
+  - Lambas
+    - `let sum: fun (f64, f64) => f64 = fun (a: f64, b: f64): f64 { a + b };`
   - Struct fields
     - `struct Box { pub let value: f64; }`
 - [Definite Assignment Analysis](https://en.wikipedia.org/wiki/Definite_assignment_analysis)
