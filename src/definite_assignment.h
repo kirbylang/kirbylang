@@ -6,20 +6,22 @@
 #include "ast.h"
 #include "token.h"
 
-// Names still awaiting their first assignment at some point in the walk.
+// A set of identifier tokens waiting to be assigned a value
+//
+// Used in definite assignment analysis
 typedef struct {
   Token *names;
   int count;
   int capacity;
-} PendingSet;
+} DaaSet;
 
-void pendingSetInit(PendingSet *set);
-void pendingSetFree(PendingSet *set);
+void daaSetInit(DaaSet *daa);
+void daaSetFree(DaaSet *daa);
 
 // Returns true if the statement unconditionally exits (return/break/continue),
 // meaning the rest of its enclosing block is unreachable..
-bool checkAssignmentStmt(PendingSet *pending, AstNode *node);
+bool daaCheckAssignmentStmt(DaaSet *daa, AstNode *node);
 
-void checkDefiniteAssignment(FunctionNode *fn);
+void daaCheckFn(FunctionNode *fn);
 
 #endif

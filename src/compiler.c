@@ -64,7 +64,7 @@ static void errorAt(int line, const char *lexeme, int lexemeLen,
   fprintf(stderr, ": %s\n", message);
 }
 
-static void errorAtToken(Token *token, const char *message) {
+static void typchkErrorAtToken(Token *token, const char *message) {
   hadError = true;
   fprintf(stderr, "[line %d] Error", token->line);
   if (token->type == TOKEN_EOF) {
@@ -75,7 +75,7 @@ static void errorAtToken(Token *token, const char *message) {
   fprintf(stderr, ": %s\n", message);
 }
 
-static void errorAtNode(AstNode *node, const char *message) {
+static void typchkErrorAtNode(AstNode *node, const char *message) {
   errorAt(node->line, NULL, 0, message);
 }
 
@@ -193,8 +193,8 @@ static int resolveLocal(FnCompiler *compiler, Token *identifier) {
 
     if (identifiersEqual(identifier, &local->name)) {
       if (local->depth == -1) {
-        errorAtToken(identifier,
-                     "Can't read local variable in its own initializer");
+        typchkErrorAtToken(identifier,
+                           "Can't read local variable in its own initializer");
       }
 
       TRACELN("  compiler.resolveLocal() -> Found local %d", i);
@@ -252,14 +252,14 @@ static int resolveUpvalue(FnCompiler *compiler, Token *name) {
 
 static void addLocal(Token name, bool isMutable) {
   if (current->localCount == UINT8_COUNT) {
-    errorAtToken(&name, "Too many local variables in function.");
+    typchkErrorAtToken(&name, "Too many local variables in function.");
     return;
   }
 
   for (int i = 0; i < current->localCount; i++) {
     Local *existing = &current->locals[i];
     if (identifiersEqual(&name, &existing->name) && !existing->isMutable) {
-      errorAtToken(&name, "Already declared in this scope.");
+      typchkErrorAtToken(&name, "Already declared in this scope.");
       return;
     }
   }
@@ -299,7 +299,7 @@ static bool isMutuableBinding(Token *name) {
 
 static void checkImmutableRedeclaration(Token *name) {
   if (isMutuableBinding(name)) {
-    errorAtToken(name, "Already declared in this scope.");
+    typchkErrorAtToken(name, "Already declared in this scope.");
   }
 }
 
@@ -413,7 +413,7 @@ static uint8_t makeConstant(CompiledConst value, Token *tok) {
 
   if (constant > UINT8_MAX) {
     if (tok != NULL) {
-      errorAtToken(tok, "Too many constants in one chunk.");
+      typchkErrorAtToken(tok, "Too many constants in one chunk.");
     } else {
       error("Too many constants in one chunk.");
     }
@@ -690,7 +690,7 @@ static void compileExpr(AstNode *node) {
     AssignNode *a = &node->as.assign;
     VarRef ref = resolveVariable(&a->name);
     if (!ref.isMutable) {
-      errorAtToken(&a->name, "Cannot assign to immutable binding");
+      typchkErrorAtToken(&a->name, "Cannot assign to immutable binding");
     }
     compileExpr(a->value);
     emitBytes(ref.setOp, ref.arg);
@@ -773,12 +773,13 @@ static void compileExpr(AstNode *node) {
   case NODE_SELF: {
     if (!selfInScope()) {
       if (current->type == TYPE_STATIC_METHOD) {
-        errorAtToken(&node->as.self_.keyword,
-                     "Can't use 'self' in a static method. Add 'self' as the "
-                     "first parameter to make it an instance method.");
+        typchkErrorAtToken(
+            &node->as.self_.keyword,
+            "Can't use 'self' in a static method. Add 'self' as the "
+            "first parameter to make it an instance method.");
       } else {
-        errorAtToken(&node->as.self_.keyword,
-                     "Can't use 'self' outside of an instance method.");
+        typchkErrorAtToken(&node->as.self_.keyword,
+                           "Can't use 'self' outside of an instance method.");
       }
       emitByte(OP_NIL);
       break;
@@ -808,7 +809,7 @@ static void compileExpr(AstNode *node) {
   case NODE_ARRAY: {
     ArrayNode *arr = &node->as.array;
     if (arr->count > UINT8_MAX) {
-      errorAtNode(node, "Too many elements in array literal.");
+      typchkErrorAtNode(node, "Too many elements in array literal.");
     }
     for (int i = 0; i < arr->count; i++) {
       compileExpr(arr->items[i]);
@@ -867,7 +868,7 @@ static void compileExpr(AstNode *node) {
   }
 
   default:
-    errorAtNode(node, "Internal error: not a valid expression node.");
+    typchkErrorAtNode(node, "Internal error: not a valid expression node.");
     break;
   }
 }
@@ -894,7 +895,7 @@ static void compileFunction(FunctionNode *fn, FunctionType type) {
 
   current->fn->arity = fn->arity;
   if (fn->arity > 255) {
-    errorAtToken(&fn->name, "Can't have more than 255 parameters.");
+    typchkErrorAtToken(&fn->name, "Can't have more than 255 parameters.");
   }
   for (int i = 0; i < fn->arity; i++) {
     declareVariable(&fn->params[i], /*isMutable=*/true);
@@ -1002,7 +1003,7 @@ static void compileReturn(AstNode *node) {
   ReturnNode *r = &node->as.return_;
 
   if (current->type == TYPE_SCRIPT) {
-    errorAtNode(node, "Can't return from top-level code.");
+    typchkErrorAtNode(node, "Can't return from top-level code.");
   }
 
   if (r->value == NULL) {
@@ -1016,12 +1017,12 @@ static void compileReturn(AstNode *node) {
 
 static void compileBreak(AstNode *node) {
   if (currentLoop == NULL) {
-    errorAtNode(node, "Can't use 'break' outside of a loop.");
+    typchkErrorAtNode(node, "Can't use 'break' outside of a loop.");
     return;
   }
 
   if (currentLoop->breakCount == UINT8_COUNT) {
-    errorAtNode(node, "Too many breaks in one loop.");
+    typchkErrorAtNode(node, "Too many breaks in one loop.");
     return;
   }
 
@@ -1031,7 +1032,7 @@ static void compileBreak(AstNode *node) {
 
 static void compileContinue(AstNode *node) {
   if (currentLoop == NULL) {
-    errorAtNode(node, "Can't use 'continue' outside of a loop.");
+    typchkErrorAtNode(node, "Can't use 'continue' outside of a loop.");
     return;
   }
 
@@ -1164,7 +1165,7 @@ static void compileBlockContents(BlockNode *block) {
     compileExpr(block->value);
 
     if (current->type == TYPE_SCRIPT) {
-      errorAtNode(block->value, "Expect ';' after expression.");
+      typchkErrorAtNode(block->value, "Expect ';' after expression.");
     } else {
       emitValueReturn();
     }
@@ -1242,7 +1243,7 @@ static void compileStmt(AstNode *node) {
     break;
 
   default:
-    errorAtNode(node, "Internal error: not a valid statement node.");
+    typchkErrorAtNode(node, "Internal error: not a valid statement node.");
     break;
   }
 }

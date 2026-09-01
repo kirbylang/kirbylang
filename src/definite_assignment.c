@@ -11,85 +11,87 @@ static bool tokensEqual(Token *a, Token *b) {
   return memcmp(a->start, b->start, a->length) == 0;
 }
 
-void pendingSetInit(PendingSet *set) {
-  set->names = NULL;
-  set->count = 0;
-  set->capacity = 0;
+void daaSetInit(DaaSet *daa) {
+  daa->names = NULL;
+  daa->count = 0;
+  daa->capacity = 0;
 }
 
-void pendingSetFree(PendingSet *set) {
-  free(set->names);
-  set->names = NULL;
-  set->count = 0;
-  set->capacity = 0;
+void daaSetFree(DaaSet *daa) {
+  free(daa->names);
+  daa->names = NULL;
+  daa->count = 0;
+  daa->capacity = 0;
 }
 
-static void pendingSetAdd(PendingSet *set, Token name) {
-  if (set->capacity < set->count + 1) {
-    set->capacity = set->capacity < 8 ? 8 : set->capacity * 2;
-    set->names = (Token *)realloc(set->names, sizeof(Token) * set->capacity);
+static void daaSetAdd(DaaSet *daa, Token name) {
+  if (daa->capacity < daa->count + 1) {
+    daa->capacity = daa->capacity < 8 ? 8 : daa->capacity * 2;
+    daa->names = (Token *)realloc(daa->names, sizeof(Token) * daa->capacity);
 
-    if (set->names == NULL) {
-      fprintf(stderr, "realloc failed in pendingSetAdd\n");
+    if (daa->names == NULL) {
+      fprintf(stderr, "realloc failed in daaSetAdd\n");
       exit(1);
     }
   }
 
-  set->names[set->count++] = name;
+  daa->names[daa->count++] = name;
 }
 
-static bool pendingSetContains(PendingSet *set, Token name) {
-  for (int i = 0; i < set->count; i++) {
-    if (tokensEqual(&set->names[i], &name))
+static bool daaSetContains(DaaSet *daa, Token name) {
+  for (int i = 0; i < daa->count; i++) {
+    if (tokensEqual(&daa->names[i], &name))
       return true;
   }
 
   return false;
 }
 
-static void pendingSetRemove(PendingSet *set, Token name) {
-  for (int i = 0; i < set->count; i++) {
-    if (tokensEqual(&set->names[i], &name)) {
-      set->names[i] = set->names[set->count - 1];
-      set->count--;
+static void daaSetRemove(DaaSet *daa, Token name) {
+  for (int i = 0; i < daa->count; i++) {
+    if (tokensEqual(&daa->names[i], &name)) {
+      daa->names[i] = daa->names[daa->count - 1];
+      daa->count--;
       return;
     }
   }
 }
 
-static PendingSet pendingSetClone(PendingSet *set) {
-  PendingSet clone;
-  pendingSetInit(&clone);
-  for (int i = 0; i < set->count; i++) {
-    pendingSetAdd(&clone, set->names[i]);
+static DaaSet daaSetClone(DaaSet *daa) {
+  DaaSet clone;
+  daaSetInit(&clone);
+  for (int i = 0; i < daa->count; i++) {
+    daaSetAdd(&clone, daa->names[i]);
   }
   return clone;
 }
 
-// Adds every name in `from` not already present in `into`.
-static void pendingSetUnionInto(PendingSet *into, PendingSet *from) {
-  for (int i = 0; i < from->count; i++) {
-    if (!pendingSetContains(into, from->names[i])) {
-      pendingSetAdd(into, from->names[i]);
+// Adds every name in `daaFrom` not already present in `daaInto`.
+static void daaSetUnionInto(DaaSet *daaInto, DaaSet *daaFrom) {
+  for (int i = 0; i < daaFrom->count; i++) {
+    if (!daaSetContains(daaInto, daaFrom->names[i])) {
+      daaSetAdd(daaInto, daaFrom->names[i]);
     }
   }
 }
 
-static void checkAssignmentExpr(PendingSet *pending, AstNode *node);
+static void daaCheckAssignmentExpr(DaaSet *daa, AstNode *node);
 
-static bool checkAssignmentBlock(PendingSet *pending, BlockNode *block) {
+static bool daaCheckAssignmentBlock(DaaSet *daa, BlockNode *block) {
   for (int i = 0; i < block->count; i++) {
-    if (checkAssignmentStmt(pending, block->stmts[i])) {
+    if (daaCheckAssignmentStmt(daa, block->stmts[i])) {
       return true; // rest of the block is unreachable
     }
   }
+
   if (block->value != NULL) {
-    checkAssignmentExpr(pending, block->value);
+    daaCheckAssignmentExpr(daa, block->value);
   }
+
   return false;
 }
 
-static void checkAssignmentExpr(PendingSet *pending, AstNode *node) {
+static void daaCheckAssignmentExpr(DaaSet *daa, AstNode *node) {
   if (node == NULL)
     return;
 
@@ -97,9 +99,9 @@ static void checkAssignmentExpr(PendingSet *pending, AstNode *node) {
   case NODE_VARIABLE: {
     Token *name = &node->as.variable.name;
 
-    if (pendingSetContains(pending, *name)) {
-      errorAtTokenFmt(name, "'%.*s' might not be assigned yet.", name->length,
-                      name->start);
+    if (daaSetContains(daa, *name)) {
+      typchkErrorAtTokenFmt(name, "'%.*s' might not be assigned yet.",
+                            name->length, name->start);
     }
 
     break;
@@ -107,66 +109,66 @@ static void checkAssignmentExpr(PendingSet *pending, AstNode *node) {
   case NODE_ASSIGN: {
     AssignNode *assign = &node->as.assign;
 
-    checkAssignmentExpr(pending, assign->value);
-    pendingSetRemove(pending, assign->name);
+    daaCheckAssignmentExpr(daa, assign->value);
+    daaSetRemove(daa, assign->name);
 
     break;
   }
   case NODE_UNARY:
-    checkAssignmentExpr(pending, node->as.unary.operand);
+    daaCheckAssignmentExpr(daa, node->as.unary.operand);
 
     break;
   case NODE_BINARY:
-    checkAssignmentExpr(pending, node->as.binary.left);
-    checkAssignmentExpr(pending, node->as.binary.right);
+    daaCheckAssignmentExpr(daa, node->as.binary.left);
+    daaCheckAssignmentExpr(daa, node->as.binary.right);
 
     break;
   case NODE_GROUPING:
-    checkAssignmentExpr(pending, node->as.grouping.inner);
+    daaCheckAssignmentExpr(daa, node->as.grouping.inner);
 
     break;
   case NODE_AND:
   case NODE_OR:
   case NODE_NULLISH:
-    checkAssignmentExpr(pending, node->as.logical.left);
-    checkAssignmentExpr(pending, node->as.logical.right);
+    daaCheckAssignmentExpr(daa, node->as.logical.left);
+    daaCheckAssignmentExpr(daa, node->as.logical.right);
 
     break;
   case NODE_CALL: {
     CallNode *call = &node->as.call;
-    checkAssignmentExpr(pending, call->callee);
+    daaCheckAssignmentExpr(daa, call->callee);
 
     for (int i = 0; i < call->argCount; i++)
-      checkAssignmentExpr(pending, call->args[i]);
+      daaCheckAssignmentExpr(daa, call->args[i]);
 
     break;
   }
   case NODE_GET:
-    checkAssignmentExpr(pending, node->as.get.object);
+    daaCheckAssignmentExpr(daa, node->as.get.object);
 
     break;
   case NODE_SET: {
     SetNode *set = &node->as.set;
 
-    checkAssignmentExpr(pending, set->object);
-    checkAssignmentExpr(pending, set->value);
+    daaCheckAssignmentExpr(daa, set->object);
+    daaCheckAssignmentExpr(daa, set->value);
 
     break;
   }
   case NODE_INDEX_GET: {
     IndexGetNode *indexGet = &node->as.indexGet;
 
-    checkAssignmentExpr(pending, indexGet->object);
-    checkAssignmentExpr(pending, indexGet->index);
+    daaCheckAssignmentExpr(daa, indexGet->object);
+    daaCheckAssignmentExpr(daa, indexGet->index);
 
     break;
   }
   case NODE_INDEX_SET: {
     IndexSetNode *indexSet = &node->as.indexSet;
 
-    checkAssignmentExpr(pending, indexSet->object);
-    checkAssignmentExpr(pending, indexSet->index);
-    checkAssignmentExpr(pending, indexSet->value);
+    daaCheckAssignmentExpr(daa, indexSet->object);
+    daaCheckAssignmentExpr(daa, indexSet->index);
+    daaCheckAssignmentExpr(daa, indexSet->value);
 
     break;
   }
@@ -174,7 +176,7 @@ static void checkAssignmentExpr(PendingSet *pending, AstNode *node) {
     StructInitNode *structInit = &node->as.structInit;
 
     for (int i = 0; i < structInit->fieldCount; i++)
-      checkAssignmentExpr(pending, structInit->fields[i].value);
+      daaCheckAssignmentExpr(daa, structInit->fields[i].value);
 
     break;
   }
@@ -182,13 +184,13 @@ static void checkAssignmentExpr(PendingSet *pending, AstNode *node) {
     ArrayNode *array = &node->as.array;
 
     for (int i = 0; i < array->count; i++)
-      checkAssignmentExpr(pending, array->items[i]);
+      daaCheckAssignmentExpr(daa, array->items[i]);
 
     break;
   }
   case NODE_IF:
   case NODE_BLOCK:
-    checkAssignmentStmt(pending, node);
+    daaCheckAssignmentStmt(daa, node);
     break;
   case NODE_FUNCTION:
     break;
@@ -200,23 +202,23 @@ static void checkAssignmentExpr(PendingSet *pending, AstNode *node) {
   }
 }
 
-bool checkAssignmentStmt(PendingSet *pending, AstNode *node) {
+bool daaCheckAssignmentStmt(DaaSet *daa, AstNode *node) {
   switch (node->kind) {
   case NODE_EXPR_STMT:
-    checkAssignmentExpr(pending, node->as.exprStmt.expr);
+    daaCheckAssignmentExpr(daa, node->as.exprStmt.expr);
     return false;
 
   case NODE_PRINT:
-    checkAssignmentExpr(pending, node->as.print.expr);
+    daaCheckAssignmentExpr(daa, node->as.print.expr);
     return false;
 
   case NODE_VAR_DECL: {
     VarDeclNode *varDecl = &node->as.varDecl;
 
     if (varDecl->initializer != NULL) {
-      checkAssignmentExpr(pending, varDecl->initializer);
+      daaCheckAssignmentExpr(daa, varDecl->initializer);
     } else {
-      pendingSetAdd(pending, varDecl->name);
+      daaSetAdd(daa, varDecl->name);
     }
 
     return false;
@@ -224,12 +226,12 @@ bool checkAssignmentStmt(PendingSet *pending, AstNode *node) {
 
   case NODE_WHILE: {
     WhileNode *while_ = &node->as.while_;
-    checkAssignmentExpr(pending, while_->condition);
+    daaCheckAssignmentExpr(daa, while_->condition);
     // The body might run zero times -- whatever it assigns isn't
-    // definite afterward, so it's checked against a pending set clone
-    PendingSet bodyPending = pendingSetClone(pending);
-    checkAssignmentStmt(&bodyPending, while_->body);
-    pendingSetFree(&bodyPending);
+    // definite afterward, so it's checked against a daa set clone
+    DaaSet bodyDaa = daaSetClone(daa);
+    daaCheckAssignmentStmt(&bodyDaa, while_->body);
+    daaSetFree(&bodyDaa);
 
     return false;
   }
@@ -238,18 +240,18 @@ bool checkAssignmentStmt(PendingSet *pending, AstNode *node) {
     ForNode *for_ = &node->as.for_;
 
     if (for_->init != NULL)
-      checkAssignmentStmt(pending, for_->init); // always runs once, for real
+      daaCheckAssignmentStmt(daa, for_->init); // always runs once, for real
 
     if (for_->condition != NULL)
-      checkAssignmentExpr(pending, for_->condition); // always evaluated once
+      daaCheckAssignmentExpr(daa, for_->condition); // always evaluated once
 
-    PendingSet bodyPending = pendingSetClone(pending);
-    checkAssignmentStmt(&bodyPending, for_->body);
+    DaaSet bodyDaa = daaSetClone(daa);
+    daaCheckAssignmentStmt(&bodyDaa, for_->body);
 
     if (for_->increment != NULL)
-      checkAssignmentExpr(&bodyPending, for_->increment);
+      daaCheckAssignmentExpr(&bodyDaa, for_->increment);
 
-    pendingSetFree(&bodyPending);
+    daaSetFree(&bodyDaa);
 
     return false;
   }
@@ -257,7 +259,7 @@ bool checkAssignmentStmt(PendingSet *pending, AstNode *node) {
   case NODE_RETURN: {
     ReturnNode *return_ = &node->as.return_;
     if (return_->value != NULL)
-      checkAssignmentExpr(pending, return_->value);
+      daaCheckAssignmentExpr(daa, return_->value);
     return true;
   }
 
@@ -267,66 +269,65 @@ bool checkAssignmentStmt(PendingSet *pending, AstNode *node) {
 
   case NODE_IF: {
     IfNode *if_ = &node->as.if_;
-    checkAssignmentExpr(pending, if_->condition);
+    daaCheckAssignmentExpr(daa, if_->condition);
 
-    PendingSet thenPending = pendingSetClone(pending);
-    bool thenEscapes = checkAssignmentStmt(&thenPending, if_->thenBranch);
+    DaaSet thenDaa = daaSetClone(daa);
+    bool thenEscapes = daaCheckAssignmentStmt(&thenDaa, if_->thenBranch);
 
-    PendingSet elsePending = pendingSetClone(pending);
-
+    DaaSet elseDaa = daaSetClone(daa);
     bool elseEscapes = false;
     if (if_->elseBranch != NULL) {
-      elseEscapes = checkAssignmentStmt(&elsePending, if_->elseBranch);
+      elseEscapes = daaCheckAssignmentStmt(&elseDaa, if_->elseBranch);
     }
 
     if (thenEscapes && elseEscapes) {
-      pendingSetFree(&thenPending);
-      pendingSetFree(&elsePending);
+      daaSetFree(&thenDaa);
+      daaSetFree(&elseDaa);
       return true;
     }
 
     if (thenEscapes) {
-      pendingSetFree(pending);
-      *pending = elsePending;
-      pendingSetFree(&thenPending);
+      daaSetFree(daa);
+      *daa = elseDaa;
+      daaSetFree(&thenDaa);
       return false;
     }
 
     if (elseEscapes) {
-      pendingSetFree(pending);
-      *pending = thenPending;
-      pendingSetFree(&elsePending);
+      daaSetFree(daa);
+      *daa = thenDaa;
+      daaSetFree(&elseDaa);
       return false;
     }
 
-    pendingSetFree(pending);
-    pendingSetInit(pending);
-    pendingSetUnionInto(pending, &thenPending);
-    pendingSetUnionInto(pending, &elsePending);
-    pendingSetFree(&thenPending);
-    pendingSetFree(&elsePending);
+    daaSetFree(daa);
+    daaSetInit(daa);
+    daaSetUnionInto(daa, &thenDaa);
+    daaSetUnionInto(daa, &elseDaa);
+    daaSetFree(&thenDaa);
+    daaSetFree(&elseDaa);
 
     return false;
   }
 
   case NODE_BLOCK:
-    return checkAssignmentBlock(pending, &node->as.block);
+    return daaCheckAssignmentBlock(daa, &node->as.block);
 
   case NODE_FUNCTION:
     return false;
 
   default:
-    checkAssignmentExpr(pending, node);
+    daaCheckAssignmentExpr(daa, node);
     return false;
   }
 }
 
-void checkDefiniteAssignment(FunctionNode *fn) {
+void daaCheckFn(FunctionNode *fn) {
   if (fn->exprBody != NULL)
     return;
 
-  PendingSet pending;
-  pendingSetInit(&pending);
-  checkAssignmentBlock(&pending, &fn->body);
-  pendingSetFree(&pending);
+  DaaSet daa;
+  daaSetInit(&daa);
+  daaCheckAssignmentBlock(&daa, &fn->body);
+  daaSetFree(&daa);
 }

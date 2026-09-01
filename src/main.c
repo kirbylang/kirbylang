@@ -189,7 +189,7 @@ static CompiledUnit *compileSource(const char *source, bool typecheck) {
   AstNode **ast = parse(source, &count, &hadError, &endLine);
 
   if (!hadError && typecheck) {
-    if (!typecheckProgram(ast, count)) {
+    if (!typchkCheckProgram(ast, count)) {
       hadError = true;
     }
   }
