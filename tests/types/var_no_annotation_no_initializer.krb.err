@@ -1,10 +1,5 @@
 == <script> ==
 0000    1 OP_NIL
 0001    | OP_RETURN
-== <script> ==
-0000    1 OP_NIL
-0001    | OP_DEFINE_GLOBAL    0 'x'
-0003    2 OP_GET_GLOBAL       1 'x'
-0005    | OP_PRINT
-0006    3 OP_NIL
-0007    | OP_RETURN
+[line 1] Error at 'x': 'x' needs a type -- it has no initializer to infer one from.
+[line 2] Error at 'x': 'x' might not be assigned yet.

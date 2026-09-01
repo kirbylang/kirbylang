@@ -34,7 +34,11 @@
   - Hoist structs during compilation
   - Deprecate the call syntax e.g. `Point()`
 - [`continue` keyword](https://github.com/kirbylang/kirbylang/issues/13)
-- Implement types in the parser. No type checking implemented.
+- Initial implementation of types and typechecker
+  - Limitations
+    - Native functions are not typechecked
+    - Generic types are ignored
+    - REPL has typechecking disabled
   - Primitive types
     - `string`
     - `bool`
@@ -42,18 +46,26 @@
     - `f64`
   - Complex Types
     - `fun (f64) => f64`
-    - `fun [T, U] (T) => U`
     - `Struct`
+    - `List` (see below)
+  - Generic types
+    - Parses but the generic types are ignored
+    - `fun [T, U] (T) => U`
     - `Struct[T]`
-  - Type aliases
+    - `List[T]`
     - `type MapFn[T, U] = fun [T, U] (T) => U;`
+  - Type aliases
+    - `type number = f64`;
   - Bindings
     - `var age: f64 = 100;`
     - `let name = "Kirby";`
-  - functions
-    - `fun [T, U] map(value: T): U { ... }`
-  - struct fields
-    - `struct Box[T] { pub let value: T; }`
+  - Functions
+    - `fun map(value: f64): f64 { ... }`
+  - Lambas
+    - `let sum: fun (f64, f64) => f64 = fun (a: f64, b: f64): f64 { a + b };`
+  - Struct fields
+    - `struct Box { pub let value: f64; }`
+- [Definite Assignment Analysis](https://en.wikipedia.org/wiki/Definite_assignment_analysis)
 
 - Refine shadow binding rules
 

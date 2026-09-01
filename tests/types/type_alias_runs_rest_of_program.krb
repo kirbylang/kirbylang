@@ -1,6 +1,6 @@
 type Wrapper[T] = T;
 
-var x: Wrapper[Number] = 5;
+var x: Wrapper[f64] = 5;
 
 print x;
 

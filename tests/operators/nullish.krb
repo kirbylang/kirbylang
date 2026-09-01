@@ -2,8 +2,9 @@ print nil ?? 123;
 print nil ?? nil ?? 456;
 print 789 ?? 000;
 
-fun should_not_call (): unit {
+fun should_not_call (): bool {
     print "Should not print";
+    return false;
 }
 
 print "Hello World" ?? should_not_call();

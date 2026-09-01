@@ -1,35 +1,4 @@
 == <script> ==
 0000    1 OP_NIL
 0001    | OP_RETURN
-== <script> ==
-0000    1 OP_STRUCT           0 'Box'
-0002    | OP_DEFINE_GLOBAL    0 'Box'
-0004    | OP_GET_GLOBAL       1 'Box'
-0006    2 OP_NIL
-0007    | OP_FIELD            2 'value' public
-0010    3 OP_POP
-0011    5 OP_GET_GLOBAL       3 'Box'
-0013    6 OP_CLOSURE          5 <fn new>
-0015    | OP_METHOD           4 'new'
-0017    7 OP_CLOSURE          7 <fn get>
-0019    | OP_METHOD           6 'get'
-0021    8 OP_POP
-0022   10 OP_GET_GLOBAL       9 'Box'
-0024    | OP_CONSTANT        11 '5.000000'
-0026    | OP_INVOKE        (1 args)   10 'new'
-0029    | OP_DEFINE_GLOBAL    8 'b'
-0031   11 OP_GET_GLOBAL      12 'b'
-0033    | OP_INVOKE        (0 args)   13 'get'
-0036    | OP_PRINT
-0037   12 OP_NIL
-0038    | OP_RETURN
-== new ==
-0000    6 OP_GET_GLOBAL       0 'Box'
-0002    | OP_CONSTANT         1 'value'
-0004    | OP_GET_LOCAL        1
-0006    | OP_STRUCT_INIT      1
-0008    | OP_RETURN
-== get ==
-0000    7 OP_GET_LOCAL        0
-0002    | OP_GET_PROPERTY     0 'value'
-0004    | OP_RETURN
+[line 1] Error at 'Box': Generic structs aren't supported yet.

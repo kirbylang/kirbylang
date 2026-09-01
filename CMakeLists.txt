@@ -57,6 +57,7 @@ set(KIRBY_SOURCES
     src/hashtable.c
     src/lexer.c
     src/compiled_unit.c
+    src/definite_assignment.c
     src/gc.c
     src/loader.c
     src/native.c
@@ -67,6 +68,8 @@ set(KIRBY_SOURCES
     src/stringset.c
     src/token_stream.c
     src/token.c
+    src/typecheck.c
+    src/types.c
     src/value.c
     src/vm.c
     ${VERSION_C}
@@ -254,6 +257,57 @@ if(BUILD_TESTS)
     add_test(
         NAME kirby-token-unit-test
         COMMAND kirby-token-unit-test
+    )
+
+    add_executable(kirby-types-unit-test
+        unit/types.c
+    )
+
+    target_link_libraries(kirby-types-unit-test
+        PRIVATE
+            kirby_core_debug
+    )
+
+    configure_kirby_target(kirby-types-unit-test)
+    enable_coverage(kirby-types-unit-test)
+
+    add_test(
+        NAME kirby-types-unit-test
+        COMMAND kirby-types-unit-test
+    )
+
+    add_executable(kirby-typecheck-unit-test
+        unit/typecheck.c
+    )
+
+    target_link_libraries(kirby-typecheck-unit-test
+        PRIVATE
+            kirby_core_debug
+    )
+
+    configure_kirby_target(kirby-typecheck-unit-test)
+    enable_coverage(kirby-typecheck-unit-test)
+
+    add_test(
+        NAME kirby-typecheck-unit-test
+        COMMAND kirby-typecheck-unit-test
+    )
+
+    add_executable(kirby-definite-assignment-unit-test
+        unit/definite_assignment.c
+    )
+
+    target_link_libraries(kirby-definite-assignment-unit-test
+        PRIVATE
+            kirby_core_debug
+    )
+
+    configure_kirby_target(kirby-definite-assignment-unit-test)
+    enable_coverage(kirby-definite-assignment-unit-test)
+
+    add_test(
+        NAME kirby-definite-assignment-unit-test
+        COMMAND kirby-definite-assignment-unit-test
     )
 
     add_executable(kirby-stringset-unit-test

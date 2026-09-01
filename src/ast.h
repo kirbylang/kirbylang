@@ -126,6 +126,7 @@ typedef struct {
   AstNode *object;
   Token name;
 } GetNode;
+
 typedef struct {
   AstNode *object;
   Token name;

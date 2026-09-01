@@ -1,1 +1,1 @@
-print (fun (message) { message })("Hello World");
+print (fun (message: string) { message })("Hello World");

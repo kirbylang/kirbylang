@@ -1,7 +1,7 @@
 // [T] generic-argument syntax (type position) and [...] array literal /
 // indexing syntax (expression position) are parsed by separate code
 // paths -- this proves neither one interferes with the other.
-var typed: List[i64];
+var typed: List[f64] = [];
 
 var numbers = [1, 2, 3];
 print numbers[0];

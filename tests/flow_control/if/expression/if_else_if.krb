@@ -2,5 +2,5 @@ print test(true, false);
 print test(false, true);
 print test(false, false);
 
-fun test (a, b) =
-    if (a) "Hello" else if (b) "World";
+fun test (a: bool, b: bool): string =
+    if (a) "Hello" else if (b) "World" else "Hello World!";

@@ -1,19 +1,4 @@
 == <script> ==
 0000    1 OP_NIL
 0001    | OP_RETURN
-== <script> ==
-0000    1 OP_STRUCT           0 'Struct'
-0002    | OP_DEFINE_GLOBAL    0 'Struct'
-0004    | OP_GET_GLOBAL       1 'Struct'
-0006    2 OP_POP
-0007    4 OP_GET_GLOBAL       3 'Struct'
-0009    | OP_STRUCT_INIT      0
-0011    | OP_DEFINE_GLOBAL    2 'instance'
-0013    6 OP_GET_GLOBAL       4 'instance'
-0015    | OP_CONSTANT         6 '123.000000'
-0017    | OP_SET_PROPERTY     5 'value'
-0019    | OP_POP
-0020    7 OP_NIL
-0021    | OP_RETURN
-Undefined field 'value'.
-[line 6] in script
+[line 6] Error at 'value': Struct has no field 'value'.

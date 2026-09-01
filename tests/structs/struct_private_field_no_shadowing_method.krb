@@ -3,4 +3,4 @@ struct Counter {
     var count: f64;
 }
 
-print Counter {}.count();
+print Counter { count: 0 }.count();

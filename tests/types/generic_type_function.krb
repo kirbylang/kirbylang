@@ -1,3 +1,0 @@
-fun identity(x: String): List[String] = x;
-
-print(identity(["Hello", "World"]));

@@ -1,4 +1,4 @@
 == <script> ==
 0000    1 OP_NIL
 0001    | OP_RETURN
-[line 2] Error at 'self': Can't use 'self' outside of an instance method.
+[line 2] Error: 'self' isn't valid here.

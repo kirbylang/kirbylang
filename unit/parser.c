@@ -140,7 +140,7 @@ int main(void) {
              "(print (index-get (index-get array 1) 1))\n");
 
   assert_ast("../tests/types/var_type_annotation.krb",
-             "(var name : String \"Hello\")\n"
+             "(var name : string \"Hello\")\n"
              "(print name)\n");
 
   assert_ast("../tests/types/let_type_annotation.krb", "(let count : f64 3)\n"
@@ -164,11 +164,11 @@ int main(void) {
              "(print (get p y))\n");
 
   assert_ast("../tests/types/function_typed_params.krb",
-             "(fun add (a : i64 b : i64) (+ a b))\n"
+             "(fun add (a : f64 b : f64) : f64 (+ a b))\n"
              "(print (call add 1 2))\n");
 
   assert_ast("../tests/types/function_return_type.krb",
-             "(fun add (a b) : i64 (+ a b))\n"
+             "(fun add (a : f64 b : f64) : f64 (+ a b))\n"
              "(print (call add 1 2))\n");
 
   assert_ast("../tests/types/function_typed_params_and_return.krb",
@@ -190,7 +190,7 @@ int main(void) {
 
   assert_ast(
       "../tests/types/generic_type_nested.krb",
-      "(let value : List[List[i64]] (array (array 1) (array 2) (array 3)))\n"
+      "(let value : List[List[f64]] (array (array 1) (array 2) (array 3)))\n"
       "(print value)\n");
 
   assert_ast("../tests/types/generic_type_struct.krb",
@@ -198,12 +198,8 @@ int main(void) {
              "(let box (struct-init Box (field value 100)))\n"
              "(print (get box value))\n");
 
-  assert_ast("../tests/types/generic_type_function.krb",
-             "(fun identity (x : String) : List[String] x)\n"
-             "(print (group (call identity (array \"Hello\" \"World\"))))\n");
-
   assert_ast("../tests/types/generic_type_and_array_brackets_dont_conflict.krb",
-             "(var typed : List[i64])\n"
+             "(var typed : List[f64] (array))\n"
              "(var numbers (array 1 2 3))\n"
              "(print (index-get numbers 0))\n"
              "(print (index-get numbers 1))\n");

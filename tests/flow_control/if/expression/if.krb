@@ -1,5 +1,5 @@
 print test(true);
 print test(false);
 
-fun test(value) =
+fun test(value: bool): string =
     if (value) "Hello";
