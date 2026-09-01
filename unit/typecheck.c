@@ -741,8 +741,6 @@ static void test_nested_function_and_closure(void) {
   typchkTypeEnvDestroy(env);
 }
 
-// --- typchkCheckProgram: whole-program driver tests ---
-
 static bool typecheckSource(const char *source) {
   int outCount = 0;
   bool hadParseError = false;

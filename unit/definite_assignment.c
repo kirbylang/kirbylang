@@ -15,8 +15,6 @@ static void test_daa_starts_empty(void) {
   daaSetFree(&daa);
 }
 
-// --- daaCheckFn, called directly on a parsed FunctionNode ---
-
 static FunctionNode *parseFirstFunction(const char *source) {
   int outCount = 0;
   bool hadParseError = false;
@@ -44,9 +42,6 @@ static void test_check_definite_assignment_direct_sequential_is_fine(void) {
   daaCheckFn(fn);
   assert(!typchkHadError());
 }
-
-// --- whole-program driver tests (typchkCheckProgram already runs this pass)
-// ---
 
 static bool typecheckSource(const char *source) {
   int outCount = 0;
