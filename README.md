@@ -1,8 +1,11 @@
-# kirby
+<h1>kirby <small>programming language</small></h1>
 
-[![Verify](https://github.com/kirbylang/kirbylang/actions/workflows/ci.yml/badge.svg)](https://github.com/kirbylang/kirbylang/actions/workflows/ci.yml)
+<div>
+<img src="https://github.com/kirbylang/kirbylang/actions/workflows/ci.yml/badge.svg" />
+<img src="https://github.com/kirbylang/kirbylang/actions/workflows/release.yml/badge.svg" />
+</div>
 
-[![Release](https://github.com/kirbylang/kirbylang/actions/workflows/release.yml/badge.svg)](https://github.com/kirbylang/kirbylang/actions/workflows/release.yml)
+---
 
 An aspiring embeddable scripting language.
 
