@@ -116,6 +116,28 @@ struct TypeEnv {
                             // its return type didn't resolve.
 };
 
+// Type environment that persists across compilation units
+static TypeEnv *sessionEnv = NULL;
+
+void typchkSessionBegin(void) {
+  if (sessionEnv != NULL)
+    return;
+  sessionEnv = typchkTypeEnvCreate();
+  typchkTypeEnvBeginScope(sessionEnv);
+}
+
+void typchkSessionEnd(void) {
+  if (sessionEnv == NULL)
+    return;
+
+  typchkTypeEnvEndScope(sessionEnv);
+  typchkTypeEnvDestroy(sessionEnv);
+
+  sessionEnv = NULL;
+
+  typesFreeAll();
+}
+
 TypeEnv *typchkTypeEnvCreate(void) {
   TypeEnv *env = (TypeEnv *)malloc(sizeof(TypeEnv));
   memset(env, 0, sizeof(TypeEnv));
@@ -158,6 +180,12 @@ void typchkTypeEnvEndScope(TypeEnv *env) {
 
 void typchkTypeEnvDeclare(TypeEnv *env, Token name, Type *type) {
   TypeEnvScope *scope = &env->scopes[env->scopeCount - 1];
+
+  // Only the outermost scope outlives the unit being checked, so that's
+  // the only one whose names need to outlive its source buffer.
+  if (env->scopeCount == 1)
+    name = typesInternToken(name);
+
   bindingArrayWrite(&scope->bindings, &scope->count, &scope->capacity, name,
                     type);
 }
@@ -174,7 +202,7 @@ Type *typchkTypeEnvLookup(TypeEnv *env, Token name) {
 
 void typchkTypeEnvRegisterStruct(TypeEnv *env, Token name, Type *type) {
   bindingArrayWrite(&env->structs, &env->structCount, &env->structCapacity,
-                    name, type);
+                    typesInternToken(name), type);
 }
 
 Type *typchkTypeEnvLookupStruct(TypeEnv *env, Token name) {
@@ -183,7 +211,7 @@ Type *typchkTypeEnvLookupStruct(TypeEnv *env, Token name) {
 
 void typchkTypeEnvRegisterFunction(TypeEnv *env, Token name, Type *type) {
   bindingArrayWrite(&env->functions, &env->functionCount,
-                    &env->functionCapacity, name, type);
+                    &env->functionCapacity, typesInternToken(name), type);
 }
 
 Type *typchkTypeEnvLookupFunction(TypeEnv *env, Token name) {
@@ -1305,8 +1333,14 @@ static void checkImplMethodBodies(TypeEnv *env, AstNode *node) {
 }
 
 bool typchkCheckProgram(AstNode **program, int count) {
-  TypeEnv *env = typchkTypeEnvCreate();
-  typchkTypeEnvBeginScope(env);
+  // Diagnostics are per-unit/program
+  typchkResetError();
+
+  bool ownsEnv = sessionEnv == NULL;
+  TypeEnv *env = ownsEnv ? typchkTypeEnvCreate() : sessionEnv;
+
+  if (ownsEnv)
+    typchkTypeEnvBeginScope(env);
 
   // Structs
 
@@ -1373,9 +1407,12 @@ bool typchkCheckProgram(AstNode **program, int count) {
 
   // Clean Up
 
-  typchkTypeEnvEndScope(env);
   bool ok = !typchkHadError();
-  typchkTypeEnvDestroy(env);
+
+  if (ownsEnv) {
+    typchkTypeEnvEndScope(env);
+    typchkTypeEnvDestroy(env);
+  }
 
   return ok;
 }

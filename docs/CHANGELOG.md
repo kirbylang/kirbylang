@@ -38,7 +38,6 @@
   - Limitations
     - Native functions are not typechecked
     - Generic types are ignored
-    - REPL has typechecking disabled
   - Primitive types
     - `string`
     - `bool`

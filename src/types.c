@@ -57,6 +57,17 @@ void typesFreeAll(void) {
   arenaOffset = 0;
 }
 
+Token typesInternToken(Token token) {
+  if (token.start == NULL || token.length <= 0)
+    return token;
+
+  char *lexeme = (char *)typesAllocRaw((size_t)token.length);
+  memcpy(lexeme, token.start, (size_t)token.length);
+  token.start = lexeme;
+
+  return token;
+}
+
 static Type *allocType(TypeKind kind) {
   Type *type = (Type *)typesAllocRaw(sizeof(Type));
   memset(type, 0, sizeof(Type));
@@ -97,7 +108,7 @@ Type *typeStruct(Token name, TypeMember *fields, int fieldCount,
                  TypeMember *staticMethods, int staticMethodCount,
                  TypeMember *instanceMethods, int instanceMethodCount) {
   Type *type = allocType(TYPE_STRUCT);
-  type->as.struct_.name = name;
+  type->as.struct_.name = typesInternToken(name);
   type->as.struct_.fields = fields;
   type->as.struct_.fieldCount = fieldCount;
   type->as.struct_.staticMethods = staticMethods;
@@ -122,6 +133,9 @@ Type *typeArray(Type *elementType) {
 }
 
 void typeStructSetFields(Type *type, TypeMember *fields, int fieldCount) {
+  for (int i = 0; i < fieldCount; i++) {
+    fields[i].name = typesInternToken(fields[i].name);
+  }
   type->as.struct_.fields = fields;
   type->as.struct_.fieldCount = fieldCount;
 }
@@ -133,7 +147,7 @@ static void appendMember(TypeMember **array, int *count, Token name,
       (TypeMember *)typesAllocRaw(newCount * sizeof(TypeMember));
   if (*count > 0)
     memcpy(newArray, *array, (size_t)(*count) * sizeof(TypeMember));
-  newArray[newCount - 1].name = name;
+  newArray[newCount - 1].name = typesInternToken(name);
   newArray[newCount - 1].type = memberType;
   *array = newArray;
   *count = newCount;

@@ -55,17 +55,21 @@ int main(int argc, char *argv[]) {
       return 0;
     case 'r':
       initVM(saved_argc, saved_argv);
+      typchkSessionBegin();
       runFile("stdlib/stdlib.krb");
       repl();
       compilerSessionEnd();
+      typchkSessionEnd();
       freeVM();
       free(saved_argv);
       return 0;
     case 'f':
       initVM(saved_argc, saved_argv);
+      typchkSessionBegin();
       runFile("stdlib/stdlib.krb");
       runFile(argv[optind]);
       compilerSessionEnd();
+      typchkSessionEnd();
       freeVM();
       free(saved_argv);
       return 0;
@@ -108,10 +112,12 @@ int main(int argc, char *argv[]) {
     }
     case 'c':
       initVM(saved_argc, saved_argv);
+      typchkSessionBegin();
       runFile("stdlib/stdlib.krb");
       char *source = argv[optind];
       runCode(source);
       compilerSessionEnd();
+      typchkSessionEnd();
       freeVM();
       free(saved_argv);
       return 0;
@@ -149,7 +155,7 @@ static void repl(void) {
       continue;
     }
 
-    CompiledUnit *unit = compileSource(line, /*typecheck=*/false);
+    CompiledUnit *unit = compileSource(line, /*typecheck=*/true);
 
     if (unit == NULL) {
       fprintf(stderr, "Compiler Error!\n");

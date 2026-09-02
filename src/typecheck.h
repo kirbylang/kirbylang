@@ -13,6 +13,9 @@ typedef struct TypeEnv TypeEnv;
 void typchkErrorAtToken(Token *token, const char *message);
 void typchkErrorAtTokenFmt(Token *token, const char *fmt, ...);
 
+void typchkSessionBegin(void);
+void typchkSessionEnd(void);
+
 TypeEnv *typchkTypeEnvCreate(void);
 void typchkTypeEnvDestroy(TypeEnv *env);
 

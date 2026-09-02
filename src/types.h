@@ -55,6 +55,13 @@ struct Type {
 void *typesAllocRaw(size_t size);
 void typesFreeAll(void);
 
+// Copies a token's lexeme into the types arena.
+//
+// Tokens point into the source buffer of the unit that produced them.
+// Anything reachable from a Type outlives that buffer, so names are
+// interned on the way in.
+Token typesInternToken(Token token);
+
 // Returns pointer to the `unit` type
 Type *typeUnit(void);
 
