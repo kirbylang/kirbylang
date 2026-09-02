@@ -351,10 +351,11 @@ static void test_struct_instance_field_and_method_access(void) {
   TypeEnv *env = typchkTypeEnvCreate();
   typchkTypeEnvBeginScope(env);
 
-  TypeMember fields[] = {{makeToken("balance"), typeF64()}};
+  UninternedTypeMember fields[] = {{makeToken("balance"), typeF64()}};
   Type *f64ToF64Params[] = {typeF64()};
   Type *depositType = typeFunction(f64ToF64Params, 1, typeF64());
-  TypeMember instanceMethods[] = {{makeToken("deposit"), depositType}};
+  UninternedTypeMember instanceMethods[] = {
+      {makeToken("deposit"), depositType}};
   Type *account =
       typeStruct(makeToken("Account"), fields, 1, NULL, 0, instanceMethods, 1);
   typchkTypeEnvRegisterStruct(env, makeToken("Account"), account);
@@ -384,7 +385,7 @@ static void test_struct_static_method_access(void) {
   Type *pointType = typeStruct(makeToken("Point"), NULL, 0, NULL, 0, NULL, 0);
   Type *newParams[] = {typeF64(), typeF64()};
   Type *newType = typeFunction(newParams, 2, pointType);
-  TypeMember staticMethods[] = {{makeToken("new"), newType}};
+  UninternedTypeMember staticMethods[] = {{makeToken("new"), newType}};
   Type *point =
       typeStruct(makeToken("Point"), NULL, 0, staticMethods, 1, NULL, 0);
   typchkTypeEnvRegisterStruct(env, makeToken("Point"), point);
@@ -419,12 +420,12 @@ static void test_local_variable_shadows_struct_name_for_get(void) {
   // static-method lookup against the real Point struct.
   Type *originType = typeFunction(
       NULL, 0, typeStruct(makeToken("Point"), NULL, 0, NULL, 0, NULL, 0));
-  TypeMember staticMethods[] = {{makeToken("origin"), originType}};
+  UninternedTypeMember staticMethods[] = {{makeToken("origin"), originType}};
   Type *pointStructType =
       typeStruct(makeToken("Point"), NULL, 0, staticMethods, 1, NULL, 0);
   typchkTypeEnvRegisterStruct(env, makeToken("Point"), pointStructType);
 
-  TypeMember otherFields[] = {{makeToken("x"), typeF64()}};
+  UninternedTypeMember otherFields[] = {{makeToken("x"), typeF64()}};
   Type *otherType =
       typeStruct(makeToken("Other"), otherFields, 1, NULL, 0, NULL, 0);
   typchkTypeEnvDeclare(env, makeToken("Point"),
@@ -468,7 +469,7 @@ static void test_struct_init(void) {
   typchkResetError();
   TypeEnv *env = typchkTypeEnvCreate();
   typchkTypeEnvBeginScope(env);
-  TypeMember fields[] = {{makeToken("x"), typeF64()},
+  UninternedTypeMember fields[] = {{makeToken("x"), typeF64()},
                          {makeToken("y"), typeF64()}};
   Type *point = typeStruct(makeToken("Point"), fields, 2, NULL, 0, NULL, 0);
   typchkTypeEnvRegisterStruct(env, makeToken("Point"), point);
@@ -490,7 +491,7 @@ static void test_struct_init_wrong_field_type_errors(void) {
   typchkResetError();
   TypeEnv *env = typchkTypeEnvCreate();
   typchkTypeEnvBeginScope(env);
-  TypeMember fields[] = {{makeToken("x"), typeF64()}};
+  UninternedTypeMember fields[] = {{makeToken("x"), typeF64()}};
   Type *point = typeStruct(makeToken("Point"), fields, 1, NULL, 0, NULL, 0);
   typchkTypeEnvRegisterStruct(env, makeToken("Point"), point);
 

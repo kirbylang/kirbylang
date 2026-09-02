@@ -59,7 +59,7 @@ bool typchkHadError(void) { return hadError; }
 void typchkResetError(void) { hadError = false; }
 
 typedef struct {
-  Token name;
+  InternedName name;
   Type *type;
 } TypeEnvBinding;
 
@@ -74,7 +74,7 @@ static void bindingArrayWrite(TypeEnvBinding **array, int *count, int *capacity,
       exit(1);
     }
   }
-  (*array)[*count].name = name;
+  (*array)[*count].name = internTokenName(name);
   (*array)[*count].type = type;
   (*count)++;
 }
@@ -82,7 +82,7 @@ static void bindingArrayWrite(TypeEnvBinding **array, int *count, int *capacity,
 static Type *bindingArrayLookup(TypeEnvBinding *array, int count, Token name) {
   // Most recently declared binding wins
   for (int i = count - 1; i >= 0; i--) {
-    if (tokensEqual(&array[i].name, &name))
+    if (internedNameEqualsToken(array[i].name, name))
       return array[i].type;
   }
   return NULL;
@@ -186,11 +186,6 @@ void typchkTypeEnvEndScope(TypeEnv *env) {
 void typchkTypeEnvDeclare(TypeEnv *env, Token name, Type *type) {
   TypeEnvScope *scope = &env->scopes[env->scopeCount - 1];
 
-  // Only the outermost scope outlives the unit being checked, so that's
-  // the only one whose names need to outlive its source buffer.
-  if (env->scopeCount == 1)
-    name = typesInternToken(name);
-
   bindingArrayWrite(&scope->bindings, &scope->count, &scope->capacity, name,
                     type);
 }
@@ -207,7 +202,7 @@ Type *typchkTypeEnvLookup(TypeEnv *env, Token name) {
 
 void typchkTypeEnvRegisterStruct(TypeEnv *env, Token name, Type *type) {
   bindingArrayWrite(&env->structs, &env->structCount, &env->structCapacity,
-                    typesInternToken(name), type);
+                    name, type);
 }
 
 Type *typchkTypeEnvLookupStruct(TypeEnv *env, Token name) {
@@ -216,7 +211,7 @@ Type *typchkTypeEnvLookupStruct(TypeEnv *env, Token name) {
 
 void typchkTypeEnvRegisterFunction(TypeEnv *env, Token name, Type *type) {
   bindingArrayWrite(&env->functions, &env->functionCount,
-                    &env->functionCapacity, typesInternToken(name), type);
+                    &env->functionCapacity, name, type);
 }
 
 Type *typchkTypeEnvLookupFunction(TypeEnv *env, Token name) {
@@ -224,8 +219,8 @@ Type *typchkTypeEnvLookupFunction(TypeEnv *env, Token name) {
 }
 
 void typchkTypeEnvRegisterAlias(TypeEnv *env, Token name, Type *type) {
-  bindingArrayWrite(&env->aliases, &env->aliasCount, &env->aliasCapacity,
-                    typesInternToken(name), type);
+  bindingArrayWrite(&env->aliases, &env->aliasCount, &env->aliasCapacity, name,
+                    type);
 }
 
 Type *typchkTypeEnvLookupAlias(TypeEnv *env, Token name) {
@@ -711,7 +706,7 @@ static Type *typchkInferGet(TypeEnv *env, AstNode *node) {
                           "instead of an instance.",
                           get->name.length, get->name.start,
                           objectType->as.struct_.name.length,
-                          objectType->as.struct_.name.start);
+                          internedNameChars(objectType->as.struct_.name));
     return NULL;
   }
 
@@ -1378,10 +1373,11 @@ static void typchkResolveStructFields(TypeEnv *env, AstNode *node) {
   if (typeStructIsGeneric(structType))
     return; // already reported once at declaration; don't cascade
 
-  TypeMember *fields = struct_->fieldCount > 0
-                           ? (TypeMember *)typesAllocRaw(struct_->fieldCount *
-                                                         sizeof(TypeMember))
-                           : NULL;
+  UninternedTypeMember *fields =
+      struct_->fieldCount > 0
+          ? (UninternedTypeMember *)typesAllocRaw(struct_->fieldCount *
+                                                  sizeof(UninternedTypeMember))
+          : NULL;
 
   bool ok = true;
   for (int i = 0; i < struct_->fieldCount; i++) {

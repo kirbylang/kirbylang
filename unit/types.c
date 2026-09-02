@@ -42,12 +42,12 @@ static void test_struct_equality_is_nominal(void) {
   Token otherPointName = makeToken("Point"); // same text, different Token
   Token vectorName = makeToken("Vector");
 
-  TypeMember pointFields[] = {
+  UninternedTypeMember pointFields[] = {
       {makeToken("x"), typeF64()},
       {makeToken("y"), typeF64()},
   };
 
-  TypeMember vectorLikeFields[] = {
+  UninternedTypeMember vectorLikeFields[] = {
       {makeToken("magnitude"), typeF64()},
   };
 
@@ -83,7 +83,7 @@ static void test_function_equality_is_structural(void) {
 }
 
 static void test_struct_field_lookup(void) {
-  TypeMember fields[] = {
+  UninternedTypeMember fields[] = {
       {makeToken("x"), typeF64()},
       {makeToken("label"), typeString()},
   };
@@ -157,9 +157,9 @@ static void test_struct_method_lookup(void) {
       typeFunction(accountParams, 1,
                    typeStruct(makeToken("Account"), NULL, 0, NULL, 0, NULL, 0));
 
-  TypeMember instanceMethods[] = {{makeToken("deposit"), deposit}};
-  TypeMember staticMethods[] = {{makeToken("new"), newAccount}};
-  TypeMember fields[] = {{makeToken("balance"), typeF64()}};
+  UninternedTypeMember instanceMethods[] = {{makeToken("deposit"), deposit}};
+  UninternedTypeMember staticMethods[] = {{makeToken("new"), newAccount}};
+  UninternedTypeMember fields[] = {{makeToken("balance"), typeF64()}};
 
   Type *account = typeStruct(makeToken("Account"), fields, 1, staticMethods, 1,
                              instanceMethods, 1);
@@ -187,7 +187,7 @@ static void test_incremental_struct_construction(void) {
   // register the placeholder first, then set fields onto the *same*
   // pointer, so the field's own type (Node) is the real, complete one.
   Type *node = typeStruct(makeToken("Node"), NULL, 0, NULL, 0, NULL, 0);
-  TypeMember fields[] = {{makeToken("next"), node}};
+  UninternedTypeMember fields[] = {{makeToken("next"), node}};
   typeStructSetFields(node, fields, 1);
 
   assert(node->as.struct_.fieldCount == 1);
