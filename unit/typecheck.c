@@ -865,7 +865,7 @@ static void test_program_return_on_both_branches_is_fine(void) {
   typchkResetError();
   bool ok = typecheckSource(
       "fun f(c: bool): f64 { if (c) { return 1; } else { return 2; } }\n");
-  assert(!ok);
+  assert(ok);
 }
 
 static void test_program_unit_body_needs_no_return(void) {
