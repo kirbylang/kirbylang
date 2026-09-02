@@ -275,13 +275,22 @@ static void test_negate_requires_f64(void) {
   typchkResetError();
 }
 
-static void test_and_or_same_type_rule(void) {
+static void test_and_or_produce_bool(void) {
   typchkResetError();
-  // The Lua/Python-style default-value idiom this rule exists to permit.
-  TypeEnv *env = checkProgram("var name = \"\" or \"default\";");
+  TypeEnv *env = checkProgram("var flag = true or false;");
   assert(!typchkHadError());
-  assert(typchkTypeEnvLookup(env, makeToken("name")) == typeString());
+  assert(typchkTypeEnvLookup(env, makeToken("flag")) == typeBool());
   typchkTypeEnvDestroy(env);
+}
+
+static void test_and_or_non_bool_operand_errors(void) {
+  typchkResetError();
+  // Only nil and false are falsey, so this yields "" rather than the
+  // default it looks like it picks. `??` is the operator for that.
+  TypeEnv *env = checkProgram("var name = \"\" or \"default\";");
+  assert(typchkHadError());
+  typchkTypeEnvDestroy(env);
+  typchkResetError();
 }
 
 static void test_and_or_mismatched_type_errors(void) {
@@ -967,7 +976,8 @@ int main(void) {
   test_ordering_requires_f64();
   test_unary();
   test_negate_requires_f64();
-  test_and_or_same_type_rule();
+  test_and_or_produce_bool();
+  test_and_or_non_bool_operand_errors();
   test_and_or_mismatched_type_errors();
   test_nullish_result_comes_from_fallback();
   test_function_call_checked();

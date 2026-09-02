@@ -567,21 +567,15 @@ static Type *typchkInferAssign(TypeEnv *env, AstNode *node) {
 // Infer the type of a logic operator e.g. and, or
 static Type *typchkInferLogical(TypeEnv *env, AstNode *node) {
   LogicalNode *l = &node->as.logical;
-  Type *leftType = typchkInfer(env, l->left);
-  Type *rightType = typchkInfer(env, l->right);
 
-  if (leftType == NULL || rightType == NULL)
-    return NULL;
+  // Both operands are conditions, so both are bool and so is the result.
+  // The VM still short circuits, it just can't yield a non-bool operand.
+  bool ok = typchkCheck(env, l->left, typeBool());
 
-  if (!typesEqual(leftType, rightType)) {
-    typchkErrorAtNodeFmt(
-        node, "Both sides of '%s' must be the same type, got %s and %s",
-        node->kind == NODE_AND ? "and" : "or", typeToString(leftType),
-        typeToString(rightType));
-    return NULL;
-  }
+  if (!typchkCheck(env, l->right, typeBool()))
+    ok = false;
 
-  return leftType;
+  return ok ? typeBool() : NULL;
 }
 
 // Infer the type of a nullish expression
