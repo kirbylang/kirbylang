@@ -49,6 +49,11 @@ void *typesAllocRaw(size_t size) {
   return ptr;
 }
 
+static Type *unitSingleton = NULL;
+static Type *boolSingleton = NULL;
+static Type *stringSingleton = NULL;
+static Type *f64Singleton = NULL;
+
 void typesFreeAll(void) {
   Slab *s = arenaHead;
   while (s != NULL) {
@@ -58,6 +63,11 @@ void typesFreeAll(void) {
   }
   arenaHead = NULL;
   arenaOffset = 0;
+
+  unitSingleton = NULL;
+  boolSingleton = NULL;
+  stringSingleton = NULL;
+  f64Singleton = NULL;
 
   stringSetFree(&typeNames);
 }
@@ -91,11 +101,6 @@ static Type *allocType(TypeKind kind) {
   type->kind = kind;
   return type;
 }
-
-static Type *unitSingleton = NULL;
-static Type *boolSingleton = NULL;
-static Type *stringSingleton = NULL;
-static Type *f64Singleton = NULL;
 
 Type *typeUnit(void) {
   if (unitSingleton == NULL)

@@ -1,0 +1,33 @@
+== <script> ==
+0000    1 OP_NIL
+0001    | OP_RETURN
+== <script> ==
+0000    1 OP_GET_GLOBAL       1 '__version__'
+0002    | OP_CALL             0
+0004    | OP_DEFINE_GLOBAL    0 'version'
+0006    2 OP_GET_GLOBAL       3 'ceil'
+0008    | OP_CONSTANT         4 '1.200000'
+0010    | OP_CALL             1
+0012    | OP_DEFINE_GLOBAL    2 'rounded'
+0014    3 OP_GET_GLOBAL       6 'fileExists'
+0016    | OP_CONSTANT         7 './does/not/exist.txt'
+0018    | OP_CALL             1
+0020    | OP_DEFINE_GLOBAL    5 'missing'
+0022    4 OP_GET_GLOBAL       9 'parseNumber'
+0024    | OP_CONSTANT        10 '42'
+0026    | OP_CALL             1
+0028    | OP_DEFINE_GLOBAL    8 'parsed'
+0030    6 OP_GET_GLOBAL      11 'rounded'
+0032    | OP_PRINT
+0033    7 OP_GET_GLOBAL      12 'missing'
+0035    | OP_PRINT
+0036    8 OP_GET_GLOBAL      13 'parsed'
+0038    | OP_PRINT
+0039    9 OP_GET_GLOBAL      14 'numberToString'
+0041    | OP_GET_GLOBAL      15 'parsed'
+0043    | OP_CALL             1
+0045    | OP_CONSTANT        16 '!'
+0047    | OP_ADD
+0048    | OP_PRINT
+0049   10 OP_NIL
+0050    | OP_RETURN

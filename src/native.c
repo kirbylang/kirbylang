@@ -9,6 +9,7 @@
 #include "asserts.h"
 #include "gc.h"
 #include "native.h"
+#include "native_signatures.h"
 #include "object.h"
 #include "version.h"
 #include "vm.h"
@@ -775,45 +776,125 @@ static Value numberToStringNative(VM *vm, int argCount, Value *args) {
   return OBJ_VAL(copyString(vm->gc, buffer, length));
 }
 
+const NativeDefinition nativeDefinitions[] = {
+    {"clock", clockNative},
+    {"__version__", versionNative},
+    {"exit", exitNative},
+    {"rand", randNative},
+    {"rand01", rand01Native},
+    {"randBetween", randBetweenNative},
+    {"ceil", ceilNative},
+    {"readFileToString", readFileToStringNative},
+    {"writeStringToFile", writeStringToFileNative},
+    {"numberToString", numberToStringNative},
+    {"fileExists", fileExistsNative},
+    {"getenv", getEnvNative},
+    {"setenv", setEnvNative},
+    {"len", lenNative},
+    {"typeof", typeofNative},
+    {"argv", argvNative},
+    {"argc", argcNative},
+    {"parseNumber", parseNumberNative},
+    {"instanceOf", instanceOfNative},
+    {"prompt", promptNative},
+    {"stdin", stdinNative},
+    {"arrPush", arrPushNative},
+    {"arrPop", arrPopNative},
+    {"arrInsert", arrInsertNative},
+    {"arrRemove", arrRemoveNative},
+    {"arrClear", arrClearNative},
+    {"arrContains", arrContainsNative},
+    {"arrCopy", arrCopyNative},
+    {"arrIsEmpty", arrIsEmptyNative},
+    {"arrEqual", arrEqualNative},
+    {"arrSlice", arrSliceNative},
+    {"arrConcat", arrConcatNative},
+    {"arrReverse", arrReverseNative},
+    {"is", isNative},
+    {"isNumber", isNumberNative},
+    {"isFunction", isFunctionNative},
+    {"isBool", isBoolNative},
+    {"isString", isStringNative},
+    {"isNil", isNilNative},
+    {"strIsEmpty", strIsEmptyNative},
+};
+
+const int nativeDefinitionCount =
+    (int)(sizeof(nativeDefinitions) / sizeof(nativeDefinitions[0]));
+
+const NativeSignature nativeSignatures[] = {
+    {"clock", {0}, 0, NATIVE_F64},
+    {"__version__", {0}, 0, NATIVE_STRING},
+    {"exit", {NATIVE_F64}, 1, NATIVE_UNIT},
+    {"rand", {0}, 0, NATIVE_F64},
+    {"rand01", {0}, 0, NATIVE_F64},
+    {"randBetween", {NATIVE_F64, NATIVE_F64}, 2, NATIVE_F64},
+    {"ceil", {NATIVE_F64}, 1, NATIVE_F64},
+    {"readFileToString", {NATIVE_STRING}, 1, NATIVE_STRING},
+    {"writeStringToFile", {NATIVE_STRING, NATIVE_STRING}, 2, NATIVE_UNIT},
+    {"numberToString", {NATIVE_F64}, 1, NATIVE_STRING},
+    {"fileExists", {NATIVE_STRING}, 1, NATIVE_BOOL},
+    {"getenv", {NATIVE_STRING}, 1, NATIVE_STRING},
+    {"setenv", {NATIVE_STRING, NATIVE_STRING}, 2, NATIVE_UNIT},
+    {"argc", {0}, 0, NATIVE_F64},
+    {"parseNumber", {NATIVE_STRING}, 1, NATIVE_F64},
+    {"strIsEmpty", {NATIVE_STRING}, 1, NATIVE_BOOL},
+};
+
+const int nativeSignatureCount =
+    (int)(sizeof(nativeSignatures) / sizeof(nativeSignatures[0]));
+
 void defineAllNatives(VM *vm) {
-  defineNative(vm, "clock", clockNative);
-  defineNative(vm, "__version__", versionNative);
-  defineNative(vm, "exit", exitNative);
-  defineNative(vm, "rand", randNative);
-  defineNative(vm, "rand01", rand01Native);
-  defineNative(vm, "randBetween", randBetweenNative);
-  defineNative(vm, "ceil", ceilNative);
-  defineNative(vm, "readFileToString", readFileToStringNative);
-  defineNative(vm, "writeStringToFile", writeStringToFileNative);
-  defineNative(vm, "numberToString", numberToStringNative);
-  defineNative(vm, "fileExists", fileExistsNative);
-  defineNative(vm, "getenv", getEnvNative);
-  defineNative(vm, "setenv", setEnvNative);
-  defineNative(vm, "len", lenNative);
-  defineNative(vm, "typeof", typeofNative);
-  defineNative(vm, "argv", argvNative);
-  defineNative(vm, "argc", argcNative);
-  defineNative(vm, "parseNumber", parseNumberNative);
-  defineNative(vm, "instanceOf", instanceOfNative);
-  defineNative(vm, "prompt", promptNative);
-  defineNative(vm, "stdin", stdinNative);
-  defineNative(vm, "arrPush", arrPushNative);
-  defineNative(vm, "arrPop", arrPopNative);
-  defineNative(vm, "arrInsert", arrInsertNative);
-  defineNative(vm, "arrRemove", arrRemoveNative);
-  defineNative(vm, "arrClear", arrClearNative);
-  defineNative(vm, "arrContains", arrContainsNative);
-  defineNative(vm, "arrCopy", arrCopyNative);
-  defineNative(vm, "arrIsEmpty", arrIsEmptyNative);
-  defineNative(vm, "arrEqual", arrEqualNative);
-  defineNative(vm, "arrSlice", arrSliceNative);
-  defineNative(vm, "arrConcat", arrConcatNative);
-  defineNative(vm, "arrReverse", arrReverseNative);
-  defineNative(vm, "is", isNative);
-  defineNative(vm, "isNumber", isNumberNative);
-  defineNative(vm, "isFunction", isFunctionNative);
-  defineNative(vm, "isBool", isBoolNative);
-  defineNative(vm, "isString", isStringNative);
-  defineNative(vm, "isNil", isNilNative);
-  defineNative(vm, "strIsEmpty", strIsEmptyNative);
+  for (int i = 0; i < nativeDefinitionCount; i++) {
+    defineNative(vm, nativeDefinitions[i].name, nativeDefinitions[i].function);
+  }
+}
+
+static Type *primitiveType(NativePrimitive primitive) {
+  switch (primitive) {
+  case NATIVE_UNIT:
+    return typeUnit();
+  case NATIVE_BOOL:
+    return typeBool();
+  case NATIVE_STRING:
+    return typeString();
+  case NATIVE_F64:
+    return typeF64();
+  }
+
+  return typeUnit();
+}
+
+static Token nativeNameToken(const char *name) {
+  Token token;
+  token.type = TOKEN_IDENTIFIER;
+  token.start = name;
+  token.length = (int)strlen(name);
+  token.line = 0;
+  return token;
+}
+
+// Natives are global functions as far as the checker is concerned. They are
+// registered before any user code, so a user declaration of the same name
+// shadows them.
+void defineAllNativeSignatures(TypeEnv *env) {
+  for (int i = 0; i < nativeSignatureCount; i++) {
+    const NativeSignature *signature = &nativeSignatures[i];
+
+    Type **paramTypes = NULL;
+
+    if (signature->paramCount > 0) {
+      paramTypes =
+          (Type **)typesAllocRaw(signature->paramCount * sizeof(Type *));
+
+      for (int param = 0; param < signature->paramCount; param++) {
+        paramTypes[param] = primitiveType(signature->paramTypes[param]);
+      }
+    }
+
+    Type *type = typeFunction(paramTypes, signature->paramCount,
+                              primitiveType(signature->returnType));
+
+    typchkTypeEnvRegisterFunction(env, nativeNameToken(signature->name), type);
+  }
 }

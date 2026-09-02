@@ -1,0 +1,3 @@
+let round: fun (f64) => f64 = ceil;
+
+print round(1.2);

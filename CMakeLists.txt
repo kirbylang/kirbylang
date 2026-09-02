@@ -293,6 +293,23 @@ if(BUILD_TESTS)
         COMMAND kirby-typecheck-unit-test
     )
 
+    add_executable(kirby-native-signatures-unit-test
+        unit/native_signatures.c
+    )
+
+    target_link_libraries(kirby-native-signatures-unit-test
+        PRIVATE
+            kirby_core_debug
+    )
+
+    configure_kirby_target(kirby-native-signatures-unit-test)
+    enable_coverage(kirby-native-signatures-unit-test)
+
+    add_test(
+        NAME kirby-native-signatures-unit-test
+        COMMAND kirby-native-signatures-unit-test
+    )
+
     add_executable(kirby-typecheck-session-unit-test
         unit/typecheck_session.c
     )

@@ -1,0 +1,6 @@
+== <script> ==
+0000    1 OP_NIL
+0001    | OP_RETURN
+[line 1] Error at ')': Expected 1 argument(s), got 0.
+[line 2] Error at ')': Expected 1 argument(s), got 2.
+[line 3] Error at ')': Expected 2 argument(s), got 1.

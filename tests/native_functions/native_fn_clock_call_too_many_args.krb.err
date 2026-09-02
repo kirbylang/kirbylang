@@ -1,12 +1,4 @@
 == <script> ==
 0000    1 OP_NIL
 0001    | OP_RETURN
-== <script> ==
-0000    1 OP_GET_GLOBAL       0 'clock'
-0002    | OP_TRUE
-0003    | OP_CALL             1
-0005    | OP_POP
-0006    2 OP_NIL
-0007    | OP_RETURN
-function clock expects 0 argument(s) but got 1 instead.
-[line 1] in script
+[line 1] Error at ')': Expected 0 argument(s), got 1.

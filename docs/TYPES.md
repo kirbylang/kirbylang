@@ -83,6 +83,25 @@ let double: fun (f64) => f64 = fun (n) { n * 2 };
 print double(21);
 ```
 
+### Native Functions
+
+Most native functions have a type, so calls to them are checked at compile
+time and they can be used as values.
+
+```
+let round: fun (f64) => f64 = ceil;
+
+print round(1.2);
+```
+
+A native whose type can't be spelled yet has no signature, and calls to it
+are checked at runtime instead. That covers `len`, `typeof`, `instanceOf`,
+the `is*` family and the `arr*` family, which need generics, and `argv`,
+`prompt` and `stdin`, which return nothing on some paths and so need
+`Option[T]`.
+
+Declaring a function with the same name as a native shadows it.
+
 ## Type Aliases
 
 ```
@@ -108,6 +127,7 @@ print count;
 
 ## Limitations
 
-- Native functions have no signatures, so calls to them aren't checked
+- Some native functions have no signature yet, so calls to them aren't
+  checked
 - Generic types parse but aren't checked
 - Lists have no type annotation syntax

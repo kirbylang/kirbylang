@@ -1,11 +1,4 @@
 == <script> ==
 0000    1 OP_NIL
 0001    | OP_RETURN
-== <script> ==
-0000    1 OP_GET_GLOBAL       0 'readFileToString'
-0002    | OP_CALL             0
-0004    | OP_PRINT
-0005    2 OP_NIL
-0006    | OP_RETURN
-function readFileToString expects 1 argument(s) but got 0 instead.
-[line 1] in script
+[line 1] Error at ')': Expected 1 argument(s), got 0.
