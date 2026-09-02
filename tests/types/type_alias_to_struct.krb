@@ -1,0 +1,12 @@
+type Coord = Point;
+
+struct Point {
+  pub var x: f64;
+}
+
+impl Point {
+  pub fun new(x: f64): Coord = Point { x: x };
+}
+
+let p: Coord = Point.new(3);
+print p.x;

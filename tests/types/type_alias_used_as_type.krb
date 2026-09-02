@@ -1,0 +1,11 @@
+type Number = f64;
+type Text = string;
+
+let count: Number = 42;
+let name: Text = "Kirby";
+
+fun add(a: Number, b: Number): Number = a + b;
+
+print count;
+print name;
+print add(1, 2);

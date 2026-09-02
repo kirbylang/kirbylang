@@ -109,6 +109,10 @@ struct TypeEnv {
   int functionCount;
   int functionCapacity;
 
+  TypeEnvBinding *aliases;
+  int aliasCount;
+  int aliasCapacity;
+
   // WIP State
 
   Type *_selfType;          // NULL when not currently checking a method body.
@@ -151,6 +155,7 @@ void typchkTypeEnvDestroy(TypeEnv *env) {
   free(env->scopes);
   free(env->structs);
   free(env->functions);
+  free(env->aliases);
   free(env);
 }
 
@@ -218,6 +223,15 @@ Type *typchkTypeEnvLookupFunction(TypeEnv *env, Token name) {
   return bindingArrayLookup(env->functions, env->functionCount, name);
 }
 
+void typchkTypeEnvRegisterAlias(TypeEnv *env, Token name, Type *type) {
+  bindingArrayWrite(&env->aliases, &env->aliasCount, &env->aliasCapacity,
+                    typesInternToken(name), type);
+}
+
+Type *typchkTypeEnvLookupAlias(TypeEnv *env, Token name) {
+  return bindingArrayLookup(env->aliases, env->aliasCount, name);
+}
+
 void typchkTypeEnvSetSelfType(TypeEnv *env, Type *selfType) {
   env->_selfType = selfType;
 }
@@ -273,6 +287,10 @@ Type *typchkResolveType(TypeEnv *env, AstNode *typeAnnotation) {
   Type *structType = typchkTypeEnvLookupStruct(env, t->name);
   if (structType != NULL)
     return structType;
+
+  Type *aliasType = typchkTypeEnvLookupAlias(env, t->name);
+  if (aliasType != NULL)
+    return aliasType;
 
   typchkErrorAtToken(&t->name, "Unknown type.");
   return NULL;
@@ -1220,6 +1238,79 @@ static Type *typchkResolveFunctionSignature(TypeEnv *env, FunctionNode *fn) {
   return typeFunction(paramTypes, fn->arity, returnType);
 }
 
+// A type alias declaration waiting to be resolved. Aliases may reference
+// each other in any order, so they're collected first and resolved
+// on demand, depth first.
+typedef struct {
+  AstNode *node;
+  bool resolving;
+  bool resolved;
+} UnresolvedTypeAlias;
+
+static void typchkResolvePendingAlias(TypeEnv *env,
+                                      UnresolvedTypeAlias *unresolvedAlias,
+                                      int count, int index);
+
+// Resolves any alias `typeAnnotation` names before it is itself resolved,
+// so an alias declared later in the file still works.
+static void typchkResolveAliasDependencies(TypeEnv *env,
+                                           UnresolvedTypeAlias *unresolvedAlias,
+                                           int count, AstNode *typeAnnotation) {
+  if (typeAnnotation == NULL)
+    return;
+
+  if (typeAnnotation->kind == NODE_TYPE_FUNCTION) {
+    TypeFunctionNode *fn = &typeAnnotation->as.typeFunction;
+    for (int i = 0; i < fn->paramCount; i++) {
+      typchkResolveAliasDependencies(env, unresolvedAlias, count,
+                                     fn->paramTypes[i]);
+    }
+    typchkResolveAliasDependencies(env, unresolvedAlias, count, fn->returnType);
+    return;
+  }
+
+  TypeNode *t = &typeAnnotation->as.type_;
+
+  for (int i = 0; i < t->genericArgCount; i++) {
+    typchkResolveAliasDependencies(env, unresolvedAlias, count,
+                                   t->genericArgs[i]);
+  }
+
+  for (int i = 0; i < count; i++) {
+    if (tokensEqual(&unresolvedAlias[i].node->as.typeAlias.name, &t->name)) {
+      typchkResolvePendingAlias(env, unresolvedAlias, count, i);
+      return;
+    }
+  }
+}
+
+static void typchkResolvePendingAlias(TypeEnv *env,
+                                      UnresolvedTypeAlias *unresolvedAlias,
+                                      int count, int index) {
+  UnresolvedTypeAlias *alias = &unresolvedAlias[index];
+  TypeAliasNode *decl = &alias->node->as.typeAlias;
+
+  if (alias->resolved)
+    return;
+
+  if (alias->resolving) {
+    typchkErrorAtTokenFmt(&decl->name, "Type alias '%.*s' is circular.",
+                          decl->name.length, decl->name.start);
+    alias->resolved = true;
+    return;
+  }
+
+  alias->resolving = true;
+  typchkResolveAliasDependencies(env, unresolvedAlias, count, decl->target);
+  alias->resolving = false;
+  alias->resolved = true;
+
+  Type *target = typchkResolveType(env, decl->target);
+
+  if (target != NULL)
+    typchkTypeEnvRegisterAlias(env, decl->name, target);
+}
+
 static void typchkResolveStructFields(TypeEnv *env, AstNode *node) {
   StructNode *struct_ = &node->as.struct_;
   Type *structType = typchkTypeEnvLookupStruct(env, struct_->name);
@@ -1356,6 +1447,44 @@ bool typchkCheckProgram(AstNode **program, int count) {
 
       typchkTypeEnvRegisterStruct(env, sn->name, placeholder);
     }
+  }
+
+  // Type aliases
+  //
+  // After struct placeholders so an alias can name a struct, before struct
+  // fields so a field can be annotated with an alias.
+
+  // TODO: Refactor this
+
+  UnresolvedTypeAlias *unresolvedAliasAliases = NULL;
+  int pendingAliasCount = 0;
+
+  for (int i = 0; i < count; i++) {
+    // Generic aliases are still parse-only, same as generic types.
+    if (program[i]->kind == NODE_TYPE_ALIAS &&
+        program[i]->as.typeAlias.genericParamCount == 0) {
+      pendingAliasCount++;
+    }
+  }
+
+  if (pendingAliasCount > 0) {
+    unresolvedAliasAliases = (UnresolvedTypeAlias *)calloc(
+        (size_t)pendingAliasCount, sizeof(UnresolvedTypeAlias));
+
+    int next = 0;
+    for (int i = 0; i < count; i++) {
+      if (program[i]->kind == NODE_TYPE_ALIAS &&
+          program[i]->as.typeAlias.genericParamCount == 0) {
+        unresolvedAliasAliases[next++].node = program[i];
+      }
+    }
+
+    for (int i = 0; i < pendingAliasCount; i++) {
+      typchkResolvePendingAlias(env, unresolvedAliasAliases, pendingAliasCount,
+                                i);
+    }
+
+    free(unresolvedAliasAliases);
   }
 
   for (int i = 0; i < count; i++) {

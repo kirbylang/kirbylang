@@ -864,6 +864,57 @@ static void test_program_nested_closure_captures_self(void) {
   assert(ok);
 }
 
+static void test_type_alias_chained(void) {
+  typchkResetError();
+  bool ok = typecheckSource("type A = B;\n"
+                            "type B = f64\n;"
+                            "let value: A = 7;\n"
+                            "print value;\n");
+  assert(ok);
+}
+
+static void test_type_alias_cycle_errors(void) {
+  typchkResetError();
+  bool ok = typecheckSource("type A = B;\n"
+                            "type B = A;\n"
+                            "let value: A = 1;\n");
+  assert(!ok);
+}
+
+static void test_type_alias_to_struct(void) {
+  typchkResetError();
+  bool ok = typecheckSource("type Coord = Point;\n"
+                            "struct Point {\n"
+                            "  pub var x: f64;\n"
+                            "}\n"
+                            "impl Point {\n"
+                            "  pub fun new(x: f64): Coord = Point { x: x };\n"
+                            "}\n"
+                            "let p: Coord = Point.new(3);\n"
+                            "print p.x;\n");
+  assert(ok);
+}
+
+static void test_type_alias_used_as_type(void) {
+  typchkResetError();
+  bool ok = typecheckSource("type Number = f64;\n"
+                            "type Text = string;\n"
+                            "let count: Number = 42;\n"
+                            "let name: Text = \"Kirby\";\n"
+                            "fun add(a: Number, b: Number): Number = a + b;\n"
+                            "print count;\n"
+                            "print name;\n"
+                            "print add(1, 2);\n");
+  assert(ok);
+}
+
+static void test_type_alias_wrong_type_errors(void) {
+  typchkResetError();
+  bool ok = typecheckSource("type Number = f64;\n"
+                            "let count: Number = \"not a number\";\n");
+  assert(!ok);
+}
+
 int main(void) {
   test_scope_declare_and_lookup();
   test_scope_shadowing();
@@ -934,6 +985,12 @@ int main(void) {
   test_program_mutually_recursive_functions();
   test_program_method_body_type_error_caught();
   test_program_nested_closure_captures_self();
+
+  test_type_alias_chained();
+  test_type_alias_cycle_errors();
+  test_type_alias_to_struct();
+  test_type_alias_used_as_type();
+  test_type_alias_wrong_type_errors();
 
   typesFreeAll();
   astFreeAll();

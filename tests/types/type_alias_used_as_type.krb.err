@@ -1,0 +1,26 @@
+== <script> ==
+0000    1 OP_NIL
+0001    | OP_RETURN
+== <script> ==
+0000    7 OP_CLOSURE          1 <fn add>
+0002    | OP_DEFINE_GLOBAL    0 'add'
+0004    4 OP_CONSTANT         3 '42.000000'
+0006    | OP_DEFINE_GLOBAL    2 'count'
+0008    5 OP_CONSTANT         5 'Kirby'
+0010    | OP_DEFINE_GLOBAL    4 'name'
+0012    9 OP_GET_GLOBAL       6 'count'
+0014    | OP_PRINT
+0015   10 OP_GET_GLOBAL       7 'name'
+0017    | OP_PRINT
+0018   11 OP_GET_GLOBAL       8 'add'
+0020    | OP_CONSTANT         9 '1.000000'
+0022    | OP_CONSTANT        10 '2.000000'
+0024    | OP_CALL             2
+0026    | OP_PRINT
+0027   12 OP_NIL
+0028    | OP_RETURN
+== add ==
+0000    7 OP_GET_LOCAL        1
+0002    | OP_GET_LOCAL        2
+0004    | OP_ADD
+0005    | OP_RETURN

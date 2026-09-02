@@ -36,6 +36,13 @@ Type *typchkTypeEnvLookupStruct(TypeEnv *env, Token name);
 void typchkTypeEnvRegisterFunction(TypeEnv *env, Token name, Type *type);
 Type *typchkTypeEnvLookupFunction(TypeEnv *env, Token name);
 
+// Aliases are resolved to their target when the alias is declared, so
+// nothing downstream of typchkResolveType() ever sees an alias -- `type
+// Number = f64;` makes `Number` another spelling of `f64`, not a type of
+// its own.
+void typchkTypeEnvRegisterAlias(TypeEnv *env, Token name, Type *type);
+Type *typchkTypeEnvLookupAlias(TypeEnv *env, Token name);
+
 // Resolve an AstNode to a Type pointer
 //
 // Returns NULL and reports a [line N] Error diagnostic
