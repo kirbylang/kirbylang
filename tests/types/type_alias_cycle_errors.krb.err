@@ -1,0 +1,7 @@
+== <script> ==
+0000    1 OP_NIL
+0001    | OP_RETURN
+[line 1] Error at 'A': Type alias 'A' is circular.
+[line 2] Error at 'A': Unknown type.
+[line 1] Error at 'B': Unknown type.
+[line 4] Error at 'A': Unknown type.

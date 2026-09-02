@@ -1,0 +1,4 @@
+== <script> ==
+0000    1 OP_NIL
+0001    | OP_RETURN
+[line 3] Error at 'let': Expect field declaration after 'pub'.

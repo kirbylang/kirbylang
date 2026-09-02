@@ -4,6 +4,7 @@
 
 #include "common.h"
 #include "strbuf.h"
+#include "stringset.h"
 #include "types.h"
 
 #define SLAB_SIZE 8192
@@ -16,6 +17,8 @@ typedef struct Slab {
 
 static Slab *arenaHead = NULL;
 static size_t arenaOffset = 0;
+
+static StringSet typeNames;
 
 static Slab *allocSlab(size_t capacity) {
   Slab *slab = (Slab *)malloc(sizeof(Slab) + capacity);
@@ -55,6 +58,31 @@ void typesFreeAll(void) {
   }
   arenaHead = NULL;
   arenaOffset = 0;
+
+  stringSetFree(&typeNames);
+}
+
+InternedName internTokenName(Token token) {
+  if (token.start == NULL || token.length <= 0)
+    return (InternedName){.offset = 0, .length = 0};
+
+  int offset = stringSetIntern(&typeNames, token.start, token.length);
+  return (InternedName){.offset = offset, .length = token.length};
+}
+
+const char *internedNameChars(InternedName name) {
+  return typeNames.arena + name.offset;
+}
+
+bool internedNamesEqual(InternedName a, InternedName b) {
+  return a.offset == b.offset;
+}
+
+bool internedNameEqualsToken(InternedName name, Token token) {
+  if (name.length != token.length)
+    return false;
+  return memcmp(internedNameChars(name), token.start, (size_t)token.length) ==
+         0;
 }
 
 static Type *allocType(TypeKind kind) {
@@ -93,16 +121,35 @@ Type *typeF64(void) {
   return f64Singleton;
 }
 
-Type *typeStruct(Token name, TypeMember *fields, int fieldCount,
-                 TypeMember *staticMethods, int staticMethodCount,
-                 TypeMember *instanceMethods, int instanceMethodCount) {
+// Copies `pending` into a durable TypeMember array, interning each name.
+static TypeMember *internMembers(UninternedTypeMember *pending, int count) {
+  if (count == 0)
+    return NULL;
+
+  TypeMember *members =
+      (TypeMember *)typesAllocRaw((size_t)count * sizeof(TypeMember));
+
+  for (int i = 0; i < count; i++) {
+    members[i].name = internTokenName(pending[i].name);
+    members[i].type = pending[i].type;
+  }
+
+  return members;
+}
+
+Type *typeStruct(Token name, UninternedTypeMember *fields, int fieldCount,
+                 UninternedTypeMember *staticMethods, int staticMethodCount,
+                 UninternedTypeMember *instanceMethods,
+                 int instanceMethodCount) {
   Type *type = allocType(TYPE_STRUCT);
-  type->as.struct_.name = name;
-  type->as.struct_.fields = fields;
+  type->as.struct_.name = internTokenName(name);
+  type->as.struct_.fields = internMembers(fields, fieldCount);
   type->as.struct_.fieldCount = fieldCount;
-  type->as.struct_.staticMethods = staticMethods;
+  type->as.struct_.staticMethods =
+      internMembers(staticMethods, staticMethodCount);
   type->as.struct_.staticMethodCount = staticMethodCount;
-  type->as.struct_.instanceMethods = instanceMethods;
+  type->as.struct_.instanceMethods =
+      internMembers(instanceMethods, instanceMethodCount);
   type->as.struct_.instanceMethodCount = instanceMethodCount;
   return type;
 }
@@ -121,8 +168,9 @@ Type *typeArray(Type *elementType) {
   return type;
 }
 
-void typeStructSetFields(Type *type, TypeMember *fields, int fieldCount) {
-  type->as.struct_.fields = fields;
+void typeStructSetFields(Type *type, UninternedTypeMember *fields,
+                         int fieldCount) {
+  type->as.struct_.fields = internMembers(fields, fieldCount);
   type->as.struct_.fieldCount = fieldCount;
 }
 
@@ -133,7 +181,7 @@ static void appendMember(TypeMember **array, int *count, Token name,
       (TypeMember *)typesAllocRaw(newCount * sizeof(TypeMember));
   if (*count > 0)
     memcpy(newArray, *array, (size_t)(*count) * sizeof(TypeMember));
-  newArray[newCount - 1].name = name;
+  newArray[newCount - 1].name = internTokenName(name);
   newArray[newCount - 1].type = memberType;
   *array = newArray;
   *count = newCount;
@@ -165,12 +213,6 @@ bool typeStructHasUnresolvedMembers(Type *type) {
          type->as.struct_.hasUnresolvedMembers;
 }
 
-static bool tokensEqual(Token *a, Token *b) {
-  if (a->length != b->length)
-    return false;
-  return memcmp(a->start, b->start, a->length) == 0;
-}
-
 bool typesEqual(Type *a, Type *b) {
   if (a == b)
     return true;
@@ -188,7 +230,7 @@ bool typesEqual(Type *a, Type *b) {
 
   case TYPE_STRUCT:
     // Nominal Equality
-    return tokensEqual(&a->as.struct_.name, &b->as.struct_.name);
+    return internedNamesEqual(a->as.struct_.name, b->as.struct_.name);
 
   case TYPE_FN:
     // Structural Equality
@@ -210,7 +252,7 @@ bool typesEqual(Type *a, Type *b) {
 
 static Type *memberLookup(TypeMember *members, int count, Token name) {
   for (int i = 0; i < count; i++) {
-    if (tokensEqual(&members[i].name, &name))
+    if (internedNameEqualsToken(members[i].name, name))
       return members[i].type;
   }
   return NULL;
@@ -258,7 +300,7 @@ static void appendTypeName(StrBuf *sb, Type *type) {
     break;
   case TYPE_STRUCT:
     sb_appendf(sb, "%.*s", type->as.struct_.name.length,
-               type->as.struct_.name.start);
+               internedNameChars(type->as.struct_.name));
     break;
   case TYPE_FN:
     sb_append(sb, "fun (");

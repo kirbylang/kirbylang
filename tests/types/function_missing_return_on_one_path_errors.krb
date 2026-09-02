@@ -1,0 +1,7 @@
+fun fn(condition: bool): f64 {
+    if (condition) {
+        return 1;
+    }
+}
+
+print fn(true);

@@ -103,6 +103,9 @@ static void printAstLiteral(StrBuf *sb, LiteralNode *lit) {
   case LITERAL_NIL:
     sb_append(sb, "nil");
     break;
+  case LITERAL_UNIT:
+    sb_append(sb, "()");
+    break;
   case LITERAL_BOOL:
     sb_append(sb, lit->as.boolean ? "true" : "false");
     break;

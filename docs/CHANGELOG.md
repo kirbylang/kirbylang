@@ -34,15 +34,15 @@
   - Hoist structs during compilation
   - Deprecate the call syntax e.g. `Point()`
 - [`continue` keyword](https://github.com/kirbylang/kirbylang/issues/13)
+- Unit literal expression: `()`.
 - Initial implementation of types and typechecker
   - Limitations
     - Native functions are not typechecked
     - Generic types are ignored
-    - REPL has typechecking disabled
   - Primitive types
     - `string`
     - `bool`
-    - `unit`
+    - `unit`, written `()` as a value
     - `f64`
   - Complex Types
     - `fun (f64) => f64`

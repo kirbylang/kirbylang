@@ -4,6 +4,7 @@
 #include <stdbool.h>
 #include <stddef.h>
 
+#include "stringset.h"
 #include "token.h"
 
 typedef enum {
@@ -19,7 +20,17 @@ typedef enum {
 typedef struct Type Type;
 
 typedef struct {
+  int offset; // Offset into the owning StringSet
+  int length;
+} InternedName;
+
+typedef struct {
   Token name;
+  Type *type;
+} UninternedTypeMember;
+
+typedef struct {
+  InternedName name;
   Type *type;
 } TypeMember;
 
@@ -28,7 +39,7 @@ struct Type {
   union {
     // Nominal Equality
     struct {
-      Token name;
+      InternedName name;
       TypeMember *fields;
       int fieldCount;
       TypeMember *staticMethods;
@@ -55,6 +66,15 @@ struct Type {
 void *typesAllocRaw(size_t size);
 void typesFreeAll(void);
 
+InternedName internTokenName(Token token);
+
+// Not a C string
+const char *internedNameChars(InternedName name);
+
+bool internedNamesEqual(InternedName a, InternedName b);
+
+bool internedNameEqualsToken(InternedName name, Token token);
+
 // Returns pointer to the `unit` type
 Type *typeUnit(void);
 
@@ -69,9 +89,10 @@ Type *typeF64(void);
 
 // Allocates a new struct type
 // Returns pointer to the new type in the types arena
-Type *typeStruct(Token name, TypeMember *fields, int fieldCount,
-                 TypeMember *staticMethods, int staticMethodCount,
-                 TypeMember *instanceMethods, int instanceMethodCount);
+Type *typeStruct(Token name, UninternedTypeMember *fields, int fieldCount,
+                 UninternedTypeMember *staticMethods, int staticMethodCount,
+                 UninternedTypeMember *instanceMethods,
+                 int instanceMethodCount);
 
 // Allocates a new function type
 // Returns pointer to the new type in the types arena
@@ -81,7 +102,8 @@ Type *typeFunction(Type **paramTypes, int paramCount, Type *returnType);
 // Returns pointer to the new type in the types arena
 Type *typeArray(Type *elementType);
 
-void typeStructSetFields(Type *type, TypeMember *fields, int fieldCount);
+void typeStructSetFields(Type *type, UninternedTypeMember *fields,
+                         int fieldCount);
 void typeStructAddStaticMethod(Type *type, Token name, Type *methodType);
 void typeStructAddInstanceMethod(Type *type, Token name, Type *methodType);
 

@@ -275,13 +275,22 @@ static void test_negate_requires_f64(void) {
   typchkResetError();
 }
 
-static void test_and_or_same_type_rule(void) {
+static void test_and_or_produce_bool(void) {
   typchkResetError();
-  // The Lua/Python-style default-value idiom this rule exists to permit.
-  TypeEnv *env = checkProgram("var name = \"\" or \"default\";");
+  TypeEnv *env = checkProgram("var flag = true or false;");
   assert(!typchkHadError());
-  assert(typchkTypeEnvLookup(env, makeToken("name")) == typeString());
+  assert(typchkTypeEnvLookup(env, makeToken("flag")) == typeBool());
   typchkTypeEnvDestroy(env);
+}
+
+static void test_and_or_non_bool_operand_errors(void) {
+  typchkResetError();
+  // Only nil and false are falsey, so this yields "" rather than the
+  // default it looks like it picks. `??` is the operator for that.
+  TypeEnv *env = checkProgram("var name = \"\" or \"default\";");
+  assert(typchkHadError());
+  typchkTypeEnvDestroy(env);
+  typchkResetError();
 }
 
 static void test_and_or_mismatched_type_errors(void) {
@@ -342,10 +351,11 @@ static void test_struct_instance_field_and_method_access(void) {
   TypeEnv *env = typchkTypeEnvCreate();
   typchkTypeEnvBeginScope(env);
 
-  TypeMember fields[] = {{makeToken("balance"), typeF64()}};
+  UninternedTypeMember fields[] = {{makeToken("balance"), typeF64()}};
   Type *f64ToF64Params[] = {typeF64()};
   Type *depositType = typeFunction(f64ToF64Params, 1, typeF64());
-  TypeMember instanceMethods[] = {{makeToken("deposit"), depositType}};
+  UninternedTypeMember instanceMethods[] = {
+      {makeToken("deposit"), depositType}};
   Type *account =
       typeStruct(makeToken("Account"), fields, 1, NULL, 0, instanceMethods, 1);
   typchkTypeEnvRegisterStruct(env, makeToken("Account"), account);
@@ -375,7 +385,7 @@ static void test_struct_static_method_access(void) {
   Type *pointType = typeStruct(makeToken("Point"), NULL, 0, NULL, 0, NULL, 0);
   Type *newParams[] = {typeF64(), typeF64()};
   Type *newType = typeFunction(newParams, 2, pointType);
-  TypeMember staticMethods[] = {{makeToken("new"), newType}};
+  UninternedTypeMember staticMethods[] = {{makeToken("new"), newType}};
   Type *point =
       typeStruct(makeToken("Point"), NULL, 0, staticMethods, 1, NULL, 0);
   typchkTypeEnvRegisterStruct(env, makeToken("Point"), point);
@@ -410,12 +420,12 @@ static void test_local_variable_shadows_struct_name_for_get(void) {
   // static-method lookup against the real Point struct.
   Type *originType = typeFunction(
       NULL, 0, typeStruct(makeToken("Point"), NULL, 0, NULL, 0, NULL, 0));
-  TypeMember staticMethods[] = {{makeToken("origin"), originType}};
+  UninternedTypeMember staticMethods[] = {{makeToken("origin"), originType}};
   Type *pointStructType =
       typeStruct(makeToken("Point"), NULL, 0, staticMethods, 1, NULL, 0);
   typchkTypeEnvRegisterStruct(env, makeToken("Point"), pointStructType);
 
-  TypeMember otherFields[] = {{makeToken("x"), typeF64()}};
+  UninternedTypeMember otherFields[] = {{makeToken("x"), typeF64()}};
   Type *otherType =
       typeStruct(makeToken("Other"), otherFields, 1, NULL, 0, NULL, 0);
   typchkTypeEnvDeclare(env, makeToken("Point"),
@@ -459,7 +469,7 @@ static void test_struct_init(void) {
   typchkResetError();
   TypeEnv *env = typchkTypeEnvCreate();
   typchkTypeEnvBeginScope(env);
-  TypeMember fields[] = {{makeToken("x"), typeF64()},
+  UninternedTypeMember fields[] = {{makeToken("x"), typeF64()},
                          {makeToken("y"), typeF64()}};
   Type *point = typeStruct(makeToken("Point"), fields, 2, NULL, 0, NULL, 0);
   typchkTypeEnvRegisterStruct(env, makeToken("Point"), point);
@@ -481,7 +491,7 @@ static void test_struct_init_wrong_field_type_errors(void) {
   typchkResetError();
   TypeEnv *env = typchkTypeEnvCreate();
   typchkTypeEnvBeginScope(env);
-  TypeMember fields[] = {{makeToken("x"), typeF64()}};
+  UninternedTypeMember fields[] = {{makeToken("x"), typeF64()}};
   Type *point = typeStruct(makeToken("Point"), fields, 1, NULL, 0, NULL, 0);
   typchkTypeEnvRegisterStruct(env, makeToken("Point"), point);
 
@@ -849,6 +859,38 @@ static void test_program_method_body_type_error_caught(void) {
   assert(!ok);
 }
 
+static void test_program_body_falling_off_the_end_errors(void) {
+  typchkResetError();
+  bool ok = typecheckSource("fun f(): f64 { print 1; }\n");
+  assert(!ok);
+}
+
+static void test_program_return_on_only_one_branch_errors(void) {
+  typchkResetError();
+  bool ok = typecheckSource("fun f(c: bool): f64 { if (c) { return 1; } }\n");
+  assert(!ok);
+}
+
+static void test_program_return_on_both_branches_is_fine(void) {
+  typchkResetError();
+  bool ok = typecheckSource(
+      "fun f(c: bool): f64 { if (c) { return 1; } else { return 2; } }\n");
+  assert(ok);
+}
+
+static void test_program_unit_body_needs_no_return(void) {
+  typchkResetError();
+  bool ok = typecheckSource("fun f(): unit { print 1; }\n");
+  assert(ok);
+}
+
+static void test_program_lambda_falling_off_the_end_errors(void) {
+  typchkResetError();
+  bool ok =
+      typecheckSource("let f: fun () => f64 = fun (): f64 { print 1; };\n");
+  assert(!ok);
+}
+
 static void test_program_nested_closure_captures_self(void) {
   typchkResetError();
   // A nested *function* (not a lambda) declared inside a method,
@@ -862,6 +904,57 @@ static void test_program_nested_closure_captures_self(void) {
                       "  }\n"
                       "}\n");
   assert(ok);
+}
+
+static void test_type_alias_chained(void) {
+  typchkResetError();
+  bool ok = typecheckSource("type A = B;\n"
+                            "type B = f64\n;"
+                            "let value: A = 7;\n"
+                            "print value;\n");
+  assert(ok);
+}
+
+static void test_type_alias_cycle_errors(void) {
+  typchkResetError();
+  bool ok = typecheckSource("type A = B;\n"
+                            "type B = A;\n"
+                            "let value: A = 1;\n");
+  assert(!ok);
+}
+
+static void test_type_alias_to_struct(void) {
+  typchkResetError();
+  bool ok = typecheckSource("type Coord = Point;\n"
+                            "struct Point {\n"
+                            "  pub var x: f64;\n"
+                            "}\n"
+                            "impl Point {\n"
+                            "  pub fun new(x: f64): Coord = Point { x: x };\n"
+                            "}\n"
+                            "let p: Coord = Point.new(3);\n"
+                            "print p.x;\n");
+  assert(ok);
+}
+
+static void test_type_alias_used_as_type(void) {
+  typchkResetError();
+  bool ok = typecheckSource("type Number = f64;\n"
+                            "type Text = string;\n"
+                            "let count: Number = 42;\n"
+                            "let name: Text = \"Kirby\";\n"
+                            "fun add(a: Number, b: Number): Number = a + b;\n"
+                            "print count;\n"
+                            "print name;\n"
+                            "print add(1, 2);\n");
+  assert(ok);
+}
+
+static void test_type_alias_wrong_type_errors(void) {
+  typchkResetError();
+  bool ok = typecheckSource("type Number = f64;\n"
+                            "let count: Number = \"not a number\";\n");
+  assert(!ok);
 }
 
 int main(void) {
@@ -884,7 +977,8 @@ int main(void) {
   test_ordering_requires_f64();
   test_unary();
   test_negate_requires_f64();
-  test_and_or_same_type_rule();
+  test_and_or_produce_bool();
+  test_and_or_non_bool_operand_errors();
   test_and_or_mismatched_type_errors();
   test_nullish_result_comes_from_fallback();
   test_function_call_checked();
@@ -934,6 +1028,17 @@ int main(void) {
   test_program_mutually_recursive_functions();
   test_program_method_body_type_error_caught();
   test_program_nested_closure_captures_self();
+
+  test_type_alias_chained();
+  test_type_alias_cycle_errors();
+  test_type_alias_to_struct();
+  test_type_alias_used_as_type();
+  test_type_alias_wrong_type_errors();
+  test_program_body_falling_off_the_end_errors();
+  test_program_return_on_only_one_branch_errors();
+  test_program_return_on_both_branches_is_fine();
+  test_program_unit_body_needs_no_return();
+  test_program_lambda_falling_off_the_end_errors();
 
   typesFreeAll();
   astFreeAll();

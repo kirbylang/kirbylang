@@ -293,6 +293,23 @@ if(BUILD_TESTS)
         COMMAND kirby-typecheck-unit-test
     )
 
+    add_executable(kirby-typecheck-session-unit-test
+        unit/typecheck_session.c
+    )
+
+    target_link_libraries(kirby-typecheck-session-unit-test
+        PRIVATE
+            kirby_core_debug
+    )
+
+    configure_kirby_target(kirby-typecheck-session-unit-test)
+    enable_coverage(kirby-typecheck-session-unit-test)
+
+    add_test(
+        NAME kirby-typecheck-session-unit-test
+        COMMAND kirby-typecheck-session-unit-test
+    )
+
     add_executable(kirby-definite-assignment-unit-test
         unit/definite_assignment.c
     )

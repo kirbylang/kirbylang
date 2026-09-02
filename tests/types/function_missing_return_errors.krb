@@ -1,0 +1,5 @@
+fun fn(): f64 {
+    print "no return here";
+}
+
+print fn();

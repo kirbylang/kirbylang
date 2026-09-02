@@ -1,0 +1,30 @@
+fun branches(condition: bool): f64 {
+    if (condition) {
+        return 1;
+    } else {
+        return 2;
+    }
+}
+
+fun trailingValue(): f64 {
+    let doubled = 2 * 2;
+    doubled
+}
+
+fun afterALoop(): string {
+    for (var i = 0; i < 3; i = i + 1) {
+        print i;
+    }
+
+    return "done";
+}
+
+fun returnsUnit(): unit {
+    print "nothing to return";
+}
+
+print branches(true);
+print branches(false);
+print trailingValue();
+print afterALoop();
+returnsUnit();

@@ -270,6 +270,13 @@ static AstNode *grouping(Parser *p, bool canAssign) {
 
   int line = p->previous.line;
 
+  // `()` is the unit value, not an empty grouping.
+  if (match(p, TOKEN_RIGHT_PAREN)) {
+    AstNode *unit = astAlloc(NODE_LITERAL, line);
+    unit->as.literal.kind = LITERAL_UNIT;
+    return unit;
+  }
+
   AstNode *inner = expression(p);
   consume(p, TOKEN_RIGHT_PAREN, "Expect ')' after expression.");
 
@@ -1256,7 +1263,17 @@ static AstNode *structDeclaration(Parser *p) {
     // since nothing here ever calls synchronize() the way declaration() does
     // for top-level statements.
     if (p->panicMode) {
+      Token rejected = p->current;
+
       synchronize(p);
+
+      if (!is_at_end(p) && !check(p, TOKEN_RIGHT_BRACE) &&
+          p->current.start == rejected.start) {
+        // Step over the errored keyword and skip the rest of the malformed
+        // member.
+        advance(p);
+        synchronize(p);
+      }
     }
   }
   consume(p, TOKEN_RIGHT_BRACE, "Expect '}' after struct body.");

@@ -59,7 +59,7 @@ bool typchkHadError(void) { return hadError; }
 void typchkResetError(void) { hadError = false; }
 
 typedef struct {
-  Token name;
+  InternedName name;
   Type *type;
 } TypeEnvBinding;
 
@@ -74,7 +74,7 @@ static void bindingArrayWrite(TypeEnvBinding **array, int *count, int *capacity,
       exit(1);
     }
   }
-  (*array)[*count].name = name;
+  (*array)[*count].name = internTokenName(name);
   (*array)[*count].type = type;
   (*count)++;
 }
@@ -82,7 +82,7 @@ static void bindingArrayWrite(TypeEnvBinding **array, int *count, int *capacity,
 static Type *bindingArrayLookup(TypeEnvBinding *array, int count, Token name) {
   // Most recently declared binding wins
   for (int i = count - 1; i >= 0; i--) {
-    if (tokensEqual(&array[i].name, &name))
+    if (internedNameEqualsToken(array[i].name, name))
       return array[i].type;
   }
   return NULL;
@@ -109,12 +109,38 @@ struct TypeEnv {
   int functionCount;
   int functionCapacity;
 
+  TypeEnvBinding *aliases;
+  int aliasCount;
+  int aliasCapacity;
+
   // WIP State
 
   Type *_selfType;          // NULL when not currently checking a method body.
   Type *_currentReturnType; // NULL when not checking a function/method body, or
                             // its return type didn't resolve.
 };
+
+// Type environment that persists across compilation units
+static TypeEnv *sessionEnv = NULL;
+
+void typchkSessionBegin(void) {
+  if (sessionEnv != NULL)
+    return;
+  sessionEnv = typchkTypeEnvCreate();
+  typchkTypeEnvBeginScope(sessionEnv);
+}
+
+void typchkSessionEnd(void) {
+  if (sessionEnv == NULL)
+    return;
+
+  typchkTypeEnvEndScope(sessionEnv);
+  typchkTypeEnvDestroy(sessionEnv);
+
+  sessionEnv = NULL;
+
+  typesFreeAll();
+}
 
 TypeEnv *typchkTypeEnvCreate(void) {
   TypeEnv *env = (TypeEnv *)malloc(sizeof(TypeEnv));
@@ -129,6 +155,7 @@ void typchkTypeEnvDestroy(TypeEnv *env) {
   free(env->scopes);
   free(env->structs);
   free(env->functions);
+  free(env->aliases);
   free(env);
 }
 
@@ -158,6 +185,7 @@ void typchkTypeEnvEndScope(TypeEnv *env) {
 
 void typchkTypeEnvDeclare(TypeEnv *env, Token name, Type *type) {
   TypeEnvScope *scope = &env->scopes[env->scopeCount - 1];
+
   bindingArrayWrite(&scope->bindings, &scope->count, &scope->capacity, name,
                     type);
 }
@@ -188,6 +216,15 @@ void typchkTypeEnvRegisterFunction(TypeEnv *env, Token name, Type *type) {
 
 Type *typchkTypeEnvLookupFunction(TypeEnv *env, Token name) {
   return bindingArrayLookup(env->functions, env->functionCount, name);
+}
+
+void typchkTypeEnvRegisterAlias(TypeEnv *env, Token name, Type *type) {
+  bindingArrayWrite(&env->aliases, &env->aliasCount, &env->aliasCapacity, name,
+                    type);
+}
+
+Type *typchkTypeEnvLookupAlias(TypeEnv *env, Token name) {
+  return bindingArrayLookup(env->aliases, env->aliasCount, name);
 }
 
 void typchkTypeEnvSetSelfType(TypeEnv *env, Type *selfType) {
@@ -245,6 +282,10 @@ Type *typchkResolveType(TypeEnv *env, AstNode *typeAnnotation) {
   Type *structType = typchkTypeEnvLookupStruct(env, t->name);
   if (structType != NULL)
     return structType;
+
+  Type *aliasType = typchkTypeEnvLookupAlias(env, t->name);
+  if (aliasType != NULL)
+    return aliasType;
 
   typchkErrorAtToken(&t->name, "Unknown type.");
   return NULL;
@@ -381,6 +422,7 @@ static Type *typchkInferLiteral(AstNode *node) {
   LiteralNode *lit = &node->as.literal;
   switch (lit->kind) {
   case LITERAL_NIL:
+  case LITERAL_UNIT:
     return typeUnit();
   case LITERAL_BOOL:
     return typeBool();
@@ -520,21 +562,15 @@ static Type *typchkInferAssign(TypeEnv *env, AstNode *node) {
 // Infer the type of a logic operator e.g. and, or
 static Type *typchkInferLogical(TypeEnv *env, AstNode *node) {
   LogicalNode *l = &node->as.logical;
-  Type *leftType = typchkInfer(env, l->left);
-  Type *rightType = typchkInfer(env, l->right);
 
-  if (leftType == NULL || rightType == NULL)
-    return NULL;
+  // Both operands are conditions, so both are bool and so is the result.
+  // The VM still short circuits, it just can't yield a non-bool operand.
+  bool ok = typchkCheck(env, l->left, typeBool());
 
-  if (!typesEqual(leftType, rightType)) {
-    typchkErrorAtNodeFmt(
-        node, "Both sides of '%s' must be the same type, got %s and %s",
-        node->kind == NODE_AND ? "and" : "or", typeToString(leftType),
-        typeToString(rightType));
-    return NULL;
-  }
+  if (!typchkCheck(env, l->right, typeBool()))
+    ok = false;
 
-  return leftType;
+  return ok ? typeBool() : NULL;
 }
 
 // Infer the type of a nullish expression
@@ -670,7 +706,7 @@ static Type *typchkInferGet(TypeEnv *env, AstNode *node) {
                           "instead of an instance.",
                           get->name.length, get->name.start,
                           objectType->as.struct_.name.length,
-                          objectType->as.struct_.name.start);
+                          internedNameChars(objectType->as.struct_.name));
     return NULL;
   }
 
@@ -909,6 +945,56 @@ static Type *typchkInferBlock(TypeEnv *env, AstNode *node) {
                                   /*expectedValueType=*/NULL);
 }
 
+static bool typchkCheckIfBlockAlwaysReturns(BlockNode *block);
+
+// Check if the statement (AstNode) exits it's enclosing function
+static bool typchkCheckIfAlwaysReturns(AstNode *node) {
+  if (node == NULL)
+    return false;
+
+  switch (node->kind) {
+  case NODE_RETURN:
+    return true;
+
+  case NODE_BLOCK:
+    return typchkCheckIfBlockAlwaysReturns(&node->as.block);
+
+  case NODE_IF: {
+    IfNode *if_ = &node->as.if_;
+    return if_->elseBranch != NULL &&
+           typchkCheckIfAlwaysReturns(if_->thenBranch) &&
+           typchkCheckIfAlwaysReturns(if_->elseBranch);
+  }
+
+  default:
+    return false;
+  }
+}
+
+static bool typchkCheckIfBlockAlwaysReturns(BlockNode *block) {
+  // Implicit return
+  if (block->value != NULL)
+    return true;
+
+  for (int i = 0; i < block->count; i++) {
+    if (typchkCheckIfAlwaysReturns(block->stmts[i]))
+      return true;
+  }
+
+  return false;
+}
+
+static bool typchkCheckIfBodyProducesDeclaredValue(FunctionNode *fn,
+                                                   Type *returnType) {
+  if (returnType == NULL || typesEqual(returnType, typeUnit()))
+    return true;
+
+  if (fn->exprBody != NULL)
+    return true;
+
+  return typchkCheckIfBlockAlwaysReturns(&fn->body);
+}
+
 static Type *typchkCheckOrInferLambda(
     TypeEnv *env, AstNode *node,
     Type *expected // expected is NULL in typchkInfer() context (every param
@@ -988,6 +1074,12 @@ static Type *typchkCheckOrInferLambda(
   typchkTypeEnvSetCurrentReturnType(env, previousReturnType);
   typchkTypeEnvEndScope(env);
 
+  if (!typchkCheckIfBodyProducesDeclaredValue(fn, targetReturnType)) {
+    typchkErrorAtNodeFmt(node, "This lambda must return %s on every path.",
+                         typeToString(targetReturnType));
+    return NULL;
+  }
+
   if (bodyResultType == NULL)
     return NULL;
 
@@ -1050,6 +1142,12 @@ static void typchkCheckFunctionBody(TypeEnv *env, FunctionNode *fn,
   }
 
   daaCheckFn(fn);
+
+  if (!typchkCheckIfBodyProducesDeclaredValue(fn, returnType)) {
+    typchkErrorAtTokenFmt(&fn->name, "'%.*s' must return %s on every path.",
+                          fn->name.length, fn->name.start,
+                          typeToString(returnType));
+  }
 
   typchkTypeEnvSetCurrentReturnType(env, previousReturnType);
   typchkTypeEnvSetSelfType(env, previousSelfType);
@@ -1192,6 +1290,79 @@ static Type *typchkResolveFunctionSignature(TypeEnv *env, FunctionNode *fn) {
   return typeFunction(paramTypes, fn->arity, returnType);
 }
 
+// A type alias declaration waiting to be resolved. Aliases may reference
+// each other in any order, so they're collected first and resolved
+// on demand, depth first.
+typedef struct {
+  AstNode *node;
+  bool resolving;
+  bool resolved;
+} UnresolvedTypeAlias;
+
+static void typchkResolvePendingAlias(TypeEnv *env,
+                                      UnresolvedTypeAlias *unresolvedAlias,
+                                      int count, int index);
+
+// Resolves any alias `typeAnnotation` names before it is itself resolved,
+// so an alias declared later in the file still works.
+static void typchkResolveAliasDependencies(TypeEnv *env,
+                                           UnresolvedTypeAlias *unresolvedAlias,
+                                           int count, AstNode *typeAnnotation) {
+  if (typeAnnotation == NULL)
+    return;
+
+  if (typeAnnotation->kind == NODE_TYPE_FUNCTION) {
+    TypeFunctionNode *fn = &typeAnnotation->as.typeFunction;
+    for (int i = 0; i < fn->paramCount; i++) {
+      typchkResolveAliasDependencies(env, unresolvedAlias, count,
+                                     fn->paramTypes[i]);
+    }
+    typchkResolveAliasDependencies(env, unresolvedAlias, count, fn->returnType);
+    return;
+  }
+
+  TypeNode *t = &typeAnnotation->as.type_;
+
+  for (int i = 0; i < t->genericArgCount; i++) {
+    typchkResolveAliasDependencies(env, unresolvedAlias, count,
+                                   t->genericArgs[i]);
+  }
+
+  for (int i = 0; i < count; i++) {
+    if (tokensEqual(&unresolvedAlias[i].node->as.typeAlias.name, &t->name)) {
+      typchkResolvePendingAlias(env, unresolvedAlias, count, i);
+      return;
+    }
+  }
+}
+
+static void typchkResolvePendingAlias(TypeEnv *env,
+                                      UnresolvedTypeAlias *unresolvedAlias,
+                                      int count, int index) {
+  UnresolvedTypeAlias *alias = &unresolvedAlias[index];
+  TypeAliasNode *decl = &alias->node->as.typeAlias;
+
+  if (alias->resolved)
+    return;
+
+  if (alias->resolving) {
+    typchkErrorAtTokenFmt(&decl->name, "Type alias '%.*s' is circular.",
+                          decl->name.length, decl->name.start);
+    alias->resolved = true;
+    return;
+  }
+
+  alias->resolving = true;
+  typchkResolveAliasDependencies(env, unresolvedAlias, count, decl->target);
+  alias->resolving = false;
+  alias->resolved = true;
+
+  Type *target = typchkResolveType(env, decl->target);
+
+  if (target != NULL)
+    typchkTypeEnvRegisterAlias(env, decl->name, target);
+}
+
 static void typchkResolveStructFields(TypeEnv *env, AstNode *node) {
   StructNode *struct_ = &node->as.struct_;
   Type *structType = typchkTypeEnvLookupStruct(env, struct_->name);
@@ -1202,10 +1373,11 @@ static void typchkResolveStructFields(TypeEnv *env, AstNode *node) {
   if (typeStructIsGeneric(structType))
     return; // already reported once at declaration; don't cascade
 
-  TypeMember *fields = struct_->fieldCount > 0
-                           ? (TypeMember *)typesAllocRaw(struct_->fieldCount *
-                                                         sizeof(TypeMember))
-                           : NULL;
+  UninternedTypeMember *fields =
+      struct_->fieldCount > 0
+          ? (UninternedTypeMember *)typesAllocRaw(struct_->fieldCount *
+                                                  sizeof(UninternedTypeMember))
+          : NULL;
 
   bool ok = true;
   for (int i = 0; i < struct_->fieldCount; i++) {
@@ -1305,8 +1477,14 @@ static void checkImplMethodBodies(TypeEnv *env, AstNode *node) {
 }
 
 bool typchkCheckProgram(AstNode **program, int count) {
-  TypeEnv *env = typchkTypeEnvCreate();
-  typchkTypeEnvBeginScope(env);
+  // Diagnostics are per-unit/program
+  typchkResetError();
+
+  bool ownsEnv = sessionEnv == NULL;
+  TypeEnv *env = ownsEnv ? typchkTypeEnvCreate() : sessionEnv;
+
+  if (ownsEnv)
+    typchkTypeEnvBeginScope(env);
 
   // Structs
 
@@ -1322,6 +1500,44 @@ bool typchkCheckProgram(AstNode **program, int count) {
 
       typchkTypeEnvRegisterStruct(env, sn->name, placeholder);
     }
+  }
+
+  // Type aliases
+  //
+  // After struct placeholders so an alias can name a struct, before struct
+  // fields so a field can be annotated with an alias.
+
+  // TODO: Refactor this
+
+  UnresolvedTypeAlias *unresolvedAliasAliases = NULL;
+  int pendingAliasCount = 0;
+
+  for (int i = 0; i < count; i++) {
+    // Generic aliases are still parse-only, same as generic types.
+    if (program[i]->kind == NODE_TYPE_ALIAS &&
+        program[i]->as.typeAlias.genericParamCount == 0) {
+      pendingAliasCount++;
+    }
+  }
+
+  if (pendingAliasCount > 0) {
+    unresolvedAliasAliases = (UnresolvedTypeAlias *)calloc(
+        (size_t)pendingAliasCount, sizeof(UnresolvedTypeAlias));
+
+    int next = 0;
+    for (int i = 0; i < count; i++) {
+      if (program[i]->kind == NODE_TYPE_ALIAS &&
+          program[i]->as.typeAlias.genericParamCount == 0) {
+        unresolvedAliasAliases[next++].node = program[i];
+      }
+    }
+
+    for (int i = 0; i < pendingAliasCount; i++) {
+      typchkResolvePendingAlias(env, unresolvedAliasAliases, pendingAliasCount,
+                                i);
+    }
+
+    free(unresolvedAliasAliases);
   }
 
   for (int i = 0; i < count; i++) {
@@ -1373,9 +1589,12 @@ bool typchkCheckProgram(AstNode **program, int count) {
 
   // Clean Up
 
-  typchkTypeEnvEndScope(env);
   bool ok = !typchkHadError();
-  typchkTypeEnvDestroy(env);
+
+  if (ownsEnv) {
+    typchkTypeEnvEndScope(env);
+    typchkTypeEnvDestroy(env);
+  }
 
   return ok;
 }
