@@ -1,0 +1,73 @@
+== <script> ==
+0000    1 OP_NIL
+0001    | OP_RETURN
+== <script> ==
+0000    7 OP_CLOSURE          1 <fn branches>
+0002    | OP_DEFINE_GLOBAL    0 'branches'
+0004   12 OP_CLOSURE          3 <fn trailingValue>
+0006    | OP_DEFINE_GLOBAL    2 'trailingValue'
+0008   20 OP_CLOSURE          5 <fn afterALoop>
+0010    | OP_DEFINE_GLOBAL    4 'afterALoop'
+0012   24 OP_CLOSURE          7 <fn returnsUnit>
+0014    | OP_DEFINE_GLOBAL    6 'returnsUnit'
+0016   26 OP_GET_GLOBAL       8 'branches'
+0018    | OP_TRUE
+0019    | OP_CALL             1
+0021    | OP_PRINT
+0022   27 OP_GET_GLOBAL       9 'branches'
+0024    | OP_FALSE
+0025    | OP_CALL             1
+0027    | OP_PRINT
+0028   28 OP_GET_GLOBAL      10 'trailingValue'
+0030    | OP_CALL             0
+0032    | OP_PRINT
+0033   29 OP_GET_GLOBAL      11 'afterALoop'
+0035    | OP_CALL             0
+0037    | OP_PRINT
+0038   30 OP_GET_GLOBAL      12 'returnsUnit'
+0040    | OP_CALL             0
+0042    | OP_POP
+0043   31 OP_NIL
+0044    | OP_RETURN
+== branches ==
+0000    2 OP_GET_LOCAL        1
+0002    | OP_JUMP_IF_FALSE    2 -> 12
+0005    | OP_POP
+0006    3 OP_CONSTANT         0 '1.000000'
+0008    | OP_RETURN
+0009    4 OP_JUMP             9 -> 16
+0012    | OP_POP
+0013    5 OP_CONSTANT         1 '2.000000'
+0015    | OP_RETURN
+== trailingValue ==
+0000   10 OP_CONSTANT         0 '2.000000'
+0002    | OP_CONSTANT         1 '2.000000'
+0004    | OP_MULTIPLY
+0005   11 OP_GET_LOCAL        1
+0007    | OP_RETURN
+== afterALoop ==
+0000   15 OP_CONSTANT         0 '0.000000'
+0002    | OP_GET_LOCAL        1
+0004    | OP_CONSTANT         1 '3.000000'
+0006    | OP_LESS
+0007    | OP_JUMP_IF_FALSE    7 -> 31
+0010    | OP_POP
+0011    | OP_JUMP            11 -> 25
+0014    | OP_GET_LOCAL        1
+0016    | OP_CONSTANT         2 '1.000000'
+0018    | OP_ADD
+0019    | OP_SET_LOCAL        1
+0021    | OP_POP
+0022    | OP_LOOP            22 -> 2
+0025   16 OP_GET_LOCAL        1
+0027    | OP_PRINT
+0028   17 OP_LOOP            28 -> 14
+0031    | OP_POP
+0032    | OP_POP
+0033   19 OP_CONSTANT         3 'done'
+0035    | OP_RETURN
+== returnsUnit ==
+0000   23 OP_CONSTANT         0 'nothing to return'
+0002    | OP_PRINT
+0003   24 OP_NIL
+0004    | OP_RETURN

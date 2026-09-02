@@ -849,6 +849,38 @@ static void test_program_method_body_type_error_caught(void) {
   assert(!ok);
 }
 
+static void test_program_body_falling_off_the_end_errors(void) {
+  typchkResetError();
+  bool ok = typecheckSource("fun f(): f64 { print 1; }\n");
+  assert(!ok);
+}
+
+static void test_program_return_on_only_one_branch_errors(void) {
+  typchkResetError();
+  bool ok = typecheckSource("fun f(c: bool): f64 { if (c) { return 1; } }\n");
+  assert(!ok);
+}
+
+static void test_program_return_on_both_branches_is_fine(void) {
+  typchkResetError();
+  bool ok = typecheckSource(
+      "fun f(c: bool): f64 { if (c) { return 1; } else { return 2; } }\n");
+  assert(!ok);
+}
+
+static void test_program_unit_body_needs_no_return(void) {
+  typchkResetError();
+  bool ok = typecheckSource("fun f(): unit { print 1; }\n");
+  assert(ok);
+}
+
+static void test_program_lambda_falling_off_the_end_errors(void) {
+  typchkResetError();
+  bool ok =
+      typecheckSource("let f: fun () => f64 = fun (): f64 { print 1; };\n");
+  assert(!ok);
+}
+
 static void test_program_nested_closure_captures_self(void) {
   typchkResetError();
   // A nested *function* (not a lambda) declared inside a method,
@@ -991,6 +1023,11 @@ int main(void) {
   test_type_alias_to_struct();
   test_type_alias_used_as_type();
   test_type_alias_wrong_type_errors();
+  test_program_body_falling_off_the_end_errors();
+  test_program_return_on_only_one_branch_errors();
+  test_program_return_on_both_branches_is_fine();
+  test_program_unit_body_needs_no_return();
+  test_program_lambda_falling_off_the_end_errors();
 
   typesFreeAll();
   astFreeAll();

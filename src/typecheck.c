@@ -955,6 +955,56 @@ static Type *typchkInferBlock(TypeEnv *env, AstNode *node) {
                                   /*expectedValueType=*/NULL);
 }
 
+static bool typchkCheckIfBlockAlwaysReturns(BlockNode *block);
+
+// Check if the statement (AstNode) exits it's enclosing function
+static bool typchkCheckIfAlwaysReturns(AstNode *node) {
+  if (node == NULL)
+    return false;
+
+  switch (node->kind) {
+  case NODE_RETURN:
+    return true;
+
+  case NODE_BLOCK:
+    return typchkCheckIfBlockAlwaysReturns(&node->as.block);
+
+  case NODE_IF: {
+    IfNode *if_ = &node->as.if_;
+    return if_->elseBranch != NULL &&
+           typchkCheckIfAlwaysReturns(if_->thenBranch) &&
+           typchkCheckIfAlwaysReturns(if_->elseBranch);
+  }
+
+  default:
+    return false;
+  }
+}
+
+static bool typchkCheckIfBlockAlwaysReturns(BlockNode *block) {
+  // Implicit return
+  if (block->value != NULL)
+    return true;
+
+  for (int i = 0; i < block->count; i++) {
+    if (typchkCheckIfAlwaysReturns(block->stmts[i]))
+      return true;
+  }
+
+  return false;
+}
+
+static bool typchkCheckIfBodyProducesDeclaredValue(FunctionNode *fn,
+                                                   Type *returnType) {
+  if (returnType == NULL || typesEqual(returnType, typeUnit()))
+    return true;
+
+  if (fn->exprBody != NULL)
+    return true;
+
+  return typchkCheckIfBlockAlwaysReturns(&fn->body);
+}
+
 static Type *typchkCheckOrInferLambda(
     TypeEnv *env, AstNode *node,
     Type *expected // expected is NULL in typchkInfer() context (every param
@@ -1034,6 +1084,12 @@ static Type *typchkCheckOrInferLambda(
   typchkTypeEnvSetCurrentReturnType(env, previousReturnType);
   typchkTypeEnvEndScope(env);
 
+  if (!typchkCheckIfBodyProducesDeclaredValue(fn, targetReturnType)) {
+    typchkErrorAtNodeFmt(node, "This lambda must return %s on every path.",
+                         typeToString(targetReturnType));
+    return NULL;
+  }
+
   if (bodyResultType == NULL)
     return NULL;
 
@@ -1096,6 +1152,12 @@ static void typchkCheckFunctionBody(TypeEnv *env, FunctionNode *fn,
   }
 
   daaCheckFn(fn);
+
+  if (!typchkCheckIfBodyProducesDeclaredValue(fn, returnType)) {
+    typchkErrorAtTokenFmt(&fn->name, "'%.*s' must return %s on every path.",
+                          fn->name.length, fn->name.start,
+                          typeToString(returnType));
+  }
 
   typchkTypeEnvSetCurrentReturnType(env, previousReturnType);
   typchkTypeEnvSetSelfType(env, previousSelfType);
