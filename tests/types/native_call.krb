@@ -1,0 +1,9 @@
+let version: string = __version__();
+let rounded: f64 = ceil(1.2);
+let missing: bool = fileExists("./does/not/exist.txt");
+let parsed: f64 = parseNumber("42");
+
+print rounded;
+print missing;
+print parsed;
+print numberToString(parsed) + "!";

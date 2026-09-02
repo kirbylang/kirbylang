@@ -1,0 +1,3 @@
+print ceil();
+print ceil(1, 2);
+print randBetween(1);

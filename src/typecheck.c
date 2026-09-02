@@ -4,6 +4,7 @@
 #include <string.h>
 
 #include "definite_assignment.h"
+#include "native_signatures.h"
 #include "typecheck.h"
 
 static bool hadError = false;
@@ -145,6 +146,7 @@ void typchkSessionEnd(void) {
 TypeEnv *typchkTypeEnvCreate(void) {
   TypeEnv *env = (TypeEnv *)malloc(sizeof(TypeEnv));
   memset(env, 0, sizeof(TypeEnv));
+  defineAllNativeSignatures(env);
   return env;
 }
 

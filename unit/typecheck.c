@@ -336,11 +336,19 @@ static void test_function_call_wrong_arity_errors(void) {
   typchkResetError();
 }
 
-static void test_native_call_is_unchecked(void) {
+static void test_native_call_with_a_signature_is_checked(void) {
   typchkResetError();
-  // `clock` isn't declared anywhere Kirby-visible -- presumed native,
-  // not an error, and the whole call infers as "no opinion."
   TypeEnv *env = checkProgram("var x = clock();");
+  assert(!typchkHadError());
+  assert(typchkTypeEnvLookup(env, makeToken("x")) == typeF64());
+  typchkTypeEnvDestroy(env);
+}
+
+static void test_native_call_without_a_signature_is_unchecked(void) {
+  typchkResetError();
+  // `len` needs generics, so it has no signature -- the call is presumed
+  // native, not an error, and infers as "no opinion."
+  TypeEnv *env = checkProgram("var x = len(\"abc\");");
   assert(!typchkHadError());
   assert(typchkTypeEnvLookup(env, makeToken("x")) == NULL);
   typchkTypeEnvDestroy(env);
@@ -984,7 +992,8 @@ int main(void) {
   test_function_call_checked();
   test_function_call_wrong_arg_type_errors();
   test_function_call_wrong_arity_errors();
-  test_native_call_is_unchecked();
+  test_native_call_with_a_signature_is_checked();
+  test_native_call_without_a_signature_is_unchecked();
   test_struct_instance_field_and_method_access();
   test_struct_static_method_access();
   test_local_variable_shadows_struct_name_for_get();

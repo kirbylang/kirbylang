@@ -1,32 +1,7 @@
 == <script> ==
 0000    1 OP_NIL
 0001    | OP_RETURN
-== <script> ==
-0000    1 OP_GET_GLOBAL       0 'strIsEmpty'
-0002    | OP_CONSTANT         1 ''
-0004    | OP_CALL             1
-0006    | OP_PRINT
-0007    2 OP_GET_GLOBAL       2 'strIsEmpty'
-0009    | OP_CONSTANT         3 'Hello World'
-0011    | OP_CALL             1
-0013    | OP_PRINT
-0014    3 OP_GET_GLOBAL       4 'strIsEmpty'
-0016    | OP_CONSTANT         5 '123.000000'
-0018    | OP_CALL             1
-0020    | OP_PRINT
-0021    4 OP_GET_GLOBAL       6 'strIsEmpty'
-0023    | OP_TRUE
-0024    | OP_CALL             1
-0026    | OP_PRINT
-0027    5 OP_GET_GLOBAL       7 'strIsEmpty'
-0029    | OP_NIL
-0030    | OP_CALL             1
-0032    | OP_PRINT
-0033    6 OP_GET_GLOBAL       8 'strIsEmpty'
-0035    | OP_GET_GLOBAL       9 'ceil'
-0037    | OP_CALL             1
-0039    | OP_PRINT
-0040    7 OP_NIL
-0041    | OP_RETURN
-function strIsEmpty expects argument 1 to be a string.
-[line 3] in script
+[line 3] Error: Expected string, got f64.
+[line 4] Error: Expected string, got bool.
+[line 5] Error: Expected string, got unit.
+[line 6] Error: Expected string, got fun (f64) => f64.

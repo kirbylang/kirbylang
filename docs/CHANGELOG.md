@@ -37,8 +37,16 @@
 - Unit literal expression: `()`.
 - Initial implementation of types and typechecker
   - Limitations
-    - Native functions are not typechecked
     - Generic types are ignored
+  - Native function signatures
+    - Calls to a native with a signature are checked like any other call
+    - `clock`, `__version__`, `exit`, `rand`, `rand01`, `randBetween`,
+      `ceil`, `readFileToString`, `writeStringToFile`, `numberToString`,
+      `fileExists`, `getenv`, `setenv`, `argc`, `parseNumber`, `strIsEmpty`
+    - Still unchecked, pending generics: `len`, `typeof`, `instanceOf`,
+      `is`, `isNumber`, `isFunction`, `isBool`, `isString`, `isNil`, and
+      the `arr*` family
+    - Still unchecked, pending `Option[T]`: `argv`, `prompt`, `stdin`
   - Primitive types
     - `string`
     - `bool`

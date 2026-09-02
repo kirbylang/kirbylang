@@ -1,0 +1,6 @@
+// len has no signature yet -- it needs generics -- so calls to it are
+// inferred as unknown and checked at runtime instead.
+
+let length: string = len("abc");
+
+print length;

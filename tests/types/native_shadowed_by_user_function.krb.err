@@ -1,0 +1,17 @@
+== <script> ==
+0000    1 OP_NIL
+0001    | OP_RETURN
+== <script> ==
+0000    1 OP_CLOSURE          1 <fn ceil>
+0002    | OP_DEFINE_GLOBAL    0 'ceil'
+0004    3 OP_GET_GLOBAL       2 'ceil'
+0006    | OP_CONSTANT         3 'hello'
+0008    | OP_CALL             1
+0010    | OP_PRINT
+0011    4 OP_NIL
+0012    | OP_RETURN
+== ceil ==
+0000    1 OP_GET_LOCAL        1
+0002    | OP_CONSTANT         0 '!'
+0004    | OP_ADD
+0005    | OP_RETURN

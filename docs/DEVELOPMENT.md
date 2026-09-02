@@ -61,7 +61,7 @@ graph LR
 - [`src/compiler.c`](../src/compiler.c) Compiler
 - [`src/chunk.c`](../src/compiler.c) Bytecode OP Codes
 - [`src/vm.c`](../src/vm.c) Virtual Machine
-- [`src/native.c`](../src/native.c) Native function definitions
+- [`src/native.c`](../src/native.c) Native function definitions and their types
 - [`src/memory.c`](../src/memory.c) Memory/garbage collection
 - [`VERSION.txt`](../VERSION.txt) Defines the version of the language. See [Incrementing Language Version](../scripts/README.md#increment-language-version) for changing this.
 - [`scripts/tests.sh`](../scripts/tests.sh) Runs the language [tests](../tests/) (E2E, snapshots)
@@ -88,15 +88,16 @@ See [scripts](../scripts/README.md)
 ### Create A Native Function
 
 - [ ] 1. Declare a new function in [native.c](../src/native.c)
-- [ ] 2. Register the native function with `defineNative("function_name", functionNameNative)` in `defineAllNatives`
-- [ ] 3. Add [tests](../tests/README.md) for the new function in the [`tests/native_functions`](../tests/native_functions/) directory
-- [ ] 4. Add function to [EXTENDING_LOC.md](EXTENDING_LOX.md) under the "next" version
-- [ ] 5. Add function to [`kirby.tmLanguage.json`](../vsc/syntaxes/kirby.tmLanguage.json) under `"name": "entity.name.function.native.kirby"`
+- [ ] 2. Add the native to the `nativeDefinitions` table in [native.c](../src/native.c)
+- [ ] 3. Give the native a type in the `nativeSignatures` table in [native.c](../src/native.c), directly below `nativeDefinitions`, or add it to one of the deferred lists in [unit/native_signatures.c](../unit/native_signatures.c) if its type can't be spelled yet. The unit test fails until one of the two happens.
+- [ ] 4. Add [tests](../tests/README.md) for the new function in the [`tests/native_functions`](../tests/native_functions/) directory
+- [ ] 5. Add function to [EXTENDING_LOC.md](EXTENDING_LOX.md) under the "next" version
+- [ ] 6. Add function to [`kirby.tmLanguage.json`](../vsc/syntaxes/kirby.tmLanguage.json) under `"name": "entity.name.function.native.kirby"`
   - [ ] Call
   - [ ] Call with no args (if applicable)
   - [ ] Call with too many args (if applicable)
   - [ ] Call with incorrect arg types (if applicable)
-- [ ] 6. Add `vsc/hovers/function_name.md` with a description that will display when hovering over the function
+- [ ] 7. Add `vsc/hovers/function_name.md` with a description that will display when hovering over the function
 
 #### Example
 
