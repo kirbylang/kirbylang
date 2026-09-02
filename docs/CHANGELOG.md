@@ -34,6 +34,7 @@
   - Hoist structs during compilation
   - Deprecate the call syntax e.g. `Point()`
 - [`continue` keyword](https://github.com/kirbylang/kirbylang/issues/13)
+- Unit literal expression: `()`.
 - Initial implementation of types and typechecker
   - Limitations
     - Native functions are not typechecked
