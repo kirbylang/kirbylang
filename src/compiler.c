@@ -601,6 +601,7 @@ static void compileExpr(AstNode *node) {
 
     switch (literal->kind) {
     case LITERAL_NIL:
+    case LITERAL_UNIT:
       emitByte(OP_NIL);
       break;
     case LITERAL_BOOL:

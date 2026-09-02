@@ -427,6 +427,7 @@ static Type *typchkInferLiteral(AstNode *node) {
   LiteralNode *lit = &node->as.literal;
   switch (lit->kind) {
   case LITERAL_NIL:
+  case LITERAL_UNIT:
     return typeUnit();
   case LITERAL_BOOL:
     return typeBool();

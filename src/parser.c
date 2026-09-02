@@ -270,6 +270,13 @@ static AstNode *grouping(Parser *p, bool canAssign) {
 
   int line = p->previous.line;
 
+  // `()` is the unit value, not an empty grouping.
+  if (match(p, TOKEN_RIGHT_PAREN)) {
+    AstNode *unit = astAlloc(NODE_LITERAL, line);
+    unit->as.literal.kind = LITERAL_UNIT;
+    return unit;
+  }
+
   AstNode *inner = expression(p);
   consume(p, TOKEN_RIGHT_PAREN, "Expect ')' after expression.");
 

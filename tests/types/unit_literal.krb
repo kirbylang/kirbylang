@@ -1,0 +1,15 @@
+let nothing: unit = ();
+
+print nothing;
+
+fun doNothing(): unit {
+    return ();
+}
+
+doNothing();
+
+fun alsoNothing(): unit = ();
+
+alsoNothing();
+
+print () == ();

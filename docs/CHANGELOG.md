@@ -41,7 +41,7 @@
   - Primitive types
     - `string`
     - `bool`
-    - `unit`
+    - `unit`, written `()` as a value
     - `f64`
   - Complex Types
     - `fun (f64) => f64`

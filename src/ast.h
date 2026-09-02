@@ -50,6 +50,7 @@ void print_ast(StrBuf *sb, AstNode *ast);
 
 typedef enum {
   LITERAL_NIL,
+  LITERAL_UNIT,
   LITERAL_BOOL,
   LITERAL_NUMBER,
   LITERAL_STRING
