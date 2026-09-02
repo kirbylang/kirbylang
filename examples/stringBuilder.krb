@@ -7,10 +7,10 @@ struct StringBuilder {
 impl StringBuilder {
     pub fun new(): StringBuilder = StringBuilder { string: "" };
 
-    pub fun new_with_init(init): StringBuilder =
+    pub fun new_with_init(init: string): StringBuilder =
         StringBuilder { string: init };
 
-    pub fun add(self, string): StringBuilder {
+    pub fun add(self, string: string): StringBuilder {
         self.string = self.string + string;
 
         self
