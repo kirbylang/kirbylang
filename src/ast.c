@@ -135,7 +135,7 @@ static void printBlock(StrBuf *sb, BlockNode *block) {
   sb_append(sb, ")");
 }
 
-static void sbAppendToken(StrBuf *sb, Token t) {
+static void sb_append_token(StrBuf *sb, Token t) {
   sb_ensure(sb, (size_t)t.length);
   memcpy(sb->data + sb->len, t.start, (size_t)t.length);
   sb->len += (size_t)t.length;
@@ -155,7 +155,7 @@ static void printNode(StrBuf *sb, AstNode *node) {
 
   case NODE_UNARY:
     sb_append(sb, "(");
-    sbAppendToken(sb, node->as.unary.op);
+    sb_append_token(sb, node->as.unary.op);
     sb_append(sb, " ");
     printNode(sb, node->as.unary.operand);
     sb_append(sb, ")");
@@ -163,7 +163,7 @@ static void printNode(StrBuf *sb, AstNode *node) {
 
   case NODE_BINARY:
     sb_append(sb, "(");
-    sbAppendToken(sb, node->as.binary.op);
+    sb_append_token(sb, node->as.binary.op);
     sb_append(sb, " ");
     printNode(sb, node->as.binary.left);
     sb_append(sb, " ");
@@ -178,12 +178,12 @@ static void printNode(StrBuf *sb, AstNode *node) {
     break;
 
   case NODE_VARIABLE:
-    sbAppendToken(sb, node->as.variable.name);
+    sb_append_token(sb, node->as.variable.name);
     break;
 
   case NODE_ASSIGN:
     sb_append(sb, "(assign ");
-    sbAppendToken(sb, node->as.assign.name);
+    sb_append_token(sb, node->as.assign.name);
     sb_append(sb, " ");
     printNode(sb, node->as.assign.value);
     sb_append(sb, ")");
@@ -229,7 +229,7 @@ static void printNode(StrBuf *sb, AstNode *node) {
     sb_append(sb, "(get ");
     printNode(sb, node->as.get.object);
     sb_append(sb, " ");
-    sbAppendToken(sb, node->as.get.name);
+    sb_append_token(sb, node->as.get.name);
     sb_append(sb, ")");
     break;
 
@@ -237,7 +237,7 @@ static void printNode(StrBuf *sb, AstNode *node) {
     sb_append(sb, "(set ");
     printNode(sb, node->as.set.object);
     sb_append(sb, " ");
-    sbAppendToken(sb, node->as.set.name);
+    sb_append_token(sb, node->as.set.name);
     sb_append(sb, " ");
     printNode(sb, node->as.set.value);
     sb_append(sb, ")");
@@ -277,7 +277,7 @@ static void printNode(StrBuf *sb, AstNode *node) {
 
   case NODE_VAR_DECL:
     sb_append(sb, node->as.varDecl.isMutable ? "(var " : "(let ");
-    sbAppendToken(sb, node->as.varDecl.name);
+    sb_append_token(sb, node->as.varDecl.name);
 
     if (node->as.varDecl.declaredType != NULL) {
       sb_append(sb, " : ");
@@ -345,14 +345,14 @@ static void printNode(StrBuf *sb, AstNode *node) {
     sb_append(sb, node->as.function.isLambda ? "(lambda (" : "(fun ");
 
     if (!node->as.function.isLambda) {
-      sbAppendToken(sb, node->as.function.name);
+      sb_append_token(sb, node->as.function.name);
 
       if (node->as.function.genericParamCount > 0) {
         sb_append(sb, "[");
         for (int i = 0; i < node->as.function.genericParamCount; i++) {
           if (i > 0)
             sb_append(sb, " ");
-          sbAppendToken(sb, node->as.function.genericParams[i]);
+          sb_append_token(sb, node->as.function.genericParams[i]);
         }
         sb_append(sb, "]");
       }
@@ -369,7 +369,7 @@ static void printNode(StrBuf *sb, AstNode *node) {
     for (int i = 0; i < node->as.function.arity; i++) {
       if (i > 0)
         sb_append(sb, " ");
-      sbAppendToken(sb, node->as.function.params[i]);
+      sb_append_token(sb, node->as.function.params[i]);
 
       if (node->as.function.paramTypes != NULL &&
           node->as.function.paramTypes[i] != NULL) {
@@ -398,14 +398,14 @@ static void printNode(StrBuf *sb, AstNode *node) {
 
   case NODE_STRUCT:
     sb_append(sb, "(struct ");
-    sbAppendToken(sb, node->as.struct_.name);
+    sb_append_token(sb, node->as.struct_.name);
 
     if (node->as.struct_.genericParamCount > 0) {
       sb_append(sb, "[");
       for (int i = 0; i < node->as.struct_.genericParamCount; i++) {
         if (i > 0)
           sb_append(sb, " ");
-        sbAppendToken(sb, node->as.struct_.genericParams[i]);
+        sb_append_token(sb, node->as.struct_.genericParams[i]);
       }
       sb_append(sb, "]");
     }
@@ -414,7 +414,7 @@ static void printNode(StrBuf *sb, AstNode *node) {
       VarDeclNode *field = &node->as.struct_.fields[i];
 
       sb_append(sb, field->isPublic ? " (pub-field " : " (field ");
-      sbAppendToken(sb, field->name);
+      sb_append_token(sb, field->name);
 
       if (field->declaredType != NULL) {
         sb_append(sb, " : ");
@@ -434,13 +434,13 @@ static void printNode(StrBuf *sb, AstNode *node) {
 
   case NODE_STRUCT_INIT:
     sb_append(sb, "(struct-init ");
-    sbAppendToken(sb, node->as.structInit.name);
+    sb_append_token(sb, node->as.structInit.name);
 
     for (int i = 0; i < node->as.structInit.fieldCount; i++) {
       StructInitFieldNode *field = &node->as.structInit.fields[i];
 
       sb_append(sb, " (field ");
-      sbAppendToken(sb, field->name);
+      sb_append_token(sb, field->name);
       sb_append(sb, " ");
       printNode(sb, field->value);
       sb_append(sb, ")");
@@ -451,14 +451,20 @@ static void printNode(StrBuf *sb, AstNode *node) {
 
   case NODE_IMPL:
     sb_append(sb, "(impl ");
-    sbAppendToken(sb, node->as.impl.name);
+
+    if (node->as.impl.hasTraitName) {
+      sb_append_token(sb, node->as.impl.traitName);
+      sb_append(sb, " for ");
+    }
+
+    sb_append_token(sb, node->as.impl.targetName);
 
     if (node->as.impl.genericParamCount > 0) {
       sb_append(sb, "[");
       for (int i = 0; i < node->as.impl.genericParamCount; i++) {
         if (i > 0)
           sb_append(sb, " ");
-        sbAppendToken(sb, node->as.impl.genericParams[i]);
+        sb_append_token(sb, node->as.impl.genericParams[i]);
       }
       sb_append(sb, "]");
     }
@@ -472,7 +478,53 @@ static void printNode(StrBuf *sb, AstNode *node) {
         sb_append(sb, method->hasSelf ? " (method " : " (static ");
       }
 
-      sbAppendToken(sb, method->name);
+      sb_append_token(sb, method->name);
+      sb_append(sb, ")");
+    }
+
+    sb_append(sb, ")");
+    break;
+
+  case NODE_TRAIT:
+    sb_append(sb, "(trait ");
+    sb_append_token(sb, node->as.trait_.name);
+
+    if (node->as.trait_.hasSupertrait) {
+      sb_append(sb, " : ");
+      sb_append_token(sb, node->as.trait_.supertrait);
+    }
+
+    for (int i = 0; i < node->as.trait_.methodCount; i++) {
+      FunctionNode *method = node->as.trait_.methods[i];
+
+      sb_append(sb, method->hasSelf ? " (method " : " (static-method ");
+      sb_append_token(sb, method->name);
+      sb_append(sb, " (");
+
+      if (method->hasSelf) {
+        sb_append(sb, "self");
+        if (method->arity > 0)
+          sb_append(sb, " ");
+      }
+
+      for (int j = 0; j < method->arity; j++) {
+        if (j > 0)
+          sb_append(sb, " ");
+        sb_append_token(sb, method->params[j]);
+
+        if (method->paramTypes != NULL && method->paramTypes[j] != NULL) {
+          sb_append(sb, " : ");
+          printNode(sb, method->paramTypes[j]);
+        }
+      }
+
+      sb_append(sb, ")");
+
+      if (method->returnType != NULL) {
+        sb_append(sb, " : ");
+        printNode(sb, method->returnType);
+      }
+
       sb_append(sb, ")");
     }
 
@@ -503,7 +555,7 @@ static void printNode(StrBuf *sb, AstNode *node) {
     break;
 
   case NODE_TYPE:
-    sbAppendToken(sb, node->as.type_.name);
+    sb_append_token(sb, node->as.type_.name);
 
     if (node->as.type_.genericArgCount > 0) {
       sb_append(sb, "[");
@@ -518,14 +570,14 @@ static void printNode(StrBuf *sb, AstNode *node) {
 
   case NODE_TYPE_ALIAS:
     sb_append(sb, "(type ");
-    sbAppendToken(sb, node->as.typeAlias.name);
+    sb_append_token(sb, node->as.typeAlias.name);
 
     if (node->as.typeAlias.genericParamCount > 0) {
       sb_append(sb, "[");
       for (int i = 0; i < node->as.typeAlias.genericParamCount; i++) {
         if (i > 0)
           sb_append(sb, " ");
-        sbAppendToken(sb, node->as.typeAlias.genericParams[i]);
+        sb_append_token(sb, node->as.typeAlias.genericParams[i]);
       }
       sb_append(sb, "]");
     }

@@ -28,6 +28,9 @@ static int lambdaCount = 0;
  */
 static int currentLine = 0;
 
+static Token currentImplTargetName;
+static bool hasCurrentImplTargetName = false;
+
 /**
  * A resolved variable reference: which opcode pair to use, and the operand
  * (local slot / upvalue index / global-name constant index) to go with it.
@@ -182,6 +185,13 @@ static bool identifiersEqual(Token *a, Token *b) {
 }
 
 /**
+ * True if `name`'s source text is exactly "Self".
+ */
+static bool isSelfTypeName(Token *name) {
+  return name->length == 4 && memcmp(name->start, "Self", 4) == 0;
+}
+
+/**
  * Resolve local variable by identifier
  *
  * @returns -1 if not found, otherwise the index of the local from the
@@ -322,6 +332,11 @@ static VarRef resolveVariable(Token *name) {
     ref.arg = (uint8_t)arg;
     ref.isMutable = current->upvalues[arg].isMutable;
   } else {
+    // Swap `Self` for the real type name
+    if (hasCurrentImplTargetName && isSelfTypeName(name)) {
+      name = &currentImplTargetName;
+    }
+
     ref.arg = identifierConstant(name);
     ref.getOp = OP_GET_GLOBAL;
     ref.setOp = OP_SET_GLOBAL;
@@ -979,16 +994,21 @@ static void compileStructDecl(AstNode *node) {
 }
 
 static void compileImplDecl(AstNode *node) {
-  ImplNode *in = &node->as.impl;
+  ImplNode *impl = &node->as.impl;
 
-  currentLine = in->name.line;
+  currentLine = impl->targetName.line;
 
   // Push the struct onto the stack so the methods can be bound to it
-  VarRef ref = resolveVariable(&in->name);
+  VarRef ref = resolveVariable(&impl->targetName);
   emitBytes(ref.getOp, ref.arg);
 
-  for (int i = 0; i < in->methodCount; i++) {
-    FunctionNode *method = in->methods[i];
+  Token previousImplTargetName = currentImplTargetName;
+  bool hadCurrentImplTargetName = hasCurrentImplTargetName;
+  currentImplTargetName = impl->targetName;
+  hasCurrentImplTargetName = true;
+
+  for (int i = 0; i < impl->methodCount; i++) {
+    FunctionNode *method = impl->methods[i];
     uint8_t constant = identifierConstant(&method->name);
 
     FunctionType type = method->hasSelf ? TYPE_METHOD : TYPE_STATIC_METHOD;
@@ -997,7 +1017,10 @@ static void compileImplDecl(AstNode *node) {
     emitBytes(OP_METHOD, constant);
   }
 
-  currentLine = in->endLine;
+  currentImplTargetName = previousImplTargetName;
+  hasCurrentImplTargetName = hadCurrentImplTargetName;
+
+  currentLine = impl->endLine;
   emitByte(OP_POP); // pop the struct off the stack
 }
 
@@ -1239,9 +1262,8 @@ static void compileStmt(AstNode *node) {
     break;
 
   case NODE_TYPE_ALIAS:
-    // Type aliases have no runtime representation -- they're resolved and
-    // discarded by the type checker (not implemented yet). Compiles to
-    // nothing, same as a comment.
+  case NODE_TRAIT:
+    // No runtime representation, skip compilation.
     break;
 
   default:

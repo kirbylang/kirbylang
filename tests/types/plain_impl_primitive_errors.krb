@@ -1,0 +1,3 @@
+impl f64 {
+    pub fun double(self): f64 = self * 2;
+}

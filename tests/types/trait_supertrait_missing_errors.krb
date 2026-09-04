@@ -1,0 +1,7 @@
+struct Money {
+    pub var cents: f64;
+}
+
+impl Ord for Money {
+    pub fun cmp(self, other: Self): f64 = self.cents - other.cents;
+}

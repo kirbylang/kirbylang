@@ -965,6 +965,351 @@ static void test_type_alias_wrong_type_errors(void) {
   assert(!ok);
 }
 
+static void test_program_trait_basic_impl_and_call(void) {
+  typchkResetError();
+  bool ok = typecheckSource(
+      "trait Display {\n"
+      "  fun toString(self): string;\n"
+      "}\n"
+      "struct Point {\n"
+      "  pub var x: f64;\n"
+      "}\n"
+      "impl Display for Point {\n"
+      "  pub fun toString(self): string = \"Point\";\n"
+      "}\n"
+      "var p = Point { x: 1 };\n"
+      "print p.toString();\n");
+  assert(ok);
+}
+
+static void test_program_trait_missing_method_fails(void) {
+  typchkResetError();
+  bool ok = typecheckSource("trait Display {\n"
+                            "  fun toString(self): string;\n"
+                            "  fun debug(self): string;\n"
+                            "}\n"
+                            "struct Point { pub var x: f64; }\n"
+                            "impl Display for Point {\n"
+                            "  pub fun toString(self): string = \"Point\";\n"
+                            "}\n");
+  assert(!ok);
+}
+
+static void test_program_trait_extra_method_fails(void) {
+  typchkResetError();
+  bool ok = typecheckSource("trait Display {\n"
+                            "  fun toString(self): string;\n"
+                            "}\n"
+                            "struct Point { pub var x: f64; }\n"
+                            "impl Display for Point {\n"
+                            "  pub fun toString(self): string = \"Point\";\n"
+                            "  pub fun extra(self): f64 = self.x;\n"
+                            "}\n");
+  assert(!ok);
+}
+
+static void test_program_trait_wrong_signature_fails(void) {
+  typchkResetError();
+  bool ok = typecheckSource("trait Display {\n"
+                            "  fun toString(self): string;\n"
+                            "}\n"
+                            "struct Point { pub var x: f64; }\n"
+                            "impl Display for Point {\n"
+                            "  pub fun toString(self): f64 = self.x;\n"
+                            "}\n");
+  assert(!ok);
+}
+
+static void test_program_trait_coherence_duplicate_fails(void) {
+  typchkResetError();
+  bool ok = typecheckSource("trait Display {\n"
+                            "  fun toString(self): string;\n"
+                            "}\n"
+                            "struct Point { pub var x: f64; }\n"
+                            "impl Display for Point {\n"
+                            "  pub fun toString(self): string = \"a\";\n"
+                            "}\n"
+                            "impl Display for Point {\n"
+                            "  pub fun toString(self): string = \"b\";\n"
+                            "}\n");
+  assert(!ok);
+}
+
+static void test_program_trait_supertrait_satisfied(void) {
+  typchkResetError();
+  bool ok = typecheckSource(
+      "struct Money { pub var cents: f64; }\n"
+      "impl Eq for Money {\n"
+      "  pub fun equals(self, other: Self): bool = self.cents == "
+      "other.cents;\n"
+      "}\n"
+      "impl Ord for Money {\n"
+      "  pub fun cmp(self, other: Self): f64 = self.cents - other.cents;\n"
+      "}\n"
+      "var a = Money { cents: 1 };\n"
+      "var b = Money { cents: 2 };\n"
+      "print a.cmp(b);\n");
+  assert(ok);
+}
+
+static void test_program_trait_supertrait_missing_fails(void) {
+  typchkResetError();
+  bool ok = typecheckSource(
+      "struct Money { pub var cents: f64; }\n"
+      "impl Ord for Money {\n"
+      "  pub fun cmp(self, other: Self): f64 = self.cents - other.cents;\n"
+      "}\n");
+  assert(!ok);
+}
+
+static void test_program_trait_unknown_trait_fails(void) {
+  typchkResetError();
+  bool ok = typecheckSource("struct Point { pub var x: f64; }\n"
+                            "impl NotATrait for Point {\n"
+                            "  pub fun toString(self): string = \"Point\";\n"
+                            "}\n");
+  assert(!ok);
+}
+
+static void test_program_trait_self_substitution_in_return_type(void) {
+  typchkResetError();
+  bool ok = typecheckSource(
+      "trait Cloneable {\n"
+      "  fun clone(self): Self;\n"
+      "}\n"
+      "struct Point { pub var x: f64; }\n"
+      "impl Cloneable for Point {\n"
+      "  pub fun clone(self): Self = Point { x: self.x };\n"
+      "}\n"
+      "var p = Point { x: 1 };\n"
+      "var p2: Point = p.clone();\n"
+      "print p2.x;\n");
+  assert(ok);
+}
+
+static void test_program_trait_static_method_via_struct_name(void) {
+  typchkResetError();
+  bool ok = typecheckSource("trait Default {\n"
+                            "  fun default(): Self;\n"
+                            "}\n"
+                            "struct Point { pub var x: f64; }\n"
+                            "impl Default for Point {\n"
+                            "  pub fun default(): Self = Point { x: 0 };\n"
+                            "}\n"
+                            "var p: Point = Point.default();\n"
+                            "print p.x;\n");
+  assert(ok);
+}
+
+static void test_program_trait_static_method_called_as_instance_fails(void) {
+  typchkResetError();
+  bool ok = typecheckSource("trait Default {\n"
+                            "  fun default(): Self;\n"
+                            "}\n"
+                            "struct Point { pub var x: f64; }\n"
+                            "impl Default for Point {\n"
+                            "  pub fun default(): Self = Point { x: 0 };\n"
+                            "}\n"
+                            "var p = Point { x: 1 };\n"
+                            "print p.default();\n");
+  assert(!ok);
+}
+
+static void test_program_equality_requires_eq_for_structs(void) {
+  typchkResetError();
+  bool ok = typecheckSource("struct Point { pub var x: f64; }\n"
+                            "var a = Point { x: 1 };\n"
+                            "var b = Point { x: 1 };\n"
+                            "print a == b;\n");
+  assert(!ok);
+}
+
+static void test_program_equality_ok_once_eq_implemented(void) {
+  typchkResetError();
+  bool ok = typecheckSource(
+      "struct Point { pub var x: f64; }\n"
+      "impl Eq for Point {\n"
+      "  pub fun equals(self, other: Self): bool = self.x == other.x;\n"
+      "}\n"
+      "var a = Point { x: 1 };\n"
+      "print a == a;\n");
+  assert(ok);
+}
+
+static void test_program_equality_between_primitives_unaffected(void) {
+  // The Eq requirement only applies to structs -- primitives never needed
+  // an impl for `==` and still don't.
+  typchkResetError();
+  bool ok = typecheckSource("print 1 == 1;\n"
+                            "print \"a\" == \"a\";\n"
+                            "print true == false;\n");
+  assert(ok);
+}
+
+static void test_program_trait_impl_on_primitive_deferred_fails(void) {
+  typchkResetError();
+  bool ok = typecheckSource("trait Display {\n"
+                            "  fun toString(self): string;\n"
+                            "}\n"
+                            "impl Display for f64 {\n"
+                            "  pub fun toString(self): string = \"n\";\n"
+                            "}\n");
+  assert(!ok);
+}
+
+static void test_program_plain_impl_on_primitive_fails(void) {
+  typchkResetError();
+  bool ok =
+      typecheckSource("impl f64 {\n"
+                      "  pub fun double(self): f64 = self * 2;\n"
+                      "}\n");
+  assert(!ok);
+}
+
+static void test_program_trait_alongside_plain_impl(void) {
+  typchkResetError();
+  bool ok = typecheckSource(
+      "trait Display {\n"
+      "  fun toString(self): string;\n"
+      "}\n"
+      "struct Counter { pub var count: f64; }\n"
+      "impl Counter {\n"
+      "  pub fun increment(self): unit { self.count = self.count + 1; }\n"
+      "}\n"
+      "impl Display for Counter {\n"
+      "  pub fun toString(self): string = \"Counter\";\n"
+      "}\n"
+      "var c = Counter { count: 0 };\n"
+      "c.increment();\n"
+      "print c.count;\n"
+      "print c.toString();\n");
+  assert(ok);
+}
+
+static void test_program_trait_method_without_pub_is_callable(void) {
+  typchkResetError();
+  bool ok = typecheckSource("trait Display {\n"
+                            "  fun toString(self): string;\n"
+                            "}\n"
+                            "struct Point { pub var x: f64; }\n"
+                            "impl Display for Point {\n"
+                            "  fun toString(self): string = \"Point\";\n"
+                            "}\n"
+                            "var p = Point { x: 1 };\n"
+                            "print p.toString();\n");
+  assert(ok);
+}
+
+static void test_program_self_return_type_in_plain_impl(void) {
+  typchkResetError();
+  bool ok = typecheckSource("struct Struct {}\n"
+                            "impl Struct {\n"
+                            "  pub fun new(): Self = Struct {};\n"
+                            "}\n"
+                            "var s: Struct = Struct.new();\n");
+  assert(ok);
+}
+
+static void test_program_self_struct_init_in_plain_impl(void) {
+  typchkResetError();
+  bool ok = typecheckSource("struct Struct {}\n"
+                            "impl Struct {\n"
+                            "  pub fun new(): Self = Self {};\n"
+                            "}\n"
+                            "var s: Struct = Struct.new();\n");
+  assert(ok);
+}
+
+static void test_program_self_as_param_type_in_plain_impl(void) {
+  typchkResetError();
+  bool ok = typecheckSource(
+      "struct Point { pub var x: f64; }\n"
+      "impl Point {\n"
+      "  pub fun combine(self, other: Self): Self = Self { x: self.x + "
+      "other.x };\n"
+      "}\n"
+      "var a = Point { x: 1 };\n"
+      "var b = Point { x: 2 };\n"
+      "var c: Point = a.combine(b);\n"
+      "print c.x;\n");
+  assert(ok);
+}
+
+static void test_program_self_in_trait_impl_struct_init(void) {
+  typchkResetError();
+  bool ok = typecheckSource("trait Cloneable {\n"
+                            "  fun clone(self): Self;\n"
+                            "}\n"
+                            "struct Point { pub var x: f64; }\n"
+                            "impl Cloneable for Point {\n"
+                            "  fun clone(self): Self = Self { x: self.x };\n"
+                            "}\n"
+                            "var p = Point { x: 5 };\n"
+                            "var p2: Point = p.clone();\n"
+                            "print p2.x;\n");
+  assert(ok);
+}
+
+static void test_program_self_outside_impl_block_fails(void) {
+  typchkResetError();
+  bool ok = typecheckSource("fun make(): Self = Self {};\n");
+  assert(!ok);
+}
+
+static void test_program_self_type_annotation_outside_impl_block_fails(void) {
+  typchkResetError();
+  bool ok = typecheckSource("struct Point { pub var x: f64; }\n"
+                            "let p: Self = Point { x: 1 };\n");
+  assert(!ok);
+}
+
+static void test_program_self_still_symbolic_in_trait_declaration(void) {
+  // Self inside a bare trait declaration (not an impl block) has no
+  // concrete type to resolve to yet -- the trait itself still checks
+  // fine, since typchkResolveTraitMethods only resolves signatures, it
+  // doesn't need Self to be concrete.
+  typchkResetError();
+  bool ok = typecheckSource("trait Eq2 {\n"
+                            "  fun equals(self, other: Self): bool;\n"
+                            "}\n");
+  assert(ok);
+}
+
+static void test_program_self_as_static_method_receiver(void) {
+  typchkResetError();
+  bool ok = typecheckSource(
+      "struct Box { pub var value: f64; }\n"
+      "impl Box {\n"
+      "  pub fun wrap(v: f64): Self = Box { value: v };\n"
+      "  pub fun zero(): Self = Self.wrap(0);\n"
+      "}\n"
+      "var b: Box = Box.zero();\n"
+      "print b.value;\n");
+  assert(ok);
+}
+
+static void test_program_self_as_static_method_receiver_in_trait_impl(void) {
+  typchkResetError();
+  bool ok = typecheckSource(
+      "struct StringBuilder { var string: string; }\n"
+      "impl StringBuilder {\n"
+      "  pub fun new(init: string): StringBuilder = StringBuilder { "
+      "string: init };\n"
+      "}\n"
+      "impl Default for StringBuilder {\n"
+      "  pub fun default(): Self = Self.new(\"\");\n"
+      "}\n"
+      "var b: StringBuilder = StringBuilder.default();\n");
+  assert(ok);
+}
+
+static void test_program_self_as_static_method_receiver_outside_impl_fails(void) {
+  typchkResetError();
+  bool ok = typecheckSource("struct Box { pub var value: f64; }\n"
+                            "fun make(): Box = Self.wrap(0);\n");
+  assert(!ok);
+}
+
 int main(void) {
   test_scope_declare_and_lookup();
   test_scope_shadowing();
@@ -1048,6 +1393,35 @@ int main(void) {
   test_program_return_on_both_branches_is_fine();
   test_program_unit_body_needs_no_return();
   test_program_lambda_falling_off_the_end_errors();
+
+  test_program_trait_basic_impl_and_call();
+  test_program_trait_missing_method_fails();
+  test_program_trait_extra_method_fails();
+  test_program_trait_wrong_signature_fails();
+  test_program_trait_coherence_duplicate_fails();
+  test_program_trait_supertrait_satisfied();
+  test_program_trait_supertrait_missing_fails();
+  test_program_trait_unknown_trait_fails();
+  test_program_trait_self_substitution_in_return_type();
+  test_program_trait_static_method_via_struct_name();
+  test_program_trait_static_method_called_as_instance_fails();
+  test_program_equality_requires_eq_for_structs();
+  test_program_equality_ok_once_eq_implemented();
+  test_program_equality_between_primitives_unaffected();
+  test_program_trait_impl_on_primitive_deferred_fails();
+  test_program_plain_impl_on_primitive_fails();
+  test_program_trait_alongside_plain_impl();
+  test_program_trait_method_without_pub_is_callable();
+  test_program_self_return_type_in_plain_impl();
+  test_program_self_struct_init_in_plain_impl();
+  test_program_self_as_param_type_in_plain_impl();
+  test_program_self_in_trait_impl_struct_init();
+  test_program_self_outside_impl_block_fails();
+  test_program_self_type_annotation_outside_impl_block_fails();
+  test_program_self_still_symbolic_in_trait_declaration();
+  test_program_self_as_static_method_receiver();
+  test_program_self_as_static_method_receiver_in_trait_impl();
+  test_program_self_as_static_method_receiver_outside_impl_fails();
 
   typesFreeAll();
   astFreeAll();

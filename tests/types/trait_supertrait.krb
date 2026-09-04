@@ -1,0 +1,7 @@
+trait Eq {
+    fun equals(self, other: Self): bool;
+}
+
+trait Ord: Eq {
+    fun cmp(self, other: Self): f64;
+}

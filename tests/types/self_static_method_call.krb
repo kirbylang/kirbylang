@@ -1,0 +1,29 @@
+struct StringBuilder {
+    var string: string;
+}
+
+impl StringBuilder {
+    pub fun new(init: string): StringBuilder =
+        StringBuilder { string: init };
+
+    pub fun add(self, string: string): StringBuilder {
+        self.string = self.string + string;
+
+        self
+    }
+}
+
+impl Default for StringBuilder {
+    pub fun default(): Self = Self.new("");
+}
+
+impl Display for StringBuilder {
+    pub fun toString(self): string = self.string;
+}
+
+var builder = StringBuilder.default()
+    .add("Hello")
+    .add(" ")
+    .add("World");
+
+print builder.toString();

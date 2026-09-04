@@ -61,6 +61,8 @@ const char *tokenTypeToString(TokenType type) {
     return "TOKEN_STRUCT";
   case TOKEN_IMPL:
     return "TOKEN_IMPL";
+  case TOKEN_TRAIT:
+    return "TOKEN_TRAIT";
   case TOKEN_ELSE:
     return "TOKEN_ELSE";
   case TOKEN_FALSE:
