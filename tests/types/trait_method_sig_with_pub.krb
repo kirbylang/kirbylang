@@ -1,0 +1,3 @@
+trait Display {
+    pub fun toString(self): string;
+}

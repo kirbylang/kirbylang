@@ -145,6 +145,22 @@ static void synchronize(Parser *p) {
   }
 }
 
+// Recover from a parser error when it occurs inside a {} delimited block
+static void recoverInBraceBody(Parser *p) {
+  if (!p->panicMode)
+    return;
+
+  Token rejected = p->current;
+
+  synchronize(p);
+
+  if (!is_at_end(p) && !check(p, TOKEN_RIGHT_BRACE) &&
+      p->current.start == rejected.start) {
+    advance(p);
+    synchronize(p);
+  }
+}
+
 static AstNode *parse_precedence(Parser *parser, Precedence precedence) {
   TRACELN("parser.parse_precedence(%d)", precedence);
 
@@ -1269,23 +1285,7 @@ static AstNode *structDeclaration(Parser *p) {
       error_at_current(p, "Expect field declaration.");
     }
 
-    // Without this, a malformed member (e.g. a missing '}') leaves the
-    // offending token in place forever and this loop spins indefinitely,
-    // since nothing here ever calls synchronize() the way declaration() does
-    // for top-level statements.
-    if (p->panicMode) {
-      Token rejected = p->current;
-
-      synchronize(p);
-
-      if (!is_at_end(p) && !check(p, TOKEN_RIGHT_BRACE) &&
-          p->current.start == rejected.start) {
-        // Step over the errored keyword and skip the rest of the malformed
-        // member.
-        advance(p);
-        synchronize(p);
-      }
-    }
+    recoverInBraceBody(p);
   }
   consume(p, TOKEN_RIGHT_BRACE, "Expect '}' after struct body.");
   int endLine = p->previous.line;
@@ -1376,9 +1376,7 @@ static AstNode *implDeclaration(Parser *p) {
       methodBuf[methodCount++] = &method->as.function;
     }
 
-    if (p->panicMode) {
-      synchronize(p);
-    }
+    recoverInBraceBody(p);
   }
   consume(p, TOKEN_RIGHT_BRACE, "Expect '}' after impl body.");
   int endLine = p->previous.line;
@@ -1449,9 +1447,7 @@ static AstNode *traitDeclaration(Parser *p) {
                      /*isLambda=*/false, /*signatureOnly=*/true);
     methodBuf[methodCount++] = &method->as.function;
 
-    if (p->panicMode) {
-      synchronize(p);
-    }
+    recoverInBraceBody(p);
   }
 
   consume(p, TOKEN_RIGHT_BRACE, "Expect '}' after trait body.");
