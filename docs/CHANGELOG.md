@@ -80,10 +80,9 @@
     - Traits can only be implemented once on a struct
     - Builtin traits, always in scope: `Display`, `Eq`, `Ord`, `Default`
     - Require structs to implement `Eq` trait for `==`/`!=`
-      - TODO: How do you compare two structs by reference?
     - Limitations
       - `impl Trait for` a primitive type (`f64`, `string`, `bool`, `unit`) isn't supported yet -- needs the same static call-resolution work operator overloading does
-      - Operators don't dispatch to trait methods on structs yet (no `Add`/`Ord`-via-operators)
+      - No real operator overloading yet. `Eq` is only a typecheck. `==` still runs identify equality
 - [Definite Assignment Analysis](https://en.wikipedia.org/wiki/Definite_assignment_analysis)
 
 - Refine shadow binding rules
