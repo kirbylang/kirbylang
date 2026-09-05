@@ -1,0 +1,22 @@
+struct Box {
+    pub var value: f64;
+}
+
+impl Box {
+    pub fun wrap(v: f64): Self = Box { value: v };
+    pub fun zero(): Self = Self.wrap(0);
+}
+
+struct Bag {
+    pub var items: f64;
+}
+
+impl Bag {
+    pub fun of(n: f64): Self = Bag { items: n };
+    pub fun empty(): Self = Self.of(0);
+}
+
+var b1 = Box.zero();
+var b2 = Bag.empty();
+print b1.value;
+print b2.items;

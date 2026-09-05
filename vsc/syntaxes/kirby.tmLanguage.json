@@ -7,6 +7,7 @@
     { "include": "#numbers" },
     { "include": "#struct-declaration" },
     { "include": "#impl-declaration" },
+    { "include": "#trait-declaration" },
     { "include": "#function-declaration" },
     { "include": "#keywords" },
     { "include": "#constants" },
@@ -54,10 +55,30 @@
       }
     },
     "impl-declaration": {
-      "match": "\\b(impl)\\s+([A-Za-z_][A-Za-z0-9_]*)",
+      "patterns": [
+        {
+          "match": "\\b(impl)\\s+([A-Za-z_][A-Za-z0-9_]*)\\s+(for)\\s+([A-Za-z_][A-Za-z0-9_]*)",
+          "captures": {
+            "1": { "name": "keyword.declaration.impl.krb" },
+            "2": { "name": "entity.name.type.trait.krb" },
+            "3": { "name": "keyword.other.for.krb" },
+            "4": { "name": "entity.name.type.struct.krb" }
+          }
+        },
+        {
+          "match": "\\b(impl)\\s+([A-Za-z_][A-Za-z0-9_]*)",
+          "captures": {
+            "1": { "name": "keyword.declaration.impl.krb" },
+            "2": { "name": "entity.name.type.struct.krb" }
+          }
+        }
+      ]
+    },
+    "trait-declaration": {
+      "match": "\\b(trait)\\s+([A-Za-z_][A-Za-z0-9_]*)",
       "captures": {
-        "1": { "name": "keyword.declaration.impl.krb" },
-        "2": { "name": "entity.name.type.struct.krb" }
+        "1": { "name": "keyword.declaration.trait.krb" },
+        "2": { "name": "entity.name.type.trait.krb" }
       }
     },
     "function-declaration": {
@@ -93,7 +114,7 @@
     },
     "constants": {
       "name": "constant.language.krb",
-      "match": "\\b(true|false|nil)\\b"
+      "match": "\\b(true|false|nil|Self)\\b"
     },
     "natives": {
       "patterns": [

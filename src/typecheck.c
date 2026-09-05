@@ -22,6 +22,22 @@ static bool tokenTextEquals(Token *token, const char *text) {
   return memcmp(token->start, text, len) == 0;
 }
 
+static bool tokenIsPrimitiveTypeName(Token *token) {
+  return tokenTextEquals(token, "unit") || tokenTextEquals(token, "bool") ||
+         tokenTextEquals(token, "string") || tokenTextEquals(token, "f64");
+}
+
+static Token makeTokenFromCString(const char *text) {
+  Token token;
+  token.type = TOKEN_IDENTIFIER;
+  token.start = text;
+  token.length = (int)strlen(text);
+  token.line = 0;
+  return token;
+}
+
+static void typchkTypeEnvDefineBuiltinTraits(TypeEnv *env);
+
 void typchkErrorAtToken(Token *token, const char *message) {
   hadError = true;
   fprintf(stderr, "[line %d] Error", token->line);
@@ -114,11 +130,16 @@ struct TypeEnv {
   int aliasCount;
   int aliasCapacity;
 
+  TypeEnvBinding *traits;
+  int traitCount;
+  int traitCapacity;
+
   // WIP State
 
   Type *_selfType;          // NULL when not currently checking a method body.
   Type *_currentReturnType; // NULL when not checking a function/method body, or
                             // its return type didn't resolve.
+  Type *_currentImplTargetType; // NULL when not checking an impl block
 };
 
 // Type environment that persists across compilation units
@@ -147,6 +168,7 @@ TypeEnv *typchkTypeEnvCreate(void) {
   TypeEnv *env = (TypeEnv *)malloc(sizeof(TypeEnv));
   memset(env, 0, sizeof(TypeEnv));
   defineAllNativeSignatures(env);
+  typchkTypeEnvDefineBuiltinTraits(env);
   return env;
 }
 
@@ -158,6 +180,7 @@ void typchkTypeEnvDestroy(TypeEnv *env) {
   free(env->structs);
   free(env->functions);
   free(env->aliases);
+  free(env->traits);
   free(env);
 }
 
@@ -229,6 +252,63 @@ Type *typchkTypeEnvLookupAlias(TypeEnv *env, Token name) {
   return bindingArrayLookup(env->aliases, env->aliasCount, name);
 }
 
+void typchkTypeEnvRegisterTrait(TypeEnv *env, Token name, Type *type) {
+  bindingArrayWrite(&env->traits, &env->traitCount, &env->traitCapacity, name,
+                    type);
+}
+
+Type *typchkTypeEnvLookupTrait(TypeEnv *env, Token name) {
+  return bindingArrayLookup(env->traits, env->traitCount, name);
+}
+
+/**
+ * Define the builtin traits
+ *
+ * Display, Eq, Ord (a supertrait of Eq), and Default
+ */
+static void typchkTypeEnvDefineBuiltinTraits(TypeEnv *env) {
+  // Display
+
+  UninternedTypeMember displayInstance[] = {
+      {makeTokenFromCString("toString"), typeFunction(NULL, 0, typeString())},
+  };
+  Type *display =
+      typeTrait(makeTokenFromCString("Display"), NULL, 0, displayInstance, 1);
+  typchkTypeEnvRegisterTrait(env, makeTokenFromCString("Display"), display);
+
+  // Eq
+
+  Type **equalsParams = (Type **)typesAllocRaw(sizeof(Type *));
+  equalsParams[0] = typeSelfPlaceholder();
+  UninternedTypeMember eqInstance[] = {
+      {makeTokenFromCString("equals"),
+       typeFunction(equalsParams, 1, typeBool())},
+  };
+  Type *eq = typeTrait(makeTokenFromCString("Eq"), NULL, 0, eqInstance, 1);
+  typchkTypeEnvRegisterTrait(env, makeTokenFromCString("Eq"), eq);
+  Type **cmpParams = (Type **)typesAllocRaw(sizeof(Type *));
+  cmpParams[0] = typeSelfPlaceholder();
+  UninternedTypeMember ordInstance[] = {
+      {makeTokenFromCString("cmp"), typeFunction(cmpParams, 1, typeF64())},
+  };
+
+  // Ord
+
+  Type *ord = typeTrait(makeTokenFromCString("Ord"), NULL, 0, ordInstance, 1);
+  typeTraitSetSupertrait(ord, eq->as.trait_.name);
+  typchkTypeEnvRegisterTrait(env, makeTokenFromCString("Ord"), ord);
+
+  // Default
+
+  UninternedTypeMember defaultStatic[] = {
+      {makeTokenFromCString("default"),
+       typeFunction(NULL, 0, typeSelfPlaceholder())},
+  };
+  Type *default_ =
+      typeTrait(makeTokenFromCString("Default"), defaultStatic, 1, NULL, 0);
+  typchkTypeEnvRegisterTrait(env, makeTokenFromCString("Default"), default_);
+}
+
 void typchkTypeEnvSetSelfType(TypeEnv *env, Type *selfType) {
   env->_selfType = selfType;
 }
@@ -241,6 +321,14 @@ void typchkTypeEnvSetCurrentReturnType(TypeEnv *env, Type *returnType) {
 
 Type *typchkTypeEnvGetCurrentReturnType(TypeEnv *env) {
   return env->_currentReturnType;
+}
+
+void typchkTypeEnvSetImplTargetType(TypeEnv *env, Type *implTargetType) {
+  env->_currentImplTargetType = implTargetType;
+}
+
+Type *typchkTypeEnvGetImplTargetType(TypeEnv *env) {
+  return env->_currentImplTargetType;
 }
 
 Type *typchkResolveType(TypeEnv *env, AstNode *typeAnnotation) {
@@ -280,6 +368,10 @@ Type *typchkResolveType(TypeEnv *env, AstNode *typeAnnotation) {
     return typeString();
   if (tokenTextEquals(&t->name, "f64"))
     return typeF64();
+  if (tokenTextEquals(&t->name, "Self")) {
+    return env->_currentImplTargetType != NULL ? env->_currentImplTargetType
+                                               : typeSelfPlaceholder();
+  }
 
   Type *structType = typchkTypeEnvLookupStruct(env, t->name);
   if (structType != NULL)
@@ -504,6 +596,15 @@ static Type *typchkInferBinary(TypeEnv *env, AstNode *node) {
                             typeToString(leftType), typeToString(rightType));
       return NULL;
     }
+    if (leftType->kind == TYPE_STRUCT &&
+        !typeStructImplementsTrait(
+            leftType, internTokenName(makeTokenFromCString("Eq")))) {
+      typchkErrorAtTokenFmt(&b->op,
+                            "%s needs 'impl Eq for %s' to support '%s'.",
+                            typeToString(leftType), typeToString(leftType),
+                            b->op.type == TOKEN_EQUAL_EQUAL ? "==" : "!=");
+      return NULL;
+    }
     return typeBool();
 
   case TOKEN_LESS:
@@ -651,13 +752,26 @@ static Type *typchkInferGet(TypeEnv *env, AstNode *node) {
                     typchkTypeEnvLookupFunction(env, *objIdentifier) != NULL;
 
     if (!shadowed) {
-      Type *structType = typchkTypeEnvLookupStruct(env, *objIdentifier);
+      bool isSelf = tokenTextEquals(objIdentifier, "Self");
+      Type *structType = isSelf
+                             ? typchkTypeEnvGetImplTargetType(env)
+                             : typchkTypeEnvLookupStruct(env, *objIdentifier);
+
+      if (structType == NULL && isSelf) {
+        typchkErrorAtTokenFmt(objIdentifier,
+                              "'Self' can only be used inside an impl block.");
+        return NULL;
+      }
 
       if (structType != NULL) {
         if (typchkStructMembersUnreliable(structType))
           return NULL;
 
         Type *methodType = typeStructStaticMethodLookup(structType, get->name);
+
+        if (methodType == NULL) {
+          methodType = typeStructTraitStaticMethodLookup(structType, get->name);
+        }
 
         if (methodType == NULL) {
           typchkErrorAtTokenFmt(&get->name, "%s has no static method '%.*s'.",
@@ -700,8 +814,17 @@ static Type *typchkInferGet(TypeEnv *env, AstNode *node) {
   if (methodType != NULL)
     return methodType;
 
+  // Then look up methods that came from an `impl Trait for X` block
+  Type *traitMethodType =
+      typeStructTraitInstanceMethodLookup(objectType, get->name);
+  if (traitMethodType != NULL)
+    return traitMethodType;
+
   // Then check for accidental static method access
   Type *staticMethodType = typeStructStaticMethodLookup(objectType, get->name);
+  if (staticMethodType == NULL) {
+    staticMethodType = typeStructTraitStaticMethodLookup(objectType, get->name);
+  }
   if (staticMethodType != NULL) {
     typchkErrorAtTokenFmt(&get->name,
                           "'%.*s' is a static method. Access it on '%.*s' "
@@ -831,7 +954,18 @@ static Type *typchkInferIndexSet(TypeEnv *env, AstNode *node) {
 // Infer the type of a struct initialization expression
 static Type *typchkInferStructInit(TypeEnv *env, AstNode *node) {
   StructInitNode *si = &node->as.structInit;
-  Type *structType = typchkTypeEnvLookupStruct(env, si->name);
+
+  Type *structType;
+  if (tokenTextEquals(&si->name, "Self")) {
+    structType = typchkTypeEnvGetImplTargetType(env);
+    if (structType == NULL) {
+      typchkErrorAtTokenFmt(&si->name,
+                            "'Self' can only be used inside an impl block.");
+      return NULL;
+    }
+  } else {
+    structType = typchkTypeEnvLookupStruct(env, si->name);
+  }
 
   if (structType == NULL) {
     typchkErrorAtTokenFmt(&si->name, "Unknown struct '%.*s'.", si->name.length,
@@ -1251,6 +1385,7 @@ void typchkCheckStmt(TypeEnv *env, AstNode *node) {
     break;
   case NODE_STRUCT:
   case NODE_IMPL:
+  case NODE_TRAIT:
   case NODE_TYPE_ALIAS:
     break;
   default:
@@ -1410,16 +1545,271 @@ static void typchkResolveStructFields(TypeEnv *env, AstNode *node) {
   }
 }
 
+static void typchkResolveTraitMethods(TypeEnv *env, AstNode *node) {
+  TraitNode *trait_ = &node->as.trait_;
+  Type *traitType = typchkTypeEnvLookupTrait(env, trait_->name);
+
+  if (traitType == NULL)
+    return;
+
+  bool ok = true;
+
+  if (trait_->hasSupertrait) {
+    Type *supertraitType = typchkTypeEnvLookupTrait(env, trait_->supertrait);
+
+    if (supertraitType == NULL) {
+      typchkErrorAtTokenFmt(&trait_->supertrait, "Unknown trait '%.*s'.",
+                            trait_->supertrait.length,
+                            trait_->supertrait.start);
+      ok = false;
+    } else {
+      typeTraitSetSupertrait(traitType, supertraitType->as.trait_.name);
+    }
+  }
+
+  int staticCount = 0, instanceCount = 0;
+  for (int i = 0; i < trait_->methodCount; i++) {
+    if (trait_->methods[i]->hasSelf)
+      instanceCount++;
+    else
+      staticCount++;
+  }
+
+  UninternedTypeMember *staticMethods =
+      staticCount > 0 ? (UninternedTypeMember *)typesAllocRaw(
+                            staticCount * sizeof(UninternedTypeMember))
+                      : NULL;
+  UninternedTypeMember *instanceMethods =
+      instanceCount > 0 ? (UninternedTypeMember *)typesAllocRaw(
+                              instanceCount * sizeof(UninternedTypeMember))
+                        : NULL;
+
+  int staticIndex = 0, instanceIndex = 0;
+  for (int i = 0; i < trait_->methodCount; i++) {
+    FunctionNode *method = trait_->methods[i];
+    Type *methodType = typchkResolveFunctionSignature(env, method);
+
+    if (methodType == NULL) {
+      ok = false;
+      continue;
+    }
+
+    if (method->hasSelf) {
+      instanceMethods[instanceIndex].name = method->name;
+      instanceMethods[instanceIndex].type = methodType;
+      instanceIndex++;
+    } else {
+      staticMethods[staticIndex].name = method->name;
+      staticMethods[staticIndex].type = methodType;
+      staticIndex++;
+    }
+  }
+
+  if (ok) {
+    typeTraitSetMethods(traitType, staticMethods, staticIndex, instanceMethods,
+                        instanceIndex);
+  } else {
+    typeTraitMarkUnresolvedMembers(traitType);
+  }
+}
+
+static void typchkRegisterTraitImpl(TypeEnv *env, AstNode *node) {
+  ImplNode *impl = &node->as.impl;
+
+  Type *traitType = typchkTypeEnvLookupTrait(env, impl->traitName);
+
+  if (traitType == NULL) {
+    typchkErrorAtTokenFmt(&impl->traitName, "Unknown trait '%.*s'.",
+                          impl->traitName.length, impl->traitName.start);
+    return;
+  }
+
+  if (typeTraitHasUnresolvedMembers(traitType))
+    return; // already reported once, at the trait's own declaration
+
+  Type *targetType = typchkTypeEnvLookupStruct(env, impl->targetName);
+
+  if (targetType == NULL) {
+    if (tokenIsPrimitiveTypeName(&impl->targetName)) {
+      typchkErrorAtTokenFmt(&impl->targetName,
+                            "Primitive trait implementations aren't supported "
+                            "yet.");
+    }
+    return;
+  }
+
+  if (typeStructIsGeneric(targetType))
+    return; // already reported once at the struct's declaration
+
+  InternedName traitName = internTokenName(impl->traitName);
+
+  if (typeStructImplementsTrait(targetType, traitName)) {
+    typchkErrorAtTokenFmt(&impl->traitName, "'%.*s' already implements '%.*s'.",
+                          impl->targetName.length, impl->targetName.start,
+                          impl->traitName.length, impl->traitName.start);
+    return;
+  }
+
+  bool ok = true;
+
+  // Register the impl's target type e.g. struct for `Self`
+  typchkTypeEnvSetImplTargetType(env, targetType);
+
+  for (int i = 0; i < impl->methodCount; i++) {
+    FunctionNode *method = impl->methods[i];
+
+    Type *requiredType =
+        method->hasSelf ? typeTraitInstanceMethodLookup(traitType, method->name)
+                        : typeTraitStaticMethodLookup(traitType, method->name);
+
+    if (requiredType == NULL) {
+      Type *otherCategory =
+          method->hasSelf
+              ? typeTraitStaticMethodLookup(traitType, method->name)
+              : typeTraitInstanceMethodLookup(traitType, method->name);
+
+      if (otherCategory != NULL) {
+        typchkErrorAtTokenFmt(
+            &method->name,
+            method->hasSelf
+                ? "'%.*s' is a static method on trait '%.*s' -- drop 'self'."
+                : "'%.*s' is an instance method on trait '%.*s' -- add "
+                  "'self'.",
+            method->name.length, method->name.start, impl->traitName.length,
+            impl->traitName.start);
+      } else {
+        typchkErrorAtTokenFmt(&method->name,
+                              "'%.*s' isn't a method defined by trait '%.*s'.",
+                              method->name.length, method->name.start,
+                              impl->traitName.length, impl->traitName.start);
+      }
+      ok = false;
+      continue;
+    }
+
+    Type *methodType = typchkResolveFunctionSignature(env, method);
+    if (methodType == NULL) {
+      ok = false;
+      continue;
+    }
+
+    Type *concreteMethodType = typeSubstituteSelf(methodType, targetType);
+    Type *concreteRequiredType = typeSubstituteSelf(requiredType, targetType);
+
+    if (!typesEqual(concreteMethodType, concreteRequiredType)) {
+      typchkErrorAtTokenFmt(
+          &method->name,
+          "'%.*s' doesn't match trait '%.*s': expected %s, got %s.",
+          method->name.length, method->name.start, impl->traitName.length,
+          impl->traitName.start, typeToString(concreteRequiredType),
+          typeToString(concreteMethodType));
+      ok = false;
+      continue;
+    }
+
+    typeStructAddTraitMethod(targetType, method->name, concreteMethodType,
+                             method->hasSelf);
+  }
+
+  typchkTypeEnvSetImplTargetType(env, NULL);
+
+  for (int i = 0; i < typeTraitInstanceMethodCount(traitType); i++) {
+    TypeMember required = typeTraitInstanceMethodAt(traitType, i);
+    bool found = false;
+    for (int j = 0; j < impl->methodCount && !found; j++) {
+      found = impl->methods[j]->hasSelf &&
+              internedNameEqualsToken(required.name, impl->methods[j]->name);
+    }
+    if (!found) {
+      typchkErrorAtTokenFmt(&impl->traitName,
+                            "'%.*s' is missing '%.*s', required by trait "
+                            "'%.*s'.",
+                            impl->targetName.length, impl->targetName.start,
+                            required.name.length,
+                            internedNameChars(required.name),
+                            impl->traitName.length, impl->traitName.start);
+      ok = false;
+    }
+  }
+  for (int i = 0; i < typeTraitStaticMethodCount(traitType); i++) {
+    TypeMember required = typeTraitStaticMethodAt(traitType, i);
+    bool found = false;
+    for (int j = 0; j < impl->methodCount && !found; j++) {
+      found = !impl->methods[j]->hasSelf &&
+              internedNameEqualsToken(required.name, impl->methods[j]->name);
+    }
+    if (!found) {
+      typchkErrorAtTokenFmt(&impl->traitName,
+                            "'%.*s' is missing '%.*s', required by trait "
+                            "'%.*s'.",
+                            impl->targetName.length, impl->targetName.start,
+                            required.name.length,
+                            internedNameChars(required.name),
+                            impl->traitName.length, impl->traitName.start);
+      ok = false;
+    }
+  }
+
+  if (!ok)
+    return;
+
+  typeStructMarkTraitImplemented(targetType, traitName);
+}
+
+static void typchkCheckTraitSupertraitSatisfied(TypeEnv *env, AstNode *node) {
+  ImplNode *impl = &node->as.impl;
+  if (!impl->hasTraitName)
+    return;
+
+  Type *traitType = typchkTypeEnvLookupTrait(env, impl->traitName);
+  if (traitType == NULL || !traitType->as.trait_.hasSupertrait)
+    return;
+
+  Type *targetType = typchkTypeEnvLookupStruct(env, impl->targetName);
+  if (targetType == NULL || targetType->kind != TYPE_STRUCT)
+    return; // already reported, or a (currently unsupported) primitive
+
+  InternedName traitName = internTokenName(impl->traitName);
+
+  if (!typeStructImplementsTrait(targetType, traitName))
+    return;
+
+  if (!typeStructImplementsTrait(targetType,
+                                 traitType->as.trait_.supertraitName)) {
+    typchkErrorAtTokenFmt(
+        &impl->traitName,
+        "'%.*s' also needs 'impl %.*s for %.*s' -- '%.*s' requires it.",
+        impl->targetName.length, impl->targetName.start,
+        traitType->as.trait_.supertraitName.length,
+        internedNameChars(traitType->as.trait_.supertraitName),
+        impl->targetName.length, impl->targetName.start, impl->traitName.length,
+        impl->traitName.start);
+  }
+}
+
 static void typchkRegisterImplMethods(TypeEnv *env, AstNode *node) {
   ImplNode *impl = &node->as.impl;
-  Type *structType = typchkTypeEnvLookupStruct(env, impl->name);
+
+  if (impl->hasTraitName) {
+    typchkRegisterTraitImpl(env, node);
+    return;
+  }
+
+  Type *structType = typchkTypeEnvLookupStruct(env, impl->targetName);
 
   if (structType == NULL) {
+    if (tokenIsPrimitiveTypeName(&impl->targetName)) {
+      typchkErrorAtTokenFmt(
+          &impl->targetName,
+          "Only trait implementations are allowed on primitive types.");
+    }
     return;
   }
 
   if (typeStructIsGeneric(structType))
     return; // already reported once at the struct's declaration
+
+  typchkTypeEnvSetImplTargetType(env, structType);
 
   for (int i = 0; i < impl->methodCount; i++) {
     FunctionNode *method = impl->methods[i];
@@ -1436,6 +1826,8 @@ static void typchkRegisterImplMethods(TypeEnv *env, AstNode *node) {
       typeStructAddStaticMethod(structType, method->name, methodType);
     }
   }
+
+  typchkTypeEnvSetImplTargetType(env, NULL);
 }
 
 static void typchkRegisterTopLevelFunctionSignature(TypeEnv *env,
@@ -1459,23 +1851,36 @@ static void typchkCheckTopLevelFunctionBody(TypeEnv *env, AstNode *node) {
 
 static void checkImplMethodBodies(TypeEnv *env, AstNode *node) {
   ImplNode *impl = &node->as.impl;
-  Type *structType = typchkTypeEnvLookupStruct(env, impl->name);
+  Type *structType = typchkTypeEnvLookupStruct(env, impl->targetName);
+
+  typchkTypeEnvSetImplTargetType(env, structType);
 
   for (int i = 0; i < impl->methodCount; i++) {
     FunctionNode *method = impl->methods[i];
-    Type *methodType =
-        structType == NULL
-            ? NULL
-            : (method->hasSelf
-                   ? typeStructInstanceMethodLookup(structType, method->name)
-                   : typeStructStaticMethodLookup(structType, method->name));
+    Type *methodType = NULL;
+
+    if (structType != NULL) {
+      if (impl->hasTraitName) {
+        methodType =
+            method->hasSelf
+                ? typeStructTraitInstanceMethodLookup(structType, method->name)
+                : typeStructTraitStaticMethodLookup(structType, method->name);
+      } else if (method->hasSelf) {
+        methodType = typeStructInstanceMethodLookup(structType, method->name);
+      } else {
+        methodType = typeStructStaticMethodLookup(structType, method->name);
+      }
+    }
+
     if (methodType == NULL)
-      continue; // signature or struct failed to resolve; already reported
+      continue; // signature/struct/trait validation failed; already reported
 
     Type *selfType = method->hasSelf ? structType : NULL;
     typchkCheckFunctionBody(env, method, methodType->as.function.paramTypes,
                             methodType->as.function.returnType, selfType);
   }
+
+  typchkTypeEnvSetImplTargetType(env, NULL);
 }
 
 bool typchkCheckProgram(AstNode **program, int count) {
@@ -1501,6 +1906,19 @@ bool typchkCheckProgram(AstNode **program, int count) {
       }
 
       typchkTypeEnvRegisterStruct(env, sn->name, placeholder);
+    }
+  }
+
+  // Trait placeholders
+  //
+  // Registered before any trait's own methods/supertrait are resolved, so
+  // `trait Ord: Eq` works regardless of which trait is declared first.
+
+  for (int i = 0; i < count; i++) {
+    if (program[i]->kind == NODE_TRAIT) {
+      TraitNode *tn = &program[i]->as.trait_;
+      Type *placeholder = typeTrait(tn->name, NULL, 0, NULL, 0);
+      typchkTypeEnvRegisterTrait(env, tn->name, placeholder);
     }
   }
 
@@ -1542,6 +1960,17 @@ bool typchkCheckProgram(AstNode **program, int count) {
     free(unresolvedAliasAliases);
   }
 
+  // Trait method signatures + supertrait resolution
+  //
+  // After aliases, so a trait method can be annotated with one; after
+  // struct placeholders, so a trait method can reference a struct by name.
+
+  for (int i = 0; i < count; i++) {
+    if (program[i]->kind == NODE_TRAIT) {
+      typchkResolveTraitMethods(env, program[i]);
+    }
+  }
+
   for (int i = 0; i < count; i++) {
     if (program[i]->kind == NODE_STRUCT) {
       typchkResolveStructFields(env, program[i]);
@@ -1551,6 +1980,18 @@ bool typchkCheckProgram(AstNode **program, int count) {
   for (int i = 0; i < count; i++) {
     if (program[i]->kind == NODE_IMPL) {
       typchkRegisterImplMethods(env, program[i]);
+    }
+  }
+
+  // Supertrait satisfaction
+  //
+  // After every impl in the program has been registered, so `impl Ord for
+  // X` is checked against `impl Eq for X` regardless of which appears
+  // first in the file.
+
+  for (int i = 0; i < count; i++) {
+    if (program[i]->kind == NODE_IMPL) {
+      typchkCheckTraitSupertraitSatisfied(env, program[i]);
     }
   }
 

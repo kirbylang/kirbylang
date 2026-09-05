@@ -1,0 +1,15 @@
+== <script> ==
+0000    1 OP_NIL
+0001    | OP_RETURN
+== <script> ==
+0000    5 OP_GET_GLOBAL       0 'Undefined'
+0002    6 OP_CLOSURE          2 <fn toString>
+0004    | OP_METHOD           1 'toString'
+0006    7 OP_POP
+0007    8 OP_NIL
+0008    | OP_RETURN
+== toString ==
+0000    6 OP_CONSTANT         0 'boo'
+0002    | OP_RETURN
+Undefined variable 'Undefined'.
+[line 5] in script

@@ -1,0 +1,12 @@
+trait Display {
+    fun toString(self): string;
+}
+
+struct Point {
+    pub var x: f64;
+}
+
+impl Display for Point {
+    pub fun toString(self): string = "Point";
+    pub fun extra(self): f64 = self.x;
+}

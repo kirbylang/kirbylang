@@ -1,0 +1,64 @@
+== <script> ==
+0000    1 OP_NIL
+0001    | OP_RETURN
+== <script> ==
+0000    1 OP_STRUCT           0 'Box'
+0002    | OP_DEFINE_GLOBAL    0 'Box'
+0004    | OP_GET_GLOBAL       1 'Box'
+0006    2 OP_NIL
+0007    | OP_FIELD            2 'value' public
+0010    3 OP_POP
+0011   10 OP_STRUCT           3 'Bag'
+0013    | OP_DEFINE_GLOBAL    3 'Bag'
+0015    | OP_GET_GLOBAL       4 'Bag'
+0017   11 OP_NIL
+0018    | OP_FIELD            5 'items' public
+0021   12 OP_POP
+0022    5 OP_GET_GLOBAL       6 'Box'
+0024    6 OP_CLOSURE          8 <fn wrap>
+0026    | OP_METHOD           7 'wrap'
+0028    7 OP_CLOSURE         10 <fn zero>
+0030    | OP_METHOD           9 'zero'
+0032    8 OP_POP
+0033   14 OP_GET_GLOBAL      11 'Bag'
+0035   15 OP_CLOSURE         13 <fn of>
+0037    | OP_METHOD          12 'of'
+0039   16 OP_CLOSURE         15 <fn empty>
+0041    | OP_METHOD          14 'empty'
+0043   17 OP_POP
+0044   19 OP_GET_GLOBAL      17 'Box'
+0046    | OP_INVOKE        (0 args)   18 'zero'
+0049    | OP_DEFINE_GLOBAL   16 'b1'
+0051   20 OP_GET_GLOBAL      20 'Bag'
+0053    | OP_INVOKE        (0 args)   21 'empty'
+0056    | OP_DEFINE_GLOBAL   19 'b2'
+0058   21 OP_GET_GLOBAL      22 'b1'
+0060    | OP_GET_PROPERTY    23 'value'
+0062    | OP_PRINT
+0063   22 OP_GET_GLOBAL      24 'b2'
+0065    | OP_GET_PROPERTY    25 'items'
+0067    | OP_PRINT
+0068   23 OP_NIL
+0069    | OP_RETURN
+== wrap ==
+0000    6 OP_GET_GLOBAL       0 'Box'
+0002    | OP_CONSTANT         1 'value'
+0004    | OP_GET_LOCAL        1
+0006    | OP_STRUCT_INIT      1
+0008    | OP_RETURN
+== zero ==
+0000    7 OP_GET_GLOBAL       0 'Box'
+0002    | OP_CONSTANT         2 '0.000000'
+0004    | OP_INVOKE        (1 args)    1 'wrap'
+0007    | OP_RETURN
+== of ==
+0000   15 OP_GET_GLOBAL       0 'Bag'
+0002    | OP_CONSTANT         1 'items'
+0004    | OP_GET_LOCAL        1
+0006    | OP_STRUCT_INIT      1
+0008    | OP_RETURN
+== empty ==
+0000   16 OP_GET_GLOBAL       0 'Bag'
+0002    | OP_CONSTANT         2 '0.000000'
+0004    | OP_INVOKE        (1 args)    1 'of'
+0007    | OP_RETURN

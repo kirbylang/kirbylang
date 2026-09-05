@@ -53,6 +53,7 @@ static Type *unitSingleton = NULL;
 static Type *boolSingleton = NULL;
 static Type *stringSingleton = NULL;
 static Type *f64Singleton = NULL;
+static Type *selfPlaceholderSingleton = NULL;
 
 void typesFreeAll(void) {
   Slab *s = arenaHead;
@@ -68,6 +69,7 @@ void typesFreeAll(void) {
   boolSingleton = NULL;
   stringSingleton = NULL;
   f64Singleton = NULL;
+  selfPlaceholderSingleton = NULL;
 
   stringSetFree(&typeNames);
 }
@@ -126,6 +128,12 @@ Type *typeF64(void) {
   return f64Singleton;
 }
 
+Type *typeSelfPlaceholder(void) {
+  if (selfPlaceholderSingleton == NULL)
+    selfPlaceholderSingleton = allocType(TYPE_SELF);
+  return selfPlaceholderSingleton;
+}
+
 // Copies `pending` into a durable TypeMember array, interning each name.
 static TypeMember *internMembers(UninternedTypeMember *pending, int count) {
   if (count == 0)
@@ -173,6 +181,20 @@ Type *typeArray(Type *elementType) {
   return type;
 }
 
+Type *typeTrait(Token name, UninternedTypeMember *staticMethods,
+                int staticMethodCount, UninternedTypeMember *instanceMethods,
+                int instanceMethodCount) {
+  Type *type = allocType(TYPE_TRAIT);
+  type->as.trait_.name = internTokenName(name);
+  type->as.trait_.staticMethods =
+      internMembers(staticMethods, staticMethodCount);
+  type->as.trait_.staticMethodCount = staticMethodCount;
+  type->as.trait_.instanceMethods =
+      internMembers(instanceMethods, instanceMethodCount);
+  type->as.trait_.instanceMethodCount = instanceMethodCount;
+  return type;
+}
+
 void typeStructSetFields(Type *type, UninternedTypeMember *fields,
                          int fieldCount) {
   type->as.struct_.fields = internMembers(fields, fieldCount);
@@ -200,6 +222,111 @@ void typeStructAddStaticMethod(Type *type, Token name, Type *methodType) {
 void typeStructAddInstanceMethod(Type *type, Token name, Type *methodType) {
   appendMember(&type->as.struct_.instanceMethods,
                &type->as.struct_.instanceMethodCount, name, methodType);
+}
+
+void typeStructAddTraitMethod(Type *type, Token name, Type *methodType,
+                              bool hasSelf) {
+  if (hasSelf) {
+    appendMember(&type->as.struct_.traitInstanceMethods,
+                 &type->as.struct_.traitInstanceMethodCount, name, methodType);
+  } else {
+    appendMember(&type->as.struct_.traitStaticMethods,
+                 &type->as.struct_.traitStaticMethodCount, name, methodType);
+  }
+}
+
+void typeStructMarkTraitImplemented(Type *type, InternedName traitName) {
+  int newCount = type->as.struct_.implementedTraitCount + 1;
+  InternedName *newArray =
+      (InternedName *)typesAllocRaw(newCount * sizeof(InternedName));
+
+  if (type->as.struct_.implementedTraitCount > 0) {
+    memcpy(newArray, type->as.struct_.implementedTraits,
+           (size_t)type->as.struct_.implementedTraitCount *
+               sizeof(InternedName));
+  }
+
+  newArray[newCount - 1] = traitName;
+  type->as.struct_.implementedTraits = newArray;
+  type->as.struct_.implementedTraitCount = newCount;
+}
+
+bool typeStructImplementsTrait(Type *type, InternedName traitName) {
+  if (type == NULL || type->kind != TYPE_STRUCT)
+    return false;
+  for (int i = 0; i < type->as.struct_.implementedTraitCount; i++) {
+    if (internedNamesEqual(type->as.struct_.implementedTraits[i], traitName))
+      return true;
+  }
+  return false;
+}
+
+void typeTraitSetMethods(Type *type, UninternedTypeMember *staticMethods,
+                         int staticMethodCount,
+                         UninternedTypeMember *instanceMethods,
+                         int instanceMethodCount) {
+  type->as.trait_.staticMethods =
+      internMembers(staticMethods, staticMethodCount);
+  type->as.trait_.staticMethodCount = staticMethodCount;
+  type->as.trait_.instanceMethods =
+      internMembers(instanceMethods, instanceMethodCount);
+  type->as.trait_.instanceMethodCount = instanceMethodCount;
+}
+
+void typeTraitSetSupertrait(Type *type, InternedName supertraitName) {
+  type->as.trait_.hasSupertrait = true;
+  type->as.trait_.supertraitName = supertraitName;
+}
+
+void typeTraitMarkUnresolvedMembers(Type *type) {
+  type->as.trait_.hasUnresolvedMembers = true;
+}
+
+bool typeTraitHasUnresolvedMembers(Type *type) {
+  return type != NULL && type->kind == TYPE_TRAIT &&
+         type->as.trait_.hasUnresolvedMembers;
+}
+
+Type *typeSubstituteSelf(Type *type, Type *concrete) {
+  if (type == NULL)
+    return NULL;
+
+  switch (type->kind) {
+  case TYPE_SELF:
+    return concrete;
+
+  case TYPE_FN: {
+    Type **paramTypes = type->as.function.paramCount > 0
+                            ? (Type **)typesAllocRaw(
+                                  type->as.function.paramCount * sizeof(Type *))
+                            : NULL;
+    bool changed = false;
+    for (int i = 0; i < type->as.function.paramCount; i++) {
+      paramTypes[i] =
+          typeSubstituteSelf(type->as.function.paramTypes[i], concrete);
+      if (paramTypes[i] != type->as.function.paramTypes[i])
+        changed = true;
+    }
+    Type *returnType =
+        typeSubstituteSelf(type->as.function.returnType, concrete);
+    if (!changed && returnType == type->as.function.returnType)
+      return type;
+    return typeFunction(paramTypes, type->as.function.paramCount, returnType);
+  }
+
+  case TYPE_ARRAY: {
+    Type *elementType =
+        typeSubstituteSelf(type->as.array.elementType, concrete);
+    if (elementType == type->as.array.elementType)
+      return type;
+    return typeArray(elementType);
+  }
+
+  default:
+    // Primitives, structs, and traits don't themselves contain Self --
+    // only a signature built from them (a TYPE_FN) can.
+    return type;
+  }
 }
 
 void typeStructMarkGeneric(Type *type) { type->as.struct_.isGeneric = true; }
@@ -231,11 +358,16 @@ bool typesEqual(Type *a, Type *b) {
   case TYPE_BOOL:
   case TYPE_STRING:
   case TYPE_F64:
+  case TYPE_SELF:
     return true;
 
   case TYPE_STRUCT:
     // Nominal Equality
     return internedNamesEqual(a->as.struct_.name, b->as.struct_.name);
+
+  case TYPE_TRAIT:
+    // Nominal Equality
+    return internedNamesEqual(a->as.trait_.name, b->as.trait_.name);
 
   case TYPE_FN:
     // Structural Equality
@@ -284,6 +416,57 @@ Type *typeStructStaticMethodLookup(Type *type, Token methodName) {
                       type->as.struct_.staticMethodCount, methodName);
 }
 
+Type *typeStructTraitInstanceMethodLookup(Type *type, Token methodName) {
+  if (type == NULL || type->kind != TYPE_STRUCT)
+    return NULL;
+
+  return memberLookup(type->as.struct_.traitInstanceMethods,
+                      type->as.struct_.traitInstanceMethodCount, methodName);
+}
+
+Type *typeStructTraitStaticMethodLookup(Type *type, Token methodName) {
+  if (type == NULL || type->kind != TYPE_STRUCT)
+    return NULL;
+
+  return memberLookup(type->as.struct_.traitStaticMethods,
+                      type->as.struct_.traitStaticMethodCount, methodName);
+}
+
+Type *typeTraitInstanceMethodLookup(Type *type, Token methodName) {
+  if (type == NULL || type->kind != TYPE_TRAIT)
+    return NULL;
+
+  return memberLookup(type->as.trait_.instanceMethods,
+                      type->as.trait_.instanceMethodCount, methodName);
+}
+
+Type *typeTraitStaticMethodLookup(Type *type, Token methodName) {
+  if (type == NULL || type->kind != TYPE_TRAIT)
+    return NULL;
+  return memberLookup(type->as.trait_.staticMethods,
+                      type->as.trait_.staticMethodCount, methodName);
+}
+
+int typeTraitInstanceMethodCount(Type *type) {
+  if (type == NULL || type->kind != TYPE_TRAIT)
+    return 0;
+  return type->as.trait_.instanceMethodCount;
+}
+
+TypeMember typeTraitInstanceMethodAt(Type *type, int index) {
+  return type->as.trait_.instanceMethods[index];
+}
+
+int typeTraitStaticMethodCount(Type *type) {
+  if (type == NULL || type->kind != TYPE_TRAIT)
+    return 0;
+  return type->as.trait_.staticMethodCount;
+}
+
+TypeMember typeTraitStaticMethodAt(Type *type, int index) {
+  return type->as.trait_.staticMethods[index];
+}
+
 static void appendTypeName(StrBuf *sb, Type *type) {
   if (type == NULL) {
     sb_append(sb, "<unknown>");
@@ -306,6 +489,13 @@ static void appendTypeName(StrBuf *sb, Type *type) {
   case TYPE_STRUCT:
     sb_appendf(sb, "%.*s", type->as.struct_.name.length,
                internedNameChars(type->as.struct_.name));
+    break;
+  case TYPE_TRAIT:
+    sb_appendf(sb, "%.*s", type->as.trait_.name.length,
+               internedNameChars(type->as.trait_.name));
+    break;
+  case TYPE_SELF:
+    sb_append(sb, "Self");
     break;
   case TYPE_FN:
     sb_append(sb, "fun (");

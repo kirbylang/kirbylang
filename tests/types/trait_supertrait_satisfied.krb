@@ -1,0 +1,18 @@
+struct Money {
+    pub var cents: f64;
+}
+
+impl Eq for Money {
+    pub fun equals(self, other: Self): bool = self.cents == other.cents;
+}
+
+impl Ord for Money {
+    pub fun cmp(self, other: Self): f64 = self.cents - other.cents;
+}
+
+var a = Money { cents: 500 };
+var b = Money { cents: 300 };
+
+print a.cmp(b);
+print a.equals(b);
+print a.equals(a);
