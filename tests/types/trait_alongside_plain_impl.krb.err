@@ -8,14 +8,14 @@
 0006    6 OP_NIL
 0007    | OP_FIELD            2 'count' public
 0010    7 OP_POP
-0011    9 OP_GET_GLOBAL       3 'Counter'
-0013   12 OP_CLOSURE          5 <fn increment>
-0015    | OP_METHOD           4 'increment'
-0017   13 OP_POP
-0018   15 OP_GET_GLOBAL       6 'Counter'
-0020   16 OP_CLOSURE          8 <fn toString>
-0022    | OP_METHOD           7 'toString'
-0024   17 OP_POP
+0011   15 OP_GET_GLOBAL       3 'Counter'
+0013   16 OP_CLOSURE          5 <fn toString>
+0015    | OP_METHOD           4 'toString'
+0017   17 OP_POP
+0018    9 OP_GET_GLOBAL       6 'Counter'
+0020   12 OP_CLOSURE          8 <fn increment>
+0022    | OP_METHOD           7 'increment'
+0024   13 OP_POP
 0025   19 OP_GET_GLOBAL      10 'Counter'
 0027    | OP_CONSTANT        11 'count'
 0029    | OP_CONSTANT        12 '0.000000'
@@ -35,6 +35,9 @@
 0057    | OP_PRINT
 0058   25 OP_NIL
 0059    | OP_RETURN
+== toString ==
+0000   16 OP_CONSTANT         0 'Counter'
+0002    | OP_RETURN
 == increment ==
 0000   11 OP_GET_LOCAL        0
 0002    | OP_GET_LOCAL        0
@@ -45,6 +48,3 @@
 0011    | OP_POP
 0012   12 OP_NIL
 0013    | OP_RETURN
-== toString ==
-0000   16 OP_CONSTANT         0 'Counter'
-0002    | OP_RETURN

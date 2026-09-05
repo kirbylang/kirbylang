@@ -8,20 +8,20 @@
 0006    2 OP_NIL
 0007    | OP_FIELD            2 'string' private
 0010    3 OP_POP
-0011    5 OP_GET_GLOBAL       3 'StringBuilder'
-0013    7 OP_CLOSURE          5 <fn new>
-0015    | OP_METHOD           4 'new'
-0017   13 OP_CLOSURE          7 <fn add>
-0019    | OP_METHOD           6 'add'
-0021   14 OP_POP
-0022   16 OP_GET_GLOBAL       8 'StringBuilder'
-0024   17 OP_CLOSURE         10 <fn default>
-0026    | OP_METHOD           9 'default'
-0028   18 OP_POP
-0029   20 OP_GET_GLOBAL      11 'StringBuilder'
-0031   21 OP_CLOSURE         13 <fn toString>
-0033    | OP_METHOD          12 'toString'
-0035   22 OP_POP
+0011   16 OP_GET_GLOBAL       3 'StringBuilder'
+0013   17 OP_CLOSURE          5 <fn default>
+0015    | OP_METHOD           4 'default'
+0017   18 OP_POP
+0018   20 OP_GET_GLOBAL       6 'StringBuilder'
+0020   21 OP_CLOSURE          8 <fn toString>
+0022    | OP_METHOD           7 'toString'
+0024   22 OP_POP
+0025    5 OP_GET_GLOBAL       9 'StringBuilder'
+0027    7 OP_CLOSURE         11 <fn new>
+0029    | OP_METHOD          10 'new'
+0031   13 OP_CLOSURE         13 <fn add>
+0033    | OP_METHOD          12 'add'
+0035   14 OP_POP
 0036   24 OP_GET_GLOBAL      15 'StringBuilder'
 0038    | OP_INVOKE        (0 args)   16 'default'
 0041   25 OP_CONSTANT        18 'Hello'
@@ -36,6 +36,15 @@
 0063    | OP_PRINT
 0064   30 OP_NIL
 0065    | OP_RETURN
+== default ==
+0000   17 OP_GET_GLOBAL       0 'StringBuilder'
+0002    | OP_CONSTANT         2 ''
+0004    | OP_INVOKE        (1 args)    1 'new'
+0007    | OP_RETURN
+== toString ==
+0000   21 OP_GET_LOCAL        0
+0002    | OP_GET_PROPERTY     0 'string'
+0004    | OP_RETURN
 == new ==
 0000    7 OP_GET_GLOBAL       0 'StringBuilder'
 0002    | OP_CONSTANT         1 'string'
@@ -52,12 +61,3 @@
 0011    | OP_POP
 0012   12 OP_GET_LOCAL        0
 0014    | OP_RETURN
-== default ==
-0000   17 OP_GET_GLOBAL       0 'StringBuilder'
-0002    | OP_CONSTANT         2 ''
-0004    | OP_INVOKE        (1 args)    1 'new'
-0007    | OP_RETURN
-== toString ==
-0000   21 OP_GET_LOCAL        0
-0002    | OP_GET_PROPERTY     0 'string'
-0004    | OP_RETURN

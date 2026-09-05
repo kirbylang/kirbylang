@@ -153,6 +153,7 @@ it always has.
 - Traits themselves can't be generic (`trait Into[T]`), and a struct
   implementing a trait can't be generic either, following the same
   generics restriction as everywhere else in the type system.
+- Methods defined in trait impl blocks do not shadow methods of the same name in the target's impl block. This doesn't error, it just calls the target's impl version of it. In the future there will be a way to fully qualify which method to call e.g. `Trait.method(obj);`
 
 ### Functions
 

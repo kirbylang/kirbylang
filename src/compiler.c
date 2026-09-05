@@ -1302,10 +1302,21 @@ CompiledUnit *compile(AstNode **ast, int count, int endLine) {
     }
   }
 
+  // Hoist trait implementation blocks
   for (int i = 0; i < count; i++) {
-    if (ast[i]->kind != NODE_FUNCTION && ast[i]->kind != NODE_STRUCT) {
+    if (ast[i]->kind == NODE_IMPL && ast[i]->as.impl.hasTraitName) {
       compileStmt(ast[i]);
     }
+  }
+
+  // Compile everything else
+  for (int i = 0; i < count; i++) {
+    bool alreadyCompiled =
+        ast[i]->kind == NODE_FUNCTION || ast[i]->kind == NODE_STRUCT ||
+        (ast[i]->kind == NODE_IMPL && ast[i]->as.impl.hasTraitName);
+
+    if (!alreadyCompiled)
+      compileStmt(ast[i]);
   }
 
   currentLine = endLine;

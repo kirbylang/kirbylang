@@ -1,0 +1,18 @@
+struct Box {
+    var value: f64;
+}
+
+impl Box {
+    pub fun new(value: f64): Self = Self { value: value };
+
+    pub fun toString(self): f64 = self.value;
+}
+
+impl Display for Box {
+    fun toString(self): string = "Hello World";
+}
+
+let box = Box.new(100);
+var n: f64 = box.toString();
+
+print n;
