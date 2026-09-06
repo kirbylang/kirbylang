@@ -1927,22 +1927,6 @@ bool typchkCheckProgram(AstNode **program, int count) {
     }
   }
 
-  // Trait placeholders
-  //
-  // Registered before any trait's own methods/supertrait are resolved, so
-  // `trait Ord: Eq` works regardless of which trait is declared first.
-  //
-  // Also where a duplicate trait name -- including a user trait reusing a
-  // builtin's name (Display/Eq/Ord/Default are already registered by the
-  // time user code is checked) -- gets caught, since bindingArrayWrite
-  // itself has no concept of "already taken" and would otherwise let the
-  // second declaration silently shadow the first on lookup.
-  //
-  // isDuplicateTrait tracks which NODE_TRAIT nodes lost that check, so the
-  // later signature-resolution pass doesn't still process a duplicate's
-  // methods and overwrite the original trait's already-registered ones
-  // out from under it.
-
   bool *isDuplicateTrait =
       count > 0 ? (bool *)calloc((size_t)count, sizeof(bool)) : NULL;
 
