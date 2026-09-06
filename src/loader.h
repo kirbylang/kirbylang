@@ -11,6 +11,6 @@
  *
  * Returns the top-level script function (functions[0]).
  */
-ObjFunction *loadUnit(VM *vm, const CompiledUnit *unit);
+ObjFunction *loadUnit(VM *vm, const CompiledUnit *unit, bool isUserCode);
 
 #endif

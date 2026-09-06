@@ -1,7 +1,4 @@
 == <script> ==
-0000    1 OP_NIL
-0001    | OP_RETURN
-== <script> ==
 0000    1 OP_GET_GLOBAL       0 'arrJoin'
 0002    | OP_CONSTANT         1 'not an array'
 0004    | OP_CONSTANT         2 ', '

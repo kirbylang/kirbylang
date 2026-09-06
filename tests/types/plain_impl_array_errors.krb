@@ -1,0 +1,3 @@
+impl Array {
+    pub fun double(self): Array = self;
+}

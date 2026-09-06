@@ -60,9 +60,11 @@ set(KIRBY_SOURCES
     src/definite_assignment.c
     src/gc.c
     src/loader.c
+    src/mangle.c
     src/native.c
     src/object.c
     src/parser.c
+    src/resolved_ops.c
     src/scanner.c
     src/strbuf.c
     src/stringset.c
@@ -359,6 +361,40 @@ if(BUILD_TESTS)
     add_test(
         NAME kirby-stringset-unit-test
         COMMAND kirby-stringset-unit-test
+    )
+
+    add_executable(kirby-mangle-unit-test
+        unit/mangle.c
+    )
+
+    target_link_libraries(kirby-mangle-unit-test
+        PRIVATE
+            kirby_core_debug
+    )
+
+    configure_kirby_target(kirby-mangle-unit-test)
+    enable_coverage(kirby-mangle-unit-test)
+
+    add_test(
+        NAME kirby-mangle-unit-test
+        COMMAND kirby-mangle-unit-test
+    )
+
+    add_executable(kirby-resolved-ops-unit-test
+        unit/resolved_ops.c
+    )
+
+    target_link_libraries(kirby-resolved-ops-unit-test
+        PRIVATE
+            kirby_core_debug
+    )
+
+    configure_kirby_target(kirby-resolved-ops-unit-test)
+    enable_coverage(kirby-resolved-ops-unit-test)
+
+    add_test(
+        NAME kirby-resolved-ops-unit-test
+        COMMAND kirby-resolved-ops-unit-test
     )
 
     add_executable(kirby-value-unit-test

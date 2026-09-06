@@ -21,7 +21,7 @@ static InterpretResult run(const char *source) {
     return INTERPRET_COMPILE_ERROR;
   }
 
-  return interpret(unit);
+  return interpret(unit, /*isUserCode=*/true);
 }
 
 /**

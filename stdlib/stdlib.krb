@@ -1,0 +1,37 @@
+// Display for the primitive types. Each is a thin forwarder over an
+// existing native or built-in behavior -- see docs/TYPES.md's Traits
+// section and TYPE_SYSTEM_RFC.md's Phase 4b for why these can live here
+// as ordinary Kirby source instead of native C.
+
+impl Display for f64 {
+    pub fun toString(self): string = numberToString(self);
+}
+
+impl Display for string {
+    pub fun toString(self): string = self;
+}
+
+impl Display for bool {
+    pub fun toString(self): string = if (self) "true" else "false";
+}
+
+impl Display for unit {
+    pub fun toString(self): string = "()";
+}
+
+// Default for the primitive types. Demonstrates the static-call form
+// (`f64.default()`) rather than Display's instance-call form -- Self as
+// a return type resolves to the concrete primitive the same way it does
+// for a struct's own Default impl.
+
+impl Default for f64 {
+    pub fun default(): Self = 0;
+}
+
+impl Default for string {
+    pub fun default(): Self = "";
+}
+
+impl Default for bool {
+    pub fun default(): Self = false;
+}

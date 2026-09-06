@@ -17,7 +17,15 @@ typedef enum {
   TYPE_FUNCTION,
   TYPE_METHOD,
   TYPE_STATIC_METHOD,
-  TYPE_SCRIPT
+  TYPE_SCRIPT,
+  // A method compiled from a primitive's impl/trait-impl block (e.g.
+  // `impl f64 { ... }`, `impl Display for f64 { ... }`). Compiles to a
+  // mangled global function -- primitives have no runtime instance
+  // OP_METHOD/OP_INVOKE could attach to or dispatch through -- so `self`
+  // is an ordinary leading parameter (see compilePrimitiveImplMethod),
+  // not the special slot-0 receiver TYPE_METHOD gets. This exists only
+  // so selfInScope() recognizes `self` is still valid inside one.
+  TYPE_PRIMITIVE_METHOD,
 } FunctionType;
 
 typedef struct {

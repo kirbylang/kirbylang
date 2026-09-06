@@ -10,6 +10,7 @@
 #include "debug.h"
 #include "lexer.h"
 #include "parser.h"
+#include "resolved_ops.h"
 #include "strbuf.h"
 #include "token_stream.h"
 #include "typecheck.h"
@@ -18,8 +19,10 @@
 
 static void repl(void);
 static char *readFile(const char *path);
-static CompiledUnit *compileSource(const char *source, bool typecheck);
-static void runFile(const char *path);
+static CompiledUnit *compileSource(const char *source, bool typecheck,
+                                   bool allowPrimitiveImpls);
+static void runFile(const char *path, bool allowPrimitiveImpls,
+                    bool isUserCode);
 static void runCode(const char *source);
 
 const char *help_message =
@@ -56,7 +59,8 @@ int main(int argc, char *argv[]) {
     case 'r':
       initVM(saved_argc, saved_argv);
       typchkSessionBegin();
-      runFile("stdlib/stdlib.krb");
+      runFile("stdlib/stdlib.krb", /*allowPrimitiveImpls=*/true,
+              /*isUserCode=*/false);
       repl();
       compilerSessionEnd();
       typchkSessionEnd();
@@ -66,8 +70,10 @@ int main(int argc, char *argv[]) {
     case 'f':
       initVM(saved_argc, saved_argv);
       typchkSessionBegin();
-      runFile("stdlib/stdlib.krb");
-      runFile(argv[optind]);
+      runFile("stdlib/stdlib.krb", /*allowPrimitiveImpls=*/true,
+              /*isUserCode=*/false);
+      runFile(argv[optind], /*allowPrimitiveImpls=*/false,
+              /*isUserCode=*/true);
       compilerSessionEnd();
       typchkSessionEnd();
       freeVM();
@@ -113,7 +119,8 @@ int main(int argc, char *argv[]) {
     case 'c':
       initVM(saved_argc, saved_argv);
       typchkSessionBegin();
-      runFile("stdlib/stdlib.krb");
+      runFile("stdlib/stdlib.krb", /*allowPrimitiveImpls=*/true,
+              /*isUserCode=*/false);
       char *source = argv[optind];
       runCode(source);
       compilerSessionEnd();
@@ -155,7 +162,8 @@ static void repl(void) {
       continue;
     }
 
-    CompiledUnit *unit = compileSource(line, /*typecheck=*/true);
+    CompiledUnit *unit =
+        compileSource(line, /*typecheck=*/true, /*allowPrimitiveImpls=*/false);
 
     if (unit == NULL) {
       fprintf(stderr, "Compiler Error!\n");
@@ -163,7 +171,7 @@ static void repl(void) {
       continue;
     }
 
-    InterpretResult result = interpret(unit);
+    InterpretResult result = interpret(unit, /*isUserCode=*/true);
 
     if (result == INTERPRET_RUNTIME_ERROR) {
       fprintf(stderr, "Runtime Error!\n");
@@ -188,14 +196,22 @@ static char *readFile(const char *path) {
   return buffer;
 }
 
-static CompiledUnit *compileSource(const char *source, bool typecheck) {
+static CompiledUnit *compileSource(const char *source, bool typecheck,
+                                   bool allowPrimitiveImpls) {
+  // Entries recorded here are keyed by AstNode* identity, valid only for
+  // the AST this one call parses and (if it gets that far) compiles --
+  // see resolved_ops.h. Resetting up front, rather than at the end,
+  // means a crash or early return part-way through never leaves a stale
+  // entry for the next call to accidentally match against.
+  resolvedOpsReset();
+
   int count = 0;
   bool hadError = false;
   int endLine = 0;
   AstNode **ast = parse(source, &count, &hadError, &endLine);
 
   if (!hadError && typecheck) {
-    if (!typchkCheckProgram(ast, count)) {
+    if (!typchkCheckProgram(ast, count, allowPrimitiveImpls)) {
       hadError = true;
     }
   }
@@ -208,29 +224,32 @@ static CompiledUnit *compileSource(const char *source, bool typecheck) {
   return unit;
 }
 
-static void runFile(const char *path) {
+static void runFile(const char *path, bool allowPrimitiveImpls,
+                    bool disassemble) {
   char *source = readFile(path);
-  CompiledUnit *unit = compileSource(source, /*typecheck=*/true);
+  CompiledUnit *unit =
+      compileSource(source, /*typecheck=*/true, allowPrimitiveImpls);
   free(source);
 
   if (unit == NULL) {
     exit(EXIT_CODE_COMPILER_ERR);
   }
 
-  InterpretResult result = interpret(unit);
+  InterpretResult result = interpret(unit, disassemble);
 
   if (result == INTERPRET_RUNTIME_ERROR)
     exit(EXIT_CODE_RUNTIME_ERR);
 }
 
 static void runCode(const char *source) {
-  CompiledUnit *unit = compileSource(source, /*typecheck=*/true);
+  CompiledUnit *unit =
+      compileSource(source, /*typecheck=*/true, /*allowPrimitiveImpls=*/false);
 
   if (unit == NULL) {
     exit(EXIT_CODE_COMPILER_ERR);
   }
 
-  InterpretResult result = interpret(unit);
+  InterpretResult result = interpret(unit, /*isUserCode=*/true);
 
   if (result == INTERPRET_RUNTIME_ERROR)
     exit(EXIT_CODE_RUNTIME_ERR);

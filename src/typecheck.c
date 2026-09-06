@@ -4,7 +4,9 @@
 #include <string.h>
 
 #include "definite_assignment.h"
+#include "mangle.h"
 #include "native_signatures.h"
+#include "resolved_ops.h"
 #include "typecheck.h"
 
 static bool hadError = false;
@@ -26,6 +28,36 @@ static bool tokenIsPrimitiveTypeName(Token *token) {
   return tokenTextEquals(token, "unit") || tokenTextEquals(token, "bool") ||
          tokenTextEquals(token, "string") || tokenTextEquals(token, "f64") ||
          tokenTextEquals(token, "Array");
+}
+
+// Returns the primitive singleton `token` names (unit/bool/string/f64), or
+// NULL if it names something else. Notably NULL for "Array" --
+// tokenIsPrimitiveTypeName() above treats that as primitive-ish too, but
+// it isn't a scalar type and can't carry impl/trait-impl methods (Phase
+// 4b doesn't extend that far -- see TYPE_SYSTEM_RFC.md).
+static Type *typchkPrimitiveTypeNamed(Token *token) {
+  if (tokenTextEquals(token, "unit"))
+    return typeUnit();
+  if (tokenTextEquals(token, "bool"))
+    return typeBool();
+  if (tokenTextEquals(token, "string"))
+    return typeString();
+  if (tokenTextEquals(token, "f64"))
+    return typeF64();
+  return NULL;
+}
+
+// The inverse of internTokenName() -- builds a Token whose text is an
+// already-interned name, for passing an InternedName back into token-based
+// APIs (error messages, further lookups). `line` is 0 since an interned
+// name has no single source location of its own.
+static Token tokenFromInternedName(InternedName name) {
+  Token token;
+  token.type = TOKEN_IDENTIFIER;
+  token.start = internedNameChars(name);
+  token.length = name.length;
+  token.line = 0;
+  return token;
 }
 
 static Token makeTokenFromCString(const char *text) {
@@ -141,6 +173,11 @@ struct TypeEnv {
   Type *_currentReturnType; // NULL when not checking a function/method body, or
                             // its return type didn't resolve.
   Type *_currentImplTargetType; // NULL when not checking an impl block
+  // Whether the program currently being checked (this one
+  // typchkCheckProgram() call) may declare impl/trait-impl blocks on
+  // primitive types. Set at the start of every call -- see
+  // typchkCheckProgram's allowPrimitiveImpls parameter.
+  bool _allowPrimitiveImpls;
 };
 
 // Type environment that persists across compilation units
@@ -334,6 +371,14 @@ void typchkTypeEnvSetImplTargetType(TypeEnv *env, Type *implTargetType) {
 
 Type *typchkTypeEnvGetImplTargetType(TypeEnv *env) {
   return env->_currentImplTargetType;
+}
+
+void typchkTypeEnvSetAllowPrimitiveImpls(TypeEnv *env, bool allow) {
+  env->_allowPrimitiveImpls = allow;
+}
+
+bool typchkTypeEnvGetAllowPrimitiveImpls(TypeEnv *env) {
+  return env->_allowPrimitiveImpls;
 }
 
 Type *typchkResolveType(TypeEnv *env, AstNode *typeAnnotation) {
@@ -748,6 +793,86 @@ static Type *typchkCheckCallAgainstFunctionType(TypeEnv *env, AstNode *node,
   return calleeType->as.function.returnType;
 }
 
+// Resolves a call/access to a primitive's impl/trait-impl method -- shared
+// by the two call shapes: `f64.default()` (a bare type name, no receiver,
+// isStaticCall=true) and `x.toString()` (an instance, isStaticCall=false).
+//
+// Enforces `pub`/private visibility right here at compile time: unlike a
+// struct method, a primitive method call has no runtime instance to
+// dispatch through, so this is the only place -- ever -- that resolves
+// one, which makes it the only place that *can* enforce visibility. A
+// private method is only reachable from code checked as part of the same
+// primitive's own impl block (typchkTypeEnvGetImplTargetType(env) is that
+// primitive's Type, set for the whole block by checkImplMethodBodies/
+// typchkRegisterTraitImpl -- see their _implTargetType usage), so any
+// other impl block for the same type can reach it too, matching the
+// per-type (not per-impl-block) visibility rule structs already use.
+//
+// On success, records the mangled global to call into resolved_ops (see
+// mangle.h/resolved_ops.h) so the compiler can compile this call site as a
+// direct call instead of OP_INVOKE, which primitives can't use at all.
+static Type *typchkResolvePrimitiveMethodCall(TypeEnv *env, AstNode *node,
+                                              Type *primitiveType,
+                                              bool isStaticCall) {
+  GetNode *get = &node->as.get;
+
+  PrimitiveMethodLookup found;
+  bool foundMethod =
+      isStaticCall
+          ? typePrimitiveStaticMethodLookup(primitiveType, get->name, &found)
+          : typePrimitiveInstanceMethodLookup(primitiveType, get->name,
+                                             &found);
+
+  if (!foundMethod) {
+    if (isStaticCall) {
+      typchkErrorAtTokenFmt(&get->name, "%s has no static method '%.*s'.",
+                            typeToString(primitiveType), get->name.length,
+                            get->name.start);
+    } else {
+      typchkErrorAtTokenFmt(&get->name, "%s has no field or method '%.*s'.",
+                            typeToString(primitiveType), get->name.length,
+                            get->name.start);
+    }
+    return NULL;
+  }
+
+  if (!found.isPublic &&
+      typchkTypeEnvGetImplTargetType(env) != primitiveType) {
+    typchkErrorAtTokenFmt(&get->name, "Method '%.*s' is private to '%s'.",
+                          get->name.length, get->name.start,
+                          typeToString(primitiveType));
+    return NULL;
+  }
+
+  Token traitToken;
+  const Token *traitTokenPtr = NULL;
+  if (found.isTraitMethod) {
+    traitToken = tokenFromInternedName(found.traitName);
+    traitTokenPtr = &traitToken;
+  }
+
+  const char *primitiveTypeName = typeToString(primitiveType);
+  char mangledBuffer[MANGLED_NAME_MAX];
+  int mangledLength = mangledPrimitiveMethodName(
+      mangledBuffer, primitiveTypeName, (int)strlen(primitiveTypeName),
+      traitTokenPtr, &get->name);
+
+  // Persisted in the types arena, which outlives this one typecheck call
+  // -- the compiler reads this back out of resolved_ops later in the same
+  // compileSource() call (see resolved_ops.h).
+  char *persistedName = (char *)typesAllocRaw((size_t)mangledLength + 1);
+  memcpy(persistedName, mangledBuffer, (size_t)mangledLength + 1);
+
+  ResolvedOp op;
+  op.kind = RESOLVED_OP_PRIMITIVE_CALL;
+  op.hasSelf = !isStaticCall;
+  op.mangledName = persistedName;
+  op.mangledLength = mangledLength;
+  resolvedOpsRecord(node, op);
+
+  return found.type;
+}
+
 // Infer the type of a get expression
 static Type *typchkInferGet(TypeEnv *env, AstNode *node) {
   GetNode *get = &node->as.get;
@@ -789,6 +914,17 @@ static Type *typchkInferGet(TypeEnv *env, AstNode *node) {
 
         return methodType;
       }
+
+      // Not Self, not a struct name -- could be a bare primitive type name
+      // used for a static method call, e.g. `f64.default()`.
+      if (!isSelf) {
+        Type *primitiveType = typchkPrimitiveTypeNamed(objIdentifier);
+
+        if (primitiveType != NULL) {
+          return typchkResolvePrimitiveMethodCall(env, node, primitiveType,
+                                                  /*isStaticCall=*/true);
+        }
+      }
     }
   }
 
@@ -798,6 +934,14 @@ static Type *typchkInferGet(TypeEnv *env, AstNode *node) {
   // No type found, bail
   if (objectType == NULL)
     return NULL;
+
+  // The object is a primitive value -- look up an impl/trait-impl instance
+  // method (e.g. `x.toString()` where x: f64). Checked before the
+  // struct-only path below since a primitive is never a TYPE_STRUCT.
+  if (typeIsPrimitiveScalar(objectType)) {
+    return typchkResolvePrimitiveMethodCall(env, node, objectType,
+                                            /*isStaticCall=*/false);
+  }
 
   // The object's type isn't a struct
   if (objectType->kind != TYPE_STRUCT) {
@@ -1631,15 +1775,6 @@ static void typchkResolveTraitMethods(TypeEnv *env, AstNode *node) {
   }
 }
 
-static Token tokenFromInternedName(InternedName name) {
-  Token token;
-  token.type = TOKEN_IDENTIFIER;
-  token.start = internedNameChars(name);
-  token.length = name.length;
-  token.line = 0;
-  return token;
-}
-
 // Walks the supertrait chain to identify circular references
 static bool typchkTraitSupertraitChainCycles(TypeEnv *env,
                                              InternedName startName) {
@@ -1701,22 +1836,41 @@ static void typchkRegisterTraitImpl(TypeEnv *env, AstNode *node) {
     return; // already reported once, at the trait's own declaration
 
   Type *targetType = typchkTypeEnvLookupStruct(env, impl->targetName);
+  bool isPrimitiveTarget = false;
 
   if (targetType == NULL) {
-    if (tokenIsPrimitiveTypeName(&impl->targetName)) {
-      typchkErrorAtTokenFmt(&impl->targetName,
-                            "Primitive trait implementations aren't supported "
-                            "yet.");
-    }
-    return;
-  }
+    Type *primitiveType = typchkPrimitiveTypeNamed(&impl->targetName);
 
-  if (typeStructIsGeneric(targetType))
+    if (primitiveType == NULL) {
+      if (tokenIsPrimitiveTypeName(&impl->targetName)) {
+        typchkErrorAtTokenFmt(&impl->targetName,
+                              "Primitive trait implementations aren't "
+                              "supported yet.");
+      }
+      return; // unknown struct name, or an unsupported primitive (Array)
+    }
+
+    if (!typchkTypeEnvGetAllowPrimitiveImpls(env)) {
+      typchkErrorAtTokenFmt(
+          &impl->targetName,
+          "Impl blocks on primitive types are only allowed in the standard "
+          "library.");
+      return;
+    }
+
+    targetType = primitiveType;
+    isPrimitiveTarget = true;
+  } else if (typeStructIsGeneric(targetType)) {
     return; // already reported once at the struct's declaration
+  }
 
   InternedName traitName = internTokenName(impl->traitName);
 
-  if (typeStructImplementsTrait(targetType, traitName)) {
+  bool alreadyImplemented =
+      isPrimitiveTarget ? typePrimitiveImplementsTrait(targetType, traitName)
+                       : typeStructImplementsTrait(targetType, traitName);
+
+  if (alreadyImplemented) {
     typchkErrorAtTokenFmt(&impl->traitName, "'%.*s' already implements '%.*s'.",
                           impl->targetName.length, impl->targetName.start,
                           impl->traitName.length, impl->traitName.start);
@@ -1780,8 +1934,13 @@ static void typchkRegisterTraitImpl(TypeEnv *env, AstNode *node) {
       continue;
     }
 
-    typeStructAddTraitMethod(targetType, method->name, concreteMethodType,
-                             method->hasSelf);
+    if (isPrimitiveTarget) {
+      typePrimitiveAddTraitMethod(targetType, traitName, method->name,
+                                 concreteMethodType, method->hasSelf);
+    } else {
+      typeStructAddTraitMethod(targetType, method->name, concreteMethodType,
+                               method->hasSelf);
+    }
   }
 
   typchkTypeEnvSetImplTargetType(env, NULL);
@@ -1826,7 +1985,11 @@ static void typchkRegisterTraitImpl(TypeEnv *env, AstNode *node) {
   if (!ok)
     return;
 
-  typeStructMarkTraitImplemented(targetType, traitName);
+  if (isPrimitiveTarget) {
+    typePrimitiveMarkTraitImplemented(targetType, traitName);
+  } else {
+    typeStructMarkTraitImplemented(targetType, traitName);
+  }
 }
 
 static void typchkCheckTraitSupertraitSatisfied(TypeEnv *env, AstNode *node) {
@@ -1839,16 +2002,33 @@ static void typchkCheckTraitSupertraitSatisfied(TypeEnv *env, AstNode *node) {
     return;
 
   Type *targetType = typchkTypeEnvLookupStruct(env, impl->targetName);
-  if (targetType == NULL || targetType->kind != TYPE_STRUCT)
-    return; // already reported, or a (currently unsupported) primitive
+  bool isPrimitiveTarget = false;
+
+  if (targetType == NULL) {
+    targetType = typchkPrimitiveTypeNamed(&impl->targetName);
+    isPrimitiveTarget = targetType != NULL;
+  }
+
+  if (targetType == NULL)
+    return; // already reported, or an unsupported primitive (Array)
 
   InternedName traitName = internTokenName(impl->traitName);
 
-  if (!typeStructImplementsTrait(targetType, traitName))
+  bool implementsThis =
+      isPrimitiveTarget ? typePrimitiveImplementsTrait(targetType, traitName)
+                       : typeStructImplementsTrait(targetType, traitName);
+
+  if (!implementsThis)
     return;
 
-  if (!typeStructImplementsTrait(targetType,
-                                 traitType->as.trait_.supertraitName)) {
+  bool implementsSuper =
+      isPrimitiveTarget
+          ? typePrimitiveImplementsTrait(targetType,
+                                        traitType->as.trait_.supertraitName)
+          : typeStructImplementsTrait(targetType,
+                                      traitType->as.trait_.supertraitName);
+
+  if (!implementsSuper) {
     typchkErrorAtTokenFmt(
         &impl->traitName,
         "'%.*s' also needs 'impl %.*s for %.*s' -- '%.*s' requires it.",
@@ -1871,11 +2051,39 @@ static void typchkRegisterImplMethods(TypeEnv *env, AstNode *node) {
   Type *structType = typchkTypeEnvLookupStruct(env, impl->targetName);
 
   if (structType == NULL) {
-    if (tokenIsPrimitiveTypeName(&impl->targetName)) {
+    Type *primitiveType = typchkPrimitiveTypeNamed(&impl->targetName);
+
+    if (primitiveType == NULL) {
+      if (tokenIsPrimitiveTypeName(&impl->targetName)) {
+        typchkErrorAtTokenFmt(
+            &impl->targetName,
+            "Only trait implementations are allowed on primitive types.");
+      }
+      return;
+    }
+
+    if (!typchkTypeEnvGetAllowPrimitiveImpls(env)) {
       typchkErrorAtTokenFmt(
           &impl->targetName,
-          "Only trait implementations are allowed on primitive types.");
+          "Impl blocks on primitive types are only allowed in the standard "
+          "library.");
+      return;
     }
+
+    typchkTypeEnvSetImplTargetType(env, primitiveType);
+
+    for (int i = 0; i < impl->methodCount; i++) {
+      FunctionNode *method = impl->methods[i];
+      Type *methodType = typchkResolveFunctionSignature(env, method);
+
+      if (methodType == NULL)
+        continue; // error already reported; nothing to register
+
+      typePrimitiveAddMethod(primitiveType, method->name, methodType,
+                             method->hasSelf, method->isPublic);
+    }
+
+    typchkTypeEnvSetImplTargetType(env, NULL);
     return;
   }
 
@@ -1925,8 +2133,12 @@ static void typchkCheckTopLevelFunctionBody(TypeEnv *env, AstNode *node) {
 static void checkImplMethodBodies(TypeEnv *env, AstNode *node) {
   ImplNode *impl = &node->as.impl;
   Type *structType = typchkTypeEnvLookupStruct(env, impl->targetName);
+  Type *primitiveType = structType == NULL
+                            ? typchkPrimitiveTypeNamed(&impl->targetName)
+                            : NULL;
+  Type *concreteTarget = structType != NULL ? structType : primitiveType;
 
-  typchkTypeEnvSetImplTargetType(env, structType);
+  typchkTypeEnvSetImplTargetType(env, concreteTarget);
 
   for (int i = 0; i < impl->methodCount; i++) {
     FunctionNode *method = impl->methods[i];
@@ -1943,12 +2155,23 @@ static void checkImplMethodBodies(TypeEnv *env, AstNode *node) {
       } else {
         methodType = typeStructStaticMethodLookup(structType, method->name);
       }
+    } else if (primitiveType != NULL) {
+      PrimitiveMethodLookup found;
+      bool foundMethod =
+          method->hasSelf
+              ? typePrimitiveInstanceMethodLookup(primitiveType, method->name,
+                                                 &found)
+              : typePrimitiveStaticMethodLookup(primitiveType, method->name,
+                                               &found);
+      if (foundMethod)
+        methodType = found.type;
     }
 
     if (methodType == NULL)
-      continue; // signature/struct/trait validation failed; already reported
+      continue; // signature/struct/trait/permission validation failed;
+                // already reported
 
-    Type *selfType = method->hasSelf ? structType : NULL;
+    Type *selfType = method->hasSelf ? concreteTarget : NULL;
     typchkCheckFunctionBody(env, method, methodType->as.function.paramTypes,
                             methodType->as.function.returnType, selfType);
   }
@@ -1956,7 +2179,8 @@ static void checkImplMethodBodies(TypeEnv *env, AstNode *node) {
   typchkTypeEnvSetImplTargetType(env, NULL);
 }
 
-bool typchkCheckProgram(AstNode **program, int count) {
+bool typchkCheckProgram(AstNode **program, int count,
+                       bool allowPrimitiveImpls) {
   // Diagnostics are per-unit/program
   typchkResetError();
 
@@ -1965,6 +2189,8 @@ bool typchkCheckProgram(AstNode **program, int count) {
 
   if (ownsEnv)
     typchkTypeEnvBeginScope(env);
+
+  typchkTypeEnvSetAllowPrimitiveImpls(env, allowPrimitiveImpls);
 
   // Structs
 
@@ -1976,6 +2202,20 @@ bool typchkCheckProgram(AstNode **program, int count) {
       if (sn->genericParamCount > 0) {
         typeStructMarkGeneric(placeholder);
         typchkErrorAtToken(&sn->name, "Generic structs aren't supported yet.");
+      }
+
+      // A struct named e.g. "f64" would be permanently unreachable by
+      // annotation (typchkResolveType always resolves that text to the
+      // primitive first), and would make an `impl f64 { ... }` block's
+      // target genuinely ambiguous between the two -- the compiler
+      // decides which codegen an impl block needs from the target name's
+      // text alone (see isPrimitiveScalarTypeName() in compiler.c), which
+      // only works if that text can only ever mean one thing.
+      if (tokenIsPrimitiveTypeName(&sn->name)) {
+        typchkErrorAtTokenFmt(
+            &sn->name, "'%.*s' is a reserved type name and can't be used as "
+                      "a struct name.",
+            sn->name.length, sn->name.start);
       }
 
       typchkTypeEnvRegisterStruct(env, sn->name, placeholder);

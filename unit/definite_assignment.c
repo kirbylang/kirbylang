@@ -49,7 +49,7 @@ static bool typecheckSource(const char *source) {
   int endLine = 0;
   AstNode **ast = parse(source, &outCount, &hadParseError, &endLine);
   assert(!hadParseError);
-  return typchkCheckProgram(ast, outCount);
+  return typchkCheckProgram(ast, outCount, /*allowPrimitiveImpls=*/false);
 }
 
 static void test_definite_assignment_sequential(void) {

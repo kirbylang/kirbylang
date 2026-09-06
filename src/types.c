@@ -293,6 +293,146 @@ bool typeTraitIsBuiltin(Type *type) {
   return type != NULL && type->kind == TYPE_TRAIT && type->as.trait_.isBuiltin;
 }
 
+bool typeIsPrimitiveScalar(Type *type) {
+  return type != NULL && (type->kind == TYPE_UNIT || type->kind == TYPE_BOOL ||
+                          type->kind == TYPE_STRING || type->kind == TYPE_F64);
+}
+
+static void appendPrimitiveOwnMember(PrimitiveOwnMember **array, int *count,
+                                     Token name, Type *memberType,
+                                     bool isPublic) {
+  int newCount = *count + 1;
+  PrimitiveOwnMember *newArray = (PrimitiveOwnMember *)typesAllocRaw(
+      (size_t)newCount * sizeof(PrimitiveOwnMember));
+  if (*count > 0)
+    memcpy(newArray, *array, (size_t)(*count) * sizeof(PrimitiveOwnMember));
+  newArray[newCount - 1].name = internTokenName(name);
+  newArray[newCount - 1].type = memberType;
+  newArray[newCount - 1].isPublic = isPublic;
+  *array = newArray;
+  *count = newCount;
+}
+
+static void appendPrimitiveTraitMember(PrimitiveTraitMember **array, int *count,
+                                       InternedName traitName, Token name,
+                                       Type *memberType) {
+  int newCount = *count + 1;
+  PrimitiveTraitMember *newArray = (PrimitiveTraitMember *)typesAllocRaw(
+      (size_t)newCount * sizeof(PrimitiveTraitMember));
+  if (*count > 0)
+    memcpy(newArray, *array, (size_t)(*count) * sizeof(PrimitiveTraitMember));
+  newArray[newCount - 1].name = internTokenName(name);
+  newArray[newCount - 1].type = memberType;
+  newArray[newCount - 1].traitName = traitName;
+  *array = newArray;
+  *count = newCount;
+}
+
+void typePrimitiveAddMethod(Type *type, Token name, Type *methodType,
+                            bool hasSelf, bool isPublic) {
+  if (hasSelf) {
+    appendPrimitiveOwnMember(&type->as.primitive.instanceMethods,
+                             &type->as.primitive.instanceMethodCount, name,
+                             methodType, isPublic);
+  } else {
+    appendPrimitiveOwnMember(&type->as.primitive.staticMethods,
+                             &type->as.primitive.staticMethodCount, name,
+                             methodType, isPublic);
+  }
+}
+
+void typePrimitiveAddTraitMethod(Type *type, InternedName traitName, Token name,
+                                 Type *methodType, bool hasSelf) {
+  if (hasSelf) {
+    appendPrimitiveTraitMember(&type->as.primitive.traitInstanceMethods,
+                               &type->as.primitive.traitInstanceMethodCount,
+                               traitName, name, methodType);
+  } else {
+    appendPrimitiveTraitMember(&type->as.primitive.traitStaticMethods,
+                               &type->as.primitive.traitStaticMethodCount,
+                               traitName, name, methodType);
+  }
+}
+
+void typePrimitiveMarkTraitImplemented(Type *type, InternedName traitName) {
+  int newCount = type->as.primitive.implementedTraitCount + 1;
+  InternedName *newArray =
+      (InternedName *)typesAllocRaw((size_t)newCount * sizeof(InternedName));
+
+  if (type->as.primitive.implementedTraitCount > 0) {
+    memcpy(newArray, type->as.primitive.implementedTraits,
+           (size_t)type->as.primitive.implementedTraitCount *
+               sizeof(InternedName));
+  }
+
+  newArray[newCount - 1] = traitName;
+  type->as.primitive.implementedTraits = newArray;
+  type->as.primitive.implementedTraitCount = newCount;
+}
+
+bool typePrimitiveImplementsTrait(Type *type, InternedName traitName) {
+  if (!typeIsPrimitiveScalar(type))
+    return false;
+  for (int i = 0; i < type->as.primitive.implementedTraitCount; i++) {
+    if (internedNamesEqual(type->as.primitive.implementedTraits[i], traitName))
+      return true;
+  }
+  return false;
+}
+
+static bool primitiveOwnMemberLookup(PrimitiveOwnMember *members, int count,
+                                     Token name, PrimitiveMethodLookup *out) {
+  for (int i = 0; i < count; i++) {
+    if (internedNameEqualsToken(members[i].name, name)) {
+      out->type = members[i].type;
+      out->isPublic = members[i].isPublic;
+      out->isTraitMethod = false;
+      return true;
+    }
+  }
+  return false;
+}
+
+static bool primitiveTraitMemberLookup(PrimitiveTraitMember *members, int count,
+                                       Token name, PrimitiveMethodLookup *out) {
+  for (int i = 0; i < count; i++) {
+    if (internedNameEqualsToken(members[i].name, name)) {
+      out->type = members[i].type;
+      out->isPublic = true; // trait methods are always public
+      out->isTraitMethod = true;
+      out->traitName = members[i].traitName;
+      return true;
+    }
+  }
+  return false;
+}
+
+bool typePrimitiveInstanceMethodLookup(Type *type, Token methodName,
+                                       PrimitiveMethodLookup *out) {
+  if (!typeIsPrimitiveScalar(type))
+    return false;
+  if (primitiveOwnMemberLookup(type->as.primitive.instanceMethods,
+                               type->as.primitive.instanceMethodCount,
+                               methodName, out))
+    return true;
+  return primitiveTraitMemberLookup(type->as.primitive.traitInstanceMethods,
+                                    type->as.primitive.traitInstanceMethodCount,
+                                    methodName, out);
+}
+
+bool typePrimitiveStaticMethodLookup(Type *type, Token methodName,
+                                     PrimitiveMethodLookup *out) {
+  if (!typeIsPrimitiveScalar(type))
+    return false;
+  if (primitiveOwnMemberLookup(type->as.primitive.staticMethods,
+                               type->as.primitive.staticMethodCount, methodName,
+                               out))
+    return true;
+  return primitiveTraitMemberLookup(type->as.primitive.traitStaticMethods,
+                                    type->as.primitive.traitStaticMethodCount,
+                                    methodName, out);
+}
+
 Type *typeSubstituteSelf(Type *type, Type *concrete) {
   if (type == NULL)
     return NULL;

@@ -79,15 +79,31 @@
     - `trait Display { fun toString(self): string; }`
     - Supertraits: `trait Ord: Eq { ... }`
     - `Self` type inside `impl` blocks
-    - Traits can only be implemented once on a struct
+    - Traits can only be implemented once on a struct or primitive type
     - A trait name can only be declared once, and can't reuse a builtin
       trait's name (`Display`/`Eq`/`Ord`/`Default`)
     - Builtin traits, always in scope: `Display`, `Eq`, `Ord`, `Default`
     - A circular supertrait chain (`trait A: A {}`, or `trait A: B {} trait B: A {}`) is a compile error
     - Require structs to implement `Eq` trait for `==`/`!=`
+    - `impl f64 { ... }` and `impl Trait for f64 { ... }` (also `string`,
+      `bool`, `unit`) -- declaring one is restricted to
+      `stdlib/stdlib.krb`; a plain impl or trait impl on a primitive
+      anywhere else is a compile error. Calling a method one of these
+      already declares has no such restriction. Compiles to a mangled
+      global function per method -- primitives have no runtime instance
+      to attach a method to or dispatch through, so the call is resolved
+      statically at compile time instead of via `OP_INVOKE`
+      - `pub`/private visibility is enforced at compile time for these
+        (stronger than structs, which only catch it at runtime): a
+        private method is only reachable from another method in an impl
+        block for that same primitive
+      - A struct can't be named after a reserved type name (`f64`,
+        `string`, `bool`, `unit`, `Array`) -- keeps an `impl` block's
+        target unambiguous between the two
     - Limitations
-      - `impl Trait for` a primitive type (`f64`, `string`, `bool`, `unit`) isn't supported yet -- needs the same static call-resolution work operator overloading does
-      - No real operator overloading yet. `Eq` is only a typecheck. `==` still runs identify equality
+      - `impl Trait for Array` isn't supported yet -- needs generics first
+      - No real operator overloading yet. `Eq` is only a typecheck. `==`
+        still runs identity equality
 - [Definite Assignment Analysis](https://en.wikipedia.org/wiki/Definite_assignment_analysis)
 
 - Refine shadow binding rules
