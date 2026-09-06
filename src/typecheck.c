@@ -1231,6 +1231,17 @@ static void typchkCheckVarDecl(TypeEnv *env, AstNode *node) {
   Type *declaredType =
       hasExpectedType ? typchkResolveType(env, varDecl->declaredType) : NULL;
 
+  if (hasExpectedType) {
+    Token declaredTypeIdentifier = varDecl->declaredType->as.type_.name;
+    bool isSelf = tokenTextEquals(&declaredTypeIdentifier, "Self");
+
+    if (isSelf && typchkTypeEnvGetImplTargetType(env) == NULL) {
+      typchkErrorAtTokenFmt(&declaredTypeIdentifier,
+                            "'Self' can only be used inside an impl block.");
+      return;
+    }
+  }
+
   if (varDecl->initializer != NULL) {
     if (declaredType != NULL) {
       typchkCheck(env, varDecl->initializer, declaredType);

@@ -1,0 +1,15 @@
+struct Struct {
+    var value: f64;
+}
+
+impl Struct {
+    fun new(value: f64): Self {
+        let instance: Self = Self {
+            value: value
+        };
+
+        let other: Self = instance;
+
+        other
+    }
+}
