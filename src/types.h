@@ -155,8 +155,6 @@ void typeTraitSetSupertrait(Type *type, InternedName supertraitName);
 void typeTraitMarkUnresolvedMembers(Type *type);
 bool typeTraitHasUnresolvedMembers(Type *type);
 
-// Marks a trait as one of the pre-seeded builtins (Display/Eq/Ord/Default)
-// rather than user-declared. See the isBuiltin field's doc comment above.
 void typeTraitMarkBuiltin(Type *type);
 bool typeTraitIsBuiltin(Type *type);
 
