@@ -23,7 +23,7 @@ static bool checkUnit(const char *source) {
   AstNode **ast = parse(owned, &count, &hadParseError, &endLine);
   assert(!hadParseError);
 
-  bool ok = typchkCheckProgram(ast, count);
+  bool ok = typchkCheckProgram(ast, count, /*allowPrimitiveImpls=*/false);
 
   astFreeAll();
   free(ast);

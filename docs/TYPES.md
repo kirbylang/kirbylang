@@ -196,7 +196,11 @@ trait Ord: Eq {
 
 #### Limitations
 
-- Traits can only be implemented for structs currently
+- Traits can only be implemented for structs and the scalar primitives
+  (`f64`, `string`, `bool`, `unit`) -- not `Array` yet, which needs
+  generics first
+- Impl blocks on primitives can only be declared in `stdlib/stdlib.krb`,
+  regardless of `pub`
 - The `Eq` and `Ord` traits are typechecked only. At runtime `==` and `<` still use compiler logic. This is a future change.
 - If a struct's impl block implements a method of the same name as a trait, the struct's impl method is what is called. A future change will allow `Trait.method(struct)` to be used to fully qualify the trait versions of the method.
 
@@ -287,5 +291,8 @@ implement `Eq` -- see [Traits](#traits).
   checked
 - Generic types parse but aren't checked
 - Lists have no type annotation syntax
-- `impl Trait for` a primitive type isn't supported yet, and operators
-  don't dispatch to trait methods -- see [Traits](#traits)
+- Operators don't dispatch to trait methods yet (`+`, `<`, etc. always use
+  compiler logic, even for structs implementing a matching trait) -- see
+  [Traits](#traits)
+- Impl blocks on primitive types are restricted to `stdlib/stdlib.krb` --
+  see [Impl blocks on primitives](#impl-blocks-on-primitives)

@@ -1,0 +1,2 @@
+let pi: f64 = 3.14;
+print "pi is " + pi.toString();

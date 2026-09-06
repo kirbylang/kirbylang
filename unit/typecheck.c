@@ -4,6 +4,7 @@
 
 #include "../src/ast.h"
 #include "../src/parser.h"
+#include "../src/resolved_ops.h"
 #include "../src/token.h"
 #include "../src/typecheck.h"
 #include "../src/types.h"
@@ -766,7 +767,35 @@ static bool typecheckSource(const char *source) {
   int endLine = 0;
   AstNode **ast = parse(source, &outCount, &hadParseError, &endLine);
   assert(!hadParseError);
-  return typchkCheckProgram(ast, outCount);
+  return typchkCheckProgram(ast, outCount, /*allowPrimitiveImpls=*/false);
+}
+
+// Same as typecheckSource(), but with allowPrimitiveImpls=true -- the way
+// main.c checks stdlib.krb, and the only way `impl f64 { ... }` /
+// `impl Trait for f64 { ... }` are allowed to declare anything.
+static bool typecheckSourceTrusted(const char *source) {
+  int outCount = 0;
+  bool hadParseError = false;
+  int endLine = 0;
+  AstNode **ast = parse(source, &outCount, &hadParseError, &endLine);
+  assert(!hadParseError);
+  return typchkCheckProgram(ast, outCount, /*allowPrimitiveImpls=*/true);
+}
+
+// Same as typecheckSourceTrusted(), but returns the parsed AST (and the
+// declaration count via `outCount`) instead of discarding it, so a test
+// can inspect what got recorded into resolved_ops for a specific node.
+// Never frees the AST -- matches typecheckSource()/typecheckSourceTrusted()
+// above, neither of which do either; everything is cleaned up once, at
+// the end of main() below.
+static AstNode **typecheckSourceTrustedKeepAst(const char *source,
+                                               int *outCount) {
+  bool hadParseError = false;
+  int endLine = 0;
+  AstNode **ast = parse(source, outCount, &hadParseError, &endLine);
+  assert(!hadParseError);
+  typchkCheckProgram(ast, *outCount, /*allowPrimitiveImpls=*/true);
+  return ast;
 }
 
 static void test_program_fully_typed_struct_and_methods(void) {
@@ -801,6 +830,33 @@ static void test_program_missing_struct_field_type_fails(void) {
   typchkResetError();
   bool ok = typecheckSource("struct Point { pub var x: f64; pub var y; }");
   assert(!ok);
+}
+
+static void test_program_struct_named_after_primitive_fails(void) {
+  // A struct sharing a primitive's name would be permanently unreachable
+  // by annotation (typchkResolveType always resolves that text to the
+  // primitive first) and would make an impl block targeting it genuinely
+  // ambiguous -- the compiler decides an impl block's codegen from the
+  // target name's text alone (see isPrimitiveScalarTypeName() in
+  // compiler.c), which only works if the text can only mean one thing.
+  typchkResetError();
+  assert(!typecheckSource("struct f64 { pub var x: unit; }"));
+
+  typchkResetError();
+  assert(!typecheckSource("struct string { pub var x: unit; }"));
+
+  typchkResetError();
+  assert(!typecheckSource("struct bool { pub var x: unit; }"));
+
+  typchkResetError();
+  assert(!typecheckSource("struct unit { pub var x: unit; }"));
+
+  typchkResetError();
+  assert(!typecheckSource("struct Array { pub var x: unit; }"));
+
+  // An ordinary struct name is unaffected.
+  typchkResetError();
+  assert(typecheckSource("struct Point { pub var x: unit; }"));
 }
 
 static void test_program_self_referential_struct(void) {
@@ -1128,7 +1184,10 @@ static void test_program_equality_between_primitives_unaffected(void) {
   assert(ok);
 }
 
-static void test_program_trait_impl_on_primitive_deferred_fails(void) {
+static void test_program_trait_impl_on_primitive_fails_when_untrusted(void) {
+  // Trait impls on primitives are real (Phase 4b), but only trusted source
+  // (stdlib.krb) may declare them -- typecheckSource() checks with
+  // allowPrimitiveImpls=false, the same as ordinary user code.
   typchkResetError();
   bool ok = typecheckSource("impl Display for f64 {\n"
                             "  pub fun toString(self): string = \"n\";\n"
@@ -1136,12 +1195,279 @@ static void test_program_trait_impl_on_primitive_deferred_fails(void) {
   assert(!ok);
 }
 
-static void test_program_plain_impl_on_primitive_fails(void) {
+static void test_program_trait_impl_on_primitive_succeeds_when_trusted(void) {
+  // A custom trait, not one of the builtins -- so a later test asserting
+  // "missing method" or "wrong signature" against its *own* custom trait
+  // can't be short-circuited by this test's successful registration (that
+  // registration is permanent for the rest of the process: primitives are
+  // singletons, and only typesFreeAll() -- called once, at the very end of
+  // main() below -- clears it).
+  typchkResetError();
+  bool ok = typecheckSourceTrusted(
+      "trait Stringify { fun toString(self): string; }\n"
+      "impl Stringify for f64 {\n"
+      "  pub fun toString(self): string = \"n\";\n"
+      "}\n");
+  assert(ok);
+}
+
+static void test_program_plain_impl_on_primitive_fails_when_untrusted(void) {
+  // Same gating as the trait-impl case above, for a plain `impl f64 { ... }`.
   typchkResetError();
   bool ok = typecheckSource("impl f64 {\n"
                             "  pub fun double(self): f64 = self * 2;\n"
                             "}\n");
   assert(!ok);
+}
+
+static void test_program_plain_impl_on_primitive_succeeds_when_trusted(void) {
+  // Same singleton-persistence caveat as the trait-impl tests above: once
+  // this registers "double" as an f64 instance method, it stays
+  // registered for the rest of the process, so no later test in this file
+  // should declare a *different* "double" on f64 and expect its own
+  // signature to be the one found.
+  typchkResetError();
+  bool ok = typecheckSourceTrusted("impl f64 {\n"
+                                   "  pub fun double(self): f64 = self * 2;\n"
+                                   "}\n");
+  assert(ok);
+}
+
+static void test_program_plain_impl_on_primitive_no_pub_still_registers(void) {
+  // No `pub` required to *declare* a method -- same as a struct's own
+  // plain impl block. It just can't be *called* from outside (patch 4's
+  // concern, not this one).
+  typchkResetError();
+  bool ok = typecheckSourceTrusted("impl f64 {\n"
+                                   "  fun helper(self): f64 = self;\n"
+                                   "}\n");
+  assert(ok);
+}
+
+static void test_program_array_impls_fail_even_when_trusted(void) {
+  // Trust only extends the scalar primitives (unit/bool/string/f64) --
+  // Array isn't one of them (needs generics first, see TYPE_SYSTEM_RFC.md),
+  // so both forms stay rejected regardless of allowPrimitiveImpls.
+  typchkResetError();
+  assert(!typecheckSourceTrusted("impl Display for Array {\n"
+                                 "  pub fun toString(self): string = \"a\";\n"
+                                 "}\n"));
+
+  typchkResetError();
+  assert(!typecheckSourceTrusted("impl Array {\n"
+                                 "  pub fun double(self): Array = self;\n"
+                                 "}\n"));
+}
+
+static void test_program_primitive_impl_method_body_is_checked(void) {
+  // Registering the signature isn't enough -- the body has to actually
+  // type-check too, the same as any other method.
+  typchkResetError();
+  bool ok = typecheckSourceTrusted("impl f64 {\n"
+                                   "  pub fun broken(self): f64 = \"nope\";\n"
+                                   "}\n");
+  assert(!ok);
+}
+
+static void test_program_primitive_trait_impl_missing_method_fails(void) {
+  // A fresh, single-use trait name -- see the isolation note on
+  // test_program_trait_impl_on_primitive_succeeds_when_trusted().
+  typchkResetError();
+  bool ok = typecheckSourceTrusted(
+      "trait Nameable { fun toString(self): string; }\n"
+      "impl Nameable for f64 {\n"
+      "}\n");
+  assert(!ok);
+}
+
+static void test_program_primitive_trait_impl_wrong_signature_fails(void) {
+  typchkResetError();
+  // Labelable.toString returns string, not f64.
+  bool ok = typecheckSourceTrusted(
+      "trait Labelable { fun toString(self): string; }\n"
+      "impl Labelable for f64 {\n"
+      "  pub fun toString(self): f64 = 1;\n"
+      "}\n");
+  assert(!ok);
+}
+
+static void test_program_primitive_trait_impl_duplicate_fails(void) {
+  typchkResetError();
+  bool ok = typecheckSourceTrusted(
+      "trait Formattable { fun toString(self): string; }\n"
+      "impl Formattable for f64 {\n"
+      "  pub fun toString(self): string = \"a\";\n"
+      "}\n"
+      "impl Formattable for f64 {\n"
+      "  pub fun toString(self): string = \"b\";\n"
+      "}\n");
+  assert(!ok);
+}
+
+// --- Calling a primitive's impl/trait-impl methods (patch 4) ---------
+//
+// Each test below calls typesFreeAll() first. Patch 3's tests avoided
+// cross-test collisions by giving each a fresh, single-use trait name --
+// workable there since coherence is the only thing checked across calls.
+// These tests also check *which* method a call resolved to (the method's
+// signature, or resolved_ops's mangled name), so an accidental match
+// against an *unrelated* earlier test's leftover registration wouldn't
+// necessarily fail loudly -- it could just quietly resolve to the wrong
+// method. Resetting the whole type arena is the more robust fix, and
+// scales better as more tests (and more patches) get added to this file:
+// every test below starts from a genuinely clean f64, unaffected by
+// anything above it, without needing to track which trait/method names
+// are still "unclaimed."
+
+static void test_program_primitive_instance_method_call_resolves(void) {
+  typesFreeAll();
+  typchkResetError();
+  resolvedOpsReset();
+
+  int count = 0;
+  AstNode **ast = typecheckSourceTrustedKeepAst(
+      "impl f64 {\n"
+      "  pub fun double(self): f64 = self * 2;\n"
+      "}\n"
+      "print (5).double();\n",
+      &count);
+  assert(!typchkHadError());
+  assert(count == 2);
+
+  AstNode *printStmt = ast[1];
+  assert(printStmt->kind == NODE_PRINT);
+  AstNode *callNode = printStmt->as.print.expr;
+  assert(callNode->kind == NODE_CALL);
+  AstNode *getNode = callNode->as.call.callee;
+  assert(getNode->kind == NODE_GET);
+
+  const ResolvedOp *op = resolvedOpsLookup(getNode);
+  assert(op != NULL);
+  assert(op->kind == RESOLVED_OP_PRIMITIVE_CALL);
+  assert(op->hasSelf);
+  assert(op->mangledLength == (int)strlen("@f64.double"));
+  assert(memcmp(op->mangledName, "@f64.double", (size_t)op->mangledLength) ==
+         0);
+}
+
+static void test_program_primitive_static_method_call_succeeds(void) {
+  typesFreeAll();
+  typchkResetError();
+  resolvedOpsReset();
+
+  int count = 0;
+  AstNode **ast = typecheckSourceTrustedKeepAst(
+      "impl f64 {\n"
+      "  pub fun zero(): f64 = 0;\n"
+      "}\n"
+      "print f64.zero();\n",
+      &count);
+  assert(!typchkHadError());
+
+  AstNode *printStmt = ast[1];
+  AstNode *callNode = printStmt->as.print.expr;
+  AstNode *getNode = callNode->as.call.callee;
+
+  const ResolvedOp *op = resolvedOpsLookup(getNode);
+  assert(op != NULL);
+  assert(!op->hasSelf); // no receiver -- a bare static call
+  assert(op->mangledLength == (int)strlen("@f64.zero"));
+  assert(memcmp(op->mangledName, "@f64.zero", (size_t)op->mangledLength) == 0);
+}
+
+static void test_program_primitive_method_call_wrong_arg_count_fails(void) {
+  typesFreeAll();
+  typchkResetError();
+  bool ok = typecheckSourceTrusted(
+      "impl f64 {\n"
+      "  pub fun add(self, other: f64): f64 = self + other;\n"
+      "}\n"
+      "print (1).add();\n");
+  assert(!ok);
+}
+
+static void test_program_primitive_method_call_wrong_arg_type_fails(void) {
+  typesFreeAll();
+  typchkResetError();
+  bool ok = typecheckSourceTrusted(
+      "impl f64 {\n"
+      "  pub fun add(self, other: f64): f64 = self + other;\n"
+      "}\n"
+      "print (1).add(\"x\");\n");
+  assert(!ok);
+}
+
+static void test_program_primitive_instance_method_not_found_fails(void) {
+  typesFreeAll();
+  typchkResetError();
+  bool ok = typecheckSourceTrusted("print (1).missing();\n");
+  assert(!ok);
+}
+
+static void test_program_primitive_static_method_not_found_fails(void) {
+  typesFreeAll();
+  typchkResetError();
+  bool ok = typecheckSourceTrusted("print f64.missing();\n");
+  assert(!ok);
+}
+
+static void test_program_primitive_private_method_uncallable_from_outside(
+    void) {
+  // No `pub` -- private, and this call is top-level code, not inside any
+  // impl block for f64. Unlike a struct, this is caught at compile time:
+  // a primitive method call is always resolved right here, so the type
+  // checker is the only enforcement point there ever is (see
+  // typchkResolvePrimitiveMethodCall's doc comment in typecheck.c).
+  typesFreeAll();
+  typchkResetError();
+  bool ok = typecheckSourceTrusted("impl f64 {\n"
+                                   "  fun secret(self): f64 = self;\n"
+                                   "}\n"
+                                   "print (1).secret();\n");
+  assert(!ok);
+}
+
+static void test_program_primitive_private_method_callable_from_sibling(
+    void) {
+  typesFreeAll();
+  typchkResetError();
+  bool ok = typecheckSourceTrusted(
+      "impl f64 {\n"
+      "  fun secret(self): f64 = self;\n"
+      "  pub fun useSecret(self): f64 = self.secret();\n"
+      "}\n");
+  assert(ok);
+}
+
+static void
+test_program_primitive_private_method_callable_from_other_impl_block(void) {
+  // Visibility is per-*type*, not per-impl-block -- same rule structs
+  // use (see canAccess() in vm.c): any impl block for f64 can reach any
+  // other impl block's private methods on f64.
+  typesFreeAll();
+  typchkResetError();
+  bool ok = typecheckSourceTrusted(
+      "impl f64 {\n"
+      "  fun secret(self): f64 = self;\n"
+      "}\n"
+      "impl f64 {\n"
+      "  pub fun useSecret(self): f64 = self.secret();\n"
+      "}\n");
+  assert(ok);
+}
+
+static void test_program_primitive_trait_method_always_public(void) {
+  // No `pub` written -- the parser forces trait impl methods public
+  // regardless (same rule as struct trait impls), so this must still be
+  // callable from top-level code, outside any impl block.
+  typesFreeAll();
+  typchkResetError();
+  bool ok = typecheckSourceTrusted("trait Greet { fun hello(self): string; }\n"
+                                   "impl Greet for f64 {\n"
+                                   "  fun hello(self): string = \"hi\";\n"
+                                   "}\n"
+                                   "print (1).hello();\n");
+  assert(ok);
 }
 
 static void test_program_trait_alongside_plain_impl(void) {
@@ -1347,6 +1673,7 @@ int main(void) {
   test_program_missing_param_type_fails();
   test_program_missing_return_type_fails();
   test_program_missing_struct_field_type_fails();
+  test_program_struct_named_after_primitive_fails();
   test_program_self_referential_struct();
   test_program_forward_referencing_struct_field();
   test_program_multiple_impl_blocks();
@@ -1380,8 +1707,26 @@ int main(void) {
   test_program_equality_requires_eq_for_structs();
   test_program_equality_ok_once_eq_implemented();
   test_program_equality_between_primitives_unaffected();
-  test_program_trait_impl_on_primitive_deferred_fails();
-  test_program_plain_impl_on_primitive_fails();
+  test_program_trait_impl_on_primitive_fails_when_untrusted();
+  test_program_trait_impl_on_primitive_succeeds_when_trusted();
+  test_program_plain_impl_on_primitive_fails_when_untrusted();
+  test_program_plain_impl_on_primitive_succeeds_when_trusted();
+  test_program_plain_impl_on_primitive_no_pub_still_registers();
+  test_program_array_impls_fail_even_when_trusted();
+  test_program_primitive_impl_method_body_is_checked();
+  test_program_primitive_trait_impl_missing_method_fails();
+  test_program_primitive_trait_impl_wrong_signature_fails();
+  test_program_primitive_trait_impl_duplicate_fails();
+  test_program_primitive_instance_method_call_resolves();
+  test_program_primitive_static_method_call_succeeds();
+  test_program_primitive_method_call_wrong_arg_count_fails();
+  test_program_primitive_method_call_wrong_arg_type_fails();
+  test_program_primitive_instance_method_not_found_fails();
+  test_program_primitive_static_method_not_found_fails();
+  test_program_primitive_private_method_uncallable_from_outside();
+  test_program_primitive_private_method_callable_from_sibling();
+  test_program_primitive_private_method_callable_from_other_impl_block();
+  test_program_primitive_trait_method_always_public();
   test_program_trait_alongside_plain_impl();
   test_program_trait_method_without_pub_is_callable();
   test_program_self_return_type_in_plain_impl();

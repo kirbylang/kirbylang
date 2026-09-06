@@ -1,0 +1,3 @@
+print f64.default();
+print string.default();
+print bool.default();

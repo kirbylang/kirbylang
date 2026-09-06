@@ -1,5 +1,7 @@
 #include "token.h"
+#include <stdbool.h>
 #include <stdio.h>
+#include <string.h>
 
 const char *tokenTypeToString(TokenType type) {
   switch (type) {
@@ -109,4 +111,21 @@ const char *tokenTypeToString(TokenType type) {
     fprintf(stderr, "Unknown token: %d", type);
     return "UNKNOWN TOKEN";
   }
+}
+
+bool isPrimitiveScalarTypeName(Token *name) {
+  static const char *names[] = {"unit", "bool", "string", "f64"};
+  for (size_t i = 0; i < sizeof(names) / sizeof(names[0]); i++) {
+    size_t len = strlen(names[i]);
+    if ((size_t)name->length == len && memcmp(name->start, names[i], len) == 0)
+      return true;
+  }
+  return false;
+}
+
+bool tokensEqual(Token *a, Token *b) {
+  if (a->length != b->length)
+    return false;
+
+  return memcmp(a->start, b->start, a->length) == 0;
 }

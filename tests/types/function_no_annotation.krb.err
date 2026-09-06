@@ -1,6 +1,3 @@
-== <script> ==
-0000    1 OP_NIL
-0001    | OP_RETURN
 [line 1] Error at 'a': Parameter 'a' needs a type.
 [line 1] Error at 'b': Parameter 'b' needs a type.
 [line 1] Error at 'add': 'add' needs a return type.

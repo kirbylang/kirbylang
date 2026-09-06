@@ -1,0 +1,5 @@
+print (3.14).toString();
+print "hello".toString();
+print true.toString();
+print false.toString();
+print ().toString();

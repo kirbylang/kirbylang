@@ -36,6 +36,29 @@ typedef struct {
   Type *type;
 } TypeMember;
 
+// A method from a plain `impl f64 { ... }` block. Unlike TypeMember, this
+// tracks visibility -- primitive method calls are always resolved
+// statically (there's no runtime instance to dispatch through), so the
+// type checker is the only place that can enforce `pub`, and it needs
+// this to do it.
+typedef struct {
+  InternedName name;
+  Type *type;
+  bool isPublic;
+} PrimitiveOwnMember;
+
+// A method from an `impl Trait for f64 { ... }` block. Always public --
+// same rule as struct trait impls -- so no isPublic field, but the owning
+// trait's name is recorded: a primitive method call compiles to a
+// mangled global name built from (primitive, trait, method), and
+// reconstructing that name after a lookup-by-name-only needs to know
+// which trait it came from.
+typedef struct {
+  InternedName name;
+  Type *type;
+  InternedName traitName;
+} PrimitiveTraitMember;
+
 struct Type {
   TypeKind kind;
   union {
@@ -79,6 +102,22 @@ struct Type {
       bool hasUnresolvedMembers;
       bool isBuiltin;
     } trait_;
+    // Primitive (unit/bool/string/f64) impl/trait-impl methods. Primitives
+    // are singletons -- see typeUnit() etc below -- so this storage lives
+    // directly on that one shared Type, mirroring struct_'s shape but
+    // flatter (no fields, and only one instance ever exists per kind).
+    struct {
+      PrimitiveOwnMember *instanceMethods;
+      int instanceMethodCount;
+      PrimitiveOwnMember *staticMethods;
+      int staticMethodCount;
+      PrimitiveTraitMember *traitInstanceMethods;
+      int traitInstanceMethodCount;
+      PrimitiveTraitMember *traitStaticMethods;
+      int traitStaticMethodCount;
+      InternedName *implementedTraits;
+      int implementedTraitCount;
+    } primitive;
   } as;
 };
 
@@ -157,6 +196,51 @@ bool typeTraitHasUnresolvedMembers(Type *type);
 
 void typeTraitMarkBuiltin(Type *type);
 bool typeTraitIsBuiltin(Type *type);
+
+// True for TYPE_UNIT/TYPE_BOOL/TYPE_STRING/TYPE_F64 -- the primitives that
+// can carry impl/trait-impl methods via the functions below.
+bool typeIsPrimitiveScalar(Type *type);
+
+// Adds a method from a plain `impl f64 { ... }` block. `hasSelf` picks
+// instance vs. static storage, same as typeStructAddInstanceMethod/
+// typeStructAddStaticMethod.
+void typePrimitiveAddMethod(Type *type, Token name, Type *methodType,
+                            bool hasSelf, bool isPublic);
+
+// Adds a method from an `impl Trait for f64 { ... }` block. `traitName` is
+// the owning trait's interned name -- see PrimitiveTraitMember's doc
+// comment for why this is tracked. `hasSelf` picks instance vs. static
+// storage, same as typeStructAddTraitMethod.
+void typePrimitiveAddTraitMethod(Type *type, InternedName traitName, Token name,
+                                 Type *methodType, bool hasSelf);
+
+// Records that `type` has an `impl Trait for` block, where `traitName` is
+// the trait's interned name. Same purpose as typeStructMarkTraitImplemented,
+// for primitives.
+void typePrimitiveMarkTraitImplemented(Type *type, InternedName traitName);
+bool typePrimitiveImplementsTrait(Type *type, InternedName traitName);
+
+// Result of a primitive method lookup -- richer than TypeMember because
+// callers need to know whether the method is public (to enforce `pub` at
+// the call site -- see typePrimitiveAddMethod's doc comment) and, for a
+// trait method, which trait it came from (to rebuild the mangled global
+// name the compiler emits for it).
+typedef struct {
+  Type *type;
+  bool isPublic;
+  bool isTraitMethod;
+  // Only meaningful when isTraitMethod is true.
+  InternedName traitName;
+} PrimitiveMethodLookup;
+
+// Checks own (plain-impl) methods first, then trait methods -- the same
+// precedence a struct's own impl block takes over a trait impl block.
+// Returns false (leaving *out untouched) if `type` isn't a primitive
+// scalar or nothing matches.
+bool typePrimitiveInstanceMethodLookup(Type *type, Token methodName,
+                                       PrimitiveMethodLookup *out);
+bool typePrimitiveStaticMethodLookup(Type *type, Token methodName,
+                                     PrimitiveMethodLookup *out);
 
 // Replaces every TYPE_SELF found inside `type` with a `concrete` type.
 Type *typeSubstituteSelf(Type *type, Type *concrete);

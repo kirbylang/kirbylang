@@ -1,0 +1,3 @@
+struct f64 {
+    pub var x: unit;
+}

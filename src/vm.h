@@ -89,7 +89,7 @@ InterpretResult interpretFunction(ObjFunction *function);
  * parse()+compile() first -- interpret() no longer does that itself, so the
  * VM has no dependency on the compiler.
  */
-InterpretResult interpret(CompiledUnit *unit);
+InterpretResult interpret(CompiledUnit *unit, bool isUserCode);
 
 void runtimeError(VM *vm, const char *format, ...);
 

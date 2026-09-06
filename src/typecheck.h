@@ -62,12 +62,25 @@ Type *typchkTypeEnvGetCurrentReturnType(TypeEnv *env);
 void typchkTypeEnvSetImplTargetType(TypeEnv *env, Type *implTargetType);
 Type *typchkTypeEnvGetImplTargetType(TypeEnv *env);
 
+// Whether the program currently being checked may declare impl/trait-impl
+// blocks on primitive types (unit/bool/string/f64). Only ever true for
+// stdlib.krb -- see typchkCheckProgram's `allowPrimitiveImpls` parameter,
+// which sets this for the duration of that one call.
+void typchkTypeEnvSetAllowPrimitiveImpls(TypeEnv *env, bool allow);
+bool typchkTypeEnvGetAllowPrimitiveImpls(TypeEnv *env);
+
 Type *typchkInfer(TypeEnv *env, AstNode *node);
 bool typchkCheck(TypeEnv *env, AstNode *node, Type *expected);
 
 void typchkCheckStmt(TypeEnv *env, AstNode *node);
 
-bool typchkCheckProgram(AstNode **program, int count);
+// `allowPrimitiveImpls` gates whether `impl f64 { ... }` / `impl Trait for
+// f64 { ... }` (and the other scalar primitives) are allowed to declare
+// methods here -- pass true only for trusted, first-party source
+// (stdlib.krb), false for everything else. It has no effect on *calling*
+// a primitive method that's already been registered elsewhere in the
+// session; only declaring new ones is gated.
+bool typchkCheckProgram(AstNode **program, int count, bool allowPrimitiveImpls);
 
 bool typchkHadError(void);
 void typchkResetError(void);

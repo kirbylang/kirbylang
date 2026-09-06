@@ -1,0 +1,38 @@
+// f64
+
+impl Default for f64 {
+    pub fun default(): Self = 0;
+}
+
+impl Display for f64 {
+    pub fun toString(self): string = numberToString(self);
+}
+
+type number = f64;
+
+// string
+
+impl Default for string {
+    pub fun default(): Self = "";
+}
+
+impl Display for string {
+    pub fun toString(self): string = self;
+}
+
+// bool
+
+impl Default for bool {
+    pub fun default(): Self = false;
+}
+
+
+impl Display for bool {
+    pub fun toString(self): string = if (self) "true" else "false";
+}
+
+// unit
+
+impl Display for unit {
+    pub fun toString(self): string = "()";
+}

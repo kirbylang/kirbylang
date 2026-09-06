@@ -8,6 +8,8 @@
 #include "ast.h"
 #include "common.h"
 #include "compiled_unit.h"
+#include "mangle.h"
+#include "resolved_ops.h"
 #include "stringset.h"
 #include "token.h"
 
@@ -176,15 +178,6 @@ static uint8_t identifierConstant(Token *identifier) {
 }
 
 /**
- * Compare two identifier tokens for equality
- */
-static bool identifiersEqual(Token *a, Token *b) {
-  if (a->length != b->length)
-    return false;
-  return memcmp(a->start, b->start, a->length) == 0;
-}
-
-/**
  * True if `name`'s source text is exactly "Self".
  */
 static bool isSelfTypeName(Token *name) {
@@ -202,7 +195,7 @@ static int resolveLocal(FnCompiler *compiler, Token *identifier) {
   for (int i = compiler->localCount - 1; i >= 0; i--) {
     Local *local = &compiler->locals[i];
 
-    if (identifiersEqual(identifier, &local->name)) {
+    if (tokensEqual(identifier, &local->name)) {
       if (local->depth == -1) {
         compilerErrorAtToken(
             identifier, "Can't read local variable in its own initializer");
@@ -269,7 +262,7 @@ static void addLocal(Token name, bool isMutable) {
 
   for (int i = 0; i < current->localCount; i++) {
     Local *existing = &current->locals[i];
-    if (identifiersEqual(&name, &existing->name) && !existing->isMutable) {
+    if (tokensEqual(&name, &existing->name) && !existing->isMutable) {
       compilerErrorAtToken(&name, "Already declared in this scope.");
       return;
     }
@@ -569,9 +562,49 @@ static int endCompiler(void) {
 }
 
 static void compileCall(CallNode *c) {
-  // Compile method calls to OP_INVOKE instead of OP_GET_PROPERTY -> OP_CALL
   if (c->callee->kind == NODE_GET) {
     GetNode *g = &c->callee->as.get;
+
+    // A call the type checker resolved to a primitive's impl/trait-impl
+    // method compiles to a direct call on a mangled global instead of
+    // OP_INVOKE -- primitives have no runtime instance OP_INVOKE could
+    // dispatch through. See resolved_ops.h and
+    // typchkResolvePrimitiveMethodCall() in typecheck.c, which is what
+    // records this.
+    const ResolvedOp *resolved = resolvedOpsLookup(c->callee);
+
+    if (resolved != NULL && resolved->kind == RESOLVED_OP_PRIMITIVE_CALL) {
+      if (resolved->hasSelf && c->argCount >= UINT8_MAX) {
+        compilerErrorAtToken(&g->name,
+                             "Too many arguments for a primitive method "
+                             "call.");
+      }
+
+      Token nameToken;
+      nameToken.type = TOKEN_IDENTIFIER;
+      nameToken.start = resolved->mangledName;
+      nameToken.length = resolved->mangledLength;
+      nameToken.line = g->name.line;
+
+      emitBytes(OP_GET_GLOBAL, identifierConstant(&nameToken));
+
+      // A static call (e.g. `f64.default()`) has no receiver at all --
+      // `g->object` names the primitive type, not a value, and must not
+      // be compiled.
+      if (resolved->hasSelf) {
+        compileExpr(g->object);
+      }
+
+      for (int i = 0; i < c->argCount; i++) {
+        compileExpr(c->args[i]);
+      }
+
+      emitBytes(OP_CALL, (uint8_t)(c->argCount + (resolved->hasSelf ? 1 : 0)));
+      return;
+    }
+
+    // Otherwise, an ordinary method call -- compile to OP_INVOKE instead
+    // of OP_GET_PROPERTY -> OP_CALL.
     compileExpr(g->object);
     uint8_t name = identifierConstant(&g->name);
     for (int i = 0; i < c->argCount; i++) {
@@ -593,12 +626,16 @@ static void compileCall(CallNode *c) {
  * Is there a receiver in scope for `self` to refer to?
  *
  * True inside an instance method, and inside any closure nested within one
- * (where `self` is reached as an upvalue). False at the top level, inside a
- * plain function, and inside a static method.
+ * (where `self` is reached as an upvalue). Also true inside a primitive's
+ * impl/trait-impl method (TYPE_PRIMITIVE_METHOD) -- `self` there is an
+ * ordinary declared local rather than TYPE_METHOD's special slot-0
+ * receiver, but it's still a real local named "self", so resolveVariable()
+ * finds it the same way. False at the top level, inside a plain function,
+ * and inside a static method.
  */
 static bool selfInScope(void) {
   for (FnCompiler *c = current; c != NULL; c = c->enclosing) {
-    if (c->type == TYPE_METHOD)
+    if (c->type == TYPE_METHOD || c->type == TYPE_PRIMITIVE_METHOD)
       return true;
   }
   return false;
@@ -993,10 +1030,104 @@ static void compileStructDecl(AstNode *node) {
   emitByte(OP_POP);
 }
 
+// Compiles one method from a primitive's impl/trait-impl block into a
+// mangled global function -- primitives have no runtime instance
+// OP_METHOD could attach a closure to, so each method becomes an
+// ordinary callable global instead, with `self` (if any) as a normal
+// leading parameter rather than the special slot-0 receiver TYPE_METHOD
+// gives it (see TYPE_PRIMITIVE_METHOD's doc comment in compiler.h).
+// `traitName` is NULL for a plain `impl f64 { ... }` method, or the
+// trait's name token for `impl Trait for f64 { ... }` -- passed straight
+// to mangledPrimitiveMethodName() so this produces exactly the same
+// global name typchkResolvePrimitiveMethodCall() in typecheck.c already
+// recorded call sites against.
+static void compilePrimitiveImplMethod(FunctionNode *method, Token *targetName,
+                                       Token *traitName) {
+  char mangledBuffer[MANGLED_NAME_MAX];
+  int mangledLength =
+      mangledPrimitiveMethodName(mangledBuffer, targetName->start,
+                                 targetName->length, traitName, &method->name);
+
+  Token nameToken;
+  nameToken.type = TOKEN_IDENTIFIER;
+  nameToken.start = mangledBuffer;
+  nameToken.length = mangledLength;
+  nameToken.line = method->name.line;
+
+  FnCompiler compiler;
+  initCompiler(&compiler, TYPE_PRIMITIVE_METHOD, &nameToken);
+  current->fn->isPublic = method->isPublic;
+  beginScope();
+
+  // Unlike TYPE_METHOD, self isn't the auto-bound slot-0 receiver --
+  // it's an ordinary leading parameter, so the compiled arity includes
+  // it (see the mangled-global calling convention in compileCall()).
+  int compiledArity = method->arity + (method->hasSelf ? 1 : 0);
+  current->fn->arity = compiledArity;
+  if (compiledArity > 255) {
+    compilerErrorAtToken(&method->name, "Can't have more than 255 parameters.");
+  }
+
+  if (method->hasSelf) {
+    Token selfToken;
+    selfToken.type = TOKEN_IDENTIFIER;
+    selfToken.start = "self";
+    selfToken.length = 4;
+    selfToken.line = method->name.line;
+    declareVariable(&selfToken, /*isMutable=*/true);
+    markInitialized();
+  }
+
+  for (int i = 0; i < method->arity; i++) {
+    declareVariable(&method->params[i], /*isMutable=*/true);
+    markInitialized();
+  }
+
+  if (method->exprBody != NULL) {
+    compileExpr(method->exprBody);
+    emitValueReturn();
+  } else {
+    compileBlockContents(&method->body);
+  }
+
+  currentLine = method->bodyEndLine;
+
+  int compiledIndex = endCompiler();
+  int compiledUpvalueCount =
+      cuGetFnByIndex(compilingUnit, compiledIndex)->upvalueCount;
+
+  CompiledConst k;
+  k.kind = CONST_FUNCTION;
+  k.as.functionIndex = compiledIndex;
+  emitBytes(OP_CLOSURE, makeConstant(k, NULL));
+
+  for (int i = 0; i < compiledUpvalueCount; i++) {
+    emitByte(compiler.upvalues[i].isLocal ? 1 : 0);
+    emitByte(compiler.upvalues[i].index);
+  }
+
+  // A plain top-level global definition -- there's no struct object to
+  // attach this to, and the mangled name already keeps it out of the way
+  // of anything user code could declare.
+  emitBytes(OP_DEFINE_GLOBAL, identifierConstant(&nameToken));
+}
+
 static void compileImplDecl(AstNode *node) {
   ImplNode *impl = &node->as.impl;
 
   currentLine = impl->targetName.line;
+
+  if (isPrimitiveScalarTypeName(&impl->targetName)) {
+    Token *traitName = impl->hasTraitName ? &impl->traitName : NULL;
+
+    for (int i = 0; i < impl->methodCount; i++) {
+      compilePrimitiveImplMethod(impl->methods[i], &impl->targetName,
+                                 traitName);
+    }
+
+    currentLine = impl->endLine;
+    return;
+  }
 
   // Push the struct onto the stack so the methods can be bound to it
   VarRef ref = resolveVariable(&impl->targetName);

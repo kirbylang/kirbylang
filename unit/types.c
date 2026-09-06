@@ -393,6 +393,152 @@ static void test_substitute_self_replaces_placeholder(void) {
   assert(typeSubstituteSelf(plainSig, point) == plainSig);
 }
 
+static void test_primitive_is_scalar(void) {
+  assert(typeIsPrimitiveScalar(typeUnit()));
+  assert(typeIsPrimitiveScalar(typeBool()));
+  assert(typeIsPrimitiveScalar(typeString()));
+  assert(typeIsPrimitiveScalar(typeF64()));
+
+  Type *point = typeStruct(makeToken("Point"), NULL, 0, NULL, 0, NULL, 0);
+  Type *display = typeTrait(makeToken("Display"), NULL, 0, NULL, 0);
+
+  assert(!typeIsPrimitiveScalar(point));
+  assert(!typeIsPrimitiveScalar(display));
+  assert(!typeIsPrimitiveScalar(typeArray(typeF64())));
+  assert(!typeIsPrimitiveScalar(typeFunction(NULL, 0, typeUnit())));
+  assert(!typeIsPrimitiveScalar(typeSelfPlaceholder()));
+  assert(!typeIsPrimitiveScalar(NULL));
+}
+
+// Uses f64 for its mutations -- primitives are singletons (unlike structs,
+// which get a fresh Type per test), so each test below that adds methods
+// picks a different primitive kind to avoid stepping on another test's
+// state.
+static void test_primitive_own_method_lookup(void) {
+  Type *helperType = typeFunction(NULL, 0, typeF64());
+  typePrimitiveAddMethod(typeF64(), makeToken("helper"), helperType,
+                         /*hasSelf=*/true, /*isPublic=*/false);
+
+  Type *zeroType = typeFunction(NULL, 0, typeF64());
+  typePrimitiveAddMethod(typeF64(), makeToken("zero"), zeroType,
+                         /*hasSelf=*/false, /*isPublic=*/true);
+
+  PrimitiveMethodLookup out;
+
+  assert(
+      typePrimitiveInstanceMethodLookup(typeF64(), makeToken("helper"), &out));
+  assert(out.type == helperType);
+  assert(!out.isPublic);
+  assert(!out.isTraitMethod);
+
+  assert(typePrimitiveStaticMethodLookup(typeF64(), makeToken("zero"), &out));
+  assert(out.type == zeroType);
+  assert(out.isPublic);
+  assert(!out.isTraitMethod);
+
+  // Wrong category doesn't find it -- static/instance are separate, same
+  // as struct methods.
+  assert(
+      !typePrimitiveStaticMethodLookup(typeF64(), makeToken("helper"), &out));
+  assert(
+      !typePrimitiveInstanceMethodLookup(typeF64(), makeToken("zero"), &out));
+
+  // Not visible on a different primitive kind -- each singleton's storage
+  // is independent.
+  assert(!typePrimitiveInstanceMethodLookup(typeString(), makeToken("helper"),
+                                            &out));
+
+  // Missing name, a non-primitive type, and NULL are all safe no-ops.
+  assert(!typePrimitiveInstanceMethodLookup(typeF64(), makeToken("missing"),
+                                            &out));
+  Type *point = typeStruct(makeToken("Point"), NULL, 0, NULL, 0, NULL, 0);
+  assert(!typePrimitiveInstanceMethodLookup(point, makeToken("helper"), &out));
+  assert(!typePrimitiveInstanceMethodLookup(NULL, makeToken("helper"), &out));
+}
+
+// Uses string for its mutations -- see test_primitive_own_method_lookup.
+static void test_primitive_trait_method_lookup(void) {
+  InternedName displayTrait = internTokenName(makeToken("Display"));
+  Type *toStringType = typeFunction(NULL, 0, typeString());
+  typePrimitiveAddTraitMethod(typeString(), displayTrait, makeToken("toString"),
+                              toStringType, /*hasSelf=*/true);
+
+  InternedName defaultTrait = internTokenName(makeToken("Default"));
+  Type *defaultType = typeFunction(NULL, 0, typeString());
+  typePrimitiveAddTraitMethod(typeString(), defaultTrait, makeToken("default"),
+                              defaultType, /*hasSelf=*/false);
+
+  PrimitiveMethodLookup out;
+
+  assert(typePrimitiveInstanceMethodLookup(typeString(), makeToken("toString"),
+                                           &out));
+  assert(out.type == toStringType);
+  assert(out.isPublic); // trait methods are always public
+  assert(out.isTraitMethod);
+  assert(internedNamesEqual(out.traitName, displayTrait));
+
+  assert(typePrimitiveStaticMethodLookup(typeString(), makeToken("default"),
+                                         &out));
+  assert(out.type == defaultType);
+  assert(out.isPublic);
+  assert(out.isTraitMethod);
+  assert(internedNamesEqual(out.traitName, defaultTrait));
+
+  // Wrong category.
+  assert(!typePrimitiveStaticMethodLookup(typeString(), makeToken("toString"),
+                                          &out));
+  assert(!typePrimitiveInstanceMethodLookup(typeString(), makeToken("default"),
+                                            &out));
+}
+
+// Uses bool for its mutations -- see test_primitive_own_method_lookup.
+static void test_primitive_own_method_precedence_over_trait(void) {
+  // A plain `impl bool { ... }` method wins over a trait method of the
+  // same name -- the same precedence a struct's own impl block takes
+  // over a trait impl block (see typchkInferGet's lookup order).
+  Type *ownType = typeFunction(NULL, 0, typeString());
+  typePrimitiveAddMethod(typeBool(), makeToken("toString"), ownType,
+                         /*hasSelf=*/true, /*isPublic=*/true);
+
+  InternedName displayTrait = internTokenName(makeToken("Display"));
+  Type *traitType = typeFunction(NULL, 0, typeString());
+  typePrimitiveAddTraitMethod(typeBool(), displayTrait, makeToken("toString"),
+                              traitType, /*hasSelf=*/true);
+
+  PrimitiveMethodLookup out;
+  assert(typePrimitiveInstanceMethodLookup(typeBool(), makeToken("toString"),
+                                           &out));
+  assert(out.type == ownType);
+  assert(!out.isTraitMethod);
+}
+
+// Uses unit for its mutations -- see test_primitive_own_method_lookup.
+static void test_primitive_trait_coherence_bookkeeping(void) {
+  Token displayName = makeToken("Display");
+  Token eqName = makeToken("Eq");
+  InternedName display = internTokenName(displayName);
+  InternedName eq = internTokenName(eqName);
+
+  assert(!typePrimitiveImplementsTrait(typeUnit(), display));
+  assert(!typePrimitiveImplementsTrait(typeUnit(), eq));
+
+  typePrimitiveMarkTraitImplemented(typeUnit(), display);
+
+  assert(typePrimitiveImplementsTrait(typeUnit(), display));
+  assert(!typePrimitiveImplementsTrait(typeUnit(), eq)); // only Display so far
+
+  typePrimitiveMarkTraitImplemented(typeUnit(), eq);
+
+  assert(typePrimitiveImplementsTrait(typeUnit(), display));
+  assert(typePrimitiveImplementsTrait(typeUnit(), eq));
+
+  assert(!typePrimitiveImplementsTrait(NULL, display));
+
+  Type *point = typeStruct(makeToken("Point"), NULL, 0, NULL, 0, NULL, 0);
+  assert(!typePrimitiveImplementsTrait(point, display)); // structs use their
+                                                         // own bookkeeping
+}
+
 int main(void) {
   test_primitives_are_singletons();
   test_primitive_equality();
@@ -412,6 +558,11 @@ int main(void) {
   test_trait_supertrait_and_unresolved_flag();
   test_self_placeholder_is_singleton_and_always_equal();
   test_substitute_self_replaces_placeholder();
+  test_primitive_is_scalar();
+  test_primitive_own_method_lookup();
+  test_primitive_trait_method_lookup();
+  test_primitive_own_method_precedence_over_trait();
+  test_primitive_trait_coherence_bookkeeping();
 
   typesFreeAll();
 
