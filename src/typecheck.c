@@ -275,6 +275,7 @@ static void typchkTypeEnvDefineBuiltinTraits(TypeEnv *env) {
   };
   Type *display =
       typeTrait(makeTokenFromCString("Display"), NULL, 0, displayInstance, 1);
+  typeTraitMarkBuiltin(display);
   typchkTypeEnvRegisterTrait(env, makeTokenFromCString("Display"), display);
 
   // Eq
@@ -286,6 +287,7 @@ static void typchkTypeEnvDefineBuiltinTraits(TypeEnv *env) {
        typeFunction(equalsParams, 1, typeBool())},
   };
   Type *eq = typeTrait(makeTokenFromCString("Eq"), NULL, 0, eqInstance, 1);
+  typeTraitMarkBuiltin(eq);
   typchkTypeEnvRegisterTrait(env, makeTokenFromCString("Eq"), eq);
   Type **cmpParams = (Type **)typesAllocRaw(sizeof(Type *));
   cmpParams[0] = typeSelfPlaceholder();
@@ -297,6 +299,7 @@ static void typchkTypeEnvDefineBuiltinTraits(TypeEnv *env) {
 
   Type *ord = typeTrait(makeTokenFromCString("Ord"), NULL, 0, ordInstance, 1);
   typeTraitSetSupertrait(ord, eq->as.trait_.name);
+  typeTraitMarkBuiltin(ord);
   typchkTypeEnvRegisterTrait(env, makeTokenFromCString("Ord"), ord);
 
   // Default
@@ -307,6 +310,7 @@ static void typchkTypeEnvDefineBuiltinTraits(TypeEnv *env) {
   };
   Type *default_ =
       typeTrait(makeTokenFromCString("Default"), defaultStatic, 1, NULL, 0);
+  typeTraitMarkBuiltin(default_);
   typchkTypeEnvRegisterTrait(env, makeTokenFromCString("Default"), default_);
 }
 
@@ -1927,12 +1931,48 @@ bool typchkCheckProgram(AstNode **program, int count) {
   //
   // Registered before any trait's own methods/supertrait are resolved, so
   // `trait Ord: Eq` works regardless of which trait is declared first.
+  //
+  // Also where a duplicate trait name -- including a user trait reusing a
+  // builtin's name (Display/Eq/Ord/Default are already registered by the
+  // time user code is checked) -- gets caught, since bindingArrayWrite
+  // itself has no concept of "already taken" and would otherwise let the
+  // second declaration silently shadow the first on lookup.
+  //
+  // isDuplicateTrait tracks which NODE_TRAIT nodes lost that check, so the
+  // later signature-resolution pass doesn't still process a duplicate's
+  // methods and overwrite the original trait's already-registered ones
+  // out from under it.
+
+  bool *isDuplicateTrait =
+      count > 0 ? (bool *)calloc((size_t)count, sizeof(bool)) : NULL;
 
   for (int i = 0; i < count; i++) {
     if (program[i]->kind == NODE_TRAIT) {
-      TraitNode *tn = &program[i]->as.trait_;
-      Type *placeholder = typeTrait(tn->name, NULL, 0, NULL, 0);
-      typchkTypeEnvRegisterTrait(env, tn->name, placeholder);
+      TraitNode *trait_ = &program[i]->as.trait_;
+
+      Type *existing = typchkTypeEnvLookupTrait(env, trait_->name);
+
+      if (existing != NULL) {
+        if (typeTraitIsBuiltin(existing)) {
+          typchkErrorAtTokenFmt(
+              &trait_->name,
+              "'%.*s' is a builtin trait and can't be redeclared.",
+              trait_->name.length, trait_->name.start);
+        } else {
+          typchkErrorAtTokenFmt(&trait_->name,
+                                "'%.*s' is already declared as a trait.",
+                                trait_->name.length, trait_->name.start);
+        }
+
+        if (isDuplicateTrait != NULL) {
+          isDuplicateTrait[i] = true;
+        }
+
+        continue;
+      }
+
+      Type *placeholder = typeTrait(trait_->name, NULL, 0, NULL, 0);
+      typchkTypeEnvRegisterTrait(env, trait_->name, placeholder);
     }
   }
 
@@ -1980,10 +2020,13 @@ bool typchkCheckProgram(AstNode **program, int count) {
   // struct placeholders, so a trait method can reference a struct by name.
 
   for (int i = 0; i < count; i++) {
-    if (program[i]->kind == NODE_TRAIT) {
+    if (program[i]->kind == NODE_TRAIT &&
+        !(isDuplicateTrait != NULL && isDuplicateTrait[i])) {
       typchkResolveTraitMethods(env, program[i]);
     }
   }
+
+  free(isDuplicateTrait);
 
   for (int i = 0; i < count; i++) {
     if (program[i]->kind == NODE_STRUCT) {

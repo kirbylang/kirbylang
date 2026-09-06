@@ -77,6 +77,11 @@ struct Type {
       bool hasSupertrait;
       InternedName supertraitName;
       bool hasUnresolvedMembers;
+      // True for the four pre-seeded traits (Display/Eq/Ord/Default).
+      // Lets duplicate-declaration detection give a more specific message
+      // when the collision is with a builtin rather than another user
+      // trait.
+      bool isBuiltin;
     } trait_;
   } as;
 };
@@ -153,6 +158,11 @@ void typeTraitSetSupertrait(Type *type, InternedName supertraitName);
 
 void typeTraitMarkUnresolvedMembers(Type *type);
 bool typeTraitHasUnresolvedMembers(Type *type);
+
+// Marks a trait as one of the pre-seeded builtins (Display/Eq/Ord/Default)
+// rather than user-declared. See the isBuiltin field's doc comment above.
+void typeTraitMarkBuiltin(Type *type);
+bool typeTraitIsBuiltin(Type *type);
 
 // Replaces every TYPE_SELF found inside `type` with a `concrete` type.
 Type *typeSubstituteSelf(Type *type, Type *concrete);

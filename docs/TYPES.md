@@ -203,8 +203,6 @@ trait Ord: Eq {
 #### Known Bugs
 
 - `impl Trait for UndefinedStruct` is a runtime error
-- Multiple traits of the same name can be declared. Last one wins.
-- Builtin traits can be shadowed
 - `trait A: A {}`, `trait A: B {} trait B: A {}` don't produce an error
 
 ### Functions

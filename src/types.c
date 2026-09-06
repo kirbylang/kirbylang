@@ -287,6 +287,12 @@ bool typeTraitHasUnresolvedMembers(Type *type) {
          type->as.trait_.hasUnresolvedMembers;
 }
 
+void typeTraitMarkBuiltin(Type *type) { type->as.trait_.isBuiltin = true; }
+
+bool typeTraitIsBuiltin(Type *type) {
+  return type != NULL && type->kind == TYPE_TRAIT && type->as.trait_.isBuiltin;
+}
+
 Type *typeSubstituteSelf(Type *type, Type *concrete) {
   if (type == NULL)
     return NULL;

@@ -1,7 +1,8 @@
-trait Eq {
+trait MyEq {
     fun equals(self, other: Self): bool;
 }
 
-trait Ord: Eq {
+trait MyOrd: MyEq {
     fun cmp(self, other: Self): f64;
 }
+

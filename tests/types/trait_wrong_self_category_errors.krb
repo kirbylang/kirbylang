@@ -1,7 +1,3 @@
-trait Display {
-    fun toString(self): string;
-}
-
 struct Point {
     pub var x: f64;
 }
