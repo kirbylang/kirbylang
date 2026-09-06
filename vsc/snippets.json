@@ -37,6 +37,25 @@
     ],
     "description": "Declare a struct"
   },
+  "Trait declaration": {
+    "prefix": "trait",
+    "body": [
+      "trait ${1:Name} {",
+      "\t$0",
+      "}"
+    ],
+    "description": "Declare a struct"
+  },
+  "Trait method": {
+    "prefix": [
+      "fun",
+      "method"
+    ],
+    "body": [
+      "fun ${1:name}(${2}): ${3: Type};$0"
+    ],
+    "description": "Declare a method signature in a trait"
+  },
   "Impl block": {
     "prefix": "impl",
     "body": [
@@ -47,6 +66,15 @@
       "}"
     ],
     "description": "Declare an impl block for a struct"
+  },
+  "Impl for block": {
+    "prefix": "implfor",
+    "body": [
+      "impl ${1:Trait} for ${2:Name} {",
+      "\t${0}",
+      "}"
+    ],
+    "description": "Implement a trait for a struct"
   },
   "Instance method": {
     "prefix": [
