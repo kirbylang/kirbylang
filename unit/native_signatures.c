@@ -13,7 +13,7 @@ static const char *awaitingGenerics[] = {
     "isBool",     "isString",   "isNil",     "instanceOf", "arrPush",
     "arrPop",     "arrInsert",  "arrRemove", "arrClear",   "arrContains",
     "arrCopy",    "arrIsEmpty", "arrEqual",  "arrSlice",   "arrConcat",
-    "arrReverse",
+    "arrReverse", "arrJoin",
 };
 
 // Natives that return nothing on some paths, so their type needs Option[T].

@@ -1,0 +1,29 @@
+== <script> ==
+0000    1 OP_NIL
+0001    | OP_RETURN
+== <script> ==
+0000    1 OP_CONSTANT         1 'kirby'
+0002    | OP_CONSTANT         2 'is'
+0004    | OP_CONSTANT         3 'a'
+0006    | OP_CONSTANT         4 'language'
+0008    | OP_ARRAY            4
+0010    | OP_DEFINE_GLOBAL    0 'parts'
+0012    3 OP_GET_GLOBAL       5 'arrJoin'
+0014    | OP_GET_GLOBAL       6 'parts'
+0016    | OP_CONSTANT         7 ' '
+0018    | OP_CALL             2
+0020    | OP_PRINT
+0021    4 OP_GET_GLOBAL       8 'arrJoin'
+0023    | OP_GET_GLOBAL       9 'parts'
+0025    | OP_CONSTANT        10 ', '
+0027    | OP_CALL             2
+0029    | OP_PRINT
+0030    5 OP_GET_GLOBAL      11 'arrJoin'
+0032    | OP_GET_GLOBAL      12 'parts'
+0034    | OP_CONSTANT        13 ''
+0036    | OP_CALL             2
+0038    | OP_PRINT
+0039    6 OP_GET_GLOBAL      14 'parts'
+0041    | OP_PRINT
+0042    7 OP_NIL
+0043    | OP_RETURN

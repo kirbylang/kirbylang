@@ -13,15 +13,12 @@ Literal values have primitive types.
 | `bool`   | `true` / `false` |
 | `unit`   | `()`             |
 
-## Complex Types
+### Arrays
 
-### Lists
-
-A list holds items that all share one type. Its type is currenly only inferred from the
-literal.
+An array holds items that all share one type. Generic types aren't supported yet so the type is just `Array`.
 
 ```
-let list = [1, 2, 3];
+let arr: Array = [1, 2, 3];
 
 print list[0];
 ```

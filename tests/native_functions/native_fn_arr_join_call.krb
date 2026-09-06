@@ -1,0 +1,6 @@
+var parts = ["kirby", "is", "a", "language"];
+
+print arrJoin(parts, " ");
+print arrJoin(parts, ", ");
+print arrJoin(parts, "");
+print parts;

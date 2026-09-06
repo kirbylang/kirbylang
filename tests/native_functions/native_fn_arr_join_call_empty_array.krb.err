@@ -1,0 +1,15 @@
+== <script> ==
+0000    1 OP_NIL
+0001    | OP_RETURN
+== <script> ==
+0000    1 OP_ARRAY            0
+0002    | OP_DEFINE_GLOBAL    0 'empty'
+0004    3 OP_GET_GLOBAL       1 'strIsEmpty'
+0006    | OP_GET_GLOBAL       2 'arrJoin'
+0008    | OP_GET_GLOBAL       3 'empty'
+0010    | OP_CONSTANT         4 ', '
+0012    | OP_CALL             2
+0014    | OP_CALL             1
+0016    | OP_PRINT
+0017    4 OP_NIL
+0018    | OP_RETURN

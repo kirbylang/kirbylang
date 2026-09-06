@@ -120,7 +120,8 @@ static void test_resolve_generic_type_errors(void) {
   TypeEnv *env = typchkTypeEnvCreate();
   typchkResetError();
 
-  Type *result = typchkResolveType(env, parseFirstVarType("var x: List[f64];"));
+  Type *result =
+      typchkResolveType(env, parseFirstVarType("var x: Array[f64];"));
   assert(result == NULL);
   assert(typchkHadError());
 
@@ -478,7 +479,7 @@ static void test_struct_init(void) {
   TypeEnv *env = typchkTypeEnvCreate();
   typchkTypeEnvBeginScope(env);
   UninternedTypeMember fields[] = {{makeToken("x"), typeF64()},
-                         {makeToken("y"), typeF64()}};
+                                   {makeToken("y"), typeF64()}};
   Type *point = typeStruct(makeToken("Point"), fields, 2, NULL, 0, NULL, 0);
   typchkTypeEnvRegisterStruct(env, makeToken("Point"), point);
 
@@ -967,18 +968,17 @@ static void test_type_alias_wrong_type_errors(void) {
 
 static void test_program_trait_basic_impl_and_call(void) {
   typchkResetError();
-  bool ok = typecheckSource(
-      "trait Display {\n"
-      "  fun toString(self): string;\n"
-      "}\n"
-      "struct Point {\n"
-      "  pub var x: f64;\n"
-      "}\n"
-      "impl Display for Point {\n"
-      "  pub fun toString(self): string = \"Point\";\n"
-      "}\n"
-      "var p = Point { x: 1 };\n"
-      "print p.toString();\n");
+  bool ok = typecheckSource("trait Display {\n"
+                            "  fun toString(self): string;\n"
+                            "}\n"
+                            "struct Point {\n"
+                            "  pub var x: f64;\n"
+                            "}\n"
+                            "impl Display for Point {\n"
+                            "  pub fun toString(self): string = \"Point\";\n"
+                            "}\n"
+                            "var p = Point { x: 1 };\n"
+                            "print p.toString();\n");
   assert(ok);
 }
 
@@ -1073,17 +1073,17 @@ static void test_program_trait_unknown_trait_fails(void) {
 
 static void test_program_trait_self_substitution_in_return_type(void) {
   typchkResetError();
-  bool ok = typecheckSource(
-      "trait Cloneable {\n"
-      "  fun clone(self): Self;\n"
-      "}\n"
-      "struct Point { pub var x: f64; }\n"
-      "impl Cloneable for Point {\n"
-      "  pub fun clone(self): Self = Point { x: self.x };\n"
-      "}\n"
-      "var p = Point { x: 1 };\n"
-      "var p2: Point = p.clone();\n"
-      "print p2.x;\n");
+  bool ok =
+      typecheckSource("trait Cloneable {\n"
+                      "  fun clone(self): Self;\n"
+                      "}\n"
+                      "struct Point { pub var x: f64; }\n"
+                      "impl Cloneable for Point {\n"
+                      "  pub fun clone(self): Self = Point { x: self.x };\n"
+                      "}\n"
+                      "var p = Point { x: 1 };\n"
+                      "var p2: Point = p.clone();\n"
+                      "print p2.x;\n");
   assert(ok);
 }
 
@@ -1159,10 +1159,9 @@ static void test_program_trait_impl_on_primitive_deferred_fails(void) {
 
 static void test_program_plain_impl_on_primitive_fails(void) {
   typchkResetError();
-  bool ok =
-      typecheckSource("impl f64 {\n"
-                      "  pub fun double(self): f64 = self * 2;\n"
-                      "}\n");
+  bool ok = typecheckSource("impl f64 {\n"
+                            "  pub fun double(self): f64 = self * 2;\n"
+                            "}\n");
   assert(!ok);
 }
 
@@ -1277,14 +1276,13 @@ static void test_program_self_still_symbolic_in_trait_declaration(void) {
 
 static void test_program_self_as_static_method_receiver(void) {
   typchkResetError();
-  bool ok = typecheckSource(
-      "struct Box { pub var value: f64; }\n"
-      "impl Box {\n"
-      "  pub fun wrap(v: f64): Self = Box { value: v };\n"
-      "  pub fun zero(): Self = Self.wrap(0);\n"
-      "}\n"
-      "var b: Box = Box.zero();\n"
-      "print b.value;\n");
+  bool ok = typecheckSource("struct Box { pub var value: f64; }\n"
+                            "impl Box {\n"
+                            "  pub fun wrap(v: f64): Self = Box { value: v };\n"
+                            "  pub fun zero(): Self = Self.wrap(0);\n"
+                            "}\n"
+                            "var b: Box = Box.zero();\n"
+                            "print b.value;\n");
   assert(ok);
 }
 
@@ -1303,7 +1301,8 @@ static void test_program_self_as_static_method_receiver_in_trait_impl(void) {
   assert(ok);
 }
 
-static void test_program_self_as_static_method_receiver_outside_impl_fails(void) {
+static void
+test_program_self_as_static_method_receiver_outside_impl_fails(void) {
   typchkResetError();
   bool ok = typecheckSource("struct Box { pub var value: f64; }\n"
                             "fun make(): Box = Self.wrap(0);\n");

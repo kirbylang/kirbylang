@@ -1,28 +1,26 @@
 #!/usr/bin/env krb -f
 
 struct StringBuilder {
-    var value: string;
+    var value: Array;
 }
 
 impl StringBuilder {
-    pub fun new(init: string): Self = Self { value: init };
-
     pub fun add(self, add: string): Self {
-        self.value = self.value + add;
+        arrPush(self.value, add);
 
         self
     }
 }
 
 impl Default for StringBuilder {
-    fun default(): Self = Self.new("");
+    fun default(): Self = Self { value: [] };
 }
 
 impl Display for StringBuilder {
-    fun toString(self): string = self.value;
+    fun toString(self): string = arrJoin(self.value, "");
 }
 
-var builder = StringBuilder.default()
+let builder = StringBuilder.default()
     .add("Hello")
     .add(" ")
     .add("World");

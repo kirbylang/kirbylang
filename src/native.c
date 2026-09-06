@@ -609,6 +609,63 @@ static Value arrReverseNative(VM *vm, int argCount, Value *args) {
   return OBJ_VAL(new_array);
 }
 
+/**
+ * Concatenate every element of an array into one string, separated by a
+ * separator string. Elements must already be strings; the language has no
+ * implicit conversion to string.
+ */
+static Value arrJoinNative(VM *vm, int argCount, Value *args) {
+  assertArgCount(vm, "arrJoin", 2, argCount);
+  assertArgIsArray(vm, "arrJoin", args, 0);
+  assertArgIsString(vm, "arrJoin", args, 1);
+
+  ObjArray *array = AS_ARRAY(args[0]);
+  ObjString *separator = AS_STRING(args[1]);
+
+  int length = 0;
+
+  for (int i = 0; i < array->count; i++) {
+    if (!IS_STRING(array->values[i])) {
+      char type[VALUE_STRING_MAX];
+
+      valueTypeToString(array->values[i], type, sizeof(type));
+
+      runtimeError(vm,
+                   "function arrJoin expects every element of argument 1 to be "
+                   "a string but element %d is a %s.",
+                   i, type);
+      exit(EXIT_CODE_RUNTIME_ERR);
+    }
+
+    length += AS_STRING(array->values[i])->length;
+  }
+
+  if (array->count > 1) {
+    length += separator->length * (array->count - 1);
+  }
+
+  // args stay on the VM stack for the duration of a native call, so the array
+  // and its strings are reachable if this allocation triggers a collection.
+  char *chars = ALLOCATE(vm->gc, char, length + 1);
+  int offset = 0;
+
+  for (int i = 0; i < array->count; i++) {
+    if (i > 0) {
+      memcpy(chars + offset, separator->chars, separator->length);
+      offset += separator->length;
+    }
+
+    ObjString *element = AS_STRING(array->values[i]);
+
+    memcpy(chars + offset, element->chars, element->length);
+    offset += element->length;
+  }
+
+  chars[length] = '\0';
+
+  return OBJ_VAL(takeString(vm->gc, chars, length));
+}
+
 static Value stdinNative(VM *vm, int argCount, Value *args) {
   if (argCount > 1) {
     assertArgCount(vm, "stdin", 1, argCount);
@@ -810,6 +867,7 @@ const NativeDefinition nativeDefinitions[] = {
     {"arrSlice", arrSliceNative},
     {"arrConcat", arrConcatNative},
     {"arrReverse", arrReverseNative},
+    {"arrJoin", arrJoinNative},
     {"is", isNative},
     {"isNumber", isNumberNative},
     {"isFunction", isFunctionNative},
@@ -860,6 +918,8 @@ static Type *primitiveType(NativePrimitive primitive) {
     return typeString();
   case NATIVE_F64:
     return typeF64();
+  case NATIVE_LIST:
+    return typeArray(NULL);
   }
 
   return typeUnit();

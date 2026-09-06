@@ -53,6 +53,7 @@ static Type *unitSingleton = NULL;
 static Type *boolSingleton = NULL;
 static Type *stringSingleton = NULL;
 static Type *f64Singleton = NULL;
+static Type *listSingleton = NULL;
 static Type *selfPlaceholderSingleton = NULL;
 
 void typesFreeAll(void) {
@@ -69,6 +70,7 @@ void typesFreeAll(void) {
   boolSingleton = NULL;
   stringSingleton = NULL;
   f64Singleton = NULL;
+  listSingleton = NULL;
   selfPlaceholderSingleton = NULL;
 
   stringSetFree(&typeNames);

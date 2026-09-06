@@ -21,7 +21,6 @@
   - [ ] `print`, `println`, `eprint`, `eprintln`
   - [ ] `arrSort(array, fn)`
   - [ ] `arrMap(array, fn)`
-  - [ ] `arrJoinToString(array, separator)`
 - Macros
 
 ## Next: 0.4.0
@@ -35,6 +34,10 @@
   - Deprecate the call syntax e.g. `Point()`
 - [`continue` keyword](https://github.com/kirbylang/kirbylang/issues/13)
 - Unit literal expression: `()`.
+- New native functions:
+  - `arrJoin(array, separator)`
+    - Every element must already be a string. There is no implicit conversion
+      to string, so joining numbers means mapping `numberToString` first
 - Initial implementation of types and typechecker
   - Limitations
     - Generic types are ignored
@@ -55,12 +58,11 @@
   - Complex Types
     - `fun (f64) => f64`
     - `Struct`
-    - `List` (see below)
+    - `Array`
   - Generic types
     - Parses but the generic types are ignored
     - `fun [T, U] (T) => U`
     - `Struct[T]`
-    - `List[T]`
     - `type MapFn[T, U] = fun [T, U] (T) => U;`
   - Type aliases
     - `type number = f64`;

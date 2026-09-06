@@ -114,13 +114,13 @@
     },
     "constants": {
       "name": "constant.language.krb",
-      "match": "\\b(true|false|nil|Self)\\b"
+      "match": "\\b(true|false|nil|Self|Array)\\b"
     },
     "natives": {
       "patterns": [
         {
           "name": "entity.name.function.native.krb",
-          "match": "\\b(clock|len|argv|argc|typeof|rand|rand01|randBetween|ceil|readFileToString|writeStringToFile|fileExists|getenv|setenv|__version__|exit|instanceOf|prompt|stdin|parseNumber|numberToString|arrPush|arrPop|arrInsert|arrRemove|arrClear|arrContains|arrCopy|arrEqual|arrIsEmpty|arrSlice|arrConcat|arrReverse)\\b"
+          "match": "\\b(clock|len|argv|argc|typeof|rand|rand01|randBetween|ceil|readFileToString|writeStringToFile|fileExists|getenv|setenv|__version__|exit|instanceOf|prompt|stdin|parseNumber|numberToString|arrPush|arrPop|arrInsert|arrRemove|arrClear|arrContains|arrCopy|arrEqual|arrIsEmpty|arrSlice|arrConcat|arrReverse|arrJoin)\\b"
         },
         {
           "name": "entity.name.function.native.krb",

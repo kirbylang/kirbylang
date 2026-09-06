@@ -24,7 +24,8 @@ static bool tokenTextEquals(Token *token, const char *text) {
 
 static bool tokenIsPrimitiveTypeName(Token *token) {
   return tokenTextEquals(token, "unit") || tokenTextEquals(token, "bool") ||
-         tokenTextEquals(token, "string") || tokenTextEquals(token, "f64");
+         tokenTextEquals(token, "string") || tokenTextEquals(token, "f64") ||
+         tokenTextEquals(token, "Array");
 }
 
 static Token makeTokenFromCString(const char *text) {
@@ -368,6 +369,8 @@ Type *typchkResolveType(TypeEnv *env, AstNode *typeAnnotation) {
     return typeString();
   if (tokenTextEquals(&t->name, "f64"))
     return typeF64();
+  if (tokenTextEquals(&t->name, "Array"))
+    return typeArray(NULL);
   if (tokenTextEquals(&t->name, "Self")) {
     return env->_currentImplTargetType != NULL ? env->_currentImplTargetType
                                                : typeSelfPlaceholder();

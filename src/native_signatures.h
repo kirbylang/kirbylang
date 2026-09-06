@@ -16,6 +16,7 @@ typedef enum {
   NATIVE_BOOL,
   NATIVE_STRING,
   NATIVE_F64,
+  NATIVE_LIST,
 } NativePrimitive;
 
 typedef struct {

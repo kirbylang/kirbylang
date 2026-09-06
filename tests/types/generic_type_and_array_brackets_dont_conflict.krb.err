@@ -1,4 +1,4 @@
 == <script> ==
 0000    1 OP_NIL
 0001    | OP_RETURN
-[line 4] Error at 'List': Generic types aren't supported yet.
+[line 1] Error at 'Array': Generic types aren't supported yet.
