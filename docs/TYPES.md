@@ -194,41 +194,6 @@ trait Ord: Eq {
 }
 ```
 
-#### Impl blocks on primitives
-
-`f64`, `string`, `bool`, and `unit` can have both plain `impl` blocks and
-trait `impl` blocks, the same as a struct -- but only in
-`stdlib/stdlib.krb`. Declaring one anywhere else is a compile error;
-calling a method one of these already declares has no such restriction.
-
-```
-impl f64 {
-    pub fun double(self): f64 = self * 2;
-}
-
-impl Display for f64 {
-    pub fun toString(self): string = numberToString(self);
-}
-```
-
-A primitive has no runtime instance to attach a method to or dispatch
-through, so a call like `x.double()` is resolved to a specific function
-at compile time instead of the dynamic dispatch a struct method call
-uses. `pub`/private visibility is enforced right there, at compile time
--- stronger than a struct's, which is only caught at runtime: a private
-method is only callable from another method in an impl block for that
-same primitive, regardless of which impl block declared either one.
-
-`Self` works the same way it does for a struct:
-
-```
-impl Default for f64 {
-    pub fun default(): Self = 0;
-}
-
-print f64.default(); // 0
-```
-
 #### Limitations
 
 - Traits can only be implemented for structs and the scalar primitives
