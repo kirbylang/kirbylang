@@ -83,6 +83,7 @@
     - A trait name can only be declared once, and can't reuse a builtin
       trait's name (`Display`/`Eq`/`Ord`/`Default`)
     - Builtin traits, always in scope: `Display`, `Eq`, `Ord`, `Default`
+    - A circular supertrait chain (`trait A: A {}`, or `trait A: B {} trait B: A {}`) is a compile error
     - Require structs to implement `Eq` trait for `==`/`!=`
     - Limitations
       - `impl Trait for` a primitive type (`f64`, `string`, `bool`, `unit`) isn't supported yet -- needs the same static call-resolution work operator overloading does

@@ -1631,6 +1631,61 @@ static void typchkResolveTraitMethods(TypeEnv *env, AstNode *node) {
   }
 }
 
+static Token tokenFromInternedName(InternedName name) {
+  Token token;
+  token.type = TOKEN_IDENTIFIER;
+  token.start = internedNameChars(name);
+  token.length = name.length;
+  token.line = 0;
+  return token;
+}
+
+// Walks the supertrait chain to identify circular references
+static bool typchkTraitSupertraitChainCycles(TypeEnv *env,
+                                             InternedName startName) {
+  InternedName current = startName;
+  int maxSteps = env->traitCount + 1;
+
+  for (int step = 0; step < maxSteps; step++) {
+    Type *currentTrait =
+        typchkTypeEnvLookupTrait(env, tokenFromInternedName(current));
+
+    if (currentTrait == NULL || !currentTrait->as.trait_.hasSupertrait)
+      return false; // chain ends cleanly, no repeat
+
+    InternedName next = currentTrait->as.trait_.supertraitName;
+
+    if (internedNamesEqual(next, startName))
+      return true; // back to where the walk started
+
+    current = next;
+  }
+
+  return true; // walked further than there are traits -- must have repeated
+}
+
+// Checked once per trait after every trait's own supertrait field has
+// been resolved, so a cycle of any length is caught regardless of which
+// trait in it happens to be declared first (or checked first).
+static void typchkCheckTraitSupertraitCycle(TypeEnv *env, AstNode *node) {
+  TraitNode *trait_ = &node->as.trait_;
+  if (!trait_->hasSupertrait)
+    return;
+
+  Type *traitType = typchkTypeEnvLookupTrait(env, trait_->name);
+
+  // NULL or no supertrait recorded means it already failed to resolve
+  // (e.g. "Unknown trait") and was reported there -- nothing to walk.
+  if (traitType == NULL || !traitType->as.trait_.hasSupertrait)
+    return;
+
+  if (typchkTraitSupertraitChainCycles(env, traitType->as.trait_.name)) {
+    typchkErrorAtTokenFmt(&trait_->name,
+                          "Trait '%.*s' has a circular supertrait chain.",
+                          trait_->name.length, trait_->name.start);
+  }
+}
+
 static void typchkRegisterTraitImpl(TypeEnv *env, AstNode *node) {
   ImplNode *impl = &node->as.impl;
 
@@ -2011,6 +2066,18 @@ bool typchkCheckProgram(AstNode **program, int count) {
   }
 
   free(isDuplicateTrait);
+
+  // Supertrait cycle detection
+  //
+  // After every trait's own supertrait field is resolved, so a chain
+  // (however many traits long) can be walked in either direction
+  // regardless of declaration order.
+
+  for (int i = 0; i < count; i++) {
+    if (program[i]->kind == NODE_TRAIT) {
+      typchkCheckTraitSupertraitCycle(env, program[i]);
+    }
+  }
 
   for (int i = 0; i < count; i++) {
     if (program[i]->kind == NODE_STRUCT) {
