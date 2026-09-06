@@ -1,7 +1,3 @@
-trait Display {
-    fun toString(self): string;
-}
-
 struct Counter {
     pub var count: f64;
 }

@@ -1,0 +1,15 @@
+trait Eq {
+    fun equals(self, other: Self): bool;
+}
+
+trait Display {
+    fun toString(self): string;
+}
+
+trait Default {
+    fun default(): Self;
+}
+
+trait Ord: Eq {
+    fun cmp(self, other: Self): f64;
+}

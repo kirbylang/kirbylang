@@ -968,10 +968,7 @@ static void test_type_alias_wrong_type_errors(void) {
 
 static void test_program_trait_basic_impl_and_call(void) {
   typchkResetError();
-  bool ok = typecheckSource("trait Display {\n"
-                            "  fun toString(self): string;\n"
-                            "}\n"
-                            "struct Point {\n"
+  bool ok = typecheckSource("struct Point {\n"
                             "  pub var x: f64;\n"
                             "}\n"
                             "impl Display for Point {\n"
@@ -984,12 +981,12 @@ static void test_program_trait_basic_impl_and_call(void) {
 
 static void test_program_trait_missing_method_fails(void) {
   typchkResetError();
-  bool ok = typecheckSource("trait Display {\n"
+  bool ok = typecheckSource("trait MyDisplay {\n"
                             "  fun toString(self): string;\n"
                             "  fun debug(self): string;\n"
                             "}\n"
                             "struct Point { pub var x: f64; }\n"
-                            "impl Display for Point {\n"
+                            "impl MyDisplay for Point {\n"
                             "  pub fun toString(self): string = \"Point\";\n"
                             "}\n");
   assert(!ok);
@@ -997,10 +994,7 @@ static void test_program_trait_missing_method_fails(void) {
 
 static void test_program_trait_extra_method_fails(void) {
   typchkResetError();
-  bool ok = typecheckSource("trait Display {\n"
-                            "  fun toString(self): string;\n"
-                            "}\n"
-                            "struct Point { pub var x: f64; }\n"
+  bool ok = typecheckSource("struct Point { pub var x: f64; }\n"
                             "impl Display for Point {\n"
                             "  pub fun toString(self): string = \"Point\";\n"
                             "  pub fun extra(self): f64 = self.x;\n"
@@ -1010,10 +1004,7 @@ static void test_program_trait_extra_method_fails(void) {
 
 static void test_program_trait_wrong_signature_fails(void) {
   typchkResetError();
-  bool ok = typecheckSource("trait Display {\n"
-                            "  fun toString(self): string;\n"
-                            "}\n"
-                            "struct Point { pub var x: f64; }\n"
+  bool ok = typecheckSource("struct Point { pub var x: f64; }\n"
                             "impl Display for Point {\n"
                             "  pub fun toString(self): f64 = self.x;\n"
                             "}\n");
@@ -1022,10 +1013,7 @@ static void test_program_trait_wrong_signature_fails(void) {
 
 static void test_program_trait_coherence_duplicate_fails(void) {
   typchkResetError();
-  bool ok = typecheckSource("trait Display {\n"
-                            "  fun toString(self): string;\n"
-                            "}\n"
-                            "struct Point { pub var x: f64; }\n"
+  bool ok = typecheckSource("struct Point { pub var x: f64; }\n"
                             "impl Display for Point {\n"
                             "  pub fun toString(self): string = \"a\";\n"
                             "}\n"
@@ -1089,10 +1077,7 @@ static void test_program_trait_self_substitution_in_return_type(void) {
 
 static void test_program_trait_static_method_via_struct_name(void) {
   typchkResetError();
-  bool ok = typecheckSource("trait Default {\n"
-                            "  fun default(): Self;\n"
-                            "}\n"
-                            "struct Point { pub var x: f64; }\n"
+  bool ok = typecheckSource("struct Point { pub var x: f64; }\n"
                             "impl Default for Point {\n"
                             "  pub fun default(): Self = Point { x: 0 };\n"
                             "}\n"
@@ -1103,10 +1088,7 @@ static void test_program_trait_static_method_via_struct_name(void) {
 
 static void test_program_trait_static_method_called_as_instance_fails(void) {
   typchkResetError();
-  bool ok = typecheckSource("trait Default {\n"
-                            "  fun default(): Self;\n"
-                            "}\n"
-                            "struct Point { pub var x: f64; }\n"
+  bool ok = typecheckSource("struct Point { pub var x: f64; }\n"
                             "impl Default for Point {\n"
                             "  pub fun default(): Self = Point { x: 0 };\n"
                             "}\n"
@@ -1148,10 +1130,7 @@ static void test_program_equality_between_primitives_unaffected(void) {
 
 static void test_program_trait_impl_on_primitive_deferred_fails(void) {
   typchkResetError();
-  bool ok = typecheckSource("trait Display {\n"
-                            "  fun toString(self): string;\n"
-                            "}\n"
-                            "impl Display for f64 {\n"
+  bool ok = typecheckSource("impl Display for f64 {\n"
                             "  pub fun toString(self): string = \"n\";\n"
                             "}\n");
   assert(!ok);
@@ -1168,9 +1147,6 @@ static void test_program_plain_impl_on_primitive_fails(void) {
 static void test_program_trait_alongside_plain_impl(void) {
   typchkResetError();
   bool ok = typecheckSource(
-      "trait Display {\n"
-      "  fun toString(self): string;\n"
-      "}\n"
       "struct Counter { pub var count: f64; }\n"
       "impl Counter {\n"
       "  pub fun increment(self): unit { self.count = self.count + 1; }\n"
@@ -1187,10 +1163,7 @@ static void test_program_trait_alongside_plain_impl(void) {
 
 static void test_program_trait_method_without_pub_is_callable(void) {
   typchkResetError();
-  bool ok = typecheckSource("trait Display {\n"
-                            "  fun toString(self): string;\n"
-                            "}\n"
-                            "struct Point { pub var x: f64; }\n"
+  bool ok = typecheckSource("struct Point { pub var x: f64; }\n"
                             "impl Display for Point {\n"
                             "  fun toString(self): string = \"Point\";\n"
                             "}\n"

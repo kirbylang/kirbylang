@@ -80,6 +80,8 @@
     - Supertraits: `trait Ord: Eq { ... }`
     - `Self` type inside `impl` blocks
     - Traits can only be implemented once on a struct
+    - A trait name can only be declared once, and can't reuse a builtin
+      trait's name (`Display`/`Eq`/`Ord`/`Default`)
     - Builtin traits, always in scope: `Display`, `Eq`, `Ord`, `Default`
     - Require structs to implement `Eq` trait for `==`/`!=`
     - Limitations

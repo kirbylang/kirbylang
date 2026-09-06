@@ -334,6 +334,7 @@ typedef struct {
   FunctionNode **methods;
   int methodCount;
   int endLine;
+  bool isBuiltin;
 } TraitNode;
 
 /**

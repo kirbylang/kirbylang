@@ -77,6 +77,7 @@ struct Type {
       bool hasSupertrait;
       InternedName supertraitName;
       bool hasUnresolvedMembers;
+      bool isBuiltin;
     } trait_;
   } as;
 };
@@ -153,6 +154,9 @@ void typeTraitSetSupertrait(Type *type, InternedName supertraitName);
 
 void typeTraitMarkUnresolvedMembers(Type *type);
 bool typeTraitHasUnresolvedMembers(Type *type);
+
+void typeTraitMarkBuiltin(Type *type);
+bool typeTraitIsBuiltin(Type *type);
 
 // Replaces every TYPE_SELF found inside `type` with a `concrete` type.
 Type *typeSubstituteSelf(Type *type, Type *concrete);

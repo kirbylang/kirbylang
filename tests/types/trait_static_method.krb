@@ -1,3 +1,4 @@
-trait Default {
-    fun default(): Self;
+trait Constructible {
+    fun make(): Self;
 }
+
