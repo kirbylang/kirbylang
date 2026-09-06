@@ -203,6 +203,14 @@ trait Ord: Eq {
 - The `Eq` and `Ord` traits are typechecked only. At runtime `==` and `<` still use compiler logic. This is a future change.
 - If a struct's impl block implements a method of the same name as a trait, the struct's impl method is what is called. A future change will allow `Trait.method(struct)` to be used to fully qualify the trait versions of the method.
 
+#### Known Bugs
+
+- `impl Trait for UndefinedStruct` is a runtime error
+- Top level `var a: Self;` doesn't produce an error
+- Multiple traits of the same name can be declared. Last one wins.
+- Builtin traits can be shadowed
+- `trait A: A {}`, `trait A: B {} trait B: A {}` don't produce an error
+
 ### Functions
 
 Functions are referred to as a type using the `fun ([T0,] [T1,]) => U`
