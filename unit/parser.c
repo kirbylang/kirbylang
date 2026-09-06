@@ -190,7 +190,7 @@ int main(void) {
 
   assert_ast(
       "../tests/types/generic_type_nested.krb",
-      "(let value : List[List[f64]] (array (array 1) (array 2) (array 3)))\n"
+      "(let value : Array[Array[f64]] (array (array 1) (array 2) (array 3)))\n"
       "(print value)\n");
 
   assert_ast("../tests/types/generic_type_struct.krb",
@@ -199,7 +199,7 @@ int main(void) {
              "(print (get box value))\n");
 
   assert_ast("../tests/types/generic_type_and_array_brackets_dont_conflict.krb",
-             "(var typed : List[f64] (array))\n"
+             "(var typed : Array[f64] (array))\n"
              "(var numbers (array 1 2 3))\n"
              "(print (index-get numbers 0))\n"
              "(print (index-get numbers 1))\n");
