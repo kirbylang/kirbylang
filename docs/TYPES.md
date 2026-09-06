@@ -203,7 +203,6 @@ trait Ord: Eq {
 #### Known Bugs
 
 - `impl Trait for UndefinedStruct` is a runtime error
-- `trait A: A {}`, `trait A: B {} trait B: A {}` don't produce an error
 
 ### Functions
 

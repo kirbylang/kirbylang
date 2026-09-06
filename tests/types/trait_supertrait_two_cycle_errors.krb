@@ -1,0 +1,7 @@
+trait A: B {
+    fun foo(self): string;
+}
+
+trait B: A {
+    fun bar(self): string;
+}
