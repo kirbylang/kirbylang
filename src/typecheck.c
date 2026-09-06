@@ -7,15 +7,10 @@
 #include "mangle.h"
 #include "native_signatures.h"
 #include "resolved_ops.h"
+#include "token.h"
 #include "typecheck.h"
 
 static bool hadError = false;
-
-static bool tokensEqual(Token *a, Token *b) {
-  if (a->length != b->length)
-    return false;
-  return memcmp(a->start, b->start, a->length) == 0;
-}
 
 static bool tokenTextEquals(Token *token, const char *text) {
   size_t len = strlen(text);
@@ -820,8 +815,7 @@ static Type *typchkResolvePrimitiveMethodCall(TypeEnv *env, AstNode *node,
   bool foundMethod =
       isStaticCall
           ? typePrimitiveStaticMethodLookup(primitiveType, get->name, &found)
-          : typePrimitiveInstanceMethodLookup(primitiveType, get->name,
-                                             &found);
+          : typePrimitiveInstanceMethodLookup(primitiveType, get->name, &found);
 
   if (!foundMethod) {
     if (isStaticCall) {
@@ -836,8 +830,7 @@ static Type *typchkResolvePrimitiveMethodCall(TypeEnv *env, AstNode *node,
     return NULL;
   }
 
-  if (!found.isPublic &&
-      typchkTypeEnvGetImplTargetType(env) != primitiveType) {
+  if (!found.isPublic && typchkTypeEnvGetImplTargetType(env) != primitiveType) {
     typchkErrorAtTokenFmt(&get->name, "Method '%.*s' is private to '%s'.",
                           get->name.length, get->name.start,
                           typeToString(primitiveType));
@@ -1868,7 +1861,7 @@ static void typchkRegisterTraitImpl(TypeEnv *env, AstNode *node) {
 
   bool alreadyImplemented =
       isPrimitiveTarget ? typePrimitiveImplementsTrait(targetType, traitName)
-                       : typeStructImplementsTrait(targetType, traitName);
+                        : typeStructImplementsTrait(targetType, traitName);
 
   if (alreadyImplemented) {
     typchkErrorAtTokenFmt(&impl->traitName, "'%.*s' already implements '%.*s'.",
@@ -1936,7 +1929,7 @@ static void typchkRegisterTraitImpl(TypeEnv *env, AstNode *node) {
 
     if (isPrimitiveTarget) {
       typePrimitiveAddTraitMethod(targetType, traitName, method->name,
-                                 concreteMethodType, method->hasSelf);
+                                  concreteMethodType, method->hasSelf);
     } else {
       typeStructAddTraitMethod(targetType, method->name, concreteMethodType,
                                method->hasSelf);
@@ -2016,7 +2009,7 @@ static void typchkCheckTraitSupertraitSatisfied(TypeEnv *env, AstNode *node) {
 
   bool implementsThis =
       isPrimitiveTarget ? typePrimitiveImplementsTrait(targetType, traitName)
-                       : typeStructImplementsTrait(targetType, traitName);
+                        : typeStructImplementsTrait(targetType, traitName);
 
   if (!implementsThis)
     return;
@@ -2024,7 +2017,7 @@ static void typchkCheckTraitSupertraitSatisfied(TypeEnv *env, AstNode *node) {
   bool implementsSuper =
       isPrimitiveTarget
           ? typePrimitiveImplementsTrait(targetType,
-                                        traitType->as.trait_.supertraitName)
+                                         traitType->as.trait_.supertraitName)
           : typeStructImplementsTrait(targetType,
                                       traitType->as.trait_.supertraitName);
 
@@ -2133,9 +2126,8 @@ static void typchkCheckTopLevelFunctionBody(TypeEnv *env, AstNode *node) {
 static void checkImplMethodBodies(TypeEnv *env, AstNode *node) {
   ImplNode *impl = &node->as.impl;
   Type *structType = typchkTypeEnvLookupStruct(env, impl->targetName);
-  Type *primitiveType = structType == NULL
-                            ? typchkPrimitiveTypeNamed(&impl->targetName)
-                            : NULL;
+  Type *primitiveType =
+      structType == NULL ? typchkPrimitiveTypeNamed(&impl->targetName) : NULL;
   Type *concreteTarget = structType != NULL ? structType : primitiveType;
 
   typchkTypeEnvSetImplTargetType(env, concreteTarget);
@@ -2157,12 +2149,11 @@ static void checkImplMethodBodies(TypeEnv *env, AstNode *node) {
       }
     } else if (primitiveType != NULL) {
       PrimitiveMethodLookup found;
-      bool foundMethod =
-          method->hasSelf
-              ? typePrimitiveInstanceMethodLookup(primitiveType, method->name,
-                                                 &found)
-              : typePrimitiveStaticMethodLookup(primitiveType, method->name,
-                                               &found);
+      bool foundMethod = method->hasSelf
+                             ? typePrimitiveInstanceMethodLookup(
+                                   primitiveType, method->name, &found)
+                             : typePrimitiveStaticMethodLookup(
+                                   primitiveType, method->name, &found);
       if (foundMethod)
         methodType = found.type;
     }
@@ -2180,7 +2171,7 @@ static void checkImplMethodBodies(TypeEnv *env, AstNode *node) {
 }
 
 bool typchkCheckProgram(AstNode **program, int count,
-                       bool allowPrimitiveImpls) {
+                        bool allowPrimitiveImpls) {
   // Diagnostics are per-unit/program
   typchkResetError();
 
@@ -2213,8 +2204,9 @@ bool typchkCheckProgram(AstNode **program, int count,
       // only works if that text can only ever mean one thing.
       if (tokenIsPrimitiveTypeName(&sn->name)) {
         typchkErrorAtTokenFmt(
-            &sn->name, "'%.*s' is a reserved type name and can't be used as "
-                      "a struct name.",
+            &sn->name,
+            "'%.*s' is a reserved type name and can't be used as "
+            "a struct name.",
             sn->name.length, sn->name.start);
       }
 

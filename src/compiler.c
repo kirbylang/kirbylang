@@ -178,40 +178,10 @@ static uint8_t identifierConstant(Token *identifier) {
 }
 
 /**
- * Compare two identifier tokens for equality
- */
-static bool identifiersEqual(Token *a, Token *b) {
-  if (a->length != b->length)
-    return false;
-  return memcmp(a->start, b->start, a->length) == 0;
-}
-
-/**
  * True if `name`'s source text is exactly "Self".
  */
 static bool isSelfTypeName(Token *name) {
   return name->length == 4 && memcmp(name->start, "Self", 4) == 0;
-}
-
-/**
- * True for the scalar primitives that can carry impl/trait-impl methods
- * (unit/bool/string/f64) -- deliberately not "Array", which stays
- * unsupported (see typchkPrimitiveTypeNamed's doc comment in
- * typecheck.c). Purely a text check: the compiler never sees a Type. By
- * the time compileImplDecl() runs, the type checker has already rejected
- * every case this shouldn't apply to -- an untrusted primitive impl, a
- * struct named the same as a primitive (see typchkCheckProgram's struct
- * registration loop), Array -- so this only needs to recognize the
- * shape, not re-validate it.
- */
-static bool isPrimitiveScalarTypeName(Token *name) {
-  static const char *names[] = {"unit", "bool", "string", "f64"};
-  for (size_t i = 0; i < sizeof(names) / sizeof(names[0]); i++) {
-    size_t len = strlen(names[i]);
-    if ((size_t)name->length == len && memcmp(name->start, names[i], len) == 0)
-      return true;
-  }
-  return false;
 }
 
 /**
@@ -225,7 +195,7 @@ static int resolveLocal(FnCompiler *compiler, Token *identifier) {
   for (int i = compiler->localCount - 1; i >= 0; i--) {
     Local *local = &compiler->locals[i];
 
-    if (identifiersEqual(identifier, &local->name)) {
+    if (tokensEqual(identifier, &local->name)) {
       if (local->depth == -1) {
         compilerErrorAtToken(
             identifier, "Can't read local variable in its own initializer");
@@ -292,7 +262,7 @@ static void addLocal(Token name, bool isMutable) {
 
   for (int i = 0; i < current->localCount; i++) {
     Local *existing = &current->locals[i];
-    if (identifiersEqual(&name, &existing->name) && !existing->isMutable) {
+    if (tokensEqual(&name, &existing->name) && !existing->isMutable) {
       compilerErrorAtToken(&name, "Already declared in this scope.");
       return;
     }
@@ -629,8 +599,7 @@ static void compileCall(CallNode *c) {
         compileExpr(c->args[i]);
       }
 
-      emitBytes(OP_CALL,
-               (uint8_t)(c->argCount + (resolved->hasSelf ? 1 : 0)));
+      emitBytes(OP_CALL, (uint8_t)(c->argCount + (resolved->hasSelf ? 1 : 0)));
       return;
     }
 
@@ -1072,12 +1041,12 @@ static void compileStructDecl(AstNode *node) {
 // to mangledPrimitiveMethodName() so this produces exactly the same
 // global name typchkResolvePrimitiveMethodCall() in typecheck.c already
 // recorded call sites against.
-static void compilePrimitiveImplMethod(FunctionNode *method,
-                                       Token *targetName, Token *traitName) {
+static void compilePrimitiveImplMethod(FunctionNode *method, Token *targetName,
+                                       Token *traitName) {
   char mangledBuffer[MANGLED_NAME_MAX];
-  int mangledLength = mangledPrimitiveMethodName(
-      mangledBuffer, targetName->start, targetName->length, traitName,
-      &method->name);
+  int mangledLength =
+      mangledPrimitiveMethodName(mangledBuffer, targetName->start,
+                                 targetName->length, traitName, &method->name);
 
   Token nameToken;
   nameToken.type = TOKEN_IDENTIFIER;
@@ -1096,8 +1065,7 @@ static void compilePrimitiveImplMethod(FunctionNode *method,
   int compiledArity = method->arity + (method->hasSelf ? 1 : 0);
   current->fn->arity = compiledArity;
   if (compiledArity > 255) {
-    compilerErrorAtToken(&method->name,
-                        "Can't have more than 255 parameters.");
+    compilerErrorAtToken(&method->name, "Can't have more than 255 parameters.");
   }
 
   if (method->hasSelf) {

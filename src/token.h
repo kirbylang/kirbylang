@@ -1,6 +1,8 @@
 #ifndef kirby_token_h
 #define kirby_token_h
 
+#include <stdbool.h>
+
 typedef enum {
   // Single-character tokens.
   TOKEN_LEFT_PAREN,
@@ -70,5 +72,11 @@ typedef struct {
 } Token;
 
 const char *tokenTypeToString(TokenType type);
+bool isPrimitiveScalarTypeName(Token *name);
+
+/**
+ * Compare two identifier tokens for equality
+ */
+bool tokensEqual(Token *a, Token *b);
 
 #endif
