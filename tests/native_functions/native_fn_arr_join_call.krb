@@ -1,4 +1,4 @@
-var parts = ["kirby", "is", "a", "language"];
+var parts = ["Hello", "World"];
 
 print arrJoin(parts, " ");
 print arrJoin(parts, ", ");
