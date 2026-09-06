@@ -1,0 +1,23 @@
+struct Box {
+    pub var value: f64;
+}
+
+impl Default for Box {
+    fun default(): Self = Self { value: 0 };
+}
+
+impl Eq for Box {
+    fun equals(self, other: Self): bool = self.value == self.value;
+}
+
+let a = Box.default();
+let b = Box.default();
+
+print a == a;
+print a.equals(a);
+
+print b == b;
+print b.equals(b);
+
+print a == b;
+print a.equals(b);

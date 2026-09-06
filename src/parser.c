@@ -126,6 +126,7 @@ static void synchronize(Parser *p) {
     switch (p->current.type) {
     case TOKEN_STRUCT:
     case TOKEN_IMPL:
+    case TOKEN_TRAIT:
     case TOKEN_FUN:
     case TOKEN_VAR:
     case TOKEN_LET:
@@ -141,6 +142,22 @@ static void synchronize(Parser *p) {
     }
 
     advance(p);
+  }
+}
+
+// Recover from a parser error when it occurs inside a {} delimited block
+static void recoverInBraceBody(Parser *p) {
+  if (!p->panicMode)
+    return;
+
+  Token rejected = p->current;
+
+  synchronize(p);
+
+  if (!is_at_end(p) && !check(p, TOKEN_RIGHT_BRACE) &&
+      p->current.start == rejected.start) {
+    advance(p);
+    synchronize(p);
   }
 }
 
@@ -1052,14 +1069,16 @@ static AstNode *varDeclaration(Parser *p, bool isMutable) {
   node->as.varDecl.declaredType = declaredType;
   node->as.varDecl.isMutable = isMutable;
   node->as.varDecl.isPublic = false; // only struct fields can be private/public
-  node->as.varDecl.declEndLine = p->previous.line; // the ';' just consumed
+  node->as.varDecl.declEndLine = p->previous.line;
   return node;
 }
 
 // Parses the "(params) { body }" or "(params) = expr;" tail shared by
-// functions, methods, and lambdas
+// functions, methods, and lambdas.
 static AstNode *functionTail(Parser *p, Token name, int line, bool isMethod,
-                             bool isLambda) {
+                             bool isLambda,
+                             // Used for trait method signatures
+                             bool signatureOnly) {
   consume(p, TOKEN_LEFT_PAREN, "Expect '(' after function name.");
 
   Token paramBuf[256];
@@ -1122,6 +1141,7 @@ static AstNode *functionTail(Parser *p, Token name, int line, bool isMethod,
   node->as.function.hasSelf = hasSelf;
   node->as.function.isLambda = isLambda;
   node->as.function.isPublic = false; // set by implDeclaration when `pub`
+  node->as.function.isTraitSignature = signatureOnly;
   node->as.function.exprBody = NULL;
   node->as.function.returnType = returnType;
   node->as.function.body.stmts = NULL;
@@ -1132,11 +1152,17 @@ static AstNode *functionTail(Parser *p, Token name, int line, bool isMethod,
   node->as.function.genericParams = NULL;
   node->as.function.genericParamCount = 0;
 
+  if (signatureOnly) {
+    consume(p, TOKEN_SEMICOLON, "Expect ';' after trait method signature.");
+    node->as.function.bodyEndLine = p->previous.line;
+    return node;
+  }
+
   // Is the function body an expression or a block statement
   if (!isLambda && match(p, TOKEN_EQUAL)) {
     node->as.function.exprBody = expression(p);
     consume(p, TOKEN_SEMICOLON, "Expect ';' after function body expression.");
-    node->as.function.bodyEndLine = p->previous.line; // the ';' just consumed
+    node->as.function.bodyEndLine = p->previous.line;
   } else {
     consume(p, TOKEN_LEFT_BRACE, "Expect '{' before function body.");
     node->as.function.body = parseBlock(p);
@@ -1177,7 +1203,8 @@ static AstNode *functionDeclaration(Parser *p, bool isMethod) {
   Token genericParamBuf[256];
   int genericParamCount = parseGenericParamList(p, genericParamBuf);
 
-  AstNode *node = functionTail(p, name, line, isMethod, /*isLambda=*/false);
+  AstNode *node = functionTail(p, name, line, isMethod, /*isLambda=*/false,
+                               /*signatureOnly=*/false);
 
   if (genericParamCount > 0) {
     Token *genericParams =
@@ -1196,7 +1223,7 @@ static AstNode *lambda(Parser *p, bool canAssign) {
   (void)canAssign;
   Token funKeyword = p->previous;
   return functionTail(p, funKeyword, funKeyword.line, /*isMethod=*/false,
-                      /*isLambda=*/true);
+                      /*isLambda=*/true, /*signatureOnly=*/false);
 }
 
 static AstNode *structDeclaration(Parser *p) {
@@ -1258,23 +1285,7 @@ static AstNode *structDeclaration(Parser *p) {
       error_at_current(p, "Expect field declaration.");
     }
 
-    // Without this, a malformed member (e.g. a missing '}') leaves the
-    // offending token in place forever and this loop spins indefinitely,
-    // since nothing here ever calls synchronize() the way declaration() does
-    // for top-level statements.
-    if (p->panicMode) {
-      Token rejected = p->current;
-
-      synchronize(p);
-
-      if (!is_at_end(p) && !check(p, TOKEN_RIGHT_BRACE) &&
-          p->current.start == rejected.start) {
-        // Step over the errored keyword and skip the rest of the malformed
-        // member.
-        advance(p);
-        synchronize(p);
-      }
-    }
+    recoverInBraceBody(p);
   }
   consume(p, TOKEN_RIGHT_BRACE, "Expect '}' after struct body.");
   int endLine = p->previous.line;
@@ -1306,12 +1317,26 @@ static AstNode *structDeclaration(Parser *p) {
 }
 
 static AstNode *implDeclaration(Parser *p) {
-  consume(p, TOKEN_IDENTIFIER, "Expect struct name after 'impl'.");
+  consume(p, TOKEN_IDENTIFIER, "Expect struct or trait name after 'impl'.");
   Token name = p->previous;
   int line = name.line;
 
   Token genericParamBuf[256];
   int genericParamCount = parseGenericParamList(p, genericParamBuf);
+
+  bool hasTraitName = false;
+  Token traitName = name;
+  Token targetName = name;
+
+  if (match(p, TOKEN_FOR)) {
+    hasTraitName = true;
+    traitName = name;
+
+    consume(p, TOKEN_IDENTIFIER,
+            "Expect struct or primitive type name after 'for'.");
+
+    targetName = p->previous;
+  }
 
   consume(p, TOKEN_LEFT_BRACE, "Expect '{' before impl body.");
 
@@ -1327,6 +1352,10 @@ static AstNode *implDeclaration(Parser *p) {
     }
 
     bool isPublic = match(p, TOKEN_PUB);
+
+    if (hasTraitName) {
+      isPublic = true;
+    }
 
     if (check(p, TOKEN_VAR)) {
       error_at_current(p, "Expect method declaration. Fields belong in the "
@@ -1347,9 +1376,7 @@ static AstNode *implDeclaration(Parser *p) {
       methodBuf[methodCount++] = &method->as.function;
     }
 
-    if (p->panicMode) {
-      synchronize(p);
-    }
+    recoverInBraceBody(p);
   }
   consume(p, TOKEN_RIGHT_BRACE, "Expect '}' after impl body.");
   int endLine = p->previous.line;
@@ -1363,7 +1390,9 @@ static AstNode *implDeclaration(Parser *p) {
   free(methodBuf);
 
   AstNode *node = astAlloc(NODE_IMPL, line);
-  node->as.impl.name = name;
+  node->as.impl.targetName = targetName;
+  node->as.impl.hasTraitName = hasTraitName;
+  node->as.impl.traitName = traitName;
 
   if (genericParamCount > 0) {
     Token *genericParams =
@@ -1378,6 +1407,69 @@ static AstNode *implDeclaration(Parser *p) {
   node->as.impl.methods = methods;
   node->as.impl.methodCount = methodCount;
   node->as.impl.endLine = endLine;
+  return node;
+}
+
+static AstNode *traitDeclaration(Parser *p) {
+  consume(p, TOKEN_IDENTIFIER, "Expect trait name.");
+  Token name = p->previous;
+  int line = name.line;
+
+  bool hasSupertrait = false;
+  Token supertrait = name;
+
+  if (match(p, TOKEN_COLON)) {
+    consume(p, TOKEN_IDENTIFIER, "Expect supertrait name after ':'.");
+
+    supertrait = p->previous;
+    hasSupertrait = true;
+  }
+
+  consume(p, TOKEN_LEFT_BRACE, "Expect '{' before trait body.");
+
+  int methodCap = 8, methodCount = 0;
+  FunctionNode **methodBuf =
+      (FunctionNode **)malloc(methodCap * sizeof(FunctionNode *));
+
+  while (!check(p, TOKEN_RIGHT_BRACE) && !is_at_end(p)) {
+    if (methodCount >= methodCap) {
+      methodCap *= 2;
+      methodBuf = (FunctionNode **)realloc(methodBuf,
+                                           methodCap * sizeof(FunctionNode *));
+    }
+
+    consume(p, TOKEN_FUN, "Expect method signature in trait body.");
+    consume(p, TOKEN_IDENTIFIER, "Expect method name.");
+    Token methodName = p->previous;
+
+    AstNode *method =
+        functionTail(p, methodName, methodName.line, /*isMethod=*/true,
+                     /*isLambda=*/false, /*signatureOnly=*/true);
+    methodBuf[methodCount++] = &method->as.function;
+
+    recoverInBraceBody(p);
+  }
+
+  consume(p, TOKEN_RIGHT_BRACE, "Expect '}' after trait body.");
+  int endLine = p->previous.line;
+
+  FunctionNode **methods = NULL;
+
+  if (methodCount > 0) {
+    methods =
+        (FunctionNode **)astAllocRaw(methodCount * sizeof(FunctionNode *));
+    memcpy(methods, methodBuf, methodCount * sizeof(FunctionNode *));
+  }
+
+  free(methodBuf);
+
+  AstNode *node = astAlloc(NODE_TRAIT, line);
+  node->as.trait_.name = name;
+  node->as.trait_.hasSupertrait = hasSupertrait;
+  node->as.trait_.supertrait = supertrait;
+  node->as.trait_.methods = methods;
+  node->as.trait_.methodCount = methodCount;
+  node->as.trait_.endLine = endLine;
   return node;
 }
 
@@ -1418,15 +1510,17 @@ static AstNode *declaration(Parser *p, bool *isTail) {
   }
 
   if (p->blockDepth > 0 && (check(p, TOKEN_STRUCT) || check(p, TOKEN_IMPL) ||
-                            check(p, TOKEN_TYPE))) {
-    error_at_current(p, "'struct', 'impl', and 'type' are declarations and "
-                        "can only appear at the top level.");
+                            check(p, TOKEN_TRAIT) || check(p, TOKEN_TYPE))) {
+    error_at_current(p, "'struct', 'impl', 'trait', and 'type' are "
+                        "declarations and can only appear at the top level.");
   }
 
   if (match(p, TOKEN_STRUCT)) {
     node = structDeclaration(p);
   } else if (match(p, TOKEN_IMPL)) {
     node = implDeclaration(p);
+  } else if (match(p, TOKEN_TRAIT)) {
+    node = traitDeclaration(p);
   } else if (match(p, TOKEN_TYPE)) {
     node = typeAliasDeclaration(p);
   } else if (match(p, TOKEN_FUN)) {
@@ -1441,6 +1535,7 @@ static AstNode *declaration(Parser *p, bool *isTail) {
 
   if (p->panicMode)
     synchronize(p);
+
   return node;
 }
 

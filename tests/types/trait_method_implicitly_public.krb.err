@@ -1,0 +1,27 @@
+== <script> ==
+0000    1 OP_NIL
+0001    | OP_RETURN
+== <script> ==
+0000    5 OP_STRUCT           0 'Point'
+0002    | OP_DEFINE_GLOBAL    0 'Point'
+0004    | OP_GET_GLOBAL       1 'Point'
+0006    6 OP_NIL
+0007    | OP_FIELD            2 'x' public
+0010    7 OP_POP
+0011    9 OP_GET_GLOBAL       3 'Point'
+0013   10 OP_CLOSURE          5 <fn toString>
+0015    | OP_METHOD           4 'toString'
+0017   11 OP_POP
+0018   13 OP_GET_GLOBAL       7 'Point'
+0020    | OP_CONSTANT         8 'x'
+0022    | OP_CONSTANT         9 '1.000000'
+0024    | OP_STRUCT_INIT      1
+0026    | OP_DEFINE_GLOBAL    6 'p'
+0028   14 OP_GET_GLOBAL      10 'p'
+0030    | OP_INVOKE        (0 args)   11 'toString'
+0033    | OP_PRINT
+0034   15 OP_NIL
+0035    | OP_RETURN
+== toString ==
+0000   10 OP_CONSTANT         0 'Point'
+0002    | OP_RETURN

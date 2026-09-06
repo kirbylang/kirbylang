@@ -1,0 +1,23 @@
+== <script> ==
+0000    1 OP_NIL
+0001    | OP_RETURN
+== <script> ==
+0000    1 OP_STRUCT           0 'Struct'
+0002    | OP_DEFINE_GLOBAL    0 'Struct'
+0004    | OP_GET_GLOBAL       1 'Struct'
+0006    | OP_POP
+0007    3 OP_GET_GLOBAL       2 'Struct'
+0009    4 OP_CLOSURE          4 <fn new>
+0011    | OP_METHOD           3 'new'
+0013    5 OP_POP
+0014    7 OP_GET_GLOBAL       6 'Struct'
+0016    | OP_INVOKE        (0 args)    7 'new'
+0019    | OP_DEFINE_GLOBAL    5 's'
+0021    8 OP_GET_GLOBAL       8 's'
+0023    | OP_PRINT
+0024    9 OP_NIL
+0025    | OP_RETURN
+== new ==
+0000    4 OP_GET_GLOBAL       0 'Struct'
+0002    | OP_STRUCT_INIT      0
+0004    | OP_RETURN

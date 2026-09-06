@@ -34,6 +34,7 @@ typedef enum {
   NODE_STRUCT,
   NODE_STRUCT_INIT,
   NODE_IMPL,
+  NODE_TRAIT,
   NODE_ARRAY,
   NODE_BREAK,
   NODE_CONTINUE,
@@ -268,6 +269,8 @@ typedef struct {
   bool hasSelf;
   bool isLambda;
   bool isPublic;
+  // Is this a fun declaration in a trait? e.g. no body
+  bool isTraitSignature;
   /**
    * arena-allocated array of bare generic parameter name tokens, e.g. the
    * `T` in `fun sum[T](a: T, b: T): T`. NULL/0 for a non-generic function.
@@ -303,7 +306,7 @@ typedef struct {
 } StructInitNode;
 
 typedef struct {
-  Token name;
+  Token targetName;
   /**
    * arena-allocated array of bare generic parameter name tokens, e.g. the
    * `T` in `impl Box[T]`. Written independently of the struct's own
@@ -312,10 +315,26 @@ typedef struct {
    */
   Token *genericParams;
   int genericParamCount;
+  // impl Trait for Struct?
+  bool hasTraitName;
+  Token traitName;
   FunctionNode **methods;
   int methodCount;
   int endLine;
 } ImplNode;
+
+typedef struct {
+  Token name;
+  bool hasSupertrait;
+  Token supertrait;
+  /**
+   * arena-allocated array of FunctionNode pointers, each with
+   * isTraitSignature == true -- required methods with no body.
+   */
+  FunctionNode **methods;
+  int methodCount;
+  int endLine;
+} TraitNode;
 
 /**
  * Called in the parser's arrayLiteral function
@@ -372,6 +391,7 @@ struct AstNode {
     StructNode struct_;
     StructInitNode structInit;
     ImplNode impl;
+    TraitNode trait_;
     ArrayNode array;
     BreakNode break_;
     ContinueNode continue_;

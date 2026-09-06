@@ -1,0 +1,7 @@
+trait Display {
+    fun toString(self): string;
+}
+
+impl Display for Undefined {
+    pub fun toString(self): string = "boo";
+}

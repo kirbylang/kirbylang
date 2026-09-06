@@ -1,0 +1,56 @@
+== <script> ==
+0000    1 OP_NIL
+0001    | OP_RETURN
+== <script> ==
+0000    1 OP_STRUCT           0 'Money'
+0002    | OP_DEFINE_GLOBAL    0 'Money'
+0004    | OP_GET_GLOBAL       1 'Money'
+0006    2 OP_NIL
+0007    | OP_FIELD            2 'cents' public
+0010    3 OP_POP
+0011    5 OP_GET_GLOBAL       3 'Money'
+0013    6 OP_CLOSURE          5 <fn equals>
+0015    | OP_METHOD           4 'equals'
+0017    7 OP_POP
+0018    9 OP_GET_GLOBAL       6 'Money'
+0020   10 OP_CLOSURE          8 <fn cmp>
+0022    | OP_METHOD           7 'cmp'
+0024   11 OP_POP
+0025   13 OP_GET_GLOBAL      10 'Money'
+0027    | OP_CONSTANT        11 'cents'
+0029    | OP_CONSTANT        12 '500.000000'
+0031    | OP_STRUCT_INIT      1
+0033    | OP_DEFINE_GLOBAL    9 'a'
+0035   14 OP_GET_GLOBAL      14 'Money'
+0037    | OP_CONSTANT        15 'cents'
+0039    | OP_CONSTANT        16 '300.000000'
+0041    | OP_STRUCT_INIT      1
+0043    | OP_DEFINE_GLOBAL   13 'b'
+0045   16 OP_GET_GLOBAL      17 'a'
+0047    | OP_GET_GLOBAL      19 'b'
+0049    | OP_INVOKE        (1 args)   18 'cmp'
+0052    | OP_PRINT
+0053   17 OP_GET_GLOBAL      20 'a'
+0055    | OP_GET_GLOBAL      22 'b'
+0057    | OP_INVOKE        (1 args)   21 'equals'
+0060    | OP_PRINT
+0061   18 OP_GET_GLOBAL      23 'a'
+0063    | OP_GET_GLOBAL      25 'a'
+0065    | OP_INVOKE        (1 args)   24 'equals'
+0068    | OP_PRINT
+0069   19 OP_NIL
+0070    | OP_RETURN
+== equals ==
+0000    6 OP_GET_LOCAL        0
+0002    | OP_GET_PROPERTY     0 'cents'
+0004    | OP_GET_LOCAL        1
+0006    | OP_GET_PROPERTY     1 'cents'
+0008    | OP_EQUAL
+0009    | OP_RETURN
+== cmp ==
+0000   10 OP_GET_LOCAL        0
+0002    | OP_GET_PROPERTY     0 'cents'
+0004    | OP_GET_LOCAL        1
+0006    | OP_GET_PROPERTY     1 'cents'
+0008    | OP_SUBTRACT
+0009    | OP_RETURN

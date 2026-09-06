@@ -1,0 +1,13 @@
+struct Point {
+    pub var x: f64;
+    pub var y: f64;
+}
+
+impl Eq for Point {
+    pub fun equals(self, other: Self): bool = self.x == other.x and self.y == other.y;
+}
+
+var a = Point { x: 1, y: 2 };
+
+print a == a;
+print a.equals(a);

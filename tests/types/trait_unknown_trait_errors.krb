@@ -1,0 +1,7 @@
+struct Point {
+    pub var x: f64;
+}
+
+impl NotATrait for Point {
+    pub fun toString(self): string = "Point";
+}

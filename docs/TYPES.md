@@ -51,6 +51,165 @@ struct Box[T] {
 }
 ```
 
+### Traits
+
+A trait declares required methods for a struct to implement.
+
+```
+trait Display {
+    fun toString(self): string;
+}
+
+struct Point {
+    pub var x: f64;
+    pub var y: f64;
+}
+
+impl Display for Point {
+    fun toString(self): string = "Point";
+}
+
+print (Point { x: 1, y: 2 }).toString();
+```
+
+#### Builtin traits
+
+The builtin, always in scope, traits are `Display`, `Eq`, `Ord`, and `Default`.
+
+##### Eq
+
+```
+trait Eq {
+    fun equals(self, other: Self): bool;
+}
+
+struct Box {
+    pub var value: f64;
+}
+
+impl Eq for Box {
+    fun equals(self, other: Self): bool = self.value == other.value;
+}
+
+let a = Box { value: 100 };
+let b = Box { value: 100 };
+
+a.equals(b); // true
+```
+
+##### Default
+
+```
+trait Default {
+    fun default(): Self;
+}
+
+struct Box {
+    pub var value: f64;
+}
+
+impl Default for Box {
+    fun default(): Self = Self { value = 0 };
+}
+
+let box = Box.default();
+
+box.value; // 0
+```
+
+##### Display
+
+```
+trait Display {
+    fun toString(self): string;
+}
+
+struct Box {
+    pub var value: f64;
+}
+
+impl Display for Box {
+    fun toString(self): string = numberToString(self.value);
+}
+
+let box = Box { value: 123 };
+
+box.toString(); // "123.000000"
+```
+
+##### Ord
+
+```
+trait Ord: Eq {
+    fun cmp(self, other: Self): f64;
+}
+
+trait Eq {
+    fun equals(self, other: Self): bool;
+}
+
+struct Box {
+    pub var value: f64;
+}
+
+impl Eq for Box {
+    fun equals(self, other: Self): bool = self.value == other.value;
+}
+
+impl Ord for Box {
+    fun cmp(self, other: Self): f64 = self.value - other.value;
+}
+
+let a = Box { value: 100 };
+let b = Box { value: 123 };
+
+a.cmp(b); // -23
+```
+
+#### `Self`
+
+`Self` is a special type/value only available in `impl` blocks and is an alias to the impl block's target struct.
+
+```
+struct Point {
+    pub var x: f64;
+    pub var y: f64;
+}
+
+impl Point {
+    pub fun origin(): Self = Self { x: 0, y: 0 };
+
+    pub fun translate(self, dx: f64, dy: f64): Self =
+        Self { x: self.x + dx, y: self.y + dy };
+}
+
+var p = Point.origin().translate(3, 4);
+```
+
+#### Supertraits
+
+`trait Sub: Super` declares that an `impl Super for X` must exist for any
+`impl Sub for X`.
+
+```
+trait Ord: Eq {
+    fun cmp(self, other: Self): f64;
+}
+```
+
+#### Limitations
+
+- Traits can only be implemented for structs currently
+- The `Eq` and `Ord` traits are typechecked only. At runtime `==` and `<` still use compiler logic. This is a future change.
+- If a struct's impl block implements a method of the same name as a trait, the struct's impl method is what is called. A future change will allow `Trait.method(struct)` to be used to fully qualify the trait versions of the method.
+
+#### Known Bugs
+
+- `impl Trait for UndefinedStruct` is a runtime error
+- Multiple traits of the same name can be declared. Last one wins.
+- Builtin traits can be shadowed
+- `trait A: A {}`, `trait A: B {} trait B: A {}` don't produce an error
+
 ### Functions
 
 Functions are referred to as a type using the `fun ([T0,] [T1,]) => U`
@@ -125,9 +284,14 @@ print count;
 | `!`               | any             | `bool`   |
 | `-` (negate)      | `f64`           | `f64`    |
 
+`==`/`!=` between two structs additionally requires the struct to
+implement `Eq` -- see [Traits](#traits).
+
 ## Limitations
 
 - Some native functions have no signature yet, so calls to them aren't
   checked
 - Generic types parse but aren't checked
 - Lists have no type annotation syntax
+- `impl Trait for` a primitive type isn't supported yet, and operators
+  don't dispatch to trait methods -- see [Traits](#traits)

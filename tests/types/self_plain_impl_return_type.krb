@@ -1,0 +1,10 @@
+struct Struct {
+
+}
+
+impl Struct {
+    pub fun new(): Self = Struct {};
+}
+
+var s = Struct.new();
+print s;

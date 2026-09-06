@@ -1,0 +1,63 @@
+== <script> ==
+0000    1 OP_NIL
+0001    | OP_RETURN
+== <script> ==
+0000    1 OP_STRUCT           0 'StringBuilder'
+0002    | OP_DEFINE_GLOBAL    0 'StringBuilder'
+0004    | OP_GET_GLOBAL       1 'StringBuilder'
+0006    2 OP_NIL
+0007    | OP_FIELD            2 'string' private
+0010    3 OP_POP
+0011   16 OP_GET_GLOBAL       3 'StringBuilder'
+0013   17 OP_CLOSURE          5 <fn default>
+0015    | OP_METHOD           4 'default'
+0017   18 OP_POP
+0018   20 OP_GET_GLOBAL       6 'StringBuilder'
+0020   21 OP_CLOSURE          8 <fn toString>
+0022    | OP_METHOD           7 'toString'
+0024   22 OP_POP
+0025    5 OP_GET_GLOBAL       9 'StringBuilder'
+0027    7 OP_CLOSURE         11 <fn new>
+0029    | OP_METHOD          10 'new'
+0031   13 OP_CLOSURE         13 <fn add>
+0033    | OP_METHOD          12 'add'
+0035   14 OP_POP
+0036   24 OP_GET_GLOBAL      15 'StringBuilder'
+0038    | OP_INVOKE        (0 args)   16 'default'
+0041   25 OP_CONSTANT        18 'Hello'
+0043    | OP_INVOKE        (1 args)   17 'add'
+0046   26 OP_CONSTANT        20 ' '
+0048    | OP_INVOKE        (1 args)   19 'add'
+0051   27 OP_CONSTANT        22 'World'
+0053    | OP_INVOKE        (1 args)   21 'add'
+0056    | OP_DEFINE_GLOBAL   14 'builder'
+0058   29 OP_GET_GLOBAL      23 'builder'
+0060    | OP_INVOKE        (0 args)   24 'toString'
+0063    | OP_PRINT
+0064   30 OP_NIL
+0065    | OP_RETURN
+== default ==
+0000   17 OP_GET_GLOBAL       0 'StringBuilder'
+0002    | OP_CONSTANT         2 ''
+0004    | OP_INVOKE        (1 args)    1 'new'
+0007    | OP_RETURN
+== toString ==
+0000   21 OP_GET_LOCAL        0
+0002    | OP_GET_PROPERTY     0 'string'
+0004    | OP_RETURN
+== new ==
+0000    7 OP_GET_GLOBAL       0 'StringBuilder'
+0002    | OP_CONSTANT         1 'string'
+0004    | OP_GET_LOCAL        1
+0006    | OP_STRUCT_INIT      1
+0008    | OP_RETURN
+== add ==
+0000   10 OP_GET_LOCAL        0
+0002    | OP_GET_LOCAL        0
+0004    | OP_GET_PROPERTY     1 'string'
+0006    | OP_GET_LOCAL        1
+0008    | OP_ADD
+0009    | OP_SET_PROPERTY     0 'string'
+0011    | OP_POP
+0012   12 OP_GET_LOCAL        0
+0014    | OP_RETURN

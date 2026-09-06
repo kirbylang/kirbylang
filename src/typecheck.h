@@ -43,6 +43,9 @@ Type *typchkTypeEnvLookupFunction(TypeEnv *env, Token name);
 void typchkTypeEnvRegisterAlias(TypeEnv *env, Token name, Type *type);
 Type *typchkTypeEnvLookupAlias(TypeEnv *env, Token name);
 
+void typchkTypeEnvRegisterTrait(TypeEnv *env, Token name, Type *type);
+Type *typchkTypeEnvLookupTrait(TypeEnv *env, Token name);
+
 // Resolve an AstNode to a Type pointer
 //
 // Returns NULL and reports a [line N] Error diagnostic
@@ -53,6 +56,11 @@ Type *typchkTypeEnvGetSelfType(TypeEnv *env);
 
 void typchkTypeEnvSetCurrentReturnType(TypeEnv *env, Type *returnType);
 Type *typchkTypeEnvGetCurrentReturnType(TypeEnv *env);
+
+// The concrete struct `Self` currently refers to -- see _implTargetType's
+// doc comment in typecheck.c.
+void typchkTypeEnvSetImplTargetType(TypeEnv *env, Type *implTargetType);
+Type *typchkTypeEnvGetImplTargetType(TypeEnv *env);
 
 Type *typchkInfer(TypeEnv *env, AstNode *node);
 bool typchkCheck(TypeEnv *env, AstNode *node, Type *expected);

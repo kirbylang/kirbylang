@@ -241,5 +241,19 @@ int main(void) {
              "(fun first[T U] (a : T b : U) : T a)\n"
              "(print (call first 1 \"two\"))\n");
 
+  assert_ast("../tests/types/trait_basic.krb",
+             "(trait Display (method toString (self) : string))\n"
+             "(struct Point (pub-field x : f64) (pub-field y : f64))\n"
+             "(impl Display for Point (pub-method toString))\n"
+             "(var p (struct-init Point (field x 1) (field y 2)))\n"
+             "(print (call (get p toString)))\n");
+
+  assert_ast("../tests/types/trait_supertrait.krb",
+             "(trait Eq (method equals (self other : Self) : bool))\n"
+             "(trait Ord : Eq (method cmp (self other : Self) : f64))\n");
+
+  assert_ast("../tests/types/trait_static_method.krb",
+             "(trait Default (static-method default () : Self))\n");
+
   return 0;
 }

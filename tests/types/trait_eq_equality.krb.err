@@ -1,0 +1,63 @@
+== <script> ==
+0000    1 OP_NIL
+0001    | OP_RETURN
+== <script> ==
+0000    1 OP_STRUCT           0 'Box'
+0002    | OP_DEFINE_GLOBAL    0 'Box'
+0004    | OP_GET_GLOBAL       1 'Box'
+0006    2 OP_NIL
+0007    | OP_FIELD            2 'value' public
+0010    3 OP_POP
+0011    5 OP_GET_GLOBAL       3 'Box'
+0013    6 OP_CLOSURE          5 <fn default>
+0015    | OP_METHOD           4 'default'
+0017    7 OP_POP
+0018    9 OP_GET_GLOBAL       6 'Box'
+0020   10 OP_CLOSURE          8 <fn equals>
+0022    | OP_METHOD           7 'equals'
+0024   11 OP_POP
+0025   13 OP_GET_GLOBAL      10 'Box'
+0027    | OP_INVOKE        (0 args)   11 'default'
+0030    | OP_DEFINE_GLOBAL    9 'a'
+0032   14 OP_GET_GLOBAL      13 'Box'
+0034    | OP_INVOKE        (0 args)   14 'default'
+0037    | OP_DEFINE_GLOBAL   12 'b'
+0039   16 OP_GET_GLOBAL      15 'a'
+0041    | OP_GET_GLOBAL      16 'a'
+0043    | OP_EQUAL
+0044    | OP_PRINT
+0045   17 OP_GET_GLOBAL      17 'a'
+0047    | OP_GET_GLOBAL      19 'a'
+0049    | OP_INVOKE        (1 args)   18 'equals'
+0052    | OP_PRINT
+0053   19 OP_GET_GLOBAL      20 'b'
+0055    | OP_GET_GLOBAL      21 'b'
+0057    | OP_EQUAL
+0058    | OP_PRINT
+0059   20 OP_GET_GLOBAL      22 'b'
+0061    | OP_GET_GLOBAL      24 'b'
+0063    | OP_INVOKE        (1 args)   23 'equals'
+0066    | OP_PRINT
+0067   22 OP_GET_GLOBAL      25 'a'
+0069    | OP_GET_GLOBAL      26 'b'
+0071    | OP_EQUAL
+0072    | OP_PRINT
+0073   23 OP_GET_GLOBAL      27 'a'
+0075    | OP_GET_GLOBAL      29 'b'
+0077    | OP_INVOKE        (1 args)   28 'equals'
+0080    | OP_PRINT
+0081   24 OP_NIL
+0082    | OP_RETURN
+== default ==
+0000    6 OP_GET_GLOBAL       0 'Box'
+0002    | OP_CONSTANT         1 'value'
+0004    | OP_CONSTANT         2 '0.000000'
+0006    | OP_STRUCT_INIT      1
+0008    | OP_RETURN
+== equals ==
+0000   10 OP_GET_LOCAL        0
+0002    | OP_GET_PROPERTY     0 'value'
+0004    | OP_GET_LOCAL        0
+0006    | OP_GET_PROPERTY     1 'value'
+0008    | OP_EQUAL
+0009    | OP_RETURN

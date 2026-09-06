@@ -1,0 +1,20 @@
+trait MyEq {
+    fun equals(self, other: Self): bool;
+}
+
+trait MyOrd: MyEq {
+    fun cmp(self, other: Self): f64;
+    fun clamp(self, low: Self, high: Self): Self;
+}
+
+struct Money {
+    pub var cents: f64;
+}
+
+impl MyEq for Money {
+    pub fun equals(self, other: Self): bool = self.cents == other.cents;
+}
+
+impl MyOrd for Money {
+    pub fun cmp(self, other: Self): f64 = self.cents - other.cents;
+}

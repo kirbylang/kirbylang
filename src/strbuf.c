@@ -42,6 +42,7 @@ void sb_appendf(StrBuf *sb, const char *fmt, ...) {
   va_end(args);
 
   sb_append(sb, tmp);
+  free(tmp);
 }
 
 void sb_free(StrBuf *sb) { free(sb->data); }

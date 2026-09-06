@@ -1,0 +1,19 @@
+struct Point {
+    pub var x: f64;
+    pub var y: f64;
+}
+
+impl Point {
+    pub fun origin(): Self = Self { x: 0, y: 0 };
+
+    pub fun translate(self, dx: f64, dy: f64): Self =
+        Self { x: self.x + dx, y: self.y + dy };
+
+    pub fun equals(self, other: Self): bool = self.x == other.x and self.y == other.y;
+}
+
+var p = Point.origin();
+var p2 = p.translate(3, 4);
+print p2.x;
+print p2.y;
+print p2.equals(p2);
