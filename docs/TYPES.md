@@ -74,25 +74,97 @@ print (Point { x: 1, y: 2 }).toString();
 
 #### Builtin traits
 
-`Display`, `Eq`, `Ord` (a supertrait of `Eq`), and `Default` are always in
-scope:
+The builtin, always in scope, traits are `Display`, `Eq`, `Ord`, and `Default`.
+
+##### Eq
 
 ```
-trait Display { fun toString(self): string; }
-trait Eq { fun equals(self, other: Self): bool; }
-trait Ord: Eq { fun cmp(self, other: Self): f64; }
-trait Default { fun default(): Self; }
+trait Eq {
+    fun equals(self, other: Self): bool;
+}
+
+struct Box {
+    pub var value: f64;
+}
+
+impl Eq for Box {
+    fun equals(self, other: Self): bool = self.value == other.value;
+}
+
+let a = Box { value: 100 };
+let b = Box { value: 100 };
+
+a.equals(b); // true
 ```
 
-`Into`, `From`, `Iter`, and `Len` need generics and aren't available yet.
+##### Default
 
-`==` and `!=` on two structs require the struct to implement `Eq` --
-comparing two structs of a type with no `Eq` impl is a compile error.
-Primitives, arrays, and functions are unaffected; they never needed an
-`Eq` impl and still don't. Note that implementing `Eq` only makes `==`
-type-check -- the runtime comparison itself is unchanged (structural
-identity for structs), since `==` doesn't yet dispatch to `.equals()`. Call
-`.equals()` directly for a real structural comparison.
+```
+trait Default {
+    fun default(): Self;
+}
+
+struct Box {
+    pub var value: f64;
+}
+
+impl Default for Box {
+    fun default(): Self = Self { value = 0 };
+}
+
+let box = Box.default();
+
+box.value; // 0
+```
+
+##### Display
+
+```
+trait Display {
+    fun toString(self): string;
+}
+
+struct Box {
+    pub var value: f64;
+}
+
+impl Display for Box {
+    fun toString(self): string = numberToString(self.value);
+}
+
+let box = Box { value: 123 };
+
+box.toString(); // "123.000000"
+```
+
+##### Ord
+
+```
+trait Ord: Eq {
+    fun cmp(self, other: Self): f64;
+}
+
+trait Eq {
+    fun equals(self, other: Self): bool;
+}
+
+struct Box {
+    pub var value: f64;
+}
+
+impl Eq for Box {
+    fun equals(self, other: Self): bool = self.value == other.value;
+}
+
+impl Ord for Box {
+    fun cmp(self, other: Self): f64 = self.value - other.value;
+}
+
+let a = Box { value: 100 };
+let b = Box { value: 123 };
+
+a.cmp(b); // -23
+```
 
 #### `Self`
 
@@ -125,35 +197,11 @@ trait Ord: Eq {
 }
 ```
 
-#### Trait methods are implicitly public
-
-A method inside `impl Trait for X` doesn't need `pub` -- implementing a
-trait's required method makes it public automatically, since that's the
-whole point of implementing the trait. Writing `pub` explicitly is still
-allowed and has no effect.
-
-```
-impl Cloneable for Point {
-    fun clone(self): Self = Self { x: self.x, y: self.y }; // no pub needed
-}
-```
-
-This is specific to trait impls. A plain `impl Struct { ... }` block still
-defaults its methods to private, same as always -- `pub` there means what
-it always has.
-
 #### Limitations
 
-- `impl Trait for` a primitive type (`f64`, `string`, `bool`, `unit`) isn't
-  supported yet -- primitives have no runtime object to attach methods to,
-  so this needs static call resolution the compiler doesn't have yet.
-- Operators (`+`, `<`, etc.) don't dispatch to trait methods on structs
-  yet -- `Add`, `Ord`-derived comparisons via operators, and friends need
-  the same static-resolution work as primitive impls.
-- Traits themselves can't be generic (`trait Into[T]`), and a struct
-  implementing a trait can't be generic either, following the same
-  generics restriction as everywhere else in the type system.
-- Methods defined in trait impl blocks do not shadow methods of the same name in the target's impl block. This doesn't error, it just calls the target's impl version of it. In the future there will be a way to fully qualify which method to call e.g. `Trait.method(obj);`
+- Traits can only be implemented for structs currently
+- The `Eq` and `Ord` traits are typechecked only. At runtime `==` and `<` still use compiler logic. This is a future change.
+- If a struct's impl block implements a method of the same name as a trait, the struct's impl method is what is called. A future change will allow `Trait.method(struct)` to be used to fully qualify the trait versions of the method.
 
 ### Functions
 
