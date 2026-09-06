@@ -77,10 +77,6 @@ struct Type {
       bool hasSupertrait;
       InternedName supertraitName;
       bool hasUnresolvedMembers;
-      // True for the four pre-seeded traits (Display/Eq/Ord/Default).
-      // Lets duplicate-declaration detection give a more specific message
-      // when the collision is with a builtin rather than another user
-      // trait.
       bool isBuiltin;
     } trait_;
   } as;
