@@ -12,19 +12,32 @@ An aspiring embeddable scripting language.
 ```kirby
 #!/usr/bin/env krb -f
 
-// Function with an expression body
-fun fizzbuzz(n: f64): string =
-    if (n % 5 == 0 and n % 3 == 0) "FizzBuzz"
-    else if (n % 3 == 0) "Fizz"
-    else if (n % 5 == 0) "Buzz"
-    else numberToString(n);
-
-// Read from stdin
-var limit: f64 = parseNumber(prompt("limit: "));
-
-for (var i = 1; i <= limit; i = i + 1) {
-    print fizzbuzz(i);
+struct StringBuilder {
+    var value: Array;
 }
+
+impl StringBuilder {
+    pub fun add(self, add: string): Self {
+        arrPush(self.value, add);
+
+        self
+    }
+}
+
+impl Default for StringBuilder {
+    fun default(): Self = Self { value: [] };
+}
+
+impl Display for StringBuilder {
+    fun toString(self): string = arrJoin(self.value, "");
+}
+
+let builder = StringBuilder.default()
+    .add("Hello")
+    .add(" ")
+    .add("World");
+
+print builder.toString();
 ```
 
 ## Learning Project
