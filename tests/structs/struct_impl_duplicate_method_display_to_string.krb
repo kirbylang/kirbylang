@@ -1,0 +1,9 @@
+struct Struct {}
+
+impl Display for Struct {
+    fun toString(self): string = "Struct";
+}
+
+impl Struct {
+    pub fun toString(self): string = "Struct!";
+}
