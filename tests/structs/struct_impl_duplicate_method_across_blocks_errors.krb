@@ -1,0 +1,9 @@
+struct Struct {}
+
+impl Struct {
+    pub fun dup(self): string = "first";
+}
+
+impl Struct {
+    pub fun dup(self): string = "second";
+}

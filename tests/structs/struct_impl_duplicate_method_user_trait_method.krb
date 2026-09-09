@@ -1,0 +1,14 @@
+struct Struct {}
+
+trait Test {
+    fun test(self): unit;
+}
+
+impl Test for Struct {
+    fun test(self): unit {}
+}
+
+impl Struct {
+    pub fun toString(self): string = "Struct!";
+    pub fun test(self): unit {}
+}
