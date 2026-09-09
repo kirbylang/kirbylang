@@ -1751,20 +1751,6 @@ static void typchkRegisterTraitImpl(TypeEnv *env, AstNode *node) {
   for (int i = 0; i < impl->methodCount; i++) {
     FunctionNode *method = impl->methods[i];
 
-    bool isDuplicateMethod = false;
-
-    for (int j = 0; j < i && !isDuplicateMethod; j++) {
-      isDuplicateMethod = impl->methods[j]->hasSelf == method->hasSelf &&
-                          tokensEqual(&impl->methods[j]->name, &method->name);
-    }
-    if (isDuplicateMethod) {
-      typchkErrorAtTokenFmt(&method->name,
-                            "'%.*s' is already declared in this impl block.",
-                            method->name.length, method->name.start);
-      ok = false;
-      continue;
-    }
-
     Type *requiredType =
         method->hasSelf ? typeTraitInstanceMethodLookup(traitType, method->name)
                         : typeTraitStaticMethodLookup(traitType, method->name);
