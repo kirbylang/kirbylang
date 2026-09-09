@@ -63,6 +63,7 @@ set(KIRBY_SOURCES
     src/native.c
     src/object.c
     src/parser.c
+    src/resolved_impl_targets.c
     src/scanner.c
     src/strbuf.c
     src/stringset.c

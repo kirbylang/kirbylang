@@ -8,6 +8,7 @@
 #include "ast.h"
 #include "common.h"
 #include "compiled_unit.h"
+#include "resolved_impl_targets.h"
 #include "stringset.h"
 #include "token.h"
 
@@ -998,13 +999,16 @@ static void compileImplDecl(AstNode *node) {
 
   currentLine = impl->targetName.line;
 
+  const Token *resolved = resolvedImplTargetsLookup(node);
+  Token structName = resolved != NULL ? *resolved : impl->targetName;
+
   // Push the struct onto the stack so the methods can be bound to it
-  VarRef ref = resolveVariable(&impl->targetName);
+  VarRef ref = resolveVariable(&structName);
   emitBytes(ref.getOp, ref.arg);
 
   Token previousImplTargetName = currentImplTargetName;
   bool hadCurrentImplTargetName = hasCurrentImplTargetName;
-  currentImplTargetName = impl->targetName;
+  currentImplTargetName = structName;
   hasCurrentImplTargetName = true;
 
   for (int i = 0; i < impl->methodCount; i++) {

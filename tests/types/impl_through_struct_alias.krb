@@ -1,0 +1,12 @@
+struct Point {
+    pub var x: f64;
+}
+
+type Coord = Point;
+
+impl Coord {
+    pub fun getX(self): f64 = self.x;
+}
+
+let p = Point { x: 42 };
+print p.getX();
