@@ -5,6 +5,7 @@
 
 #include "definite_assignment.h"
 #include "native_signatures.h"
+#include "resolved_impl_targets.h"
 #include "typecheck.h"
 
 static bool hadError = false;
@@ -1686,6 +1687,18 @@ static void typchkCheckTraitSupertraitCycle(TypeEnv *env, AstNode *node) {
   }
 }
 
+// Resolves an impl block's target name to the concrete struct directly, or
+// through a type alias. NULL if the name doesn't name either
+static Type *typchkResolveImplTarget(TypeEnv *env, Token name) {
+  Type *type = typchkTypeEnvLookupStruct(env, name);
+  if (type != NULL)
+    return type;
+
+  type = typchkTypeEnvLookupAlias(env, name);
+
+  return (type != NULL && type->kind == TYPE_STRUCT) ? type : NULL;
+}
+
 static void typchkRegisterTraitImpl(TypeEnv *env, AstNode *node) {
   ImplNode *impl = &node->as.impl;
 
@@ -1700,16 +1713,22 @@ static void typchkRegisterTraitImpl(TypeEnv *env, AstNode *node) {
   if (typeTraitHasUnresolvedMembers(traitType))
     return; // already reported once, at the trait's own declaration
 
-  Type *targetType = typchkTypeEnvLookupStruct(env, impl->targetName);
+  Type *targetType = typchkResolveImplTarget(env, impl->targetName);
 
   if (targetType == NULL) {
     if (tokenIsPrimitiveTypeName(&impl->targetName)) {
-      typchkErrorAtTokenFmt(&impl->targetName,
-                            "Primitive trait implementations aren't supported "
-                            "yet.");
+      typchkErrorAtTokenFmt(
+          &impl->targetName,
+          "Primitive trait implementations aren't supported yet.");
+    } else {
+      typchkErrorAtTokenFmt(&impl->targetName, "Unknown type '%.*s'.",
+                            impl->targetName.length, impl->targetName.start);
     }
+
     return;
   }
+
+  resolvedImplTargetsRecord(node, tokenFromInternedName(targetType->as.struct_.name));
 
   if (typeStructIsGeneric(targetType))
     return; // already reported once at the struct's declaration
@@ -1838,8 +1857,8 @@ static void typchkCheckTraitSupertraitSatisfied(TypeEnv *env, AstNode *node) {
   if (traitType == NULL || !traitType->as.trait_.hasSupertrait)
     return;
 
-  Type *targetType = typchkTypeEnvLookupStruct(env, impl->targetName);
-  if (targetType == NULL || targetType->kind != TYPE_STRUCT)
+  Type *targetType = typchkResolveImplTarget(env, impl->targetName);
+  if (targetType == NULL)
     return; // already reported, or a (currently unsupported) primitive
 
   InternedName traitName = internTokenName(impl->traitName);
@@ -1868,16 +1887,21 @@ static void typchkRegisterImplMethods(TypeEnv *env, AstNode *node) {
     return;
   }
 
-  Type *structType = typchkTypeEnvLookupStruct(env, impl->targetName);
+  Type *structType = typchkResolveImplTarget(env, impl->targetName);
 
   if (structType == NULL) {
     if (tokenIsPrimitiveTypeName(&impl->targetName)) {
       typchkErrorAtTokenFmt(
           &impl->targetName,
           "Only trait implementations are allowed on primitive types.");
+    } else {
+      typchkErrorAtTokenFmt(&impl->targetName, "Unknown type '%.*s'.",
+                            impl->targetName.length, impl->targetName.start);
     }
     return;
   }
+
+  resolvedImplTargetsRecord(node, tokenFromInternedName(structType->as.struct_.name));
 
   if (typeStructIsGeneric(structType))
     return; // already reported once at the struct's declaration
@@ -1924,7 +1948,7 @@ static void typchkCheckTopLevelFunctionBody(TypeEnv *env, AstNode *node) {
 
 static void checkImplMethodBodies(TypeEnv *env, AstNode *node) {
   ImplNode *impl = &node->as.impl;
-  Type *structType = typchkTypeEnvLookupStruct(env, impl->targetName);
+  Type *structType = typchkResolveImplTarget(env, impl->targetName);
 
   typchkTypeEnvSetImplTargetType(env, structType);
 

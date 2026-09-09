@@ -10,6 +10,7 @@
 #include "debug.h"
 #include "lexer.h"
 #include "parser.h"
+#include "resolved_impl_targets.h"
 #include "strbuf.h"
 #include "token_stream.h"
 #include "typecheck.h"
@@ -189,6 +190,11 @@ static char *readFile(const char *path) {
 }
 
 static CompiledUnit *compileSource(const char *source, bool typecheck) {
+  // Entries recorded here are keyed by AstNode* identity, valid only for
+  // the AST this one call parses and (if it gets that far) compiles --
+  // see resolved_impl_targets.h.
+  resolvedImplTargetsReset();
+
   int count = 0;
   bool hadError = false;
   int endLine = 0;
