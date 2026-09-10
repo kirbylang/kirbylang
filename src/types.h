@@ -46,8 +46,17 @@ struct Type {
       int fieldCount;
       TypeMember *staticMethods;
       int staticMethodCount;
+      // Parallel to staticMethods/instanceMethods -- staticMethodIsPublic[i]
+      // is whether staticMethods[i] was declared `pub`. A separate array
+      // rather than adding a field to TypeMember, since TypeMember is
+      // shared with `fields` (which tracks visibility elsewhere, via
+      // OP_FIELD's runtime flag) and with trait_'s method arrays (which
+      // have no visibility concept at all -- a trait's required methods
+      // aren't `pub`/private, they're just requirements).
+      bool *staticMethodIsPublic;
       TypeMember *instanceMethods;
       int instanceMethodCount;
+      bool *instanceMethodIsPublic;
       TypeMember *traitInstanceMethods;
       int traitInstanceMethodCount;
       TypeMember *traitStaticMethods;
@@ -132,8 +141,10 @@ Type *typeTrait(Token name, UninternedTypeMember *staticMethods,
 
 void typeStructSetFields(Type *type, UninternedTypeMember *fields,
                          int fieldCount);
-void typeStructAddStaticMethod(Type *type, Token name, Type *methodType);
-void typeStructAddInstanceMethod(Type *type, Token name, Type *methodType);
+void typeStructAddStaticMethod(Type *type, Token name, Type *methodType,
+                               bool isPublic);
+void typeStructAddInstanceMethod(Type *type, Token name, Type *methodType,
+                                 bool isPublic);
 // `hasSelf` picks which of traitInstanceMethods/traitStaticMethods the
 // method is stored in -- see the field's doc comment above.
 void typeStructAddTraitMethod(Type *type, Token name, Type *methodType,
@@ -181,6 +192,14 @@ Type *typeStructInstanceMethodLookup(Type *type, Token methodName);
 Type *typeStructStaticMethodLookup(Type *type, Token methodName);
 Type *typeStructTraitInstanceMethodLookup(Type *type, Token methodName);
 Type *typeStructTraitStaticMethodLookup(Type *type, Token methodName);
+
+// Whether the given own (non-trait) method was declared `pub`. Only
+// meaningful for a method that typeStructInstanceMethodLookup()/
+// typeStructStaticMethodLookup() would find -- returns true (harmlessly)
+// for anything else, since callers only use these after already
+// confirming the method exists.
+bool typeStructInstanceMethodIsPublic(Type *type, Token methodName);
+bool typeStructStaticMethodIsPublic(Type *type, Token methodName);
 
 // Returns NULL if `type` isn't TYPE_TRAIT or has no required method with
 // this name in the given category.

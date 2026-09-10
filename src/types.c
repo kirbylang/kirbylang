@@ -150,6 +150,49 @@ static TypeMember *internMembers(UninternedTypeMember *pending, int count) {
   return members;
 }
 
+static void appendMember(TypeMember **array, int *count, Token name,
+                         Type *memberType) {
+  int newCount = *count + 1;
+  TypeMember *newArray =
+      (TypeMember *)typesAllocRaw(newCount * sizeof(TypeMember));
+  if (*count > 0)
+    memcpy(newArray, *array, (size_t)(*count) * sizeof(TypeMember));
+  newArray[newCount - 1].name = internTokenName(name);
+  newArray[newCount - 1].type = memberType;
+  *array = newArray;
+  *count = newCount;
+}
+
+// Same as appendMember(), but also grows a parallel bool array in
+// lockstep -- used for struct_'s staticMethods/instanceMethods, which
+// track visibility this way rather than on TypeMember itself (see
+// staticMethodIsPublic's doc comment in types.h). This is the *only*
+// place either array grows, including from typeStruct() below -- one
+// path means there's no second call site that can leave the two arrays
+// mismatched in length the way a previous version of typeStruct() once
+// could.
+static void appendMemberWithVisibility(TypeMember **array, bool **isPublicArray,
+                                       int *count, Token name, Type *memberType,
+                                       bool isPublic) {
+  int newCount = *count + 1;
+
+  TypeMember *newMembers =
+      (TypeMember *)typesAllocRaw((size_t)newCount * sizeof(TypeMember));
+  if (*count > 0)
+    memcpy(newMembers, *array, (size_t)(*count) * sizeof(TypeMember));
+  newMembers[newCount - 1].name = internTokenName(name);
+  newMembers[newCount - 1].type = memberType;
+
+  bool *newIsPublic = (bool *)typesAllocRaw((size_t)newCount * sizeof(bool));
+  if (*count > 0)
+    memcpy(newIsPublic, *isPublicArray, (size_t)(*count) * sizeof(bool));
+  newIsPublic[newCount - 1] = isPublic;
+
+  *array = newMembers;
+  *isPublicArray = newIsPublic;
+  *count = newCount;
+}
+
 Type *typeStruct(Token name, UninternedTypeMember *fields, int fieldCount,
                  UninternedTypeMember *staticMethods, int staticMethodCount,
                  UninternedTypeMember *instanceMethods,
@@ -158,12 +201,31 @@ Type *typeStruct(Token name, UninternedTypeMember *fields, int fieldCount,
   type->as.struct_.name = internTokenName(name);
   type->as.struct_.fields = internMembers(fields, fieldCount);
   type->as.struct_.fieldCount = fieldCount;
-  type->as.struct_.staticMethods =
-      internMembers(staticMethods, staticMethodCount);
-  type->as.struct_.staticMethodCount = staticMethodCount;
-  type->as.struct_.instanceMethods =
-      internMembers(instanceMethods, instanceMethodCount);
-  type->as.struct_.instanceMethodCount = instanceMethodCount;
+
+  // Built one at a time through appendMemberWithVisibility(), the same
+  // helper typeStructAddStaticMethod()/typeStructAddInstanceMethod() use,
+  // rather than a separate internMembers()-plus-fill-the-visibility-array
+  // path. The real checker only ever calls typeStruct() with all-zero
+  // method counts (a placeholder -- see typchkCheckProgram's struct
+  // registration pass) and always adds methods afterwards through those
+  // two functions; a caller that passes pre-built methods here directly
+  // (as some unit tests do) gets them defaulted to public the same way.
+  for (int i = 0; i < staticMethodCount; i++) {
+    appendMemberWithVisibility(&type->as.struct_.staticMethods,
+                               &type->as.struct_.staticMethodIsPublic,
+                               &type->as.struct_.staticMethodCount,
+                               staticMethods[i].name, staticMethods[i].type,
+                               /*isPublic=*/false);
+  }
+
+  for (int i = 0; i < instanceMethodCount; i++) {
+    appendMemberWithVisibility(&type->as.struct_.instanceMethods,
+                               &type->as.struct_.instanceMethodIsPublic,
+                               &type->as.struct_.instanceMethodCount,
+                               instanceMethods[i].name, instanceMethods[i].type,
+                               /*isPublic=*/false);
+  }
+
   return type;
 }
 
@@ -201,27 +263,19 @@ void typeStructSetFields(Type *type, UninternedTypeMember *fields,
   type->as.struct_.fieldCount = fieldCount;
 }
 
-static void appendMember(TypeMember **array, int *count, Token name,
-                         Type *memberType) {
-  int newCount = *count + 1;
-  TypeMember *newArray =
-      (TypeMember *)typesAllocRaw(newCount * sizeof(TypeMember));
-  if (*count > 0)
-    memcpy(newArray, *array, (size_t)(*count) * sizeof(TypeMember));
-  newArray[newCount - 1].name = internTokenName(name);
-  newArray[newCount - 1].type = memberType;
-  *array = newArray;
-  *count = newCount;
+void typeStructAddStaticMethod(Type *type, Token name, Type *methodType,
+                               bool isPublic) {
+  appendMemberWithVisibility(
+      &type->as.struct_.staticMethods, &type->as.struct_.staticMethodIsPublic,
+      &type->as.struct_.staticMethodCount, name, methodType, isPublic);
 }
 
-void typeStructAddStaticMethod(Type *type, Token name, Type *methodType) {
-  appendMember(&type->as.struct_.staticMethods,
-               &type->as.struct_.staticMethodCount, name, methodType);
-}
-
-void typeStructAddInstanceMethod(Type *type, Token name, Type *methodType) {
-  appendMember(&type->as.struct_.instanceMethods,
-               &type->as.struct_.instanceMethodCount, name, methodType);
+void typeStructAddInstanceMethod(Type *type, Token name, Type *methodType,
+                                 bool isPublic) {
+  appendMemberWithVisibility(&type->as.struct_.instanceMethods,
+                             &type->as.struct_.instanceMethodIsPublic,
+                             &type->as.struct_.instanceMethodCount, name,
+                             methodType, isPublic);
 }
 
 void typeStructAddTraitMethod(Type *type, Token name, Type *methodType,
@@ -420,6 +474,31 @@ Type *typeStructStaticMethodLookup(Type *type, Token methodName) {
     return NULL;
   return memberLookup(type->as.struct_.staticMethods,
                       type->as.struct_.staticMethodCount, methodName);
+}
+
+static bool memberIsPublicLookup(TypeMember *members, bool *isPublicArray,
+                                 int count, Token name) {
+  for (int i = 0; i < count; i++) {
+    if (internedNameEqualsToken(members[i].name, name))
+      return isPublicArray[i];
+  }
+  return true; // not found -- harmless default; callers check existence first
+}
+
+bool typeStructInstanceMethodIsPublic(Type *type, Token methodName) {
+  if (type == NULL || type->kind != TYPE_STRUCT)
+    return true;
+  return memberIsPublicLookup(type->as.struct_.instanceMethods,
+                              type->as.struct_.instanceMethodIsPublic,
+                              type->as.struct_.instanceMethodCount, methodName);
+}
+
+bool typeStructStaticMethodIsPublic(Type *type, Token methodName) {
+  if (type == NULL || type->kind != TYPE_STRUCT)
+    return true;
+  return memberIsPublicLookup(type->as.struct_.staticMethods,
+                              type->as.struct_.staticMethodIsPublic,
+                              type->as.struct_.staticMethodCount, methodName);
 }
 
 Type *typeStructTraitInstanceMethodLookup(Type *type, Token methodName) {

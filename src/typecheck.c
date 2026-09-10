@@ -776,6 +776,7 @@ static Type *typchkInferGet(TypeEnv *env, AstNode *node) {
           return NULL;
 
         Type *methodType = typeStructStaticMethodLookup(structType, get->name);
+        bool isOwnMethod = methodType != NULL;
 
         if (methodType == NULL) {
           methodType = typeStructTraitStaticMethodLookup(structType, get->name);
@@ -785,6 +786,18 @@ static Type *typchkInferGet(TypeEnv *env, AstNode *node) {
           typchkErrorAtTokenFmt(&get->name, "%s has no static method '%.*s'.",
                                 typeToString(structType), get->name.length,
                                 get->name.start);
+          return NULL;
+        }
+
+        // Trait methods are always public; only an own (plain-impl)
+        // method can be private.
+        bool isPrivate = !typeStructStaticMethodIsPublic(structType, get->name);
+
+        if (isOwnMethod && isPrivate &&
+            typchkTypeEnvGetImplTargetType(env) != structType) {
+          typchkErrorAtTokenFmt(&get->name, "Method '%.*s' is private to '%s'.",
+                                get->name.length, get->name.start,
+                                typeToString(structType));
           return NULL;
         }
 
@@ -819,8 +832,16 @@ static Type *typchkInferGet(TypeEnv *env, AstNode *node) {
 
   // Then look up struct methods
   Type *methodType = typeStructInstanceMethodLookup(objectType, get->name);
-  if (methodType != NULL)
+  if (methodType != NULL) {
+    if (!typeStructInstanceMethodIsPublic(objectType, get->name) &&
+        typchkTypeEnvGetImplTargetType(env) != objectType) {
+      typchkErrorAtTokenFmt(&get->name, "Method '%.*s' is private to '%s'.",
+                            get->name.length, get->name.start,
+                            typeToString(objectType));
+      return NULL;
+    }
     return methodType;
+  }
 
   // Then look up methods that came from an `impl Trait for X` block
   Type *traitMethodType =
@@ -1932,9 +1953,11 @@ static void typchkRegisterImplMethods(TypeEnv *env, AstNode *node) {
     }
 
     if (method->hasSelf) {
-      typeStructAddInstanceMethod(structType, method->name, methodType);
+      typeStructAddInstanceMethod(structType, method->name, methodType,
+                                  method->isPublic);
     } else {
-      typeStructAddStaticMethod(structType, method->name, methodType);
+      typeStructAddStaticMethod(structType, method->name, methodType,
+                                method->isPublic);
     }
   }
 

@@ -363,10 +363,9 @@ static void test_struct_instance_field_and_method_access(void) {
   UninternedTypeMember fields[] = {{makeToken("balance"), typeF64()}};
   Type *f64ToF64Params[] = {typeF64()};
   Type *depositType = typeFunction(f64ToF64Params, 1, typeF64());
-  UninternedTypeMember instanceMethods[] = {
-      {makeToken("deposit"), depositType}};
-  Type *account =
-      typeStruct(makeToken("Account"), fields, 1, NULL, 0, instanceMethods, 1);
+  Type *account = typeStruct(makeToken("Account"), fields, 1, NULL, 0, NULL, 0);
+  typeStructAddInstanceMethod(account, makeToken("deposit"), depositType,
+                              /*isPublic=*/true);
   typchkTypeEnvRegisterStruct(env, makeToken("Account"), account);
   typchkTypeEnvDeclare(env, makeToken("a"), account);
 
@@ -394,9 +393,10 @@ static void test_struct_static_method_access(void) {
   Type *pointType = typeStruct(makeToken("Point"), NULL, 0, NULL, 0, NULL, 0);
   Type *newParams[] = {typeF64(), typeF64()};
   Type *newType = typeFunction(newParams, 2, pointType);
-  UninternedTypeMember staticMethods[] = {{makeToken("new"), newType}};
-  Type *point =
-      typeStruct(makeToken("Point"), NULL, 0, staticMethods, 1, NULL, 0);
+  Type *point = typeStruct(makeToken("Point"), NULL, 0, NULL, 0, NULL, 0);
+  typeStructAddStaticMethod(point, makeToken("new"), newType,
+                            /*isPublic=*/true);
+
   typchkTypeEnvRegisterStruct(env, makeToken("Point"), point);
 
   int outCount = 0;
@@ -767,6 +767,44 @@ static bool typecheckSource(const char *source) {
   AstNode **ast = parse(source, &outCount, &hadParseError, &endLine);
   assert(!hadParseError);
   return typchkCheckProgram(ast, outCount);
+}
+
+static void test_struct_private_instance_method_uncallable_from_outside(void) {
+  // Structs now get compile-time visibility enforcement instead of only
+  // failing at runtime via canAccess() in vm.c.
+  typchkResetError();
+  bool ok = typecheckSource("struct Greeter {}\n"
+                            "impl Greeter {\n"
+                            "  fun greet(self): string = \"hi\";\n"
+                            "}\n"
+                            "print Greeter {}.greet();\n");
+  assert(!ok);
+}
+
+static void test_struct_private_static_method_uncallable_from_outside(void) {
+  typchkResetError();
+  bool ok = typecheckSource("struct Point {}\n"
+                            "impl Point {\n"
+                            "  fun origin(): Point = Point {};\n"
+                            "}\n"
+                            "print Point.origin();\n");
+  assert(!ok);
+}
+
+static void test_struct_private_method_callable_from_own_impl_block(void) {
+  // Visibility is per-*type*, not per-impl-block: a private method is
+  // reachable from any impl block for the same struct, including a
+  // different one than the one that declared it.
+  typchkResetError();
+  bool ok =
+      typecheckSource("struct Greeter {}\n"
+                      "impl Greeter {\n"
+                      "  fun secret(self): string = \"hi\";\n"
+                      "}\n"
+                      "impl Greeter {\n"
+                      "  pub fun useSecret(self): string = self.secret();\n"
+                      "}\n");
+  assert(ok);
 }
 
 static void test_program_fully_typed_struct_and_methods(void) {
@@ -1343,6 +1381,9 @@ int main(void) {
   test_unresolved_variable_is_presumed_native_not_an_error();
   test_nested_function_and_closure();
 
+  test_struct_private_instance_method_uncallable_from_outside();
+  test_struct_private_static_method_uncallable_from_outside();
+  test_struct_private_method_callable_from_own_impl_block();
   test_program_fully_typed_struct_and_methods();
   test_program_missing_param_type_fails();
   test_program_missing_return_type_fails();
