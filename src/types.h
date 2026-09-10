@@ -46,13 +46,6 @@ struct Type {
       int fieldCount;
       TypeMember *staticMethods;
       int staticMethodCount;
-      // Parallel to staticMethods/instanceMethods -- staticMethodIsPublic[i]
-      // is whether staticMethods[i] was declared `pub`. A separate array
-      // rather than adding a field to TypeMember, since TypeMember is
-      // shared with `fields` (which tracks visibility elsewhere, via
-      // OP_FIELD's runtime flag) and with trait_'s method arrays (which
-      // have no visibility concept at all -- a trait's required methods
-      // aren't `pub`/private, they're just requirements).
       bool *staticMethodIsPublic;
       TypeMember *instanceMethods;
       int instanceMethodCount;
@@ -193,11 +186,6 @@ Type *typeStructStaticMethodLookup(Type *type, Token methodName);
 Type *typeStructTraitInstanceMethodLookup(Type *type, Token methodName);
 Type *typeStructTraitStaticMethodLookup(Type *type, Token methodName);
 
-// Whether the given own (non-trait) method was declared `pub`. Only
-// meaningful for a method that typeStructInstanceMethodLookup()/
-// typeStructStaticMethodLookup() would find -- returns true (harmlessly)
-// for anything else, since callers only use these after already
-// confirming the method exists.
 bool typeStructInstanceMethodIsPublic(Type *type, Token methodName);
 bool typeStructStaticMethodIsPublic(Type *type, Token methodName);
 
