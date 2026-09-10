@@ -194,28 +194,21 @@ Type *typeStruct(Token name, UninternedTypeMember *fields, int fieldCount,
   type->as.struct_.fields = internMembers(fields, fieldCount);
   type->as.struct_.fieldCount = fieldCount;
 
-  // Built one at a time through appendMemberWithVisibility(), the same
-  // helper typeStructAddStaticMethod()/typeStructAddInstanceMethod() use,
-  // rather than a separate internMembers()-plus-fill-the-visibility-array
-  // path. The real checker only ever calls typeStruct() with all-zero
-  // method counts (a placeholder -- see typchkCheckProgram's struct
-  // registration pass) and always adds methods afterwards through those
-  // two functions; a caller that passes pre-built methods here directly
-  // (as some unit tests do) gets them defaulted to public the same way.
   for (int i = 0; i < staticMethodCount; i++) {
-    appendMemberWithVisibility(&type->as.struct_.staticMethods,
-                               &type->as.struct_.staticMethodIsPublic,
-                               &type->as.struct_.staticMethodCount,
-                               staticMethods[i].name, staticMethods[i].type,
-                               /*isPublic=*/false);
+    appendMemberWithVisibility(
+        &type->as.struct_.staticMethods, &type->as.struct_.staticMethodIsPublic,
+        &type->as.struct_.staticMethodCount, staticMethods[i].name,
+        staticMethods[i].type,
+        /*isPublic=*/&type->as.struct_.staticMethodIsPublic[i]);
   }
 
   for (int i = 0; i < instanceMethodCount; i++) {
-    appendMemberWithVisibility(&type->as.struct_.instanceMethods,
-                               &type->as.struct_.instanceMethodIsPublic,
-                               &type->as.struct_.instanceMethodCount,
-                               instanceMethods[i].name, instanceMethods[i].type,
-                               /*isPublic=*/false);
+    appendMemberWithVisibility(
+        &type->as.struct_.instanceMethods,
+        &type->as.struct_.instanceMethodIsPublic,
+        &type->as.struct_.instanceMethodCount, instanceMethods[i].name,
+        instanceMethods[i].type,
+        /*isPublic=*/&type->as.struct_.instanceMethodIsPublic[i]);
   }
 
   return type;
