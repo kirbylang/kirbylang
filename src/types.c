@@ -163,14 +163,6 @@ static void appendMember(TypeMember **array, int *count, Token name,
   *count = newCount;
 }
 
-// Same as appendMember(), but also grows a parallel bool array in
-// lockstep -- used for struct_'s staticMethods/instanceMethods, which
-// track visibility this way rather than on TypeMember itself (see
-// staticMethodIsPublic's doc comment in types.h). This is the *only*
-// place either array grows, including from typeStruct() below -- one
-// path means there's no second call site that can leave the two arrays
-// mismatched in length the way a previous version of typeStruct() once
-// could.
 static void appendMemberWithVisibility(TypeMember **array, bool **isPublicArray,
                                        int *count, Token name, Type *memberType,
                                        bool isPublic) {
