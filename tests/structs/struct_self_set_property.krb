@@ -1,19 +1,25 @@
 struct Struct {
-    var value: string;
+     var value: string;
 }
 
 impl Struct {
-    fun set(self, value: string): unit {
+    pub fun set(self, value: string): unit {
         self.value = value;
     }
+
+    pub fun get(self): string = self.value;
 }
 
-var instance = Struct {};
+impl Default for Struct {
+    fun default(): Self = Self { value: "" };
+}
+
+var instance = Struct.default();
 
 instance.set("Hello");
 
-print instance.value;
+print instance.get();
 
-instance.value = "World";
+instance.set("World");
 
-print instance.value;
+print instance.get();

@@ -46,8 +46,10 @@ struct Type {
       int fieldCount;
       TypeMember *staticMethods;
       int staticMethodCount;
+      bool *staticMethodIsPublic;
       TypeMember *instanceMethods;
       int instanceMethodCount;
+      bool *instanceMethodIsPublic;
       TypeMember *traitInstanceMethods;
       int traitInstanceMethodCount;
       TypeMember *traitStaticMethods;
@@ -132,8 +134,10 @@ Type *typeTrait(Token name, UninternedTypeMember *staticMethods,
 
 void typeStructSetFields(Type *type, UninternedTypeMember *fields,
                          int fieldCount);
-void typeStructAddStaticMethod(Type *type, Token name, Type *methodType);
-void typeStructAddInstanceMethod(Type *type, Token name, Type *methodType);
+void typeStructAddStaticMethod(Type *type, Token name, Type *methodType,
+                               bool isPublic);
+void typeStructAddInstanceMethod(Type *type, Token name, Type *methodType,
+                                 bool isPublic);
 // `hasSelf` picks which of traitInstanceMethods/traitStaticMethods the
 // method is stored in -- see the field's doc comment above.
 void typeStructAddTraitMethod(Type *type, Token name, Type *methodType,
@@ -181,6 +185,9 @@ Type *typeStructInstanceMethodLookup(Type *type, Token methodName);
 Type *typeStructStaticMethodLookup(Type *type, Token methodName);
 Type *typeStructTraitInstanceMethodLookup(Type *type, Token methodName);
 Type *typeStructTraitStaticMethodLookup(Type *type, Token methodName);
+
+bool typeStructInstanceMethodIsPublic(Type *type, Token methodName);
+bool typeStructStaticMethodIsPublic(Type *type, Token methodName);
 
 // Returns NULL if `type` isn't TYPE_TRAIT or has no required method with
 // this name in the given category.

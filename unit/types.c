@@ -204,14 +204,16 @@ static void test_incremental_struct_methods_across_multiple_calls(void) {
   Type *counter = typeStruct(makeToken("Counter"), NULL, 0, NULL, 0, NULL, 0);
 
   Type *newType = typeFunction(NULL, 0, counter);
-  typeStructAddStaticMethod(counter, makeToken("new"), newType);
+  typeStructAddStaticMethod(counter, makeToken("new"), newType, /*isPublic=*/true);
 
   Type *getType = typeFunction(NULL, 0, typeF64());
-  typeStructAddInstanceMethod(counter, makeToken("get"), getType);
+  typeStructAddInstanceMethod(counter, makeToken("get"), getType,
+                              /*isPublic=*/true);
 
   Type *incParams[] = {typeF64()};
   Type *incType = typeFunction(incParams, 1, typeUnit());
-  typeStructAddInstanceMethod(counter, makeToken("increment"), incType);
+  typeStructAddInstanceMethod(counter, makeToken("increment"), incType,
+                              /*isPublic=*/false);
 
   assert(typeStructStaticMethodLookup(counter, makeToken("new")) == newType);
   assert(typeStructInstanceMethodLookup(counter, makeToken("get")) == getType);
@@ -220,6 +222,11 @@ static void test_incremental_struct_methods_across_multiple_calls(void) {
   // Adding instance methods didn't disturb the static one, or vice versa.
   assert(typeStructStaticMethodLookup(counter, makeToken("get")) == NULL);
   assert(typeStructInstanceMethodLookup(counter, makeToken("new")) == NULL);
+  // Visibility travels with the right method, not just whichever was
+  // added most recently.
+  assert(typeStructStaticMethodIsPublic(counter, makeToken("new")));
+  assert(typeStructInstanceMethodIsPublic(counter, makeToken("get")));
+  assert(!typeStructInstanceMethodIsPublic(counter, makeToken("increment")));
 }
 
 static void test_struct_trait_method_lookup_is_separate_from_instance(void) {
