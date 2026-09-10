@@ -467,12 +467,14 @@ static bool memberIsPublicLookup(TypeMember *members, bool *isPublicArray,
     if (internedNameEqualsToken(members[i].name, name))
       return isPublicArray[i];
   }
-  return true; // not found -- harmless default; callers check existence first
+
+  return false;
 }
 
 bool typeStructInstanceMethodIsPublic(Type *type, Token methodName) {
   if (type == NULL || type->kind != TYPE_STRUCT)
-    return true;
+    return false;
+
   return memberIsPublicLookup(type->as.struct_.instanceMethods,
                               type->as.struct_.instanceMethodIsPublic,
                               type->as.struct_.instanceMethodCount, methodName);
@@ -480,7 +482,8 @@ bool typeStructInstanceMethodIsPublic(Type *type, Token methodName) {
 
 bool typeStructStaticMethodIsPublic(Type *type, Token methodName) {
   if (type == NULL || type->kind != TYPE_STRUCT)
-    return true;
+    return false;
+
   return memberIsPublicLookup(type->as.struct_.staticMethods,
                               type->as.struct_.staticMethodIsPublic,
                               type->as.struct_.staticMethodCount, methodName);
