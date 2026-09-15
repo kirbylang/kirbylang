@@ -1,0 +1,4 @@
+fun identity[T](x: T): T = x;
+
+print identity(1.5);
+print identity("hi");

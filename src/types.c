@@ -134,6 +134,14 @@ Type *typeSelfPlaceholder(void) {
   return selfPlaceholderSingleton;
 }
 
+Type *typeGenericParam(Token name) {
+  Type *type = allocType(TYPE_GENERIC_PARAM);
+
+  type->as.genericParam.name = internTokenName(name);
+
+  return type;
+}
+
 // Copies `pending` into a durable TypeMember array, interning each name.
 static TypeMember *internMembers(UninternedTypeMember *pending, int count) {
   if (count == 0)
@@ -381,6 +389,126 @@ bool typeStructIsGeneric(Type *type) {
          type->as.struct_.isGeneric;
 }
 
+void typeStructSetGenericParams(Type *type, Type **params, int count) {
+  type->as.struct_.genericTypeParams = params;
+  type->as.struct_.genericTypeParamCount = count;
+}
+
+int typeStructGenericParamCount(Type *type) {
+  return type->as.struct_.genericTypeParamCount;
+}
+
+Type *typeStructGenericParamAt(Type *type, int index) {
+  return type->as.struct_.genericTypeParams[index];
+}
+
+Type *typeSubstituteGenericParams(Type *type, Type **params, Type **args,
+                                  int count) {
+  if (type == NULL)
+    return NULL;
+
+  switch (type->kind) {
+  case TYPE_GENERIC_PARAM:
+    for (int i = 0; i < count; i++) {
+      if (type == params[i])
+        return args[i];
+    }
+
+    return type;
+
+  case TYPE_FN: {
+    Type **paramTypes = type->as.function.paramCount > 0
+                            ? (Type **)typesAllocRaw(
+                                  type->as.function.paramCount * sizeof(Type *))
+                            : NULL;
+
+    bool changed = false;
+    for (int i = 0; i < type->as.function.paramCount; i++) {
+      paramTypes[i] = typeSubstituteGenericParams(
+          type->as.function.paramTypes[i], params, args, count);
+
+      if (paramTypes[i] != type->as.function.paramTypes[i])
+        changed = true;
+    }
+
+    Type *returnType = typeSubstituteGenericParams(type->as.function.returnType,
+                                                   params, args, count);
+    if (!changed && returnType == type->as.function.returnType)
+      return type;
+
+    return typeFunction(paramTypes, type->as.function.paramCount, returnType);
+  }
+
+  case TYPE_ARRAY: {
+    Type *elementType = typeSubstituteGenericParams(type->as.array.elementType,
+                                                    params, args, count);
+
+    if (elementType == type->as.array.elementType)
+      return type;
+
+    return typeArray(elementType);
+  }
+
+  case TYPE_STRUCT: {
+    // A field/return type that's itself another generic instantiation
+    // (e.g. `value: Box[T]` inside `struct Wrapper[T]`, or a generic
+    // method's return type `Box[T]`) -- re-instantiate its origin with
+    // its arguments substituted too.
+    if (type->as.struct_.genericTypeArgCount == 0)
+      return type;
+
+    Type **newArgs = (Type **)typesAllocRaw(
+        (size_t)type->as.struct_.genericTypeArgCount * sizeof(Type *));
+    bool changed = false;
+    for (int i = 0; i < type->as.struct_.genericTypeArgCount; i++) {
+      newArgs[i] = typeSubstituteGenericParams(
+          type->as.struct_.genericTypeArgs[i], params, args, count);
+      if (newArgs[i] != type->as.struct_.genericTypeArgs[i])
+        changed = true;
+    }
+    if (!changed)
+      return type;
+
+    if (type->as.struct_.genericOrigin == NULL)
+      return type; // shouldn't happen -- an instantiated type always has one
+
+    return typeStructInstantiate(type->as.struct_.genericOrigin, newArgs,
+                                 type->as.struct_.genericTypeArgCount);
+  }
+
+  default:
+    // Primitives and traits don't themselves contain a generic param --
+    // only a signature or struct built from one can.
+    return type;
+  }
+}
+
+// Fields and methods are resolved lazily, on demand, by
+// typeStructFieldLookup/typeStructInstanceMethodLookup/
+// typeStructStaticMethodLookup below -- substituting from
+// genericOrigin only for the one member actually being looked up.
+//
+// Eagerly copying and substituting every member here recurses forever for a
+// method that returns the struct's own generic type -- e.g. a `new`
+// static method returning `Box[T]`. Building Box[f64] would eagerly
+// substitute `new`'s return type too, which is Box[T] again, which
+// needs Box[f64] built again to substitute *its* `new`, forever. Doing
+// this lazily breaks the cycle: instantiating Box[f64] costs nothing
+// up front, and substituting `new`'s return type only happens if and
+// when something actually looks `new` up.
+Type *typeStructInstantiate(Type *genericType, Type **typeArgs,
+                            int typeArgCount) {
+  Type *instantiated = allocType(TYPE_STRUCT);
+  instantiated->as.struct_.name = genericType->as.struct_.name;
+  instantiated->as.struct_.genericTypeArgs = typeArgs;
+  instantiated->as.struct_.genericTypeArgCount = typeArgCount;
+  instantiated->as.struct_.genericOrigin = genericType;
+  instantiated->as.struct_.hasUnresolvedMembers =
+      genericType->as.struct_.hasUnresolvedMembers;
+
+  return instantiated;
+}
+
 void typeStructMarkUnresolvedMembers(Type *type) {
   type->as.struct_.hasUnresolvedMembers = true;
 }
@@ -406,9 +534,24 @@ bool typesEqual(Type *a, Type *b) {
   case TYPE_SELF:
     return true;
 
-  case TYPE_STRUCT:
-    // Nominal Equality
-    return internedNamesEqual(a->as.struct_.name, b->as.struct_.name);
+  case TYPE_GENERIC_PARAM:
+    return false;
+
+  case TYPE_STRUCT: {
+    if (!internedNamesEqual(a->as.struct_.name, b->as.struct_.name))
+      return false;
+
+    if (a->as.struct_.genericTypeArgCount != b->as.struct_.genericTypeArgCount)
+      return false;
+
+    for (int i = 0; i < a->as.struct_.genericTypeArgCount; i++) {
+      if (!typesEqual(a->as.struct_.genericTypeArgs[i],
+                      b->as.struct_.genericTypeArgs[i]))
+        return false;
+    }
+
+    return true;
+  }
 
   case TYPE_TRAIT:
     // Nominal Equality
@@ -443,6 +586,20 @@ static Type *memberLookup(TypeMember *members, int count, Token name) {
 Type *typeStructFieldLookup(Type *type, Token fieldName) {
   if (type == NULL || type->kind != TYPE_STRUCT)
     return NULL;
+
+  if (type->as.struct_.genericOrigin != NULL) {
+    Type *origin = type->as.struct_.genericOrigin;
+    Type *declared = memberLookup(origin->as.struct_.fields,
+                                  origin->as.struct_.fieldCount, fieldName);
+
+    if (declared == NULL)
+      return NULL;
+
+    return typeSubstituteGenericParams(
+        declared, origin->as.struct_.genericTypeParams,
+        type->as.struct_.genericTypeArgs, type->as.struct_.genericTypeArgCount);
+  }
+
   return memberLookup(type->as.struct_.fields, type->as.struct_.fieldCount,
                       fieldName);
 }
@@ -450,6 +607,21 @@ Type *typeStructFieldLookup(Type *type, Token fieldName) {
 Type *typeStructInstanceMethodLookup(Type *type, Token methodName) {
   if (type == NULL || type->kind != TYPE_STRUCT)
     return NULL;
+
+  if (type->as.struct_.genericOrigin != NULL) {
+    Type *origin = type->as.struct_.genericOrigin;
+    Type *declared =
+        memberLookup(origin->as.struct_.instanceMethods,
+                     origin->as.struct_.instanceMethodCount, methodName);
+
+    if (declared == NULL)
+      return NULL;
+
+    return typeSubstituteGenericParams(
+        declared, origin->as.struct_.genericTypeParams,
+        type->as.struct_.genericTypeArgs, type->as.struct_.genericTypeArgCount);
+  }
+
   return memberLookup(type->as.struct_.instanceMethods,
                       type->as.struct_.instanceMethodCount, methodName);
 }
@@ -457,6 +629,21 @@ Type *typeStructInstanceMethodLookup(Type *type, Token methodName) {
 Type *typeStructStaticMethodLookup(Type *type, Token methodName) {
   if (type == NULL || type->kind != TYPE_STRUCT)
     return NULL;
+
+  if (type->as.struct_.genericOrigin != NULL) {
+    Type *origin = type->as.struct_.genericOrigin;
+    Type *declared =
+        memberLookup(origin->as.struct_.staticMethods,
+                     origin->as.struct_.staticMethodCount, methodName);
+
+    if (declared == NULL)
+      return NULL;
+
+    return typeSubstituteGenericParams(
+        declared, origin->as.struct_.genericTypeParams,
+        type->as.struct_.genericTypeArgs, type->as.struct_.genericTypeArgCount);
+  }
+
   return memberLookup(type->as.struct_.staticMethods,
                       type->as.struct_.staticMethodCount, methodName);
 }
@@ -475,6 +662,15 @@ bool typeStructInstanceMethodIsPublic(Type *type, Token methodName) {
   if (type == NULL || type->kind != TYPE_STRUCT)
     return false;
 
+  if (type->as.struct_.genericOrigin != NULL) {
+    Type *origin = type->as.struct_.genericOrigin;
+
+    return memberIsPublicLookup(origin->as.struct_.instanceMethods,
+                                origin->as.struct_.instanceMethodIsPublic,
+                                origin->as.struct_.instanceMethodCount,
+                                methodName);
+  }
+
   return memberIsPublicLookup(type->as.struct_.instanceMethods,
                               type->as.struct_.instanceMethodIsPublic,
                               type->as.struct_.instanceMethodCount, methodName);
@@ -483,6 +679,15 @@ bool typeStructInstanceMethodIsPublic(Type *type, Token methodName) {
 bool typeStructStaticMethodIsPublic(Type *type, Token methodName) {
   if (type == NULL || type->kind != TYPE_STRUCT)
     return false;
+
+  if (type->as.struct_.genericOrigin != NULL) {
+    Type *origin = type->as.struct_.genericOrigin;
+
+    return memberIsPublicLookup(origin->as.struct_.staticMethods,
+                                origin->as.struct_.staticMethodIsPublic,
+                                origin->as.struct_.staticMethodCount,
+                                methodName);
+  }
 
   return memberIsPublicLookup(type->as.struct_.staticMethods,
                               type->as.struct_.staticMethodIsPublic,
@@ -562,6 +767,21 @@ static void appendTypeName(StrBuf *sb, Type *type) {
   case TYPE_STRUCT:
     sb_appendf(sb, "%.*s", type->as.struct_.name.length,
                internedNameChars(type->as.struct_.name));
+    if (type->as.struct_.genericTypeArgCount > 0) {
+      sb_append(sb, "[");
+
+      for (int i = 0; i < type->as.struct_.genericTypeArgCount; i++) {
+        if (i > 0)
+          sb_append(sb, ", ");
+        appendTypeName(sb, type->as.struct_.genericTypeArgs[i]);
+      }
+
+      sb_append(sb, "]");
+    }
+    break;
+  case TYPE_GENERIC_PARAM:
+    sb_appendf(sb, "%.*s", type->as.genericParam.name.length,
+               internedNameChars(type->as.genericParam.name));
     break;
   case TYPE_TRAIT:
     sb_appendf(sb, "%.*s", type->as.trait_.name.length,

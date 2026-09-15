@@ -400,6 +400,44 @@ static void test_substitute_self_replaces_placeholder(void) {
   assert(typeSubstituteSelf(plainSig, point) == plainSig);
 }
 
+static void test_generic_struct_instantiate_substitutes_fields(void) {
+  Token tParam = makeToken("T");
+  Type *tType = typeGenericParam(tParam);
+  Type *genericParams[] = {tType};
+
+  UninternedTypeMember fields[] = {{makeToken("value"), tType}};
+  Type *box = typeStruct(makeToken("Box"), fields, 1, NULL, 0, NULL, 0);
+  typeStructMarkGeneric(box);
+  typeStructSetGenericParams(box, genericParams, 1);
+
+  Type *f64Args[] = {typeF64()};
+  Type *boxF64 = typeStructInstantiate(box, f64Args, 1);
+
+  Type *stringArgs[] = {typeString()};
+  Type *boxString = typeStructInstantiate(box, stringArgs, 1);
+
+  assert(typeStructFieldLookup(boxF64, makeToken("value")) == typeF64());
+  assert(typeStructFieldLookup(boxString, makeToken("value")) ==
+         typeString());
+  assert(!typesEqual(boxF64, boxString));
+  assert(typesEqual(boxF64, typeStructInstantiate(box, f64Args, 1)));
+
+  // A non-generic struct is unaffected by any of this.
+  Type *point = typeStruct(makeToken("Point"), NULL, 0, NULL, 0, NULL, 0);
+  assert(typeStructGenericParamCount(point) == 0);
+}
+
+static void test_generic_param_equality_is_by_identity(void) {
+  Type *t1 = typeGenericParam(makeToken("T"));
+  Type *t2 = typeGenericParam(makeToken("T"));
+
+  // Same name, but two different declarations' T's are different types --
+  // Box[T]'s T and Pair[T]'s T must never be treated as the same
+  // placeholder, or substituting one would wrongly affect the other.
+  assert(!typesEqual(t1, t2));
+  assert(typesEqual(t1, t1));
+}
+
 int main(void) {
   test_primitives_are_singletons();
   test_primitive_equality();
@@ -419,6 +457,8 @@ int main(void) {
   test_trait_supertrait_and_unresolved_flag();
   test_self_placeholder_is_singleton_and_always_equal();
   test_substitute_self_replaces_placeholder();
+  test_generic_struct_instantiate_substitutes_fields();
+  test_generic_param_equality_is_by_identity();
 
   typesFreeAll();
 

@@ -62,6 +62,9 @@ Type *typchkTypeEnvGetCurrentReturnType(TypeEnv *env);
 void typchkTypeEnvSetImplTargetType(TypeEnv *env, Type *implTargetType);
 Type *typchkTypeEnvGetImplTargetType(TypeEnv *env);
 
+void typchkTypeEnvSetGenericParams(TypeEnv *env, Type **params, int count);
+Type *typchkTypeEnvLookupGenericParam(TypeEnv *env, Token name);
+
 Type *typchkInfer(TypeEnv *env, AstNode *node);
 bool typchkCheck(TypeEnv *env, AstNode *node, Type *expected);
 

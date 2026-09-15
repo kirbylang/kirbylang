@@ -1,0 +1,4 @@
+struct Box[T] {
+    pub var value: T;
+}
+var b: Box[f64] = Box { value: "hi" };

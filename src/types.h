@@ -16,7 +16,8 @@ typedef enum {
   TYPE_FN,
   TYPE_ARRAY,
   TYPE_TRAIT,
-  TYPE_SELF, // `Self`
+  TYPE_SELF,          // `Self`
+  TYPE_GENERIC_PARAM, // Struct[T]; fun id[T](value: T): T = value;
 } TypeKind;
 
 typedef struct Type Type;
@@ -56,7 +57,18 @@ struct Type {
       int traitStaticMethodCount;
       InternedName *implementedTraits;
       int implementedTraitCount;
+
       bool isGeneric;
+      Type **genericTypeParams;
+      int genericTypeParamCount;
+      Type **genericTypeArgs;
+      int genericTypeArgCount;
+      // Set only on an instantiated copy (e.g. Box[f64]) -- points back
+      // to the bare generic declaration it was instantiated from, so a
+      // nested substitution (a field typed as another generic
+      // instantiation) can re-instantiate with new arguments.
+      Type *genericOrigin;
+
       // True if any field/method failed to resolve for any reason
       // (missing annotation, unknown type, etc)
       bool hasUnresolvedMembers;
@@ -66,6 +78,8 @@ struct Type {
       Type **paramTypes;
       int paramCount;
       Type *returnType;
+      Type **genericTypeParams;
+      int genericTypeParamCount;
     } function;
     struct {
       Type *elementType;
@@ -81,6 +95,9 @@ struct Type {
       bool hasUnresolvedMembers;
       bool isBuiltin;
     } trait_;
+    struct {
+      InternedName name;
+    } genericParam;
   } as;
 };
 
@@ -110,6 +127,9 @@ Type *typeF64(void);
 
 // Returns pointer to the `Self` placeholder type
 Type *typeSelfPlaceholder(void);
+
+// Allocate a new generic param type and return a pointer to it
+Type *typeGenericParam(Token name);
 
 // Allocates a new struct type
 // Returns pointer to the new type in the types arena
@@ -149,6 +169,23 @@ void typeStructAddTraitMethod(Type *type, Token name, Type *methodType,
 // type implements a given trait (e.g. `==` requiring Eq).
 void typeStructMarkTraitImplemented(Type *type, InternedName traitName);
 bool typeStructImplementsTrait(Type *type, InternedName traitName);
+
+void typeStructSetGenericParams(Type *type, Type **params, int count);
+int typeStructGenericParamCount(Type *type);
+Type *typeStructGenericParamAt(Type *type, int index);
+
+// Builds a new Type representing `genericType` instantiated with
+// `typeArgs` (e.g. Box + [f64] -> Box[f64]). Copies genericType's
+// fields/methods, substituting every occurrence of genericType's own
+// declared parameters with the matching typeArgs entry.
+Type *typeStructInstantiate(Type *genericType, Type **typeArgs,
+                            int typeArgCount);
+
+// Walks `type`, replacing every occurrence of a Type* found in `params`
+// with the Type* at the same index in `args`. Mirrors typeSubstituteSelf
+// exactly, generalized to more than one substitution at a time.
+Type *typeSubstituteGenericParams(Type *type, Type **params, Type **args,
+                                  int count);
 
 void typeTraitSetMethods(Type *type, UninternedTypeMember *staticMethods,
                          int staticMethodCount,

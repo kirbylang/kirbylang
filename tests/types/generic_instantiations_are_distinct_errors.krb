@@ -1,0 +1,5 @@
+struct Box[T] {
+    pub var value: T;
+}
+var b: Box[string] = Box { value: "hi" };
+var a: Box[f64] = b;
