@@ -450,10 +450,6 @@ Type *typeSubstituteGenericParams(Type *type, Type **params, Type **args,
   }
 
   case TYPE_STRUCT: {
-    // A field/return type that's itself another generic instantiation
-    // (e.g. `value: Box[T]` inside `struct Wrapper[T]`, or a generic
-    // method's return type `Box[T]`) -- re-instantiate its origin with
-    // its arguments substituted too.
     if (type->as.struct_.genericTypeArgCount == 0)
       return type;
 
@@ -483,19 +479,6 @@ Type *typeSubstituteGenericParams(Type *type, Type **params, Type **args,
   }
 }
 
-// Fields and methods are resolved lazily, on demand, by
-// typeStructFieldLookup/typeStructInstanceMethodLookup/
-// typeStructStaticMethodLookup below -- substituting from
-// genericOrigin only for the one member actually being looked up.
-//
-// Eagerly copying and substituting every member here recurses forever for a
-// method that returns the struct's own generic type -- e.g. a `new`
-// static method returning `Box[T]`. Building Box[f64] would eagerly
-// substitute `new`'s return type too, which is Box[T] again, which
-// needs Box[f64] built again to substitute *its* `new`, forever. Doing
-// this lazily breaks the cycle: instantiating Box[f64] costs nothing
-// up front, and substituting `new`'s return type only happens if and
-// when something actually looks `new` up.
 Type *typeStructInstantiate(Type *genericType, Type **typeArgs,
                             int typeArgCount) {
   Type *instantiated = allocType(TYPE_STRUCT);

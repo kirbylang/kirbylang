@@ -980,14 +980,6 @@ static Type *typchkCheckGenericCall(TypeEnv *env, AstNode *node,
     Type *param = genericParams[i];
     Type *bound = bindings[i];
 
-    // A call from inside another generic function can bind this
-    // parameter to *another*, still-abstract generic parameter (the
-    // caller's own), not a concrete type yet -- e.g. callsSecond[T]
-    // calling addViaOther(a, b) binds addViaOther's own parameter to
-    // callsSecond's T, not to f64 directly. In that case the
-    // requirement can't be checked yet; it has to be propagated onto
-    // the caller's own parameter instead, to be checked later, whenever
-    // something eventually calls the caller with a concrete type.
     if (bound->kind == TYPE_GENERIC_PARAM) {
       if (param->as.genericParam.requiresAdd)
         bound->as.genericParam.requiresAdd = true;
@@ -2679,15 +2671,14 @@ bool typchkCheckProgram(AstNode **program, int count) {
     }
   }
 
-  // Generic function bodies, checked early, before any other top-level
-  // code -- including a call site appearing earlier in the file than
-  // the function's own declaration. A generic function's body can
-  // discover, while being checked, that one of its own type parameters
-  // needs to support an operator like +/-/*// (see typchkInferBinary's
-  // TYPE_GENERIC_PARAM handling) -- that discovery has to be complete
-  // before anything that might call this function is checked, or a call
-  // site could be checked against an incomplete picture of what the
-  // function actually requires.
+  // Generic function bodies
+  //
+  // A generic function's body can discover, while being checked,
+  // that one of its own type parameters needs to support an operator like
+  // +/-/*// (see typchkInferBinary's TYPE_GENERIC_PARAM handling) -- that
+  // discovery has to be complete before anything that might call this function
+  // is checked, or a call site could be checked against an incomplete picture
+  // of what the function actually requires.
   //
   // This does not handle two generic functions whose inferred
   // requirements depend on each other (one calling the other, in either
