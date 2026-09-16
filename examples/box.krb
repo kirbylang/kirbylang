@@ -16,8 +16,6 @@ impl Eq for Box {
     fun equals(self, other: Self): bool = self.value == other.value;
 }
 
-fun double(value: f64): f64 = value * 2;
-
 let box_a = Box.new(5);
 let box_b = box_a.map(double);
 let box_c = box_a.map(fun (value: f64): f64 { value * value });
@@ -26,3 +24,5 @@ print box_a != box_b;
 print box_a.get(); // 5
 print box_b.get(); // 10
 print box_c.get(); // 100
+
+fun double(value: f64): f64 = value * 2;
