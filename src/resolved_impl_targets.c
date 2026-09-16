@@ -5,7 +5,7 @@
 
 typedef struct {
   AstNode *node;
-  Token structName;
+  InternedName structName;
 } ResolvedImplTargetEntry;
 
 static ResolvedImplTargetEntry *entries = NULL;
@@ -19,7 +19,7 @@ void resolvedImplTargetsReset(void) {
   entryCapacity = 0;
 }
 
-void resolvedImplTargetsRecord(AstNode *implNode, Token structName) {
+void resolvedImplTargetsRecord(AstNode *implNode, InternedName structName) {
   if (entryCount + 1 > entryCapacity) {
     entryCapacity = entryCapacity < 8 ? 8 : entryCapacity * 2;
     entries = (ResolvedImplTargetEntry *)realloc(
@@ -36,9 +36,18 @@ void resolvedImplTargetsRecord(AstNode *implNode, Token structName) {
 }
 
 const Token *resolvedImplTargetsLookup(AstNode *implNode) {
+  // Rebuilt on every call, from the arena's current base pointer -- not
+  // cached from record time, when a later realloc could have moved it.
+  static Token resolved;
+
   for (int i = 0; i < entryCount; i++) {
-    if (entries[i].node == implNode)
-      return &entries[i].structName;
+    if (entries[i].node == implNode) {
+      resolved.type = TOKEN_IDENTIFIER;
+      resolved.start = internedNameChars(entries[i].structName);
+      resolved.length = entries[i].structName.length;
+      resolved.line = 0;
+      return &resolved;
+    }
   }
 
   return NULL;

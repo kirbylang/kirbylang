@@ -1,0 +1,126 @@
+struct Point {
+  pub var x: f64;
+  pub var y: f64;
+}
+
+impl Point {
+  pub fun new(x: f64, y: f64): Self = Self { x: x, y: y };
+}
+
+impl Display for Point {
+  fun toString(self): string = "(" + numberToString(self.x) + "," + numberToString(self.y) + ")";
+}
+
+impl Eq for Point {
+  fun equals(self, other: Self): bool = self.x == other.x;
+}
+
+impl Default for Point {
+  fun default(): Self = Self { x: 0, y: 0 };
+}
+
+// Force the arena to grow
+
+let identifier0 = 0;
+let identifier1 = 1;
+let identifier2 = 2;
+let identifier3 = 3;
+let identifier4 = 4;
+let identifier5 = 5;
+let identifier6 = 6;
+let identifier7 = 7;
+let identifier8 = 8;
+let identifier9 = 9;
+let identifier10 = 10;
+let identifier11 = 11;
+let identifier12 = 12;
+let identifier13 = 13;
+let identifier14 = 14;
+let identifier15 = 15;
+let identifier16 = 16;
+let identifier17 = 17;
+let identifier18 = 18;
+let identifier19 = 19;
+let identifier20 = 20;
+let identifier21 = 21;
+let identifier22 = 22;
+let identifier23 = 23;
+let identifier24 = 24;
+let identifier25 = 25;
+let identifier26 = 26;
+let identifier27 = 27;
+let identifier28 = 28;
+let identifier29 = 29;
+let identifier30 = 30;
+let identifier31 = 31;
+let identifier32 = 32;
+let identifier33 = 33;
+let identifier34 = 34;
+let identifier35 = 35;
+let identifier36 = 36;
+let identifier37 = 37;
+let identifier38 = 38;
+let identifier39 = 39;
+let identifier40 = 40;
+let identifier41 = 41;
+let identifier42 = 42;
+let identifier43 = 43;
+let identifier44 = 44;
+let identifier45 = 45;
+let identifier46 = 46;
+let identifier47 = 47;
+let identifier48 = 48;
+let identifier49 = 49;
+let identifier50 = 50;
+let identifier51 = 51;
+let identifier52 = 52;
+let identifier53 = 53;
+let identifier54 = 54;
+let identifier55 = 55;
+let identifier56 = 56;
+let identifier57 = 57;
+let identifier58 = 58;
+let identifier59 = 59;
+let identifier60 = 60;
+let identifier61 = 61;
+let identifier62 = 62;
+let identifier63 = 63;
+let identifier64 = 64;
+let identifier65 = 65;
+let identifier66 = 66;
+let identifier67 = 67;
+let identifier68 = 68;
+let identifier69 = 69;
+let identifier70 = 70;
+let identifier71 = 71;
+let identifier72 = 72;
+let identifier73 = 73;
+let identifier74 = 74;
+let identifier75 = 75;
+let identifier76 = 76;
+let identifier77 = 77;
+let identifier78 = 78;
+let identifier79 = 79;
+let identifier80 = 80;
+let identifier81 = 81;
+let identifier82 = 82;
+let identifier83 = 83;
+let identifier84 = 84;
+let identifier85 = 85;
+let identifier86 = 86;
+let identifier87 = 87;
+let identifier88 = 88;
+let identifier89 = 89;
+let identifier90 = 90;
+let identifier91 = 91;
+let identifier92 = 92;
+let identifier93 = 93;
+let identifier94 = 94;
+let identifier95 = 95;
+let identifier96 = 96;
+let identifier97 = 97;
+let identifier98 = 98;
+let identifier99 = 99;
+
+let p = Point.new(identifier0, identifier99);
+print p.toString();
