@@ -1030,9 +1030,7 @@ static Type *typchkCheckGenericCall(TypeEnv *env, AstNode *node,
     }
 
     if (missing != NULL) {
-      typchkErrorAtTokenFmt(&c->paren,
-                            "%s doesn't implement %s, needed here because "
-                            "of how it's used inside this function.",
+      typchkErrorAtTokenFmt(&c->paren, "%s doesn't implement %s",
                             typeToString(bound), missing);
       ok = false;
     }
