@@ -163,6 +163,30 @@ let b = Box { value: 123 };
 a.cmp(b); // -23
 ```
 
+##### Add
+
+```
+struct
+```
+
+##### Sub
+
+```
+
+```
+
+##### Mul
+
+```
+
+```
+
+##### Div
+
+```
+
+```
+
 #### `Self`
 
 `Self` is a special type/value only available in `impl` blocks and is an alias to the impl block's target struct.
