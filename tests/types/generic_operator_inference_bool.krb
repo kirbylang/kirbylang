@@ -1,0 +1,9 @@
+fun add[T](a: T, b: T): T = a + b;
+fun sub[T](a: T, b: T): T = a - b;
+fun div[T](a: T, b: T): T = a / b;
+fun mul[T](a: T, b: T): T = a / b;
+
+print add(true, false);
+print sub(true, false);
+print div(true, false);
+print mul(true, false);
