@@ -1,0 +1,3 @@
+trait Add {
+    fun add(self, other: Self): Self;
+}

@@ -1,0 +1,7 @@
+struct Vector2 {
+    pub var x: f64;
+}
+
+var a = Vector2 { x: 1.0 };
+var b = Vector2 { x: 2.0 };
+print a + b;

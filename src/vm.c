@@ -47,6 +47,11 @@ static void markVMRoots(GC *gc, void *ctx) {
   }
 
   markTable(gc, &vm.globals);
+
+  markObject(gc, (Obj *)vm.addMethodName);
+  markObject(gc, (Obj *)vm.subMethodName);
+  markObject(gc, (Obj *)vm.mulMethodName);
+  markObject(gc, (Obj *)vm.divMethodName);
 }
 
 InterpretResult interpretFunction(ObjFunction *function) {
@@ -129,6 +134,25 @@ void initVM(int argc, char *argv[]) {
 
   initTable(&vm.globals);
 
+  // Set to NULL *before* any of the copyString calls below, not after --
+  // on a second or later call to initVM() (e.g. one test process calling
+  // initVM()/freeVM() repeatedly), these fields still hold whatever
+  // ObjString* they pointed at from the previous run. freeVM() frees
+  // every object, including those strings, but has no reason to know
+  // about these four fields and doesn't null them out. If the first
+  // copyString call below triggers a GC cycle before its own assignment
+  // completes, markVMRoots would otherwise mark a dangling pointer left
+  // over from the prior run.
+  vm.addMethodName = NULL;
+  vm.subMethodName = NULL;
+  vm.mulMethodName = NULL;
+  vm.divMethodName = NULL;
+
+  vm.addMethodName = copyString(vm.gc, "add", 3);
+  vm.subMethodName = copyString(vm.gc, "sub", 3);
+  vm.mulMethodName = copyString(vm.gc, "mul", 3);
+  vm.divMethodName = copyString(vm.gc, "div", 3);
+
   defineAllNatives(&vm);
 }
 
@@ -137,6 +161,14 @@ void freeVM(void) {
   freeTable(vm.gc, &vm.globals);
   freeTable(vm.gc, &vm.gc->strings);
   freeObjects(vm.gc);
+
+  // freeObjects just freed the ObjStrings these pointed at -- null them
+  // out so nothing can read through a dangling pointer if anything looks
+  // at them before the next initVM() call.
+  vm.addMethodName = NULL;
+  vm.subMethodName = NULL;
+  vm.mulMethodName = NULL;
+  vm.divMethodName = NULL;
 }
 
 void pushOnStack(Value value) {
@@ -488,21 +520,109 @@ static InterpretResult run(void) {
         Value result = NUMBER_VAL(a + b);
 
         pushOnStack(result);
+      } else if (IS_INSTANCE(operand_a) && IS_INSTANCE(operand_b)) {
+        ObjInstance *instance = AS_INSTANCE(operand_a);
+        Value method;
+        if (!tableGet(&instance->struct_->methods, vm.addMethodName,
+                      &method)) {
+          runtimeError(&vm, "'%s' doesn't implement Add.",
+                      instance->struct_->name->chars);
+          return INTERPRET_RUNTIME_ERROR;
+        }
+        if (!call(AS_CLOSURE(method), 1)) {
+          return INTERPRET_RUNTIME_ERROR;
+        }
+        frame = &vm.frames[vm.frameCount - 1];
       } else {
-        runtimeError(&vm, "Operands must be two numbers or two strings.");
+        runtimeError(&vm, "Operands must be two numbers, two strings, or "
+                          "two values of a type implementing Add.");
         return INTERPRET_RUNTIME_ERROR;
       }
       break;
     }
-    case OP_SUBTRACT:
-      BINARY_OP(NUMBER_VAL, -);
+    case OP_SUBTRACT: {
+      Value operand_b = peekStack(0);
+      Value operand_a = peekStack(1);
+
+      if (IS_NUMBER(operand_b) && IS_NUMBER(operand_a)) {
+        double b = AS_NUMBER(popFromStack());
+        double a = AS_NUMBER(popFromStack());
+        pushOnStack(NUMBER_VAL(a - b));
+      } else if (IS_INSTANCE(operand_a) && IS_INSTANCE(operand_b)) {
+        ObjInstance *instance = AS_INSTANCE(operand_a);
+        Value method;
+        if (!tableGet(&instance->struct_->methods, vm.subMethodName,
+                      &method)) {
+          runtimeError(&vm, "'%s' doesn't implement Sub.",
+                      instance->struct_->name->chars);
+          return INTERPRET_RUNTIME_ERROR;
+        }
+        if (!call(AS_CLOSURE(method), 1)) {
+          return INTERPRET_RUNTIME_ERROR;
+        }
+        frame = &vm.frames[vm.frameCount - 1];
+      } else {
+        runtimeError(&vm, "Operands must be two numbers or two values of "
+                          "a type implementing Sub.");
+        return INTERPRET_RUNTIME_ERROR;
+      }
       break;
-    case OP_MULTIPLY:
-      BINARY_OP(NUMBER_VAL, *);
+    }
+    case OP_MULTIPLY: {
+      Value operand_b = peekStack(0);
+      Value operand_a = peekStack(1);
+
+      if (IS_NUMBER(operand_b) && IS_NUMBER(operand_a)) {
+        double b = AS_NUMBER(popFromStack());
+        double a = AS_NUMBER(popFromStack());
+        pushOnStack(NUMBER_VAL(a * b));
+      } else if (IS_INSTANCE(operand_a) && IS_INSTANCE(operand_b)) {
+        ObjInstance *instance = AS_INSTANCE(operand_a);
+        Value method;
+        if (!tableGet(&instance->struct_->methods, vm.mulMethodName,
+                      &method)) {
+          runtimeError(&vm, "'%s' doesn't implement Mul.",
+                      instance->struct_->name->chars);
+          return INTERPRET_RUNTIME_ERROR;
+        }
+        if (!call(AS_CLOSURE(method), 1)) {
+          return INTERPRET_RUNTIME_ERROR;
+        }
+        frame = &vm.frames[vm.frameCount - 1];
+      } else {
+        runtimeError(&vm, "Operands must be two numbers or two values of "
+                          "a type implementing Mul.");
+        return INTERPRET_RUNTIME_ERROR;
+      }
       break;
+    }
     case OP_DIVIDE: {
-      assertNonZero(&vm, "/", peekStack(0).as.number, 1);
-      BINARY_OP(NUMBER_VAL, /);
+      Value operand_b = peekStack(0);
+      Value operand_a = peekStack(1);
+
+      if (IS_NUMBER(operand_b) && IS_NUMBER(operand_a)) {
+        assertNonZero(&vm, "/", operand_b.as.number, 1);
+        double b = AS_NUMBER(popFromStack());
+        double a = AS_NUMBER(popFromStack());
+        pushOnStack(NUMBER_VAL(a / b));
+      } else if (IS_INSTANCE(operand_a) && IS_INSTANCE(operand_b)) {
+        ObjInstance *instance = AS_INSTANCE(operand_a);
+        Value method;
+        if (!tableGet(&instance->struct_->methods, vm.divMethodName,
+                      &method)) {
+          runtimeError(&vm, "'%s' doesn't implement Div.",
+                      instance->struct_->name->chars);
+          return INTERPRET_RUNTIME_ERROR;
+        }
+        if (!call(AS_CLOSURE(method), 1)) {
+          return INTERPRET_RUNTIME_ERROR;
+        }
+        frame = &vm.frames[vm.frameCount - 1];
+      } else {
+        runtimeError(&vm, "Operands must be two numbers or two values of "
+                          "a type implementing Div.");
+        return INTERPRET_RUNTIME_ERROR;
+      }
       break;
     }
     case OP_MODULO: {

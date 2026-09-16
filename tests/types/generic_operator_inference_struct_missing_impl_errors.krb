@@ -1,0 +1,7 @@
+struct Vector2 {
+    pub var x: f64;
+}
+
+fun sum[T](a: T, b: T): T = a + b;
+var r = sum(Vector2 { x: 1.0 }, Vector2 { x: 2.0 });
+print r.x;

@@ -1,0 +1,58 @@
+== <script> ==
+0000    1 OP_NIL
+0001    | OP_RETURN
+== <script> ==
+0000    1 OP_STRUCT           0 'Vector2'
+0002    | OP_DEFINE_GLOBAL    0 'Vector2'
+0004    | OP_GET_GLOBAL       1 'Vector2'
+0006    2 OP_NIL
+0007    | OP_FIELD            2 'x' public
+0010    3 OP_NIL
+0011    | OP_FIELD            3 'y' public
+0014    4 OP_POP
+0015    6 OP_GET_GLOBAL       4 'Vector2'
+0017    8 OP_CLOSURE          6 <fn add>
+0019    | OP_METHOD           5 'add'
+0021    9 OP_POP
+0022   11 OP_GET_GLOBAL       8 'Vector2'
+0024    | OP_CONSTANT         9 'x'
+0026    | OP_CONSTANT        10 '1.000000'
+0028    | OP_CONSTANT        11 'y'
+0030    | OP_CONSTANT        12 '2.000000'
+0032    | OP_STRUCT_INIT      2
+0034    | OP_DEFINE_GLOBAL    7 'a'
+0036   12 OP_GET_GLOBAL      14 'Vector2'
+0038    | OP_CONSTANT        15 'x'
+0040    | OP_CONSTANT        16 '3.000000'
+0042    | OP_CONSTANT        17 'y'
+0044    | OP_CONSTANT        18 '4.000000'
+0046    | OP_STRUCT_INIT      2
+0048    | OP_DEFINE_GLOBAL   13 'b'
+0050   13 OP_GET_GLOBAL      20 'a'
+0052    | OP_GET_GLOBAL      21 'b'
+0054    | OP_ADD
+0055    | OP_DEFINE_GLOBAL   19 'c'
+0057   14 OP_GET_GLOBAL      22 'c'
+0059    | OP_GET_PROPERTY    23 'x'
+0061    | OP_PRINT
+0062   15 OP_GET_GLOBAL      24 'c'
+0064    | OP_GET_PROPERTY    25 'y'
+0066    | OP_PRINT
+0067   16 OP_NIL
+0068    | OP_RETURN
+== add ==
+0000    8 OP_GET_GLOBAL       0 'Vector2'
+0002    | OP_CONSTANT         1 'x'
+0004    | OP_GET_LOCAL        0
+0006    | OP_GET_PROPERTY     2 'x'
+0008    | OP_GET_LOCAL        1
+0010    | OP_GET_PROPERTY     3 'x'
+0012    | OP_ADD
+0013    | OP_CONSTANT         4 'y'
+0015    | OP_GET_LOCAL        0
+0017    | OP_GET_PROPERTY     5 'y'
+0019    | OP_GET_LOCAL        1
+0021    | OP_GET_PROPERTY     6 'y'
+0023    | OP_ADD
+0024    | OP_STRUCT_INIT      2
+0026    | OP_RETURN

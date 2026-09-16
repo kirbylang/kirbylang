@@ -38,6 +38,14 @@ struct VM {
 
   Table globals;
 
+  // Pre-interned once at startup so OP_ADD/OP_SUBTRACT/OP_MULTIPLY/
+  // OP_DIVIDE's struct-dispatch fallback doesn't re-intern these on
+  // every single operation.
+  ObjString *addMethodName;
+  ObjString *subMethodName;
+  ObjString *mulMethodName;
+  ObjString *divMethodName;
+
   ObjUpvalue *openUpvalues;
 
   GC *gc; // heap context (borrowed)

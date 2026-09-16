@@ -1,0 +1,48 @@
+== <script> ==
+0000    1 OP_NIL
+0001    | OP_RETURN
+== <script> ==
+0000    1 OP_CLOSURE          1 <fn identity>
+0002    | OP_DEFINE_GLOBAL    0 'identity'
+0004    5 OP_STRUCT           2 'Box'
+0006    | OP_DEFINE_GLOBAL    2 'Box'
+0008    | OP_GET_GLOBAL       3 'Box'
+0010    6 OP_NIL
+0011    | OP_FIELD            4 'value' public
+0014    7 OP_POP
+0015    2 OP_GET_GLOBAL       5 'identity'
+0017    | OP_CONSTANT         6 '1.500000'
+0019    | OP_CALL             1
+0021    | OP_PRINT
+0022    3 OP_GET_GLOBAL       7 'identity'
+0024    | OP_CONSTANT         8 'hi'
+0026    | OP_CALL             1
+0028    | OP_PRINT
+0029    8 OP_GET_GLOBAL       9 'Box'
+0031    9 OP_CLOSURE         11 <fn new>
+0033    | OP_METHOD          10 'new'
+0035   10 OP_CLOSURE         13 <fn get>
+0037    | OP_METHOD          12 'get'
+0039   11 OP_POP
+0040   12 OP_GET_GLOBAL      15 'Box'
+0042    | OP_CONSTANT        17 '5.000000'
+0044    | OP_INVOKE        (1 args)   16 'new'
+0047    | OP_DEFINE_GLOBAL   14 'b'
+0049   13 OP_GET_GLOBAL      18 'b'
+0051    | OP_INVOKE        (0 args)   19 'get'
+0054    | OP_PRINT
+0055   14 OP_NIL
+0056    | OP_RETURN
+== identity ==
+0000    1 OP_GET_LOCAL        1
+0002    | OP_RETURN
+== new ==
+0000    9 OP_GET_GLOBAL       0 'Box'
+0002    | OP_CONSTANT         1 'value'
+0004    | OP_GET_LOCAL        1
+0006    | OP_STRUCT_INIT      1
+0008    | OP_RETURN
+== get ==
+0000   10 OP_GET_LOCAL        0
+0002    | OP_GET_PROPERTY     0 'value'
+0004    | OP_RETURN

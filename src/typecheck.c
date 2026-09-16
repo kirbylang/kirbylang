@@ -317,6 +317,50 @@ static void typchkTypeEnvDefineBuiltinTraits(TypeEnv *env) {
       typeTrait(makeTokenFromCString("Default"), defaultStatic, 1, NULL, 0);
   typeTraitMarkBuiltin(default_);
   typchkTypeEnvRegisterTrait(env, makeTokenFromCString("Default"), default_);
+
+  // Add
+  Type **addParams = (Type **)typesAllocRaw(sizeof(Type *));
+  addParams[0] = typeSelfPlaceholder();
+  UninternedTypeMember addInstance[] = {
+      {makeTokenFromCString("add"),
+       typeFunction(addParams, 1, typeSelfPlaceholder())},
+  };
+  Type *add = typeTrait(makeTokenFromCString("Add"), NULL, 0, addInstance, 1);
+  typeTraitMarkBuiltin(add);
+  typchkTypeEnvRegisterTrait(env, makeTokenFromCString("Add"), add);
+
+  // Sub
+  Type **subParams = (Type **)typesAllocRaw(sizeof(Type *));
+  subParams[0] = typeSelfPlaceholder();
+  UninternedTypeMember subInstance[] = {
+      {makeTokenFromCString("sub"),
+       typeFunction(subParams, 1, typeSelfPlaceholder())},
+  };
+  Type *sub = typeTrait(makeTokenFromCString("Sub"), NULL, 0, subInstance, 1);
+  typeTraitMarkBuiltin(sub);
+  typchkTypeEnvRegisterTrait(env, makeTokenFromCString("Sub"), sub);
+
+  // Mul
+  Type **mulParams = (Type **)typesAllocRaw(sizeof(Type *));
+  mulParams[0] = typeSelfPlaceholder();
+  UninternedTypeMember mulInstance[] = {
+      {makeTokenFromCString("mul"),
+       typeFunction(mulParams, 1, typeSelfPlaceholder())},
+  };
+  Type *mul = typeTrait(makeTokenFromCString("Mul"), NULL, 0, mulInstance, 1);
+  typeTraitMarkBuiltin(mul);
+  typchkTypeEnvRegisterTrait(env, makeTokenFromCString("Mul"), mul);
+
+  // Div
+  Type **divParams = (Type **)typesAllocRaw(sizeof(Type *));
+  divParams[0] = typeSelfPlaceholder();
+  UninternedTypeMember divInstance[] = {
+      {makeTokenFromCString("div"),
+       typeFunction(divParams, 1, typeSelfPlaceholder())},
+  };
+  Type *div = typeTrait(makeTokenFromCString("Div"), NULL, 0, divInstance, 1);
+  typeTraitMarkBuiltin(div);
+  typchkTypeEnvRegisterTrait(env, makeTokenFromCString("Div"), div);
 }
 
 void typchkTypeEnvSetSelfType(TypeEnv *env, Type *selfType) {
@@ -649,14 +693,82 @@ static Type *typchkInferBinary(TypeEnv *env, AstNode *node) {
         typesEqual(rightType, typeString()))
       return typeString();
 
+    if (leftType->kind == TYPE_STRUCT && typesEqual(leftType, rightType) &&
+        typeStructImplementsTrait(
+            leftType, internTokenName(makeTokenFromCString("Add")))) {
+      return leftType;
+    }
+
+    if (leftType->kind == TYPE_GENERIC_PARAM &&
+        typesEqual(leftType, rightType)) {
+      leftType->as.genericParam.requiresAdd = true;
+      return leftType;
+    }
+
     typchkErrorAtTokenFmt(&b->op,
-                          "'+' needs two f64s or two strings, got %s and %s.",
+                          "'+' requires f64, string or a type implementing the "
+                          "`Add` trait. got %s and %s.",
                           typeToString(leftType), typeToString(rightType));
     return NULL;
 
   case TOKEN_MINUS:
+    if (typesEqual(leftType, typeF64()) && typesEqual(rightType, typeF64()))
+      return typeF64();
+
+    if (leftType->kind == TYPE_STRUCT && typesEqual(leftType, rightType) &&
+        typeStructImplementsTrait(
+            leftType, internTokenName(makeTokenFromCString("Sub")))) {
+      return leftType;
+    }
+
+    if (leftType->kind == TYPE_GENERIC_PARAM &&
+        typesEqual(leftType, rightType)) {
+      leftType->as.genericParam.requiresSub = true;
+      return leftType;
+    }
+
+    typchkErrorAtTokenFmt(&b->op,
+                          "'-' needs two f64s or two values of a type "
+                          "implementing Sub, got %s and %s.",
+                          typeToString(leftType), typeToString(rightType));
+
+    return NULL;
   case TOKEN_STAR:
+    if (typesEqual(leftType, typeF64()) && typesEqual(rightType, typeF64()))
+      return typeF64();
+    if (leftType->kind == TYPE_STRUCT && typesEqual(leftType, rightType) &&
+        typeStructImplementsTrait(
+            leftType, internTokenName(makeTokenFromCString("Mul")))) {
+      return leftType;
+    }
+    if (leftType->kind == TYPE_GENERIC_PARAM &&
+        typesEqual(leftType, rightType)) {
+      leftType->as.genericParam.requiresMul = true;
+      return leftType;
+    }
+    typchkErrorAtTokenFmt(&b->op,
+                          "'*' needs two f64s or two values of a type "
+                          "implementing Mul, got %s and %s.",
+                          typeToString(leftType), typeToString(rightType));
+    return NULL;
   case TOKEN_SLASH:
+    if (typesEqual(leftType, typeF64()) && typesEqual(rightType, typeF64()))
+      return typeF64();
+    if (leftType->kind == TYPE_STRUCT && typesEqual(leftType, rightType) &&
+        typeStructImplementsTrait(
+            leftType, internTokenName(makeTokenFromCString("Div")))) {
+      return leftType;
+    }
+    if (leftType->kind == TYPE_GENERIC_PARAM &&
+        typesEqual(leftType, rightType)) {
+      leftType->as.genericParam.requiresDiv = true;
+      return leftType;
+    }
+    typchkErrorAtTokenFmt(&b->op,
+                          "'/' needs two f64s or two values of a type "
+                          "implementing Div, got %s and %s.",
+                          typeToString(leftType), typeToString(rightType));
+    return NULL;
   case TOKEN_MODULO:
     if (!typesEqual(leftType, typeF64())) {
       typchkErrorAtNodeFmt(b->left, "Expected f64, got %s.",
@@ -798,11 +910,49 @@ static Type *typchkInferCall(TypeEnv *env, AstNode *node) {
   return typchkCheckCallAgainstFunctionType(env, node, calleeType);
 }
 
+static bool typchkTypeSatisfiesOperatorTrait(Type *type,
+                                             const char *traitName) {
+  if (typesEqual(type, typeF64())) {
+    // f64 satisfies all four -- matches the existing, unconditional f64
+    // arithmetic rules.
+    return true;
+  }
+  if (typesEqual(type, typeString())) {
+    // string only ever satisfied +, never -, *, /.
+    return strcmp(traitName, "Add") == 0;
+  }
+  if (type->kind == TYPE_STRUCT) {
+    return typeStructImplementsTrait(
+        type, internTokenName(makeTokenFromCString(traitName)));
+  }
+  return false;
+}
+
 static Type *typchkCheckGenericCall(TypeEnv *env, AstNode *node,
                                     Type *calleeType) {
   CallNode *c = &node->as.call;
   Type **genericParams = calleeType->as.function.genericTypeParams;
   int genericParamCount = calleeType->as.function.genericTypeParamCount;
+
+  if (!calleeType->as.function.bodyChecked) {
+    // This can only happen while checking another generic function's own
+    // body, before this callee's body has had its turn in the early
+    // generic-function pass (see typchkCheckProgram) -- e.g. one generic
+    // function calling another one declared later in the file. Its
+    // operator requirements aren't necessarily complete yet, and
+    // proceeding anyway can let a genuinely wrong call through
+    // undetected until runtime. Reject it outright rather than risk
+    // that -- known limitation, not a silent gap; see the design notes
+    // this is drawn from for the real fix (checking to a fixpoint).
+    typchkErrorAtTokenFmt(
+        &c->paren,
+        "Can't call this generic function yet -- it's declared later in "
+        "the file than the generic function calling it, and its own "
+        "requirements aren't fully known until its declaration is "
+        "reached. Move it earlier, or avoid calling one generic "
+        "function from another for now.");
+    return NULL;
+  }
 
   if (c->argCount != calleeType->as.function.paramCount) {
     typchkErrorAtTokenFmt(&c->paren, "Expected %d argument(s), got %d.",
@@ -830,6 +980,60 @@ static Type *typchkCheckGenericCall(TypeEnv *env, AstNode *node,
       typchkErrorAtTokenFmt(
           &c->paren, "Argument %d has the wrong type. Expected %s, got %s.",
           i + 1, typeToString(expected), typeToString(argType));
+      ok = false;
+    }
+  }
+
+  // Every requirement discovered while checking this function's own body
+  // (see typchkInferBinary's TYPE_GENERIC_PARAM handling) has to hold for
+  // whatever this call bound each parameter to.
+  for (int i = 0; i < genericParamCount; i++) {
+    if (bindings[i] == NULL)
+      continue; // this parameter's binding already failed to unify above
+
+    Type *param = genericParams[i];
+    Type *bound = bindings[i];
+
+    // A call from inside another generic function can bind this
+    // parameter to *another*, still-abstract generic parameter (the
+    // caller's own), not a concrete type yet -- e.g. callsSecond[T]
+    // calling addViaOther(a, b) binds addViaOther's own parameter to
+    // callsSecond's T, not to f64 directly. In that case the
+    // requirement can't be checked yet; it has to be propagated onto
+    // the caller's own parameter instead, to be checked later, whenever
+    // something eventually calls the caller with a concrete type.
+    if (bound->kind == TYPE_GENERIC_PARAM) {
+      if (param->as.genericParam.requiresAdd)
+        bound->as.genericParam.requiresAdd = true;
+      if (param->as.genericParam.requiresSub)
+        bound->as.genericParam.requiresSub = true;
+      if (param->as.genericParam.requiresMul)
+        bound->as.genericParam.requiresMul = true;
+      if (param->as.genericParam.requiresDiv)
+        bound->as.genericParam.requiresDiv = true;
+      continue;
+    }
+
+    const char *missing = NULL;
+    if (param->as.genericParam.requiresAdd &&
+        !typchkTypeSatisfiesOperatorTrait(bound, "Add")) {
+      missing = "Add";
+    } else if (param->as.genericParam.requiresSub &&
+               !typchkTypeSatisfiesOperatorTrait(bound, "Sub")) {
+      missing = "Sub";
+    } else if (param->as.genericParam.requiresMul &&
+               !typchkTypeSatisfiesOperatorTrait(bound, "Mul")) {
+      missing = "Mul";
+    } else if (param->as.genericParam.requiresDiv &&
+               !typchkTypeSatisfiesOperatorTrait(bound, "Div")) {
+      missing = "Div";
+    }
+
+    if (missing != NULL) {
+      typchkErrorAtTokenFmt(&c->paren,
+                            "%s doesn't implement %s, needed here because "
+                            "of how it's used inside this function.",
+                            typeToString(bound), missing);
       ok = false;
     }
   }
@@ -2279,6 +2483,7 @@ static void typchkCheckTopLevelFunctionBody(TypeEnv *env, AstNode *node) {
   typchkCheckFunctionBody(env, fn, fnType->as.function.paramTypes,
                           fnType->as.function.returnType, NULL);
   typchkTypeEnvSetGenericParams(env, NULL, 0);
+  fnType->as.function.bodyChecked = true;
 }
 
 static void checkImplMethodBodies(TypeEnv *env, AstNode *node) {
@@ -2317,6 +2522,7 @@ static void checkImplMethodBodies(TypeEnv *env, AstNode *node) {
     Type *selfType = method->hasSelf ? structType : NULL;
     typchkCheckFunctionBody(env, method, methodType->as.function.paramTypes,
                             methodType->as.function.returnType, selfType);
+    methodType->as.function.bodyChecked = true;
   }
 
   typchkTypeEnvSetImplTargetType(env, NULL);
@@ -2489,6 +2695,28 @@ bool typchkCheckProgram(AstNode **program, int count) {
     }
   }
 
+  // Generic function bodies, checked early, before any other top-level
+  // code -- including a call site appearing earlier in the file than
+  // the function's own declaration. A generic function's body can
+  // discover, while being checked, that one of its own type parameters
+  // needs to support an operator like +/-/*// (see typchkInferBinary's
+  // TYPE_GENERIC_PARAM handling) -- that discovery has to be complete
+  // before anything that might call this function is checked, or a call
+  // site could be checked against an incomplete picture of what the
+  // function actually requires.
+  //
+  // This does not handle two generic functions whose inferred
+  // requirements depend on each other (one calling the other, in either
+  // order) -- see the design note this is drawn from for why that's a
+  // real, separate, currently open question.
+
+  for (int i = 0; i < count; i++) {
+    if (program[i]->kind == NODE_FUNCTION &&
+        program[i]->as.function.genericParamCount > 0) {
+      typchkCheckTopLevelFunctionBody(env, program[i]);
+    }
+  }
+
   // Definite Assignment Analysis
 
   DaaSet topLevelDaa;
@@ -2499,7 +2727,9 @@ bool typchkCheckProgram(AstNode **program, int count) {
 
     switch (node->kind) {
     case NODE_FUNCTION:
-      typchkCheckTopLevelFunctionBody(env, node);
+      if (node->as.function.genericParamCount == 0) {
+        typchkCheckTopLevelFunctionBody(env, node);
+      }
       break;
 
     case NODE_IMPL:

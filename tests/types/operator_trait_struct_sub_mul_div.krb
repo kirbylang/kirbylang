@@ -1,0 +1,22 @@
+struct Scalar {
+    pub var value: f64;
+}
+
+impl Sub for Scalar {
+    pub fun sub(self, other: Scalar): Scalar =
+        Scalar { value: self.value - other.value };
+}
+impl Mul for Scalar {
+    pub fun mul(self, other: Scalar): Scalar =
+        Scalar { value: self.value * other.value };
+}
+impl Div for Scalar {
+    pub fun div(self, other: Scalar): Scalar =
+        Scalar { value: self.value / other.value };
+}
+
+var a = Scalar { value: 10.0 };
+var b = Scalar { value: 4.0 };
+print (a - b).value;
+print (a * b).value;
+print (a / b).value;

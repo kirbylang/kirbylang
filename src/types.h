@@ -80,6 +80,13 @@ struct Type {
       Type *returnType;
       Type **genericTypeParams;
       int genericTypeParamCount;
+      // True once this function's own body has been checked (and, for a
+      // generic function, its operator requirements fully discovered --
+      // see typchkInferBinary's TYPE_GENERIC_PARAM handling). A generic
+      // function calling another generic function whose body hasn't
+      // been checked yet can't safely trust that its requirements are
+      // complete -- see typchkCheckGenericCall's use of this flag.
+      bool bodyChecked;
     } function;
     struct {
       Type *elementType;
@@ -97,6 +104,19 @@ struct Type {
     } trait_;
     struct {
       InternedName name;
+      // Discovered by scanning a generic function's own body for
+      // operator usage on this exact parameter -- see the operator
+      // inference design. Checked against the concrete argument type at
+      // every call site once discovered. Every generic parameter gets
+      // its own, unique Type*, so these flags live directly on it
+      // rather than in some separate, parallel array -- whatever this
+      // parameter's Type* flows to (the function's own
+      // genericTypeParams array, every field/param type built from it)
+      // already shares this exact pointer.
+      bool requiresAdd;
+      bool requiresSub;
+      bool requiresMul;
+      bool requiresDiv;
     } genericParam;
   } as;
 };
