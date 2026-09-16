@@ -1,3 +1,4 @@
-fun addViaOther[T](a: T, b: T): T = a + b;
-fun callsSecond[T](a: T, b: T): T = addViaOther(a, b);
-print callsSecond(1, 2);
+fun add[T](a: T, b: T): T = a + b;
+fun callAdd[T](a: T, b: T): T = add(a, b);
+
+print callAdd(1, 2);

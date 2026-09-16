@@ -1,0 +1,4 @@
+fun callOther(a: f64, b: f64): f64 = other(a, b);
+fun other[T](a: T, b: T): T = a + b;
+
+print callOther(1, 2);

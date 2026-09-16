@@ -2,24 +2,24 @@
 0000    1 OP_NIL
 0001    | OP_RETURN
 == <script> ==
-0000    1 OP_CLOSURE          1 <fn addViaOther>
-0002    | OP_DEFINE_GLOBAL    0 'addViaOther'
-0004    2 OP_CLOSURE          3 <fn callsSecond>
-0006    | OP_DEFINE_GLOBAL    2 'callsSecond'
-0008    3 OP_GET_GLOBAL       4 'callsSecond'
+0000    1 OP_CLOSURE          1 <fn add>
+0002    | OP_DEFINE_GLOBAL    0 'add'
+0004    2 OP_CLOSURE          3 <fn callAdd>
+0006    | OP_DEFINE_GLOBAL    2 'callAdd'
+0008    4 OP_GET_GLOBAL       4 'callAdd'
 0010    | OP_CONSTANT         5 '1.000000'
 0012    | OP_CONSTANT         6 '2.000000'
 0014    | OP_CALL             2
 0016    | OP_PRINT
-0017    4 OP_NIL
+0017    5 OP_NIL
 0018    | OP_RETURN
-== addViaOther ==
+== add ==
 0000    1 OP_GET_LOCAL        1
 0002    | OP_GET_LOCAL        2
 0004    | OP_ADD
 0005    | OP_RETURN
-== callsSecond ==
-0000    2 OP_GET_GLOBAL       0 'addViaOther'
+== callAdd ==
+0000    2 OP_GET_GLOBAL       0 'add'
 0002    | OP_GET_LOCAL        1
 0004    | OP_GET_LOCAL        2
 0006    | OP_CALL             2

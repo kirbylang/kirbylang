@@ -1,10 +1,12 @@
 struct Vector2 {
     pub var x: f64;
 }
+
 impl Add for Vector2 {
     pub fun add(self, other: Vector2): Vector2 = Vector2 { x: self.x + other.x };
 }
 
-fun sum[T](a: T, b: T): T = a + b;
 var r = sum(Vector2 { x: 1.0 }, Vector2 { x: 2.0 });
+fun sum[T](a: T, b: T): T = a + b;
+
 print r.x;
