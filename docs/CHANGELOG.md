@@ -60,7 +60,6 @@
     - `Struct`
     - `Array`
   - Generic types
-    - Parses but the generic types are ignored
     - `fun [T, U] (T) => U`
     - `Struct[T]`
     - `type MapFn[T, U] = fun [T, U] (T) => U;`
@@ -82,12 +81,19 @@
     - Traits can only be implemented once on a struct
     - A trait name can only be declared once, and can't reuse a builtin
       trait's name (`Display`/`Eq`/`Ord`/`Default`)
-    - Builtin traits, always in scope: `Display`, `Eq`, `Ord`, `Default`
+    - Builtin traits, always in scope: `Display`, `Eq`, `Ord`, `Default`, `Add`, `Sub`, `Mul`, `Div`
+      - `f64` and `string` still use OP codes, not trait resolution
     - A circular supertrait chain (`trait A: A {}`, or `trait A: B {} trait B: A {}`) is a compile error
     - Require structs to implement `Eq` trait for `==`/`!=`
     - Limitations
       - `impl Trait for` a primitive type (`f64`, `string`, `bool`, `unit`) isn't supported yet -- needs the same static call-resolution work operator overloading does
-      - No real operator overloading yet. `Eq` is only a typecheck. `==` still runs identify equality
+      - Not full operator overloading
+        - `Eq` is only a typecheck. `==` still runs identify equality
+        - `%` isn't supported yet
+- Initial implementation of polymorphism (unbounded parametric polymorphism). It uses type witness/dictionary passing similar to languages like Haskell.
+  - Generic functions (unbounded) `fun id[T](value: T): T = value`
+    - Function bodies are still checked to detect `+`, `-`, `/`, `*` operations. It's implicit bound checking. `f64` implements `Add`, `Sub`, `Mul`, `Div`. `string` implements `Add`. User types must implement those traits to get those operations.
+  - Generic structs (unbounded) `struct Box[T] {}`
 - [Definite Assignment Analysis](https://en.wikipedia.org/wiki/Definite_assignment_analysis)
 
 - Refine shadow binding rules
