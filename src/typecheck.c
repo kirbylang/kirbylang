@@ -935,22 +935,8 @@ static Type *typchkCheckGenericCall(TypeEnv *env, AstNode *node,
   int genericParamCount = calleeType->as.function.genericTypeParamCount;
 
   if (!calleeType->as.function.bodyChecked) {
-    // This can only happen while checking another generic function's own
-    // body, before this callee's body has had its turn in the early
-    // generic-function pass (see typchkCheckProgram) -- e.g. one generic
-    // function calling another one declared later in the file. Its
-    // operator requirements aren't necessarily complete yet, and
-    // proceeding anyway can let a genuinely wrong call through
-    // undetected until runtime. Reject it outright rather than risk
-    // that -- known limitation, not a silent gap; see the design notes
-    // this is drawn from for the real fix (checking to a fixpoint).
-    typchkErrorAtTokenFmt(
-        &c->paren,
-        "Can't call this generic function yet -- it's declared later in "
-        "the file than the generic function calling it, and its own "
-        "requirements aren't fully known until its declaration is "
-        "reached. Move it earlier, or avoid calling one generic "
-        "function from another for now.");
+    typchkErrorAtTokenFmt(&c->paren, "Generic functions can only call other "
+                                     "generic functions declared before them");
     return NULL;
   }
 
