@@ -1,3 +1,15 @@
 trait Add {
     fun add(self, other: Self): Self;
 }
+
+trait Sub {
+    fun sub(self, other: Self): Self;
+}
+
+trait Mul {
+    fun mul(self, other: Self): Self;
+}
+
+trait Div {
+    fun div(self, other: Self): Self;
+}
