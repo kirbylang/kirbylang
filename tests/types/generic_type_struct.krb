@@ -1,3 +1,5 @@
+type Wrapper[T] = T;
+
 struct Box {
   pub var value: Wrapper[f64];
 }
