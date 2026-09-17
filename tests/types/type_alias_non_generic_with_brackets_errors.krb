@@ -1,0 +1,5 @@
+type Number = f64;
+
+var x: Number[f64] = 1;
+
+print x;

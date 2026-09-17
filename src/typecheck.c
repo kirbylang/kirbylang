@@ -113,6 +113,14 @@ typedef struct {
   int capacity;
 } TypeEnvScope;
 
+// An alias binding, e.g. `type Wrapper[T] = T;` or `type Number = f64;`.
+typedef struct {
+  InternedName name;
+  Type *type;
+  Type **genericParams;
+  int genericParamCount;
+} AliasBinding;
+
 struct TypeEnv {
   // State
 
@@ -128,7 +136,7 @@ struct TypeEnv {
   int functionCount;
   int functionCapacity;
 
-  TypeEnvBinding *aliases;
+  AliasBinding *aliases;
   int aliasCount;
   int aliasCapacity;
 
@@ -249,13 +257,54 @@ Type *typchkTypeEnvLookupFunction(TypeEnv *env, Token name) {
   return bindingArrayLookup(env->functions, env->functionCount, name);
 }
 
+static void aliasArrayWrite(AliasBinding **array, int *count, int *capacity,
+                            Token name, Type *type, Type **genericParams,
+                            int genericParamCount) {
+  if (*capacity < *count + 1) {
+    *capacity = *capacity < 8 ? 8 : *capacity * 2;
+    *array =
+        (AliasBinding *)realloc(*array, sizeof(AliasBinding) * (*capacity));
+    if (*array == NULL) {
+      fprintf(stderr, "realloc failed in aliasArrayWrite\n");
+      exit(1);
+    }
+  }
+  (*array)[*count].name = internTokenName(name);
+  (*array)[*count].type = type;
+  (*array)[*count].genericParams = genericParams;
+  (*array)[*count].genericParamCount = genericParamCount;
+  (*count)++;
+}
+
+static AliasBinding *aliasArrayLookup(AliasBinding *array, int count,
+                                      Token name) {
+  // Most recently declared binding wins
+  for (int i = count - 1; i >= 0; i--) {
+    if (internedNameEqualsToken(array[i].name, name))
+      return &array[i];
+  }
+  return NULL;
+}
+
 void typchkTypeEnvRegisterAlias(TypeEnv *env, Token name, Type *type) {
-  bindingArrayWrite(&env->aliases, &env->aliasCount, &env->aliasCapacity, name,
-                    type);
+  aliasArrayWrite(&env->aliases, &env->aliasCount, &env->aliasCapacity, name,
+                  type, NULL, 0);
 }
 
 Type *typchkTypeEnvLookupAlias(TypeEnv *env, Token name) {
-  return bindingArrayLookup(env->aliases, env->aliasCount, name);
+  AliasBinding *binding = aliasArrayLookup(env->aliases, env->aliasCount, name);
+  return binding != NULL ? binding->type : NULL;
+}
+
+static void typchkTypeEnvRegisterGenericAlias(TypeEnv *env, Token name,
+                                              Type **params, int paramCount,
+                                              Type *targetTemplate) {
+  aliasArrayWrite(&env->aliases, &env->aliasCount, &env->aliasCapacity, name,
+                  targetTemplate, params, paramCount);
+}
+
+static AliasBinding *typchkTypeEnvLookupAliasBinding(TypeEnv *env, Token name) {
+  return aliasArrayLookup(env->aliases, env->aliasCount, name);
 }
 
 void typchkTypeEnvRegisterTrait(TypeEnv *env, Token name, Type *type) {
@@ -462,6 +511,53 @@ Type *typchkResolveType(TypeEnv *env, AstNode *typeAnnotation) {
   TypeNode *t = &typeAnnotation->as.type_;
 
   if (t->genericArgCount > 0) {
+    if (tokenTextEquals(&t->name, "Array")) {
+      if (t->genericArgCount != 1) {
+        typchkErrorAtTokenFmt(&t->name,
+                              "'Array' expects 1 type argument(s), got %d.",
+                              t->genericArgCount);
+        return NULL;
+      }
+
+      Type *elementType = typchkResolveType(env, t->genericArgs[0]);
+      if (elementType == NULL)
+        return NULL;
+
+      return typeArray(elementType);
+    }
+
+    AliasBinding *aliasBinding = typchkTypeEnvLookupAliasBinding(env, t->name);
+
+    if (aliasBinding != NULL) {
+      if (aliasBinding->genericParamCount == 0) {
+        typchkErrorAtTokenFmt(&t->name, "'%.*s' doesn't take type arguments.",
+                              t->name.length, t->name.start);
+        return NULL;
+      }
+
+      if (t->genericArgCount != aliasBinding->genericParamCount) {
+        typchkErrorAtTokenFmt(
+            &t->name, "'%.*s' expects %d type argument(s), got %d.",
+            t->name.length, t->name.start, aliasBinding->genericParamCount,
+            t->genericArgCount);
+        return NULL;
+      }
+
+      Type **typeArgs =
+          (Type **)typesAllocRaw(t->genericArgCount * sizeof(Type *));
+
+      for (int i = 0; i < t->genericArgCount; i++) {
+        typeArgs[i] = typchkResolveType(env, t->genericArgs[i]);
+
+        if (typeArgs[i] == NULL)
+          return NULL;
+      }
+
+      return typeSubstituteGenericParams(aliasBinding->type,
+                                         aliasBinding->genericParams, typeArgs,
+                                         aliasBinding->genericParamCount);
+    }
+
     Type *baseType;
 
     if (tokenTextEquals(&t->name, "Self")) {
@@ -2643,7 +2739,6 @@ bool typchkCheckProgram(AstNode **program, int count) {
   int pendingAliasCount = 0;
 
   for (int i = 0; i < count; i++) {
-    // Generic aliases are still parse-only, same as generic types.
     if (program[i]->kind == NODE_TYPE_ALIAS &&
         program[i]->as.typeAlias.genericParamCount == 0) {
       pendingAliasCount++;
@@ -2668,6 +2763,34 @@ bool typchkCheckProgram(AstNode **program, int count) {
     }
 
     free(unresolvedAliasAliases);
+  }
+
+  // Generic type aliases (e.g. `type Wrapper[T] = T;`).
+  for (int i = 0; i < count; i++) {
+    AstNode *node = program[i];
+
+    if (node->kind != NODE_TYPE_ALIAS ||
+        node->as.typeAlias.genericParamCount == 0) {
+      continue;
+    }
+
+    TypeAliasNode *alias = &node->as.typeAlias;
+
+    Type **params = (Type **)typesAllocRaw((size_t)alias->genericParamCount *
+                                           sizeof(Type *));
+
+    for (int p = 0; p < alias->genericParamCount; p++) {
+      params[p] = typeGenericParam(alias->genericParams[p]);
+    }
+
+    typchkTypeEnvSetGenericParams(env, params, alias->genericParamCount);
+    Type *target = typchkResolveType(env, alias->target);
+    typchkTypeEnvSetGenericParams(env, NULL, 0);
+
+    if (target != NULL) {
+      typchkTypeEnvRegisterGenericAlias(env, alias->name, params,
+                                        alias->genericParamCount, target);
+    }
   }
 
   // Trait method signatures + supertrait resolution

@@ -116,12 +116,52 @@ static void test_resolve_unknown_name_errors(void) {
   typchkTypeEnvDestroy(env);
 }
 
-static void test_resolve_generic_type_errors(void) {
+// Array[T] is a builtin, not a struct in the struct table, so it's resolved
+// by its own case in typchkResolveType's generic-args branch rather than by
+// looking anything up.
+static void test_resolve_array_generic_type(void) {
+  TypeEnv *env = typchkTypeEnvCreate();
+
+  Type *result =
+      typchkResolveType(env, parseFirstVarType("var x: Array[f64];"));
+  assert(result != NULL);
+  assert(result->kind == TYPE_ARRAY);
+  assert(result->as.array.elementType == typeF64());
+
+  // Nested Array[Array[f64]] resolves its argument recursively.
+  Type *nested =
+      typchkResolveType(env, parseFirstVarType("var x: Array[Array[f64]];"));
+  assert(nested != NULL);
+  assert(nested->kind == TYPE_ARRAY);
+  Type *inner = nested->as.array.elementType;
+  assert(inner != NULL);
+  assert(inner->kind == TYPE_ARRAY);
+  assert(inner->as.array.elementType == typeF64());
+
+  typchkTypeEnvDestroy(env);
+}
+
+static void test_resolve_array_generic_type_wrong_arity_errors(void) {
   TypeEnv *env = typchkTypeEnvCreate();
   typchkResetError();
 
   Type *result =
-      typchkResolveType(env, parseFirstVarType("var x: Array[f64];"));
+      typchkResolveType(env, parseFirstVarType("var x: Array[f64, f64];"));
+  assert(result == NULL);
+  assert(typchkHadError());
+
+  typchkResetError();
+  typchkTypeEnvDestroy(env);
+}
+
+// An unregistered name used with generic args still errors -- only Array
+// and registered generic structs/aliases are recognized there.
+static void test_resolve_unknown_generic_type_errors(void) {
+  TypeEnv *env = typchkTypeEnvCreate();
+  typchkResetError();
+
+  Type *result =
+      typchkResolveType(env, parseFirstVarType("var x: Bogus[f64];"));
   assert(result == NULL);
   assert(typchkHadError());
 
@@ -1327,7 +1367,9 @@ int main(void) {
   test_resolve_primitives();
   test_resolve_registered_struct();
   test_resolve_unknown_name_errors();
-  test_resolve_generic_type_errors();
+  test_resolve_array_generic_type();
+  test_resolve_array_generic_type_wrong_arity_errors();
+  test_resolve_unknown_generic_type_errors();
   test_resolve_function_type();
   test_resolve_function_type_propagates_inner_error();
 

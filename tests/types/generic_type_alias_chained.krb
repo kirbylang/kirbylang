@@ -1,0 +1,6 @@
+type First[T] = T;
+type Second[T] = First[T];
+
+let value: Second[f64] = 5;
+
+print value;
