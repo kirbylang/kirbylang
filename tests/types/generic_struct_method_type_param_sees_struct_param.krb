@@ -1,0 +1,14 @@
+struct Box[T] {
+  pub var value: T;
+}
+
+impl Box[T] {
+  pub fun get(self): T = self.value;
+
+  // `U` is this method's own generic param; `T` belongs to the enclosing
+  // `impl Box[T]` block. Both need to resolve here.
+  pub fun echo[U](self, x: U): T = self.value;
+}
+
+let b = Box { value: 5 };
+print b.get();

@@ -374,6 +374,38 @@ void typchkTypeEnvSetGenericParams(TypeEnv *env, Type **params, int count) {
   env->_genericParamCount = count;
 }
 
+// A snapshot of whatever generic-param scope was active before
+// typchkEnterGenericScope extended it, for typchkExitGenericScope to
+// restore.
+typedef struct {
+  Type **params;
+  int count;
+} GenericParamScope;
+
+static GenericParamScope typchkEnterGenericScope(TypeEnv *env, Type **extra,
+                                                 int extraCount) {
+  GenericParamScope previous = {env->_genericParams, env->_genericParamCount};
+
+  if (extraCount == 0)
+    return previous;
+
+  int mergedCount = extraCount + previous.count;
+  Type **merged = (Type **)typesAllocRaw((size_t)mergedCount * sizeof(Type *));
+
+  for (int i = 0; i < extraCount; i++)
+    merged[i] = extra[i];
+
+  for (int i = 0; i < previous.count; i++)
+    merged[extraCount + i] = previous.params[i];
+
+  typchkTypeEnvSetGenericParams(env, merged, mergedCount);
+  return previous;
+}
+
+static void typchkExitGenericScope(TypeEnv *env, GenericParamScope previous) {
+  typchkTypeEnvSetGenericParams(env, previous.params, previous.count);
+}
+
 Type *typchkTypeEnvLookupGenericParam(TypeEnv *env, Token name) {
   for (int i = 0; i < env->_genericParamCount; i++) {
     if (internedNameEqualsToken(env->_genericParams[i]->as.genericParam.name,
@@ -1873,9 +1905,10 @@ static Type *typchkResolveFunctionSignature(TypeEnv *env, FunctionNode *fn) {
     for (int i = 0; i < fn->genericParamCount; i++) {
       genericParams[i] = typeGenericParam(fn->genericParams[i]);
     }
-
-    typchkTypeEnvSetGenericParams(env, genericParams, fn->genericParamCount);
   }
+
+  GenericParamScope previousScope =
+      typchkEnterGenericScope(env, genericParams, fn->genericParamCount);
 
   Type **paramTypes =
       fn->arity > 0 ? (Type **)typesAllocRaw(fn->arity * sizeof(Type *)) : NULL;
@@ -1901,9 +1934,7 @@ static Type *typchkResolveFunctionSignature(TypeEnv *env, FunctionNode *fn) {
   Type *returnType =
       fn->returnType != NULL ? typchkResolveType(env, fn->returnType) : NULL;
 
-  if (fn->genericParamCount > 0) {
-    typchkTypeEnvSetGenericParams(env, NULL, 0);
-  }
+  typchkExitGenericScope(env, previousScope);
 
   if (!ok)
     return NULL;
@@ -2495,10 +2526,24 @@ static void checkImplMethodBodies(TypeEnv *env, AstNode *node) {
     if (methodType == NULL)
       continue; // signature/struct/trait validation failed; already reported
 
+    // A method's own generic params (echo[U]) aren't in methodType's
+    // signature-resolution scope by default here -- only the struct's
+    // (T, from the impl block's own SetGenericParams call above) is.
+    // Extend it for this method's body the same way
+    // typchkResolveFunctionSignature already does for its signature.
+    int methodGenericParamCount = method->genericParamCount;
+    GenericParamScope previousMethodScope = typchkEnterGenericScope(
+        env,
+        methodGenericParamCount > 0 ? methodType->as.function.genericTypeParams
+                                    : NULL,
+        methodGenericParamCount);
+
     Type *selfType = method->hasSelf ? structType : NULL;
     typchkCheckFunctionBody(env, method, methodType->as.function.paramTypes,
                             methodType->as.function.returnType, selfType);
     methodType->as.function.bodyChecked = true;
+
+    typchkExitGenericScope(env, previousMethodScope);
   }
 
   typchkTypeEnvSetImplTargetType(env, NULL);
