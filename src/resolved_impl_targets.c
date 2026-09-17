@@ -24,6 +24,7 @@ void resolvedImplTargetsRecord(AstNode *implNode, InternedName structName) {
     entryCapacity = entryCapacity < 8 ? 8 : entryCapacity * 2;
     entries = (ResolvedImplTargetEntry *)realloc(
         entries, (size_t)entryCapacity * sizeof(ResolvedImplTargetEntry));
+
     if (entries == NULL) {
       fprintf(stderr, "realloc failed in resolvedImplTargetsRecord\n");
       exit(1);
