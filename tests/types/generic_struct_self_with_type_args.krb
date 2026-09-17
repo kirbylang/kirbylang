@@ -1,0 +1,14 @@
+struct Box[T] {
+  pub var value: T;
+}
+
+impl Box[T] {
+  // `Self[T]` here should resolve to `Box[T]`, the same generic struct
+  // this impl block targets, instantiated with its own type param.
+  pub fun new(value: T): Self[T] = Self {
+    value: value
+  };
+}
+
+let b = Box.new(5);
+print b.value;

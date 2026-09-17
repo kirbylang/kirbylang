@@ -1,0 +1,7 @@
+struct Point {
+  pub var x: f64;
+}
+
+impl Point {
+  pub fun bad(): Self[f64] = Point { x: 1 };
+}

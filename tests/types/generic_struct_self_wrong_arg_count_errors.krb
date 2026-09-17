@@ -1,0 +1,7 @@
+struct Box[T] {
+  pub var value: T;
+}
+
+impl Box[T] {
+  pub fun bad(): Self[T, T] = Box { value: 1 };
+}

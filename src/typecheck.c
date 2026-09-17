@@ -462,10 +462,22 @@ Type *typchkResolveType(TypeEnv *env, AstNode *typeAnnotation) {
   TypeNode *t = &typeAnnotation->as.type_;
 
   if (t->genericArgCount > 0) {
-    Type *baseType = typchkTypeEnvLookupStruct(env, t->name);
-    if (baseType == NULL) {
-      typchkErrorAtToken(&t->name, "Unknown type.");
-      return NULL;
+    Type *baseType;
+
+    if (tokenTextEquals(&t->name, "Self")) {
+      baseType = env->_currentImplTargetType;
+
+      if (baseType == NULL) {
+        // Error will be reported upstream
+        return typeSelfPlaceholder();
+      }
+    } else {
+      baseType = typchkTypeEnvLookupStruct(env, t->name);
+
+      if (baseType == NULL) {
+        typchkErrorAtToken(&t->name, "Unknown type.");
+        return NULL;
+      }
     }
 
     if (!typeStructIsGeneric(baseType)) {
