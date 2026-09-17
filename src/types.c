@@ -436,7 +436,19 @@ Type *typeSubstituteGenericParams(Type *type, Type **params, Type **args,
     if (!changed && returnType == type->as.function.returnType)
       return type;
 
-    return typeFunction(paramTypes, type->as.function.paramCount, returnType);
+    Type *substituted =
+        typeFunction(paramTypes, type->as.function.paramCount, returnType);
+    // This function's own generic params (e.g. U in a method declared as
+    // map[U](...)) are unrelated to the substitution just performed (e.g.
+    // the enclosing struct's T -> f64) and must survive it -- otherwise a
+    // call to this method loses genericTypeParamCount and silently stops
+    // being treated as a generic call at all.
+    substituted->as.function.genericTypeParams =
+        type->as.function.genericTypeParams;
+    substituted->as.function.genericTypeParamCount =
+        type->as.function.genericTypeParamCount;
+    substituted->as.function.bodyChecked = type->as.function.bodyChecked;
+    return substituted;
   }
 
   case TYPE_ARRAY: {
