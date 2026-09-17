@@ -3,5 +3,5 @@ struct Point {
 }
 
 impl Point {
-  pub fun bad(): Self[f64] = Point { x: 1 };
+  pub fun one(): Self[f64] = Point { x: 1 };
 }

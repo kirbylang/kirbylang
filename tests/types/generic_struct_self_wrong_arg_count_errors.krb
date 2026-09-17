@@ -3,5 +3,5 @@ struct Box[T] {
 }
 
 impl Box[T] {
-  pub fun bad(): Self[T, T] = Box { value: 1 };
+  pub fun one(): Self[T, T] = Box { value: 1 };
 }
