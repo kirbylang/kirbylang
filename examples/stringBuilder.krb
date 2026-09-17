@@ -1,23 +1,23 @@
 #!/usr/bin/env krb -f
 
 struct StringBuilder {
-    var value: Array;
+    var parts: Array[string];
 }
 
 impl StringBuilder {
-    pub fun add(self, add: string): Self {
-        arrPush(self.value, add);
+    pub fun add(self, part: string): Self {
+        arrPush(self.parts, part);
 
         self
     }
 }
 
 impl Default for StringBuilder {
-    fun default(): Self = Self { value: [] };
+    fun default(): Self = Self { parts: [] };
 }
 
 impl Display for StringBuilder {
-    fun toString(self): string = arrJoin(self.value, "");
+    fun toString(self): string = arrJoin(self.parts, "");
 }
 
 let builder = StringBuilder.default()
