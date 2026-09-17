@@ -37,17 +37,19 @@ void resolvedImplTargetsRecord(AstNode *implNode, InternedName structName) {
 }
 
 const Token *resolvedImplTargetsLookup(AstNode *implNode) {
-  // Rebuilt on every call, from the arena's current base pointer -- not
-  // cached from record time, when a later realloc could have moved it.
-  static Token resolved;
+  static Token resolvedImplTargetToken;
 
   for (int i = 0; i < entryCount; i++) {
-    if (entries[i].node == implNode) {
-      resolved.type = TOKEN_IDENTIFIER;
-      resolved.start = internedNameChars(entries[i].structName);
-      resolved.length = entries[i].structName.length;
-      resolved.line = 0;
-      return &resolved;
+    ResolvedImplTargetEntry entry = entries[i];
+    InternedName structName = entry.structName;
+
+    if (entry.node == implNode) {
+      resolvedImplTargetToken.type = TOKEN_IDENTIFIER;
+      resolvedImplTargetToken.start = internedNameChars(structName);
+      resolvedImplTargetToken.length = structName.length;
+      resolvedImplTargetToken.line = 0;
+
+      return &resolvedImplTargetToken;
     }
   }
 
