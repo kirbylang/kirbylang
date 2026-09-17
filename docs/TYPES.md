@@ -15,12 +15,18 @@ Literal values have primitive types.
 
 ### Arrays
 
-An array holds items that all share one type. Generic types aren't supported yet so the type is just `Array`.
+```
+let arr: Array[f64] = [1, 2, 3];
+
+print arr[0];
+```
+
+Nesting works the same way any other generic type argument does.
 
 ```
-let arr: Array = [1, 2, 3];
+let matrix: Array[Array[f64]] = [[1, 2], [3, 4]];
 
-print list[0];
+print matrix[0][1];
 ```
 
 ### Structs
@@ -39,13 +45,66 @@ print box.value;
 
 #### Generics
 
-Not supported yet. Generic parameters parse, but declaring or using one is
-an error.
+A struct can declare its own type parameters.
 
 ```
 struct Box[T] {
     pub var value: T;
 }
+
+let box: Box[f64] = Box { value: 100 };
+
+print box.value;
+```
+
+`Box[f64]` and `Box[string]` are different, incompatible types even though
+they both come from the same generic struct.
+
+```
+struct Box[T] {
+    pub var value: T;
+}
+
+var b: Box[string] = Box { value: "Hello World" };
+var a: Box[f64] = b; // Error: Expected Box[f64], got Box[string].
+```
+
+Inside an `impl` block for a generic struct, `Self` can take the same type
+arguments to refer to a specific instantiation.
+
+```
+struct Box[T] {
+    pub var value: T;
+}
+
+impl Box[T] {
+    pub fun new(value: T): Self[T] = Self { value: value };
+}
+
+let box = Box.new(5);
+```
+
+A method can also declare its own type parameter, separate from the
+struct's own.
+
+```
+struct Box[T] {
+    pub var value: T;
+}
+
+impl Box[T] {
+    pub fun new(value: T): Self[T] = Self { value: value };
+
+    pub fun map[U](self, transform: fun (T) => U): Self[U] =
+        Self.new(transform(self.value));
+}
+
+fun double(value: f64): f64 = value * 2;
+
+let box: Box[f64] = Box.new(5);
+let doubled: Box[f64] = box.map(double);
+
+print doubled.value; // 10
 ```
 
 ### Traits
@@ -106,7 +165,7 @@ struct Box {
 }
 
 impl Default for Box {
-    fun default(): Self = Self { value = 0 };
+    fun default(): Self = Self { value: 0 };
 }
 
 let box = Box.default();
@@ -257,6 +316,24 @@ impl Point {
 var p = Point.origin().translate(3, 4);
 ```
 
+##### Generics
+
+`Self` takes the same generics as it's impl target.
+
+```
+struct Wrapper[T] {
+    pub var value: T;
+}
+
+impl Wrapper[T] {
+    pub fun new(value: T): Self[T] = Self { value: value };
+}
+
+let wrapper = Wrapper.new(123);
+
+wrapper.value = "Hello World"; // Error: Expected f64, got string.
+```
+
 #### Supertraits
 
 `trait Sub: Super` declares that an `impl Super for X` must exist for any
@@ -289,6 +366,37 @@ fun sum(a: f64, b: f64): f64 = a + b;
 let sum2: fun (f64, f64) => f64 = sum;
 
 print sum2(1, 2);
+```
+
+#### Generics
+
+A function can declare its own type parameters, resolved from the
+arguments at each call site.
+
+```
+fun id[T](value: T): T = value;
+
+print id(5);    // 5
+print id("hi"); // hi
+```
+
+Using `+`, `-`, `*`, or `/` inside a generic function body requires every
+type the function is ever called with to implement the matching trait
+(`Add`, `Sub`, `Mul`, `Div`). `f64` implements all four and `string`
+implements `Add`; a user struct needs its own `impl` block -- see
+[Add/Sub/Mul/Div](#addsubmuldiv).
+
+```
+fun sum[T](a: T, b: T): T = a + b;
+
+print sum(1, 2);     // 3
+print sum("a", "b"); // ab
+```
+
+```
+fun sub[T](a: T, b: T): T = a - b;
+
+print sub("a", "b"); // Error: string doesn't implement Sub
 ```
 
 ### Lambdas
@@ -339,6 +447,16 @@ let count: Number = 42;
 print count;
 ```
 
+An alias can take its own type parameters too.
+
+```
+type Wrapper[T] = T;
+
+let value: Wrapper[f64] = 5;
+
+print value;
+```
+
 ## Operators
 
 | Operator          | Operands        | Result   |
@@ -355,11 +473,17 @@ print count;
 `==`/`!=` between two structs additionally requires the struct to
 implement `Eq` -- see [Traits](#traits).
 
+`+` `-` `*` `/` between two structs of the same type additionally requires
+that struct to implement `Add`/`Sub`/`Mul`/`Div` respectively -- see
+[Add/Sub/Mul/Div](#addsubmuldiv). `f64` and `string` don't go through
+trait dispatch for these operators; they still use dedicated op codes.
+
 ## Limitations
 
 - Some native functions have no signature yet, so calls to them aren't
   checked
-- Generic types parse but aren't checked
-- Lists have no type annotation syntax
-- `impl Trait for` a primitive type isn't supported yet, and operators
-  don't dispatch to trait methods -- see [Traits](#traits)
+- `impl Trait for` a primitive type (`f64`, `string`, `bool`, `unit`) isn't
+  supported yet -- see [Traits](#traits)
+- Operators only dispatch to trait methods for structs. `f64` and `string`
+  still use dedicated op codes for `+`, `-`, `*`, `/`, `==`, and `<` rather
+  than their trait implementations

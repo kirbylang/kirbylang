@@ -39,8 +39,6 @@
     - Every element must already be a string. There is no implicit conversion
       to string, so joining numbers means mapping `numberToString` first
 - Initial implementation of types and typechecker
-  - Limitations
-    - Generic types are ignored
   - Native function signatures
     - Calls to a native with a signature are checked like any other call
     - `clock`, `__version__`, `exit`, `rand`, `rand01`, `randBetween`,
@@ -57,12 +55,17 @@
     - `f64`
   - Complex Types
     - `fun (f64) => f64`
-    - `Struct`
-    - `Array`
+    - `Struct[T]`
+    - `Array[T]`
+  - `Self` Type
+    - A placeholder type inside `impl` blocks
+    - Supports generics `Self[T]`
   - Generic types
     - `fun [T, U] (T) => U`
     - `Struct[T]`
     - `type MapFn[T, U] = fun [T, U] (T) => U;`
+    - Generic methods
+      - `struct Struct[T] { pub fn method[U](self): unit {} }`
   - Type aliases
     - `type number = f64`;
   - Bindings
@@ -73,7 +76,7 @@
   - Lambas
     - `let sum: fun (f64, f64) => f64 = fun (a: f64, b: f64): f64 { a + b };`
   - Struct fields
-    - `struct Box { pub let value: f64; }`
+    - `struct Box[T] { pub var value: T; }`
   - Traits
     - `trait Display { fun toString(self): string; }`
     - Supertraits: `trait Ord: Eq { ... }`
