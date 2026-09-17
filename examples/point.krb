@@ -67,3 +67,5 @@ print point_c.toString();
 print point_d.toString();
 print point_e.toString();
 print point_f.toString();
+
+print (point_a * point_b - point_c / point_d + point_e).toString();
