@@ -2733,8 +2733,6 @@ bool typchkCheckProgram(AstNode **program, int count) {
   // After struct placeholders so an alias can name a struct, before struct
   // fields so a field can be annotated with an alias.
 
-  // TODO: Refactor this
-
   UnresolvedTypeAlias *unresolvedAliasAliases = NULL;
   int pendingAliasCount = 0;
 
