@@ -5,7 +5,7 @@
 
 typedef struct {
   AstNode *node;
-  Token structName;
+  InternedName structName;
 } ResolvedImplTargetEntry;
 
 static ResolvedImplTargetEntry *entries = NULL;
@@ -19,11 +19,12 @@ void resolvedImplTargetsReset(void) {
   entryCapacity = 0;
 }
 
-void resolvedImplTargetsRecord(AstNode *implNode, Token structName) {
+void resolvedImplTargetsRecord(AstNode *implNode, InternedName structName) {
   if (entryCount + 1 > entryCapacity) {
     entryCapacity = entryCapacity < 8 ? 8 : entryCapacity * 2;
     entries = (ResolvedImplTargetEntry *)realloc(
         entries, (size_t)entryCapacity * sizeof(ResolvedImplTargetEntry));
+
     if (entries == NULL) {
       fprintf(stderr, "realloc failed in resolvedImplTargetsRecord\n");
       exit(1);
@@ -36,9 +37,20 @@ void resolvedImplTargetsRecord(AstNode *implNode, Token structName) {
 }
 
 const Token *resolvedImplTargetsLookup(AstNode *implNode) {
+  static Token resolvedImplTargetToken;
+
   for (int i = 0; i < entryCount; i++) {
-    if (entries[i].node == implNode)
-      return &entries[i].structName;
+    ResolvedImplTargetEntry entry = entries[i];
+    InternedName structName = entry.structName;
+
+    if (entry.node == implNode) {
+      resolvedImplTargetToken.type = TOKEN_IDENTIFIER;
+      resolvedImplTargetToken.start = internedNameChars(structName);
+      resolvedImplTargetToken.length = structName.length;
+      resolvedImplTargetToken.line = 0;
+
+      return &resolvedImplTargetToken;
+    }
   }
 
   return NULL;

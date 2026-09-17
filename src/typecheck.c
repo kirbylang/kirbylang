@@ -1749,8 +1749,7 @@ static void typchkRegisterTraitImpl(TypeEnv *env, AstNode *node) {
     return;
   }
 
-  resolvedImplTargetsRecord(node,
-                            tokenFromInternedName(targetType->as.struct_.name));
+  resolvedImplTargetsRecord(node, targetType->as.struct_.name);
 
   if (typeStructIsGeneric(targetType))
     return; // already reported once at the struct's declaration
@@ -1923,8 +1922,7 @@ static void typchkRegisterImplMethods(TypeEnv *env, AstNode *node) {
     return;
   }
 
-  resolvedImplTargetsRecord(node,
-                            tokenFromInternedName(structType->as.struct_.name));
+  resolvedImplTargetsRecord(node, structType->as.struct_.name);
 
   if (typeStructIsGeneric(structType))
     return; // already reported once at the struct's declaration
