@@ -6,7 +6,6 @@
 #include "types.h"
 
 void resolvedImplTargetsReset(void);
-
 void resolvedImplTargetsRecord(AstNode *implNode, InternedName structName);
 
 const Token *resolvedImplTargetsLookup(AstNode *implNode);
