@@ -40,12 +40,6 @@ let builder = StringBuilder.default()
 print builder.toString();
 ```
 
-## Learning Project
-
-This is a highly modified implementation of clox, from the [Crafting Interpreters](https://craftinginterpreters.com/) book. I highly recommend the free online version then purchasing a physical copy.
-
-This is also a learning project for me. Specifically to learn C (coming from a Rust/Typescript/Java background).
-
 ## Documentation
 
 - [Proposals](./docs/PROPOSALS.md)
@@ -58,6 +52,12 @@ This is also a learning project for me. Specifically to learn C (coming from a R
 - [Important Files](./docs/DEVELOPMENT.md#important-files)
 - [Writing A Test](./tests/README.md#writing-a-test)
 - [Create A Native Function](./docs/DEVELOPMENT.md#create-a-native-function)
+
+## Learning Project
+
+This is a highly modified implementation of clox, from the [Crafting Interpreters](https://craftinginterpreters.com/) book. I highly recommend the free online version then purchasing a physical copy.
+
+This is also a learning project for me. Specifically to learn C (coming from a Rust/Typescript/Java background).
 
 ## AI
 
