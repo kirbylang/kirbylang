@@ -48,6 +48,7 @@ This is also a learning project for me. Specifically to learn C (coming from a R
 
 ## Documentation
 
+- [Proposals](./docs/PROPOSALS.md)
 - [Types](./docs/TYPES.md)
 - [CLI](./docs/CLI.md)
 - [Development](./docs/DEVELOPMENT.md)
