@@ -252,11 +252,6 @@ the `@is*` family and the `@arr*` family, which need generics, and `@argv`,
 `@prompt` and `@stdin`, which return nothing on some paths and so need
 `Option[T]`.
 
-`@` isn't a valid character to start a user-declared name (a variable,
-function, parameter, struct, field, trait, method, or type alias), so a
-user-declared function can never shadow a native -- they're always
-different globals, even if the rest of the name matches.
-
 ## Type Aliases
 
 ```
