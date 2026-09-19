@@ -40,6 +40,7 @@
       to string, so joining numbers means mapping `@numberToString` first
 - Native functions are now prefixed with `@` (e.g. `len(x)` becomes `@len(x)`)
   - `@` is now a reserved character identifiers
+  - `__version__()` is now `@version()`
 - Initial implementation of types and typechecker
   - Limitations
     - Generic types are ignored
