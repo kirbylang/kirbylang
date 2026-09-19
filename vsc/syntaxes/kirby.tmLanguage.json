@@ -117,8 +117,11 @@
       "match": "\\b(true|false|nil|Self|Array)\\b"
     },
     "natives": {
-      "name": "entity.name.function.native.krb",
-      "match": "@[A-Za-z_][A-Za-z0-9_]*\\b"
+      "match": "(@)([A-Za-z_][A-Za-z0-9_]*\\b)",
+      "captures": {
+        "1": { "name": "markup.bold.prefix.native.krb" },
+        "2": { "name": "entity.name.function.native.krb" }
+      }
     },
     "struct-initializer": {
       "name": "entity.name.type.struct.krb",
