@@ -38,11 +38,8 @@
   - `@arrJoin(array, separator)`
     - Every element must already be a string. There is no implicit conversion
       to string, so joining numbers means mapping `@numberToString` first
-- Prefix every native function name with `@` (e.g. `len(x)` becomes `@len(x)`)
-  - See the [prefixed-native-functions proposal](https://github.com/kirbylang/proposals/blob/main/proposals/prefixed-native-functions/PROPOSAL.md)
-  - `@` is reserved for native references and can't start a user-declared
-    name (variable, function, parameter, generic parameter, struct, field,
-    trait, method, or type alias), so user code can never shadow a native
+- Native functions are now prefixed with `@` (e.g. `len(x)` becomes `@len(x)`)
+  - `@` is now a reserved character identifiers
 - Initial implementation of types and typechecker
   - Limitations
     - Generic types are ignored
