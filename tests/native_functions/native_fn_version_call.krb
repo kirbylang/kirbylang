@@ -1,1 +1,1 @@
-print __version__();
+print @version();

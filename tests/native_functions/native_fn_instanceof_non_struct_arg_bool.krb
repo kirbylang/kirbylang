@@ -2,4 +2,4 @@ struct Struct {}
 
 var instance = Struct {};
 
-print instanceOf(instance, true);
+print @instanceOf(instance, true);

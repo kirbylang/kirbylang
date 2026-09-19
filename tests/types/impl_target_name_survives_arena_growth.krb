@@ -8,7 +8,7 @@ impl Point {
 }
 
 impl Display for Point {
-  fun toString(self): string = "(" + numberToString(self.x) + "," + numberToString(self.y) + ")";
+  fun toString(self): string = "(" + @numberToString(self.x) + "," + @numberToString(self.y) + ")";
 }
 
 impl Eq for Point {

@@ -2,23 +2,23 @@
 0000    1 OP_NIL
 0001    | OP_RETURN
 == <script> ==
-0000    1 OP_GET_GLOBAL       0 'isNumber'
+0000    1 OP_GET_GLOBAL       0 '@isNumber'
 0002    | OP_CONSTANT         1 '12345.000000'
 0004    | OP_CALL             1
 0006    | OP_PRINT
-0007    2 OP_GET_GLOBAL       2 'isNumber'
-0009    | OP_GET_GLOBAL       3 'ceil'
+0007    2 OP_GET_GLOBAL       2 '@isNumber'
+0009    | OP_GET_GLOBAL       3 '@ceil'
 0011    | OP_CALL             1
 0013    | OP_PRINT
-0014    3 OP_GET_GLOBAL       4 'isNumber'
+0014    3 OP_GET_GLOBAL       4 '@isNumber'
 0016    | OP_TRUE
 0017    | OP_CALL             1
 0019    | OP_PRINT
-0020    4 OP_GET_GLOBAL       5 'isNumber'
+0020    4 OP_GET_GLOBAL       5 '@isNumber'
 0022    | OP_CONSTANT         6 'Hello'
 0024    | OP_CALL             1
 0026    | OP_PRINT
-0027    5 OP_GET_GLOBAL       7 'isNumber'
+0027    5 OP_GET_GLOBAL       7 '@isNumber'
 0029    | OP_NIL
 0030    | OP_CALL             1
 0032    | OP_PRINT

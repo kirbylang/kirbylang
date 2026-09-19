@@ -1,5 +1,5 @@
 var a = [];
 
 for (var i = 0; i < 10000; i = i + 1) {
-  arrPush(a, i);
+  @arrPush(a, i);
 }

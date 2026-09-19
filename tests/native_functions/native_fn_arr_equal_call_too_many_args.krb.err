@@ -9,7 +9,7 @@
 0008    | OP_DEFINE_GLOBAL    0 'a'
 0010    2 OP_GET_GLOBAL       5 'a'
 0012    | OP_DEFINE_GLOBAL    4 'b'
-0014    4 OP_GET_GLOBAL       6 'arrEqual'
+0014    4 OP_GET_GLOBAL       6 '@arrEqual'
 0016    | OP_GET_GLOBAL       7 'a'
 0018    | OP_GET_GLOBAL       8 'b'
 0020    | OP_NIL
@@ -17,5 +17,5 @@
 0023    | OP_PRINT
 0024    5 OP_NIL
 0025    | OP_RETURN
-function arrEqual expects 2 argument(s) but got 3 instead.
+function @arrEqual expects 2 argument(s) but got 3 instead.
 [line 4] in script

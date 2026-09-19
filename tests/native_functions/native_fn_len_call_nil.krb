@@ -1,1 +1,1 @@
-print len(nil);
+print @len(nil);

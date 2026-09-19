@@ -1,4 +1,4 @@
 var a = [1, 2, 3];
 var b = [4, 5, 6];
 
-arrConcat(a, b, []);
+@arrConcat(a, b, []);

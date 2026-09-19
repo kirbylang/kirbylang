@@ -1,1 +1,1 @@
-print isNumber();
+print @isNumber();

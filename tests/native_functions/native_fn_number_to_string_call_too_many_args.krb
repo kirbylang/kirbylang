@@ -1,1 +1,1 @@
-print typeof(numberToString(123, 456));
+print @typeof(@numberToString(123, 456));

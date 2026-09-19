@@ -1,1 +1,1 @@
-print getenv("DOESNTEXIST");
+print @getenv("DOESNTEXIST");

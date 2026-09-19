@@ -7,12 +7,12 @@
 0004    | OP_CONSTANT         3 '3.000000'
 0006    | OP_ARRAY            3
 0008    | OP_DEFINE_GLOBAL    0 'array'
-0010    3 OP_GET_GLOBAL       5 'arrPop'
+0010    3 OP_GET_GLOBAL       5 '@arrPop'
 0012    | OP_GET_GLOBAL       6 'array'
 0014    | OP_TRUE
 0015    | OP_CALL             2
 0017    | OP_DEFINE_GLOBAL    4 'popped'
 0019    4 OP_NIL
 0020    | OP_RETURN
-function arrPop expects 1 argument(s) but got 2 instead.
+function @arrPop expects 1 argument(s) but got 2 instead.
 [line 3] in script

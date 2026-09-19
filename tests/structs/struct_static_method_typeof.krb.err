@@ -10,7 +10,7 @@
 0009    4 OP_CLOSURE          4 <fn hello>
 0011    | OP_METHOD           3 'hello'
 0013    5 OP_POP
-0014    7 OP_GET_GLOBAL       5 'typeof'
+0014    7 OP_GET_GLOBAL       5 '@typeof'
 0016    | OP_GET_GLOBAL       6 'Struct'
 0018    | OP_GET_PROPERTY     7 'hello'
 0020    | OP_CALL             1

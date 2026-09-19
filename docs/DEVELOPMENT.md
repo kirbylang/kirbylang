@@ -88,16 +88,19 @@ See [scripts](../scripts/README.md)
 ### Create A Native Function
 
 - [ ] 1. Declare a new function in [native.c](../src/native.c)
-- [ ] 2. Add the native to the `nativeDefinitions` table in [native.c](../src/native.c)
+- [ ] 2. Add the native to the `nativeDefinitions` table in [native.c](../src/native.c), with its name prefixed by `@` (e.g. `"@len"`)
 - [ ] 3. Give the native a type in the `nativeSignatures` table in [native.c](../src/native.c), directly below `nativeDefinitions`, or add it to one of the deferred lists in [unit/native_signatures.c](../unit/native_signatures.c) if its type can't be spelled yet. The unit test fails until one of the two happens.
 - [ ] 4. Add [tests](../tests/README.md) for the new function in the [`tests/native_functions`](../tests/native_functions/) directory
-- [ ] 5. Add function to [EXTENDING_LOC.md](EXTENDING_LOX.md) under the "next" version
-- [ ] 6. Add function to [`kirby.tmLanguage.json`](../vsc/syntaxes/kirby.tmLanguage.json) under `"name": "entity.name.function.native.kirby"`
   - [ ] Call
   - [ ] Call with no args (if applicable)
   - [ ] Call with too many args (if applicable)
   - [ ] Call with incorrect arg types (if applicable)
-- [ ] 7. Add `vsc/hovers/function_name.md` with a description that will display when hovering over the function
+- [ ] 5. Add function to [EXTENDING_LOC.md](EXTENDING_LOX.md) under the "next" version
+- [ ] 6. Add `vsc/hovers/@function_name.md` with a description that will display when hovering over the function
+
+Every `@`-prefixed name already highlights as a native in
+[`kirby.tmLanguage.json`](../vsc/syntaxes/kirby.tmLanguage.json), so there's
+nothing to add there for a new native.
 
 #### Example
 
@@ -108,14 +111,14 @@ See [scripts](../scripts/README.md)
 
 static Value exitNative(int argCount, Value *args) {
   // Function arity
-  assertArgCount(&vm, "exit", 1, argCount);
+  assertArgCount(&vm, "@exit", 1, argCount);
   // Runtime argument type checking
-  assertArgIsNumber(&vm, "exit", args, 0);
+  assertArgIsNumber(&vm, "@exit", args, 0);
 
   double exitCode = args[0].as.number;
 
   // Assert runtime value conditions
-  assertPositiveNumber(&vm, "exit", exitCode, 0);
+  assertPositiveNumber(&vm, "@exit", exitCode, 0);
 
   exit(exitCode);
 
@@ -128,7 +131,7 @@ static Value exitNative(int argCount, Value *args) {
 
  void initVM(int argc, char *argv[]) {
    // ...
-+  defineNative("exit", exitNative);
++  defineNative("@exit", exitNative);
    // ...
  }
 ```

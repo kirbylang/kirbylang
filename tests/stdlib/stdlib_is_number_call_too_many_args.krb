@@ -1,1 +1,1 @@
-print isNumber(12345, 67890);
+print @isNumber(12345, 67890);

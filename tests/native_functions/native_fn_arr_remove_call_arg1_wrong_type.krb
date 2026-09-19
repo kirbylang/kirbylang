@@ -1,3 +1,3 @@
 var array = [1, 2, 3];
 
-arrRemove(array, true);
+@arrRemove(array, true);

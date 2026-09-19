@@ -9,12 +9,12 @@
 0007    3 OP_GET_GLOBAL       3 'Struct'
 0009    | OP_STRUCT_INIT      0
 0011    | OP_DEFINE_GLOBAL    2 'instance'
-0013    5 OP_GET_GLOBAL       4 'instanceOf'
+0013    5 OP_GET_GLOBAL       4 '@instanceOf'
 0015    | OP_GET_GLOBAL       5 'instance'
 0017    | OP_CONSTANT         6 'Hello World'
 0019    | OP_CALL             2
 0021    | OP_PRINT
 0022    6 OP_NIL
 0023    | OP_RETURN
-function instanceOf expects argument 2 to be a struct.
+function @instanceOf expects argument 2 to be a struct.
 [line 5] in script

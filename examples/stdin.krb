@@ -4,6 +4,6 @@
 //
 // cat path/to/file.txt | kirby stdin.krb
 
-var text = stdin();
+var text = @stdin();
 
 print text;

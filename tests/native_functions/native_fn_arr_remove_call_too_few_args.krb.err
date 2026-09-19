@@ -7,11 +7,11 @@
 0004    | OP_CONSTANT         3 '3.000000'
 0006    | OP_ARRAY            3
 0008    | OP_DEFINE_GLOBAL    0 'array'
-0010    3 OP_GET_GLOBAL       4 'arrRemove'
+0010    3 OP_GET_GLOBAL       4 '@arrRemove'
 0012    | OP_GET_GLOBAL       5 'array'
 0014    | OP_CALL             1
 0016    | OP_POP
 0017    4 OP_NIL
 0018    | OP_RETURN
-function arrRemove expects 2 argument(s) but got 1 instead.
+function @arrRemove expects 2 argument(s) but got 1 instead.
 [line 3] in script

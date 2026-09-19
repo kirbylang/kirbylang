@@ -9,13 +9,13 @@
 0008    | OP_CONSTANT         5 '50.000000'
 0010    | OP_ARRAY            5
 0012    | OP_DEFINE_GLOBAL    0 'array'
-0014    3 OP_GET_GLOBAL       7 'arrSlice'
+0014    3 OP_GET_GLOBAL       7 '@arrSlice'
 0016    | OP_GET_GLOBAL       8 'array'
 0018    | OP_CONSTANT         9 '1.000000'
 0020    | OP_CONSTANT        10 '4.000000'
 0022    | OP_CALL             3
 0024    | OP_DEFINE_GLOBAL    6 'slice'
-0026    5 OP_GET_GLOBAL      11 'arrEqual'
+0026    5 OP_GET_GLOBAL      11 '@arrEqual'
 0028    | OP_CONSTANT        12 '20.000000'
 0030    | OP_CONSTANT        13 '30.000000'
 0032    | OP_CONSTANT        14 '40.000000'

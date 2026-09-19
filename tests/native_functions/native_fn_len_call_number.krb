@@ -1,1 +1,1 @@
-print len(100);
+print @len(100);

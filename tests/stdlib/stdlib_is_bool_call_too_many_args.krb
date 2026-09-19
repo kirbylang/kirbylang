@@ -1,1 +1,1 @@
-print isBool(true, true);
+print @isBool(true, true);

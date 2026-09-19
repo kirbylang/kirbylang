@@ -1,1 +1,1 @@
-var slice = arrSlice(nil, 1, 4);
+var slice = @arrSlice(nil, 1, 4);

@@ -232,5 +232,292 @@
       "break;$0"
     ],
     "description": "Break out of a loop"
+  },
+  "Native: @clock": {
+    "prefix": "@clock",
+    "body": [
+      "@clock()$0"
+    ],
+    "description": "Get the number of seconds since the program started"
+  },
+  "Native: @version": {
+    "prefix": "@version",
+    "body": [
+      "@version()$0"
+    ],
+    "description": "Get the current Kirby version"
+  },
+  "Native: @exit": {
+    "prefix": "@exit",
+    "body": [
+      "@exit(${1:code})$0"
+    ],
+    "description": "Exit the program with an exit code"
+  },
+  "Native: @rand": {
+    "prefix": "@rand",
+    "body": [
+      "@rand()$0"
+    ],
+    "description": "Get a random number"
+  },
+  "Native: @rand01": {
+    "prefix": "@rand01",
+    "body": [
+      "@rand01()$0"
+    ],
+    "description": "Get a random number between 0 and 1"
+  },
+  "Native: @randBetween": {
+    "prefix": "@randBetween",
+    "body": [
+      "@randBetween(${1:min}, ${2:max})$0"
+    ],
+    "description": "Get a random whole number between min and max"
+  },
+  "Native: @ceil": {
+    "prefix": "@ceil",
+    "body": [
+      "@ceil(${1:value})$0"
+    ],
+    "description": "Round a number up"
+  },
+  "Native: @readFileToString": {
+    "prefix": "@readFileToString",
+    "body": [
+      "@readFileToString(${1:path})$0"
+    ],
+    "description": "Read a file at a path into a string"
+  },
+  "Native: @writeStringToFile": {
+    "prefix": "@writeStringToFile",
+    "body": [
+      "@writeStringToFile(${1:path}, ${2:text})$0"
+    ],
+    "description": "Write a string to a file at a path"
+  },
+  "Native: @numberToString": {
+    "prefix": "@numberToString",
+    "body": [
+      "@numberToString(${1:value})$0"
+    ],
+    "description": "Convert a number to a string"
+  },
+  "Native: @fileExists": {
+    "prefix": "@fileExists",
+    "body": [
+      "@fileExists(${1:path})$0"
+    ],
+    "description": "Check whether a file or path exists"
+  },
+  "Native: @getenv": {
+    "prefix": "@getenv",
+    "body": [
+      "@getenv(${1:name})$0"
+    ],
+    "description": "Get an environment variable's value"
+  },
+  "Native: @setenv": {
+    "prefix": "@setenv",
+    "body": [
+      "@setenv(${1:name}, ${2:value})$0"
+    ],
+    "description": "Set an environment variable's value"
+  },
+  "Native: @len": {
+    "prefix": "@len",
+    "body": [
+      "@len(${1:value})$0"
+    ],
+    "description": "Get the length of a string or array"
+  },
+  "Native: @typeof": {
+    "prefix": "@typeof",
+    "body": [
+      "@typeof(${1:value})$0"
+    ],
+    "description": "Get a value's type as a string"
+  },
+  "Native: @argv": {
+    "prefix": "@argv",
+    "body": [
+      "@argv(${1:index})$0"
+    ],
+    "description": "Get a command-line argument by index"
+  },
+  "Native: @argc": {
+    "prefix": "@argc",
+    "body": [
+      "@argc()$0"
+    ],
+    "description": "Get the number of command-line arguments"
+  },
+  "Native: @parseNumber": {
+    "prefix": "@parseNumber",
+    "body": [
+      "@parseNumber(${1:string})$0"
+    ],
+    "description": "Parse a string into a number"
+  },
+  "Native: @instanceOf": {
+    "prefix": "@instanceOf",
+    "body": [
+      "@instanceOf(${1:value}, ${2:Struct})$0"
+    ],
+    "description": "Check whether a value is an instance of a struct"
+  },
+  "Native: @prompt": {
+    "prefix": "@prompt",
+    "body": [
+      "@prompt(${1:message})$0"
+    ],
+    "description": "Print a message, then read a line of input from stdin"
+  },
+  "Native: @stdin": {
+    "prefix": "@stdin",
+    "body": [
+      "@stdin()$0"
+    ],
+    "description": "Read all of stdin until EOF"
+  },
+  "Native: @arrPush": {
+    "prefix": "@arrPush",
+    "body": [
+      "@arrPush(${1:array}, ${2:value})$0"
+    ],
+    "description": "Push a value onto the end of an array"
+  },
+  "Native: @arrPop": {
+    "prefix": "@arrPop",
+    "body": [
+      "@arrPop(${1:array})$0"
+    ],
+    "description": "Remove and return the last value in an array"
+  },
+  "Native: @arrInsert": {
+    "prefix": "@arrInsert",
+    "body": [
+      "@arrInsert(${1:array}, ${2:index}, ${3:value})$0"
+    ],
+    "description": "Insert a value into an array at an index"
+  },
+  "Native: @arrRemove": {
+    "prefix": "@arrRemove",
+    "body": [
+      "@arrRemove(${1:array}, ${2:index})$0"
+    ],
+    "description": "Remove and return the value at an index"
+  },
+  "Native: @arrClear": {
+    "prefix": "@arrClear",
+    "body": [
+      "@arrClear(${1:array})$0"
+    ],
+    "description": "Remove every value from an array"
+  },
+  "Native: @arrContains": {
+    "prefix": "@arrContains",
+    "body": [
+      "@arrContains(${1:array}, ${2:value})$0"
+    ],
+    "description": "Check whether an array contains a value"
+  },
+  "Native: @arrCopy": {
+    "prefix": "@arrCopy",
+    "body": [
+      "@arrCopy(${1:array})$0"
+    ],
+    "description": "Copy an array into a new array"
+  },
+  "Native: @arrIsEmpty": {
+    "prefix": "@arrIsEmpty",
+    "body": [
+      "@arrIsEmpty(${1:array})$0"
+    ],
+    "description": "Check whether an array is empty"
+  },
+  "Native: @arrEqual": {
+    "prefix": "@arrEqual",
+    "body": [
+      "@arrEqual(${1:array1}, ${2:array2})$0"
+    ],
+    "description": "Check whether two arrays have equal values"
+  },
+  "Native: @arrSlice": {
+    "prefix": "@arrSlice",
+    "body": [
+      "@arrSlice(${1:array}, ${2:start}, ${3:end})$0"
+    ],
+    "description": "Copy a range of an array into a new array"
+  },
+  "Native: @arrConcat": {
+    "prefix": "@arrConcat",
+    "body": [
+      "@arrConcat(${1:array1}, ${2:array2})$0"
+    ],
+    "description": "Concatenate two arrays into a new array"
+  },
+  "Native: @arrReverse": {
+    "prefix": "@arrReverse",
+    "body": [
+      "@arrReverse(${1:array})$0"
+    ],
+    "description": "Reverse an array into a new array"
+  },
+  "Native: @arrJoin": {
+    "prefix": "@arrJoin",
+    "body": [
+      "@arrJoin(${1:array}, ${2:separator})$0"
+    ],
+    "description": "Join an array of strings into one string"
+  },
+  "Native: @is": {
+    "prefix": "@is",
+    "body": [
+      "@is(${1:value}, ${2:type})$0"
+    ],
+    "description": "Check whether a value is of a named type"
+  },
+  "Native: @isNumber": {
+    "prefix": "@isNumber",
+    "body": [
+      "@isNumber(${1:value})$0"
+    ],
+    "description": "Check whether a value is a number"
+  },
+  "Native: @isFunction": {
+    "prefix": "@isFunction",
+    "body": [
+      "@isFunction(${1:value})$0"
+    ],
+    "description": "Check whether a value is a function"
+  },
+  "Native: @isBool": {
+    "prefix": "@isBool",
+    "body": [
+      "@isBool(${1:value})$0"
+    ],
+    "description": "Check whether a value is a bool"
+  },
+  "Native: @isString": {
+    "prefix": "@isString",
+    "body": [
+      "@isString(${1:value})$0"
+    ],
+    "description": "Check whether a value is a string"
+  },
+  "Native: @isNil": {
+    "prefix": "@isNil",
+    "body": [
+      "@isNil(${1:value})$0"
+    ],
+    "description": "Check whether a value is nil"
+  },
+  "Native: @strIsEmpty": {
+    "prefix": "@strIsEmpty",
+    "body": [
+      "@strIsEmpty(${1:string})$0"
+    ],
+    "description": "Check whether a string is empty"
   }
 }

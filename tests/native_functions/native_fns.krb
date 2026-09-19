@@ -1,113 +1,113 @@
-print exit;
-print typeof(exit);
+print @exit;
+print @typeof(@exit);
 
-print __version__;
-print typeof(__version__);
+print @version;
+print @typeof(@version);
 
-print rand;
-print typeof(rand);
+print @rand;
+print @typeof(@rand);
 
-print rand01;
-print typeof(rand01);
+print @rand01;
+print @typeof(@rand01);
 
-print randBetween;
-print typeof(randBetween);
+print @randBetween;
+print @typeof(@randBetween);
 
-print ceil;
-print typeof(ceil);
+print @ceil;
+print @typeof(@ceil);
 
-print readFileToString;
-print typeof(readFileToString);
+print @readFileToString;
+print @typeof(@readFileToString);
 
-print writeStringToFile;
-print typeof(writeStringToFile);
+print @writeStringToFile;
+print @typeof(@writeStringToFile);
 
-print fileExists;
-print typeof(fileExists);
+print @fileExists;
+print @typeof(@fileExists);
 
-print getenv;
-print typeof(getenv);
+print @getenv;
+print @typeof(@getenv);
 
-print setenv;
-print typeof(setenv);
+print @setenv;
+print @typeof(@setenv);
 
-print len;
-print typeof(len);
+print @len;
+print @typeof(@len);
 
-print typeof;
-print typeof(typeof);
+print @typeof;
+print @typeof(@typeof);
 
-print argc;
-print typeof(argc);
+print @argc;
+print @typeof(@argc);
 
-print argv;
-print typeof(argv);
+print @argv;
+print @typeof(@argv);
 
-print clock;
-print typeof(clock);
+print @clock;
+print @typeof(@clock);
 
-print prompt;
-print typeof(prompt);
+print @prompt;
+print @typeof(@prompt);
 
-print stdin;
-print typeof(stdin);
+print @stdin;
+print @typeof(@stdin);
 
-print instanceOf;
-print typeof(instanceOf);
+print @instanceOf;
+print @typeof(@instanceOf);
 
-print parseNumber;
-print typeof(parseNumber);
+print @parseNumber;
+print @typeof(@parseNumber);
 
-print numberToString;
-print typeof(numberToString);
+print @numberToString;
+print @typeof(@numberToString);
 
-print arrPush;
-print typeof(arrPush);
+print @arrPush;
+print @typeof(@arrPush);
 
-print arrPop;
-print typeof(arrPop);
+print @arrPop;
+print @typeof(@arrPop);
 
-print arrInsert;
-print typeof(arrInsert);
+print @arrInsert;
+print @typeof(@arrInsert);
 
-print arrRemove;
-print typeof(arrRemove);
+print @arrRemove;
+print @typeof(@arrRemove);
 
-print arrCopy;
-print typeof(arrCopy);
+print @arrCopy;
+print @typeof(@arrCopy);
 
-print arrIsEmpty;
-print typeof(arrIsEmpty);
+print @arrIsEmpty;
+print @typeof(@arrIsEmpty);
 
-print arrEqual;
-print typeof(arrEqual);
+print @arrEqual;
+print @typeof(@arrEqual);
 
-print arrSlice;
-print typeof(arrSlice);
+print @arrSlice;
+print @typeof(@arrSlice);
 
-print arrConcat;
-print typeof(arrConcat);
+print @arrConcat;
+print @typeof(@arrConcat);
 
-print arrReverse;
-print typeof(arrReverse);
+print @arrReverse;
+print @typeof(@arrReverse);
 
-print is;
-print typeof(is);
+print @is;
+print @typeof(@is);
 
-print isNumber;
-print typeof(isNumber);
+print @isNumber;
+print @typeof(@isNumber);
 
-print isFunction;
-print typeof(isFunction);
+print @isFunction;
+print @typeof(@isFunction);
 
-print isBool;
-print typeof(isBool);
+print @isBool;
+print @typeof(@isBool);
 
-print isNil;
-print typeof(isNil);
+print @isNil;
+print @typeof(@isNil);
 
-print isString;
-print typeof(isString);
+print @isString;
+print @typeof(@isString);
 
-print strIsEmpty;
-print typeof(strIsEmpty);
+print @strIsEmpty;
+print @typeof(@strIsEmpty);

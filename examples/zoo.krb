@@ -28,7 +28,7 @@ impl Zoo {
 }
 
 var zoo = Zoo.init();
-var start = clock();
+var start = @clock();
 
 var sum = 0;
 
@@ -41,5 +41,5 @@ while (sum < 100000000) {
             + zoo.mouse();
 }
 
-print clock() - start;
+print @clock() - start;
 print sum;

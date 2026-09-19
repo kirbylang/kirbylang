@@ -1,1 +1,1 @@
-print isNil();
+print @isNil();

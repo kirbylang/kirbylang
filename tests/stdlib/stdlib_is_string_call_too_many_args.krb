@@ -1,1 +1,1 @@
-print isString("Hello", "World");
+print @isString("Hello", "World");

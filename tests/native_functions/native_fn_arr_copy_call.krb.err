@@ -9,7 +9,7 @@
 0008    | OP_DEFINE_GLOBAL    0 'a'
 0010    2 OP_GET_GLOBAL       5 'a'
 0012    | OP_DEFINE_GLOBAL    4 'b'
-0014    3 OP_GET_GLOBAL       7 'arrCopy'
+0014    3 OP_GET_GLOBAL       7 '@arrCopy'
 0016    | OP_GET_GLOBAL       8 'a'
 0018    | OP_CALL             1
 0020    | OP_DEFINE_GLOBAL    6 'c'

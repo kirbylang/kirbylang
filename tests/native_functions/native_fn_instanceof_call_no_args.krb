@@ -1,1 +1,1 @@
-print instanceOf();
+print @instanceOf();

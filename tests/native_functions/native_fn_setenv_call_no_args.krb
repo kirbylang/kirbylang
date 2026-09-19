@@ -1,1 +1,1 @@
-print setenv();
+print @setenv();

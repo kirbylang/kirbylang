@@ -18,7 +18,7 @@ struct StringBuilder {
 
 impl StringBuilder {
     pub fun add(self, add: string): Self {
-        arrPush(self.value, add);
+        @arrPush(self.value, add);
 
         self
     }
@@ -29,7 +29,7 @@ impl Default for StringBuilder {
 }
 
 impl Display for StringBuilder {
-    fun toString(self): string = arrJoin(self.value, "");
+    fun toString(self): string = @arrJoin(self.value, "");
 }
 
 let builder = StringBuilder.default()

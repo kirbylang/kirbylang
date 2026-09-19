@@ -1,5 +1,5 @@
-print isString("Hello");
-print isString(12345);
-print isString(ceil);
-print isString(true);
-print isString(nil);
+print @isString("Hello");
+print @isString(12345);
+print @isString(@ceil);
+print @isString(true);
+print @isString(nil);

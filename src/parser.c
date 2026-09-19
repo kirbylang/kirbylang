@@ -116,6 +116,19 @@ static bool is_at_end(Parser *parser) {
   return parser->current.type == TOKEN_EOF;
 }
 
+/**
+ * Consumes an identifier token that names a new declaration: a variable,
+ * function, parameter, generic parameter, struct, field, trait, method, or
+ * type alias.
+ */
+static void consumeDeclarationIdentifier(Parser *parser, const char *message) {
+  consume(parser, TOKEN_IDENTIFIER, message);
+
+  if (parser->previous.length > 0 && parser->previous.start[0] == '@') {
+    parse_error(parser, "'@' is a reserved character.");
+  }
+}
+
 // Discards tokens until a statement boundary is found (panic-mode recovery).
 static void synchronize(Parser *p) {
   p->panicMode = false;
@@ -1046,7 +1059,7 @@ static AstNode *parseType(Parser *p) {
 }
 
 static AstNode *varDeclaration(Parser *p, bool isMutable) {
-  consume(p, TOKEN_IDENTIFIER, "Expect variable name.");
+  consumeDeclarationIdentifier(p, "Expect variable name.");
   Token name = p->previous;
 
   AstNode *declaredType = NULL;
@@ -1104,7 +1117,7 @@ static AstNode *functionTail(Parser *p, Token name, int line, bool isMethod,
       if (check(p, TOKEN_SELF)) {
         error_at_current(p, "'self' must be the first parameter.");
       }
-      consume(p, TOKEN_IDENTIFIER, "Expect parameter name.");
+      consumeDeclarationIdentifier(p, "Expect parameter name.");
       paramBuf[arity] = p->previous;
 
       typeBuf[arity] = NULL;
@@ -1186,7 +1199,7 @@ static int parseGenericParamList(Parser *p, Token *paramBuf) {
       if (count >= 255) {
         error_at_current(p, "Can't have more than 255 generic parameters.");
       }
-      consume(p, TOKEN_IDENTIFIER, "Expect generic parameter name.");
+      consumeDeclarationIdentifier(p, "Expect generic parameter name.");
       paramBuf[count++] = p->previous;
     } while (match(p, TOKEN_COMMA));
     consume(p, TOKEN_RIGHT_BRACKET, "Expect ']' after generic parameters.");
@@ -1196,7 +1209,7 @@ static int parseGenericParamList(Parser *p, Token *paramBuf) {
 
 static AstNode *functionDeclaration(Parser *p, bool isMethod) {
   if (!isMethod)
-    consume(p, TOKEN_IDENTIFIER, "Expect function name.");
+    consumeDeclarationIdentifier(p, "Expect function name.");
   Token name = p->previous;
   int line = name.line;
 
@@ -1227,7 +1240,7 @@ static AstNode *lambda(Parser *p, bool canAssign) {
 }
 
 static AstNode *structDeclaration(Parser *p) {
-  consume(p, TOKEN_IDENTIFIER, "Expect struct name.");
+  consumeDeclarationIdentifier(p, "Expect struct name.");
   Token name = p->previous;
   int line = name.line;
 
@@ -1249,7 +1262,7 @@ static AstNode *structDeclaration(Parser *p) {
     bool isPublic = match(p, TOKEN_PUB);
 
     if (match(p, TOKEN_VAR)) {
-      consume(p, TOKEN_IDENTIFIER, "Expect field name.");
+      consumeDeclarationIdentifier(p, "Expect field name.");
       Token fieldName = p->previous;
 
       AstNode *fieldType = NULL;
@@ -1370,7 +1383,7 @@ static AstNode *implDeclaration(Parser *p) {
       p->panicMode = false;
     } else {
       consume(p, TOKEN_FUN, "Expect 'fun' before method declaration.");
-      consume(p, TOKEN_IDENTIFIER, "Expect method name.");
+      consumeDeclarationIdentifier(p, "Expect method name.");
       AstNode *method = functionDeclaration(p, /*isMethod=*/true);
       method->as.function.isPublic = isPublic;
       methodBuf[methodCount++] = &method->as.function;
@@ -1411,7 +1424,7 @@ static AstNode *implDeclaration(Parser *p) {
 }
 
 static AstNode *traitDeclaration(Parser *p) {
-  consume(p, TOKEN_IDENTIFIER, "Expect trait name.");
+  consumeDeclarationIdentifier(p, "Expect trait name.");
   Token name = p->previous;
   int line = name.line;
 
@@ -1439,7 +1452,7 @@ static AstNode *traitDeclaration(Parser *p) {
     }
 
     consume(p, TOKEN_FUN, "Expect method signature in trait body.");
-    consume(p, TOKEN_IDENTIFIER, "Expect method name.");
+    consumeDeclarationIdentifier(p, "Expect method name.");
     Token methodName = p->previous;
 
     AstNode *method =
@@ -1474,7 +1487,7 @@ static AstNode *traitDeclaration(Parser *p) {
 }
 
 static AstNode *typeAliasDeclaration(Parser *p) {
-  consume(p, TOKEN_IDENTIFIER, "Expect type alias name.");
+  consumeDeclarationIdentifier(p, "Expect type alias name.");
   Token name = p->previous;
   int line = name.line;
 

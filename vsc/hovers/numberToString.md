@@ -1,1 +1,0 @@
-Convert a number to a string.

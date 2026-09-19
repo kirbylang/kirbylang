@@ -1,1 +1,1 @@
-print is(true, true);
+print @is(true, true);

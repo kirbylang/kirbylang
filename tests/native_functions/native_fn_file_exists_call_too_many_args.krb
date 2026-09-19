@@ -1,1 +1,1 @@
-print fileExists("./path/to/file.txt", "another/path/to/fix.txt");
+print @fileExists("./path/to/file.txt", "another/path/to/fix.txt");

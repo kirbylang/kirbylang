@@ -1,6 +1,6 @@
 var parts = ["a", "c"];
 
-// arrPush is untyped, so a non-string element only surfaces at runtime
-arrPush(parts, 2);
+// @arrPush is untyped, so a non-string element only surfaces at runtime
+@arrPush(parts, 2);
 
-arrJoin(parts, ", ");
+@arrJoin(parts, ", ");

@@ -4,9 +4,9 @@ fun fizzbuzz(n: f64): string =
     if (n % 5 == 0 and n % 3 == 0) "FizzBuzz"
     else if (n % 3 == 0) "Fizz"
     else if (n % 5 == 0) "Buzz"
-    else numberToString(n);
+    else @numberToString(n);
 
-var limit = parseNumber(prompt("limit: "));
+var limit = @parseNumber(@prompt("limit: "));
 
 for (var i = 1; i <= limit; i = i + 1) {
     print fizzbuzz(i);

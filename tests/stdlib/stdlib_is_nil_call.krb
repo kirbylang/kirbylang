@@ -1,5 +1,5 @@
-print isNil(nil);
-print isNil("Hello");
-print isNil(12345);
-print isNil(ceil);
-print isNil(true);
+print @isNil(nil);
+print @isNil("Hello");
+print @isNil(12345);
+print @isNil(@ceil);
+print @isNil(true);

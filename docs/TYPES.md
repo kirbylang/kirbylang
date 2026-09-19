@@ -126,7 +126,7 @@ struct Box {
 }
 
 impl Display for Box {
-    fun toString(self): string = numberToString(self.value);
+    fun toString(self): string = @numberToString(self.value);
 }
 
 let box = Box { value: 123 };
@@ -238,22 +238,27 @@ print double(21);
 
 ### Native Functions
 
-Most native functions have a type, so calls to them are checked at compile
-time and they can be used as values.
+Every native function's name starts with `@` (e.g. `@len`, `@ceil`), so it
+can never collide with a name a user declares. Most natives also have a
+type, so calls to them are checked at compile time and they can be used as
+values.
 
 ```
-let round: fun (f64) => f64 = ceil;
+let round: fun (f64) => f64 = @ceil;
 
 print round(1.2);
 ```
 
 A native whose type can't be spelled yet has no signature, and calls to it
-are checked at runtime instead. That covers `len`, `typeof`, `instanceOf`,
-the `is*` family and the `arr*` family, which need generics, and `argv`,
-`prompt` and `stdin`, which return nothing on some paths and so need
+are checked at runtime instead. That covers `@len`, `@typeof`, `@instanceOf`,
+the `@is*` family and the `@arr*` family, which need generics, and `@argv`,
+`@prompt` and `@stdin`, which return nothing on some paths and so need
 `Option[T]`.
 
-Declaring a function with the same name as a native shadows it.
+`@` isn't a valid character to start a user-declared name (a variable,
+function, parameter, struct, field, trait, method, or type alias), so a
+user-declared function can never shadow a native -- they're always
+different globals, even if the rest of the name matches.
 
 ## Type Aliases
 

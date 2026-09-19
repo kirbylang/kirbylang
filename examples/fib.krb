@@ -8,13 +8,13 @@ fun fib(n: f64): f64 {
 
 print "Fibonacci";
 
-var arg = argv(4) ?? prompt("n: ");
-var n = parseNumber(arg);
+var arg = @argv(4) ?? @prompt("n: ");
+var n = @parseNumber(arg);
 
 print n;
 print "";
 
-var start = clock();
+var start = @clock();
 
 print "Result:";
 print "";
@@ -23,4 +23,4 @@ print fib(n);
 print "";
 
 print "Time Taken:";
-print clock() - start;
+print @clock() - start;

@@ -1,5 +1,5 @@
-print isBool(true);
-print isBool("Hello");
-print isBool(12345);
-print isBool(ceil);
-print isBool(nil);
+print @isBool(true);
+print @isBool("Hello");
+print @isBool(12345);
+print @isBool(@ceil);
+print @isBool(nil);

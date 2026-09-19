@@ -1,6 +1,6 @@
 var array = [];
 
-arrInsert(array, 0, "Hello");
-arrInsert(array, 1, "World");
-arrInsert(array, 10, "World");
+@arrInsert(array, 0, "Hello");
+@arrInsert(array, 1, "World");
+@arrInsert(array, 10, "World");
 

@@ -1,0 +1,13 @@
+Copy an array to a new array.
+
+```kirby
+var a = [1, 2, 3];
+var b = a;
+var c = @arrCopy(a);
+
+a[0] = 100;
+
+print a; // [100, 2, 3]
+print b; // [100, 2, 3]
+print c; // [1, 2, 3]
+```

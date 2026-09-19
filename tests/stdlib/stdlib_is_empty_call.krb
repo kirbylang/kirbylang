@@ -1,2 +1,2 @@
-print strIsEmpty("");
-print strIsEmpty("Hello World");
+print @strIsEmpty("");
+print @strIsEmpty("Hello World");

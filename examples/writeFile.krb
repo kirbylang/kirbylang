@@ -1,6 +1,6 @@
 #!/usr/bin/env krb -f
 
-var path = prompt("File: ");
-var text = prompt("Text: ");
+var path = @prompt("File: ");
+var text = @prompt("Text: ");
 
-writeStringToFile(path, text);
+@writeStringToFile(path, text);

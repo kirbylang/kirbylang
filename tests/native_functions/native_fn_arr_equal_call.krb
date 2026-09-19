@@ -1,17 +1,17 @@
 var a = [1, 2, 3];
 var b = a;
-var c = arrCopy(a);
+var c = @arrCopy(a);
 
 print "Before";
 
-print arrEqual(a, b);
-print arrEqual(b, c);
-print arrEqual(a, c);
+print @arrEqual(a, b);
+print @arrEqual(b, c);
+print @arrEqual(a, c);
 
 c[0] = 100;
 
 print "After";
 
-print arrEqual(a, b);
-print arrEqual(b, c);
-print arrEqual(a, c);
+print @arrEqual(a, b);
+print @arrEqual(b, c);
+print @arrEqual(a, c);

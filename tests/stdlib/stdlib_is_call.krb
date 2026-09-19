@@ -1,5 +1,5 @@
-print is(true, "bool");
-print is("Hello", "string");
-print is(12345, "number");
-print is(ceil, "function");
-print is(nil, "nil");
+print @is(true, "bool");
+print @is("Hello", "string");
+print @is(12345, "number");
+print @is(@ceil, "function");
+print @is(nil, "nil");
