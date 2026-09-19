@@ -1,0 +1,5 @@
+---
+aliases:
+  - Typechecker
+---
+- [[Types]]
