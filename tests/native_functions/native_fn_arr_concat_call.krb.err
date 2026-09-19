@@ -12,7 +12,7 @@
 0014    | OP_CONSTANT         7 '6.000000'
 0016    | OP_ARRAY            3
 0018    | OP_DEFINE_GLOBAL    4 'b'
-0020    3 OP_GET_GLOBAL       9 'arrConcat'
+0020    3 OP_GET_GLOBAL       9 '@arrConcat'
 0022    | OP_GET_GLOBAL      10 'a'
 0024    | OP_GET_GLOBAL      11 'b'
 0026    | OP_CALL             2

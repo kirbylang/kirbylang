@@ -1,1 +1,1 @@
-print typeof(123);
+print @typeof(123);

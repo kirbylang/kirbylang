@@ -1,2 +1,2 @@
-print arrIsEmpty([]);
-print arrIsEmpty([1, 2, 3]);
+print @arrIsEmpty([]);
+print @arrIsEmpty([1, 2, 3]);

@@ -1,3 +1,0 @@
-fun ceil(value: string): string = value + "!";
-
-print ceil("hello");

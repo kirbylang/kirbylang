@@ -2,6 +2,6 @@ var array = [1, 2, 3];
 
 print array;
 
-arrClear(array);
+@arrClear(array);
 
 print array;

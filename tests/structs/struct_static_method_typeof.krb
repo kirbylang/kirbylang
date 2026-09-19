@@ -4,4 +4,4 @@ impl Struct {
     pub fun hello(): unit {}
 }
 
-print typeof(Struct.hello);
+print @typeof(Struct.hello);

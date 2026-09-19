@@ -1,1 +1,1 @@
-print arrContains(nil, 2);
+print @arrContains(nil, 2);

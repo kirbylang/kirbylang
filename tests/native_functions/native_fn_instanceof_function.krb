@@ -2,4 +2,4 @@ struct Struct {}
 
 fun test(): unit {}
 
-print instanceOf(test, Struct);
+print @instanceOf(test, Struct);

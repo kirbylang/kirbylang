@@ -1,1 +1,1 @@
-print setenv("key", 123);
+print @setenv("key", 123);

@@ -1,1 +1,1 @@
-print isFunction(ceil, ceil);
+print @isFunction(@ceil, @ceil);

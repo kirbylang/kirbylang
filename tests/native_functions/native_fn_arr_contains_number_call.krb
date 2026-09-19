@@ -1,4 +1,4 @@
 var array = [1, 2, 3];
 
-print arrContains(array, 2);
-print arrContains(array, 100);
+print @arrContains(array, 2);
+print @arrContains(array, 100);

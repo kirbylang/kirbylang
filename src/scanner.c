@@ -58,6 +58,9 @@ Token scanToken(Scanner *scanner) {
   if (isAlpha(c))
     return identifier(scanner);
 
+  if (c == '@' && isAlpha(peek(scanner)))
+    return identifier(scanner);
+
   if (isDigit(c))
     return number(scanner);
 

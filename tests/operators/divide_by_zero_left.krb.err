@@ -66,13 +66,13 @@
 0023    | OP_ADD
 0024    | OP_CONSTANT         2 ': expected '
 0026    | OP_ADD
-0027    | OP_GET_GLOBAL       3 'numberToString'
+0027    | OP_GET_GLOBAL       3 '@numberToString'
 0029    | OP_GET_LOCAL        3
 0031    | OP_CALL             1
 0033    | OP_ADD
 0034    6 OP_CONSTANT         4 ' got '
 0036    | OP_ADD
-0037    | OP_GET_GLOBAL       5 'numberToString'
+0037    | OP_GET_GLOBAL       5 '@numberToString'
 0039    | OP_GET_LOCAL        2
 0041    | OP_CALL             1
 0043    | OP_ADD

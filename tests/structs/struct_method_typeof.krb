@@ -8,4 +8,4 @@ impl Greeter {
 
 var greeter = Greeter {};
 
-print typeof(greeter.greet);
+print @typeof(greeter.greet);

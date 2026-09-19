@@ -80,7 +80,7 @@ void defineNative(VM *vm, const char *name, NativeFn function) {
 static Value clockNative(VM *vm, int argCount, Value *args) {
   (void)args;
 
-  assertArgCount(vm, "clock", 0, argCount);
+  assertArgCount(vm, "@clock", 0, argCount);
 
   return NUMBER_VAL((double)clock() / CLOCKS_PER_SEC);
 }
@@ -88,18 +88,18 @@ static Value clockNative(VM *vm, int argCount, Value *args) {
 static Value versionNative(VM *vm, int argCount, Value *args) {
   (void)args;
 
-  assertArgCount(vm, "__version__", 0, argCount);
+  assertArgCount(vm, "@version", 0, argCount);
 
   return OBJ_VAL(copyString(vm->gc, KIRBY_VERSION, KIRBY_VERSION_len));
 }
 
 static Value exitNative(VM *vm, int argCount, Value *args) {
-  assertArgCount(vm, "exit", 1, argCount);
-  assertArgIsNumber(vm, "exit", args, 0);
+  assertArgCount(vm, "@exit", 1, argCount);
+  assertArgIsNumber(vm, "@exit", args, 0);
 
   double exitCode = args[0].as.number;
 
-  assertPositiveNumber(vm, "exit", exitCode, 0);
+  assertPositiveNumber(vm, "@exit", exitCode, 0);
 
   exit(exitCode);
 
@@ -109,7 +109,7 @@ static Value exitNative(VM *vm, int argCount, Value *args) {
 static Value randNative(VM *vm, int argCount, Value *args) {
   (void)args;
 
-  assertArgCount(vm, "rand", 0, argCount);
+  assertArgCount(vm, "@rand", 0, argCount);
 
   return NUMBER_VAL((double)rand());
 }
@@ -117,15 +117,15 @@ static Value randNative(VM *vm, int argCount, Value *args) {
 static Value rand01Native(VM *vm, int argCount, Value *args) {
   (void)args;
 
-  assertArgCount(vm, "rand01", 0, argCount);
+  assertArgCount(vm, "@rand01", 0, argCount);
 
   return NUMBER_VAL((double)rand() / (double)RAND_MAX);
 }
 
 static Value randBetweenNative(VM *vm, int argCount, Value *args) {
-  assertArgCount(vm, "randBetween", 2, argCount);
-  assertArgIsNumber(vm, "randBetween", args, 0);
-  assertArgIsNumber(vm, "randBetween", args, 1);
+  assertArgCount(vm, "@randBetween", 2, argCount);
+  assertArgIsNumber(vm, "@randBetween", args, 0);
+  assertArgIsNumber(vm, "@randBetween", args, 1);
 
   double min = AS_NUMBER(args[0]);
   double max = AS_NUMBER(args[1]);
@@ -141,8 +141,8 @@ static Value randBetweenNative(VM *vm, int argCount, Value *args) {
 }
 
 static Value ceilNative(VM *vm, int argCount, Value *args) {
-  assertArgCount(vm, "ceil", 1, argCount);
-  assertArgIsNumber(vm, "ceil", args, 0);
+  assertArgCount(vm, "@ceil", 1, argCount);
+  assertArgIsNumber(vm, "@ceil", args, 0);
 
   Value value = args[0];
 
@@ -155,8 +155,8 @@ Value fileExists(char *filename) {
 }
 
 static Value fileExistsNative(VM *vm, int argCount, Value *args) {
-  assertArgCount(vm, "fileExists", 1, argCount);
-  assertArgIsString(vm, "fileExists", args, 0);
+  assertArgCount(vm, "@fileExists", 1, argCount);
+  assertArgIsString(vm, "@fileExists", args, 0);
 
   Value value = args[0];
 
@@ -166,8 +166,8 @@ static Value fileExistsNative(VM *vm, int argCount, Value *args) {
 }
 
 static Value readFileToStringNative(VM *vm, int argCount, Value *args) {
-  assertArgCount(vm, "readFileToString", 1, argCount);
-  assertArgIsString(vm, "readFileToString", args, 0);
+  assertArgCount(vm, "@readFileToString", 1, argCount);
+  assertArgIsString(vm, "@readFileToString", args, 0);
 
   Value value = args[0];
 
@@ -178,9 +178,9 @@ static Value readFileToStringNative(VM *vm, int argCount, Value *args) {
 }
 
 static Value writeStringToFileNative(VM *vm, int argCount, Value *args) {
-  assertArgCount(vm, "writeStringToFile", 2, argCount);
-  assertArgIsString(vm, "writeStringToFile", args, 0);
-  assertArgIsString(vm, "writeStringToFile", args, 1);
+  assertArgCount(vm, "@writeStringToFile", 2, argCount);
+  assertArgIsString(vm, "@writeStringToFile", args, 0);
+  assertArgIsString(vm, "@writeStringToFile", args, 1);
 
   Value path_arg = args[0];
   Value text_arg = args[1];
@@ -194,8 +194,8 @@ static Value writeStringToFileNative(VM *vm, int argCount, Value *args) {
 }
 
 static Value getEnvNative(VM *vm, int argCount, Value *args) {
-  assertArgCount(vm, "getenv", 1, argCount);
-  assertArgIsString(vm, "getenv", args, 0);
+  assertArgCount(vm, "@getenv", 1, argCount);
+  assertArgIsString(vm, "@getenv", args, 0);
 
   Value name = args[0];
 
@@ -212,9 +212,9 @@ static Value getEnvNative(VM *vm, int argCount, Value *args) {
 }
 
 static Value setEnvNative(VM *vm, int argCount, Value *args) {
-  assertArgCount(vm, "setenv", 2, argCount);
-  assertArgIsString(vm, "setenv", args, 0);
-  assertArgIsString(vm, "setenv", args, 1);
+  assertArgCount(vm, "@setenv", 2, argCount);
+  assertArgIsString(vm, "@setenv", args, 0);
+  assertArgIsString(vm, "@setenv", args, 1);
 
   ObjString *name = AS_STRING(args[0]);
   ObjString *value = AS_STRING(args[1]);
@@ -232,7 +232,7 @@ static Value setEnvNative(VM *vm, int argCount, Value *args) {
 }
 
 static Value lenNative(VM *vm, int argCount, Value *args) {
-  assertArgCount(vm, "len", 1, argCount);
+  assertArgCount(vm, "@len", 1, argCount);
 
   Value name = args[0];
 
@@ -252,7 +252,7 @@ static Value lenNative(VM *vm, int argCount, Value *args) {
 }
 
 static Value typeofNative(VM *vm, int argCount, Value *args) {
-  assertArgCount(vm, "typeof", 1, argCount);
+  assertArgCount(vm, "@typeof", 1, argCount);
 
   Value value = args[0];
 
@@ -285,8 +285,8 @@ static bool isHelper(Value value, char *type) {
 }
 
 static Value isNative(VM *vm, int argCount, Value *args) {
-  assertArgCount(vm, "is", 2, argCount);
-  assertArgIsString(vm, "is", args, 1);
+  assertArgCount(vm, "@is", 2, argCount);
+  assertArgIsString(vm, "@is", args, 1);
 
   Value value = args[0];
   Value type = args[1];
@@ -297,7 +297,7 @@ static Value isNative(VM *vm, int argCount, Value *args) {
 }
 
 static Value isNumberNative(VM *vm, int argCount, Value *args) {
-  assertArgCount(vm, "isNumber", 1, argCount);
+  assertArgCount(vm, "@isNumber", 1, argCount);
 
   Value value = args[0];
 
@@ -307,7 +307,7 @@ static Value isNumberNative(VM *vm, int argCount, Value *args) {
 }
 
 static Value isFunctionNative(VM *vm, int argCount, Value *args) {
-  assertArgCount(vm, "isFunction", 1, argCount);
+  assertArgCount(vm, "@isFunction", 1, argCount);
 
   Value value = args[0];
 
@@ -317,7 +317,7 @@ static Value isFunctionNative(VM *vm, int argCount, Value *args) {
 }
 
 static Value isBoolNative(VM *vm, int argCount, Value *args) {
-  assertArgCount(vm, "isBool", 1, argCount);
+  assertArgCount(vm, "@isBool", 1, argCount);
 
   Value value = args[0];
 
@@ -327,7 +327,7 @@ static Value isBoolNative(VM *vm, int argCount, Value *args) {
 }
 
 static Value isStringNative(VM *vm, int argCount, Value *args) {
-  assertArgCount(vm, "isString", 1, argCount);
+  assertArgCount(vm, "@isString", 1, argCount);
 
   Value value = args[0];
 
@@ -337,7 +337,7 @@ static Value isStringNative(VM *vm, int argCount, Value *args) {
 }
 
 static Value isNilNative(VM *vm, int argCount, Value *args) {
-  assertArgCount(vm, "isNil", 1, argCount);
+  assertArgCount(vm, "@isNil", 1, argCount);
 
   Value value = args[0];
 
@@ -347,8 +347,8 @@ static Value isNilNative(VM *vm, int argCount, Value *args) {
 }
 
 static Value instanceOfNative(VM *vm, int argCount, Value *args) {
-  assertArgCount(vm, "instanceOf", 2, argCount);
-  assertArgIsStruct(vm, "instanceOf", args, 1);
+  assertArgCount(vm, "@instanceOf", 2, argCount);
+  assertArgIsStruct(vm, "@instanceOf", args, 1);
 
   Value value = args[0];
 
@@ -365,8 +365,8 @@ static Value instanceOfNative(VM *vm, int argCount, Value *args) {
 }
 
 static Value arrPushNative(VM *vm, int argCount, Value *args) {
-  assertArgCount(vm, "arrPush", 2, argCount);
-  assertArgIsArray(vm, "arrPush", args, 0);
+  assertArgCount(vm, "@arrPush", 2, argCount);
+  assertArgIsArray(vm, "@arrPush", args, 0);
 
   ObjArray *array = AS_ARRAY(args[0]);
   Value value = args[1];
@@ -377,8 +377,8 @@ static Value arrPushNative(VM *vm, int argCount, Value *args) {
 }
 
 static Value arrPopNative(VM *vm, int argCount, Value *args) {
-  assertArgCount(vm, "arrPop", 1, argCount);
-  assertArgIsArray(vm, "arrPop", args, 0);
+  assertArgCount(vm, "@arrPop", 1, argCount);
+  assertArgIsArray(vm, "@arrPop", args, 0);
 
   ObjArray *array = AS_ARRAY(args[0]);
 
@@ -395,9 +395,9 @@ static Value arrPopNative(VM *vm, int argCount, Value *args) {
 }
 
 static Value arrInsertNative(VM *vm, int argCount, Value *args) {
-  assertArgCount(vm, "arrInsert", 3, argCount);
-  assertArgIsArray(vm, "arrInsert", args, 0);
-  assertArgIsNumber(vm, "arrInsert", args, 1);
+  assertArgCount(vm, "@arrInsert", 3, argCount);
+  assertArgIsArray(vm, "@arrInsert", args, 0);
+  assertArgIsNumber(vm, "@arrInsert", args, 1);
 
   ObjArray *array = AS_ARRAY(args[0]);
   int index = (int)AS_NUMBER(args[1]);
@@ -417,9 +417,9 @@ static Value arrInsertNative(VM *vm, int argCount, Value *args) {
 }
 
 static Value arrRemoveNative(VM *vm, int argCount, Value *args) {
-  assertArgCount(vm, "arrRemove", 2, argCount);
-  assertArgIsArray(vm, "arrRemove", args, 0);
-  assertArgIsNumber(vm, "arrRemove", args, 1);
+  assertArgCount(vm, "@arrRemove", 2, argCount);
+  assertArgIsArray(vm, "@arrRemove", args, 0);
+  assertArgIsNumber(vm, "@arrRemove", args, 1);
 
   ObjArray *array = AS_ARRAY(args[0]);
   int index = (int)AS_NUMBER(args[1]);
@@ -438,8 +438,8 @@ static Value arrRemoveNative(VM *vm, int argCount, Value *args) {
 }
 
 static Value arrClearNative(VM *vm, int argCount, Value *args) {
-  assertArgCount(vm, "arrClear", 1, argCount);
-  assertArgIsArray(vm, "arrClear", args, 0);
+  assertArgCount(vm, "@arrClear", 1, argCount);
+  assertArgIsArray(vm, "@arrClear", args, 0);
 
   ObjArray *array = AS_ARRAY(args[0]);
 
@@ -449,8 +449,8 @@ static Value arrClearNative(VM *vm, int argCount, Value *args) {
 }
 
 static Value arrContainsNative(VM *vm, int argCount, Value *args) {
-  assertArgCount(vm, "arrContains", 2, argCount);
-  assertArgIsArray(vm, "arrContains", args, 0);
+  assertArgCount(vm, "@arrContains", 2, argCount);
+  assertArgIsArray(vm, "@arrContains", args, 0);
 
   ObjArray *array = AS_ARRAY(args[0]);
   Value value = args[1];
@@ -465,8 +465,8 @@ static Value arrContainsNative(VM *vm, int argCount, Value *args) {
 }
 
 static Value arrCopyNative(VM *vm, int argCount, Value *args) {
-  assertArgCount(vm, "arrayCopy", 1, argCount);
-  assertArgIsArray(vm, "arrayCopy", args, 0);
+  assertArgCount(vm, "@arrCopy", 1, argCount);
+  assertArgIsArray(vm, "@arrCopy", args, 0);
 
   ObjArray *array = AS_ARRAY(args[0]);
   ObjArray *result = newArray(vm->gc);
@@ -483,8 +483,8 @@ static Value arrCopyNative(VM *vm, int argCount, Value *args) {
 }
 
 static Value arrIsEmptyNative(VM *vm, int argCount, Value *args) {
-  assertArgCount(vm, "arrIsEmpty", 1, argCount);
-  assertArgIsArray(vm, "arrIsEmpty", args, 0);
+  assertArgCount(vm, "@arrIsEmpty", 1, argCount);
+  assertArgIsArray(vm, "@arrIsEmpty", args, 0);
 
   ObjArray *array = AS_ARRAY(args[0]);
 
@@ -494,8 +494,8 @@ static Value arrIsEmptyNative(VM *vm, int argCount, Value *args) {
 }
 
 static Value strIsEmptyNative(VM *vm, int argCount, Value *args) {
-  assertArgCount(vm, "strIsEmpty", 1, argCount);
-  assertArgIsString(vm, "strIsEmpty", args, 0);
+  assertArgCount(vm, "@strIsEmpty", 1, argCount);
+  assertArgIsString(vm, "@strIsEmpty", args, 0);
 
   ObjString *string = AS_STRING(args[0]);
 
@@ -505,9 +505,9 @@ static Value strIsEmptyNative(VM *vm, int argCount, Value *args) {
 }
 
 static Value arrEqualNative(VM *vm, int argCount, Value *args) {
-  assertArgCount(vm, "arrEqual", 2, argCount);
-  assertArgIsArray(vm, "arrEqual", args, 0);
-  assertArgIsArray(vm, "arrEqual", args, 1);
+  assertArgCount(vm, "@arrEqual", 2, argCount);
+  assertArgIsArray(vm, "@arrEqual", args, 0);
+  assertArgIsArray(vm, "@arrEqual", args, 1);
 
   ObjArray *array_a = AS_ARRAY(args[0]);
   ObjArray *array_b = AS_ARRAY(args[1]);
@@ -531,19 +531,19 @@ static Value arrEqualNative(VM *vm, int argCount, Value *args) {
 }
 
 static Value arrSliceNative(VM *vm, int argCount, Value *args) {
-  assertArgCount(vm, "arrSlice", 3, argCount);
-  assertArgIsArray(vm, "arrSlice", args, 0);
-  assertArgIsNumber(vm, "arrSlice", args, 1);
-  assertArgIsNumber(vm, "arrSlice", args, 2);
+  assertArgCount(vm, "@arrSlice", 3, argCount);
+  assertArgIsArray(vm, "@arrSlice", args, 0);
+  assertArgIsNumber(vm, "@arrSlice", args, 1);
+  assertArgIsNumber(vm, "@arrSlice", args, 2);
 
   ObjArray *array = AS_ARRAY(args[0]);
 
   double start = AS_NUMBER(args[1]);
-  assertPositiveNumber(vm, "arrSlice", start, 1);
+  assertPositiveNumber(vm, "@arrSlice", start, 1);
   assertIsInArrayBounds(vm, array, start);
 
   double end = AS_NUMBER(args[2]);
-  assertPositiveNumber(vm, "arrSlice", end, 2);
+  assertPositiveNumber(vm, "@arrSlice", end, 2);
   assertIsInArrayBounds(vm, array, end);
 
   if (start >= end) {
@@ -566,9 +566,9 @@ static Value arrSliceNative(VM *vm, int argCount, Value *args) {
 }
 
 static Value arrConcatNative(VM *vm, int argCount, Value *args) {
-  assertArgCount(vm, "arrConcat", 2, argCount);
-  assertArgIsArray(vm, "arrConcat", args, 0);
-  assertArgIsArray(vm, "arrConcat", args, 1);
+  assertArgCount(vm, "@arrConcat", 2, argCount);
+  assertArgIsArray(vm, "@arrConcat", args, 0);
+  assertArgIsArray(vm, "@arrConcat", args, 1);
 
   ObjArray *array_a = AS_ARRAY(args[0]);
   ObjArray *array_b = AS_ARRAY(args[1]);
@@ -591,8 +591,8 @@ static Value arrConcatNative(VM *vm, int argCount, Value *args) {
 }
 
 static Value arrReverseNative(VM *vm, int argCount, Value *args) {
-  assertArgCount(vm, "arrReverse", 1, argCount);
-  assertArgIsArray(vm, "arrReverse", args, 0);
+  assertArgCount(vm, "@arrReverse", 1, argCount);
+  assertArgIsArray(vm, "@arrReverse", args, 0);
 
   ObjArray *array_a = AS_ARRAY(args[0]);
 
@@ -615,9 +615,9 @@ static Value arrReverseNative(VM *vm, int argCount, Value *args) {
  * implicit conversion to string.
  */
 static Value arrJoinNative(VM *vm, int argCount, Value *args) {
-  assertArgCount(vm, "arrJoin", 2, argCount);
-  assertArgIsArray(vm, "arrJoin", args, 0);
-  assertArgIsString(vm, "arrJoin", args, 1);
+  assertArgCount(vm, "@arrJoin", 2, argCount);
+  assertArgIsArray(vm, "@arrJoin", args, 0);
+  assertArgIsString(vm, "@arrJoin", args, 1);
 
   ObjArray *array = AS_ARRAY(args[0]);
   ObjString *separator = AS_STRING(args[1]);
@@ -668,7 +668,7 @@ static Value arrJoinNative(VM *vm, int argCount, Value *args) {
 
 static Value stdinNative(VM *vm, int argCount, Value *args) {
   if (argCount > 1) {
-    assertArgCount(vm, "stdin", 1, argCount);
+    assertArgCount(vm, "@stdin", 1, argCount);
   }
 
   if (argCount == 1) {
@@ -725,8 +725,8 @@ static Value stdinNative(VM *vm, int argCount, Value *args) {
 
 static Value promptNative(VM *vm, int argCount, Value *args) {
   if (argCount > 1) {
-    assertArgCount(vm, "prompt", 1, argCount);
-    assertArgIsString(vm, "prompt", args, 0);
+    assertArgCount(vm, "@prompt", 1, argCount);
+    assertArgIsString(vm, "@prompt", args, 0);
   }
 
   if (argCount == 1) {
@@ -782,8 +782,8 @@ static Value promptNative(VM *vm, int argCount, Value *args) {
 }
 
 static Value argvNative(VM *vm, int argCount, Value *args) {
-  assertArgCount(vm, "argv", 1, argCount);
-  assertArgIsNumber(vm, "argv", args, 0);
+  assertArgCount(vm, "@argv", 1, argCount);
+  assertArgIsNumber(vm, "@argv", args, 0);
 
   Value index = args[0];
 
@@ -799,7 +799,7 @@ static Value argvNative(VM *vm, int argCount, Value *args) {
 }
 
 static Value argcNative(VM *vm, int argCount, Value *args) {
-  assertArgCount(vm, "argc", 0, argCount);
+  assertArgCount(vm, "@argc", 0, argCount);
 
   (void)args;
 
@@ -809,8 +809,8 @@ static Value argcNative(VM *vm, int argCount, Value *args) {
 }
 
 static Value parseNumberNative(VM *vm, int argCount, Value *args) {
-  assertArgCount(vm, "parseNumber", 1, argCount);
-  assertArgIsString(vm, "parseNumber", args, 0);
+  assertArgCount(vm, "@parseNumber", 1, argCount);
+  assertArgIsString(vm, "@parseNumber", args, 0);
 
   Value value = args[0];
 
@@ -821,8 +821,8 @@ static Value parseNumberNative(VM *vm, int argCount, Value *args) {
 }
 
 static Value numberToStringNative(VM *vm, int argCount, Value *args) {
-  assertArgCount(vm, "numberToString", 1, argCount);
-  assertArgIsNumber(vm, "numberToString", args, 0);
+  assertArgCount(vm, "@numberToString", 1, argCount);
+  assertArgIsNumber(vm, "@numberToString", args, 0);
 
   Value value = args[0];
 
@@ -834,69 +834,69 @@ static Value numberToStringNative(VM *vm, int argCount, Value *args) {
 }
 
 const NativeDefinition nativeDefinitions[] = {
-    {"clock", clockNative},
-    {"__version__", versionNative},
-    {"exit", exitNative},
-    {"rand", randNative},
-    {"rand01", rand01Native},
-    {"randBetween", randBetweenNative},
-    {"ceil", ceilNative},
-    {"readFileToString", readFileToStringNative},
-    {"writeStringToFile", writeStringToFileNative},
-    {"numberToString", numberToStringNative},
-    {"fileExists", fileExistsNative},
-    {"getenv", getEnvNative},
-    {"setenv", setEnvNative},
-    {"len", lenNative},
-    {"typeof", typeofNative},
-    {"argv", argvNative},
-    {"argc", argcNative},
-    {"parseNumber", parseNumberNative},
-    {"instanceOf", instanceOfNative},
-    {"prompt", promptNative},
-    {"stdin", stdinNative},
-    {"arrPush", arrPushNative},
-    {"arrPop", arrPopNative},
-    {"arrInsert", arrInsertNative},
-    {"arrRemove", arrRemoveNative},
-    {"arrClear", arrClearNative},
-    {"arrContains", arrContainsNative},
-    {"arrCopy", arrCopyNative},
-    {"arrIsEmpty", arrIsEmptyNative},
-    {"arrEqual", arrEqualNative},
-    {"arrSlice", arrSliceNative},
-    {"arrConcat", arrConcatNative},
-    {"arrReverse", arrReverseNative},
-    {"arrJoin", arrJoinNative},
-    {"is", isNative},
-    {"isNumber", isNumberNative},
-    {"isFunction", isFunctionNative},
-    {"isBool", isBoolNative},
-    {"isString", isStringNative},
-    {"isNil", isNilNative},
-    {"strIsEmpty", strIsEmptyNative},
+    {"@clock", clockNative},
+    {"@version", versionNative},
+    {"@exit", exitNative},
+    {"@rand", randNative},
+    {"@rand01", rand01Native},
+    {"@randBetween", randBetweenNative},
+    {"@ceil", ceilNative},
+    {"@readFileToString", readFileToStringNative},
+    {"@writeStringToFile", writeStringToFileNative},
+    {"@numberToString", numberToStringNative},
+    {"@fileExists", fileExistsNative},
+    {"@getenv", getEnvNative},
+    {"@setenv", setEnvNative},
+    {"@len", lenNative},
+    {"@typeof", typeofNative},
+    {"@argv", argvNative},
+    {"@argc", argcNative},
+    {"@parseNumber", parseNumberNative},
+    {"@instanceOf", instanceOfNative},
+    {"@prompt", promptNative},
+    {"@stdin", stdinNative},
+    {"@arrPush", arrPushNative},
+    {"@arrPop", arrPopNative},
+    {"@arrInsert", arrInsertNative},
+    {"@arrRemove", arrRemoveNative},
+    {"@arrClear", arrClearNative},
+    {"@arrContains", arrContainsNative},
+    {"@arrCopy", arrCopyNative},
+    {"@arrIsEmpty", arrIsEmptyNative},
+    {"@arrEqual", arrEqualNative},
+    {"@arrSlice", arrSliceNative},
+    {"@arrConcat", arrConcatNative},
+    {"@arrReverse", arrReverseNative},
+    {"@arrJoin", arrJoinNative},
+    {"@is", isNative},
+    {"@isNumber", isNumberNative},
+    {"@isFunction", isFunctionNative},
+    {"@isBool", isBoolNative},
+    {"@isString", isStringNative},
+    {"@isNil", isNilNative},
+    {"@strIsEmpty", strIsEmptyNative},
 };
 
 const int nativeDefinitionCount =
     (int)(sizeof(nativeDefinitions) / sizeof(nativeDefinitions[0]));
 
 const NativeSignature nativeSignatures[] = {
-    {"clock", {0}, 0, NATIVE_F64},
-    {"__version__", {0}, 0, NATIVE_STRING},
-    {"exit", {NATIVE_F64}, 1, NATIVE_UNIT},
-    {"rand", {0}, 0, NATIVE_F64},
-    {"rand01", {0}, 0, NATIVE_F64},
-    {"randBetween", {NATIVE_F64, NATIVE_F64}, 2, NATIVE_F64},
-    {"ceil", {NATIVE_F64}, 1, NATIVE_F64},
-    {"readFileToString", {NATIVE_STRING}, 1, NATIVE_STRING},
-    {"writeStringToFile", {NATIVE_STRING, NATIVE_STRING}, 2, NATIVE_UNIT},
-    {"numberToString", {NATIVE_F64}, 1, NATIVE_STRING},
-    {"fileExists", {NATIVE_STRING}, 1, NATIVE_BOOL},
-    {"getenv", {NATIVE_STRING}, 1, NATIVE_STRING},
-    {"setenv", {NATIVE_STRING, NATIVE_STRING}, 2, NATIVE_UNIT},
-    {"argc", {0}, 0, NATIVE_F64},
-    {"parseNumber", {NATIVE_STRING}, 1, NATIVE_F64},
-    {"strIsEmpty", {NATIVE_STRING}, 1, NATIVE_BOOL},
+    {"@clock", {0}, 0, NATIVE_F64},
+    {"@version", {0}, 0, NATIVE_STRING},
+    {"@exit", {NATIVE_F64}, 1, NATIVE_UNIT},
+    {"@rand", {0}, 0, NATIVE_F64},
+    {"@rand01", {0}, 0, NATIVE_F64},
+    {"@randBetween", {NATIVE_F64, NATIVE_F64}, 2, NATIVE_F64},
+    {"@ceil", {NATIVE_F64}, 1, NATIVE_F64},
+    {"@readFileToString", {NATIVE_STRING}, 1, NATIVE_STRING},
+    {"@writeStringToFile", {NATIVE_STRING, NATIVE_STRING}, 2, NATIVE_UNIT},
+    {"@numberToString", {NATIVE_F64}, 1, NATIVE_STRING},
+    {"@fileExists", {NATIVE_STRING}, 1, NATIVE_BOOL},
+    {"@getenv", {NATIVE_STRING}, 1, NATIVE_STRING},
+    {"@setenv", {NATIVE_STRING, NATIVE_STRING}, 2, NATIVE_UNIT},
+    {"@argc", {0}, 0, NATIVE_F64},
+    {"@parseNumber", {NATIVE_STRING}, 1, NATIVE_F64},
+    {"@strIsEmpty", {NATIVE_STRING}, 1, NATIVE_BOOL},
 };
 
 const int nativeSignatureCount =

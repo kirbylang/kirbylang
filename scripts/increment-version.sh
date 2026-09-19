@@ -186,7 +186,7 @@ else
 fi
 
 # The build regenerates version.c from VERSION.txt. This MUST happen before the
-# snapshot update, or the __version__ snapshot captures the previous version.
+# snapshot update, or the version snapshot captures the previous version.
 echo "==> Building"
 run ./scripts/build.sh
 

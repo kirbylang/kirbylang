@@ -9,7 +9,7 @@
 0008    | OP_DEFINE_GLOBAL    0 'array'
 0010    3 OP_GET_GLOBAL       4 'array'
 0012    | OP_PRINT
-0013    5 OP_GET_GLOBAL       5 'arrClear'
+0013    5 OP_GET_GLOBAL       5 '@arrClear'
 0015    | OP_GET_GLOBAL       6 'array'
 0017    | OP_CALL             1
 0019    | OP_POP

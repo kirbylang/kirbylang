@@ -13,7 +13,7 @@
 0014    9 OP_GET_GLOBAL       6 'Greeter'
 0016    | OP_STRUCT_INIT      0
 0018    | OP_DEFINE_GLOBAL    5 'greeter'
-0020   11 OP_GET_GLOBAL       7 'typeof'
+0020   11 OP_GET_GLOBAL       7 '@typeof'
 0022    | OP_GET_GLOBAL       8 'greeter'
 0024    | OP_GET_PROPERTY     9 'greet'
 0026    | OP_CALL             1

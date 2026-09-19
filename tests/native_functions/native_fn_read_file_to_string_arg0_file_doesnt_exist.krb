@@ -1,1 +1,1 @@
-print readFileToString("path/to/file/doesnt.exist");
+print @readFileToString("path/to/file/doesnt.exist");

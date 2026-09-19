@@ -1,1 +1,1 @@
-writeStringToFile("./path/to/file.txt", 123);
+@writeStringToFile("./path/to/file.txt", 123);

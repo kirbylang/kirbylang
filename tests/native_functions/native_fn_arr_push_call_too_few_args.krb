@@ -1,3 +1,3 @@
 var array = [];
 
-arrPush(array);
+@arrPush(array);

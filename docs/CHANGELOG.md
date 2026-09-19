@@ -35,21 +35,24 @@
 - [`continue` keyword](https://github.com/kirbylang/kirbylang/issues/13)
 - Unit literal expression: `()`.
 - New native functions:
-  - `arrJoin(array, separator)`
+  - `@arrJoin(array, separator)`
     - Every element must already be a string. There is no implicit conversion
-      to string, so joining numbers means mapping `numberToString` first
+      to string, so joining numbers means mapping `@numberToString` first
+- Native functions are now prefixed with `@` (e.g. `len(x)` becomes `@len(x)`)
+  - `@` is now a reserved character identifiers
+  - `__version__()` is now `@version()`
 - Initial implementation of types and typechecker
   - Limitations
     - Generic types are ignored
   - Native function signatures
     - Calls to a native with a signature are checked like any other call
-    - `clock`, `__version__`, `exit`, `rand`, `rand01`, `randBetween`,
-      `ceil`, `readFileToString`, `writeStringToFile`, `numberToString`,
-      `fileExists`, `getenv`, `setenv`, `argc`, `parseNumber`, `strIsEmpty`
-    - Still unchecked, pending generics: `len`, `typeof`, `instanceOf`,
-      `is`, `isNumber`, `isFunction`, `isBool`, `isString`, `isNil`, and
-      the `arr*` family
-    - Still unchecked, pending `Option[T]`: `argv`, `prompt`, `stdin`
+    - `@clock`, `@version`, `@exit`, `@rand`, `@rand01`, `@randBetween`,
+      `@ceil`, `@readFileToString`, `@writeStringToFile`, `@numberToString`,
+      `@fileExists`, `@getenv`, `@setenv`, `@argc`, `@parseNumber`, `@strIsEmpty`
+    - Still unchecked, pending generics: `@len`, `@typeof`, `@instanceOf`,
+      `@is`, `@isNumber`, `@isFunction`, `@isBool`, `@isString`, `@isNil`, and
+      the `@arr*` family
+    - Still unchecked, pending `Option[T]`: `@argv`, `@prompt`, `@stdin`
   - Primitive types
     - `string`
     - `bool`
@@ -191,7 +194,7 @@ These are the documented changes to the language/syntax from the original Lox la
 - No class inheritance
 - Native functions added
   - `exit`
-  - `__version__`
+  - `version`
   - `rand`
   - `rand01`
   - `randBetween`

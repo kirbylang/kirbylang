@@ -43,5 +43,25 @@ int main(void) {
   assert_token_types("trait true trapdoor", traitExpected,
                      (int)(sizeof(traitExpected) / sizeof(traitExpected[0])));
 
+  TokenType nativeRefExpected[] = {
+      TOKEN_IDENTIFIER,
+      TOKEN_LEFT_PAREN,
+      TOKEN_RIGHT_PAREN,
+      TOKEN_SEMICOLON,
+      TOKEN_EOF,
+  };
+
+  assert_token_types(
+      "@len();", nativeRefExpected,
+      (int)(sizeof(nativeRefExpected) / sizeof(nativeRefExpected[0])));
+
+  TokenType bareAtExpected[] = {
+      TOKEN_ERROR,
+      TOKEN_EOF,
+  };
+
+  assert_token_types("@", bareAtExpected,
+                     (int)(sizeof(bareAtExpected) / sizeof(bareAtExpected[0])));
+
   return 0;
 }

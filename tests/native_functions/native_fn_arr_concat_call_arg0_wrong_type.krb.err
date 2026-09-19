@@ -7,12 +7,12 @@
 0004    | OP_CONSTANT         3 '6.000000'
 0006    | OP_ARRAY            3
 0008    | OP_DEFINE_GLOBAL    0 'b'
-0010    3 OP_GET_GLOBAL       4 'arrConcat'
+0010    3 OP_GET_GLOBAL       4 '@arrConcat'
 0012    | OP_NIL
 0013    | OP_GET_GLOBAL       5 'b'
 0015    | OP_CALL             2
 0017    | OP_POP
 0018    4 OP_NIL
 0019    | OP_RETURN
-function arrConcat expects argument 1 to be an array.
+function @arrConcat expects argument 1 to be an array.
 [line 3] in script

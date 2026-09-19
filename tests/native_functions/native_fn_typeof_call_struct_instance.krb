@@ -2,4 +2,4 @@ struct Struct {}
 
 var instance = Struct {};
 
-print typeof(instance);
+print @typeof(instance);

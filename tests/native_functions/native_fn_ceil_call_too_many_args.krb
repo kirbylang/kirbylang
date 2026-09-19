@@ -1,1 +1,1 @@
-print ceil(1, 2, 3);
+print @ceil(1, 2, 3);

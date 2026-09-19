@@ -2,5 +2,5 @@ print [1, 2, 3, 4];
 print ["Hello", "World"];
 print [true, false];
 print [nil];
-print [__version__];
+print [@version];
 print [];

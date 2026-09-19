@@ -1,1 +1,1 @@
-writeStringToFile("file.txt", "Hello, world!", true);
+@writeStringToFile("file.txt", "Hello, world!", true);

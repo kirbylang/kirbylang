@@ -9,11 +9,11 @@
 0008    | OP_CONSTANT         5 '50.000000'
 0010    | OP_ARRAY            5
 0012    | OP_DEFINE_GLOBAL    0 'array'
-0014    3 OP_GET_GLOBAL       7 'arrSlice'
+0014    3 OP_GET_GLOBAL       7 '@arrSlice'
 0016    | OP_GET_GLOBAL       8 'array'
 0018    | OP_CALL             1
 0020    | OP_DEFINE_GLOBAL    6 'slice'
 0022    4 OP_NIL
 0023    | OP_RETURN
-function arrSlice expects 3 argument(s) but got 1 instead.
+function @arrSlice expects 3 argument(s) but got 1 instead.
 [line 3] in script

@@ -1,1 +1,1 @@
-print arrReverse(nil);
+print @arrReverse(nil);

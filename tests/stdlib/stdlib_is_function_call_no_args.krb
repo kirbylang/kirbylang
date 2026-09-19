@@ -1,1 +1,1 @@
-print isFunction();
+print @isFunction();

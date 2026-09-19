@@ -1,1 +1,1 @@
-print readFileToString("./path/to/file.txt", "another/path/to/fix");
+print @readFileToString("./path/to/file.txt", "another/path/to/fix");

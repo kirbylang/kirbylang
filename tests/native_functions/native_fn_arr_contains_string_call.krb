@@ -1,3 +1,3 @@
 var array = ["Hello", "World"];
 
-print arrContains(array, "Hello");
+print @arrContains(array, "Hello");

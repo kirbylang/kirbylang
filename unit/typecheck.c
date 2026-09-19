@@ -339,7 +339,7 @@ static void test_function_call_wrong_arity_errors(void) {
 
 static void test_native_call_with_a_signature_is_checked(void) {
   typchkResetError();
-  TypeEnv *env = checkProgram("var x = clock();");
+  TypeEnv *env = checkProgram("var x = @clock();");
   assert(!typchkHadError());
   assert(typchkTypeEnvLookup(env, makeToken("x")) == typeF64());
   typchkTypeEnvDestroy(env);
@@ -347,9 +347,9 @@ static void test_native_call_with_a_signature_is_checked(void) {
 
 static void test_native_call_without_a_signature_is_unchecked(void) {
   typchkResetError();
-  // `len` needs generics, so it has no signature -- the call is presumed
+  // `@len` needs generics, so it has no signature -- the call is presumed
   // native, not an error, and infers as "no opinion."
-  TypeEnv *env = checkProgram("var x = len(\"abc\");");
+  TypeEnv *env = checkProgram("var x = @len(\"abc\");");
   assert(!typchkHadError());
   assert(typchkTypeEnvLookup(env, makeToken("x")) == NULL);
   typchkTypeEnvDestroy(env);

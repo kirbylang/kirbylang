@@ -1,1 +1,1 @@
-writeStringToFile("path/to/file/doesnt.exist", "Hello World");
+@writeStringToFile("path/to/file/doesnt.exist", "Hello World");

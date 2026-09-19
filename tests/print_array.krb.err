@@ -19,7 +19,7 @@
 0023    4 OP_NIL
 0024    | OP_ARRAY            1
 0026    | OP_PRINT
-0027    5 OP_GET_GLOBAL       6 '__version__'
+0027    5 OP_GET_GLOBAL       6 '@version'
 0029    | OP_ARRAY            1
 0031    | OP_PRINT
 0032    6 OP_ARRAY            0

@@ -1,6 +1,6 @@
 var a = [1, 2, 3];
 var b = a;
-var c = arrCopy(a);
+var c = @arrCopy(a);
 
 a[0] = 100;
 

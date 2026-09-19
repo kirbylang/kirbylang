@@ -7,12 +7,12 @@
 0004    | OP_CONSTANT         3 '3.000000'
 0006    | OP_ARRAY            3
 0008    | OP_DEFINE_GLOBAL    0 'array'
-0010    3 OP_GET_GLOBAL       4 'arrContains'
+0010    3 OP_GET_GLOBAL       4 '@arrContains'
 0012    | OP_GET_GLOBAL       5 'array'
 0014    | OP_CONSTANT         6 '2.000000'
 0016    | OP_CALL             2
 0018    | OP_PRINT
-0019    4 OP_GET_GLOBAL       7 'arrContains'
+0019    4 OP_GET_GLOBAL       7 '@arrContains'
 0021    | OP_GET_GLOBAL       8 'array'
 0023    | OP_CONSTANT         9 '100.000000'
 0025    | OP_CALL             2

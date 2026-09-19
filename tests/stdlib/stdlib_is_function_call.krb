@@ -1,5 +1,5 @@
-print isFunction(ceil);
-print isFunction(true);
-print isFunction(12345);
-print isFunction("Hello");
-print isFunction(nil);
+print @isFunction(@ceil);
+print @isFunction(true);
+print @isFunction(12345);
+print @isFunction("Hello");
+print @isFunction(nil);

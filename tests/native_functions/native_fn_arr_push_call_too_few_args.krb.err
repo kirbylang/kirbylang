@@ -4,11 +4,11 @@
 == <script> ==
 0000    1 OP_ARRAY            0
 0002    | OP_DEFINE_GLOBAL    0 'array'
-0004    3 OP_GET_GLOBAL       1 'arrPush'
+0004    3 OP_GET_GLOBAL       1 '@arrPush'
 0006    | OP_GET_GLOBAL       2 'array'
 0008    | OP_CALL             1
 0010    | OP_POP
 0011    4 OP_NIL
 0012    | OP_RETURN
-function arrPush expects 2 argument(s) but got 1 instead.
+function @arrPush expects 2 argument(s) but got 1 instead.
 [line 3] in script
