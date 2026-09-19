@@ -1,0 +1,3 @@
+print @strSplit("abc", "");
+print @len(@strSplit("abc", ""));
+print @len(@strSplit("", ""));

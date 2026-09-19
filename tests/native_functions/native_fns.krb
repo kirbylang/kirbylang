@@ -111,3 +111,69 @@ print @typeof(@isString);
 
 print @strIsEmpty;
 print @typeof(@strIsEmpty);
+
+print @assert;
+print @typeof(@assert);
+
+print @panic;
+print @typeof(@panic);
+
+print @floor;
+print @typeof(@floor);
+
+print @round;
+print @typeof(@round);
+
+print @trunc;
+print @typeof(@trunc);
+
+print @abs;
+print @typeof(@abs);
+
+print @sqrt;
+print @typeof(@sqrt);
+
+print @pow;
+print @typeof(@pow);
+
+print @min;
+print @typeof(@min);
+
+print @max;
+print @typeof(@max);
+
+print @strContains;
+print @typeof(@strContains);
+
+print @strIndexOf;
+print @typeof(@strIndexOf);
+
+print @strSlice;
+print @typeof(@strSlice);
+
+print @strSplit;
+print @typeof(@strSplit);
+
+print @strTrim;
+print @typeof(@strTrim);
+
+print @strToUpper;
+print @typeof(@strToUpper);
+
+print @strToLower;
+print @typeof(@strToLower);
+
+print @strStartsWith;
+print @typeof(@strStartsWith);
+
+print @strEndsWith;
+print @typeof(@strEndsWith);
+
+print @strRepeat;
+print @typeof(@strRepeat);
+
+print @strReplace;
+print @typeof(@strReplace);
+
+print @strReplaceAll;
+print @typeof(@strReplaceAll);

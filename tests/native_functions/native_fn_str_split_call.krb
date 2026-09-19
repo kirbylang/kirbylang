@@ -1,0 +1,10 @@
+var parts = @strSplit("a,b,c", ",");
+print parts;
+print @len(parts);
+print parts[1];
+print @strSplit("a,b,,c", ",");
+print @strSplit("a,b,", ",");
+print @strSplit(",a", ",");
+print @strSplit("abc", ",");
+print @strSplit("a--b--c", "--");
+print @strSplit("aaa", "aa");

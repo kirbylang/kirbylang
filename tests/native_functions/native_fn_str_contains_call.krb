@@ -1,0 +1,6 @@
+print @strContains("hello world", "lo wo");
+print @strContains("hello world", "xyz");
+print @strContains("hello", "");
+print @strContains("", "a");
+print @strContains("", "");
+print @strContains("abc", "abcd");

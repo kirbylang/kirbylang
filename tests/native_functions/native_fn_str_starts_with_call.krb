@@ -1,0 +1,5 @@
+print @strStartsWith("hello", "he");
+print @strStartsWith("hello", "lo");
+print @strStartsWith("hello", "");
+print @strStartsWith("he", "hello");
+print @strStartsWith("hello", "hello");

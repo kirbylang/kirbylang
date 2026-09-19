@@ -1,0 +1,5 @@
+print @strEndsWith("hello", "lo");
+print @strEndsWith("hello", "he");
+print @strEndsWith("hello", "");
+print @strEndsWith("lo", "hello");
+print @strEndsWith("hello", "hello");

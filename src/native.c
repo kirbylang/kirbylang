@@ -1,4 +1,5 @@
 #include "sys/stat.h"
+#include <limits.h>
 #include <math.h>
 #include <stdarg.h>
 #include <stdio.h>
@@ -681,7 +682,7 @@ static Value stdinNative(VM *vm, int argCount, Value *args) {
     fflush(stdout);
   }
 
-  const size_t MAX_INPUT = 1024 * 1024 * 5; // 5 MB cap
+  const size_t MAX_INPUT_BYTES = 1024 * 1024 * 5; // 5 MB cap
 
   size_t capacity = 64;
   size_t length = 0;
@@ -696,11 +697,11 @@ static Value stdinNative(VM *vm, int argCount, Value *args) {
     if (length + 1 >= capacity) {
       size_t newCapacity = capacity * 2;
 
-      if (newCapacity > MAX_INPUT) {
-        newCapacity = MAX_INPUT;
+      if (newCapacity > MAX_INPUT_BYTES) {
+        newCapacity = MAX_INPUT_BYTES;
       }
 
-      if (capacity == MAX_INPUT) {
+      if (capacity == MAX_INPUT_BYTES) {
         FREE_ARRAY(vm->gc, char, buffer, capacity);
         runtimeError(vm, "stdin() exceeded maximum length.");
         return NIL_VAL;
@@ -739,7 +740,7 @@ static Value promptNative(VM *vm, int argCount, Value *args) {
     fflush(stdout);
   }
 
-  const size_t MAX_INPUT = 1024 * 1024; // 1 MB cap
+  const size_t MAX_INPUT_BYTES = 1024 * 1024; // 1 MB cap
 
   size_t capacity = 64;
   size_t length = 0;
@@ -754,11 +755,11 @@ static Value promptNative(VM *vm, int argCount, Value *args) {
     if (length + 1 >= capacity) {
       size_t newCapacity = capacity * 2;
 
-      if (newCapacity > MAX_INPUT) {
-        newCapacity = MAX_INPUT;
+      if (newCapacity > MAX_INPUT_BYTES) {
+        newCapacity = MAX_INPUT_BYTES;
       }
 
-      if (capacity == MAX_INPUT) {
+      if (capacity == MAX_INPUT_BYTES) {
         FREE_ARRAY(vm->gc, char, buffer, capacity);
         runtimeError(vm, "input() exceeded maximum length.");
         return NIL_VAL;
@@ -833,6 +834,460 @@ static Value numberToStringNative(VM *vm, int argCount, Value *args) {
   return OBJ_VAL(copyString(vm->gc, buffer, length));
 }
 
+static Value floorNative(VM *vm, int argCount, Value *args) {
+  assertArgCount(vm, "@floor", 1, argCount);
+  assertArgIsNumber(vm, "@floor", args, 0);
+
+  return NUMBER_VAL(floor(AS_NUMBER(args[0])));
+}
+
+// Rounds halves away from zero: round(2.5) is 3, round(-2.5) is -3.
+static Value roundNative(VM *vm, int argCount, Value *args) {
+  assertArgCount(vm, "@round", 1, argCount);
+  assertArgIsNumber(vm, "@round", args, 0);
+
+  return NUMBER_VAL(round(AS_NUMBER(args[0])));
+}
+
+// Drops the fractional part, moving toward zero: trunc(-2.7) is -2.
+static Value truncNative(VM *vm, int argCount, Value *args) {
+  assertArgCount(vm, "@trunc", 1, argCount);
+  assertArgIsNumber(vm, "@trunc", args, 0);
+
+  return NUMBER_VAL(trunc(AS_NUMBER(args[0])));
+}
+
+static Value absNative(VM *vm, int argCount, Value *args) {
+  assertArgCount(vm, "@abs", 1, argCount);
+  assertArgIsNumber(vm, "@abs", args, 0);
+
+  return NUMBER_VAL(fabs(AS_NUMBER(args[0])));
+}
+
+static Value sqrtNative(VM *vm, int argCount, Value *args) {
+  assertArgCount(vm, "@sqrt", 1, argCount);
+  assertArgIsNumber(vm, "@sqrt", args, 0);
+
+  double number = AS_NUMBER(args[0]);
+
+  assertNonNegativeNumber(vm, "@sqrt", number, 0);
+
+  return NUMBER_VAL(sqrt(number));
+}
+
+// Raising 0 to a negative power divides by zero, and a negative number to a
+// fractional power has no real result. Both raise an error, like `/` with a
+// zero divisor and `@sqrt` of a negative number.
+static Value powNative(VM *vm, int argCount, Value *args) {
+  assertArgCount(vm, "@pow", 2, argCount);
+  assertArgIsNumber(vm, "@pow", args, 0);
+  assertArgIsNumber(vm, "@pow", args, 1);
+
+  double base = AS_NUMBER(args[0]);
+  double exponent = AS_NUMBER(args[1]);
+
+  if (base == 0 && exponent < 0) {
+    runtimeError(vm, "function @pow can't raise 0 to a negative power (%g).",
+                 exponent);
+    exit(EXIT_CODE_RUNTIME_ERR);
+  }
+
+  if (base < 0 && exponent != floor(exponent)) {
+    runtimeError(vm,
+                 "function @pow can't raise a negative number (%g) to a "
+                 "fractional power (%g).",
+                 base, exponent);
+    exit(EXIT_CODE_RUNTIME_ERR);
+  }
+
+  return NUMBER_VAL(pow(base, exponent));
+}
+
+static Value minNative(VM *vm, int argCount, Value *args) {
+  assertArgCount(vm, "@min", 2, argCount);
+  assertArgIsNumber(vm, "@min", args, 0);
+  assertArgIsNumber(vm, "@min", args, 1);
+
+  return NUMBER_VAL(fmin(AS_NUMBER(args[0]), AS_NUMBER(args[1])));
+}
+
+static Value maxNative(VM *vm, int argCount, Value *args) {
+  assertArgCount(vm, "@max", 2, argCount);
+  assertArgIsNumber(vm, "@max", args, 0);
+  assertArgIsNumber(vm, "@max", args, 1);
+
+  return NUMBER_VAL(fmax(AS_NUMBER(args[0]), AS_NUMBER(args[1])));
+}
+
+// Stops the program with a message written by the script, after a fixed
+// prefix. The message is printed as is, never used as a format string.
+static void raiseScriptMessage(VM *vm, const char *prefix, ObjString *message) {
+  runtimeError(vm, "%s%.*s", prefix, message->length, message->chars);
+  exit(EXIT_CODE_RUNTIME_ERR);
+}
+
+static Value assertNative(VM *vm, int argCount, Value *args) {
+  assertArgCount(vm, "@assert", 2, argCount);
+  assertArgIsBool(vm, "@assert", args, 0);
+  assertArgIsString(vm, "@assert", args, 1);
+
+  if (!AS_BOOL(args[0])) {
+    raiseScriptMessage(vm, "assertion failed: ", AS_STRING(args[1]));
+  }
+
+  return NIL_VAL;
+}
+
+static Value panicNative(VM *vm, int argCount, Value *args) {
+  assertArgCount(vm, "@panic", 1, argCount);
+  assertArgIsString(vm, "@panic", args, 0);
+
+  raiseScriptMessage(vm, "panic: ", AS_STRING(args[0]));
+
+  return NIL_VAL;
+}
+
+// Finds the first place `needle` appears in `haystack` at or after `start`.
+// Returns its byte offset, or -1 if it doesn't appear. An empty needle is
+// found at `start`.
+static int findBytes(const char *haystack, int haystackLength, int start,
+                     const char *needle, int needleLength) {
+  for (int i = start; i + needleLength <= haystackLength; i++) {
+    if (memcmp(haystack + i, needle, needleLength) == 0) {
+      return i;
+    }
+  }
+
+  return -1;
+}
+
+static Value strContainsNative(VM *vm, int argCount, Value *args) {
+  assertArgCount(vm, "@strContains", 2, argCount);
+  assertArgIsString(vm, "@strContains", args, 0);
+  assertArgIsString(vm, "@strContains", args, 1);
+
+  ObjString *string = AS_STRING(args[0]);
+  ObjString *sub = AS_STRING(args[1]);
+
+  int index =
+      findBytes(string->chars, string->length, 0, sub->chars, sub->length);
+
+  return BOOL_VAL(index >= 0);
+}
+
+static Value strStartsWithNative(VM *vm, int argCount, Value *args) {
+  assertArgCount(vm, "@strStartsWith", 2, argCount);
+  assertArgIsString(vm, "@strStartsWith", args, 0);
+  assertArgIsString(vm, "@strStartsWith", args, 1);
+
+  ObjString *string = AS_STRING(args[0]);
+  ObjString *prefix = AS_STRING(args[1]);
+
+  bool startsWith = prefix->length <= string->length &&
+                    memcmp(string->chars, prefix->chars, prefix->length) == 0;
+
+  return BOOL_VAL(startsWith);
+}
+
+static Value strEndsWithNative(VM *vm, int argCount, Value *args) {
+  assertArgCount(vm, "@strEndsWith", 2, argCount);
+  assertArgIsString(vm, "@strEndsWith", args, 0);
+  assertArgIsString(vm, "@strEndsWith", args, 1);
+
+  ObjString *string = AS_STRING(args[0]);
+  ObjString *suffix = AS_STRING(args[1]);
+
+  bool endsWith = suffix->length <= string->length &&
+                  memcmp(string->chars + string->length - suffix->length,
+                         suffix->chars, suffix->length) == 0;
+
+  return BOOL_VAL(endsWith);
+}
+
+// The whitespace strTrim removes. Not isspace(), which depends on the locale.
+static bool isTrimmedChar(char c) {
+  return c == ' ' || c == '\t' || c == '\n' || c == '\r';
+}
+
+static Value strTrimNative(VM *vm, int argCount, Value *args) {
+  assertArgCount(vm, "@strTrim", 1, argCount);
+  assertArgIsString(vm, "@strTrim", args, 0);
+
+  ObjString *string = AS_STRING(args[0]);
+
+  int start = 0;
+  int end = string->length;
+
+  while (start < end && isTrimmedChar(string->chars[start])) {
+    start++;
+  }
+
+  while (end > start && isTrimmedChar(string->chars[end - 1])) {
+    end--;
+  }
+
+  return OBJ_VAL(copyString(vm->gc, string->chars + start, end - start));
+}
+
+// Copies a string, changing only the ASCII letters 'a'-'z' (or 'A'-'Z'). Every
+// other byte, including the bytes of multi-byte characters, is kept as is.
+static Value changeAsciiCase(VM *vm, ObjString *string, bool toUpper) {
+  // The string is still an argument on the VM stack, so it stays reachable if
+  // this allocation triggers a collection.
+  char *chars = ALLOCATE(vm->gc, char, string->length + 1);
+
+  for (int i = 0; i < string->length; i++) {
+    char c = string->chars[i];
+
+    if (toUpper && c >= 'a' && c <= 'z') {
+      c = (char)(c - 'a' + 'A');
+    } else if (!toUpper && c >= 'A' && c <= 'Z') {
+      c = (char)(c - 'A' + 'a');
+    }
+
+    chars[i] = c;
+  }
+
+  chars[string->length] = '\0';
+
+  return OBJ_VAL(takeString(vm->gc, chars, string->length));
+}
+
+static Value strToUpperNative(VM *vm, int argCount, Value *args) {
+  assertArgCount(vm, "@strToUpper", 1, argCount);
+  assertArgIsString(vm, "@strToUpper", args, 0);
+
+  return changeAsciiCase(vm, AS_STRING(args[0]), true);
+}
+
+static Value strToLowerNative(VM *vm, int argCount, Value *args) {
+  assertArgCount(vm, "@strToLower", 1, argCount);
+  assertArgIsString(vm, "@strToLower", args, 0);
+
+  return changeAsciiCase(vm, AS_STRING(args[0]), false);
+}
+
+static Value strRepeatNative(VM *vm, int argCount, Value *args) {
+  assertArgCount(vm, "@strRepeat", 2, argCount);
+  assertArgIsString(vm, "@strRepeat", args, 0);
+  assertArgIsNumber(vm, "@strRepeat", args, 1);
+
+  ObjString *string = AS_STRING(args[0]);
+  double number = AS_NUMBER(args[1]);
+
+  assertNonNegativeNumber(vm, "@strRepeat", number, 1);
+  assertWholeNumber(vm, "@strRepeat", number, 1);
+
+  // A count of 0 repeats nothing
+  if (string->length == 0 || number < 1) {
+    return OBJ_VAL(copyString(vm->gc, "", 0));
+  }
+
+  // Written as a negated comparison so NaN is rejected too. Checking before
+  // converting to int keeps the conversion and the multiplication from
+  // overflowing.
+  if (!(number <= (double)(INT_MAX - 1) / string->length)) {
+    raiseError(vm, "function @strRepeat result is too large.");
+  }
+
+  int count = (int)number;
+  int length = string->length * count;
+
+  char *chars = ALLOCATE(vm->gc, char, length + 1);
+
+  for (int i = 0; i < count; i++) {
+    memcpy(chars + i * string->length, string->chars, string->length);
+  }
+
+  chars[length] = '\0';
+
+  return OBJ_VAL(takeString(vm->gc, chars, length));
+}
+
+// Appends a copy of `length` bytes to an array as a new string. The new string
+// is held on the VM stack while the array grows, since growing the array can
+// start a collection before the string is reachable from anywhere else.
+static void appendStringCopy(VM *vm, ObjArray *array, const char *chars,
+                             int length) {
+  ObjString *piece = copyString(vm->gc, chars, length);
+
+  pushOnStack(OBJ_VAL(piece));
+  writeValueToArrayObj(vm->gc, array, OBJ_VAL(piece));
+  popFromStack();
+}
+
+static Value strSplitNative(VM *vm, int argCount, Value *args) {
+  assertArgCount(vm, "@strSplit", 2, argCount);
+  assertArgIsString(vm, "@strSplit", args, 0);
+  assertArgIsString(vm, "@strSplit", args, 1);
+
+  ObjString *string = AS_STRING(args[0]);
+  ObjString *separator = AS_STRING(args[1]);
+
+  ObjArray *result = newArray(vm->gc);
+
+  pushOnStack(OBJ_VAL(result)); // Protect from GC
+
+  if (separator->length == 0) {
+    // With no separator every byte becomes its own string
+    for (int i = 0; i < string->length; i++) {
+      appendStringCopy(vm, result, string->chars + i, 1);
+    }
+  } else {
+    int start = 0;
+    int found;
+
+    while ((found = findBytes(string->chars, string->length, start,
+                              separator->chars, separator->length)) >= 0) {
+      appendStringCopy(vm, result, string->chars + start, found - start);
+      start = found + separator->length;
+    }
+
+    appendStringCopy(vm, result, string->chars + start, string->length - start);
+  }
+
+  popFromStack(); // Clean up after GC protection
+
+  return OBJ_VAL(result);
+}
+
+static Value strIndexOfNative(VM *vm, int argCount, Value *args) {
+  assertArgCount(vm, "@strIndexOf", 2, argCount);
+  assertArgIsString(vm, "@strIndexOf", args, 0);
+  assertArgIsString(vm, "@strIndexOf", args, 1);
+
+  ObjString *string = AS_STRING(args[0]);
+  ObjString *sub = AS_STRING(args[1]);
+
+  int index =
+      findBytes(string->chars, string->length, 0, sub->chars, sub->length);
+
+  if (index < 0) {
+    return NIL_VAL;
+  }
+
+  return NUMBER_VAL(index);
+}
+
+// Asserts a number is a whole position in the string: 0 up to and including
+// its length. Returns it as an int.
+static int assertStringPosition(VM *vm, const char *function, ObjString *string,
+                                double number, int index) {
+  assertWholeNumber(vm, function, number, index);
+
+  // Written as a negated comparison so NaN is rejected too
+  if (!(number >= 0 && number <= string->length)) {
+    runtimeError(
+        vm,
+        "function %s expects argument %d to be between 0 and %d but got %g.",
+        function, index + 1, string->length, number);
+    exit(EXIT_CODE_RUNTIME_ERR);
+  }
+
+  return (int)number;
+}
+
+static Value strSliceNative(VM *vm, int argCount, Value *args) {
+  assertArgCount(vm, "@strSlice", 3, argCount);
+  assertArgIsString(vm, "@strSlice", args, 0);
+  assertArgIsNumber(vm, "@strSlice", args, 1);
+  assertArgIsNumber(vm, "@strSlice", args, 2);
+
+  ObjString *string = AS_STRING(args[0]);
+
+  int start =
+      assertStringPosition(vm, "@strSlice", string, AS_NUMBER(args[1]), 1);
+  int end =
+      assertStringPosition(vm, "@strSlice", string, AS_NUMBER(args[2]), 2);
+
+  if (start > end) {
+    runtimeError(vm, "function @strSlice expects argument 2 to be less than or "
+                     "equal to argument 3.");
+    exit(EXIT_CODE_RUNTIME_ERR);
+  }
+
+  return OBJ_VAL(copyString(vm->gc, string->chars + start, end - start));
+}
+
+// Replaces the first match of `old` in a string, or every match when `all` is
+// true. Matches are found left to right and never overlap. A string with no
+// matches is returned as is. An empty `old` never matches.
+static Value replaceMatches(VM *vm, const char *function, int argCount,
+                            Value *args, bool all) {
+  assertArgCount(vm, function, 3, argCount);
+  assertArgIsString(vm, function, args, 0);
+  assertArgIsString(vm, function, args, 1);
+  assertArgIsString(vm, function, args, 2);
+
+  ObjString *string = AS_STRING(args[0]);
+  ObjString *old = AS_STRING(args[1]);
+  ObjString *replacement = AS_STRING(args[2]);
+
+  if (old->length == 0) {
+    return args[0];
+  }
+
+  int matches = 0;
+  int at = findBytes(string->chars, string->length, 0, old->chars, old->length);
+
+  while (at >= 0) {
+    matches++;
+
+    if (!all) {
+      break;
+    }
+
+    at = findBytes(string->chars, string->length, at + old->length, old->chars,
+                   old->length);
+  }
+
+  if (matches == 0) {
+    return args[0];
+  }
+
+  // Done in long long so a large replacement can't overflow before the check
+  long long length =
+      (long long)string->length +
+      (long long)matches * ((long long)replacement->length - old->length);
+
+  if (length >= INT_MAX) {
+    runtimeError(vm, "function %s result is too large.", function);
+    exit(EXIT_CODE_RUNTIME_ERR);
+  }
+
+  // The string is still an argument on the VM stack, so it stays reachable if
+  // this allocation triggers a collection.
+  char *chars = ALLOCATE(vm->gc, char, (int)length + 1);
+  int read = 0;
+  int write = 0;
+
+  for (int i = 0; i < matches; i++) {
+    int next =
+        findBytes(string->chars, string->length, read, old->chars, old->length);
+
+    memcpy(chars + write, string->chars + read, next - read);
+    write += next - read;
+
+    memcpy(chars + write, replacement->chars, replacement->length);
+    write += replacement->length;
+
+    read = next + old->length;
+  }
+
+  memcpy(chars + write, string->chars + read, string->length - read);
+  chars[length] = '\0';
+
+  return OBJ_VAL(takeString(vm->gc, chars, (int)length));
+}
+
+static Value strReplaceNative(VM *vm, int argCount, Value *args) {
+  return replaceMatches(vm, "@strReplace", argCount, args, false);
+}
+
+static Value strReplaceAllNative(VM *vm, int argCount, Value *args) {
+  return replaceMatches(vm, "@strReplaceAll", argCount, args, true);
+}
+
 const NativeDefinition nativeDefinitions[] = {
     {"@clock", clockNative},
     {"@version", versionNative},
@@ -875,6 +1330,28 @@ const NativeDefinition nativeDefinitions[] = {
     {"@isString", isStringNative},
     {"@isNil", isNilNative},
     {"@strIsEmpty", strIsEmptyNative},
+    {"@floor", floorNative},
+    {"@round", roundNative},
+    {"@trunc", truncNative},
+    {"@abs", absNative},
+    {"@sqrt", sqrtNative},
+    {"@pow", powNative},
+    {"@min", minNative},
+    {"@max", maxNative},
+    {"@assert", assertNative},
+    {"@panic", panicNative},
+    {"@strContains", strContainsNative},
+    {"@strStartsWith", strStartsWithNative},
+    {"@strEndsWith", strEndsWithNative},
+    {"@strTrim", strTrimNative},
+    {"@strToUpper", strToUpperNative},
+    {"@strToLower", strToLowerNative},
+    {"@strRepeat", strRepeatNative},
+    {"@strSplit", strSplitNative},
+    {"@strIndexOf", strIndexOfNative},
+    {"@strSlice", strSliceNative},
+    {"@strReplace", strReplaceNative},
+    {"@strReplaceAll", strReplaceAllNative},
 };
 
 const int nativeDefinitionCount =
@@ -897,6 +1374,24 @@ const NativeSignature nativeSignatures[] = {
     {"@argc", {0}, 0, NATIVE_F64},
     {"@parseNumber", {NATIVE_STRING}, 1, NATIVE_F64},
     {"@strIsEmpty", {NATIVE_STRING}, 1, NATIVE_BOOL},
+    {"@floor", {NATIVE_F64}, 1, NATIVE_F64},
+    {"@round", {NATIVE_F64}, 1, NATIVE_F64},
+    {"@trunc", {NATIVE_F64}, 1, NATIVE_F64},
+    {"@abs", {NATIVE_F64}, 1, NATIVE_F64},
+    {"@sqrt", {NATIVE_F64}, 1, NATIVE_F64},
+    {"@pow", {NATIVE_F64, NATIVE_F64}, 2, NATIVE_F64},
+    {"@min", {NATIVE_F64, NATIVE_F64}, 2, NATIVE_F64},
+    {"@max", {NATIVE_F64, NATIVE_F64}, 2, NATIVE_F64},
+    {"@assert", {NATIVE_BOOL, NATIVE_STRING}, 2, NATIVE_UNIT},
+    {"@panic", {NATIVE_STRING}, 1, NATIVE_UNIT},
+    {"@strContains", {NATIVE_STRING, NATIVE_STRING}, 2, NATIVE_BOOL},
+    {"@strStartsWith", {NATIVE_STRING, NATIVE_STRING}, 2, NATIVE_BOOL},
+    {"@strEndsWith", {NATIVE_STRING, NATIVE_STRING}, 2, NATIVE_BOOL},
+    {"@strTrim", {NATIVE_STRING}, 1, NATIVE_STRING},
+    {"@strToUpper", {NATIVE_STRING}, 1, NATIVE_STRING},
+    {"@strToLower", {NATIVE_STRING}, 1, NATIVE_STRING},
+    {"@strRepeat", {NATIVE_STRING, NATIVE_F64}, 2, NATIVE_STRING},
+    {"@strSplit", {NATIVE_STRING, NATIVE_STRING}, 2, NATIVE_LIST},
 };
 
 const int nativeSignatureCount =

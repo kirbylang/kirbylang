@@ -230,5 +230,137 @@
 0375    | OP_GET_GLOBAL     113 '@strIsEmpty'
 0377    | OP_CALL             1
 0379    | OP_PRINT
-0380  114 OP_NIL
-0381    | OP_RETURN
+0380  115 OP_GET_GLOBAL     114 '@assert'
+0382    | OP_PRINT
+0383  116 OP_GET_GLOBAL     115 '@typeof'
+0385    | OP_GET_GLOBAL     116 '@assert'
+0387    | OP_CALL             1
+0389    | OP_PRINT
+0390  118 OP_GET_GLOBAL     117 '@panic'
+0392    | OP_PRINT
+0393  119 OP_GET_GLOBAL     118 '@typeof'
+0395    | OP_GET_GLOBAL     119 '@panic'
+0397    | OP_CALL             1
+0399    | OP_PRINT
+0400  121 OP_GET_GLOBAL     120 '@floor'
+0402    | OP_PRINT
+0403  122 OP_GET_GLOBAL     121 '@typeof'
+0405    | OP_GET_GLOBAL     122 '@floor'
+0407    | OP_CALL             1
+0409    | OP_PRINT
+0410  124 OP_GET_GLOBAL     123 '@round'
+0412    | OP_PRINT
+0413  125 OP_GET_GLOBAL     124 '@typeof'
+0415    | OP_GET_GLOBAL     125 '@round'
+0417    | OP_CALL             1
+0419    | OP_PRINT
+0420  127 OP_GET_GLOBAL     126 '@trunc'
+0422    | OP_PRINT
+0423  128 OP_GET_GLOBAL     127 '@typeof'
+0425    | OP_GET_GLOBAL     128 '@trunc'
+0427    | OP_CALL             1
+0429    | OP_PRINT
+0430  130 OP_GET_GLOBAL     129 '@abs'
+0432    | OP_PRINT
+0433  131 OP_GET_GLOBAL     130 '@typeof'
+0435    | OP_GET_GLOBAL     131 '@abs'
+0437    | OP_CALL             1
+0439    | OP_PRINT
+0440  133 OP_GET_GLOBAL     132 '@sqrt'
+0442    | OP_PRINT
+0443  134 OP_GET_GLOBAL     133 '@typeof'
+0445    | OP_GET_GLOBAL     134 '@sqrt'
+0447    | OP_CALL             1
+0449    | OP_PRINT
+0450  136 OP_GET_GLOBAL     135 '@pow'
+0452    | OP_PRINT
+0453  137 OP_GET_GLOBAL     136 '@typeof'
+0455    | OP_GET_GLOBAL     137 '@pow'
+0457    | OP_CALL             1
+0459    | OP_PRINT
+0460  139 OP_GET_GLOBAL     138 '@min'
+0462    | OP_PRINT
+0463  140 OP_GET_GLOBAL     139 '@typeof'
+0465    | OP_GET_GLOBAL     140 '@min'
+0467    | OP_CALL             1
+0469    | OP_PRINT
+0470  142 OP_GET_GLOBAL     141 '@max'
+0472    | OP_PRINT
+0473  143 OP_GET_GLOBAL     142 '@typeof'
+0475    | OP_GET_GLOBAL     143 '@max'
+0477    | OP_CALL             1
+0479    | OP_PRINT
+0480  145 OP_GET_GLOBAL     144 '@strContains'
+0482    | OP_PRINT
+0483  146 OP_GET_GLOBAL     145 '@typeof'
+0485    | OP_GET_GLOBAL     146 '@strContains'
+0487    | OP_CALL             1
+0489    | OP_PRINT
+0490  148 OP_GET_GLOBAL     147 '@strIndexOf'
+0492    | OP_PRINT
+0493  149 OP_GET_GLOBAL     148 '@typeof'
+0495    | OP_GET_GLOBAL     149 '@strIndexOf'
+0497    | OP_CALL             1
+0499    | OP_PRINT
+0500  151 OP_GET_GLOBAL     150 '@strSlice'
+0502    | OP_PRINT
+0503  152 OP_GET_GLOBAL     151 '@typeof'
+0505    | OP_GET_GLOBAL     152 '@strSlice'
+0507    | OP_CALL             1
+0509    | OP_PRINT
+0510  154 OP_GET_GLOBAL     153 '@strSplit'
+0512    | OP_PRINT
+0513  155 OP_GET_GLOBAL     154 '@typeof'
+0515    | OP_GET_GLOBAL     155 '@strSplit'
+0517    | OP_CALL             1
+0519    | OP_PRINT
+0520  157 OP_GET_GLOBAL     156 '@strTrim'
+0522    | OP_PRINT
+0523  158 OP_GET_GLOBAL     157 '@typeof'
+0525    | OP_GET_GLOBAL     158 '@strTrim'
+0527    | OP_CALL             1
+0529    | OP_PRINT
+0530  160 OP_GET_GLOBAL     159 '@strToUpper'
+0532    | OP_PRINT
+0533  161 OP_GET_GLOBAL     160 '@typeof'
+0535    | OP_GET_GLOBAL     161 '@strToUpper'
+0537    | OP_CALL             1
+0539    | OP_PRINT
+0540  163 OP_GET_GLOBAL     162 '@strToLower'
+0542    | OP_PRINT
+0543  164 OP_GET_GLOBAL     163 '@typeof'
+0545    | OP_GET_GLOBAL     164 '@strToLower'
+0547    | OP_CALL             1
+0549    | OP_PRINT
+0550  166 OP_GET_GLOBAL     165 '@strStartsWith'
+0552    | OP_PRINT
+0553  167 OP_GET_GLOBAL     166 '@typeof'
+0555    | OP_GET_GLOBAL     167 '@strStartsWith'
+0557    | OP_CALL             1
+0559    | OP_PRINT
+0560  169 OP_GET_GLOBAL     168 '@strEndsWith'
+0562    | OP_PRINT
+0563  170 OP_GET_GLOBAL     169 '@typeof'
+0565    | OP_GET_GLOBAL     170 '@strEndsWith'
+0567    | OP_CALL             1
+0569    | OP_PRINT
+0570  172 OP_GET_GLOBAL     171 '@strRepeat'
+0572    | OP_PRINT
+0573  173 OP_GET_GLOBAL     172 '@typeof'
+0575    | OP_GET_GLOBAL     173 '@strRepeat'
+0577    | OP_CALL             1
+0579    | OP_PRINT
+0580  175 OP_GET_GLOBAL     174 '@strReplace'
+0582    | OP_PRINT
+0583  176 OP_GET_GLOBAL     175 '@typeof'
+0585    | OP_GET_GLOBAL     176 '@strReplace'
+0587    | OP_CALL             1
+0589    | OP_PRINT
+0590  178 OP_GET_GLOBAL     177 '@strReplaceAll'
+0592    | OP_PRINT
+0593  179 OP_GET_GLOBAL     178 '@typeof'
+0595    | OP_GET_GLOBAL     179 '@strReplaceAll'
+0597    | OP_CALL             1
+0599    | OP_PRINT
+0600  180 OP_NIL
+0601    | OP_RETURN

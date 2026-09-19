@@ -1,0 +1,3 @@
+@assert(true, "never shown");
+@assert(1 < 2, "math works");
+print "after";

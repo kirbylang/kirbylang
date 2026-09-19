@@ -1,0 +1,4 @@
+print @min(3, 7);
+print @min(7, 3);
+print @min(-1, -5);
+print @min(2, 2);

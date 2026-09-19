@@ -1,0 +1,7 @@
+print @strReplaceAll("a-b-c", "-", "+");
+print @strReplaceAll("banana", "an", "AN");
+print @strReplaceAll("aaa", "aa", "b");
+print @strReplaceAll("hello", "xyz", "!");
+print @strReplaceAll("abab", "ab", "");
+print @strReplaceAll("a.b.c", ".", "..");
+print @strReplaceAll("", "a", "b");

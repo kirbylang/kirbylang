@@ -1,0 +1,4 @@
+print @max(3, 7);
+print @max(7, 3);
+print @max(-1, -5);
+print @max(2, 2);

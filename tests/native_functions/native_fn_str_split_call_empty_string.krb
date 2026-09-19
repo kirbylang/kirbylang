@@ -1,0 +1,2 @@
+print @len(@strSplit("", ","));
+print @strSplit("", ",")[0] == "";

@@ -692,6 +692,50 @@ static Type *typchkInferNullish(TypeEnv *env, AstNode *node) {
   return typchkInfer(env, l->right); // result type comes from the fallback
 }
 
+// Reads a constant number out of an expression: a number literal, possibly
+// negated with '-' and possibly wrapped in parentheses. Anything else, such as
+// a variable or arithmetic, isn't treated as constant.
+static bool typchkConstantNumber(AstNode *node, double *value) {
+  switch (node->kind) {
+  case NODE_LITERAL:
+    if (node->as.literal.kind != LITERAL_NUMBER)
+      return false;
+    *value = node->as.literal.as.number;
+    return true;
+  case NODE_GROUPING:
+    return typchkConstantNumber(node->as.grouping.inner, value);
+  case NODE_UNARY:
+    if (node->as.unary.op.type != TOKEN_MINUS)
+      return false;
+    if (!typchkConstantNumber(node->as.unary.operand, value))
+      return false;
+    *value = -*value;
+    return true;
+  default:
+    return false;
+  }
+}
+
+// Some natives can never accept certain arguments. When the argument is a
+// constant, report it now instead of when the call runs. Arguments that aren't
+// constant are still checked at runtime by the native itself.
+static void typchkCheckNativeConstantArgs(AstNode *node) {
+  CallNode *c = &node->as.call;
+
+  if (c->callee->kind != NODE_VARIABLE || c->argCount != 1)
+    return;
+
+  double value;
+
+  if (tokenTextEquals(&c->callee->as.variable.name, "@sqrt") &&
+      typchkConstantNumber(c->args[0], &value) && value < 0) {
+    typchkErrorAtNodeFmt(c->args[0],
+                         "function @sqrt expects argument 1 to be a "
+                         "non-negative number but got %g.",
+                         value);
+  }
+}
+
 // Infer the type of a call expression
 static Type *typchkInferCall(TypeEnv *env, AstNode *node) {
   CallNode *c = &node->as.call;
@@ -712,7 +756,14 @@ static Type *typchkInferCall(TypeEnv *env, AstNode *node) {
       return NULL;
     }
 
-    return typchkCheckCallAgainstFunctionType(env, node, calleeType);
+    Type *returnType =
+        typchkCheckCallAgainstFunctionType(env, node, calleeType);
+
+    if (returnType != NULL)
+      // Used to validate args passed native functions like `@sqrt`
+      typchkCheckNativeConstantArgs(node);
+
+    return returnType;
   }
 
   Type *calleeType = typchkInfer(env, c->callee);

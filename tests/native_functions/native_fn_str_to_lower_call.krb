@@ -1,0 +1,4 @@
+print @strToLower("Hello, World 123!");
+print @strToLower("ALREADY lower");
+print @strToLower("");
+print @strToLower("CAFÉ");

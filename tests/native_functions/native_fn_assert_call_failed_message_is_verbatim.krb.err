@@ -1,0 +1,13 @@
+== <script> ==
+0000    1 OP_NIL
+0001    | OP_RETURN
+== <script> ==
+0000    1 OP_GET_GLOBAL       0 '@assert'
+0002    | OP_FALSE
+0003    | OP_CONSTANT         1 '50%s off, 100%d done'
+0005    | OP_CALL             2
+0007    | OP_POP
+0008    2 OP_NIL
+0009    | OP_RETURN
+assertion failed: 50%s off, 100%d done
+[line 1] in script

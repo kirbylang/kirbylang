@@ -1,0 +1,1 @@
+print @strRepeat("ab", "x");

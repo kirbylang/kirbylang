@@ -1,0 +1,3 @@
+let parts: Array = @strSplit("a b c", " ");
+print @arrJoin(parts, "-");
+print parts[0];

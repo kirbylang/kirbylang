@@ -1,0 +1,1 @@
+print @strSlice(1, 1, 3);

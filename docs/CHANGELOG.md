@@ -35,9 +35,13 @@
 - [`continue` keyword](https://github.com/kirbylang/kirbylang/issues/13)
 - Unit literal expression: `()`.
 - New native functions:
-  - `@arrJoin(array, separator)`
+  - `@assert(condition, message)`
+  - `@panic(message)`
+  - Math: `@floor(n)`, `@round(n)`, `@trunc(n)`, `@abs(n)`, `@sqrt(n)`, `@pow(base, exponent`, `@min(a, b)`, `@max(a, b)`
+  - Arrays: `@arrJoin(array, separator)`
     - Every element must already be a string. There is no implicit conversion
       to string, so joining numbers means mapping `@numberToString` first
+  - Strings: `@strContains(s, sub)`, `@strIndexOf(s, sub)`, `@strSlice(s, start, end)`, `@strSplit(s, sep)`, `@strTrim(s)`, `@strToUpper(s)`, `@strToLower(s)`, `@strStartsWith(s, prefix)`, `@strEndsWith(s, suffix)`, `@strRepeat(s, count)`, `@strReplace(s, old, new)`, `@strReplaceAll(s, old, new)`
 - Native functions are now prefixed with `@` (e.g. `len(x)` becomes `@len(x)`)
   - `@` is now a reserved character identifiers
   - `__version__()` is now `@version()`
@@ -48,11 +52,18 @@
     - Calls to a native with a signature are checked like any other call
     - `@clock`, `@version`, `@exit`, `@rand`, `@rand01`, `@randBetween`,
       `@ceil`, `@readFileToString`, `@writeStringToFile`, `@numberToString`,
-      `@fileExists`, `@getenv`, `@setenv`, `@argc`, `@parseNumber`, `@strIsEmpty`
+      `@fileExists`, `@getenv`, `@setenv`, `@argc`, `@parseNumber`, `@strIsEmpty`,
+      `@assert`, `@panic`, `@floor`, `@round`, `@trunc`, `@abs`, `@sqrt`,
+      `@pow`, `@min`, `@max`, `@strContains`, `@strStartsWith`,
+      `@strEndsWith`, `@strTrim`, `@strToUpper`, `@strToLower`, `@strRepeat`,
+      `@strSplit`
     - Still unchecked, pending generics: `@len`, `@typeof`, `@instanceOf`,
       `@is`, `@isNumber`, `@isFunction`, `@isBool`, `@isString`, `@isNil`, and
       the `@arr*` family
-    - Still unchecked, pending `Option[T]`: `@argv`, `@prompt`, `@stdin`
+    - Still unchecked, pending `Option[T]`: `@argv`, `@prompt`, `@stdin`,
+      `@strIndexOf`
+    - Still unchecked, pending more than two parameters: `@strSlice`,
+      `@strReplace`, `@strReplaceAll`
   - Primitive types
     - `string`
     - `bool`

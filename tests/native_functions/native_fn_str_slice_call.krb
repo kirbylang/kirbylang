@@ -1,0 +1,5 @@
+print @strSlice("hello world", 0, 5);
+print @strSlice("hello world", 6, 11);
+print @strSlice("hello", 1, 3);
+print @strSlice("hello", 2, 2);
+print @strSlice("", 0, 0);

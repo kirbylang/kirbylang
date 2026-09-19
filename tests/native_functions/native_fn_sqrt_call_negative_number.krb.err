@@ -1,0 +1,15 @@
+== <script> ==
+0000    1 OP_NIL
+0001    | OP_RETURN
+== <script> ==
+0000    1 OP_CONSTANT         1 '4.000000'
+0002    | OP_NEGATE
+0003    | OP_DEFINE_GLOBAL    0 'n'
+0005    2 OP_GET_GLOBAL       2 '@sqrt'
+0007    | OP_GET_GLOBAL       3 'n'
+0009    | OP_CALL             1
+0011    | OP_PRINT
+0012    3 OP_NIL
+0013    | OP_RETURN
+function @sqrt expects argument 1 to be a non-negative number but got -4.
+[line 2] in script
