@@ -1,0 +1,1 @@
+print @strReplaceAll(@strRepeat("a", 1000000), "a", @strRepeat("b", 3000));

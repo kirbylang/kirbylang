@@ -1,0 +1,1 @@
+print @strEndsWith("abc", 2);

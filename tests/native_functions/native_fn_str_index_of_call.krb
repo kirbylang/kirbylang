@@ -1,0 +1,7 @@
+print @strIndexOf("hello world", "o");
+print @strIndexOf("hello world", "world");
+print @strIndexOf("hello", "xyz");
+print @strIndexOf("hello", "");
+print @strIndexOf("", "a");
+print @strIndexOf("", "");
+print @strIndexOf("aaa", "aa");

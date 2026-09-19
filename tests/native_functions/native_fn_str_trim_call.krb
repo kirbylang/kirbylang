@@ -1,0 +1,6 @@
+print "[" + @strTrim("  hello  ") + "]";
+print "[" + @strTrim("\t\n hi \r\n") + "]";
+print "[" + @strTrim("no-trim") + "]";
+print "[" + @strTrim("   ") + "]";
+print "[" + @strTrim("") + "]";
+print "[" + @strTrim(" a  b ") + "]";

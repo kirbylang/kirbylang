@@ -1,0 +1,3 @@
+print "before";
+@assert(false, "expected a positive number");
+print "after";

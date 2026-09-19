@@ -1,0 +1,1 @@
+print @strContains("abc", "b", 1, 2);

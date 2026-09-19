@@ -1,0 +1,31 @@
+== <script> ==
+0000    1 OP_NIL
+0001    | OP_RETURN
+== <script> ==
+0000    1 OP_GET_GLOBAL       0 '@strEndsWith'
+0002    | OP_CONSTANT         1 'hello'
+0004    | OP_CONSTANT         2 'lo'
+0006    | OP_CALL             2
+0008    | OP_PRINT
+0009    2 OP_GET_GLOBAL       3 '@strEndsWith'
+0011    | OP_CONSTANT         4 'hello'
+0013    | OP_CONSTANT         5 'he'
+0015    | OP_CALL             2
+0017    | OP_PRINT
+0018    3 OP_GET_GLOBAL       6 '@strEndsWith'
+0020    | OP_CONSTANT         7 'hello'
+0022    | OP_CONSTANT         8 ''
+0024    | OP_CALL             2
+0026    | OP_PRINT
+0027    4 OP_GET_GLOBAL       9 '@strEndsWith'
+0029    | OP_CONSTANT        10 'lo'
+0031    | OP_CONSTANT        11 'hello'
+0033    | OP_CALL             2
+0035    | OP_PRINT
+0036    5 OP_GET_GLOBAL      12 '@strEndsWith'
+0038    | OP_CONSTANT        13 'hello'
+0040    | OP_CONSTANT        14 'hello'
+0042    | OP_CALL             2
+0044    | OP_PRINT
+0045    6 OP_NIL
+0046    | OP_RETURN

@@ -1,0 +1,1 @@
+print @strIndexOf("a", 2);

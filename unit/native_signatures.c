@@ -19,7 +19,12 @@ static const char *awaitingGenerics[] = {
 // Natives that return nothing on some paths, so their type needs Option[T].
 // Phase 6. prompt and stdin also take an optional argument, which the
 // language has no way to spell.
-static const char *awaitingOptionType[] = {"@argv", "@prompt", "@stdin"};
+static const char *awaitingOptionType[] = {"@argv", "@prompt", "@stdin",
+                                           "@strIndexOf"};
+
+// Natives with more parameters than NATIVE_SIGNATURE_MAX_PARAMS allows.
+static const char *awaitingMoreParams[] = {"@strSlice", "@strReplace",
+                                           "@strReplaceAll"};
 
 static bool listContains(const char *const *names, int count,
                          const char *name) {
@@ -35,9 +40,12 @@ static bool isDeferred(const char *name) {
       (int)(sizeof(awaitingGenerics) / sizeof(*awaitingGenerics));
   int optionCount =
       (int)(sizeof(awaitingOptionType) / sizeof(*awaitingOptionType));
+  int moreParamsCount =
+      (int)(sizeof(awaitingMoreParams) / sizeof(*awaitingMoreParams));
 
   return listContains(awaitingGenerics, genericCount, name) ||
-         listContains(awaitingOptionType, optionCount, name);
+         listContains(awaitingOptionType, optionCount, name) ||
+         listContains(awaitingMoreParams, moreParamsCount, name);
 }
 
 static bool hasSignature(const char *name) {

@@ -1,0 +1,1 @@
+print @strReplace(1, "b", "c");

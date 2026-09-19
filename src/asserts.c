@@ -1,3 +1,4 @@
+#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -106,6 +107,36 @@ void assertPositiveNumber(VM *vm, const char *function, double number,
           vm,
           "function %s expects argument %d to be a positive number but got %g.",
           function, index, number);
+    exit(EXIT_CODE_RUNTIME_ERR);
+  }
+}
+
+/**
+ * Assert a number is zero or greater. `index` is the argument's zero based
+ * position.
+ */
+void assertNonNegativeNumber(VM *vm, const char *function, double number,
+                             int index) {
+  if (number < 0) {
+    runtimeError(
+        vm,
+        "function %s expects argument %d to be a non-negative number but "
+        "got %g.",
+        function, index + 1, number);
+    exit(EXIT_CODE_RUNTIME_ERR);
+  }
+}
+
+/**
+ * Assert a number has no fractional part. `index` is the argument's zero based
+ * position.
+ */
+void assertWholeNumber(VM *vm, const char *function, double number, int index) {
+  if (number != floor(number)) {
+    runtimeError(vm,
+                 "function %s expects argument %d to be a whole number but "
+                 "got %g.",
+                 function, index + 1, number);
     exit(EXIT_CODE_RUNTIME_ERR);
   }
 }

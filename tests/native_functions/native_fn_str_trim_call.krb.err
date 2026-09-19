@@ -1,0 +1,56 @@
+== <script> ==
+0000    1 OP_NIL
+0001    | OP_RETURN
+== <script> ==
+0000    1 OP_CONSTANT         0 '['
+0002    | OP_GET_GLOBAL       1 '@strTrim'
+0004    | OP_CONSTANT         2 '  hello  '
+0006    | OP_CALL             1
+0008    | OP_ADD
+0009    | OP_CONSTANT         3 ']'
+0011    | OP_ADD
+0012    | OP_PRINT
+0013    2 OP_CONSTANT         4 '['
+0015    | OP_GET_GLOBAL       5 '@strTrim'
+0017    | OP_CONSTANT         6 '	
+ hi 
+'
+0019    | OP_CALL             1
+0021    | OP_ADD
+0022    | OP_CONSTANT         7 ']'
+0024    | OP_ADD
+0025    | OP_PRINT
+0026    3 OP_CONSTANT         8 '['
+0028    | OP_GET_GLOBAL       9 '@strTrim'
+0030    | OP_CONSTANT        10 'no-trim'
+0032    | OP_CALL             1
+0034    | OP_ADD
+0035    | OP_CONSTANT        11 ']'
+0037    | OP_ADD
+0038    | OP_PRINT
+0039    4 OP_CONSTANT        12 '['
+0041    | OP_GET_GLOBAL      13 '@strTrim'
+0043    | OP_CONSTANT        14 '   '
+0045    | OP_CALL             1
+0047    | OP_ADD
+0048    | OP_CONSTANT        15 ']'
+0050    | OP_ADD
+0051    | OP_PRINT
+0052    5 OP_CONSTANT        16 '['
+0054    | OP_GET_GLOBAL      17 '@strTrim'
+0056    | OP_CONSTANT        18 ''
+0058    | OP_CALL             1
+0060    | OP_ADD
+0061    | OP_CONSTANT        19 ']'
+0063    | OP_ADD
+0064    | OP_PRINT
+0065    6 OP_CONSTANT        20 '['
+0067    | OP_GET_GLOBAL      21 '@strTrim'
+0069    | OP_CONSTANT        22 ' a  b '
+0071    | OP_CALL             1
+0073    | OP_ADD
+0074    | OP_CONSTANT        23 ']'
+0076    | OP_ADD
+0077    | OP_PRINT
+0078    7 OP_NIL
+0079    | OP_RETURN

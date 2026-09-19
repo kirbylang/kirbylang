@@ -519,5 +519,159 @@
       "@strIsEmpty(${1:string})$0"
     ],
     "description": "Check whether a string is empty"
+  },
+  "Native: @floor": {
+    "prefix": "@floor",
+    "body": [
+      "@floor(${1:value})$0"
+    ],
+    "description": "Round a number down"
+  },
+  "Native: @round": {
+    "prefix": "@round",
+    "body": [
+      "@round(${1:value})$0"
+    ],
+    "description": "Round a number to the nearest whole number"
+  },
+  "Native: @trunc": {
+    "prefix": "@trunc",
+    "body": [
+      "@trunc(${1:value})$0"
+    ],
+    "description": "Remove a number's fractional part"
+  },
+  "Native: @abs": {
+    "prefix": "@abs",
+    "body": [
+      "@abs(${1:value})$0"
+    ],
+    "description": "Get a number without its sign"
+  },
+  "Native: @sqrt": {
+    "prefix": "@sqrt",
+    "body": [
+      "@sqrt(${1:value})$0"
+    ],
+    "description": "Get the square root of a number"
+  },
+  "Native: @pow": {
+    "prefix": "@pow",
+    "body": [
+      "@pow(${1:base}, ${2:exponent})$0"
+    ],
+    "description": "Raise a number to a power"
+  },
+  "Native: @min": {
+    "prefix": "@min",
+    "body": [
+      "@min(${1:a}, ${2:b})$0"
+    ],
+    "description": "Get the smaller of two numbers"
+  },
+  "Native: @max": {
+    "prefix": "@max",
+    "body": [
+      "@max(${1:a}, ${2:b})$0"
+    ],
+    "description": "Get the larger of two numbers"
+  },
+  "Native: @assert": {
+    "prefix": "@assert",
+    "body": [
+      "@assert(${1:condition}, ${2:message})$0"
+    ],
+    "description": "Stop the program with an error if a condition is false"
+  },
+  "Native: @panic": {
+    "prefix": "@panic",
+    "body": [
+      "@panic(${1:message})$0"
+    ],
+    "description": "Stop the program with an error message"
+  },
+  "Native: @strContains": {
+    "prefix": "@strContains",
+    "body": [
+      "@strContains(${1:string}, ${2:substring})$0"
+    ],
+    "description": "Check whether a string contains another string"
+  },
+  "Native: @strStartsWith": {
+    "prefix": "@strStartsWith",
+    "body": [
+      "@strStartsWith(${1:string}, ${2:prefix})$0"
+    ],
+    "description": "Check whether a string starts with another string"
+  },
+  "Native: @strEndsWith": {
+    "prefix": "@strEndsWith",
+    "body": [
+      "@strEndsWith(${1:string}, ${2:suffix})$0"
+    ],
+    "description": "Check whether a string ends with another string"
+  },
+  "Native: @strTrim": {
+    "prefix": "@strTrim",
+    "body": [
+      "@strTrim(${1:string})$0"
+    ],
+    "description": "Remove spaces, tabs, and newlines from both ends of a string"
+  },
+  "Native: @strToUpper": {
+    "prefix": "@strToUpper",
+    "body": [
+      "@strToUpper(${1:string})$0"
+    ],
+    "description": "Change the letters in a string to upper case"
+  },
+  "Native: @strToLower": {
+    "prefix": "@strToLower",
+    "body": [
+      "@strToLower(${1:string})$0"
+    ],
+    "description": "Change the letters in a string to lower case"
+  },
+  "Native: @strRepeat": {
+    "prefix": "@strRepeat",
+    "body": [
+      "@strRepeat(${1:string}, ${2:count})$0"
+    ],
+    "description": "Repeat a string a number of times"
+  },
+  "Native: @strSplit": {
+    "prefix": "@strSplit",
+    "body": [
+      "@strSplit(${1:string}, ${2:separator})$0"
+    ],
+    "description": "Split a string into an array of strings"
+  },
+  "Native: @strIndexOf": {
+    "prefix": "@strIndexOf",
+    "body": [
+      "@strIndexOf(${1:string}, ${2:substring})$0"
+    ],
+    "description": "Get the position of a string inside another string, or nil if it isn't there"
+  },
+  "Native: @strSlice": {
+    "prefix": "@strSlice",
+    "body": [
+      "@strSlice(${1:string}, ${2:start}, ${3:end})$0"
+    ],
+    "description": "Copy a range of a string into a new string"
+  },
+  "Native: @strReplace": {
+    "prefix": "@strReplace",
+    "body": [
+      "@strReplace(${1:string}, ${2:old}, ${3:new})$0"
+    ],
+    "description": "Replace the first match of a string inside another string"
+  },
+  "Native: @strReplaceAll": {
+    "prefix": "@strReplaceAll",
+    "body": [
+      "@strReplaceAll(${1:string}, ${2:old}, ${3:new})$0"
+    ],
+    "description": "Replace every match of a string inside another string"
   }
 }

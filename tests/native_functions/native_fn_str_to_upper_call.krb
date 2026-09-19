@@ -1,0 +1,4 @@
+print @strToUpper("Hello, World 123!");
+print @strToUpper("already UPPER");
+print @strToUpper("");
+print @strToUpper("café");

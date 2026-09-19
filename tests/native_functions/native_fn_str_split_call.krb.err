@@ -1,0 +1,51 @@
+== <script> ==
+0000    1 OP_NIL
+0001    | OP_RETURN
+== <script> ==
+0000    1 OP_GET_GLOBAL       1 '@strSplit'
+0002    | OP_CONSTANT         2 'a,b,c'
+0004    | OP_CONSTANT         3 ','
+0006    | OP_CALL             2
+0008    | OP_DEFINE_GLOBAL    0 'parts'
+0010    2 OP_GET_GLOBAL       4 'parts'
+0012    | OP_PRINT
+0013    3 OP_GET_GLOBAL       5 '@len'
+0015    | OP_GET_GLOBAL       6 'parts'
+0017    | OP_CALL             1
+0019    | OP_PRINT
+0020    4 OP_GET_GLOBAL       7 'parts'
+0022    | OP_CONSTANT         8 '1.000000'
+0024    | OP_GET_INDEX
+0025    | OP_PRINT
+0026    5 OP_GET_GLOBAL       9 '@strSplit'
+0028    | OP_CONSTANT        10 'a,b,,c'
+0030    | OP_CONSTANT        11 ','
+0032    | OP_CALL             2
+0034    | OP_PRINT
+0035    6 OP_GET_GLOBAL      12 '@strSplit'
+0037    | OP_CONSTANT        13 'a,b,'
+0039    | OP_CONSTANT        14 ','
+0041    | OP_CALL             2
+0043    | OP_PRINT
+0044    7 OP_GET_GLOBAL      15 '@strSplit'
+0046    | OP_CONSTANT        16 ',a'
+0048    | OP_CONSTANT        17 ','
+0050    | OP_CALL             2
+0052    | OP_PRINT
+0053    8 OP_GET_GLOBAL      18 '@strSplit'
+0055    | OP_CONSTANT        19 'abc'
+0057    | OP_CONSTANT        20 ','
+0059    | OP_CALL             2
+0061    | OP_PRINT
+0062    9 OP_GET_GLOBAL      21 '@strSplit'
+0064    | OP_CONSTANT        22 'a--b--c'
+0066    | OP_CONSTANT        23 '--'
+0068    | OP_CALL             2
+0070    | OP_PRINT
+0071   10 OP_GET_GLOBAL      24 '@strSplit'
+0073    | OP_CONSTANT        25 'aaa'
+0075    | OP_CONSTANT        26 'aa'
+0077    | OP_CALL             2
+0079    | OP_PRINT
+0080   11 OP_NIL
+0081    | OP_RETURN

@@ -1,0 +1,4 @@
+print @strRepeat("ab", 3);
+print @strRepeat("x", 1);
+print @strRepeat("ab", 0);
+print @strRepeat("", 5);

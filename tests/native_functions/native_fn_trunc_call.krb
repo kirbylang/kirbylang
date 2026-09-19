@@ -1,0 +1,3 @@
+print @trunc(2.7);
+print @trunc(-2.7);
+print @trunc(5);
