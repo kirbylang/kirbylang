@@ -238,10 +238,7 @@ print double(21);
 
 ### Native Functions
 
-Every native function's name starts with `@` (e.g. `@len`, `@ceil`), so it
-can never collide with a name a user declares. Most natives also have a
-type, so calls to them are checked at compile time and they can be used as
-values.
+Native functions start with `@` (a reserved character in user code).
 
 ```
 let round: fun (f64) => f64 = @ceil;
