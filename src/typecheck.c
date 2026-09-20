@@ -4,32 +4,31 @@
 #include <string.h>
 
 #include "definite_assignment.h"
-#include "native_signatures.h"
 #include "resolved_impl_targets.h"
 #include "typecheck.h"
 
 static bool hadError = false;
 
-static bool tokensEqual(Token *a, Token *b) {
+static bool _tokensEqual(Token *a, Token *b) {
   if (a->length != b->length)
     return false;
   return memcmp(a->start, b->start, a->length) == 0;
 }
 
-static bool tokenTextEquals(Token *token, const char *text) {
+static bool _tokenTextEquals(Token *token, const char *text) {
   size_t len = strlen(text);
   if ((size_t)token->length != len)
     return false;
   return memcmp(token->start, text, len) == 0;
 }
 
-static bool tokenIsPrimitiveTypeName(Token *token) {
-  return tokenTextEquals(token, "unit") || tokenTextEquals(token, "bool") ||
-         tokenTextEquals(token, "string") || tokenTextEquals(token, "f64") ||
-         tokenTextEquals(token, "Array");
+static bool _tokenIsPrimitiveTypeName(Token *token) {
+  return _tokenTextEquals(token, "unit") || _tokenTextEquals(token, "bool") ||
+         _tokenTextEquals(token, "string") || _tokenTextEquals(token, "f64") ||
+         _tokenTextEquals(token, "Array");
 }
 
-static Token makeTokenFromCString(const char *text) {
+static Token _makeTokenFromCString(const char *text) {
   Token token;
   token.type = TOKEN_IDENTIFIER;
   token.start = text;
@@ -37,8 +36,6 @@ static Token makeTokenFromCString(const char *text) {
   token.line = 0;
   return token;
 }
-
-static void typchkTypeEnvDefineBuiltinTraits(TypeEnv *env);
 
 void typchkErrorAtToken(Token *token, const char *message) {
   hadError = true;
@@ -60,89 +57,22 @@ void typchkErrorAtTokenFmt(Token *token, const char *fmt, ...) {
   typchkErrorAtToken(token, message);
 }
 
-static void typchkErrorAtNode(AstNode *node, const char *message) {
+static void _errorAtNode(AstNode *node, const char *message) {
   hadError = true;
   fprintf(stderr, "[line %d] Error: %s\n", node->line, message);
 }
 
-static void typchkErrorAtNodeFmt(AstNode *node, const char *fmt, ...) {
+static void _errorAtNodeFmt(AstNode *node, const char *fmt, ...) {
   char message[256];
   va_list args;
   va_start(args, fmt);
   vsnprintf(message, sizeof(message), fmt, args);
   va_end(args);
-  typchkErrorAtNode(node, message);
+  _errorAtNode(node, message);
 }
 
-bool typchkHadError(void) { return hadError; }
-void typchkResetError(void) { hadError = false; }
-
-typedef struct {
-  InternedName name;
-  Type *type;
-} TypeEnvBinding;
-
-static void bindingArrayWrite(TypeEnvBinding **array, int *count, int *capacity,
-                              Token name, Type *type) {
-  if (*capacity < *count + 1) {
-    *capacity = *capacity < 8 ? 8 : *capacity * 2;
-    *array =
-        (TypeEnvBinding *)realloc(*array, sizeof(TypeEnvBinding) * (*capacity));
-    if (*array == NULL) {
-      fprintf(stderr, "realloc failed in bindingArrayWrite\n");
-      exit(1);
-    }
-  }
-  (*array)[*count].name = internTokenName(name);
-  (*array)[*count].type = type;
-  (*count)++;
-}
-
-static Type *bindingArrayLookup(TypeEnvBinding *array, int count, Token name) {
-  // Most recently declared binding wins
-  for (int i = count - 1; i >= 0; i--) {
-    if (internedNameEqualsToken(array[i].name, name))
-      return array[i].type;
-  }
-  return NULL;
-}
-
-typedef struct {
-  TypeEnvBinding *bindings;
-  int count;
-  int capacity;
-} TypeEnvScope;
-
-struct TypeEnv {
-  // State
-
-  TypeEnvScope *scopes;
-  int scopeCount;
-  int scopeCapacity;
-
-  TypeEnvBinding *structs;
-  int structCount;
-  int structCapacity;
-
-  TypeEnvBinding *functions;
-  int functionCount;
-  int functionCapacity;
-
-  TypeEnvBinding *aliases;
-  int aliasCount;
-  int aliasCapacity;
-
-  TypeEnvBinding *traits;
-  int traitCount;
-  int traitCapacity;
-
-  // WIP State
-
-  Type *_selfType;          // NULL when not currently checking a method body.
-  Type *_currentReturnType; // NULL when not checking a function/method body, or
-                            // its return type didn't resolve.
-  Type *_currentImplTargetType; // NULL when not checking an impl block
-};
+bool _hadTypecheckError(void) { return hadError; }
+void _resetHadTypecheckError(void) { hadError = false; }
 
 // Type environment that persists across compilation units
 static TypeEnv *sessionEnv = NULL;
@@ -150,191 +80,20 @@ static TypeEnv *sessionEnv = NULL;
 void typchkSessionBegin(void) {
   if (sessionEnv != NULL)
     return;
-  sessionEnv = typchkTypeEnvCreate();
-  typchkTypeEnvBeginScope(sessionEnv);
+  sessionEnv = typeEnvInit();
+  typeEnvBeginScope(sessionEnv);
 }
 
 void typchkSessionEnd(void) {
   if (sessionEnv == NULL)
     return;
 
-  typchkTypeEnvEndScope(sessionEnv);
-  typchkTypeEnvDestroy(sessionEnv);
+  typeEnvEndScope(sessionEnv);
+  typeEnvFree(sessionEnv);
 
   sessionEnv = NULL;
 
   typesFreeAll();
-}
-
-TypeEnv *typchkTypeEnvCreate(void) {
-  TypeEnv *env = (TypeEnv *)malloc(sizeof(TypeEnv));
-  memset(env, 0, sizeof(TypeEnv));
-  defineAllNativeSignatures(env);
-  typchkTypeEnvDefineBuiltinTraits(env);
-  return env;
-}
-
-void typchkTypeEnvDestroy(TypeEnv *env) {
-  for (int i = 0; i < env->scopeCount; i++) {
-    free(env->scopes[i].bindings);
-  }
-  free(env->scopes);
-  free(env->structs);
-  free(env->functions);
-  free(env->aliases);
-  free(env->traits);
-  free(env);
-}
-
-void typchkTypeEnvBeginScope(TypeEnv *env) {
-  if (env->scopeCapacity < env->scopeCount + 1) {
-    env->scopeCapacity = env->scopeCapacity < 8 ? 8 : env->scopeCapacity * 2;
-    env->scopes = (TypeEnvScope *)realloc(env->scopes, sizeof(TypeEnvScope) *
-                                                           env->scopeCapacity);
-    if (env->scopes == NULL) {
-      fprintf(stderr, "realloc failed in typchkTypeEnvBeginScope\n");
-      exit(1);
-    }
-  }
-  env->scopes[env->scopeCount].bindings = NULL;
-  env->scopes[env->scopeCount].count = 0;
-  env->scopes[env->scopeCount].capacity = 0;
-  env->scopeCount++;
-}
-
-void typchkTypeEnvEndScope(TypeEnv *env) {
-  env->scopeCount--;
-  free(env->scopes[env->scopeCount].bindings);
-  env->scopes[env->scopeCount].bindings = NULL;
-  env->scopes[env->scopeCount].count = 0;
-  env->scopes[env->scopeCount].capacity = 0;
-}
-
-void typchkTypeEnvDeclare(TypeEnv *env, Token name, Type *type) {
-  TypeEnvScope *scope = &env->scopes[env->scopeCount - 1];
-
-  bindingArrayWrite(&scope->bindings, &scope->count, &scope->capacity, name,
-                    type);
-}
-
-Type *typchkTypeEnvLookup(TypeEnv *env, Token name) {
-  for (int i = env->scopeCount - 1; i >= 0; i--) {
-    Type *found =
-        bindingArrayLookup(env->scopes[i].bindings, env->scopes[i].count, name);
-    if (found != NULL)
-      return found;
-  }
-  return NULL;
-}
-
-void typchkTypeEnvRegisterStruct(TypeEnv *env, Token name, Type *type) {
-  bindingArrayWrite(&env->structs, &env->structCount, &env->structCapacity,
-                    name, type);
-}
-
-Type *typchkTypeEnvLookupStruct(TypeEnv *env, Token name) {
-  return bindingArrayLookup(env->structs, env->structCount, name);
-}
-
-void typchkTypeEnvRegisterFunction(TypeEnv *env, Token name, Type *type) {
-  bindingArrayWrite(&env->functions, &env->functionCount,
-                    &env->functionCapacity, name, type);
-}
-
-Type *typchkTypeEnvLookupFunction(TypeEnv *env, Token name) {
-  return bindingArrayLookup(env->functions, env->functionCount, name);
-}
-
-void typchkTypeEnvRegisterAlias(TypeEnv *env, Token name, Type *type) {
-  bindingArrayWrite(&env->aliases, &env->aliasCount, &env->aliasCapacity, name,
-                    type);
-}
-
-Type *typchkTypeEnvLookupAlias(TypeEnv *env, Token name) {
-  return bindingArrayLookup(env->aliases, env->aliasCount, name);
-}
-
-void typchkTypeEnvRegisterTrait(TypeEnv *env, Token name, Type *type) {
-  bindingArrayWrite(&env->traits, &env->traitCount, &env->traitCapacity, name,
-                    type);
-}
-
-Type *typchkTypeEnvLookupTrait(TypeEnv *env, Token name) {
-  return bindingArrayLookup(env->traits, env->traitCount, name);
-}
-
-/**
- * Define the builtin traits
- *
- * Display, Eq, Ord (a supertrait of Eq), and Default
- */
-static void typchkTypeEnvDefineBuiltinTraits(TypeEnv *env) {
-  // Display
-
-  UninternedTypeMember displayInstance[] = {
-      {makeTokenFromCString("toString"), typeFunction(NULL, 0, typeString())},
-  };
-  Type *display =
-      typeTrait(makeTokenFromCString("Display"), NULL, 0, displayInstance, 1);
-  typeTraitMarkBuiltin(display);
-  typchkTypeEnvRegisterTrait(env, makeTokenFromCString("Display"), display);
-
-  // Eq
-
-  Type **equalsParams = (Type **)typesAllocRaw(sizeof(Type *));
-  equalsParams[0] = typeSelfPlaceholder();
-  UninternedTypeMember eqInstance[] = {
-      {makeTokenFromCString("equals"),
-       typeFunction(equalsParams, 1, typeBool())},
-  };
-  Type *eq = typeTrait(makeTokenFromCString("Eq"), NULL, 0, eqInstance, 1);
-  typeTraitMarkBuiltin(eq);
-  typchkTypeEnvRegisterTrait(env, makeTokenFromCString("Eq"), eq);
-  Type **cmpParams = (Type **)typesAllocRaw(sizeof(Type *));
-  cmpParams[0] = typeSelfPlaceholder();
-  UninternedTypeMember ordInstance[] = {
-      {makeTokenFromCString("cmp"), typeFunction(cmpParams, 1, typeF64())},
-  };
-
-  // Ord
-
-  Type *ord = typeTrait(makeTokenFromCString("Ord"), NULL, 0, ordInstance, 1);
-  typeTraitSetSupertrait(ord, eq->as.trait_.name);
-  typeTraitMarkBuiltin(ord);
-  typchkTypeEnvRegisterTrait(env, makeTokenFromCString("Ord"), ord);
-
-  // Default
-
-  UninternedTypeMember defaultStatic[] = {
-      {makeTokenFromCString("default"),
-       typeFunction(NULL, 0, typeSelfPlaceholder())},
-  };
-  Type *default_ =
-      typeTrait(makeTokenFromCString("Default"), defaultStatic, 1, NULL, 0);
-  typeTraitMarkBuiltin(default_);
-  typchkTypeEnvRegisterTrait(env, makeTokenFromCString("Default"), default_);
-}
-
-void typchkTypeEnvSetSelfType(TypeEnv *env, Type *selfType) {
-  env->_selfType = selfType;
-}
-
-Type *typchkTypeEnvGetSelfType(TypeEnv *env) { return env->_selfType; }
-
-void typchkTypeEnvSetCurrentReturnType(TypeEnv *env, Type *returnType) {
-  env->_currentReturnType = returnType;
-}
-
-Type *typchkTypeEnvGetCurrentReturnType(TypeEnv *env) {
-  return env->_currentReturnType;
-}
-
-void typchkTypeEnvSetImplTargetType(TypeEnv *env, Type *implTargetType) {
-  env->_currentImplTargetType = implTargetType;
-}
-
-Type *typchkTypeEnvGetImplTargetType(TypeEnv *env) {
-  return env->_currentImplTargetType;
 }
 
 Type *typchkResolveType(TypeEnv *env, AstNode *typeAnnotation) {
@@ -366,26 +125,26 @@ Type *typchkResolveType(TypeEnv *env, AstNode *typeAnnotation) {
     return NULL;
   }
 
-  if (tokenTextEquals(&t->name, "unit"))
+  if (_tokenTextEquals(&t->name, "unit"))
     return typeUnit();
-  if (tokenTextEquals(&t->name, "bool"))
+  if (_tokenTextEquals(&t->name, "bool"))
     return typeBool();
-  if (tokenTextEquals(&t->name, "string"))
+  if (_tokenTextEquals(&t->name, "string"))
     return typeString();
-  if (tokenTextEquals(&t->name, "f64"))
+  if (_tokenTextEquals(&t->name, "f64"))
     return typeF64();
-  if (tokenTextEquals(&t->name, "Array"))
+  if (_tokenTextEquals(&t->name, "Array"))
     return typeArray(NULL);
-  if (tokenTextEquals(&t->name, "Self")) {
-    return env->_currentImplTargetType != NULL ? env->_currentImplTargetType
-                                               : typeSelfPlaceholder();
+  if (_tokenTextEquals(&t->name, "Self")) {
+    return typeEnvGetImplTargetType(env) != NULL ? typeEnvGetImplTargetType(env)
+                                                 : typeSelfPlaceholder();
   }
 
-  Type *structType = typchkTypeEnvLookupStruct(env, t->name);
+  Type *structType = typeEnvLookupStruct(env, t->name);
   if (structType != NULL)
     return structType;
 
-  Type *aliasType = typchkTypeEnvLookupAlias(env, t->name);
+  Type *aliasType = typeEnvLookupAlias(env, t->name);
   if (aliasType != NULL)
     return aliasType;
 
@@ -393,110 +152,109 @@ Type *typchkResolveType(TypeEnv *env, AstNode *typeAnnotation) {
   return NULL;
 }
 
-static Type *typchkInferLiteral(AstNode *node);
-static Type *typchkInferUnary(TypeEnv *env, AstNode *node);
-static Type *typchkInferBinary(TypeEnv *env, AstNode *node);
-static Type *typchkInferVariable(TypeEnv *env, AstNode *node);
-static Type *typchkInferAssign(TypeEnv *env, AstNode *node);
-static Type *typchkInferLogical(TypeEnv *env, AstNode *node);
-static Type *typchkInferNullish(TypeEnv *env, AstNode *node);
-static Type *typchkInferCall(TypeEnv *env, AstNode *node);
-static Type *typchkCheckCallAgainstFunctionType(TypeEnv *env, AstNode *node,
-                                                Type *calleeType);
-static Type *typchkInferGet(TypeEnv *env, AstNode *node);
-static Type *typchkInferSet(TypeEnv *env, AstNode *node);
-static Type *typchkInferSelf(TypeEnv *env, AstNode *node);
-static Type *typchkInferIndexGet(TypeEnv *env, AstNode *node);
-static Type *typchkInferIndexSet(TypeEnv *env, AstNode *node);
-static Type *typchkInferStructInit(TypeEnv *env, AstNode *node);
-static Type *typchkInferArray(TypeEnv *env, AstNode *node);
-static Type *typchkInferIf(TypeEnv *env, AstNode *node);
-static Type *typchkInferBlock(TypeEnv *env, AstNode *node);
-static Type *typchkCheckBlockContents(TypeEnv *env, BlockNode *block,
-                                      Type *expectedValueType);
-static Type *typchkCheckOrInferLambda(TypeEnv *env, AstNode *node,
-                                      Type *expected);
-static void typchkCheckVarDecl(TypeEnv *env, AstNode *node);
-static void typchkCheckFunctionDecl(TypeEnv *env, AstNode *node);
+static Type *_inferLiteral(AstNode *node);
+static Type *_inferUnary(TypeEnv *env, AstNode *node);
+static Type *_inferBinary(TypeEnv *env, AstNode *node);
+static Type *_inferVariable(TypeEnv *env, AstNode *node);
+static Type *_inferAssign(TypeEnv *env, AstNode *node);
+static Type *_inferLogical(TypeEnv *env, AstNode *node);
+static Type *_inferNullish(TypeEnv *env, AstNode *node);
+static Type *_inferCall(TypeEnv *env, AstNode *node);
+static Type *_checkCallAgainstFunctionType(TypeEnv *env, AstNode *node,
+                                           Type *calleeType);
+static Type *_inferGet(TypeEnv *env, AstNode *node);
+static Type *_inferSet(TypeEnv *env, AstNode *node);
+static Type *_inferSelf(TypeEnv *env, AstNode *node);
+static Type *_inferIndexGet(TypeEnv *env, AstNode *node);
+static Type *_inferIndexSet(TypeEnv *env, AstNode *node);
+static Type *_inferStructInit(TypeEnv *env, AstNode *node);
+static Type *_inferArray(TypeEnv *env, AstNode *node);
+static Type *_inferIf(TypeEnv *env, AstNode *node);
+static Type *_inferBlockExpr(TypeEnv *env, AstNode *node);
+static Type *_checkBlockContents(TypeEnv *env, BlockNode *block,
+                                 Type *expectedValueType);
+static Type *_checkOrInferLambda(TypeEnv *env, AstNode *node, Type *expected);
+static void _checkVarDecl(TypeEnv *env, AstNode *node);
+static void _checkFunctionDecl(TypeEnv *env, AstNode *node);
 
 // Infer the type of an expression
-Type *typchkInfer(TypeEnv *env, AstNode *node) {
+Type *infer(TypeEnv *env, AstNode *node) {
   switch (node->kind) {
   case NODE_LITERAL:
-    return typchkInferLiteral(node);
+    return _inferLiteral(node);
   case NODE_UNARY:
-    return typchkInferUnary(env, node);
+    return _inferUnary(env, node);
   case NODE_BINARY:
-    return typchkInferBinary(env, node);
+    return _inferBinary(env, node);
   case NODE_GROUPING:
-    return typchkInfer(env, node->as.grouping.inner);
+    return infer(env, node->as.grouping.inner);
   case NODE_VARIABLE:
-    return typchkInferVariable(env, node);
+    return _inferVariable(env, node);
   case NODE_ASSIGN:
-    return typchkInferAssign(env, node);
+    return _inferAssign(env, node);
   case NODE_AND:
   case NODE_OR:
-    return typchkInferLogical(env, node);
+    return _inferLogical(env, node);
   case NODE_NULLISH:
-    return typchkInferNullish(env, node);
+    return _inferNullish(env, node);
   case NODE_CALL:
-    return typchkInferCall(env, node);
+    return _inferCall(env, node);
   case NODE_GET:
-    return typchkInferGet(env, node);
+    return _inferGet(env, node);
   case NODE_SET:
-    return typchkInferSet(env, node);
+    return _inferSet(env, node);
   case NODE_SELF:
-    return typchkInferSelf(env, node);
+    return _inferSelf(env, node);
   case NODE_INDEX_GET:
-    return typchkInferIndexGet(env, node);
+    return _inferIndexGet(env, node);
   case NODE_INDEX_SET:
-    return typchkInferIndexSet(env, node);
+    return _inferIndexSet(env, node);
   case NODE_STRUCT_INIT:
-    return typchkInferStructInit(env, node);
+    return _inferStructInit(env, node);
   case NODE_ARRAY:
-    return typchkInferArray(env, node);
+    return _inferArray(env, node);
   case NODE_IF:
-    return typchkInferIf(env, node);
+    return _inferIf(env, node);
   case NODE_BLOCK:
-    return typchkInferBlock(env, node);
+    return _inferBlockExpr(env, node);
   case NODE_FUNCTION:
     if (node->as.function.isLambda)
-      return typchkCheckOrInferLambda(env, node, NULL);
-    typchkErrorAtNode(node, "Internal: unexpected function declaration in "
-                            "expression position.");
+      return _checkOrInferLambda(env, node, NULL);
+    _errorAtNode(node, "Internal: unexpected function declaration in "
+                       "expression position.");
     return NULL;
   default:
-    typchkErrorAtNode(node, "Internal: this isn't a checkable expression.");
+    _errorAtNode(node, "Internal: this isn't a checkable expression.");
     return NULL;
   }
 }
 
-bool typchkCheck(TypeEnv *env, AstNode *node, Type *expected) {
+bool check(TypeEnv *env, AstNode *node, Type *expected) {
   if (node->kind == NODE_FUNCTION && node->as.function.isLambda)
-    return typchkCheckOrInferLambda(env, node, expected) != NULL;
+    return _checkOrInferLambda(env, node, expected) != NULL;
 
   if (node->kind == NODE_ARRAY && expected != NULL) {
     if (expected->kind != TYPE_ARRAY) {
-      typchkErrorAtNodeFmt(node, "Expected %s, got an array.",
-                           typeToString(expected));
+      _errorAtNodeFmt(node, "Expected %s, got an array.",
+                      typeToString(expected));
       return false;
     }
 
-    ArrayNode *a = &node->as.array;
+    ArrayNode *arr = &node->as.array;
 
     bool ok = true;
 
-    for (int i = 0; i < a->count; i++) {
-      AstNode *item = a->items[i];
+    for (int i = 0; i < arr->count; i++) {
+      AstNode *item = arr->items[i];
 
-      if (!typchkCheck(env, item, expected->as.array.elementType))
+      if (!check(env, item, expected->as.array.elementType))
         ok = false;
     }
 
     return ok;
   }
 
-  Type *actual = typchkInfer(env, node);
+  Type *actual = infer(env, node);
 
   if (actual == NULL)
     return true;
@@ -505,8 +263,8 @@ bool typchkCheck(TypeEnv *env, AstNode *node, Type *expected) {
     return true;
 
   if (!typesEqual(actual, expected)) {
-    typchkErrorAtNodeFmt(node, "Expected %s, got %s.", typeToString(expected),
-                         typeToString(actual));
+    _errorAtNodeFmt(node, "Expected %s, got %s.", typeToString(expected),
+                    typeToString(actual));
     return false;
   }
 
@@ -515,12 +273,12 @@ bool typchkCheck(TypeEnv *env, AstNode *node, Type *expected) {
 
 // True if either: struct is generic (unsupported currently) or if struct
 // members couldn't be type checked
-static bool typchkStructMembersUnreliable(Type *type) {
+static bool _areStructMembersUnreliable(Type *type) {
   return typeStructIsGeneric(type) || typeStructHasUnresolvedMembers(type);
 }
 
 // Infer the type of a literal value expression
-static Type *typchkInferLiteral(AstNode *node) {
+static Type *_inferLiteral(AstNode *node) {
   LiteralNode *lit = &node->as.literal;
   switch (lit->kind) {
   case LITERAL_NIL:
@@ -537,11 +295,11 @@ static Type *typchkInferLiteral(AstNode *node) {
 }
 
 // Infer the type of a unary expressoin
-static Type *typchkInferUnary(TypeEnv *env, AstNode *node) {
+static Type *_inferUnary(TypeEnv *env, AstNode *node) {
   UnaryNode *u = &node->as.unary;
 
   if (u->op.type == TOKEN_BANG) {
-    Type *operandType = typchkInfer(env, u->operand);
+    Type *operandType = infer(env, u->operand);
 
     if (operandType == NULL)
       return NULL;
@@ -549,17 +307,17 @@ static Type *typchkInferUnary(TypeEnv *env, AstNode *node) {
     return typeBool();
   }
 
-  if (!typchkCheck(env, u->operand, typeF64()))
+  if (!check(env, u->operand, typeF64()))
     return NULL;
 
   return typeF64();
 }
 
 // Infer the type of a binary expression
-static Type *typchkInferBinary(TypeEnv *env, AstNode *node) {
+static Type *_inferBinary(TypeEnv *env, AstNode *node) {
   BinaryNode *b = &node->as.binary;
-  Type *leftType = typchkInfer(env, b->left);
-  Type *rightType = typchkInfer(env, b->right);
+  Type *leftType = infer(env, b->left);
+  Type *rightType = infer(env, b->right);
 
   if (leftType == NULL || rightType == NULL)
     return NULL;
@@ -583,13 +341,12 @@ static Type *typchkInferBinary(TypeEnv *env, AstNode *node) {
   case TOKEN_SLASH:
   case TOKEN_MODULO:
     if (!typesEqual(leftType, typeF64())) {
-      typchkErrorAtNodeFmt(b->left, "Expected f64, got %s.",
-                           typeToString(leftType));
+      _errorAtNodeFmt(b->left, "Expected f64, got %s.", typeToString(leftType));
       return NULL;
     }
     if (!typesEqual(rightType, typeF64())) {
-      typchkErrorAtNodeFmt(b->right, "Expected f64, got %s.",
-                           typeToString(rightType));
+      _errorAtNodeFmt(b->right, "Expected f64, got %s.",
+                      typeToString(rightType));
       return NULL;
     }
     return typeF64();
@@ -606,7 +363,7 @@ static Type *typchkInferBinary(TypeEnv *env, AstNode *node) {
     }
     if (leftType->kind == TYPE_STRUCT &&
         !typeStructImplementsTrait(
-            leftType, internTokenName(makeTokenFromCString("Eq")))) {
+            leftType, internTokenName(_makeTokenFromCString("Eq")))) {
       typchkErrorAtTokenFmt(&b->op,
                             "%s needs 'impl Eq for %s' to support '%s'.",
                             typeToString(leftType), typeToString(leftType),
@@ -620,13 +377,12 @@ static Type *typchkInferBinary(TypeEnv *env, AstNode *node) {
   case TOKEN_LESS_EQUAL:
   case TOKEN_GREATER_EQUAL:
     if (!typesEqual(leftType, typeF64())) {
-      typchkErrorAtNodeFmt(b->left, "Expected f64, got %s.",
-                           typeToString(leftType));
+      _errorAtNodeFmt(b->left, "Expected f64, got %s.", typeToString(leftType));
       return NULL;
     }
     if (!typesEqual(rightType, typeF64())) {
-      typchkErrorAtNodeFmt(b->right, "Expected f64, got %s.",
-                           typeToString(rightType));
+      _errorAtNodeFmt(b->right, "Expected f64, got %s.",
+                      typeToString(rightType));
       return NULL;
     }
     return typeBool();
@@ -638,12 +394,12 @@ static Type *typchkInferBinary(TypeEnv *env, AstNode *node) {
 }
 
 // Infer the type of an variable/identifier expression
-static Type *typchkInferVariable(TypeEnv *env, AstNode *node) {
+static Type *_inferVariable(TypeEnv *env, AstNode *node) {
   Token *name = &node->as.variable.name;
-  Type *type = typchkTypeEnvLookup(env, *name);
+  Type *type = typeEnvLookupName(env, *name);
 
   if (type == NULL)
-    type = typchkTypeEnvLookupFunction(env, *name);
+    type = typeEnvLookupFunction(env, *name);
 
   if (type == NULL)
     return NULL;
@@ -652,50 +408,50 @@ static Type *typchkInferVariable(TypeEnv *env, AstNode *node) {
 }
 
 // Infer the type of an assignment expression
-static Type *typchkInferAssign(TypeEnv *env, AstNode *node) {
+static Type *_inferAssign(TypeEnv *env, AstNode *node) {
   AssignNode *a = &node->as.assign;
-  Type *varType = typchkTypeEnvLookup(env, a->name);
+  Type *varType = typeEnvLookupName(env, a->name);
 
   if (varType == NULL)
-    varType = typchkTypeEnvLookupFunction(env, a->name);
+    varType = typeEnvLookupFunction(env, a->name);
 
   if (varType == NULL) {
-    typchkInfer(env, a->value);
+    infer(env, a->value);
     return NULL;
   }
 
-  if (!typchkCheck(env, a->value, varType))
+  if (!check(env, a->value, varType))
     return NULL;
 
   return varType;
 }
 
 // Infer the type of a logic operator e.g. and, or
-static Type *typchkInferLogical(TypeEnv *env, AstNode *node) {
+static Type *_inferLogical(TypeEnv *env, AstNode *node) {
   LogicalNode *l = &node->as.logical;
 
   // Both operands are conditions, so both are bool and so is the result.
   // The VM still short circuits, it just can't yield a non-bool operand.
-  bool ok = typchkCheck(env, l->left, typeBool());
+  bool ok = check(env, l->left, typeBool());
 
-  if (!typchkCheck(env, l->right, typeBool()))
+  if (!check(env, l->right, typeBool()))
     ok = false;
 
   return ok ? typeBool() : NULL;
 }
 
 // Infer the type of a nullish expression
-static Type *typchkInferNullish(TypeEnv *env, AstNode *node) {
+static Type *_inferNullish(TypeEnv *env, AstNode *node) {
   LogicalNode *l = &node->as.logical; // reuses LogicalNode, like compiler.c
-  typchkInfer(env,
-              l->left); // unconstrained -- no Option[T] to check against yet
-  return typchkInfer(env, l->right); // result type comes from the fallback
+  infer(env,
+        l->left); // unconstrained -- no Option[T] to check against yet
+  return infer(env, l->right); // result type comes from the fallback
 }
 
 // Reads a constant number out of an expression: a number literal, possibly
 // negated with '-' and possibly wrapped in parentheses. Anything else, such as
 // a variable or arithmetic, isn't treated as constant.
-static bool typchkConstantNumber(AstNode *node, double *value) {
+static bool _getConstantNumberFromExpr(AstNode *node, double *value) {
   switch (node->kind) {
   case NODE_LITERAL:
     if (node->as.literal.kind != LITERAL_NUMBER)
@@ -703,11 +459,11 @@ static bool typchkConstantNumber(AstNode *node, double *value) {
     *value = node->as.literal.as.number;
     return true;
   case NODE_GROUPING:
-    return typchkConstantNumber(node->as.grouping.inner, value);
+    return _getConstantNumberFromExpr(node->as.grouping.inner, value);
   case NODE_UNARY:
     if (node->as.unary.op.type != TOKEN_MINUS)
       return false;
-    if (!typchkConstantNumber(node->as.unary.operand, value))
+    if (!_getConstantNumberFromExpr(node->as.unary.operand, value))
       return false;
     *value = -*value;
     return true;
@@ -719,7 +475,7 @@ static bool typchkConstantNumber(AstNode *node, double *value) {
 // Some natives can never accept certain arguments. When the argument is a
 // constant, report it now instead of when the call runs. Arguments that aren't
 // constant are still checked at runtime by the native itself.
-static void typchkCheckNativeConstantArgs(AstNode *node) {
+static void _checkNativeConstantArgs(AstNode *node) {
   CallNode *c = &node->as.call;
 
   if (c->callee->kind != NODE_VARIABLE || c->argCount != 1)
@@ -727,55 +483,54 @@ static void typchkCheckNativeConstantArgs(AstNode *node) {
 
   double value;
 
-  if (tokenTextEquals(&c->callee->as.variable.name, "@sqrt") &&
-      typchkConstantNumber(c->args[0], &value) && value < 0) {
-    typchkErrorAtNodeFmt(c->args[0],
-                         "function @sqrt expects argument 1 to be a "
-                         "non-negative number but got %g.",
-                         value);
+  if (_tokenTextEquals(&c->callee->as.variable.name, "@sqrt") &&
+      _getConstantNumberFromExpr(c->args[0], &value) && value < 0) {
+    _errorAtNodeFmt(c->args[0],
+                    "function @sqrt expects argument 1 to be a "
+                    "non-negative number but got %g.",
+                    value);
   }
 }
 
 // Infer the type of a call expression
-static Type *typchkInferCall(TypeEnv *env, AstNode *node) {
+static Type *_inferCall(TypeEnv *env, AstNode *node) {
   CallNode *c = &node->as.call;
 
   if (c->callee->kind == NODE_VARIABLE) {
     Token *name = &c->callee->as.variable.name;
-    Type *calleeType = typchkTypeEnvLookup(env, *name);
+    Type *calleeType = typeEnvLookupName(env, *name);
 
     if (calleeType == NULL)
-      calleeType = typchkTypeEnvLookupFunction(env, *name);
+      calleeType = typeEnvLookupFunction(env, *name);
 
     if (calleeType == NULL) {
       // Unable to resolve called function (possible a native function)
-      // Run typchkInfer over args to report any type errors they might contain
+      // Run infer over args to report any type errors they might contain
       for (int i = 0; i < c->argCount; i++)
-        typchkInfer(env, c->args[i]);
+        infer(env, c->args[i]);
 
       return NULL;
     }
 
-    Type *returnType =
-        typchkCheckCallAgainstFunctionType(env, node, calleeType);
+    Type *returnType = _checkCallAgainstFunctionType(env, node, calleeType);
 
     if (returnType != NULL)
       // Used to validate args passed native functions like `@sqrt`
-      typchkCheckNativeConstantArgs(node);
+      _checkNativeConstantArgs(node);
 
     return returnType;
   }
 
-  Type *calleeType = typchkInfer(env, c->callee);
+  Type *calleeType = infer(env, c->callee);
 
   if (calleeType == NULL)
     return NULL;
 
-  return typchkCheckCallAgainstFunctionType(env, node, calleeType);
+  return _checkCallAgainstFunctionType(env, node, calleeType);
 }
 
-static Type *typchkCheckCallAgainstFunctionType(TypeEnv *env, AstNode *node,
-                                                Type *calleeType) {
+static Type *_checkCallAgainstFunctionType(TypeEnv *env, AstNode *node,
+                                           Type *calleeType) {
   CallNode *c = &node->as.call;
 
   if (calleeType->kind != TYPE_FN) {
@@ -791,7 +546,7 @@ static Type *typchkCheckCallAgainstFunctionType(TypeEnv *env, AstNode *node,
 
   bool ok = true;
   for (int i = 0; i < c->argCount; i++) {
-    if (!typchkCheck(env, c->args[i], calleeType->as.function.paramTypes[i]))
+    if (!check(env, c->args[i], calleeType->as.function.paramTypes[i]))
       ok = false;
   }
   if (!ok)
@@ -801,20 +556,19 @@ static Type *typchkCheckCallAgainstFunctionType(TypeEnv *env, AstNode *node,
 }
 
 // Infer the type of a get expression
-static Type *typchkInferGet(TypeEnv *env, AstNode *node) {
+static Type *_inferGet(TypeEnv *env, AstNode *node) {
   GetNode *get = &node->as.get;
 
   if (get->object->kind == NODE_VARIABLE) {
     Token *objIdentifier = &get->object->as.variable.name;
 
-    bool shadowed = typchkTypeEnvLookup(env, *objIdentifier) != NULL ||
-                    typchkTypeEnvLookupFunction(env, *objIdentifier) != NULL;
+    bool shadowed = typeEnvLookupName(env, *objIdentifier) != NULL ||
+                    typeEnvLookupFunction(env, *objIdentifier) != NULL;
 
     if (!shadowed) {
-      bool isSelf = tokenTextEquals(objIdentifier, "Self");
-      Type *structType = isSelf
-                             ? typchkTypeEnvGetImplTargetType(env)
-                             : typchkTypeEnvLookupStruct(env, *objIdentifier);
+      bool isSelf = _tokenTextEquals(objIdentifier, "Self");
+      Type *structType = isSelf ? typeEnvGetImplTargetType(env)
+                                : typeEnvLookupStruct(env, *objIdentifier);
 
       if (structType == NULL && isSelf) {
         typchkErrorAtTokenFmt(objIdentifier,
@@ -823,7 +577,7 @@ static Type *typchkInferGet(TypeEnv *env, AstNode *node) {
       }
 
       if (structType != NULL) {
-        if (typchkStructMembersUnreliable(structType))
+        if (_areStructMembersUnreliable(structType))
           return NULL;
 
         Type *methodType = typeStructStaticMethodLookup(structType, get->name);
@@ -845,7 +599,7 @@ static Type *typchkInferGet(TypeEnv *env, AstNode *node) {
         bool isPrivate = !typeStructStaticMethodIsPublic(structType, get->name);
 
         if (isOwnMethod && isPrivate &&
-            typchkTypeEnvGetImplTargetType(env) != structType) {
+            typeEnvGetImplTargetType(env) != structType) {
           typchkErrorAtTokenFmt(&get->name, "Method '%.*s' is private to '%s'.",
                                 get->name.length, get->name.start,
                                 typeToString(structType));
@@ -858,7 +612,7 @@ static Type *typchkInferGet(TypeEnv *env, AstNode *node) {
   }
 
   // Attempt to infer the object's type
-  Type *objectType = typchkInfer(env, get->object);
+  Type *objectType = infer(env, get->object);
 
   // No type found, bail
   if (objectType == NULL)
@@ -873,7 +627,7 @@ static Type *typchkInferGet(TypeEnv *env, AstNode *node) {
   }
 
   // There was an error performing typechecking on object
-  if (typchkStructMembersUnreliable(objectType))
+  if (_areStructMembersUnreliable(objectType))
     return NULL; // already reported once
 
   // Look up struct fields first
@@ -885,7 +639,7 @@ static Type *typchkInferGet(TypeEnv *env, AstNode *node) {
   Type *methodType = typeStructInstanceMethodLookup(objectType, get->name);
   if (methodType != NULL) {
     if (!typeStructInstanceMethodIsPublic(objectType, get->name) &&
-        typchkTypeEnvGetImplTargetType(env) != objectType) {
+        typeEnvGetImplTargetType(env) != objectType) {
       typchkErrorAtTokenFmt(&get->name, "Method '%.*s' is private to '%s'.",
                             get->name.length, get->name.start,
                             typeToString(objectType));
@@ -923,54 +677,54 @@ static Type *typchkInferGet(TypeEnv *env, AstNode *node) {
 }
 
 // Infer the type of a set expression
-static Type *typchkInferSet(TypeEnv *env, AstNode *node) {
-  SetNode *s = &node->as.set;
-  Type *objectType = typchkInfer(env, s->object);
+static Type *_inferSet(TypeEnv *env, AstNode *node) {
+  SetNode *set = &node->as.set;
+  Type *objectType = infer(env, set->object);
 
   if (objectType == NULL) {
-    typchkInfer(env, s->value); // still walk for internal errors
+    infer(env, set->value); // still walk for internal errors
     return NULL;
   }
 
   // Check attempts to set fields on a none struct
   if (objectType->kind != TYPE_STRUCT) {
-    typchkErrorAtTokenFmt(&s->name, "Can't set '.%.*s' on a %s.",
-                          s->name.length, s->name.start,
+    typchkErrorAtTokenFmt(&set->name, "Can't set '.%.*s' on a %s.",
+                          set->name.length, set->name.start,
                           typeToString(objectType));
     return NULL;
   }
 
   // There was an error performing typechecking on object
-  if (typchkStructMembersUnreliable(objectType)) {
-    typchkInfer(env, s->value); // still walk for internal errors
+  if (_areStructMembersUnreliable(objectType)) {
+    infer(env, set->value); // still walk for internal errors
     return NULL;
   }
 
   // Check struct for field
-  Type *fieldType = typeStructFieldLookup(objectType, s->name);
+  Type *fieldType = typeStructFieldLookup(objectType, set->name);
 
   // Struct has no field by name
   if (fieldType == NULL) {
-    typchkErrorAtTokenFmt(&s->name, "%s has no field '%.*s'.",
-                          typeToString(objectType), s->name.length,
-                          s->name.start);
+    typchkErrorAtTokenFmt(&set->name, "%s has no field '%.*s'.",
+                          typeToString(objectType), set->name.length,
+                          set->name.start);
     return NULL;
   }
 
   // Type check value being set matches struct field's type
-  if (!typchkCheck(env, s->value, fieldType))
+  if (!check(env, set->value, fieldType))
     return NULL;
 
   return fieldType;
 }
 
 // Infer the type of the self parameter of a method
-static Type *typchkInferSelf(TypeEnv *env, AstNode *node) {
+static Type *_inferSelf(TypeEnv *env, AstNode *node) {
   // Returns null if not inside a method
-  Type *selfType = typchkTypeEnvGetSelfType(env);
+  Type *selfType = typeEnvGetSelfType(env);
 
   if (selfType == NULL) {
-    typchkErrorAtNode(node, "'self' isn't valid here.");
+    _errorAtNode(node, "'self' isn't valid here.");
     return NULL;
   }
 
@@ -978,53 +732,53 @@ static Type *typchkInferSelf(TypeEnv *env, AstNode *node) {
 }
 
 // Infer the type of an index access get expression
-static Type *typchkInferIndexGet(TypeEnv *env, AstNode *node) {
-  IndexGetNode *ig = &node->as.indexGet;
-  Type *objectType = typchkInfer(env, ig->object);
+static Type *_inferIndexGet(TypeEnv *env, AstNode *node) {
+  IndexGetNode *indexGet = &node->as.indexGet;
+  Type *objectType = infer(env, indexGet->object);
 
   if (objectType == NULL) {
-    typchkInfer(env, ig->index);
+    infer(env, indexGet->index);
     return NULL;
   }
 
   if (objectType->kind != TYPE_ARRAY) {
-    typchkErrorAtTokenFmt(&ig->bracket, "Can't index into a %s.",
+    typchkErrorAtTokenFmt(&indexGet->bracket, "Can't index into a %s.",
                           typeToString(objectType));
     return NULL;
   }
 
-  if (!typchkCheck(env, ig->index, typeF64()))
+  if (!check(env, indexGet->index, typeF64()))
     return NULL;
 
   return objectType->as.array.elementType;
 }
 
 // Infer the type of an index access set expression
-static Type *typchkInferIndexSet(TypeEnv *env, AstNode *node) {
-  IndexSetNode *is = &node->as.indexSet;
-  Type *objectType = typchkInfer(env, is->object);
+static Type *_inferIndexSet(TypeEnv *env, AstNode *node) {
+  IndexSetNode *indexSet = &node->as.indexSet;
+  Type *objectType = infer(env, indexSet->object);
 
   if (objectType == NULL) {
-    typchkInfer(env, is->index);
-    typchkInfer(env, is->value);
+    infer(env, indexSet->index);
+    infer(env, indexSet->value);
     return NULL;
   }
 
   if (objectType->kind != TYPE_ARRAY) {
-    typchkErrorAtTokenFmt(&is->bracket, "Can't index into a %s.",
+    typchkErrorAtTokenFmt(&indexSet->bracket, "Can't index into a %s.",
                           typeToString(objectType));
     return NULL;
   }
 
-  if (!typchkCheck(env, is->index, typeF64()))
+  if (!check(env, indexSet->index, typeF64()))
     return NULL;
 
   Type *elementType = objectType->as.array.elementType;
   if (elementType != NULL) {
-    if (!typchkCheck(env, is->value, elementType))
+    if (!check(env, indexSet->value, elementType))
       return NULL;
   } else {
-    typchkInfer(env, is->value); // nothing to check against yet (empty-array
+    infer(env, indexSet->value); // nothing to check against yet (empty-array
                                  // case), still walk for internal errors
   }
 
@@ -1032,30 +786,30 @@ static Type *typchkInferIndexSet(TypeEnv *env, AstNode *node) {
 }
 
 // Infer the type of a struct initialization expression
-static Type *typchkInferStructInit(TypeEnv *env, AstNode *node) {
-  StructInitNode *si = &node->as.structInit;
+static Type *_inferStructInit(TypeEnv *env, AstNode *node) {
+  StructInitNode *structInit = &node->as.structInit;
 
   Type *structType;
-  if (tokenTextEquals(&si->name, "Self")) {
-    structType = typchkTypeEnvGetImplTargetType(env);
+  if (_tokenTextEquals(&structInit->name, "Self")) {
+    structType = typeEnvGetImplTargetType(env);
     if (structType == NULL) {
-      typchkErrorAtTokenFmt(&si->name,
+      typchkErrorAtTokenFmt(&structInit->name,
                             "'Self' can only be used inside an impl block.");
       return NULL;
     }
   } else {
-    structType = typchkTypeEnvLookupStruct(env, si->name);
+    structType = typeEnvLookupStruct(env, structInit->name);
   }
 
   if (structType == NULL) {
-    typchkErrorAtTokenFmt(&si->name, "Unknown struct '%.*s'.", si->name.length,
-                          si->name.start);
+    typchkErrorAtTokenFmt(&structInit->name, "Unknown struct '%.*s'.",
+                          structInit->name.length, structInit->name.start);
     return NULL;
   }
 
-  if (typchkStructMembersUnreliable(structType)) {
-    for (int i = 0; i < si->fieldCount; i++) {
-      typchkInfer(env, si->fields[i].value); // still walk for internal errors
+  if (_areStructMembersUnreliable(structType)) {
+    for (int i = 0; i < structInit->fieldCount; i++) {
+      infer(env, structInit->fields[i].value); // still walk for internal errors
     }
     return structType; // already reported once
   }
@@ -1063,8 +817,8 @@ static Type *typchkInferStructInit(TypeEnv *env, AstNode *node) {
   // Missing required fields are a separate runtime-level check, not
   // this pass's concern.
   bool ok = true;
-  for (int i = 0; i < si->fieldCount; i++) {
-    StructInitFieldNode *field = &si->fields[i];
+  for (int i = 0; i < structInit->fieldCount; i++) {
+    StructInitFieldNode *field = &structInit->fields[i];
     Type *fieldType = typeStructFieldLookup(structType, field->name);
     if (fieldType == NULL) {
       typchkErrorAtTokenFmt(&field->name, "%s has no field '%.*s'.",
@@ -1073,7 +827,7 @@ static Type *typchkInferStructInit(TypeEnv *env, AstNode *node) {
       ok = false;
       continue;
     }
-    if (!typchkCheck(env, field->value, fieldType))
+    if (!check(env, field->value, fieldType))
       ok = false;
   }
 
@@ -1083,19 +837,19 @@ static Type *typchkInferStructInit(TypeEnv *env, AstNode *node) {
   return structType;
 }
 
-static Type *typchkInferArray(TypeEnv *env, AstNode *node) {
+static Type *_inferArray(TypeEnv *env, AstNode *node) {
   ArrayNode *a = &node->as.array;
   if (a->count == 0)
     return typeArray(NULL); // nothing to learn an element type from yet
 
-  Type *elementType = typchkInfer(env, a->items[0]);
+  Type *elementType = infer(env, a->items[0]);
   bool ok = true;
   for (int i = 1; i < a->count; i++) {
     if (elementType != NULL) {
-      if (!typchkCheck(env, a->items[i], elementType))
+      if (!check(env, a->items[i], elementType))
         ok = false;
     } else {
-      typchkInfer(env, a->items[i]); // still walk for internal errors
+      infer(env, a->items[i]); // still walk for internal errors
     }
   }
   if (!ok)
@@ -1104,45 +858,44 @@ static Type *typchkInferArray(TypeEnv *env, AstNode *node) {
 }
 
 // Infer the type of an if expression
-static Type *typchkInferIf(TypeEnv *env, AstNode *node) {
+static Type *_inferIf(TypeEnv *env, AstNode *node) {
   IfNode *i = &node->as.if_;
-  typchkCheck(env, i->condition,
-              typeBool()); // reported if wrong; still proceed
+  check(env, i->condition,
+        typeBool()); // reported if wrong; still proceed
 
-  Type *thenType = typchkInfer(env, i->thenBranch);
+  Type *thenType = infer(env, i->thenBranch);
   Type *elseType =
-      i->elseBranch != NULL ? typchkInfer(env, i->elseBranch) : typeUnit();
+      i->elseBranch != NULL ? infer(env, i->elseBranch) : typeUnit();
 
   if (thenType == NULL || elseType == NULL)
     return NULL;
 
   if (!typesEqual(thenType, elseType)) {
-    typchkErrorAtNodeFmt(node,
-                         "if/else branches must produce the same type, got %s "
-                         "and %s.",
-                         typeToString(thenType), typeToString(elseType));
+    _errorAtNodeFmt(node,
+                    "if/else branches must produce the same type, got %s "
+                    "and %s.",
+                    typeToString(thenType), typeToString(elseType));
     return NULL;
   }
 
   return thenType;
 }
 
-static Type *typchkCheckBlockContents(TypeEnv *env, BlockNode *block,
-                                      Type *expectedValueType) {
-  typchkTypeEnvBeginScope(env);
+static Type *_checkBlockContents(TypeEnv *env, BlockNode *block,
+                                 Type *expectedValueType) {
+  typeEnvBeginScope(env);
 
   for (int i = 0; i < block->count; i++) {
-    typchkCheckStmt(env, block->stmts[i]);
+    checkStmt(env, block->stmts[i]);
   }
 
   Type *result;
   if (block->value != NULL) {
     if (expectedValueType != NULL) {
-      result = typchkCheck(env, block->value, expectedValueType)
-                   ? expectedValueType
-                   : NULL;
+      result = check(env, block->value, expectedValueType) ? expectedValueType
+                                                           : NULL;
     } else {
-      result = typchkInfer(env, block->value);
+      result = infer(env, block->value);
     }
   } else {
     // No trailing value -- always unit. A declared return type can
@@ -1151,20 +904,20 @@ static Type *typchkCheckBlockContents(TypeEnv *env, BlockNode *block,
     result = typeUnit();
   }
 
-  typchkTypeEnvEndScope(env);
+  typeEnvEndScope(env);
   return result;
 }
 
 // Infer the type of a block expression
-static Type *typchkInferBlock(TypeEnv *env, AstNode *node) {
-  return typchkCheckBlockContents(env, &node->as.block,
-                                  /*expectedValueType=*/NULL);
+static Type *_inferBlockExpr(TypeEnv *env, AstNode *node) {
+  return _checkBlockContents(env, &node->as.block,
+                             /*expectedValueType=*/NULL);
 }
 
-static bool typchkCheckIfBlockAlwaysReturns(BlockNode *block);
+static bool _checkIfBlockAlwaysReturns(BlockNode *block);
 
 // Check if the statement (AstNode) exits it's enclosing function
-static bool typchkCheckIfAlwaysReturns(AstNode *node) {
+static bool _checkIfAlwaysReturns(AstNode *node) {
   if (node == NULL)
     return false;
 
@@ -1173,13 +926,12 @@ static bool typchkCheckIfAlwaysReturns(AstNode *node) {
     return true;
 
   case NODE_BLOCK:
-    return typchkCheckIfBlockAlwaysReturns(&node->as.block);
+    return _checkIfBlockAlwaysReturns(&node->as.block);
 
   case NODE_IF: {
     IfNode *if_ = &node->as.if_;
-    return if_->elseBranch != NULL &&
-           typchkCheckIfAlwaysReturns(if_->thenBranch) &&
-           typchkCheckIfAlwaysReturns(if_->elseBranch);
+    return if_->elseBranch != NULL && _checkIfAlwaysReturns(if_->thenBranch) &&
+           _checkIfAlwaysReturns(if_->elseBranch);
   }
 
   default:
@@ -1187,51 +939,51 @@ static bool typchkCheckIfAlwaysReturns(AstNode *node) {
   }
 }
 
-static bool typchkCheckIfBlockAlwaysReturns(BlockNode *block) {
+static bool _checkIfBlockAlwaysReturns(BlockNode *block) {
   // Implicit return
   if (block->value != NULL)
     return true;
 
   for (int i = 0; i < block->count; i++) {
-    if (typchkCheckIfAlwaysReturns(block->stmts[i]))
+    if (_checkIfAlwaysReturns(block->stmts[i]))
       return true;
   }
 
   return false;
 }
 
-static bool typchkCheckIfBodyProducesDeclaredValue(FunctionNode *fn,
-                                                   Type *returnType) {
+static bool _checkIfBodyProducesDeclaredValue(FunctionNode *fn,
+                                              Type *returnType) {
   if (returnType == NULL || typesEqual(returnType, typeUnit()))
     return true;
 
   if (fn->exprBody != NULL)
     return true;
 
-  return typchkCheckIfBlockAlwaysReturns(&fn->body);
+  return _checkIfBlockAlwaysReturns(&fn->body);
 }
 
-static Type *typchkCheckOrInferLambda(
+static Type *_checkOrInferLambda(
     TypeEnv *env, AstNode *node,
-    Type *expected // expected is NULL in typchkInfer() context (every param
-                   // needs an explicit type) or a TYPE_FN in typchkCheck()
+    Type *expected // expected is NULL in infer() context (every param
+                   // needs an explicit type) or a TYPE_FN in check()
                    // context (untyped params take their type from the matching
-                   // position). Shared by typchkInfer()'s NODE_FUNCTION case
-                   // and typchkCheck()'s lambda special case.
+                   // position). Shared by infer()'s NODE_FUNCTION case
+                   // and check()'s lambda special case.
 ) {
   FunctionNode *fn = &node->as.function;
 
   if (expected != NULL && expected->kind != TYPE_FN) {
-    typchkErrorAtNodeFmt(node, "Expected %s here, not a function.",
-                         typeToString(expected));
+    _errorAtNodeFmt(node, "Expected %s here, not a function.",
+                    typeToString(expected));
     return NULL;
   }
 
   if (expected != NULL && expected->as.function.paramCount != fn->arity) {
-    typchkErrorAtNodeFmt(node,
-                         "Expected a function taking %d argument(s), this one "
-                         "takes %d.",
-                         expected->as.function.paramCount, fn->arity);
+    _errorAtNodeFmt(node,
+                    "Expected a function taking %d argument(s), this one "
+                    "takes %d.",
+                    expected->as.function.paramCount, fn->arity);
     return NULL;
   }
 
@@ -1248,10 +1000,10 @@ static Type *typchkCheckOrInferLambda(
     } else if (expected != NULL) {
       paramTypes[i] = expected->as.function.paramTypes[i];
     } else {
-      typchkErrorAtNode(
-          node, "Can't infer this lambda's parameter types without more "
-                "context -- add explicit types, or use it somewhere "
-                "its type is already known.");
+      _errorAtNode(node,
+                   "Can't infer this lambda's parameter types without more "
+                   "context -- add explicit types, or use it somewhere "
+                   "its type is already known.");
       paramTypes[i] = NULL;
       ok = false;
     }
@@ -1267,32 +1019,32 @@ static Type *typchkCheckOrInferLambda(
           ? declaredReturnType
           : (expected != NULL ? expected->as.function.returnType : NULL);
 
-  typchkTypeEnvBeginScope(env);
+  typeEnvBeginScope(env);
 
   for (int i = 0; i < fn->arity; i++) {
-    typchkTypeEnvDeclare(env, fn->params[i], paramTypes[i]);
+    typeEnvDeclare(env, fn->params[i], paramTypes[i]);
   }
 
-  Type *previousReturnType = typchkTypeEnvGetCurrentReturnType(env);
-  typchkTypeEnvSetCurrentReturnType(env, targetReturnType);
+  Type *previousReturnType = typeEnvGetCurrentReturnType(env);
+  typeEnvSetCurrentReturnType(env, targetReturnType);
 
   Type *bodyResultType;
   if (fn->exprBody != NULL) {
-    bodyResultType = targetReturnType != NULL
-                         ? (typchkCheck(env, fn->exprBody, targetReturnType)
-                                ? targetReturnType
-                                : NULL)
-                         : typchkInfer(env, fn->exprBody);
+    bodyResultType =
+        targetReturnType != NULL
+            ? (check(env, fn->exprBody, targetReturnType) ? targetReturnType
+                                                          : NULL)
+            : infer(env, fn->exprBody);
   } else {
-    bodyResultType = typchkCheckBlockContents(env, &fn->body, targetReturnType);
+    bodyResultType = _checkBlockContents(env, &fn->body, targetReturnType);
   }
 
-  typchkTypeEnvSetCurrentReturnType(env, previousReturnType);
-  typchkTypeEnvEndScope(env);
+  typeEnvSetCurrentReturnType(env, previousReturnType);
+  typeEnvEndScope(env);
 
-  if (!typchkCheckIfBodyProducesDeclaredValue(fn, targetReturnType)) {
-    typchkErrorAtNodeFmt(node, "This lambda must return %s on every path.",
-                         typeToString(targetReturnType));
+  if (!_checkIfBodyProducesDeclaredValue(fn, targetReturnType)) {
+    _errorAtNodeFmt(node, "This lambda must return %s on every path.",
+                    typeToString(targetReturnType));
     return NULL;
   }
 
@@ -1305,7 +1057,7 @@ static Type *typchkCheckOrInferLambda(
   return typeFunction(paramTypes, fn->arity, actualReturnType);
 }
 
-static void typchkCheckVarDecl(TypeEnv *env, AstNode *node) {
+static void _checkVarDecl(TypeEnv *env, AstNode *node) {
   VarDeclNode *varDecl = &node->as.varDecl;
   bool hasExpectedType = varDecl->declaredType != NULL;
   Type *declaredType =
@@ -1313,9 +1065,9 @@ static void typchkCheckVarDecl(TypeEnv *env, AstNode *node) {
 
   if (hasExpectedType) {
     Token declaredTypeIdentifier = varDecl->declaredType->as.type_.name;
-    bool isSelf = tokenTextEquals(&declaredTypeIdentifier, "Self");
+    bool isSelf = _tokenTextEquals(&declaredTypeIdentifier, "Self");
 
-    if (isSelf && typchkTypeEnvGetImplTargetType(env) == NULL) {
+    if (isSelf && typeEnvGetImplTargetType(env) == NULL) {
       typchkErrorAtTokenFmt(&declaredTypeIdentifier,
                             "'Self' can only be used inside an impl block.");
       return;
@@ -1324,11 +1076,11 @@ static void typchkCheckVarDecl(TypeEnv *env, AstNode *node) {
 
   if (varDecl->initializer != NULL) {
     if (declaredType != NULL) {
-      typchkCheck(env, varDecl->initializer, declaredType);
-      typchkTypeEnvDeclare(env, varDecl->name, declaredType);
+      check(env, varDecl->initializer, declaredType);
+      typeEnvDeclare(env, varDecl->name, declaredType);
     } else {
-      Type *inferred = typchkInfer(env, varDecl->initializer);
-      typchkTypeEnvDeclare(env, varDecl->name, inferred);
+      Type *inferred = infer(env, varDecl->initializer);
+      typeEnvDeclare(env, varDecl->name, inferred);
     }
   } else {
     if (declaredType == NULL) {
@@ -1338,50 +1090,50 @@ static void typchkCheckVarDecl(TypeEnv *env, AstNode *node) {
                             varDecl->name.length, varDecl->name.start);
     }
 
-    typchkTypeEnvDeclare(env, varDecl->name, declaredType);
+    typeEnvDeclare(env, varDecl->name, declaredType);
   }
 }
 
 // Checks a function/method body against an already-resolved signature.
 // Callers handle registration differently (local fn vs. hoisted
 // top-level/impl method), so that's not redone here.
-static void typchkCheckFunctionBody(TypeEnv *env, FunctionNode *fn,
-                                    Type **paramTypes, Type *returnType,
-                                    Type *selfType) {
-  typchkTypeEnvBeginScope(env);
+static void _checkFunctionBody(TypeEnv *env, FunctionNode *fn,
+                               Type **paramTypes, Type *returnType,
+                               Type *selfType) {
+  typeEnvBeginScope(env);
   for (int i = 0; i < fn->arity; i++) {
-    typchkTypeEnvDeclare(env, fn->params[i], paramTypes[i]);
+    typeEnvDeclare(env, fn->params[i], paramTypes[i]);
   }
 
-  Type *previousSelfType = typchkTypeEnvGetSelfType(env);
-  typchkTypeEnvSetSelfType(env, selfType);
+  Type *previousSelfType = typeEnvGetSelfType(env);
+  typeEnvSetSelfType(env, selfType);
 
-  Type *previousReturnType = typchkTypeEnvGetCurrentReturnType(env);
-  typchkTypeEnvSetCurrentReturnType(env, returnType);
+  Type *previousReturnType = typeEnvGetCurrentReturnType(env);
+  typeEnvSetCurrentReturnType(env, returnType);
 
   if (fn->exprBody != NULL) {
     if (returnType != NULL)
-      typchkCheck(env, fn->exprBody, returnType);
+      check(env, fn->exprBody, returnType);
     else
-      typchkInfer(env, fn->exprBody);
+      infer(env, fn->exprBody);
   } else {
-    typchkCheckBlockContents(env, &fn->body, returnType);
+    _checkBlockContents(env, &fn->body, returnType);
   }
 
   daaCheckFn(fn);
 
-  if (!typchkCheckIfBodyProducesDeclaredValue(fn, returnType)) {
+  if (!_checkIfBodyProducesDeclaredValue(fn, returnType)) {
     typchkErrorAtTokenFmt(&fn->name, "'%.*s' must return %s on every path.",
                           fn->name.length, fn->name.start,
                           typeToString(returnType));
   }
 
-  typchkTypeEnvSetCurrentReturnType(env, previousReturnType);
-  typchkTypeEnvSetSelfType(env, previousSelfType);
-  typchkTypeEnvEndScope(env);
+  typeEnvSetCurrentReturnType(env, previousReturnType);
+  typeEnvSetSelfType(env, previousSelfType);
+  typeEnvEndScope(env);
 }
 
-static void typchkCheckFunctionDecl(TypeEnv *env, AstNode *node) {
+static void _checkFunctionDecl(TypeEnv *env, AstNode *node) {
   FunctionNode *fn = &node->as.function;
   bool hasArity = fn->arity > 0;
 
@@ -1398,72 +1150,72 @@ static void typchkCheckFunctionDecl(TypeEnv *env, AstNode *node) {
       fn->returnType != NULL ? typchkResolveType(env, fn->returnType) : NULL;
 
   Type *fnType = typeFunction(paramTypes, fn->arity, returnType);
-  typchkTypeEnvDeclare(env, fn->name, fnType);
+  typeEnvDeclare(env, fn->name, fnType);
 
-  Type *selfType = typchkTypeEnvGetSelfType(env);
+  Type *selfType = typeEnvGetSelfType(env);
 
-  typchkCheckFunctionBody(env, fn, paramTypes, returnType, selfType);
+  _checkFunctionBody(env, fn, paramTypes, returnType, selfType);
 }
 
-void typchkCheckStmt(TypeEnv *env, AstNode *node) {
+void checkStmt(TypeEnv *env, AstNode *node) {
   switch (node->kind) {
   case NODE_EXPR_STMT:
-    typchkInfer(env, node->as.exprStmt.expr);
+    infer(env, node->as.exprStmt.expr);
     break;
   case NODE_PRINT:
-    typchkInfer(env, node->as.print.expr);
+    infer(env, node->as.print.expr);
     break;
   case NODE_VAR_DECL:
-    typchkCheckVarDecl(env, node);
+    _checkVarDecl(env, node);
     break;
   case NODE_WHILE: {
     WhileNode *w = &node->as.while_;
-    typchkCheck(env, w->condition, typeBool());
-    typchkCheckStmt(env, w->body);
+    check(env, w->condition, typeBool());
+    checkStmt(env, w->body);
     break;
   }
   case NODE_FOR: {
     ForNode *f = &node->as.for_;
-    typchkTypeEnvBeginScope(env);
+    typeEnvBeginScope(env);
 
     if (f->init != NULL)
-      typchkCheckStmt(env, f->init);
+      checkStmt(env, f->init);
 
     if (f->condition != NULL)
-      typchkCheck(env, f->condition, typeBool());
+      check(env, f->condition, typeBool());
 
-    typchkCheckStmt(env, f->body);
+    checkStmt(env, f->body);
 
     if (f->increment != NULL)
-      typchkInfer(env, f->increment);
+      infer(env, f->increment);
 
-    typchkTypeEnvEndScope(env);
+    typeEnvEndScope(env);
     break;
   }
   case NODE_IF: {
     IfNode *if_ = &node->as.if_;
 
-    typchkCheck(env, if_->condition, typeBool());
-    typchkCheckStmt(env, if_->thenBranch);
+    check(env, if_->condition, typeBool());
+    checkStmt(env, if_->thenBranch);
 
     if (if_->elseBranch != NULL)
-      typchkCheckStmt(env, if_->elseBranch);
+      checkStmt(env, if_->elseBranch);
 
     break;
   }
   case NODE_RETURN: {
     ReturnNode *r = &node->as.return_;
-    Type *expectedReturn = typchkTypeEnvGetCurrentReturnType(env);
+    Type *expectedReturn = typeEnvGetCurrentReturnType(env);
 
     if (r->value != NULL) {
       if (expectedReturn != NULL)
-        typchkCheck(env, r->value, expectedReturn);
+        check(env, r->value, expectedReturn);
       else
-        typchkInfer(env, r->value);
+        infer(env, r->value);
     } else if (expectedReturn != NULL &&
                !typesEqual(expectedReturn, typeUnit())) {
-      typchkErrorAtNodeFmt(node, "Expected a return value of type %s.",
-                           typeToString(expectedReturn));
+      _errorAtNodeFmt(node, "Expected a return value of type %s.",
+                      typeToString(expectedReturn));
     }
 
     break;
@@ -1472,7 +1224,7 @@ void typchkCheckStmt(TypeEnv *env, AstNode *node) {
   case NODE_CONTINUE:
     break;
   case NODE_FUNCTION:
-    typchkCheckFunctionDecl(env, node);
+    _checkFunctionDecl(env, node);
     break;
   case NODE_STRUCT:
   case NODE_IMPL:
@@ -1480,7 +1232,7 @@ void typchkCheckStmt(TypeEnv *env, AstNode *node) {
   case NODE_TYPE_ALIAS:
     break;
   default:
-    typchkInfer(env, node);
+    infer(env, node);
     break;
   }
 }
@@ -1488,7 +1240,7 @@ void typchkCheckStmt(TypeEnv *env, AstNode *node) {
 // Resolves a function/method signature, requiring every param + the
 // return type to have an annotation. self is excluded -- its type is
 // always just "this struct," bound separately via selfType.
-static Type *typchkResolveFunctionSignature(TypeEnv *env, FunctionNode *fn) {
+static Type *_resolveFunctionSignature(TypeEnv *env, FunctionNode *fn) {
   Type **paramTypes =
       fn->arity > 0 ? (Type **)typesAllocRaw(fn->arity * sizeof(Type *)) : NULL;
   bool ok = true;
@@ -1527,46 +1279,44 @@ typedef struct {
   bool resolved;
 } UnresolvedTypeAlias;
 
-static void typchkResolvePendingAlias(TypeEnv *env,
-                                      UnresolvedTypeAlias *unresolvedAlias,
-                                      int count, int index);
+static void _resolvePendingAlias(TypeEnv *env,
+                                 UnresolvedTypeAlias *unresolvedAlias,
+                                 int count, int index);
 
 // Resolves any alias `typeAnnotation` names before it is itself resolved,
 // so an alias declared later in the file still works.
-static void typchkResolveAliasDependencies(TypeEnv *env,
-                                           UnresolvedTypeAlias *unresolvedAlias,
-                                           int count, AstNode *typeAnnotation) {
+static void _resolveAliasDependencies(TypeEnv *env,
+                                      UnresolvedTypeAlias *unresolvedAlias,
+                                      int count, AstNode *typeAnnotation) {
   if (typeAnnotation == NULL)
     return;
 
   if (typeAnnotation->kind == NODE_TYPE_FUNCTION) {
     TypeFunctionNode *fn = &typeAnnotation->as.typeFunction;
     for (int i = 0; i < fn->paramCount; i++) {
-      typchkResolveAliasDependencies(env, unresolvedAlias, count,
-                                     fn->paramTypes[i]);
+      _resolveAliasDependencies(env, unresolvedAlias, count, fn->paramTypes[i]);
     }
-    typchkResolveAliasDependencies(env, unresolvedAlias, count, fn->returnType);
+    _resolveAliasDependencies(env, unresolvedAlias, count, fn->returnType);
     return;
   }
 
   TypeNode *t = &typeAnnotation->as.type_;
 
   for (int i = 0; i < t->genericArgCount; i++) {
-    typchkResolveAliasDependencies(env, unresolvedAlias, count,
-                                   t->genericArgs[i]);
+    _resolveAliasDependencies(env, unresolvedAlias, count, t->genericArgs[i]);
   }
 
   for (int i = 0; i < count; i++) {
-    if (tokensEqual(&unresolvedAlias[i].node->as.typeAlias.name, &t->name)) {
-      typchkResolvePendingAlias(env, unresolvedAlias, count, i);
+    if (_tokensEqual(&unresolvedAlias[i].node->as.typeAlias.name, &t->name)) {
+      _resolvePendingAlias(env, unresolvedAlias, count, i);
       return;
     }
   }
 }
 
-static void typchkResolvePendingAlias(TypeEnv *env,
-                                      UnresolvedTypeAlias *unresolvedAlias,
-                                      int count, int index) {
+static void _resolvePendingAlias(TypeEnv *env,
+                                 UnresolvedTypeAlias *unresolvedAlias,
+                                 int count, int index) {
   UnresolvedTypeAlias *alias = &unresolvedAlias[index];
   TypeAliasNode *decl = &alias->node->as.typeAlias;
 
@@ -1581,19 +1331,19 @@ static void typchkResolvePendingAlias(TypeEnv *env,
   }
 
   alias->resolving = true;
-  typchkResolveAliasDependencies(env, unresolvedAlias, count, decl->target);
+  _resolveAliasDependencies(env, unresolvedAlias, count, decl->target);
   alias->resolving = false;
   alias->resolved = true;
 
   Type *target = typchkResolveType(env, decl->target);
 
   if (target != NULL)
-    typchkTypeEnvRegisterAlias(env, decl->name, target);
+    typeEnvRegisterAlias(env, decl->name, target);
 }
 
-static void typchkResolveStructFields(TypeEnv *env, AstNode *node) {
+static void _resolveStructFields(TypeEnv *env, AstNode *node) {
   StructNode *struct_ = &node->as.struct_;
-  Type *structType = typchkTypeEnvLookupStruct(env, struct_->name);
+  Type *structType = typeEnvLookupStruct(env, struct_->name);
 
   if (structType == NULL)
     return;
@@ -1636,9 +1386,9 @@ static void typchkResolveStructFields(TypeEnv *env, AstNode *node) {
   }
 }
 
-static void typchkResolveTraitMethods(TypeEnv *env, AstNode *node) {
+static void _resolveTraitMethods(TypeEnv *env, AstNode *node) {
   TraitNode *trait_ = &node->as.trait_;
-  Type *traitType = typchkTypeEnvLookupTrait(env, trait_->name);
+  Type *traitType = typeEnvLookupTrait(env, trait_->name);
 
   if (traitType == NULL)
     return;
@@ -1646,7 +1396,7 @@ static void typchkResolveTraitMethods(TypeEnv *env, AstNode *node) {
   bool ok = true;
 
   if (trait_->hasSupertrait) {
-    Type *supertraitType = typchkTypeEnvLookupTrait(env, trait_->supertrait);
+    Type *supertraitType = typeEnvLookupTrait(env, trait_->supertrait);
 
     if (supertraitType == NULL) {
       typchkErrorAtTokenFmt(&trait_->supertrait, "Unknown trait '%.*s'.",
@@ -1678,7 +1428,7 @@ static void typchkResolveTraitMethods(TypeEnv *env, AstNode *node) {
   int staticIndex = 0, instanceIndex = 0;
   for (int i = 0; i < trait_->methodCount; i++) {
     FunctionNode *method = trait_->methods[i];
-    Type *methodType = typchkResolveFunctionSignature(env, method);
+    Type *methodType = _resolveFunctionSignature(env, method);
 
     if (methodType == NULL) {
       ok = false;
@@ -1714,14 +1464,13 @@ static Token tokenFromInternedName(InternedName name) {
 }
 
 // Walks the supertrait chain to identify circular references
-static bool typchkTraitSupertraitChainCycles(TypeEnv *env,
-                                             InternedName startName) {
+static bool _traitSupertraitChainCycles(TypeEnv *env, InternedName startName) {
   InternedName current = startName;
-  int maxSteps = env->traitCount + 1;
+  int maxSteps = typeEnvTraitCount(env) + 1;
 
   for (int step = 0; step < maxSteps; step++) {
     Type *currentTrait =
-        typchkTypeEnvLookupTrait(env, tokenFromInternedName(current));
+        typeEnvLookupTrait(env, tokenFromInternedName(current));
 
     if (currentTrait == NULL || !currentTrait->as.trait_.hasSupertrait)
       return false; // chain ends cleanly, no repeat
@@ -1740,19 +1489,19 @@ static bool typchkTraitSupertraitChainCycles(TypeEnv *env,
 // Checked once per trait after every trait's own supertrait field has
 // been resolved, so a cycle of any length is caught regardless of which
 // trait in it happens to be declared first (or checked first).
-static void typchkCheckTraitSupertraitCycle(TypeEnv *env, AstNode *node) {
+static void _checkTraitSupertraitCycle(TypeEnv *env, AstNode *node) {
   TraitNode *trait_ = &node->as.trait_;
   if (!trait_->hasSupertrait)
     return;
 
-  Type *traitType = typchkTypeEnvLookupTrait(env, trait_->name);
+  Type *traitType = typeEnvLookupTrait(env, trait_->name);
 
   // NULL or no supertrait recorded means it already failed to resolve
   // (e.g. "Unknown trait") and was reported there -- nothing to walk.
   if (traitType == NULL || !traitType->as.trait_.hasSupertrait)
     return;
 
-  if (typchkTraitSupertraitChainCycles(env, traitType->as.trait_.name)) {
+  if (_traitSupertraitChainCycles(env, traitType->as.trait_.name)) {
     typchkErrorAtTokenFmt(&trait_->name,
                           "Trait '%.*s' has a circular supertrait chain.",
                           trait_->name.length, trait_->name.start);
@@ -1761,20 +1510,20 @@ static void typchkCheckTraitSupertraitCycle(TypeEnv *env, AstNode *node) {
 
 // Resolves an impl block's target name to the concrete struct directly, or
 // through a type alias. NULL if the name doesn't name either
-static Type *typchkResolveImplTarget(TypeEnv *env, Token name) {
-  Type *type = typchkTypeEnvLookupStruct(env, name);
+static Type *_resolveImplTarget(TypeEnv *env, Token name) {
+  Type *type = typeEnvLookupStruct(env, name);
   if (type != NULL)
     return type;
 
-  type = typchkTypeEnvLookupAlias(env, name);
+  type = typeEnvLookupAlias(env, name);
 
   return (type != NULL && type->kind == TYPE_STRUCT) ? type : NULL;
 }
 
-static void typchkRegisterTraitImpl(TypeEnv *env, AstNode *node) {
+static void _registerTraitImpl(TypeEnv *env, AstNode *node) {
   ImplNode *impl = &node->as.impl;
 
-  Type *traitType = typchkTypeEnvLookupTrait(env, impl->traitName);
+  Type *traitType = typeEnvLookupTrait(env, impl->traitName);
 
   if (traitType == NULL) {
     typchkErrorAtTokenFmt(&impl->traitName, "Unknown trait '%.*s'.",
@@ -1785,10 +1534,10 @@ static void typchkRegisterTraitImpl(TypeEnv *env, AstNode *node) {
   if (typeTraitHasUnresolvedMembers(traitType))
     return; // already reported once, at the trait's own declaration
 
-  Type *targetType = typchkResolveImplTarget(env, impl->targetName);
+  Type *targetType = _resolveImplTarget(env, impl->targetName);
 
   if (targetType == NULL) {
-    if (tokenIsPrimitiveTypeName(&impl->targetName)) {
+    if (_tokenIsPrimitiveTypeName(&impl->targetName)) {
       typchkErrorAtTokenFmt(
           &impl->targetName,
           "Primitive trait implementations aren't supported yet.");
@@ -1817,7 +1566,7 @@ static void typchkRegisterTraitImpl(TypeEnv *env, AstNode *node) {
   bool ok = true;
 
   // Register the impl's target type e.g. struct for `Self`
-  typchkTypeEnvSetImplTargetType(env, targetType);
+  typeEnvSetImplTargetType(env, targetType);
 
   for (int i = 0; i < impl->methodCount; i++) {
     FunctionNode *method = impl->methods[i];
@@ -1851,7 +1600,7 @@ static void typchkRegisterTraitImpl(TypeEnv *env, AstNode *node) {
       continue;
     }
 
-    Type *methodType = typchkResolveFunctionSignature(env, method);
+    Type *methodType = _resolveFunctionSignature(env, method);
     if (methodType == NULL) {
       ok = false;
       continue;
@@ -1875,7 +1624,7 @@ static void typchkRegisterTraitImpl(TypeEnv *env, AstNode *node) {
                              method->hasSelf);
   }
 
-  typchkTypeEnvSetImplTargetType(env, NULL);
+  typeEnvSetImplTargetType(env, NULL);
 
   for (int i = 0; i < typeTraitInstanceMethodCount(traitType); i++) {
     TypeMember required = typeTraitInstanceMethodAt(traitType, i);
@@ -1920,16 +1669,16 @@ static void typchkRegisterTraitImpl(TypeEnv *env, AstNode *node) {
   typeStructMarkTraitImplemented(targetType, traitName);
 }
 
-static void typchkCheckTraitSupertraitSatisfied(TypeEnv *env, AstNode *node) {
+static void _checkTraitSupertraitSatisfied(TypeEnv *env, AstNode *node) {
   ImplNode *impl = &node->as.impl;
   if (!impl->hasTraitName)
     return;
 
-  Type *traitType = typchkTypeEnvLookupTrait(env, impl->traitName);
+  Type *traitType = typeEnvLookupTrait(env, impl->traitName);
   if (traitType == NULL || !traitType->as.trait_.hasSupertrait)
     return;
 
-  Type *targetType = typchkResolveImplTarget(env, impl->targetName);
+  Type *targetType = _resolveImplTarget(env, impl->targetName);
   if (targetType == NULL)
     return; // already reported, or a (currently unsupported) primitive
 
@@ -1951,18 +1700,18 @@ static void typchkCheckTraitSupertraitSatisfied(TypeEnv *env, AstNode *node) {
   }
 }
 
-static void typchkRegisterImplMethods(TypeEnv *env, AstNode *node) {
+static void _registerImplMethods(TypeEnv *env, AstNode *node) {
   ImplNode *impl = &node->as.impl;
 
   if (impl->hasTraitName) {
-    typchkRegisterTraitImpl(env, node);
+    _registerTraitImpl(env, node);
     return;
   }
 
-  Type *structType = typchkResolveImplTarget(env, impl->targetName);
+  Type *structType = _resolveImplTarget(env, impl->targetName);
 
   if (structType == NULL) {
-    if (tokenIsPrimitiveTypeName(&impl->targetName)) {
+    if (_tokenIsPrimitiveTypeName(&impl->targetName)) {
       typchkErrorAtTokenFmt(
           &impl->targetName,
           "Only trait implementations are allowed on primitive types.");
@@ -1978,11 +1727,11 @@ static void typchkRegisterImplMethods(TypeEnv *env, AstNode *node) {
   if (typeStructIsGeneric(structType))
     return; // already reported once at the struct's declaration
 
-  typchkTypeEnvSetImplTargetType(env, structType);
+  typeEnvSetImplTargetType(env, structType);
 
   for (int i = 0; i < impl->methodCount; i++) {
     FunctionNode *method = impl->methods[i];
-    Type *methodType = typchkResolveFunctionSignature(env, method);
+    Type *methodType = _resolveFunctionSignature(env, method);
 
     if (methodType == NULL) {
       typeStructMarkUnresolvedMembers(structType); // error already reported
@@ -2010,33 +1759,32 @@ static void typchkRegisterImplMethods(TypeEnv *env, AstNode *node) {
     }
   }
 
-  typchkTypeEnvSetImplTargetType(env, NULL);
+  typeEnvSetImplTargetType(env, NULL);
 }
 
-static void typchkRegisterTopLevelFunctionSignature(TypeEnv *env,
-                                                    AstNode *node) {
+static void _registerTopLevelFunctionSignature(TypeEnv *env, AstNode *node) {
   FunctionNode *fn = &node->as.function;
-  Type *fnType = typchkResolveFunctionSignature(env, fn);
+  Type *fnType = _resolveFunctionSignature(env, fn);
 
   if (fnType != NULL) {
-    typchkTypeEnvRegisterFunction(env, fn->name, fnType);
+    typeEnvRegisterFunction(env, fn->name, fnType);
   }
 }
 
-static void typchkCheckTopLevelFunctionBody(TypeEnv *env, AstNode *node) {
+static void _checkTopLevelFunctionBody(TypeEnv *env, AstNode *node) {
   FunctionNode *fn = &node->as.function;
-  Type *fnType = typchkTypeEnvLookupFunction(env, fn->name);
+  Type *fnType = typeEnvLookupFunction(env, fn->name);
   if (fnType == NULL)
     return; // signature failed to resolve in Pass D; already reported
-  typchkCheckFunctionBody(env, fn, fnType->as.function.paramTypes,
-                          fnType->as.function.returnType, NULL);
+  _checkFunctionBody(env, fn, fnType->as.function.paramTypes,
+                     fnType->as.function.returnType, NULL);
 }
 
-static void checkImplMethodBodies(TypeEnv *env, AstNode *node) {
+static void _checkImplMethodBodies(TypeEnv *env, AstNode *node) {
   ImplNode *impl = &node->as.impl;
-  Type *structType = typchkResolveImplTarget(env, impl->targetName);
+  Type *structType = _resolveImplTarget(env, impl->targetName);
 
-  typchkTypeEnvSetImplTargetType(env, structType);
+  typeEnvSetImplTargetType(env, structType);
 
   for (int i = 0; i < impl->methodCount; i++) {
     FunctionNode *method = impl->methods[i];
@@ -2059,22 +1807,22 @@ static void checkImplMethodBodies(TypeEnv *env, AstNode *node) {
       continue; // signature/struct/trait validation failed; already reported
 
     Type *selfType = method->hasSelf ? structType : NULL;
-    typchkCheckFunctionBody(env, method, methodType->as.function.paramTypes,
-                            methodType->as.function.returnType, selfType);
+    _checkFunctionBody(env, method, methodType->as.function.paramTypes,
+                       methodType->as.function.returnType, selfType);
   }
 
-  typchkTypeEnvSetImplTargetType(env, NULL);
+  typeEnvSetImplTargetType(env, NULL);
 }
 
 bool typchkCheckProgram(AstNode **program, int count) {
   // Diagnostics are per-unit/program
-  typchkResetError();
+  _resetHadTypecheckError();
 
   bool ownsEnv = sessionEnv == NULL;
-  TypeEnv *env = ownsEnv ? typchkTypeEnvCreate() : sessionEnv;
+  TypeEnv *env = ownsEnv ? typeEnvInit() : sessionEnv;
 
   if (ownsEnv)
-    typchkTypeEnvBeginScope(env);
+    typeEnvBeginScope(env);
 
   // Structs
 
@@ -2088,7 +1836,7 @@ bool typchkCheckProgram(AstNode **program, int count) {
         typchkErrorAtToken(&sn->name, "Generic structs aren't supported yet.");
       }
 
-      typchkTypeEnvRegisterStruct(env, sn->name, placeholder);
+      typeEnvRegisterStruct(env, sn->name, placeholder);
     }
   }
 
@@ -2099,7 +1847,7 @@ bool typchkCheckProgram(AstNode **program, int count) {
     if (program[i]->kind == NODE_TRAIT) {
       TraitNode *trait_ = &program[i]->as.trait_;
 
-      Type *existing = typchkTypeEnvLookupTrait(env, trait_->name);
+      Type *existing = typeEnvLookupTrait(env, trait_->name);
 
       if (existing != NULL) {
         if (typeTraitIsBuiltin(existing)) {
@@ -2121,7 +1869,7 @@ bool typchkCheckProgram(AstNode **program, int count) {
       }
 
       Type *placeholder = typeTrait(trait_->name, NULL, 0, NULL, 0);
-      typchkTypeEnvRegisterTrait(env, trait_->name, placeholder);
+      typeEnvRegisterTrait(env, trait_->name, placeholder);
     }
   }
 
@@ -2156,8 +1904,7 @@ bool typchkCheckProgram(AstNode **program, int count) {
     }
 
     for (int i = 0; i < pendingAliasCount; i++) {
-      typchkResolvePendingAlias(env, unresolvedAliasAliases, pendingAliasCount,
-                                i);
+      _resolvePendingAlias(env, unresolvedAliasAliases, pendingAliasCount, i);
     }
 
     free(unresolvedAliasAliases);
@@ -2171,7 +1918,7 @@ bool typchkCheckProgram(AstNode **program, int count) {
   for (int i = 0; i < count; i++) {
     if (program[i]->kind == NODE_TRAIT &&
         !(isDuplicateTrait != NULL && isDuplicateTrait[i])) {
-      typchkResolveTraitMethods(env, program[i]);
+      _resolveTraitMethods(env, program[i]);
     }
   }
 
@@ -2185,19 +1932,19 @@ bool typchkCheckProgram(AstNode **program, int count) {
 
   for (int i = 0; i < count; i++) {
     if (program[i]->kind == NODE_TRAIT) {
-      typchkCheckTraitSupertraitCycle(env, program[i]);
+      _checkTraitSupertraitCycle(env, program[i]);
     }
   }
 
   for (int i = 0; i < count; i++) {
     if (program[i]->kind == NODE_STRUCT) {
-      typchkResolveStructFields(env, program[i]);
+      _resolveStructFields(env, program[i]);
     }
   }
 
   for (int i = 0; i < count; i++) {
     if (program[i]->kind == NODE_IMPL) {
-      typchkRegisterImplMethods(env, program[i]);
+      _registerImplMethods(env, program[i]);
     }
   }
 
@@ -2209,7 +1956,7 @@ bool typchkCheckProgram(AstNode **program, int count) {
 
   for (int i = 0; i < count; i++) {
     if (program[i]->kind == NODE_IMPL) {
-      typchkCheckTraitSupertraitSatisfied(env, program[i]);
+      _checkTraitSupertraitSatisfied(env, program[i]);
     }
   }
 
@@ -2217,7 +1964,7 @@ bool typchkCheckProgram(AstNode **program, int count) {
 
   for (int i = 0; i < count; i++) {
     if (program[i]->kind == NODE_FUNCTION) {
-      typchkRegisterTopLevelFunctionSignature(env, program[i]);
+      _registerTopLevelFunctionSignature(env, program[i]);
     }
   }
 
@@ -2231,15 +1978,15 @@ bool typchkCheckProgram(AstNode **program, int count) {
 
     switch (node->kind) {
     case NODE_FUNCTION:
-      typchkCheckTopLevelFunctionBody(env, node);
+      _checkTopLevelFunctionBody(env, node);
       break;
 
     case NODE_IMPL:
-      checkImplMethodBodies(env, node);
+      _checkImplMethodBodies(env, node);
       break;
 
     default:
-      typchkCheckStmt(env, node);
+      checkStmt(env, node);
       break;
     }
 
@@ -2250,11 +1997,11 @@ bool typchkCheckProgram(AstNode **program, int count) {
 
   // Clean Up
 
-  bool ok = !typchkHadError();
+  bool ok = !_hadTypecheckError();
 
   if (ownsEnv) {
-    typchkTypeEnvEndScope(env);
-    typchkTypeEnvDestroy(env);
+    typeEnvEndScope(env);
+    typeEnvFree(env);
   }
 
   return ok;

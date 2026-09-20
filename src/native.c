@@ -1450,6 +1450,6 @@ void defineAllNativeSignatures(TypeEnv *env) {
     Type *type = typeFunction(paramTypes, signature->paramCount,
                               primitiveType(signature->returnType));
 
-    typchkTypeEnvRegisterFunction(env, nativeNameToken(signature->name), type);
+    typeEnvRegisterFunction(env, nativeNameToken(signature->name), type);
   }
 }

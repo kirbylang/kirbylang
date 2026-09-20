@@ -27,20 +27,20 @@ static FunctionNode *parseFirstFunction(const char *source) {
 }
 
 static void test_check_definite_assignment_direct_read_before_assign(void) {
-  typchkResetError();
+  _resetHadTypecheckError();
   FunctionNode *fn =
       parseFirstFunction("fun f(): f64 { var x: f64; return x; }");
   daaCheckFn(fn);
-  assert(typchkHadError());
-  typchkResetError();
+  assert(_hadTypecheckError());
+  _resetHadTypecheckError();
 }
 
 static void test_check_definite_assignment_direct_sequential_is_fine(void) {
-  typchkResetError();
+  _resetHadTypecheckError();
   FunctionNode *fn =
       parseFirstFunction("fun f(): f64 { var x: f64; x = 5; return x; }");
   daaCheckFn(fn);
-  assert(!typchkHadError());
+  assert(!_hadTypecheckError());
 }
 
 static bool typecheckSource(const char *source) {
@@ -53,19 +53,19 @@ static bool typecheckSource(const char *source) {
 }
 
 static void test_definite_assignment_sequential(void) {
-  typchkResetError();
+  _resetHadTypecheckError();
   bool ok = typecheckSource("fun f(): f64 { var x: f64; x = 5; return x; }");
   assert(ok);
 }
 
 static void test_definite_assignment_read_before_assignment_errors(void) {
-  typchkResetError();
+  _resetHadTypecheckError();
   bool ok = typecheckSource("fun f(): f64 { var x: f64; return x; }");
   assert(!ok);
 }
 
 static void test_definite_assignment_self_reference_errors(void) {
-  typchkResetError();
+  _resetHadTypecheckError();
   // x = x + 1 -- the RHS is evaluated before the assignment takes
   // effect, so this must still be caught as a read-before-assignment.
   bool ok =
@@ -74,14 +74,14 @@ static void test_definite_assignment_self_reference_errors(void) {
 }
 
 static void test_definite_assignment_initialized_var_never_tracked(void) {
-  typchkResetError();
+  _resetHadTypecheckError();
   // Has an initializer -- never pending, safe to read immediately.
   bool ok = typecheckSource("fun f(): f64 { var x: f64 = 1; return x; }");
   assert(ok);
 }
 
 static void test_definite_assignment_if_both_branches_assign(void) {
-  typchkResetError();
+  _resetHadTypecheckError();
   bool ok = typecheckSource("fun f(cond: bool): f64 {\n"
                             "  var x: f64;\n"
                             "  if (cond) { x = 1; } else { x = 2; }\n"
@@ -91,7 +91,7 @@ static void test_definite_assignment_if_both_branches_assign(void) {
 }
 
 static void test_definite_assignment_if_only_one_branch_assigns_errors(void) {
-  typchkResetError();
+  _resetHadTypecheckError();
   bool ok = typecheckSource("fun f(cond: bool): f64 {\n"
                             "  var x: f64;\n"
                             "  if (cond) { x = 1; }\n"
@@ -101,7 +101,7 @@ static void test_definite_assignment_if_only_one_branch_assigns_errors(void) {
 }
 
 static void test_definite_assignment_if_no_else_at_all_errors(void) {
-  typchkResetError();
+  _resetHadTypecheckError();
   bool ok = typecheckSource("fun f(cond: bool): f64 {\n"
                             "  var x: f64;\n"
                             "  if (cond) { x = 1; }\n"
@@ -112,7 +112,7 @@ static void test_definite_assignment_if_no_else_at_all_errors(void) {
 
 static void
 test_definite_assignment_early_return_narrows_to_other_branch(void) {
-  typchkResetError();
+  _resetHadTypecheckError();
   // Only reachable via the else branch, which assigns -- the then
   // branch's early return means it never falls through to `return x;`.
   bool ok = typecheckSource("fun f(cond: bool): f64 {\n"
@@ -124,7 +124,7 @@ test_definite_assignment_early_return_narrows_to_other_branch(void) {
 }
 
 static void test_definite_assignment_while_body_not_definite_after(void) {
-  typchkResetError();
+  _resetHadTypecheckError();
   // The loop might run zero times -- its assignment isn't definite once
   // the loop is done, even though it looks like it "obviously" runs.
   bool ok = typecheckSource("fun f(cond: bool): f64 {\n"
@@ -136,7 +136,7 @@ static void test_definite_assignment_while_body_not_definite_after(void) {
 }
 
 static void test_definite_assignment_for_body_not_definite_after(void) {
-  typchkResetError();
+  _resetHadTypecheckError();
   bool ok = typecheckSource("fun f(): f64 {\n"
                             "  var x: f64;\n"
                             "  for (var i = 0; i < 10; i = i + 1) { x = i; }\n"
@@ -146,7 +146,7 @@ static void test_definite_assignment_for_body_not_definite_after(void) {
 }
 
 static void test_definite_assignment_nested_function_independent_scope(void) {
-  typchkResetError();
+  _resetHadTypecheckError();
   // Intraprocedural by design: an assignment inside a *called* function
   // isn't visible to the caller's own analysis (matches Java/C#/Rust's
   // definite-assignment, none of which trace effects through a call).
@@ -159,7 +159,7 @@ static void test_definite_assignment_nested_function_independent_scope(void) {
 }
 
 static void test_definite_assignment_top_level_uninitialized_var(void) {
-  typchkResetError();
+  _resetHadTypecheckError();
   // A top-level uninitialized var, assigned and read at the top level
   // (not inside any function) -- the ordinary case, no cross-function
   // reasoning involved.
@@ -170,14 +170,14 @@ static void test_definite_assignment_top_level_uninitialized_var(void) {
 }
 
 static void test_definite_assignment_top_level_read_before_assign_errors(void) {
-  typchkResetError();
+  _resetHadTypecheckError();
   bool ok = typecheckSource("var x: f64;\n"
                             "print x;\n");
   assert(!ok);
 }
 
 static void test_definite_assignment_cross_function_pattern_is_rejected(void) {
-  typchkResetError();
+  _resetHadTypecheckError();
   // The exact shape upvalue_global.krb uses: a top-level uninitialized
   // var, assigned *inside* a function body, read at the top level after
   // that function is called. A properly-scoped intraprocedural analysis

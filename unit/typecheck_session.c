@@ -33,20 +33,20 @@ static bool checkUnit(const char *source) {
 }
 
 static void test_function_signatures_survive_the_unit_that_declared_them(void) {
-  typchkResetError();
+  _resetHadTypecheckError();
   typchkSessionBegin();
 
   assert(checkUnit("fun double(x: f64): f64 = x * 2;"));
 
-  typchkResetError();
+  _resetHadTypecheckError();
   assert(!checkUnit("print double(1, 2);"));
 
   typchkSessionEnd();
-  typchkResetError();
+  _resetHadTypecheckError();
 }
 
 static void test_struct_types_survive_the_unit_that_declared_them(void) {
-  typchkResetError();
+  _resetHadTypecheckError();
   typchkSessionBegin();
 
   assert(checkUnit("struct Point {\n"
@@ -58,15 +58,15 @@ static void test_struct_types_survive_the_unit_that_declared_them(void) {
 
   assert(checkUnit("let p: Point = Point.new(1);\nprint p.x;"));
 
-  typchkResetError();
+  _resetHadTypecheckError();
   assert(!checkUnit("print Point.new(1).nope;"));
 
   typchkSessionEnd();
-  typchkResetError();
+  _resetHadTypecheckError();
 }
 
 static void test_an_error_in_one_unit_doesnt_fail_the_next(void) {
-  typchkResetError();
+  _resetHadTypecheckError();
   typchkSessionBegin();
 
   assert(!checkUnit("let x: f64 = \"no\";"));
@@ -76,7 +76,7 @@ static void test_an_error_in_one_unit_doesnt_fail_the_next(void) {
 }
 
 static void test_units_are_independent_without_a_session(void) {
-  typchkResetError();
+  _resetHadTypecheckError();
 
   assert(checkUnit("fun double(x: f64): f64 = x * 2;"));
 
@@ -84,7 +84,7 @@ static void test_units_are_independent_without_a_session(void) {
   // through to the unresolved-callee path and stays unchecked.
   assert(checkUnit("print double(1, 2);"));
 
-  typchkResetError();
+  _resetHadTypecheckError();
 }
 
 int main(void) {

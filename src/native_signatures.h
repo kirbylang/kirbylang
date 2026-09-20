@@ -1,11 +1,11 @@
 #ifndef kirby_native_signatures_h
 #define kirby_native_signatures_h
 
-// This file is seperate from native.h to avoid typecheck.h pulling in files
+// This file is seperate from native.h to avoid typenv.h pulling in files
 // like gc.h, vm.h
 
-#include "typecheck.h"
 #include "types.h"
+#include "typenv.h"
 
 #define NATIVE_SIGNATURE_MAX_PARAMS 2
 

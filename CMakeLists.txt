@@ -70,6 +70,7 @@ set(KIRBY_SOURCES
     src/token_stream.c
     src/token.c
     src/typecheck.c
+    src/typenv.c
     src/types.c
     src/value.c
     src/vm.c
