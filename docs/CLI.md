@@ -3,34 +3,34 @@
 ## Language Version
 
 ```sh
-kirby -v
-kirby --version
+krb -v
+krb --version
 ```
 
 ## REPL
 
 ```sh
-kirby -r
-kirby --repl
+krb -r
+krb --repl
 ```
 
 ## Run File
 
 ```sh
-kirby -f path/to/file.krb
-kirby --file path/to/file.krb
+krb -f path/to/file.krb
+krb --file path/to/file.krb
 ```
 
 ## Run Code
 
 ```sh
-kirby -c 'print "Hello, World!";'
-kirby --code 'print "Hello, World!";'
+krb -c 'print "Hello, World!";'
+krb --code 'print "Hello, World!";'
 ```
 
 ## Help
 
 ```sh
-kirby -h
-kirby --help
+krb -h
+krb --help
 ```

@@ -42,11 +42,12 @@ print builder.toString();
 
 ## Documentation
 
-- [Proposals](./docs/PROPOSALS.md)
-- [Types](./docs/TYPES.md)
-- [CLI](./docs/CLI.md)
-- [Development](./docs/DEVELOPMENT.md)
-- [Change Log](./docs/CHANGELOG.md)
+- [Documentation](./wiki/README.md)
+  - [Development](./docs/DEVELOPMENT.md)
+  - [Change Log](./docs/CHANGELOG.md)
+  - [Proposals](./docs/PROPOSALS.md)
+  - [Types](./docs/TYPES.md)
+  - [CLI](./docs/CLI.md)
 - [Tests](./tests/README.md)
 - [Scripts](./scripts/README.md)
 - [Important Files](./docs/DEVELOPMENT.md#important-files)
