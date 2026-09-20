@@ -52,7 +52,7 @@ graph LR
 
 ## Reference
 
-- [Bytecode](./OPCODES.md)
+- [Bytecode](../wiki/pages/docs/compiler/Opcodes.md)
 
 ## Important Files
 
