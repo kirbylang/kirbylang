@@ -101,23 +101,23 @@ static Token makeToken(const char *text) {
 }
 
 static void test_signed_natives_resolve_in_a_new_env(void) {
-  TypeEnv *env = typchkTypeEnvCreate();
+  TypeEnv *env = typeEnvInit();
 
-  Type *ceil = typchkTypeEnvLookupFunction(env, makeToken("@ceil"));
+  Type *ceil = typeEnvLookupFunction(env, makeToken("@ceil"));
   assert(ceil != NULL);
   assert(ceil->kind == TYPE_FN);
   assert(ceil->as.function.paramCount == 1);
   assert(ceil->as.function.paramTypes[0] == typeF64());
   assert(ceil->as.function.returnType == typeF64());
 
-  Type *clock = typchkTypeEnvLookupFunction(env, makeToken("@clock"));
+  Type *clock = typeEnvLookupFunction(env, makeToken("@clock"));
   assert(clock != NULL);
   assert(clock->as.function.paramCount == 0);
   assert(clock->as.function.returnType == typeF64());
 
-  assert(typchkTypeEnvLookupFunction(env, makeToken("@len")) == NULL);
+  assert(typeEnvLookupFunction(env, makeToken("@len")) == NULL);
 
-  typchkTypeEnvDestroy(env);
+  typeEnvFree(env);
 }
 
 // A user function named "ceil" (no '@') is a completely different global
@@ -125,21 +125,21 @@ static void test_signed_natives_resolve_in_a_new_env(void) {
 // declares, so the two can never collide. Registering one leaves the
 // other's type untouched.
 static void test_a_user_function_does_not_collide_with_a_native(void) {
-  TypeEnv *env = typchkTypeEnvCreate();
+  TypeEnv *env = typeEnvInit();
 
   Type *userCeil = typeFunction(NULL, 0, typeString());
-  typchkTypeEnvRegisterFunction(env, makeToken("ceil"), userCeil);
+  typeEnvRegisterFunction(env, makeToken("ceil"), userCeil);
 
-  assert(typchkTypeEnvLookupFunction(env, makeToken("ceil")) == userCeil);
+  assert(typeEnvLookupFunction(env, makeToken("ceil")) == userCeil);
 
-  Type *nativeCeil = typchkTypeEnvLookupFunction(env, makeToken("@ceil"));
+  Type *nativeCeil = typeEnvLookupFunction(env, makeToken("@ceil"));
   assert(nativeCeil != NULL);
   assert(nativeCeil != userCeil);
   assert(nativeCeil->as.function.paramCount == 1);
   assert(nativeCeil->as.function.paramTypes[0] == typeF64());
   assert(nativeCeil->as.function.returnType == typeF64());
 
-  typchkTypeEnvDestroy(env);
+  typeEnvFree(env);
 }
 
 int main(void) {

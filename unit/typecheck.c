@@ -34,54 +34,53 @@ static AstNode *parseFirstVarType(const char *source) {
 }
 
 static void test_scope_declare_and_lookup(void) {
-  TypeEnv *env = typchkTypeEnvCreate();
-  typchkTypeEnvBeginScope(env);
+  TypeEnv *env = typeEnvInit();
+  typeEnvBeginScope(env);
 
-  typchkTypeEnvDeclare(env, makeToken("x"), typeF64());
-  assert(typchkTypeEnvLookup(env, makeToken("x")) == typeF64());
-  assert(typchkTypeEnvLookup(env, makeToken("missing")) == NULL);
+  typeEnvDeclare(env, makeToken("x"), typeF64());
+  assert(typeEnvLookupName(env, makeToken("x")) == typeF64());
+  assert(typeEnvLookupName(env, makeToken("missing")) == NULL);
 
-  typchkTypeEnvEndScope(env);
-  typchkTypeEnvDestroy(env);
+  typeEnvEndScope(env);
+  typeEnvFree(env);
 }
 
 static void test_scope_shadowing(void) {
-  TypeEnv *env = typchkTypeEnvCreate();
-  typchkTypeEnvBeginScope(env); // outer
-  typchkTypeEnvDeclare(env, makeToken("x"), typeF64());
+  TypeEnv *env = typeEnvInit();
+  typeEnvBeginScope(env); // outer
+  typeEnvDeclare(env, makeToken("x"), typeF64());
 
-  typchkTypeEnvBeginScope(env); // inner
-  typchkTypeEnvDeclare(env, makeToken("x"), typeString());
-  assert(typchkTypeEnvLookup(env, makeToken("x")) ==
-         typeString()); // inner wins
-  typchkTypeEnvEndScope(env);
+  typeEnvBeginScope(env); // inner
+  typeEnvDeclare(env, makeToken("x"), typeString());
+  assert(typeEnvLookupName(env, makeToken("x")) == typeString()); // inner wins
+  typeEnvEndScope(env);
 
   // Back in the outer scope -- inner's shadow is gone.
-  assert(typchkTypeEnvLookup(env, makeToken("x")) == typeF64());
+  assert(typeEnvLookupName(env, makeToken("x")) == typeF64());
 
-  typchkTypeEnvEndScope(env);
-  typchkTypeEnvDestroy(env);
+  typeEnvEndScope(env);
+  typeEnvFree(env);
 }
 
 static void test_struct_and_function_registries(void) {
-  TypeEnv *env = typchkTypeEnvCreate();
+  TypeEnv *env = typeEnvInit();
 
   Type *point = typeStruct(makeToken("Point"), NULL, 0, NULL, 0, NULL, 0);
-  typchkTypeEnvRegisterStruct(env, makeToken("Point"), point);
-  assert(typchkTypeEnvLookupStruct(env, makeToken("Point")) == point);
-  assert(typchkTypeEnvLookupStruct(env, makeToken("Missing")) == NULL);
+  typeEnvRegisterStruct(env, makeToken("Point"), point);
+  assert(typeEnvLookupStruct(env, makeToken("Point")) == point);
+  assert(typeEnvLookupStruct(env, makeToken("Missing")) == NULL);
 
   Type *addParams[] = {typeF64(), typeF64()};
   Type *add = typeFunction(addParams, 2, typeF64());
-  typchkTypeEnvRegisterFunction(env, makeToken("add"), add);
-  assert(typchkTypeEnvLookupFunction(env, makeToken("add")) == add);
-  assert(typchkTypeEnvLookupFunction(env, makeToken("missing")) == NULL);
+  typeEnvRegisterFunction(env, makeToken("add"), add);
+  assert(typeEnvLookupFunction(env, makeToken("add")) == add);
+  assert(typeEnvLookupFunction(env, makeToken("missing")) == NULL);
 
-  typchkTypeEnvDestroy(env);
+  typeEnvFree(env);
 }
 
 static void test_resolve_primitives(void) {
-  TypeEnv *env = typchkTypeEnvCreate();
+  TypeEnv *env = typeEnvInit();
 
   assert(typchkResolveType(env, parseFirstVarType("var x: unit;")) ==
          typeUnit());
@@ -91,46 +90,46 @@ static void test_resolve_primitives(void) {
          typeString());
   assert(typchkResolveType(env, parseFirstVarType("var x: f64;")) == typeF64());
 
-  typchkTypeEnvDestroy(env);
+  typeEnvFree(env);
 }
 
 static void test_resolve_registered_struct(void) {
-  TypeEnv *env = typchkTypeEnvCreate();
+  TypeEnv *env = typeEnvInit();
   Type *point = typeStruct(makeToken("Point"), NULL, 0, NULL, 0, NULL, 0);
-  typchkTypeEnvRegisterStruct(env, makeToken("Point"), point);
+  typeEnvRegisterStruct(env, makeToken("Point"), point);
 
   assert(typchkResolveType(env, parseFirstVarType("var x: Point;")) == point);
 
-  typchkTypeEnvDestroy(env);
+  typeEnvFree(env);
 }
 
 static void test_resolve_unknown_name_errors(void) {
-  TypeEnv *env = typchkTypeEnvCreate();
-  typchkResetError();
+  TypeEnv *env = typeEnvInit();
+  _resetHadTypecheckError();
 
   Type *result = typchkResolveType(env, parseFirstVarType("var x: Bogus;"));
   assert(result == NULL);
-  assert(typchkHadError());
+  assert(_hadTypecheckError());
 
-  typchkResetError();
-  typchkTypeEnvDestroy(env);
+  _resetHadTypecheckError();
+  typeEnvFree(env);
 }
 
 static void test_resolve_generic_type_errors(void) {
-  TypeEnv *env = typchkTypeEnvCreate();
-  typchkResetError();
+  TypeEnv *env = typeEnvInit();
+  _resetHadTypecheckError();
 
   Type *result =
       typchkResolveType(env, parseFirstVarType("var x: Array[f64];"));
   assert(result == NULL);
-  assert(typchkHadError());
+  assert(_hadTypecheckError());
 
-  typchkResetError();
-  typchkTypeEnvDestroy(env);
+  _resetHadTypecheckError();
+  typeEnvFree(env);
 }
 
 static void test_resolve_function_type(void) {
-  TypeEnv *env = typchkTypeEnvCreate();
+  TypeEnv *env = typeEnvInit();
 
   Type *result = typchkResolveType(
       env, parseFirstVarType("var x: fun (f64, f64) => f64;"));
@@ -152,29 +151,29 @@ static void test_resolve_function_type(void) {
   assert(innerParam->as.function.returnType == typeBool());
   assert(nested->as.function.returnType == typeUnit());
 
-  typchkTypeEnvDestroy(env);
+  typeEnvFree(env);
 }
 
 static void test_resolve_function_type_propagates_inner_error(void) {
-  TypeEnv *env = typchkTypeEnvCreate();
-  typchkResetError();
+  TypeEnv *env = typeEnvInit();
+  _resetHadTypecheckError();
 
   // The unknown type is buried inside a function-type parameter --
   // typchkResolveType() must still catch it, not just check the top level.
   Type *result =
       typchkResolveType(env, parseFirstVarType("var x: fun (Bogus) => unit;"));
   assert(result == NULL);
-  assert(typchkHadError());
+  assert(_hadTypecheckError());
 
-  typchkResetError();
-  typchkTypeEnvDestroy(env);
+  _resetHadTypecheckError();
+  typeEnvFree(env);
 }
 
-// Parses `source` and runs typchkCheckStmt() over every top-level declaration
+// Parses `source` and runs checkStmt() over every top-level declaration
 // in order -- doesn't populate struct/function registries the way
-// typchkCheckProgram() does (see typchkCheckStmt's NODE_STRUCT/NODE_IMPL case);
+// typchkCheckProgram() does (see checkStmt's NODE_STRUCT/NODE_IMPL case);
 // tests below that need a struct register it directly via
-// typchkTypeEnvRegisterStruct().
+// typeEnvRegisterStruct().
 static TypeEnv *checkProgram(const char *source) {
   int outCount = 0;
   bool hadParseError = false;
@@ -182,183 +181,183 @@ static TypeEnv *checkProgram(const char *source) {
   AstNode **ast = parse(source, &outCount, &hadParseError, &endLine);
   assert(!hadParseError);
 
-  TypeEnv *env = typchkTypeEnvCreate();
-  typchkTypeEnvBeginScope(env);
+  TypeEnv *env = typeEnvInit();
+  typeEnvBeginScope(env);
   for (int i = 0; i < outCount; i++) {
-    typchkCheckStmt(env, ast[i]);
+    checkStmt(env, ast[i]);
   }
   return env;
 }
 
 static void test_literals(void) {
-  typchkResetError();
+  _resetHadTypecheckError();
   TypeEnv *env = checkProgram("var a = 5; var b = \"hi\"; var c = true; "
                               "var d = nil;");
-  assert(!typchkHadError());
-  assert(typchkTypeEnvLookup(env, makeToken("a")) == typeF64());
-  assert(typchkTypeEnvLookup(env, makeToken("b")) == typeString());
-  assert(typchkTypeEnvLookup(env, makeToken("c")) == typeBool());
-  assert(typchkTypeEnvLookup(env, makeToken("d")) == typeUnit());
-  typchkTypeEnvDestroy(env);
+  assert(!_hadTypecheckError());
+  assert(typeEnvLookupName(env, makeToken("a")) == typeF64());
+  assert(typeEnvLookupName(env, makeToken("b")) == typeString());
+  assert(typeEnvLookupName(env, makeToken("c")) == typeBool());
+  assert(typeEnvLookupName(env, makeToken("d")) == typeUnit());
+  typeEnvFree(env);
 }
 
 static void test_binary_arithmetic_and_concat(void) {
-  typchkResetError();
+  _resetHadTypecheckError();
   TypeEnv *env = checkProgram(
       "var sum = 1 + 2; var product = 3 * 4; var greeting = \"a\" + \"b\";");
-  assert(!typchkHadError());
-  assert(typchkTypeEnvLookup(env, makeToken("sum")) == typeF64());
-  assert(typchkTypeEnvLookup(env, makeToken("product")) == typeF64());
-  assert(typchkTypeEnvLookup(env, makeToken("greeting")) == typeString());
-  typchkTypeEnvDestroy(env);
+  assert(!_hadTypecheckError());
+  assert(typeEnvLookupName(env, makeToken("sum")) == typeF64());
+  assert(typeEnvLookupName(env, makeToken("product")) == typeF64());
+  assert(typeEnvLookupName(env, makeToken("greeting")) == typeString());
+  typeEnvFree(env);
 }
 
 static void test_binary_plus_mismatch_errors(void) {
-  typchkResetError();
+  _resetHadTypecheckError();
   TypeEnv *env = checkProgram("var x = 1 + \"two\";");
-  assert(typchkHadError());
-  typchkTypeEnvDestroy(env);
-  typchkResetError();
+  assert(_hadTypecheckError());
+  typeEnvFree(env);
+  _resetHadTypecheckError();
 }
 
 static void test_binary_arithmetic_requires_f64(void) {
-  typchkResetError();
+  _resetHadTypecheckError();
   TypeEnv *env = checkProgram("var x = \"a\" - \"b\";");
-  assert(typchkHadError());
-  typchkTypeEnvDestroy(env);
-  typchkResetError();
+  assert(_hadTypecheckError());
+  typeEnvFree(env);
+  _resetHadTypecheckError();
 }
 
 static void test_comparisons(void) {
-  typchkResetError();
+  _resetHadTypecheckError();
   TypeEnv *env =
       checkProgram("var a = 1 < 2; var b = 1 == 1; var c = true == false;");
-  assert(!typchkHadError());
-  assert(typchkTypeEnvLookup(env, makeToken("a")) == typeBool());
-  assert(typchkTypeEnvLookup(env, makeToken("b")) == typeBool());
-  assert(typchkTypeEnvLookup(env, makeToken("c")) == typeBool());
-  typchkTypeEnvDestroy(env);
+  assert(!_hadTypecheckError());
+  assert(typeEnvLookupName(env, makeToken("a")) == typeBool());
+  assert(typeEnvLookupName(env, makeToken("b")) == typeBool());
+  assert(typeEnvLookupName(env, makeToken("c")) == typeBool());
+  typeEnvFree(env);
 }
 
 static void test_equality_requires_same_type(void) {
-  typchkResetError();
+  _resetHadTypecheckError();
   TypeEnv *env = checkProgram("var x = 1 == \"one\";");
-  assert(typchkHadError());
-  typchkTypeEnvDestroy(env);
-  typchkResetError();
+  assert(_hadTypecheckError());
+  typeEnvFree(env);
+  _resetHadTypecheckError();
 }
 
 static void test_ordering_requires_f64(void) {
-  typchkResetError();
+  _resetHadTypecheckError();
   TypeEnv *env = checkProgram("var x = \"a\" < \"b\";");
-  assert(typchkHadError());
-  typchkTypeEnvDestroy(env);
-  typchkResetError();
+  assert(_hadTypecheckError());
+  typeEnvFree(env);
+  _resetHadTypecheckError();
 }
 
 static void test_unary(void) {
-  typchkResetError();
+  _resetHadTypecheckError();
   TypeEnv *env =
       checkProgram("var a = !5; var b = !\"\"; var c = !!5; var d = -5;");
-  assert(!typchkHadError());
-  assert(typchkTypeEnvLookup(env, makeToken("a")) == typeBool());
-  assert(typchkTypeEnvLookup(env, makeToken("b")) == typeBool());
-  assert(typchkTypeEnvLookup(env, makeToken("c")) == typeBool());
-  assert(typchkTypeEnvLookup(env, makeToken("d")) == typeF64());
-  typchkTypeEnvDestroy(env);
+  assert(!_hadTypecheckError());
+  assert(typeEnvLookupName(env, makeToken("a")) == typeBool());
+  assert(typeEnvLookupName(env, makeToken("b")) == typeBool());
+  assert(typeEnvLookupName(env, makeToken("c")) == typeBool());
+  assert(typeEnvLookupName(env, makeToken("d")) == typeF64());
+  typeEnvFree(env);
 }
 
 static void test_negate_requires_f64(void) {
-  typchkResetError();
+  _resetHadTypecheckError();
   TypeEnv *env = checkProgram("var x = -\"a\";");
-  assert(typchkHadError());
-  typchkTypeEnvDestroy(env);
-  typchkResetError();
+  assert(_hadTypecheckError());
+  typeEnvFree(env);
+  _resetHadTypecheckError();
 }
 
 static void test_and_or_produce_bool(void) {
-  typchkResetError();
+  _resetHadTypecheckError();
   TypeEnv *env = checkProgram("var flag = true or false;");
-  assert(!typchkHadError());
-  assert(typchkTypeEnvLookup(env, makeToken("flag")) == typeBool());
-  typchkTypeEnvDestroy(env);
+  assert(!_hadTypecheckError());
+  assert(typeEnvLookupName(env, makeToken("flag")) == typeBool());
+  typeEnvFree(env);
 }
 
 static void test_and_or_non_bool_operand_errors(void) {
-  typchkResetError();
+  _resetHadTypecheckError();
   // Only nil and false are falsey, so this yields "" rather than the
   // default it looks like it picks. `??` is the operator for that.
   TypeEnv *env = checkProgram("var name = \"\" or \"default\";");
-  assert(typchkHadError());
-  typchkTypeEnvDestroy(env);
-  typchkResetError();
+  assert(_hadTypecheckError());
+  typeEnvFree(env);
+  _resetHadTypecheckError();
 }
 
 static void test_and_or_mismatched_type_errors(void) {
-  typchkResetError();
+  _resetHadTypecheckError();
   TypeEnv *env = checkProgram("var x = true and \"oops\";");
-  assert(typchkHadError());
-  typchkTypeEnvDestroy(env);
-  typchkResetError();
+  assert(_hadTypecheckError());
+  typeEnvFree(env);
+  _resetHadTypecheckError();
 }
 
 static void test_nullish_result_comes_from_fallback(void) {
-  typchkResetError();
+  _resetHadTypecheckError();
   TypeEnv *env = checkProgram("var x = nil ?? \"fallback\";");
-  assert(!typchkHadError());
-  assert(typchkTypeEnvLookup(env, makeToken("x")) == typeString());
-  typchkTypeEnvDestroy(env);
+  assert(!_hadTypecheckError());
+  assert(typeEnvLookupName(env, makeToken("x")) == typeString());
+  typeEnvFree(env);
 }
 
 static void test_function_call_checked(void) {
-  typchkResetError();
+  _resetHadTypecheckError();
   TypeEnv *env =
       checkProgram("fun add(a: f64, b: f64): f64 = a + b; var x = add(1, 2);");
-  assert(!typchkHadError());
-  assert(typchkTypeEnvLookup(env, makeToken("x")) == typeF64());
-  typchkTypeEnvDestroy(env);
+  assert(!_hadTypecheckError());
+  assert(typeEnvLookupName(env, makeToken("x")) == typeF64());
+  typeEnvFree(env);
 }
 
 static void test_function_call_wrong_arg_type_errors(void) {
-  typchkResetError();
+  _resetHadTypecheckError();
   TypeEnv *env = checkProgram("fun add(a: f64, b: f64): f64 = a + b; var x = "
                               "add(1, \"two\");");
-  assert(typchkHadError());
-  typchkTypeEnvDestroy(env);
-  typchkResetError();
+  assert(_hadTypecheckError());
+  typeEnvFree(env);
+  _resetHadTypecheckError();
 }
 
 static void test_function_call_wrong_arity_errors(void) {
-  typchkResetError();
+  _resetHadTypecheckError();
   TypeEnv *env =
       checkProgram("fun add(a: f64, b: f64): f64 = a + b; var x = add(1);");
-  assert(typchkHadError());
-  typchkTypeEnvDestroy(env);
-  typchkResetError();
+  assert(_hadTypecheckError());
+  typeEnvFree(env);
+  _resetHadTypecheckError();
 }
 
 static void test_native_call_with_a_signature_is_checked(void) {
-  typchkResetError();
+  _resetHadTypecheckError();
   TypeEnv *env = checkProgram("var x = @clock();");
-  assert(!typchkHadError());
-  assert(typchkTypeEnvLookup(env, makeToken("x")) == typeF64());
-  typchkTypeEnvDestroy(env);
+  assert(!_hadTypecheckError());
+  assert(typeEnvLookupName(env, makeToken("x")) == typeF64());
+  typeEnvFree(env);
 }
 
 static void test_native_call_without_a_signature_is_unchecked(void) {
-  typchkResetError();
+  _resetHadTypecheckError();
   // `@len` needs generics, so it has no signature -- the call is presumed
   // native, not an error, and infers as "no opinion."
   TypeEnv *env = checkProgram("var x = @len(\"abc\");");
-  assert(!typchkHadError());
-  assert(typchkTypeEnvLookup(env, makeToken("x")) == NULL);
-  typchkTypeEnvDestroy(env);
+  assert(!_hadTypecheckError());
+  assert(typeEnvLookupName(env, makeToken("x")) == NULL);
+  typeEnvFree(env);
 }
 
 static void test_struct_instance_field_and_method_access(void) {
-  typchkResetError();
-  TypeEnv *env = typchkTypeEnvCreate();
-  typchkTypeEnvBeginScope(env);
+  _resetHadTypecheckError();
+  TypeEnv *env = typeEnvInit();
+  typeEnvBeginScope(env);
 
   UninternedTypeMember fields[] = {{makeToken("balance"), typeF64()}};
   Type *f64ToF64Params[] = {typeF64()};
@@ -366,8 +365,8 @@ static void test_struct_instance_field_and_method_access(void) {
   Type *account = typeStruct(makeToken("Account"), fields, 1, NULL, 0, NULL, 0);
   typeStructAddInstanceMethod(account, makeToken("deposit"), depositType,
                               /*isPublic=*/true);
-  typchkTypeEnvRegisterStruct(env, makeToken("Account"), account);
-  typchkTypeEnvDeclare(env, makeToken("a"), account);
+  typeEnvRegisterStruct(env, makeToken("Account"), account);
+  typeEnvDeclare(env, makeToken("a"), account);
 
   int outCount = 0;
   bool hadParseError = false;
@@ -376,19 +375,19 @@ static void test_struct_instance_field_and_method_access(void) {
                         &outCount, &hadParseError, &endLine);
   assert(!hadParseError);
   for (int i = 0; i < outCount; i++)
-    typchkCheckStmt(env, ast[i]);
+    checkStmt(env, ast[i]);
 
-  assert(!typchkHadError());
-  assert(typchkTypeEnvLookup(env, makeToken("balance")) == typeF64());
-  assert(typchkTypeEnvLookup(env, makeToken("result")) == typeF64());
+  assert(!_hadTypecheckError());
+  assert(typeEnvLookupName(env, makeToken("balance")) == typeF64());
+  assert(typeEnvLookupName(env, makeToken("result")) == typeF64());
 
-  typchkTypeEnvDestroy(env);
+  typeEnvFree(env);
 }
 
 static void test_struct_static_method_access(void) {
-  typchkResetError();
-  TypeEnv *env = typchkTypeEnvCreate();
-  typchkTypeEnvBeginScope(env);
+  _resetHadTypecheckError();
+  TypeEnv *env = typeEnvInit();
+  typeEnvBeginScope(env);
 
   Type *pointType = typeStruct(makeToken("Point"), NULL, 0, NULL, 0, NULL, 0);
   Type *newParams[] = {typeF64(), typeF64()};
@@ -397,7 +396,7 @@ static void test_struct_static_method_access(void) {
   typeStructAddStaticMethod(point, makeToken("new"), newType,
                             /*isPublic=*/true);
 
-  typchkTypeEnvRegisterStruct(env, makeToken("Point"), point);
+  typeEnvRegisterStruct(env, makeToken("Point"), point);
 
   int outCount = 0;
   bool hadParseError = false;
@@ -406,20 +405,20 @@ static void test_struct_static_method_access(void) {
       parse("var p = Point.new(1, 2);", &outCount, &hadParseError, &endLine);
   assert(!hadParseError);
   for (int i = 0; i < outCount; i++)
-    typchkCheckStmt(env, ast[i]);
+    checkStmt(env, ast[i]);
 
-  assert(!typchkHadError());
+  assert(!_hadTypecheckError());
   // p's type is a *different* Type* instance than `point` (nominal
   // equality, not pointer identity) -- typesEqual is the right check.
-  assert(typesEqual(typchkTypeEnvLookup(env, makeToken("p")), point));
+  assert(typesEqual(typeEnvLookupName(env, makeToken("p")), point));
 
-  typchkTypeEnvDestroy(env);
+  typeEnvFree(env);
 }
 
 static void test_local_variable_shadows_struct_name_for_get(void) {
-  typchkResetError();
-  TypeEnv *env = typchkTypeEnvCreate();
-  typchkTypeEnvBeginScope(env);
+  _resetHadTypecheckError();
+  TypeEnv *env = typeEnvInit();
+  typeEnvBeginScope(env);
 
   // Register a real struct "Point" with a static method "origin" -- then
   // declare a *local variable*, also named "Point", holding an unrelated
@@ -432,13 +431,13 @@ static void test_local_variable_shadows_struct_name_for_get(void) {
   UninternedTypeMember staticMethods[] = {{makeToken("origin"), originType}};
   Type *pointStructType =
       typeStruct(makeToken("Point"), NULL, 0, staticMethods, 1, NULL, 0);
-  typchkTypeEnvRegisterStruct(env, makeToken("Point"), pointStructType);
+  typeEnvRegisterStruct(env, makeToken("Point"), pointStructType);
 
   UninternedTypeMember otherFields[] = {{makeToken("x"), typeF64()}};
   Type *otherType =
       typeStruct(makeToken("Other"), otherFields, 1, NULL, 0, NULL, 0);
-  typchkTypeEnvDeclare(env, makeToken("Point"),
-                       otherType); // shadows the struct
+  typeEnvDeclare(env, makeToken("Point"),
+                 otherType); // shadows the struct
 
   int outCount = 0;
   bool hadParseError = false;
@@ -446,20 +445,20 @@ static void test_local_variable_shadows_struct_name_for_get(void) {
   AstNode **ast =
       parse("var result = Point.x;", &outCount, &hadParseError, &endLine);
   assert(!hadParseError);
-  typchkCheckStmt(env, ast[0]);
+  checkStmt(env, ast[0]);
 
-  assert(!typchkHadError());
-  assert(typchkTypeEnvLookup(env, makeToken("result")) == typeF64());
+  assert(!_hadTypecheckError());
+  assert(typeEnvLookupName(env, makeToken("result")) == typeF64());
 
-  typchkTypeEnvDestroy(env);
+  typeEnvFree(env);
 }
 
 static void test_struct_unknown_field_errors(void) {
-  typchkResetError();
-  TypeEnv *env = typchkTypeEnvCreate();
-  typchkTypeEnvBeginScope(env);
+  _resetHadTypecheckError();
+  TypeEnv *env = typeEnvInit();
+  typeEnvBeginScope(env);
   Type *point = typeStruct(makeToken("Point"), NULL, 0, NULL, 0, NULL, 0);
-  typchkTypeEnvDeclare(env, makeToken("p"), point);
+  typeEnvDeclare(env, makeToken("p"), point);
 
   int outCount = 0;
   bool hadParseError = false;
@@ -467,21 +466,21 @@ static void test_struct_unknown_field_errors(void) {
   AstNode **ast =
       parse("var x = p.bogus;", &outCount, &hadParseError, &endLine);
   assert(!hadParseError);
-  typchkCheckStmt(env, ast[0]);
+  checkStmt(env, ast[0]);
 
-  assert(typchkHadError());
-  typchkTypeEnvDestroy(env);
-  typchkResetError();
+  assert(_hadTypecheckError());
+  typeEnvFree(env);
+  _resetHadTypecheckError();
 }
 
 static void test_struct_init(void) {
-  typchkResetError();
-  TypeEnv *env = typchkTypeEnvCreate();
-  typchkTypeEnvBeginScope(env);
+  _resetHadTypecheckError();
+  TypeEnv *env = typeEnvInit();
+  typeEnvBeginScope(env);
   UninternedTypeMember fields[] = {{makeToken("x"), typeF64()},
                                    {makeToken("y"), typeF64()}};
   Type *point = typeStruct(makeToken("Point"), fields, 2, NULL, 0, NULL, 0);
-  typchkTypeEnvRegisterStruct(env, makeToken("Point"), point);
+  typeEnvRegisterStruct(env, makeToken("Point"), point);
 
   int outCount = 0;
   bool hadParseError = false;
@@ -489,20 +488,20 @@ static void test_struct_init(void) {
   AstNode **ast = parse("var p = Point { x: 1, y: 2 };", &outCount,
                         &hadParseError, &endLine);
   assert(!hadParseError);
-  typchkCheckStmt(env, ast[0]);
+  checkStmt(env, ast[0]);
 
-  assert(!typchkHadError());
-  assert(typesEqual(typchkTypeEnvLookup(env, makeToken("p")), point));
-  typchkTypeEnvDestroy(env);
+  assert(!_hadTypecheckError());
+  assert(typesEqual(typeEnvLookupName(env, makeToken("p")), point));
+  typeEnvFree(env);
 }
 
 static void test_struct_init_wrong_field_type_errors(void) {
-  typchkResetError();
-  TypeEnv *env = typchkTypeEnvCreate();
-  typchkTypeEnvBeginScope(env);
+  _resetHadTypecheckError();
+  TypeEnv *env = typeEnvInit();
+  typeEnvBeginScope(env);
   UninternedTypeMember fields[] = {{makeToken("x"), typeF64()}};
   Type *point = typeStruct(makeToken("Point"), fields, 1, NULL, 0, NULL, 0);
-  typchkTypeEnvRegisterStruct(env, makeToken("Point"), point);
+  typeEnvRegisterStruct(env, makeToken("Point"), point);
 
   int outCount = 0;
   bool hadParseError = false;
@@ -510,254 +509,254 @@ static void test_struct_init_wrong_field_type_errors(void) {
   AstNode **ast = parse("var p = Point { x: \"wrong\" };", &outCount,
                         &hadParseError, &endLine);
   assert(!hadParseError);
-  typchkCheckStmt(env, ast[0]);
+  checkStmt(env, ast[0]);
 
-  assert(typchkHadError());
-  typchkTypeEnvDestroy(env);
-  typchkResetError();
+  assert(_hadTypecheckError());
+  typeEnvFree(env);
+  _resetHadTypecheckError();
 }
 
 static void test_self_type(void) {
-  typchkResetError();
-  TypeEnv *env = typchkTypeEnvCreate();
-  typchkTypeEnvBeginScope(env);
+  _resetHadTypecheckError();
+  TypeEnv *env = typeEnvInit();
+  typeEnvBeginScope(env);
   Type *point = typeStruct(makeToken("Point"), NULL, 0, NULL, 0, NULL, 0);
-  // Sets self-type directly to test typchkInferSelf() in isolation, rather
-  // than going through a whole method body via typchkCheckFunctionBody().
-  typchkTypeEnvSetSelfType(env, point);
+  // Sets self-type directly to test _inferSelf() in isolation, rather
+  // than going through a whole method body via _checkFunctionBody().
+  typeEnvSetSelfType(env, point);
 
   int outCount = 0;
   bool hadParseError = false;
   int endLine = 0;
   AstNode **ast = parse("var x = self;", &outCount, &hadParseError, &endLine);
   assert(!hadParseError);
-  typchkCheckStmt(env, ast[0]);
+  checkStmt(env, ast[0]);
 
-  assert(!typchkHadError());
-  assert(typchkTypeEnvLookup(env, makeToken("x")) == point);
+  assert(!_hadTypecheckError());
+  assert(typeEnvLookupName(env, makeToken("x")) == point);
 
-  typchkTypeEnvDestroy(env);
+  typeEnvFree(env);
 }
 
 static void test_self_outside_method_errors(void) {
-  typchkResetError();
-  TypeEnv *env = typchkTypeEnvCreate();
-  typchkTypeEnvBeginScope(env);
-  // No typchkTypeEnvSetSelfType call -- stays NULL, matching "not currently
+  _resetHadTypecheckError();
+  TypeEnv *env = typeEnvInit();
+  typeEnvBeginScope(env);
+  // No typeEnvSetSelfType call -- stays NULL, matching "not currently
   // checking a method body." The parser itself allows bare `self`
   // anywhere (the compiler's own "self outside a method" rejection is a
   // separate, later, compile-time check, not a parse-time one) -- this
   // confirms the checker reports its own diagnostic if that compiler
-  // typchkCheck somehow didn't already catch it first.
+  // check somehow didn't already catch it first.
   int outCount = 0;
   bool hadParseError = false;
   int endLine = 0;
   AstNode **ast = parse("var x = self;", &outCount, &hadParseError, &endLine);
   assert(!hadParseError);
-  typchkCheckStmt(env, ast[0]);
+  checkStmt(env, ast[0]);
 
-  assert(typchkHadError());
-  typchkTypeEnvDestroy(env);
-  typchkResetError();
+  assert(_hadTypecheckError());
+  typeEnvFree(env);
+  _resetHadTypecheckError();
 }
 
 static void test_array_literal_and_index(void) {
-  typchkResetError();
+  _resetHadTypecheckError();
   TypeEnv *env = checkProgram(
       "var nums = [1, 2, 3]; var first = nums[0]; var empty = [];");
-  assert(!typchkHadError());
-  Type *numsType = typchkTypeEnvLookup(env, makeToken("nums"));
+  assert(!_hadTypecheckError());
+  Type *numsType = typeEnvLookupName(env, makeToken("nums"));
   assert(numsType != NULL && numsType->kind == TYPE_ARRAY);
   assert(numsType->as.array.elementType == typeF64());
-  assert(typchkTypeEnvLookup(env, makeToken("first")) == typeF64());
-  Type *emptyType = typchkTypeEnvLookup(env, makeToken("empty"));
+  assert(typeEnvLookupName(env, makeToken("first")) == typeF64());
+  Type *emptyType = typeEnvLookupName(env, makeToken("empty"));
   assert(emptyType != NULL && emptyType->kind == TYPE_ARRAY);
   assert(emptyType->as.array.elementType == NULL);
-  typchkTypeEnvDestroy(env);
+  typeEnvFree(env);
 }
 
 static void test_array_heterogeneous_elements_error(void) {
-  typchkResetError();
+  _resetHadTypecheckError();
   TypeEnv *env = checkProgram("var x = [1, \"two\"];");
-  assert(typchkHadError());
-  typchkTypeEnvDestroy(env);
-  typchkResetError();
+  assert(_hadTypecheckError());
+  typeEnvFree(env);
+  _resetHadTypecheckError();
 }
 
 static void test_index_non_array_errors(void) {
-  typchkResetError();
+  _resetHadTypecheckError();
   TypeEnv *env = checkProgram("var x = 5; var y = x[0];");
-  assert(typchkHadError());
-  typchkTypeEnvDestroy(env);
-  typchkResetError();
+  assert(_hadTypecheckError());
+  typeEnvFree(env);
+  _resetHadTypecheckError();
 }
 
 static void test_if_expression(void) {
-  typchkResetError();
+  _resetHadTypecheckError();
   TypeEnv *env =
       checkProgram("fun test(a: bool): string = if (a) \"yes\" else \"no\";");
-  assert(!typchkHadError());
-  typchkTypeEnvDestroy(env);
+  assert(!_hadTypecheckError());
+  typeEnvFree(env);
 }
 
 static void test_if_expression_missing_else_with_non_unit_branch_errors(void) {
-  typchkResetError();
+  _resetHadTypecheckError();
   // No else -- implicit else is unit, "yes" is string, mismatch.
   TypeEnv *env = checkProgram("fun test(a: bool): string = if (a) \"yes\";");
-  assert(typchkHadError());
-  typchkTypeEnvDestroy(env);
-  typchkResetError();
+  assert(_hadTypecheckError());
+  typeEnvFree(env);
+  _resetHadTypecheckError();
 }
 
 static void test_if_statement_with_unit_branches_is_fine(void) {
-  typchkResetError();
+  _resetHadTypecheckError();
   TypeEnv *env =
       checkProgram("fun test(a: bool): unit { if (a) { print \"hi\"; } }");
-  assert(!typchkHadError());
-  typchkTypeEnvDestroy(env);
+  assert(!_hadTypecheckError());
+  typeEnvFree(env);
 }
 
 static void test_block_expression(void) {
-  typchkResetError();
+  _resetHadTypecheckError();
   TypeEnv *env = checkProgram("var result = { var a = 1; var b = 2; a + b };");
-  assert(!typchkHadError());
-  assert(typchkTypeEnvLookup(env, makeToken("result")) == typeF64());
-  typchkTypeEnvDestroy(env);
+  assert(!_hadTypecheckError());
+  assert(typeEnvLookupName(env, makeToken("result")) == typeF64());
+  typeEnvFree(env);
 }
 
 static void test_function_implicit_return_checked_against_declared_type(void) {
-  typchkResetError();
+  _resetHadTypecheckError();
   TypeEnv *env = checkProgram("fun sum(a: f64, b: f64): f64 { a + b }");
-  assert(!typchkHadError());
-  typchkTypeEnvDestroy(env);
+  assert(!_hadTypecheckError());
+  typeEnvFree(env);
 }
 
 static void test_function_wrong_implicit_return_type_errors(void) {
-  typchkResetError();
+  _resetHadTypecheckError();
   TypeEnv *env = checkProgram("fun sum(a: f64, b: f64): string { a + b }");
-  assert(typchkHadError());
-  typchkTypeEnvDestroy(env);
-  typchkResetError();
+  assert(_hadTypecheckError());
+  typeEnvFree(env);
+  _resetHadTypecheckError();
 }
 
 static void test_return_statement_checked(void) {
-  typchkResetError();
+  _resetHadTypecheckError();
   TypeEnv *env = checkProgram("fun sum(a: f64, b: f64): f64 { return a + b; }");
-  assert(!typchkHadError());
-  typchkTypeEnvDestroy(env);
+  assert(!_hadTypecheckError());
+  typeEnvFree(env);
 }
 
 static void test_return_wrong_type_errors(void) {
-  typchkResetError();
+  _resetHadTypecheckError();
   TypeEnv *env =
       checkProgram("fun sum(a: f64, b: f64): f64 { return \"oops\"; }");
-  assert(typchkHadError());
-  typchkTypeEnvDestroy(env);
-  typchkResetError();
+  assert(_hadTypecheckError());
+  typeEnvFree(env);
+  _resetHadTypecheckError();
 }
 
 static void test_recursive_function(void) {
-  typchkResetError();
+  _resetHadTypecheckError();
   TypeEnv *env = checkProgram(
       "fun fib(n: f64): f64 { if (n < 2) return n; return fib(n - 1) + "
       "fib(n - 2); }");
-  assert(!typchkHadError());
-  typchkTypeEnvDestroy(env);
+  assert(!_hadTypecheckError());
+  typeEnvFree(env);
 }
 
 static void test_lambda_with_explicit_types(void) {
-  typchkResetError();
+  _resetHadTypecheckError();
   TypeEnv *env = checkProgram(
       "var add = fun (a: f64, b: f64) { a + b }; var x = add(1, 2);");
-  assert(!typchkHadError());
-  assert(typchkTypeEnvLookup(env, makeToken("x")) == typeF64());
-  typchkTypeEnvDestroy(env);
+  assert(!_hadTypecheckError());
+  assert(typeEnvLookupName(env, makeToken("x")) == typeF64());
+  typeEnvFree(env);
 }
 
 static void test_lambda_contextual_inference(void) {
-  typchkResetError();
+  _resetHadTypecheckError();
   TypeEnv *env =
       checkProgram("var handler: fun (f64) => f64 = fun (x) { x + 1 };");
-  assert(!typchkHadError());
-  typchkTypeEnvDestroy(env);
+  assert(!_hadTypecheckError());
+  typeEnvFree(env);
 }
 
 static void test_lambda_untyped_without_context_errors(void) {
-  typchkResetError();
+  _resetHadTypecheckError();
   TypeEnv *env = checkProgram("var f = fun (x) { x };");
-  assert(typchkHadError());
-  typchkTypeEnvDestroy(env);
-  typchkResetError();
+  assert(_hadTypecheckError());
+  typeEnvFree(env);
+  _resetHadTypecheckError();
 }
 
 static void test_while_loop(void) {
-  typchkResetError();
+  _resetHadTypecheckError();
   TypeEnv *env = checkProgram(
       "fun countdown(n: f64): unit { while (n > 0) { n = n - 1; } }");
-  assert(!typchkHadError());
-  typchkTypeEnvDestroy(env);
+  assert(!_hadTypecheckError());
+  typeEnvFree(env);
 }
 
 static void test_while_condition_not_bool_errors(void) {
-  typchkResetError();
+  _resetHadTypecheckError();
   TypeEnv *env = checkProgram("while (\"x\") { print 1; }");
-  assert(typchkHadError());
-  typchkTypeEnvDestroy(env);
-  typchkResetError();
+  assert(_hadTypecheckError());
+  typeEnvFree(env);
+  _resetHadTypecheckError();
 }
 
 static void test_for_loop_scopes_its_variable(void) {
-  typchkResetError();
+  _resetHadTypecheckError();
   TypeEnv *env =
       checkProgram("for (var i = 0; i < 10; i = i + 1) { print i; }");
-  assert(!typchkHadError());
-  typchkTypeEnvDestroy(env);
+  assert(!_hadTypecheckError());
+  typeEnvFree(env);
 }
 
 static void test_var_with_annotation_checks_initializer(void) {
-  typchkResetError();
+  _resetHadTypecheckError();
   TypeEnv *env = checkProgram("var x: f64 = \"wrong\";");
-  assert(typchkHadError());
-  typchkTypeEnvDestroy(env);
-  typchkResetError();
+  assert(_hadTypecheckError());
+  typeEnvFree(env);
+  _resetHadTypecheckError();
 }
 
 static void test_uninitialized_var_with_type_is_fine(void) {
-  typchkResetError();
+  _resetHadTypecheckError();
   TypeEnv *env = checkProgram("var x: f64;");
-  assert(!typchkHadError());
-  assert(typchkTypeEnvLookup(env, makeToken("x")) == typeF64());
-  typchkTypeEnvDestroy(env);
+  assert(!_hadTypecheckError());
+  assert(typeEnvLookupName(env, makeToken("x")) == typeF64());
+  typeEnvFree(env);
 }
 
 static void test_uninitialized_var_without_type_errors(void) {
-  typchkResetError();
+  _resetHadTypecheckError();
   TypeEnv *env = checkProgram("var x;");
-  assert(typchkHadError());
-  typchkTypeEnvDestroy(env);
-  typchkResetError();
+  assert(_hadTypecheckError());
+  typeEnvFree(env);
+  _resetHadTypecheckError();
 }
 
 static void test_unresolved_variable_is_presumed_native_not_an_error(void) {
-  typchkResetError();
+  _resetHadTypecheckError();
   // No such Kirby-level declaration anywhere -- presumed native, per
-  // typchkInferVariable()'s documented design. A real typo still surfaces, just
+  // _inferVariable()'s documented design. A real typo still surfaces, just
   // at runtime ("Undefined variable"), not statically -- there's no way
   // to distinguish the two cases without a native signature to check
   // against.
   TypeEnv *env = checkProgram("var x = bogus;");
-  assert(!typchkHadError());
-  assert(typchkTypeEnvLookup(env, makeToken("x")) == NULL);
-  typchkTypeEnvDestroy(env);
+  assert(!_hadTypecheckError());
+  assert(typeEnvLookupName(env, makeToken("x")) == NULL);
+  typeEnvFree(env);
 }
 
 static void test_nested_function_and_closure(void) {
-  typchkResetError();
+  _resetHadTypecheckError();
   TypeEnv *env = checkProgram(
       "fun outer(): fun () => f64 { var a = 123; fun inner(): f64 { "
       "return a; } return inner; }");
-  assert(!typchkHadError());
-  typchkTypeEnvDestroy(env);
+  assert(!_hadTypecheckError());
+  typeEnvFree(env);
 }
 
 static bool typecheckSource(const char *source) {
@@ -772,7 +771,7 @@ static bool typecheckSource(const char *source) {
 static void test_struct_private_instance_method_uncallable_from_outside(void) {
   // Structs now get compile-time visibility enforcement instead of only
   // failing at runtime via canAccess() in vm.c.
-  typchkResetError();
+  _resetHadTypecheckError();
   bool ok = typecheckSource("struct Greeter {}\n"
                             "impl Greeter {\n"
                             "  fun greet(self): string = \"hi\";\n"
@@ -782,7 +781,7 @@ static void test_struct_private_instance_method_uncallable_from_outside(void) {
 }
 
 static void test_struct_private_static_method_uncallable_from_outside(void) {
-  typchkResetError();
+  _resetHadTypecheckError();
   bool ok = typecheckSource("struct Point {}\n"
                             "impl Point {\n"
                             "  fun origin(): Point = Point {};\n"
@@ -795,7 +794,7 @@ static void test_struct_private_method_callable_from_own_impl_block(void) {
   // Visibility is per-*type*, not per-impl-block: a private method is
   // reachable from any impl block for the same struct, including a
   // different one than the one that declared it.
-  typchkResetError();
+  _resetHadTypecheckError();
   bool ok =
       typecheckSource("struct Greeter {}\n"
                       "impl Greeter {\n"
@@ -808,7 +807,7 @@ static void test_struct_private_method_callable_from_own_impl_block(void) {
 }
 
 static void test_program_fully_typed_struct_and_methods(void) {
-  typchkResetError();
+  _resetHadTypecheckError();
   bool ok = typecheckSource(
       "struct Point {\n"
       "  pub var x: f64;\n"
@@ -824,25 +823,25 @@ static void test_program_fully_typed_struct_and_methods(void) {
 }
 
 static void test_program_missing_param_type_fails(void) {
-  typchkResetError();
+  _resetHadTypecheckError();
   bool ok = typecheckSource("fun add(a: f64, b): f64 = a + b;");
   assert(!ok);
 }
 
 static void test_program_missing_return_type_fails(void) {
-  typchkResetError();
+  _resetHadTypecheckError();
   bool ok = typecheckSource("fun add(a: f64, b: f64) = a + b;");
   assert(!ok);
 }
 
 static void test_program_missing_struct_field_type_fails(void) {
-  typchkResetError();
+  _resetHadTypecheckError();
   bool ok = typecheckSource("struct Point { pub var x: f64; pub var y; }");
   assert(!ok);
 }
 
 static void test_program_self_referential_struct(void) {
-  typchkResetError();
+  _resetHadTypecheckError();
   bool ok = typecheckSource("struct Node {\n"
                             "  var value: f64;\n"
                             "  var next: Node;\n"
@@ -851,14 +850,14 @@ static void test_program_self_referential_struct(void) {
 }
 
 static void test_program_forward_referencing_struct_field(void) {
-  typchkResetError();
+  _resetHadTypecheckError();
   bool ok = typecheckSource("struct B { var value: f64; }\n"
                             "struct A { var b: B; }\n");
   assert(ok);
 }
 
 static void test_program_multiple_impl_blocks(void) {
-  typchkResetError();
+  _resetHadTypecheckError();
   bool ok = typecheckSource("struct Counter {\n"
                             "  var count: f64;\n"
                             "}\n"
@@ -874,7 +873,7 @@ static void test_program_multiple_impl_blocks(void) {
 }
 
 static void test_program_impl_before_struct_declaration(void) {
-  typchkResetError();
+  _resetHadTypecheckError();
   bool ok = typecheckSource("impl Point {\n"
                             "  pub fun origin(): Point = Point { x: 0 };\n"
                             "}\n"
@@ -887,7 +886,7 @@ static void test_program_impl_before_struct_declaration(void) {
 }
 
 static void test_program_mutually_recursive_functions(void) {
-  typchkResetError();
+  _resetHadTypecheckError();
   bool ok = typecheckSource(
       "fun isEven(n: f64): bool { if (n == 0) return true; return "
       "isOdd(n - 1); }\n"
@@ -898,7 +897,7 @@ static void test_program_mutually_recursive_functions(void) {
 }
 
 static void test_program_method_body_type_error_caught(void) {
-  typchkResetError();
+  _resetHadTypecheckError();
   bool ok = typecheckSource("struct Point { pub var x: f64; }\n"
                             "impl Point {\n"
                             "  pub fun bad(self): string = self.x;\n"
@@ -907,39 +906,39 @@ static void test_program_method_body_type_error_caught(void) {
 }
 
 static void test_program_body_falling_off_the_end_errors(void) {
-  typchkResetError();
+  _resetHadTypecheckError();
   bool ok = typecheckSource("fun f(): f64 { print 1; }\n");
   assert(!ok);
 }
 
 static void test_program_return_on_only_one_branch_errors(void) {
-  typchkResetError();
+  _resetHadTypecheckError();
   bool ok = typecheckSource("fun f(c: bool): f64 { if (c) { return 1; } }\n");
   assert(!ok);
 }
 
 static void test_program_return_on_both_branches_is_fine(void) {
-  typchkResetError();
+  _resetHadTypecheckError();
   bool ok = typecheckSource(
       "fun f(c: bool): f64 { if (c) { return 1; } else { return 2; } }\n");
   assert(ok);
 }
 
 static void test_program_unit_body_needs_no_return(void) {
-  typchkResetError();
+  _resetHadTypecheckError();
   bool ok = typecheckSource("fun f(): unit { print 1; }\n");
   assert(ok);
 }
 
 static void test_program_lambda_falling_off_the_end_errors(void) {
-  typchkResetError();
+  _resetHadTypecheckError();
   bool ok =
       typecheckSource("let f: fun () => f64 = fun (): f64 { print 1; };\n");
   assert(!ok);
 }
 
 static void test_program_nested_closure_captures_self(void) {
-  typchkResetError();
+  _resetHadTypecheckError();
   // A nested *function* (not a lambda) declared inside a method,
   // referencing self.
   bool ok =
@@ -954,7 +953,7 @@ static void test_program_nested_closure_captures_self(void) {
 }
 
 static void test_type_alias_chained(void) {
-  typchkResetError();
+  _resetHadTypecheckError();
   bool ok = typecheckSource("type A = B;\n"
                             "type B = f64\n;"
                             "let value: A = 7;\n"
@@ -963,7 +962,7 @@ static void test_type_alias_chained(void) {
 }
 
 static void test_type_alias_cycle_errors(void) {
-  typchkResetError();
+  _resetHadTypecheckError();
   bool ok = typecheckSource("type A = B;\n"
                             "type B = A;\n"
                             "let value: A = 1;\n");
@@ -971,7 +970,7 @@ static void test_type_alias_cycle_errors(void) {
 }
 
 static void test_type_alias_to_struct(void) {
-  typchkResetError();
+  _resetHadTypecheckError();
   bool ok = typecheckSource("type Coord = Point;\n"
                             "struct Point {\n"
                             "  pub var x: f64;\n"
@@ -985,7 +984,7 @@ static void test_type_alias_to_struct(void) {
 }
 
 static void test_type_alias_used_as_type(void) {
-  typchkResetError();
+  _resetHadTypecheckError();
   bool ok = typecheckSource("type Number = f64;\n"
                             "type Text = string;\n"
                             "let count: Number = 42;\n"
@@ -998,14 +997,14 @@ static void test_type_alias_used_as_type(void) {
 }
 
 static void test_type_alias_wrong_type_errors(void) {
-  typchkResetError();
+  _resetHadTypecheckError();
   bool ok = typecheckSource("type Number = f64;\n"
                             "let count: Number = \"not a number\";\n");
   assert(!ok);
 }
 
 static void test_program_trait_basic_impl_and_call(void) {
-  typchkResetError();
+  _resetHadTypecheckError();
   bool ok = typecheckSource("struct Point {\n"
                             "  pub var x: f64;\n"
                             "}\n"
@@ -1018,7 +1017,7 @@ static void test_program_trait_basic_impl_and_call(void) {
 }
 
 static void test_program_trait_missing_method_fails(void) {
-  typchkResetError();
+  _resetHadTypecheckError();
   bool ok = typecheckSource("trait MyDisplay {\n"
                             "  fun toString(self): string;\n"
                             "  fun debug(self): string;\n"
@@ -1031,7 +1030,7 @@ static void test_program_trait_missing_method_fails(void) {
 }
 
 static void test_program_trait_extra_method_fails(void) {
-  typchkResetError();
+  _resetHadTypecheckError();
   bool ok = typecheckSource("struct Point { pub var x: f64; }\n"
                             "impl Display for Point {\n"
                             "  pub fun toString(self): string = \"Point\";\n"
@@ -1041,7 +1040,7 @@ static void test_program_trait_extra_method_fails(void) {
 }
 
 static void test_program_trait_wrong_signature_fails(void) {
-  typchkResetError();
+  _resetHadTypecheckError();
   bool ok = typecheckSource("struct Point { pub var x: f64; }\n"
                             "impl Display for Point {\n"
                             "  pub fun toString(self): f64 = self.x;\n"
@@ -1050,7 +1049,7 @@ static void test_program_trait_wrong_signature_fails(void) {
 }
 
 static void test_program_trait_coherence_duplicate_fails(void) {
-  typchkResetError();
+  _resetHadTypecheckError();
   bool ok = typecheckSource("struct Point { pub var x: f64; }\n"
                             "impl Display for Point {\n"
                             "  pub fun toString(self): string = \"a\";\n"
@@ -1062,7 +1061,7 @@ static void test_program_trait_coherence_duplicate_fails(void) {
 }
 
 static void test_program_trait_supertrait_satisfied(void) {
-  typchkResetError();
+  _resetHadTypecheckError();
   bool ok = typecheckSource(
       "struct Money { pub var cents: f64; }\n"
       "impl Eq for Money {\n"
@@ -1079,7 +1078,7 @@ static void test_program_trait_supertrait_satisfied(void) {
 }
 
 static void test_program_trait_supertrait_missing_fails(void) {
-  typchkResetError();
+  _resetHadTypecheckError();
   bool ok = typecheckSource(
       "struct Money { pub var cents: f64; }\n"
       "impl Ord for Money {\n"
@@ -1089,7 +1088,7 @@ static void test_program_trait_supertrait_missing_fails(void) {
 }
 
 static void test_program_trait_unknown_trait_fails(void) {
-  typchkResetError();
+  _resetHadTypecheckError();
   bool ok = typecheckSource("struct Point { pub var x: f64; }\n"
                             "impl NotATrait for Point {\n"
                             "  pub fun toString(self): string = \"Point\";\n"
@@ -1098,7 +1097,7 @@ static void test_program_trait_unknown_trait_fails(void) {
 }
 
 static void test_program_trait_self_substitution_in_return_type(void) {
-  typchkResetError();
+  _resetHadTypecheckError();
   bool ok =
       typecheckSource("trait Cloneable {\n"
                       "  fun clone(self): Self;\n"
@@ -1114,7 +1113,7 @@ static void test_program_trait_self_substitution_in_return_type(void) {
 }
 
 static void test_program_trait_static_method_via_struct_name(void) {
-  typchkResetError();
+  _resetHadTypecheckError();
   bool ok = typecheckSource("struct Point { pub var x: f64; }\n"
                             "impl Default for Point {\n"
                             "  pub fun default(): Self = Point { x: 0 };\n"
@@ -1125,7 +1124,7 @@ static void test_program_trait_static_method_via_struct_name(void) {
 }
 
 static void test_program_trait_static_method_called_as_instance_fails(void) {
-  typchkResetError();
+  _resetHadTypecheckError();
   bool ok = typecheckSource("struct Point { pub var x: f64; }\n"
                             "impl Default for Point {\n"
                             "  pub fun default(): Self = Point { x: 0 };\n"
@@ -1136,7 +1135,7 @@ static void test_program_trait_static_method_called_as_instance_fails(void) {
 }
 
 static void test_program_equality_requires_eq_for_structs(void) {
-  typchkResetError();
+  _resetHadTypecheckError();
   bool ok = typecheckSource("struct Point { pub var x: f64; }\n"
                             "var a = Point { x: 1 };\n"
                             "var b = Point { x: 1 };\n"
@@ -1145,7 +1144,7 @@ static void test_program_equality_requires_eq_for_structs(void) {
 }
 
 static void test_program_equality_ok_once_eq_implemented(void) {
-  typchkResetError();
+  _resetHadTypecheckError();
   bool ok = typecheckSource(
       "struct Point { pub var x: f64; }\n"
       "impl Eq for Point {\n"
@@ -1159,7 +1158,7 @@ static void test_program_equality_ok_once_eq_implemented(void) {
 static void test_program_equality_between_primitives_unaffected(void) {
   // The Eq requirement only applies to structs -- primitives never needed
   // an impl for `==` and still don't.
-  typchkResetError();
+  _resetHadTypecheckError();
   bool ok = typecheckSource("print 1 == 1;\n"
                             "print \"a\" == \"a\";\n"
                             "print true == false;\n");
@@ -1167,7 +1166,7 @@ static void test_program_equality_between_primitives_unaffected(void) {
 }
 
 static void test_program_trait_impl_on_primitive_deferred_fails(void) {
-  typchkResetError();
+  _resetHadTypecheckError();
   bool ok = typecheckSource("impl Display for f64 {\n"
                             "  pub fun toString(self): string = \"n\";\n"
                             "}\n");
@@ -1175,7 +1174,7 @@ static void test_program_trait_impl_on_primitive_deferred_fails(void) {
 }
 
 static void test_program_plain_impl_on_primitive_fails(void) {
-  typchkResetError();
+  _resetHadTypecheckError();
   bool ok = typecheckSource("impl f64 {\n"
                             "  pub fun double(self): f64 = self * 2;\n"
                             "}\n");
@@ -1183,7 +1182,7 @@ static void test_program_plain_impl_on_primitive_fails(void) {
 }
 
 static void test_program_trait_alongside_plain_impl(void) {
-  typchkResetError();
+  _resetHadTypecheckError();
   bool ok = typecheckSource(
       "struct Counter { pub var count: f64; }\n"
       "impl Counter {\n"
@@ -1200,7 +1199,7 @@ static void test_program_trait_alongside_plain_impl(void) {
 }
 
 static void test_program_trait_method_without_pub_is_callable(void) {
-  typchkResetError();
+  _resetHadTypecheckError();
   bool ok = typecheckSource("struct Point { pub var x: f64; }\n"
                             "impl Display for Point {\n"
                             "  fun toString(self): string = \"Point\";\n"
@@ -1211,7 +1210,7 @@ static void test_program_trait_method_without_pub_is_callable(void) {
 }
 
 static void test_program_self_return_type_in_plain_impl(void) {
-  typchkResetError();
+  _resetHadTypecheckError();
   bool ok = typecheckSource("struct Struct {}\n"
                             "impl Struct {\n"
                             "  pub fun new(): Self = Struct {};\n"
@@ -1221,7 +1220,7 @@ static void test_program_self_return_type_in_plain_impl(void) {
 }
 
 static void test_program_self_struct_init_in_plain_impl(void) {
-  typchkResetError();
+  _resetHadTypecheckError();
   bool ok = typecheckSource("struct Struct {}\n"
                             "impl Struct {\n"
                             "  pub fun new(): Self = Self {};\n"
@@ -1231,7 +1230,7 @@ static void test_program_self_struct_init_in_plain_impl(void) {
 }
 
 static void test_program_self_as_param_type_in_plain_impl(void) {
-  typchkResetError();
+  _resetHadTypecheckError();
   bool ok = typecheckSource(
       "struct Point { pub var x: f64; }\n"
       "impl Point {\n"
@@ -1246,7 +1245,7 @@ static void test_program_self_as_param_type_in_plain_impl(void) {
 }
 
 static void test_program_self_in_trait_impl_struct_init(void) {
-  typchkResetError();
+  _resetHadTypecheckError();
   bool ok = typecheckSource("trait Cloneable {\n"
                             "  fun clone(self): Self;\n"
                             "}\n"
@@ -1261,13 +1260,13 @@ static void test_program_self_in_trait_impl_struct_init(void) {
 }
 
 static void test_program_self_outside_impl_block_fails(void) {
-  typchkResetError();
+  _resetHadTypecheckError();
   bool ok = typecheckSource("fun make(): Self = Self {};\n");
   assert(!ok);
 }
 
 static void test_program_self_type_annotation_outside_impl_block_fails(void) {
-  typchkResetError();
+  _resetHadTypecheckError();
   bool ok = typecheckSource("struct Point { pub var x: f64; }\n"
                             "let p: Self = Point { x: 1 };\n");
   assert(!ok);
@@ -1276,9 +1275,9 @@ static void test_program_self_type_annotation_outside_impl_block_fails(void) {
 static void test_program_self_still_symbolic_in_trait_declaration(void) {
   // Self inside a bare trait declaration (not an impl block) has no
   // concrete type to resolve to yet -- the trait itself still checks
-  // fine, since typchkResolveTraitMethods only resolves signatures, it
+  // fine, since _resolveTraitMethods only resolves signatures, it
   // doesn't need Self to be concrete.
-  typchkResetError();
+  _resetHadTypecheckError();
   bool ok = typecheckSource("trait Eq2 {\n"
                             "  fun equals(self, other: Self): bool;\n"
                             "}\n");
@@ -1286,7 +1285,7 @@ static void test_program_self_still_symbolic_in_trait_declaration(void) {
 }
 
 static void test_program_self_as_static_method_receiver(void) {
-  typchkResetError();
+  _resetHadTypecheckError();
   bool ok = typecheckSource("struct Box { pub var value: f64; }\n"
                             "impl Box {\n"
                             "  pub fun wrap(v: f64): Self = Box { value: v };\n"
@@ -1298,7 +1297,7 @@ static void test_program_self_as_static_method_receiver(void) {
 }
 
 static void test_program_self_as_static_method_receiver_in_trait_impl(void) {
-  typchkResetError();
+  _resetHadTypecheckError();
   bool ok = typecheckSource(
       "struct StringBuilder { var string: string; }\n"
       "impl StringBuilder {\n"
@@ -1314,7 +1313,7 @@ static void test_program_self_as_static_method_receiver_in_trait_impl(void) {
 
 static void
 test_program_self_as_static_method_receiver_outside_impl_fails(void) {
-  typchkResetError();
+  _resetHadTypecheckError();
   bool ok = typecheckSource("struct Box { pub var value: f64; }\n"
                             "fun make(): Box = Self.wrap(0);\n");
   assert(!ok);
