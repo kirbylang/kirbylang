@@ -144,6 +144,7 @@ Token tokenFromCString(const char *text) {
   return token;
 }
 
+// Returns if a token is of a primitive type e.g. unit, bool, string
 bool tokenIsPrimitiveTypeName(const Token *token) {
   return tokenTextEquals(token, "unit") || tokenTextEquals(token, "bool") ||
          tokenTextEquals(token, "string") || tokenTextEquals(token, "f64") ||
