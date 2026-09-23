@@ -1420,15 +1420,6 @@ static Type *primitiveType(NativePrimitive primitive) {
   return typeUnit();
 }
 
-static Token nativeNameToken(const char *name) {
-  Token token;
-  token.type = TOKEN_IDENTIFIER;
-  token.start = name;
-  token.length = (int)strlen(name);
-  token.line = 0;
-  return token;
-}
-
 // Natives are global functions as far as the checker is concerned. They are
 // registered before any user code, so a user declaration of the same name
 // shadows them.
@@ -1450,6 +1441,6 @@ void defineAllNativeSignatures(TypeEnv *env) {
     Type *type = typeFunction(paramTypes, signature->paramCount,
                               primitiveType(signature->returnType));
 
-    typchkTypeEnvRegisterFunction(env, nativeNameToken(signature->name), type);
+    typchkTypeEnvRegisterFunction(env, tokenFromCString(signature->name), type);
   }
 }

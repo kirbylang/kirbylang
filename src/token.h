@@ -1,6 +1,8 @@
 #ifndef kirby_token_h
 #define kirby_token_h
 
+#include <stdbool.h>
+
 typedef enum {
   // Single-character tokens.
   TOKEN_LEFT_PAREN,
@@ -70,5 +72,19 @@ typedef struct {
 } Token;
 
 const char *tokenTypeToString(TokenType type);
+
+// True when both tokens have the same text
+bool tokensEqual(const Token *a, const Token *b);
+
+// True when the token's text is exactly `text`
+bool tokenTextEquals(const Token *token, const char *text);
+
+// An identifier token for a C string. The token does not copy `text`, so it
+// must outlive the token.
+Token tokenFromCString(const char *text);
+
+// True for the names of the types every program has: unit, bool, string, f64
+// and Array
+bool tokenIsPrimitiveTypeName(const Token *token);
 
 #endif

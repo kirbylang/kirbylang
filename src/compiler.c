@@ -177,22 +177,6 @@ static uint8_t identifierConstant(Token *identifier) {
 }
 
 /**
- * Compare two identifier tokens for equality
- */
-static bool identifiersEqual(Token *a, Token *b) {
-  if (a->length != b->length)
-    return false;
-  return memcmp(a->start, b->start, a->length) == 0;
-}
-
-/**
- * True if `name`'s source text is exactly "Self".
- */
-static bool isSelfTypeName(Token *name) {
-  return name->length == 4 && memcmp(name->start, "Self", 4) == 0;
-}
-
-/**
  * Resolve local variable by identifier
  *
  * @returns -1 if not found, otherwise the index of the local from the
@@ -203,7 +187,7 @@ static int resolveLocal(FnCompiler *compiler, Token *identifier) {
   for (int i = compiler->localCount - 1; i >= 0; i--) {
     Local *local = &compiler->locals[i];
 
-    if (identifiersEqual(identifier, &local->name)) {
+    if (tokensEqual(identifier, &local->name)) {
       if (local->depth == -1) {
         compilerErrorAtToken(
             identifier, "Can't read local variable in its own initializer");
@@ -270,7 +254,7 @@ static void addLocal(Token name, bool isMutable) {
 
   for (int i = 0; i < current->localCount; i++) {
     Local *existing = &current->locals[i];
-    if (identifiersEqual(&name, &existing->name) && !existing->isMutable) {
+    if (tokensEqual(&name, &existing->name) && !existing->isMutable) {
       compilerErrorAtToken(&name, "Already declared in this scope.");
       return;
     }
@@ -334,7 +318,7 @@ static VarRef resolveVariable(Token *name) {
     ref.isMutable = current->upvalues[arg].isMutable;
   } else {
     // Swap `Self` for the real type name
-    if (hasCurrentImplTargetName && isSelfTypeName(name)) {
+    if (hasCurrentImplTargetName && tokenTextEquals(name, "Self")) {
       name = &currentImplTargetName;
     }
 

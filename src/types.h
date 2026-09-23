@@ -92,6 +92,9 @@ InternedName internTokenName(Token token);
 // Not a C string
 const char *internedNameChars(InternedName name);
 
+// The identifier token for an interned name. Its text lives in the type arena.
+Token internedNameToToken(InternedName name);
+
 bool internedNamesEqual(InternedName a, InternedName b);
 
 bool internedNameEqualsToken(InternedName name, Token token);

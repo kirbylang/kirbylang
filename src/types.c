@@ -86,6 +86,15 @@ const char *internedNameChars(InternedName name) {
   return typeNames.arena + name.offset;
 }
 
+Token internedNameToToken(InternedName name) {
+  Token token;
+  token.type = TOKEN_IDENTIFIER;
+  token.start = internedNameChars(name);
+  token.length = name.length;
+  token.line = 0;
+  return token;
+}
+
 bool internedNamesEqual(InternedName a, InternedName b) {
   return a.offset == b.offset;
 }

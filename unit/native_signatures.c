@@ -91,31 +91,22 @@ static void test_every_signature_names_a_real_native(void) {
   }
 }
 
-static Token makeToken(const char *text) {
-  Token t;
-  t.type = TOKEN_IDENTIFIER;
-  t.start = text;
-  t.length = (int)strlen(text);
-  t.line = 1;
-  return t;
-}
-
 static void test_signed_natives_resolve_in_a_new_env(void) {
   TypeEnv *env = typchkTypeEnvCreate();
 
-  Type *ceil = typchkTypeEnvLookupFunction(env, makeToken("@ceil"));
+  Type *ceil = typchkTypeEnvLookupFunction(env, tokenFromCString("@ceil"));
   assert(ceil != NULL);
   assert(ceil->kind == TYPE_FN);
   assert(ceil->as.function.paramCount == 1);
   assert(ceil->as.function.paramTypes[0] == typeF64());
   assert(ceil->as.function.returnType == typeF64());
 
-  Type *clock = typchkTypeEnvLookupFunction(env, makeToken("@clock"));
+  Type *clock = typchkTypeEnvLookupFunction(env, tokenFromCString("@clock"));
   assert(clock != NULL);
   assert(clock->as.function.paramCount == 0);
   assert(clock->as.function.returnType == typeF64());
 
-  assert(typchkTypeEnvLookupFunction(env, makeToken("@len")) == NULL);
+  assert(typchkTypeEnvLookupFunction(env, tokenFromCString("@len")) == NULL);
 
   typchkTypeEnvDestroy(env);
 }
@@ -128,11 +119,13 @@ static void test_a_user_function_does_not_collide_with_a_native(void) {
   TypeEnv *env = typchkTypeEnvCreate();
 
   Type *userCeil = typeFunction(NULL, 0, typeString());
-  typchkTypeEnvRegisterFunction(env, makeToken("ceil"), userCeil);
+  typchkTypeEnvRegisterFunction(env, tokenFromCString("ceil"), userCeil);
 
-  assert(typchkTypeEnvLookupFunction(env, makeToken("ceil")) == userCeil);
+  assert(typchkTypeEnvLookupFunction(env, tokenFromCString("ceil")) ==
+         userCeil);
 
-  Type *nativeCeil = typchkTypeEnvLookupFunction(env, makeToken("@ceil"));
+  Type *nativeCeil =
+      typchkTypeEnvLookupFunction(env, tokenFromCString("@ceil"));
   assert(nativeCeil != NULL);
   assert(nativeCeil != userCeil);
   assert(nativeCeil->as.function.paramCount == 1);
