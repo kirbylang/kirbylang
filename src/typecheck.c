@@ -10,32 +10,10 @@
 
 static bool hadError = false;
 
-static bool tokensEqual(Token *a, Token *b) {
-  if (a->length != b->length)
-    return false;
-  return memcmp(a->start, b->start, a->length) == 0;
-}
-
-static bool tokenTextEquals(Token *token, const char *text) {
-  size_t len = strlen(text);
-  if ((size_t)token->length != len)
-    return false;
-  return memcmp(token->start, text, len) == 0;
-}
-
 static bool tokenIsPrimitiveTypeName(Token *token) {
   return tokenTextEquals(token, "unit") || tokenTextEquals(token, "bool") ||
          tokenTextEquals(token, "string") || tokenTextEquals(token, "f64") ||
          tokenTextEquals(token, "Array");
-}
-
-static Token makeTokenFromCString(const char *text) {
-  Token token;
-  token.type = TOKEN_IDENTIFIER;
-  token.start = text;
-  token.length = (int)strlen(text);
-  token.line = 0;
-  return token;
 }
 
 static void typchkTypeEnvDefineBuiltinTraits(TypeEnv *env);
@@ -272,47 +250,46 @@ static void typchkTypeEnvDefineBuiltinTraits(TypeEnv *env) {
   // Display
 
   UninternedTypeMember displayInstance[] = {
-      {makeTokenFromCString("toString"), typeFunction(NULL, 0, typeString())},
+      {tokenFromCString("toString"), typeFunction(NULL, 0, typeString())},
   };
   Type *display =
-      typeTrait(makeTokenFromCString("Display"), NULL, 0, displayInstance, 1);
+      typeTrait(tokenFromCString("Display"), NULL, 0, displayInstance, 1);
   typeTraitMarkBuiltin(display);
-  typchkTypeEnvRegisterTrait(env, makeTokenFromCString("Display"), display);
+  typchkTypeEnvRegisterTrait(env, tokenFromCString("Display"), display);
 
   // Eq
 
   Type **equalsParams = (Type **)typesAllocRaw(sizeof(Type *));
   equalsParams[0] = typeSelfPlaceholder();
   UninternedTypeMember eqInstance[] = {
-      {makeTokenFromCString("equals"),
-       typeFunction(equalsParams, 1, typeBool())},
+      {tokenFromCString("equals"), typeFunction(equalsParams, 1, typeBool())},
   };
-  Type *eq = typeTrait(makeTokenFromCString("Eq"), NULL, 0, eqInstance, 1);
+  Type *eq = typeTrait(tokenFromCString("Eq"), NULL, 0, eqInstance, 1);
   typeTraitMarkBuiltin(eq);
-  typchkTypeEnvRegisterTrait(env, makeTokenFromCString("Eq"), eq);
+  typchkTypeEnvRegisterTrait(env, tokenFromCString("Eq"), eq);
   Type **cmpParams = (Type **)typesAllocRaw(sizeof(Type *));
   cmpParams[0] = typeSelfPlaceholder();
   UninternedTypeMember ordInstance[] = {
-      {makeTokenFromCString("cmp"), typeFunction(cmpParams, 1, typeF64())},
+      {tokenFromCString("cmp"), typeFunction(cmpParams, 1, typeF64())},
   };
 
   // Ord
 
-  Type *ord = typeTrait(makeTokenFromCString("Ord"), NULL, 0, ordInstance, 1);
+  Type *ord = typeTrait(tokenFromCString("Ord"), NULL, 0, ordInstance, 1);
   typeTraitSetSupertrait(ord, eq->as.trait_.name);
   typeTraitMarkBuiltin(ord);
-  typchkTypeEnvRegisterTrait(env, makeTokenFromCString("Ord"), ord);
+  typchkTypeEnvRegisterTrait(env, tokenFromCString("Ord"), ord);
 
   // Default
 
   UninternedTypeMember defaultStatic[] = {
-      {makeTokenFromCString("default"),
+      {tokenFromCString("default"),
        typeFunction(NULL, 0, typeSelfPlaceholder())},
   };
   Type *default_ =
-      typeTrait(makeTokenFromCString("Default"), defaultStatic, 1, NULL, 0);
+      typeTrait(tokenFromCString("Default"), defaultStatic, 1, NULL, 0);
   typeTraitMarkBuiltin(default_);
-  typchkTypeEnvRegisterTrait(env, makeTokenFromCString("Default"), default_);
+  typchkTypeEnvRegisterTrait(env, tokenFromCString("Default"), default_);
 }
 
 void typchkTypeEnvSetSelfType(TypeEnv *env, Type *selfType) {
@@ -605,8 +582,8 @@ static Type *typchkInferBinary(TypeEnv *env, AstNode *node) {
       return NULL;
     }
     if (leftType->kind == TYPE_STRUCT &&
-        !typeStructImplementsTrait(
-            leftType, internTokenName(makeTokenFromCString("Eq")))) {
+        !typeStructImplementsTrait(leftType,
+                                   internTokenName(tokenFromCString("Eq")))) {
       typchkErrorAtTokenFmt(&b->op,
                             "%s needs 'impl Eq for %s' to support '%s'.",
                             typeToString(leftType), typeToString(leftType),
@@ -1704,15 +1681,6 @@ static void typchkResolveTraitMethods(TypeEnv *env, AstNode *node) {
   }
 }
 
-static Token tokenFromInternedName(InternedName name) {
-  Token token;
-  token.type = TOKEN_IDENTIFIER;
-  token.start = internedNameChars(name);
-  token.length = name.length;
-  token.line = 0;
-  return token;
-}
-
 // Walks the supertrait chain to identify circular references
 static bool typchkTraitSupertraitChainCycles(TypeEnv *env,
                                              InternedName startName) {
@@ -1721,7 +1689,7 @@ static bool typchkTraitSupertraitChainCycles(TypeEnv *env,
 
   for (int step = 0; step < maxSteps; step++) {
     Type *currentTrait =
-        typchkTypeEnvLookupTrait(env, tokenFromInternedName(current));
+        typchkTypeEnvLookupTrait(env, internedNameToToken(current));
 
     if (currentTrait == NULL || !currentTrait->as.trait_.hasSupertrait)
       return false; // chain ends cleanly, no repeat

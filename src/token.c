@@ -1,5 +1,6 @@
 #include "token.h"
 #include <stdio.h>
+#include <string.h>
 
 const char *tokenTypeToString(TokenType type) {
   switch (type) {
@@ -109,4 +110,36 @@ const char *tokenTypeToString(TokenType type) {
     fprintf(stderr, "Unknown token: %d", type);
     return "UNKNOWN TOKEN";
   }
+}
+
+// Compare two tokens using pointer identity
+bool tokensEqual(const Token *a, const Token *b) {
+  if (a->length != b->length)
+    return false;
+
+  return memcmp(a->start, b->start, a->length) == 0;
+}
+
+// Compare two tokens using their text
+bool tokenTextEquals(const Token *token, const char *text) {
+  size_t len = strlen(text);
+
+  if ((size_t)token->length != len)
+    return false;
+
+  return memcmp(token->start, text, len) == 0;
+}
+
+// Create a token from a C string
+//
+// The line for the token is set to 0.
+Token tokenFromCString(const char *text) {
+  Token token;
+
+  token.type = TOKEN_IDENTIFIER;
+  token.start = text;
+  token.length = (int)strlen(text);
+  token.line = 0;
+
+  return token;
 }

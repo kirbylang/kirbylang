@@ -400,6 +400,15 @@ static void test_substitute_self_replaces_placeholder(void) {
   assert(typeSubstituteSelf(plainSig, point) == plainSig);
 }
 
+static void test_interned_name_round_trips_through_a_token(void) {
+  Token point = makeToken("Point");
+  InternedName name = internTokenName(point);
+  Token back = internedNameToToken(name);
+
+  assert(back.type == TOKEN_IDENTIFIER);
+  assert(tokensEqual(&point, &back));
+}
+
 int main(void) {
   test_primitives_are_singletons();
   test_primitive_equality();
@@ -422,5 +431,6 @@ int main(void) {
 
   typesFreeAll();
 
+  test_interned_name_round_trips_through_a_token();
   return 0;
 }

@@ -5,12 +5,6 @@
 #include "definite_assignment.h"
 #include "typecheck.h"
 
-static bool tokensEqual(Token *a, Token *b) {
-  if (a->length != b->length)
-    return false;
-  return memcmp(a->start, b->start, a->length) == 0;
-}
-
 void daaSetInit(DaaSet *daa) {
   daa->names = NULL;
   daa->count = 0;
