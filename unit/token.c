@@ -33,11 +33,25 @@ static void test_token_from_c_string(void) {
   assert(token.line == 0);
 }
 
+static void test_primitive_type_names(void) {
+  const char *primitives[] = {"unit", "bool", "string", "f64", "Array"};
+  for (int i = 0; i < 5; i++) {
+    Token name = tokenFromCString(primitives[i]);
+    assert(tokenIsPrimitiveTypeName(&name));
+  }
+
+  Token point = tokenFromCString("Point");
+  Token number = tokenFromCString("number");
+  assert(!tokenIsPrimitiveTypeName(&point));
+  assert(!tokenIsPrimitiveTypeName(&number));
+}
+
 int main(void) {
   assert(NumberOfDefinedTokens == 52);
   assert(strcmp(tokenTypeToString(TOKEN_AND), "TOKEN_AND") == 0);
   test_tokens_equal();
   test_token_text_equals();
   test_token_from_c_string();
+  test_primitive_type_names();
   return 0;
 }

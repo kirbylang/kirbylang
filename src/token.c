@@ -143,3 +143,9 @@ Token tokenFromCString(const char *text) {
 
   return token;
 }
+
+bool tokenIsPrimitiveTypeName(const Token *token) {
+  return tokenTextEquals(token, "unit") || tokenTextEquals(token, "bool") ||
+         tokenTextEquals(token, "string") || tokenTextEquals(token, "f64") ||
+         tokenTextEquals(token, "Array");
+}

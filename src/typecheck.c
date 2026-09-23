@@ -10,12 +10,6 @@
 
 static bool hadError = false;
 
-static bool tokenIsPrimitiveTypeName(Token *token) {
-  return tokenTextEquals(token, "unit") || tokenTextEquals(token, "bool") ||
-         tokenTextEquals(token, "string") || tokenTextEquals(token, "f64") ||
-         tokenTextEquals(token, "Array");
-}
-
 static void typchkTypeEnvDefineBuiltinTraits(TypeEnv *env);
 
 void typchkErrorAtToken(Token *token, const char *message) {
