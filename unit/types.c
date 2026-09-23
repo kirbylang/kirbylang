@@ -4,15 +4,6 @@
 #include "../src/token.h"
 #include "../src/types.h"
 
-static Token makeToken(const char *text) {
-  Token t;
-  t.type = TOKEN_IDENTIFIER;
-  t.start = text;
-  t.length = (int)strlen(text);
-  t.line = 1;
-  return t;
-}
-
 static void test_primitives_are_singletons(void) {
   assert(typeUnit() == typeUnit());
   assert(typeBool() == typeBool());
@@ -38,17 +29,18 @@ static void test_primitive_equality(void) {
 }
 
 static void test_struct_equality_is_nominal(void) {
-  Token pointName = makeToken("Point");
-  Token otherPointName = makeToken("Point"); // same text, different Token
-  Token vectorName = makeToken("Vector");
+  Token pointName = tokenFromCString("Point");
+  Token otherPointName =
+      tokenFromCString("Point"); // same text, different Token
+  Token vectorName = tokenFromCString("Vector");
 
   UninternedTypeMember pointFields[] = {
-      {makeToken("x"), typeF64()},
-      {makeToken("y"), typeF64()},
+      {tokenFromCString("x"), typeF64()},
+      {tokenFromCString("y"), typeF64()},
   };
 
   UninternedTypeMember vectorLikeFields[] = {
-      {makeToken("magnitude"), typeF64()},
+      {tokenFromCString("magnitude"), typeF64()},
   };
 
   Type *point = typeStruct(pointName, pointFields, 2, NULL, 0, NULL, 0);
@@ -84,17 +76,19 @@ static void test_function_equality_is_structural(void) {
 
 static void test_struct_field_lookup(void) {
   UninternedTypeMember fields[] = {
-      {makeToken("x"), typeF64()},
-      {makeToken("label"), typeString()},
+      {tokenFromCString("x"), typeF64()},
+      {tokenFromCString("label"), typeString()},
   };
-  Type *point = typeStruct(makeToken("Point"), fields, 2, NULL, 0, NULL, 0);
+  Type *point =
+      typeStruct(tokenFromCString("Point"), fields, 2, NULL, 0, NULL, 0);
 
-  assert(typeStructFieldLookup(point, makeToken("x")) == typeF64());
-  assert(typeStructFieldLookup(point, makeToken("label")) == typeString());
-  assert(typeStructFieldLookup(point, makeToken("missing")) == NULL);
+  assert(typeStructFieldLookup(point, tokenFromCString("x")) == typeF64());
+  assert(typeStructFieldLookup(point, tokenFromCString("label")) ==
+         typeString());
+  assert(typeStructFieldLookup(point, tokenFromCString("missing")) == NULL);
 
-  assert(typeStructFieldLookup(typeF64(), makeToken("x")) == NULL);
-  assert(typeStructFieldLookup(NULL, makeToken("x")) == NULL);
+  assert(typeStructFieldLookup(typeF64(), tokenFromCString("x")) == NULL);
+  assert(typeStructFieldLookup(NULL, tokenFromCString("x")) == NULL);
 }
 
 static void test_type_to_string(void) {
@@ -103,7 +97,8 @@ static void test_type_to_string(void) {
   assert(strcmp(typeToString(typeString()), "string") == 0);
   assert(strcmp(typeToString(typeF64()), "f64") == 0);
 
-  Type *point = typeStruct(makeToken("Point"), NULL, 0, NULL, 0, NULL, 0);
+  Type *point =
+      typeStruct(tokenFromCString("Point"), NULL, 0, NULL, 0, NULL, 0);
   assert(strcmp(typeToString(point), "Point") == 0);
 
   Type *addParams[] = {typeF64(), typeF64()};
@@ -153,80 +148,91 @@ static void test_struct_method_lookup(void) {
   Type *deposit = typeFunction(f64ToF64Params, 1, typeF64());
 
   Type *accountParams[] = {typeF64()};
-  Type *newAccount =
-      typeFunction(accountParams, 1,
-                   typeStruct(makeToken("Account"), NULL, 0, NULL, 0, NULL, 0));
+  Type *newAccount = typeFunction(
+      accountParams, 1,
+      typeStruct(tokenFromCString("Account"), NULL, 0, NULL, 0, NULL, 0));
 
-  UninternedTypeMember instanceMethods[] = {{makeToken("deposit"), deposit}};
-  UninternedTypeMember staticMethods[] = {{makeToken("new"), newAccount}};
-  UninternedTypeMember fields[] = {{makeToken("balance"), typeF64()}};
+  UninternedTypeMember instanceMethods[] = {
+      {tokenFromCString("deposit"), deposit}};
+  UninternedTypeMember staticMethods[] = {
+      {tokenFromCString("new"), newAccount}};
+  UninternedTypeMember fields[] = {{tokenFromCString("balance"), typeF64()}};
 
-  Type *accountStruct = typeStruct(makeToken("Account"), fields, 1,
+  Type *accountStruct = typeStruct(tokenFromCString("Account"), fields, 1,
                                    staticMethods, 1, instanceMethods, 1);
 
   // Instance methods and static methods live in separate lookups --
   // a static method isn't found via the instance lookup and vice versa.
-  assert(typeStructInstanceMethodLookup(accountStruct, makeToken("deposit")) ==
-         deposit);
-  assert(typeStructInstanceMethodLookup(accountStruct, makeToken("new")) ==
-         NULL);
-  assert(typeStructStaticMethodLookup(accountStruct, makeToken("new")) ==
+  assert(typeStructInstanceMethodLookup(
+             accountStruct, tokenFromCString("deposit")) == deposit);
+  assert(typeStructInstanceMethodLookup(accountStruct,
+                                        tokenFromCString("new")) == NULL);
+  assert(typeStructStaticMethodLookup(accountStruct, tokenFromCString("new")) ==
          newAccount);
-  assert(typeStructStaticMethodLookup(accountStruct, makeToken("deposit")) ==
-         NULL);
+  assert(typeStructStaticMethodLookup(accountStruct,
+                                      tokenFromCString("deposit")) == NULL);
 
   // Fields stay in their own lookup, unaffected by methods existing now.
-  assert(typeStructFieldLookup(accountStruct, makeToken("balance")) ==
+  assert(typeStructFieldLookup(accountStruct, tokenFromCString("balance")) ==
          typeF64());
-  assert(typeStructFieldLookup(accountStruct, makeToken("deposit")) == NULL);
+  assert(typeStructFieldLookup(accountStruct, tokenFromCString("deposit")) ==
+         NULL);
 
   // Non-struct types and NULL still return NULL, not crash, for both new
   // lookups too.
-  assert(typeStructInstanceMethodLookup(typeF64(), makeToken("x")) == NULL);
-  assert(typeStructStaticMethodLookup(NULL, makeToken("x")) == NULL);
+  assert(typeStructInstanceMethodLookup(typeF64(), tokenFromCString("x")) ==
+         NULL);
+  assert(typeStructStaticMethodLookup(NULL, tokenFromCString("x")) == NULL);
 }
 
 static void test_incremental_struct_construction(void) {
   // The self-referential case: struct Node { var next: Node; } --
   // register the placeholder first, then set fields onto the *same*
   // pointer, so the field's own type (Node) is the real, complete one.
-  Type *node = typeStruct(makeToken("Node"), NULL, 0, NULL, 0, NULL, 0);
-  UninternedTypeMember fields[] = {{makeToken("next"), node}};
+  Type *node = typeStruct(tokenFromCString("Node"), NULL, 0, NULL, 0, NULL, 0);
+  UninternedTypeMember fields[] = {{tokenFromCString("next"), node}};
   typeStructSetFields(node, fields, 1);
 
   assert(node->as.struct_.fieldCount == 1);
-  assert(typeStructFieldLookup(node, makeToken("next")) == node);
+  assert(typeStructFieldLookup(node, tokenFromCString("next")) == node);
 }
 
 static void test_incremental_struct_methods_across_multiple_calls(void) {
   // Simulates multiple impl blocks contributing methods to the same
   // struct one at a time, in any order.
-  Type *counter = typeStruct(makeToken("Counter"), NULL, 0, NULL, 0, NULL, 0);
+  Type *counter =
+      typeStruct(tokenFromCString("Counter"), NULL, 0, NULL, 0, NULL, 0);
 
   Type *newType = typeFunction(NULL, 0, counter);
-  typeStructAddStaticMethod(counter, makeToken("new"), newType, /*isPublic=*/true);
+  typeStructAddStaticMethod(counter, tokenFromCString("new"), newType,
+                            /*isPublic=*/true);
 
   Type *getType = typeFunction(NULL, 0, typeF64());
-  typeStructAddInstanceMethod(counter, makeToken("get"), getType,
+  typeStructAddInstanceMethod(counter, tokenFromCString("get"), getType,
                               /*isPublic=*/true);
 
   Type *incParams[] = {typeF64()};
   Type *incType = typeFunction(incParams, 1, typeUnit());
-  typeStructAddInstanceMethod(counter, makeToken("increment"), incType,
+  typeStructAddInstanceMethod(counter, tokenFromCString("increment"), incType,
                               /*isPublic=*/false);
 
-  assert(typeStructStaticMethodLookup(counter, makeToken("new")) == newType);
-  assert(typeStructInstanceMethodLookup(counter, makeToken("get")) == getType);
-  assert(typeStructInstanceMethodLookup(counter, makeToken("increment")) ==
-         incType);
+  assert(typeStructStaticMethodLookup(counter, tokenFromCString("new")) ==
+         newType);
+  assert(typeStructInstanceMethodLookup(counter, tokenFromCString("get")) ==
+         getType);
+  assert(typeStructInstanceMethodLookup(
+             counter, tokenFromCString("increment")) == incType);
   // Adding instance methods didn't disturb the static one, or vice versa.
-  assert(typeStructStaticMethodLookup(counter, makeToken("get")) == NULL);
-  assert(typeStructInstanceMethodLookup(counter, makeToken("new")) == NULL);
+  assert(typeStructStaticMethodLookup(counter, tokenFromCString("get")) ==
+         NULL);
+  assert(typeStructInstanceMethodLookup(counter, tokenFromCString("new")) ==
+         NULL);
   // Visibility travels with the right method, not just whichever was
   // added most recently.
-  assert(typeStructStaticMethodIsPublic(counter, makeToken("new")));
-  assert(typeStructInstanceMethodIsPublic(counter, makeToken("get")));
-  assert(!typeStructInstanceMethodIsPublic(counter, makeToken("increment")));
+  assert(typeStructStaticMethodIsPublic(counter, tokenFromCString("new")));
+  assert(typeStructInstanceMethodIsPublic(counter, tokenFromCString("get")));
+  assert(!typeStructInstanceMethodIsPublic(counter,
+                                           tokenFromCString("increment")));
 }
 
 static void test_struct_trait_method_lookup_is_separate_from_instance(void) {
@@ -237,44 +243,47 @@ static void test_struct_trait_method_lookup_is_separate_from_instance(void) {
   // methods, so a static trait method (e.g. Default.default()) can't be
   // called as if it were an instance method or vice versa.
   Type *accountStruct =
-      typeStruct(makeToken("Account"), NULL, 0, NULL, 0, NULL, 0);
+      typeStruct(tokenFromCString("Account"), NULL, 0, NULL, 0, NULL, 0);
 
   Type *toStringType = typeFunction(NULL, 0, typeString());
-  typeStructAddTraitMethod(accountStruct, makeToken("toString"), toStringType,
+  typeStructAddTraitMethod(accountStruct, tokenFromCString("toString"),
+                           toStringType,
                            /*hasSelf=*/true);
 
   Type *defaultType = typeFunction(NULL, 0, typeF64());
-  typeStructAddTraitMethod(accountStruct, makeToken("default"), defaultType,
+  typeStructAddTraitMethod(accountStruct, tokenFromCString("default"),
+                           defaultType,
                            /*hasSelf=*/false);
 
   assert(typeStructTraitInstanceMethodLookup(
-             accountStruct, makeToken("toString")) == toStringType);
+             accountStruct, tokenFromCString("toString")) == toStringType);
   assert(typeStructTraitStaticMethodLookup(
-             accountStruct, makeToken("default")) == defaultType);
+             accountStruct, tokenFromCString("default")) == defaultType);
 
   // Not visible via the plain instance-method lookup.
-  assert(typeStructInstanceMethodLookup(accountStruct, makeToken("toString")) ==
-         NULL);
+  assert(typeStructInstanceMethodLookup(accountStruct,
+                                        tokenFromCString("toString")) == NULL);
 
   // Not visible via the other trait-method category.
-  assert(typeStructTraitStaticMethodLookup(accountStruct,
-                                           makeToken("toString")) == NULL);
+  assert(typeStructTraitStaticMethodLookup(
+             accountStruct, tokenFromCString("toString")) == NULL);
 
-  assert(typeStructTraitInstanceMethodLookup(accountStruct,
-                                             makeToken("default")) == NULL);
-  assert(typeStructTraitInstanceMethodLookup(typeF64(),
-                                             makeToken("toString")) == NULL);
-  assert(typeStructTraitInstanceMethodLookup(NULL, makeToken("toString")) ==
-         NULL);
+  assert(typeStructTraitInstanceMethodLookup(
+             accountStruct, tokenFromCString("default")) == NULL);
+  assert(typeStructTraitInstanceMethodLookup(
+             typeF64(), tokenFromCString("toString")) == NULL);
+  assert(typeStructTraitInstanceMethodLookup(
+             NULL, tokenFromCString("toString")) == NULL);
 }
 
 static void test_struct_trait_coherence_bookkeeping(void) {
-  Token displayName = makeToken("Display");
-  Token eqName = makeToken("Eq");
+  Token displayName = tokenFromCString("Display");
+  Token eqName = tokenFromCString("Eq");
   InternedName display = internTokenName(displayName);
   InternedName eq = internTokenName(eqName);
 
-  Type *point = typeStruct(makeToken("Point"), NULL, 0, NULL, 0, NULL, 0);
+  Type *point =
+      typeStruct(tokenFromCString("Point"), NULL, 0, NULL, 0, NULL, 0);
 
   assert(!typeStructImplementsTrait(point, display));
   assert(!typeStructImplementsTrait(point, eq));
@@ -295,41 +304,48 @@ static void test_struct_trait_coherence_bookkeeping(void) {
 
 static void test_trait_construction_and_method_lookup(void) {
   UninternedTypeMember instanceMethods[] = {
-      {makeToken("toString"), typeFunction(NULL, 0, typeString())},
+      {tokenFromCString("toString"), typeFunction(NULL, 0, typeString())},
   };
   UninternedTypeMember staticMethods[] = {
-      {makeToken("default"), typeFunction(NULL, 0, typeSelfPlaceholder())},
+      {tokenFromCString("default"),
+       typeFunction(NULL, 0, typeSelfPlaceholder())},
   };
-  Type *display =
-      typeTrait(makeToken("Display"), staticMethods, 1, instanceMethods, 1);
+  Type *display = typeTrait(tokenFromCString("Display"), staticMethods, 1,
+                            instanceMethods, 1);
 
   assert(display->kind == TYPE_TRAIT);
   assert(strcmp(typeToString(display), "Display") == 0);
 
-  Type *found = typeTraitInstanceMethodLookup(display, makeToken("toString"));
+  Type *found =
+      typeTraitInstanceMethodLookup(display, tokenFromCString("toString"));
   assert(found != NULL);
   assert(typesEqual(found, typeFunction(NULL, 0, typeString())));
-  assert(typeTraitInstanceMethodLookup(display, makeToken("missing")) == NULL);
+  assert(typeTraitInstanceMethodLookup(display, tokenFromCString("missing")) ==
+         NULL);
   // Static and instance methods live in separate lookups, same as structs.
-  assert(typeTraitInstanceMethodLookup(display, makeToken("default")) == NULL);
-  assert(typeTraitStaticMethodLookup(display, makeToken("default")) != NULL);
-  assert(typeTraitStaticMethodLookup(display, makeToken("toString")) == NULL);
+  assert(typeTraitInstanceMethodLookup(display, tokenFromCString("default")) ==
+         NULL);
+  assert(typeTraitStaticMethodLookup(display, tokenFromCString("default")) !=
+         NULL);
+  assert(typeTraitStaticMethodLookup(display, tokenFromCString("toString")) ==
+         NULL);
 
   assert(typeTraitInstanceMethodCount(display) == 1);
   TypeMember first = typeTraitInstanceMethodAt(display, 0);
-  assert(internedNameEqualsToken(first.name, makeToken("toString")));
+  assert(internedNameEqualsToken(first.name, tokenFromCString("toString")));
   assert(typeTraitStaticMethodCount(display) == 1);
 
   // Non-trait types and NULL are safe no-ops, same as the struct lookups.
-  assert(typeTraitInstanceMethodLookup(typeF64(), makeToken("toString")) ==
+  assert(typeTraitInstanceMethodLookup(typeF64(),
+                                       tokenFromCString("toString")) == NULL);
+  assert(typeTraitInstanceMethodLookup(NULL, tokenFromCString("toString")) ==
          NULL);
-  assert(typeTraitInstanceMethodLookup(NULL, makeToken("toString")) == NULL);
 }
 
 static void test_trait_equality_is_nominal(void) {
-  Type *displayA = typeTrait(makeToken("Display"), NULL, 0, NULL, 0);
-  Type *displayB = typeTrait(makeToken("Display"), NULL, 0, NULL, 0);
-  Type *eq = typeTrait(makeToken("Eq"), NULL, 0, NULL, 0);
+  Type *displayA = typeTrait(tokenFromCString("Display"), NULL, 0, NULL, 0);
+  Type *displayB = typeTrait(tokenFromCString("Display"), NULL, 0, NULL, 0);
+  Type *eq = typeTrait(tokenFromCString("Eq"), NULL, 0, NULL, 0);
 
   assert(typesEqual(displayA, displayB)); // same name -> equal
   assert(!typesEqual(displayA, eq));
@@ -337,8 +353,8 @@ static void test_trait_equality_is_nominal(void) {
 }
 
 static void test_trait_supertrait_and_unresolved_flag(void) {
-  Type *eq = typeTrait(makeToken("Eq"), NULL, 0, NULL, 0);
-  Type *ord = typeTrait(makeToken("Ord"), NULL, 0, NULL, 0);
+  Type *eq = typeTrait(tokenFromCString("Eq"), NULL, 0, NULL, 0);
+  Type *ord = typeTrait(tokenFromCString("Ord"), NULL, 0, NULL, 0);
 
   assert(!ord->as.trait_.hasSupertrait);
 
@@ -365,7 +381,8 @@ static void test_self_placeholder_is_singleton_and_always_equal(void) {
 }
 
 static void test_substitute_self_replaces_placeholder(void) {
-  Type *point = typeStruct(makeToken("Point"), NULL, 0, NULL, 0, NULL, 0);
+  Type *point =
+      typeStruct(tokenFromCString("Point"), NULL, 0, NULL, 0, NULL, 0);
 
   // Bare Self.
   assert(typeSubstituteSelf(typeSelfPlaceholder(), point) == point);
@@ -401,7 +418,7 @@ static void test_substitute_self_replaces_placeholder(void) {
 }
 
 static void test_interned_name_round_trips_through_a_token(void) {
-  Token point = makeToken("Point");
+  Token point = tokenFromCString("Point");
   InternedName name = internTokenName(point);
   Token back = internedNameToToken(name);
 
