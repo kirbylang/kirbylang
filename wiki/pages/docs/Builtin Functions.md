@@ -324,6 +324,17 @@ var exitCode = 1;
 @exit(exitCode);
 ```
 
+#### Valid Exit Codes
+
+Exit codes must be `>= 0`.
+
+```kirby
+@exit(-1); // Compile time error
+
+let exit_code = -1;
+
+@exit(exit_code); // Runtime error
+```
 ### `@getenv`
 
 Get an environment variable's value.
