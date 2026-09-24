@@ -108,11 +108,23 @@ void assertPositiveNumber(VM *vm, const char *function, double value,
 
 void assertGtEq(VM *vm, const char *function, double value, double comparison,
                 int argIndex) {
-  if (value < comparison) {
+  if (!(value >= comparison)) {
     runtimeError(vm,
                  "function %s expects argument %d to be greater than or equal "
                  "to %g but got %g.",
-                 function, argIndex, comparison, value);
+                 function, argIndex + 1, comparison, value);
+
+    exit(EXIT_CODE_RUNTIME_ERR);
+  }
+}
+
+void assertLtEq(VM *vm, const char *function, double value, double comparison,
+                int argIndex) {
+  if (!(value <= comparison)) {
+    runtimeError(vm,
+                 "function %s expects argument %d to be less than or equal "
+                 "to %g but got %g.",
+                 function, argIndex + 1, comparison, value);
 
     exit(EXIT_CODE_RUNTIME_ERR);
   }

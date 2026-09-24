@@ -100,7 +100,8 @@ static Value exitNative(VM *vm, int argCount, Value *args) {
 
   double exitCode = args[0].as.number;
 
-  assertGtEq(vm, "@exit", exitCode, 0, 0);
+  assertGtEq(vm, "@exit", exitCode, /**>=*/0, /**arg=*/0);
+  assertLtEq(vm, "@exit", exitCode, /**<=*/255, /**arg=*/0);
 
   exit(exitCode);
 
@@ -1398,10 +1399,12 @@ const int nativeSignatureCount =
     (int)(sizeof(nativeSignatures) / sizeof(nativeSignatures[0]));
 
 static bool _isNonNegative(double value) { return value >= 0; }
+static bool _isLessThanOrEqualTo255(double value) { return value <= 255; }
 
 const NativeArgConstraint nativeArgConstraints[] = {
     {"@sqrt", 0, _isNonNegative, "a non-negative number"},
     {"@exit", 0, _isNonNegative, "a non-negative number"},
+    {"@exit", 0, _isLessThanOrEqualTo255, "a number less than or equal to 255"},
 };
 
 const int nativeArgConstraintCount =

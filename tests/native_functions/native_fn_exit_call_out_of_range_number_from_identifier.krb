@@ -1,0 +1,3 @@
+let exit_code = 256;
+
+@exit(exit_code);
