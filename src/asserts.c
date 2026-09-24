@@ -6,7 +6,7 @@
 #include "vm.h"
 
 void raiseError(VM *vm, const char *message) {
-  runtimeError(vm, message);
+  runtimeError(vm, "%s", message);
   exit(EXIT_CODE_RUNTIME_ERR);
 }
 
@@ -111,7 +111,7 @@ void assertGtEq(VM *vm, const char *function, double value, double comparison,
   if (value < comparison) {
     runtimeError(vm,
                  "function %s expects argument %d to be greater than or equal "
-                 "to %g but got %g.",
+                 "to %d but got %g.",
                  function, argIndex, comparison, value);
 
     exit(EXIT_CODE_RUNTIME_ERR);

@@ -91,7 +91,8 @@ InterpretResult interpretFunction(ObjFunction *function);
  */
 InterpretResult interpret(CompiledUnit *unit);
 
-void runtimeError(VM *vm, const char *format, ...);
+void runtimeError(VM *vm, const char *format, ...)
+    __attribute__((format(printf, 2, 3)));
 
 // Push a value on to the VM's stack
 void pushOnStack(Value value);
