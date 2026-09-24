@@ -100,7 +100,7 @@ static Value exitNative(VM *vm, int argCount, Value *args) {
 
   double exitCode = args[0].as.number;
 
-  assertPositiveNumber(vm, "@exit", exitCode, 0);
+  assertGtEq(vm, "@exit", exitCode, 0, 0);
 
   exit(exitCode);
 

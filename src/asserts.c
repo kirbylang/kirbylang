@@ -94,19 +94,26 @@ void assertNonZero(VM *vm, const char *function, double number, int index) {
   }
 }
 
-void assertPositiveNumber(VM *vm, const char *function, double number,
-                          int index) {
-  if (number <= 0) {
-    if (index < 0)
-      runtimeError(
-          vm,
-          "function %s expects receiver to be a positive number but got %g.",
-          function, number);
-    else
-      runtimeError(
-          vm,
-          "function %s expects argument %d to be a positive number but got %g.",
-          function, index, number);
+void assertPositiveNumber(VM *vm, const char *function, double value,
+                          int argIndex) {
+  if (value <= 0) {
+    runtimeError(
+        vm,
+        "function %s expects argument %d to be a positive number but got %g.",
+        function, argIndex, value);
+
+    exit(EXIT_CODE_RUNTIME_ERR);
+  }
+}
+
+void assertGtEq(VM *vm, const char *function, double value, double comparison,
+                int argIndex) {
+  if (value < comparison) {
+    runtimeError(vm,
+                 "function %s expects argument %d to be greater than or equal "
+                 "to %d but got %g.",
+                 function, argIndex, comparison, value);
+
     exit(EXIT_CODE_RUNTIME_ERR);
   }
 }

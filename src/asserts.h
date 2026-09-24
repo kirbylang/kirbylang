@@ -22,4 +22,7 @@ void assertNonNegativeNumber(VM *vm, const char *function, double number,
 void assertWholeNumber(VM *vm, const char *function, double number, int index);
 void raiseError(VM *vm, const char *message);
 
+void assertGtEq(VM *vm, const char *function, double value, double comparison,
+                int argIndex);
+
 #endif
