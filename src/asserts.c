@@ -111,7 +111,7 @@ void assertGtEq(VM *vm, const char *function, double value, double comparison,
   if (value < comparison) {
     runtimeError(vm,
                  "function %s expects argument %d to be greater than or equal "
-                 "to %d but got %g.",
+                 "to %g but got %g.",
                  function, argIndex, comparison, value);
 
     exit(EXIT_CODE_RUNTIME_ERR);
