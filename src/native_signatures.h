@@ -29,6 +29,18 @@ typedef struct {
 extern const NativeSignature nativeSignatures[];
 extern const int nativeSignatureCount;
 
+typedef bool (*NativeArgPredicate)(double value);
+
+typedef struct {
+  const char *name;
+  int paramIndex; // Zero-based
+  NativeArgPredicate isValid;
+  const char *expectation;
+} NativeArgConstraint;
+
+extern const NativeArgConstraint nativeArgConstraints[];
+extern const int nativeArgConstraintCount;
+
 void defineAllNativeSignatures(TypeEnv *env);
 
 #endif

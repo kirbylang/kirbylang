@@ -1397,6 +1397,15 @@ const NativeSignature nativeSignatures[] = {
 const int nativeSignatureCount =
     (int)(sizeof(nativeSignatures) / sizeof(nativeSignatures[0]));
 
+static bool _isNonNegative(double value) { return value >= 0; }
+
+const NativeArgConstraint nativeArgConstraints[] = {
+    {"@sqrt", 0, _isNonNegative, "a non-negative number"},
+};
+
+const int nativeArgConstraintCount =
+    (int)(sizeof(nativeArgConstraints) / sizeof(nativeArgConstraints[0]));
+
 void defineAllNatives(VM *vm) {
   for (int i = 0; i < nativeDefinitionCount; i++) {
     defineNative(vm, nativeDefinitions[i].name, nativeDefinitions[i].function);
