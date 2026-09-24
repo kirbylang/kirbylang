@@ -29,13 +29,8 @@ typedef struct {
 extern const NativeSignature nativeSignatures[];
 extern const int nativeSignatureCount;
 
-// True when a native's constant argument satisfies some rule beyond its type,
-// such as being non-negative
 typedef bool (*NativeArgPredicate)(double value);
 
-// A native whose argument at paramIndex, when it's a compile-time constant,
-// must satisfy isValid. expectation completes "expects argument N to be
-// %s but got %g."
 typedef struct {
   const char *name;
   int paramIndex; // Zero-based
