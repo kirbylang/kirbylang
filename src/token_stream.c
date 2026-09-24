@@ -44,7 +44,13 @@ Token tsPeekNext(TokenStream *ts) {
   return ts->tokens[ts->current + 1];
 }
 
-Token tsAdvance(TokenStream *ts) { return ts->tokens[ts->current++]; }
+Token tsAdvance(TokenStream *ts) {
+  // The stream ends with TOKEN_EOF
+  if (ts->current >= ts->count)
+    return ts->tokens[ts->count - 1];
+
+  return ts->tokens[ts->current++];
+}
 
 bool tsIsAtEnd(TokenStream *ts) {
   return ts->tokens[ts->current].type == TOKEN_EOF;
