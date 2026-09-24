@@ -693,17 +693,20 @@ static bool typchkConstantNumber(AstNode *node, double *value) {
 static void typchkCheckNativeConstantArgs(AstNode *node) {
   CallNode *c = &node->as.call;
 
-  if (c->callee->kind != NODE_VARIABLE || c->argCount != 1)
-    return;
+  for (int i = 0; i < nativeArgConstraintCount; i++) {
+    const NativeArgConstraint *constraint = &nativeArgConstraints[i];
+    double value;
 
-  double value;
-
-  if (tokenTextEquals(&c->callee->as.variable.name, "@sqrt") &&
-      typchkConstantNumber(c->args[0], &value) && value < 0) {
-    typchkErrorAtNodeFmt(c->args[0],
-                         "function @sqrt expects argument 1 to be a "
-                         "non-negative number but got %g.",
-                         value);
+    if (constraint->paramIndex < c->argCount &&
+        tokenTextEquals(&c->callee->as.variable.name, constraint->name) &&
+        typchkConstantNumber(c->args[constraint->paramIndex], &value) &&
+        !constraint->isValid(value)) {
+      typchkErrorAtNodeFmt(
+          c->args[constraint->paramIndex],
+          "function %s expects argument %d to be %s but got %g.",
+          constraint->name, constraint->paramIndex + 1, constraint->expectation,
+          value);
+    }
   }
 }
 
