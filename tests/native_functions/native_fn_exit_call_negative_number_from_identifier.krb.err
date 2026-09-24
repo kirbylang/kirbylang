@@ -1,0 +1,15 @@
+== <script> ==
+0000    1 OP_NIL
+0001    | OP_RETURN
+== <script> ==
+0000    1 OP_CONSTANT         1 '1.000000'
+0002    | OP_NEGATE
+0003    | OP_DEFINE_GLOBAL    0 'exit_code'
+0005    3 OP_GET_GLOBAL       2 '@exit'
+0007    | OP_GET_GLOBAL       3 'exit_code'
+0009    | OP_CALL             1
+0011    | OP_POP
+0012    4 OP_NIL
+0013    | OP_RETURN
+function @exit expects argument 0 to be greater than or equal to 0 but got -1.
+[line 3] in script

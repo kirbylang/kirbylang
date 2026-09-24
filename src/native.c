@@ -1401,6 +1401,7 @@ static bool _isNonNegative(double value) { return value >= 0; }
 
 const NativeArgConstraint nativeArgConstraints[] = {
     {"@sqrt", 0, _isNonNegative, "a non-negative number"},
+    {"@exit", 0, _isNonNegative, "a non-negative number"},
 };
 
 const int nativeArgConstraintCount =
