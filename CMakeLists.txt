@@ -43,6 +43,21 @@ add_custom_command(
     COMMENT "Generating version.c"
 )
 
+set(STDLIB_KRB ${CMAKE_SOURCE_DIR}/stdlib/stdlib.krb)
+set(STDLIB_C ${GENERATED_DIR}/stdlib.c)
+
+add_custom_command(
+    OUTPUT ${STDLIB_C}
+    COMMAND bash
+        ${CMAKE_SOURCE_DIR}/scripts/generate_stdlib_c.sh
+        ${STDLIB_C}
+        ${STDLIB_KRB}
+    DEPENDS
+        ${STDLIB_KRB}
+        ${CMAKE_SOURCE_DIR}/scripts/generate_stdlib_c.sh
+    COMMENT "Generating stdlib.c"
+)
+
 # -----------------------------------------------------------------------------
 # Shared source list
 # -----------------------------------------------------------------------------
@@ -75,6 +90,7 @@ set(KIRBY_SOURCES
     src/value.c
     src/vm.c
     ${VERSION_C}
+    ${STDLIB_C}
 )
 
 # -----------------------------------------------------------------------------
@@ -259,6 +275,28 @@ if(BUILD_TESTS)
     add_test(
         NAME kirby-token-unit-test
         COMMAND kirby-token-unit-test
+    )
+
+    add_executable(kirby-stdlib-unit-test
+        unit/stdlib.c
+    )
+
+    target_link_libraries(kirby-stdlib-unit-test
+        PRIVATE
+            kirby_core_debug
+    )
+
+    target_compile_definitions(kirby-stdlib-unit-test
+        PRIVATE
+            KIRBY_STDLIB_PATH="${CMAKE_SOURCE_DIR}/stdlib/stdlib.krb"
+    )
+
+    configure_kirby_target(kirby-stdlib-unit-test)
+    enable_coverage(kirby-stdlib-unit-test)
+
+    add_test(
+        NAME kirby-stdlib-unit-test
+        COMMAND kirby-stdlib-unit-test
     )
 
     add_executable(kirby-opcode-unit-test

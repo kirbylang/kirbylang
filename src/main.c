@@ -14,6 +14,7 @@
 #include "strbuf.h"
 #include "token_stream.h"
 #include "typecheck.h"
+#include "stdlib_source.h"
 #include "version.h"
 #include "vm.h"
 
@@ -23,6 +24,7 @@ static CompiledUnit *compileSource(const char *source, bool typecheck);
 static void runFile(const char *path);
 static void runCode(const char *source);
 static void compileFile(const char *path);
+static void compileCode(const char *source);
 
 const char *help_message =
     "Usage: krb [-h] [-v] [-r|-f [path]|-x [source]|-l [path]|-p [path]]\n"
@@ -74,7 +76,7 @@ int main(int argc, char *argv[]) {
     case 'r':
       initVM(saved_argc, saved_argv);
       typchkSessionBegin();
-      runFile("stdlib/stdlib.krb");
+      runCode(KIRBY_STDLIB);
       repl();
       compilerSessionEnd();
       typchkSessionEnd();
@@ -84,7 +86,7 @@ int main(int argc, char *argv[]) {
     case 'f':
       initVM(saved_argc, saved_argv);
       typchkSessionBegin();
-      runFile("stdlib/stdlib.krb");
+      runCode(KIRBY_STDLIB);
       runFile(argv[optind]);
       compilerSessionEnd();
       typchkSessionEnd();
@@ -130,7 +132,7 @@ int main(int argc, char *argv[]) {
     }
     case 'c': {
       typchkSessionBegin();
-      compileFile("stdlib/stdlib.krb");
+      compileCode(KIRBY_STDLIB);
       compileFile(argv[optind]);
       compilerSessionEnd();
       typchkSessionEnd();
@@ -141,7 +143,7 @@ int main(int argc, char *argv[]) {
     case 'x':
       initVM(saved_argc, saved_argv);
       typchkSessionBegin();
-      runFile("stdlib/stdlib.krb");
+      runCode(KIRBY_STDLIB);
       char *source = argv[optind];
       runCode(source);
       compilerSessionEnd();
@@ -259,8 +261,12 @@ static CompiledUnit *compileSource(const char *source, bool typecheck) {
 
 static void compileFile(const char *path) {
   char *source = readFile(path);
-  CompiledUnit *unit = compileSource(source, /*typecheck=*/true);
+  compileCode(source);
   free(source);
+}
+
+static void compileCode(const char *source) {
+  CompiledUnit *unit = compileSource(source, /*typecheck=*/true);
 
   if (unit == NULL) {
     exit(EXIT_CODE_COMPILER_ERR);
