@@ -478,6 +478,13 @@
     ],
     "description": "Join an array of strings into one string"
   },
+  "Native: @strConcat": {
+    "prefix": "@strConcat",
+    "body": [
+      "@strConcat(${1:strings})$0"
+    ],
+    "description": "Concatenate an array of strings into one string"
+  },
   "Native: @is": {
     "prefix": "@is",
     "body": [

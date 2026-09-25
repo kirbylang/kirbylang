@@ -49,7 +49,7 @@
   - Arrays: `@arrJoin(array, separator)`
     - Every element must already be a string. There is no implicit conversion
       to string, so joining numbers means mapping `@numberToString` first
-  - Strings: `@strContains(s, sub)`, `@strIndexOf(s, sub)`, `@strSlice(s, start, end)`, `@strSplit(s, sep)`, `@strTrim(s)`, `@strToUpper(s)`, `@strToLower(s)`, `@strStartsWith(s, prefix)`, `@strEndsWith(s, suffix)`, `@strRepeat(s, count)`, `@strReplace(s, old, new)`, `@strReplaceAll(s, old, new)`
+  - Strings: `@strConcat(strings)`, `@strContains(s, sub)`, `@strIndexOf(s, sub)`, `@strSlice(s, start, end)`, `@strSplit(s, sep)`, `@strTrim(s)`, `@strToUpper(s)`, `@strToLower(s)`, `@strStartsWith(s, prefix)`, `@strEndsWith(s, suffix)`, `@strRepeat(s, count)`, `@strReplace(s, old, new)`, `@strReplaceAll(s, old, new)`
 - Native functions are now prefixed with `@` (e.g. `len(x)` becomes `@len(x)`)
   - `@` is now a reserved character identifiers
   - `__version__()` is now `@version()`
@@ -67,8 +67,8 @@
       `@strEndsWith`, `@strTrim`, `@strToUpper`, `@strToLower`, `@strRepeat`,
       `@strSplit`
     - Still unchecked, pending generics: `@len`, `@typeof`, `@instanceOf`,
-      `@is`, `@isNumber`, `@isFunction`, `@isBool`, `@isString`, `@isNil`, and
-      the `@arr*` family
+      `@is`, `@isNumber`, `@isFunction`, `@isBool`, `@isString`, `@isNil`,
+      `@strConcat`, and the `@arr*` family
     - Still unchecked, pending `Option[T]`: `@argv`, `@prompt`, `@stdin`,
       `@strIndexOf`
     - Still unchecked, pending more than two parameters: `@strSlice`,

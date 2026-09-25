@@ -643,6 +643,15 @@ print @strSlice("hello world", 0, 5); // hello
 print @strSlice("hello world", 6, 11); // world
 ```
 
+### `@strConcat`
+
+Concatenate an array of strings into one string. Every element must already be a string.
+
+```kirby
+print @strConcat(["Hello", ", ", "World"]); // Hello, World
+print @strConcat([]); // an empty string
+```
+
 ### `@strSplit`
 
 Split a string into an array of strings at each place the separator appears. An empty separator splits the string into single character strings.
