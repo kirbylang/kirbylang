@@ -508,10 +508,10 @@ typedef enum {
 typedef struct {
   AstNode *expr;
   StringConversion conversion;
-} StringPart;
+} InterpPart;
 
 typedef struct {
-  StringPart *parts;
+  InterpPart *parts;
   int count;
 } InterpStringNode;
 ```

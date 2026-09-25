@@ -381,7 +381,7 @@ typedef struct {
    * conversion from.
    */
   StringConversion conversion;
-} StringPart;
+} InterpPart;
 
 /**
  * `$"Hello {name}!"`
@@ -392,7 +392,7 @@ typedef struct {
    * expressions in source order. Empty text is left out, so `$"{a}{b}"`
    * joins two parts, not three.
    */
-  StringPart *parts;
+  InterpPart *parts;
   int count;
 } InterpStringNode;
 

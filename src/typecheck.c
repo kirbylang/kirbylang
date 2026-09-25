@@ -619,7 +619,7 @@ static Type *typchkInferInterpString(TypeEnv *env, AstNode *node) {
   InterpStringNode *is = &node->as.interpString;
 
   for (int i = 0; i < is->count; i++) {
-    StringPart *part = &is->parts[i];
+    InterpPart *part = &is->parts[i];
 
     // A NULL type means either an error was already reported, or the type
     // isn't known. Only the second needs its own error.

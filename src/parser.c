@@ -353,7 +353,8 @@ static AstNode *interpolation(Parser *parser, bool canAssign) {
   InterpStringNode *is = &node->as.interpString;
 
   is->count = parts.count;
-  is->parts = (StringPart *)astAllocRaw((size_t)parts.count * sizeof(StringPart));
+  is->parts =
+      (InterpPart *)astAllocRaw((size_t)parts.count * sizeof(InterpPart));
 
   for (int i = 0; i < parts.count; i++) {
     is->parts[i].expr = parts.data[i];
