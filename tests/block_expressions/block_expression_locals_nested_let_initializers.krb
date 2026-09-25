@@ -1,0 +1,19 @@
+fun nested(): f64 {
+    let a = {
+        let b = {
+            let c = 1;
+            c + 1
+        };
+        b * 10
+    };
+    a
+}
+
+fun afterLocals(): f64 {
+    let x = 100;
+    let y = { let n = 5; x + n };
+    x + y
+}
+
+print nested();
+print afterLocals();

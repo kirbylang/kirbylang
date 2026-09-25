@@ -6,9 +6,23 @@
 #include "opcode.h"
 #include "token.h"
 
+/**
+ * A local's depth from its declaration until its initializer finishes.
+ */
+#define LOCAL_UNINITIALIZED (-1)
+
 typedef struct {
   Token name;
+  /**
+   * The scope depth the local belongs to, or LOCAL_UNINITIALIZED.
+   */
   int depth;
+  /**
+   * Where the local's value lives in the call frame. This is not always its
+   * index in `locals`, because a block expression's locals can sit above
+   * operands, e.g. the callee in `f({ let n = 1; n })`.
+   */
+  int slot;
   bool isCaptured;
   bool isMutable;
 } Local;
@@ -50,6 +64,11 @@ struct FnCompiler {
   int localCount;
   Upvalue upvalues[UINT8_COUNT];
   int scopeDepth;
+  /**
+   * Values pushed for an instruction that hasn't run yet, e.g. the left
+   * operand of `a + b` while `b` compiles.
+   */
+  int operandCount;
 
   struct LoopCompiler *enclosingLoop;
 };

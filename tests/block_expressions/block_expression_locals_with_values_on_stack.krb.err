@@ -1,0 +1,71 @@
+== <script> ==
+0000    1 OP_NIL
+0001    | OP_RETURN
+== <script> ==
+0000    1 OP_CLOSURE          1 <fn id>
+0002    | OP_DEFINE_GLOBAL    0 'id'
+0004    7 OP_CLOSURE          3 <fn inFunction>
+0006    | OP_DEFINE_GLOBAL    2 'inFunction'
+0008    9 OP_CONSTANT         4 '1.000000'
+0010    | OP_CONSTANT         5 '2.000000'
+0012    | OP_GET_LOCAL        2
+0014    | OP_CONSTANT         6 '3.000000'
+0016    | OP_MULTIPLY
+0017    | OP_CLOSE_BLOCK_EXPR    1
+0019    | OP_ADD
+0020    | OP_PRINT
+0021   10 OP_CONSTANT         7 '0.000000'
+0023    | OP_CONSTANT         8 '2.000000'
+0025    | OP_GET_LOCAL        2
+0027    | OP_CLOSE_BLOCK_EXPR    1
+0029    | OP_ARRAY            2
+0031    | OP_PRINT
+0032   11 OP_GET_GLOBAL       9 'id'
+0034    | OP_CONSTANT        10 '2.000000'
+0036    | OP_GET_LOCAL        2
+0038    | OP_CONSTANT        11 '3.000000'
+0040    | OP_MULTIPLY
+0041    | OP_CLOSE_BLOCK_EXPR    1
+0043    | OP_CALL             1
+0045    | OP_PRINT
+0046   12 OP_GET_GLOBAL      12 'inFunction'
+0048    | OP_CALL             0
+0050    | OP_PRINT
+0051   13 OP_GET_GLOBAL      13 'id'
+0053    | OP_CONSTANT        14 '5.000000'
+0055    | OP_CLOSURE         15 <fn lambda0x1>
+0057      |                     local 2
+0059    | OP_GET_LOCAL        3
+0061    | OP_CALL             0
+0063    | OP_CLOSE_BLOCK_EXPR    2
+0065    | OP_CALL             1
+0067    | OP_PRINT
+0068   14 OP_GET_GLOBAL      16 'id'
+0070    | OP_CONSTANT        17 '1.000000'
+0072    | OP_CONSTANT        18 '1.000000'
+0074    | OP_CONSTANT        19 '2.000000'
+0076    | OP_GET_LOCAL        3
+0078    | OP_GET_LOCAL        4
+0080    | OP_ADD
+0081    | OP_CLOSE_BLOCK_EXPR    1
+0083    | OP_CLOSE_BLOCK_EXPR    1
+0085    | OP_ADD
+0086    | OP_CALL             1
+0088    | OP_PRINT
+0089   15 OP_NIL
+0090    | OP_RETURN
+== id ==
+0000    1 OP_GET_LOCAL        1
+0002    | OP_RETURN
+== inFunction ==
+0000    4 OP_CONSTANT         0 '1.000000'
+0002    5 OP_CONSTANT         1 '2.000000'
+0004    | OP_GET_LOCAL        2
+0006    | OP_GET_LOCAL        1
+0008    | OP_ADD
+0009    | OP_CLOSE_BLOCK_EXPR    1
+0011    6 OP_GET_LOCAL        2
+0013    | OP_RETURN
+== lambda0x1 ==
+0000   13 OP_GET_UPVALUE      0
+0002    | OP_RETURN

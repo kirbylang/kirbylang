@@ -1,0 +1,14 @@
+fun id(v: f64): f64 = v;
+
+fun inFunction(): f64 {
+    let a = 1;
+    let x = { let n = 2; n + a };
+    x
+}
+
+print 1 + { let n = 2; n * 3 };
+print [0, { let n = 2; n }];
+print id({ let n = 2; n * 3 });
+print inFunction();
+print id({ let n = 5; let f = fun (): f64 { n }; f() });
+print id(1 + { let a = 1; { let b = 2; a + b } });

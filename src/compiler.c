@@ -103,6 +103,7 @@ static void initCompiler(FnCompiler *compiler, FunctionType functionType,
   compiler->enclosing = current;
   compiler->type = functionType;
   compiler->localCount = 0;
+  compiler->operandCount = 0;
   compiler->scopeDepth = 0;
   compiler->upvalueCount = 0;
   compiler->fnIndex = cuAddFunction(compilingUnit);
@@ -139,6 +140,7 @@ static void initCompiler(FnCompiler *compiler, FunctionType functionType,
 
   Local *local = &current->locals[current->localCount++];
   local->depth = 0;
+  local->slot = 0;
   local->isCaptured = false;
   local->isMutable = false;
 
@@ -177,6 +179,17 @@ static uint8_t identifierConstant(Token *identifier) {
 }
 
 /**
+ * Has the local's initializer finished?
+ *
+ * An uninitialized local's value isn't on the stack yet. The reverse doesn't
+ * always hold: a local function is marked initialized before its closure is
+ * pushed, so it can call itself.
+ */
+static bool isInitialized(const Local *local) {
+  return local->depth != LOCAL_UNINITIALIZED;
+}
+
+/**
  * Resolve local variable by identifier
  *
  * @returns -1 if not found, otherwise the index of the local from the
@@ -188,7 +201,7 @@ static int resolveLocal(FnCompiler *compiler, Token *identifier) {
     Local *local = &compiler->locals[i];
 
     if (tokensEqual(identifier, &local->name)) {
-      if (local->depth == -1) {
+      if (!isInitialized(local)) {
         compilerErrorAtToken(
             identifier, "Can't read local variable in its own initializer");
       }
@@ -233,7 +246,8 @@ static int resolveUpvalue(FnCompiler *compiler, Token *name) {
   int local = resolveLocal(compiler->enclosing, name);
   if (local != -1) {
     compiler->enclosing->locals[local].isCaptured = true;
-    return addUpvalue(compiler, (uint8_t)local, true,
+    return addUpvalue(compiler,
+                      (uint8_t)compiler->enclosing->locals[local].slot, true,
                       compiler->enclosing->locals[local].isMutable);
   }
 
@@ -260,9 +274,19 @@ static void addLocal(Token name, bool isMutable) {
     }
   }
 
-  Local *local = &current->locals[current->localCount++];
+  // Uninitialized locals are waiting on their initializer, so their values
+  // aren't on the stack yet.
+  int onStack = 0;
+  for (int i = 0; i < current->localCount; i++) {
+    if (isInitialized(&current->locals[i]))
+      onStack++;
+  }
+
+  Local *local = &current->locals[current->localCount];
+  local->slot = onStack + current->operandCount;
+  current->localCount++;
   local->name = name;
-  local->depth = -1;
+  local->depth = LOCAL_UNINITIALIZED;
 
   local->isCaptured = false;
   local->isMutable = isMutable;
@@ -309,7 +333,7 @@ static VarRef resolveVariable(Token *name) {
   if (arg != -1) {
     ref.getOp = OP_GET_LOCAL;
     ref.setOp = OP_SET_LOCAL;
-    ref.arg = (uint8_t)arg;
+    ref.arg = (uint8_t)current->locals[arg].slot;
     ref.isMutable = current->locals[arg].isMutable;
   } else if ((arg = resolveUpvalue(current, name)) != -1) {
     ref.getOp = OP_GET_UPVALUE;
@@ -558,19 +582,25 @@ static void compileCall(CallNode *c) {
   if (c->callee->kind == NODE_GET) {
     GetNode *g = &c->callee->as.get;
     compileExpr(g->object);
+    current->operandCount++;
     uint8_t name = identifierConstant(&g->name);
     for (int i = 0; i < c->argCount; i++) {
       compileExpr(c->args[i]);
+      current->operandCount++;
     }
+    current->operandCount -= 1 + c->argCount;
     emitBytes(OP_INVOKE, name);
     emitByte((uint8_t)c->argCount);
     return;
   }
 
   compileExpr(c->callee);
+  current->operandCount++;
   for (int i = 0; i < c->argCount; i++) {
     compileExpr(c->args[i]);
+    current->operandCount++;
   }
+  current->operandCount -= 1 + c->argCount;
   emitBytes(OP_CALL, (uint8_t)c->argCount);
 }
 
@@ -637,7 +667,9 @@ static void compileExpr(AstNode *node) {
   case NODE_BINARY: {
     BinaryNode *b = &node->as.binary;
     compileExpr(b->left);
+    current->operandCount++;
     compileExpr(b->right);
+    current->operandCount--;
     switch (b->op.type) {
     case TOKEN_BANG_EQUAL:
       emitBytes(OP_EQUAL, OP_NOT);
@@ -740,15 +772,20 @@ static void compileExpr(AstNode *node) {
 
     VarRef ref = resolveVariable(&si->name);
     emitBytes(ref.getOp, ref.arg);
+    current->operandCount++;
 
     for (int i = 0; i < si->fieldCount; i++) {
       StructInitFieldNode *field = &si->fields[i];
 
       currentLine = field->name.line;
       emitBytes(OP_CONSTANT, identifierConstant(&field->name));
+      current->operandCount++;
 
       compileExpr(field->value);
+      current->operandCount++;
     }
+
+    current->operandCount -= 1 + 2 * si->fieldCount;
 
     currentLine = si->endLine;
     emitBytes(OP_STRUCT_INIT, (uint8_t)si->fieldCount);
@@ -767,7 +804,9 @@ static void compileExpr(AstNode *node) {
     SetNode *s = &node->as.set;
     compileExpr(s->object);
     uint8_t name = identifierConstant(&s->name);
+    current->operandCount++;
     compileExpr(s->value);
+    current->operandCount--;
     emitBytes(OP_SET_PROPERTY, name);
     break;
   }
@@ -794,7 +833,9 @@ static void compileExpr(AstNode *node) {
   case NODE_INDEX_GET: {
     IndexGetNode *ig = &node->as.indexGet;
     compileExpr(ig->object);
+    current->operandCount++;
     compileExpr(ig->index);
+    current->operandCount--;
     emitByte(OP_GET_INDEX);
     break;
   }
@@ -802,8 +843,11 @@ static void compileExpr(AstNode *node) {
   case NODE_INDEX_SET: {
     IndexSetNode *is = &node->as.indexSet;
     compileExpr(is->object);
+    current->operandCount++;
     compileExpr(is->index);
+    current->operandCount++;
     compileExpr(is->value);
+    current->operandCount -= 2;
     emitByte(OP_SET_INDEX);
     break;
   }
@@ -815,7 +859,9 @@ static void compileExpr(AstNode *node) {
     }
     for (int i = 0; i < arr->count; i++) {
       compileExpr(arr->items[i]);
+      current->operandCount++;
     }
+    current->operandCount -= arr->count;
     emitBytes(OP_ARRAY, (uint8_t)arr->count);
     break;
   }
