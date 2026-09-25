@@ -667,6 +667,102 @@ static void compileCall(CallNode *c) {
   emitBytes(OP_CALL, (uint8_t)c->argCount);
 }
 
+// Natives are always globals, and users can't declare `@` names, so a native
+// can be referenced by name without resolving locals or upvalues.
+static void emitGetNative(const char *name) {
+  emitBytes(OP_GET_GLOBAL, stringConstant(name, (int)strlen(name), NULL));
+}
+
+// The native that turns a value into a string, or NULL if it already is one
+static const char *stringConversionNative(StringConversion conversion) {
+  switch (conversion) {
+  case STRING_CONVERSION_NUMBER:
+    return "@numberToString";
+  case STRING_CONVERSION_BOOL:
+    return "@boolToString";
+  case STRING_CONVERSION_NONE:
+    break;
+  }
+  return NULL;
+}
+
+// Leaves the part, converted to a string, on the stack
+static void compileStringPart(StringPart *part) {
+  const char *native = stringConversionNative(part->conversion);
+
+  if (native != NULL)
+    emitGetNative(native);
+
+  compileExpr(part->expr);
+
+  if (native != NULL)
+    emitBytes(OP_CALL, 1);
+}
+
+/**
+ * Leaves all parts joined into one string on the stack.
+ *
+ * Compiles to `@arrJoin([part, part, ...], "")`, which copies each part once.
+ * A single part needs no join.
+ */
+static void compileStringJoin(StringPart *parts, int count, int line) {
+  assert(count <= UINT8_MAX);
+
+  if (count == 1) {
+    compileStringPart(&parts[0]);
+    return;
+  }
+
+  emitGetNative("@arrJoin");
+
+  for (int i = 0; i < count; i++) {
+    compileStringPart(&parts[i]);
+  }
+
+  currentLine = line;
+  emitBytes(OP_ARRAY, (uint8_t)count);
+  emitStringConstant("", 0);
+  emitBytes(OP_CALL, 2);
+}
+
+static AstNode *skipGroupings(AstNode *node) {
+  while (node->kind == NODE_GROUPING)
+    node = node->as.grouping.inner;
+  return node;
+}
+
+// Is this `+` on two strings, possibly in parentheses?
+static bool isStringConcat(AstNode *node) {
+  node = skipGroupings(node);
+  return node->kind == NODE_BINARY && node->as.binary.isStringConcat;
+}
+
+// How many strings a chain like `a + (b + c) + d` joins. Parentheses don't
+// change the result of joining strings, so they're looked through.
+static int countConcatOperands(AstNode *node) {
+  if (!isStringConcat(node))
+    return 1;
+
+  node = skipGroupings(node);
+  return countConcatOperands(node->as.binary.left) +
+         countConcatOperands(node->as.binary.right);
+}
+
+// Writes the strings a chain joins into `parts`, left to right
+static void collectConcatOperands(AstNode *node, StringPart *parts,
+                                  int *count) {
+  if (!isStringConcat(node)) {
+    parts[*count].expr = node;
+    parts[*count].conversion = STRING_CONVERSION_NONE;
+    (*count)++;
+    return;
+  }
+
+  node = skipGroupings(node);
+  collectConcatOperands(node->as.binary.left, parts, count);
+  collectConcatOperands(node->as.binary.right, parts, count);
+}
+
 /**
  * Is there a receiver in scope for `self` to refer to?
  *
@@ -729,6 +825,28 @@ static void compileExpr(AstNode *node) {
 
   case NODE_BINARY: {
     BinaryNode *b = &node->as.binary;
+
+    // Three or more strings joined with `+` copy each string once with
+    // @arrJoin, instead of copying the growing result at every `+`. Two
+    // strings are cheaper with a single OP_ADD.
+    if (b->isStringConcat) {
+      int count = countConcatOperands(node);
+
+      if (count >= 3 && count <= UINT8_MAX) {
+        StringPart *parts =
+            (StringPart *)astAllocRaw((size_t)count * sizeof(StringPart));
+        int collected = 0;
+
+        collectConcatOperands(node, parts, &collected);
+
+        // Start at the first string's line, not the last `+`'s, so line
+        // numbers don't jump backwards partway through the expression.
+        currentLine = parts[0].expr->line;
+        compileStringJoin(parts, collected, node->line);
+        break;
+      }
+    }
+
     compileExpr(b->left);
     compileExpr(b->right);
     switch (b->op.type) {
@@ -910,6 +1028,18 @@ static void compileExpr(AstNode *node) {
       compileExpr(arr->items[i]);
     }
     emitBytes(OP_ARRAY, (uint8_t)arr->count);
+    break;
+  }
+
+  case NODE_INTERP_STRING: {
+    InterpStringNode *is = &node->as.interpString;
+
+    if (is->count > UINT8_MAX) {
+      compilerErrorAtNode(node, "Too many parts in interpolated string.");
+      break;
+    }
+
+    compileStringJoin(is->parts, is->count, node->line);
     break;
   }
 

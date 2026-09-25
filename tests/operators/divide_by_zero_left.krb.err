@@ -59,23 +59,22 @@
 0011    | OP_GET_LOCAL        1
 0013    | OP_ADD
 0014    | OP_PRINT
-0015    4 OP_JUMP            15 -> 45
+0015    4 OP_JUMP            15 -> 48
 0018    | OP_POP
-0019    5 OP_CONSTANT         1 'FAIL '
-0021    | OP_GET_LOCAL        1
-0023    | OP_ADD
-0024    | OP_CONSTANT         2 ': expected '
-0026    | OP_ADD
-0027    | OP_GET_GLOBAL       3 '@numberToString'
+0019    5 OP_GET_GLOBAL       1 '@arrJoin'
+0021    | OP_CONSTANT         2 'FAIL '
+0023    | OP_GET_LOCAL        1
+0025    | OP_CONSTANT         3 ': expected '
+0027    | OP_GET_GLOBAL       4 '@numberToString'
 0029    | OP_GET_LOCAL        3
 0031    | OP_CALL             1
-0033    | OP_ADD
-0034    6 OP_CONSTANT         4 ' got '
-0036    | OP_ADD
-0037    | OP_GET_GLOBAL       5 '@numberToString'
-0039    | OP_GET_LOCAL        2
-0041    | OP_CALL             1
-0043    | OP_ADD
-0044    | OP_PRINT
-0045    8 OP_NIL
-0046    | OP_RETURN
+0033    6 OP_CONSTANT         5 ' got '
+0035    | OP_GET_GLOBAL       6 '@numberToString'
+0037    | OP_GET_LOCAL        2
+0039    | OP_CALL             1
+0041    | OP_ARRAY            6
+0043    | OP_CONSTANT         7 ''
+0045    | OP_CALL             2
+0047    | OP_PRINT
+0048    8 OP_NIL
+0049    | OP_RETURN

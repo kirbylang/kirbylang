@@ -1,0 +1,3 @@
+print @boolToString(true);
+print @boolToString(false);
+print @typeof(@boolToString(true));

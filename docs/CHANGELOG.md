@@ -15,7 +15,6 @@
 - [Type System](https://github.com/kirbylang/kirbylang/issues/17)
 - Number types
   - `u#` (e.g. `123u8`), `i#`, `f#`, `number`
-- [String interpolation](https://github.com/kirbylang/kirbylang/issues/15)
 - Lambda body expressions `var sum = fun (a, b) a + b;`
 - Native Functions
   - [ ] `print`, `println`, `eprint`, `eprintln`
@@ -33,10 +32,19 @@
   - Hoist structs during compilation
   - Deprecate the call syntax e.g. `Point()`
 - [`continue` keyword](https://github.com/kirbylang/kirbylang/issues/13)
+- [String interpolation](https://github.com/kirbylang/kirbylang/issues/15): `$"Hello {name}!"`
+  - New tokens: `TOKEN_INTERP_STRING`, `TOKEN_INTERP_START`, `TOKEN_INTERP_MIDDLE`, `TOKEN_INTERP_END`
+  - New AST node: `NODE_INTERP_STRING`
+  - Placeholders can be a `string`, `f64`, or `bool`
+  - `\{` and `\}` write literal braces. A bare `}` is an error.
+  - Compiles to `@arrJoin([...], "")`. No new opcode.
+- Three or more strings joined with `+` compile to one `@arrJoin([...], "")`
+  instead of an `OP_ADD` per `+`
 - Unit literal expression: `()`.
 - New native functions:
   - `@assert(condition, message)`
   - `@panic(message)`
+  - `@boolToString(b)`
   - Math: `@floor(n)`, `@round(n)`, `@trunc(n)`, `@abs(n)`, `@sqrt(n)`, `@pow(base, exponent`, `@min(a, b)`, `@max(a, b)`
   - Arrays: `@arrJoin(array, separator)`
     - Every element must already be a string. There is no implicit conversion
@@ -52,6 +60,7 @@
     - Calls to a native with a signature are checked like any other call
     - `@clock`, `@version`, `@exit`, `@rand`, `@rand01`, `@randBetween`,
       `@ceil`, `@readFileToString`, `@writeStringToFile`, `@numberToString`,
+      `@boolToString`,
       `@fileExists`, `@getenv`, `@setenv`, `@argc`, `@parseNumber`, `@strIsEmpty`,
       `@assert`, `@panic`, `@floor`, `@round`, `@trunc`, `@abs`, `@sqrt`,
       `@pow`, `@min`, `@max`, `@strContains`, `@strStartsWith`,

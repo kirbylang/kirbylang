@@ -22,6 +22,7 @@ static TokenType identifierType(Scanner *scanner);
 static Token identifier(Scanner *scanner);
 static Token number(Scanner *scanner);
 static Token string(Scanner *scanner);
+static Token interpSegment(Scanner *scanner, bool isFirst);
 static void skipWhitespace(Scanner *scanner);
 
 /**
@@ -33,6 +34,7 @@ void initScanner(Scanner *scanner, const char *source) {
   scanner->start = source;
   scanner->current = source;
   scanner->line = 1;
+  scanner->interpDepth = 0;
 }
 
 /**
@@ -61,6 +63,11 @@ Token scanToken(Scanner *scanner) {
   if (c == '@' && isAlpha(peek(scanner)))
     return identifier(scanner);
 
+  if (c == '$' && peek(scanner) == '"') {
+    advance(scanner);
+    return interpSegment(scanner, true);
+  }
+
   if (isDigit(c))
     return number(scanner);
 
@@ -70,8 +77,21 @@ Token scanToken(Scanner *scanner) {
   case ')':
     return makeToken(scanner, TOKEN_RIGHT_PAREN);
   case '{':
+    if (scanner->interpDepth > 0)
+      scanner->interpBraces[scanner->interpDepth - 1]++;
+
     return makeToken(scanner, TOKEN_LEFT_BRACE);
   case '}':
+    if (scanner->interpDepth > 0) {
+      int *open = &scanner->interpBraces[scanner->interpDepth - 1];
+
+      // This `}` closes the placeholder, not a brace inside it.
+      if (*open == 0)
+        return interpSegment(scanner, false);
+
+      (*open)--;
+    }
+
     return makeToken(scanner, TOKEN_RIGHT_BRACE);
   case '[':
     return makeToken(scanner, TOKEN_LEFT_BRACKET);
@@ -345,6 +365,50 @@ static Token string(Scanner *scanner) {
   // The closing quote.
   advance(scanner);
   return makeToken(scanner, TOKEN_STRING);
+}
+
+/**
+ * Scans the literal text of an interpolated string up to the next unescaped
+ * `{` (a placeholder starts) or the closing `"` (the string ends).
+ *
+ * `isFirst` is true right after `$"`, and false right after the `}` that
+ * closes a placeholder.
+ */
+static Token interpSegment(Scanner *scanner, bool isFirst) {
+  TRACELN("scanner.interpSegment()");
+
+  while (peek(scanner) != '"' && peek(scanner) != '{' && !isAtEnd(scanner)) {
+    if (peek(scanner) == '\n') {
+      scanner->line++;
+    }
+
+    if (peek(scanner) == '\\' && peekNext(scanner) != '\0') {
+      advance(scanner);
+    }
+
+    advance(scanner);
+  }
+
+  if (isAtEnd(scanner))
+    return errorToken(scanner, "Unterminated string.");
+
+  if (advance(scanner) == '{') {
+    if (isFirst) {
+      if (scanner->interpDepth == MAX_INTERP_DEPTH)
+        return errorToken(scanner, "Interpolated strings nested too deeply.");
+
+      scanner->interpBraces[scanner->interpDepth++] = 0;
+    }
+
+    return makeToken(scanner,
+                     isFirst ? TOKEN_INTERP_START : TOKEN_INTERP_MIDDLE);
+  }
+
+  if (isFirst)
+    return makeToken(scanner, TOKEN_INTERP_STRING);
+
+  scanner->interpDepth--;
+  return makeToken(scanner, TOKEN_INTERP_END);
 }
 
 static void skipWhitespace(Scanner *scanner) {

@@ -303,6 +303,13 @@
     ],
     "description": "Convert a number to a string"
   },
+  "Native: @boolToString": {
+    "prefix": "@boolToString",
+    "body": [
+      "@boolToString(${1:value})$0"
+    ],
+    "description": "Convert a boolean to a string"
+  },
   "Native: @fileExists": {
     "prefix": "@fileExists",
     "body": [

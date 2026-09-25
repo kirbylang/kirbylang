@@ -835,6 +835,15 @@ static Value numberToStringNative(VM *vm, int argCount, Value *args) {
   return OBJ_VAL(copyString(vm->gc, buffer, length));
 }
 
+static Value boolToStringNative(VM *vm, int argCount, Value *args) {
+  assertArgCount(vm, "@boolToString", 1, argCount);
+  assertArgIsBool(vm, "@boolToString", args, 0);
+
+  const char *text = AS_BOOL(args[0]) ? "true" : "false";
+
+  return OBJ_VAL(copyString(vm->gc, text, (int)strlen(text)));
+}
+
 static Value floorNative(VM *vm, int argCount, Value *args) {
   assertArgCount(vm, "@floor", 1, argCount);
   assertArgIsNumber(vm, "@floor", args, 0);
@@ -1300,6 +1309,7 @@ const NativeDefinition nativeDefinitions[] = {
     {"@readFileToString", readFileToStringNative},
     {"@writeStringToFile", writeStringToFileNative},
     {"@numberToString", numberToStringNative},
+    {"@boolToString", boolToStringNative},
     {"@fileExists", fileExistsNative},
     {"@getenv", getEnvNative},
     {"@setenv", setEnvNative},
@@ -1369,6 +1379,7 @@ const NativeSignature nativeSignatures[] = {
     {"@readFileToString", {NATIVE_STRING}, 1, NATIVE_STRING},
     {"@writeStringToFile", {NATIVE_STRING, NATIVE_STRING}, 2, NATIVE_UNIT},
     {"@numberToString", {NATIVE_F64}, 1, NATIVE_STRING},
+    {"@boolToString", {NATIVE_BOOL}, 1, NATIVE_STRING},
     {"@fileExists", {NATIVE_STRING}, 1, NATIVE_BOOL},
     {"@getenv", {NATIVE_STRING}, 1, NATIVE_STRING},
     {"@setenv", {NATIVE_STRING, NATIVE_STRING}, 2, NATIVE_UNIT},

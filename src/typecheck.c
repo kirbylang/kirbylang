@@ -381,6 +381,7 @@ static Type *typchkInferIndexGet(TypeEnv *env, AstNode *node);
 static Type *typchkInferIndexSet(TypeEnv *env, AstNode *node);
 static Type *typchkInferStructInit(TypeEnv *env, AstNode *node);
 static Type *typchkInferArray(TypeEnv *env, AstNode *node);
+static Type *typchkInferInterpString(TypeEnv *env, AstNode *node);
 static Type *typchkInferIf(TypeEnv *env, AstNode *node);
 static Type *typchkInferBlock(TypeEnv *env, AstNode *node);
 static Type *typchkCheckBlockContents(TypeEnv *env, BlockNode *block,
@@ -426,6 +427,8 @@ Type *typchkInfer(TypeEnv *env, AstNode *node) {
     return typchkInferStructInit(env, node);
   case NODE_ARRAY:
     return typchkInferArray(env, node);
+  case NODE_INTERP_STRING:
+    return typchkInferInterpString(env, node);
   case NODE_IF:
     return typchkInferIf(env, node);
   case NODE_BLOCK:
@@ -541,8 +544,10 @@ static Type *typchkInferBinary(TypeEnv *env, AstNode *node) {
       return typeF64();
 
     if (typesEqual(leftType, typeString()) &&
-        typesEqual(rightType, typeString()))
+        typesEqual(rightType, typeString())) {
+      b->isStringConcat = true;
       return typeString();
+    }
 
     typchkErrorAtTokenFmt(&b->op,
                           "'+' needs two f64s or two strings, got %s and %s.",
@@ -606,6 +611,51 @@ static Type *typchkInferBinary(TypeEnv *env, AstNode *node) {
     typchkErrorAtToken(&b->op, "Internal: unhandled binary operator.");
     return NULL;
   }
+}
+
+// Infer the type of an interpolated string. Also records how each placeholder
+// becomes a string, because the compiler has no types to decide that itself.
+static Type *typchkInferInterpString(TypeEnv *env, AstNode *node) {
+  InterpStringNode *is = &node->as.interpString;
+
+  for (int i = 0; i < is->count; i++) {
+    StringPart *part = &is->parts[i];
+
+    // A NULL type means either an error was already reported, or the type
+    // isn't known. Only the second needs its own error.
+    bool hadErrorBefore = hadError;
+    hadError = false;
+
+    Type *type = typchkInfer(env, part->expr);
+
+    bool partHadError = hadError;
+    hadError = hadErrorBefore || partHadError;
+
+    if (type == NULL) {
+      if (!partHadError) {
+        typchkErrorAtNode(part->expr,
+                          "Can't tell the type of this placeholder. Declare it "
+                          "before this line, or give it a type, e.g. 'let n: "
+                          "f64 = ...;'.");
+      }
+      continue;
+    }
+
+    if (typesEqual(type, typeString())) {
+      part->conversion = STRING_CONVERSION_NONE;
+    } else if (typesEqual(type, typeF64())) {
+      part->conversion = STRING_CONVERSION_NUMBER;
+    } else if (typesEqual(type, typeBool())) {
+      part->conversion = STRING_CONVERSION_BOOL;
+    } else {
+      typchkErrorAtNodeFmt(part->expr,
+                           "Can't interpolate %s. Only string, f64, and bool "
+                           "can be interpolated.",
+                           typeToString(type));
+    }
+  }
+
+  return typeString();
 }
 
 // Infer the type of an variable/identifier expression

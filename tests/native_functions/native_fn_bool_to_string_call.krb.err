@@ -1,0 +1,20 @@
+== <script> ==
+0000    1 OP_NIL
+0001    | OP_RETURN
+== <script> ==
+0000    1 OP_GET_GLOBAL       0 '@boolToString'
+0002    | OP_TRUE
+0003    | OP_CALL             1
+0005    | OP_PRINT
+0006    2 OP_GET_GLOBAL       1 '@boolToString'
+0008    | OP_FALSE
+0009    | OP_CALL             1
+0011    | OP_PRINT
+0012    3 OP_GET_GLOBAL       2 '@typeof'
+0014    | OP_GET_GLOBAL       3 '@boolToString'
+0016    | OP_TRUE
+0017    | OP_CALL             1
+0019    | OP_CALL             1
+0021    | OP_PRINT
+0022    4 OP_NIL
+0023    | OP_RETURN

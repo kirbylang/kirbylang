@@ -237,22 +237,22 @@
 0460  127 OP_NIL
 0461    | OP_RETURN
 == toString ==
-0000   11 OP_CONSTANT         0 '('
-0002    | OP_GET_GLOBAL       1 '@numberToString'
-0004    | OP_GET_LOCAL        0
-0006    | OP_GET_PROPERTY     2 'x'
-0008    | OP_CALL             1
-0010    | OP_ADD
-0011    | OP_CONSTANT         3 ','
-0013    | OP_ADD
-0014    | OP_GET_GLOBAL       4 '@numberToString'
+0000   11 OP_GET_GLOBAL       0 '@arrJoin'
+0002    | OP_CONSTANT         1 '('
+0004    | OP_GET_GLOBAL       2 '@numberToString'
+0006    | OP_GET_LOCAL        0
+0008    | OP_GET_PROPERTY     3 'x'
+0010    | OP_CALL             1
+0012    | OP_CONSTANT         4 ','
+0014    | OP_GET_GLOBAL       5 '@numberToString'
 0016    | OP_GET_LOCAL        0
-0018    | OP_GET_PROPERTY     5 'y'
+0018    | OP_GET_PROPERTY     6 'y'
 0020    | OP_CALL             1
-0022    | OP_ADD
-0023    | OP_CONSTANT         6 ')'
-0025    | OP_ADD
-0026    | OP_RETURN
+0022    | OP_CONSTANT         7 ')'
+0024    | OP_ARRAY            5
+0026    | OP_CONSTANT         8 ''
+0028    | OP_CALL             2
+0030    | OP_RETURN
 == equals ==
 0000   15 OP_GET_LOCAL        0
 0002    | OP_GET_PROPERTY     0 'x'

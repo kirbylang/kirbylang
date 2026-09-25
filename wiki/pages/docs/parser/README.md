@@ -72,6 +72,7 @@ struct AstNode {
 		TypeNode type_;
 		TypeAliasNode typeAlias;
 		TypeFunctionNode typeFunction;
+		InterpStringNode interpString;
 	} as;
 };
 ```
@@ -112,6 +113,10 @@ typedef struct {
 Token op;
 AstNode *left;
 AstNode *right;
+/**
+ * `+` on two strings. Set by the type checker.
+ */
+bool isStringConcat;
 } BinaryNode;
 ```
 
@@ -488,6 +493,29 @@ typedef struct {
 } ArrayNode;
 ```
 
+### Interpolated Strings
+
+`$"Hello {name}!"`. The type checker sets each part's `conversion`, and the
+compiler joins the parts with `@arrJoin`.
+
+```c
+typedef enum {
+  STRING_CONVERSION_NONE,   // already a string
+  STRING_CONVERSION_NUMBER, // @numberToString
+  STRING_CONVERSION_BOOL,   // @boolToString
+} StringConversion;
+
+typedef struct {
+  AstNode *expr;
+  StringConversion conversion;
+} StringPart;
+
+typedef struct {
+  StringPart *parts;
+  int count;
+} InterpStringNode;
+```
+
 ```c
 void arrayNodeDataInit(ArrayNodeData *and);
 void arrayNodeDataWrite(ArrayNodeData *and, AstNode *item);
@@ -532,3 +560,4 @@ void arrayNodeDataFree(ArrayNodeData *and);
 |  31 | `NODE_TYPE`          |
 |  32 | `NODE_TYPE_ALIAS`    |
 |  33 | `NODE_TYPE_FUNCTION` |
+|  34 | `NODE_INTERP_STRING` |

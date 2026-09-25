@@ -517,6 +517,16 @@ print @isString("Hello World"); // true
 print @isString(123); // false
 ```
 
+## Booleans
+
+### `@boolToString`
+
+Convert a boolean to a string.
+
+```kirby
+print @boolToString(true); // "true"
+```
+
 ## Numbers
 
 ### `@numberToString`

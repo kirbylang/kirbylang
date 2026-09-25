@@ -41,6 +41,7 @@ typedef enum {
   NODE_TYPE,
   NODE_TYPE_ALIAS,
   NODE_TYPE_FUNCTION,
+  NODE_INTERP_STRING,
   // Sentinel
   NODE_COUNT
 } NodeKind;
@@ -78,6 +79,11 @@ typedef struct {
   Token op;
   AstNode *left;
   AstNode *right;
+  /**
+   * `+` on two strings. The compiler has no types, so the type checker sets
+   * this to let it join chains of strings with @arrJoin.
+   */
+  bool isStringConcat;
 } BinaryNode;
 
 typedef struct {
@@ -359,6 +365,37 @@ typedef struct {
   int count;
 } ArrayNode;
 
+/**
+ * How a piece of a joined string becomes a string.
+ */
+typedef enum {
+  STRING_CONVERSION_NONE,   // already a string
+  STRING_CONVERSION_NUMBER, // @numberToString
+  STRING_CONVERSION_BOOL,   // @boolToString
+} StringConversion;
+
+typedef struct {
+  AstNode *expr;
+  /**
+   * Set by the type checker, because the compiler has no types to choose a
+   * conversion from.
+   */
+  StringConversion conversion;
+} StringPart;
+
+/**
+ * `$"Hello {name}!"`
+ */
+typedef struct {
+  /**
+   * arena-allocated. Literal text (NODE_LITERAL strings) and placeholder
+   * expressions in source order. Empty text is left out, so `$"{a}{b}"`
+   * joins two parts, not three.
+   */
+  StringPart *parts;
+  int count;
+} InterpStringNode;
+
 void arrayNodeDataInit(ArrayNodeData *and);
 void arrayNodeDataWrite(ArrayNodeData *and, AstNode *item);
 void arrayNodeDataFree(ArrayNodeData *and);
@@ -399,6 +436,7 @@ struct AstNode {
     TypeNode type_;
     TypeAliasNode typeAlias;
     TypeFunctionNode typeFunction;
+    InterpStringNode interpString;
   } as;
 };
 

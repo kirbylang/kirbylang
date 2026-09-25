@@ -1,0 +1,3 @@
+struct Point {}
+
+print $"point={Point {}}";

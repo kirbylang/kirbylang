@@ -1,0 +1,7 @@
+let a = "a";
+let b = "b";
+
+print a + b;
+print a + b + "c";
+print "x" + (a + b) + "y";
+print (1 + 2) + 3;
