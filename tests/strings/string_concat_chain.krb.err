@@ -10,28 +10,26 @@
 0010    | OP_GET_GLOBAL       5 'b'
 0012    | OP_ADD
 0013    | OP_PRINT
-0014    5 OP_GET_GLOBAL       6 '@arrJoin'
+0014    5 OP_GET_GLOBAL       6 '@strConcat'
 0016    | OP_GET_GLOBAL       7 'a'
 0018    | OP_GET_GLOBAL       8 'b'
 0020    | OP_CONSTANT         9 'c'
 0022    | OP_ARRAY            3
-0024    | OP_CONSTANT        10 ''
-0026    | OP_CALL             2
-0028    | OP_PRINT
-0029    6 OP_GET_GLOBAL      11 '@arrJoin'
-0031    | OP_CONSTANT        12 'x'
-0033    | OP_GET_GLOBAL      13 'a'
-0035    | OP_GET_GLOBAL      14 'b'
-0037    | OP_CONSTANT        15 'y'
-0039    | OP_ARRAY            4
-0041    | OP_CONSTANT        16 ''
-0043    | OP_CALL             2
-0045    | OP_PRINT
-0046    7 OP_CONSTANT        17 '1.000000'
-0048    | OP_CONSTANT        18 '2.000000'
-0050    | OP_ADD
-0051    | OP_CONSTANT        19 '3.000000'
-0053    | OP_ADD
-0054    | OP_PRINT
-0055    8 OP_NIL
-0056    | OP_RETURN
+0024    | OP_CALL             1
+0026    | OP_PRINT
+0027    6 OP_GET_GLOBAL      10 '@strConcat'
+0029    | OP_CONSTANT        11 'x'
+0031    | OP_GET_GLOBAL      12 'a'
+0033    | OP_GET_GLOBAL      13 'b'
+0035    | OP_CONSTANT        14 'y'
+0037    | OP_ARRAY            4
+0039    | OP_CALL             1
+0041    | OP_PRINT
+0042    7 OP_CONSTANT        15 '1.000000'
+0044    | OP_CONSTANT        16 '2.000000'
+0046    | OP_ADD
+0047    | OP_CONSTANT        17 '3.000000'
+0049    | OP_ADD
+0050    | OP_PRINT
+0051    8 OP_NIL
+0052    | OP_RETURN

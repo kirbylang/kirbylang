@@ -81,7 +81,7 @@ typedef struct {
   AstNode *right;
   /**
    * `+` on two strings. The compiler has no types, so the type checker sets
-   * this to let it join chains of strings with @arrJoin.
+   * this to let it join chains of strings with @strConcat.
    */
   bool isStringConcat;
 } BinaryNode;

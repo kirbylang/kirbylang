@@ -674,21 +674,21 @@ static void emitGetNative(const char *name) {
 }
 
 /**
- * Joining strings: `@arrJoin([s1, s2, ...], "")`.
+ * Joining strings: `@strConcat([s1, s2, ...])`.
  *
  * Shared by string interpolation and `+` chains of strings. It copies each
  * string once, instead of copying a growing result for every string added.
- * Call emitJoinStart, compile the strings, then call emitJoinEnd.
+ * Call emitNativeStrConcatStart, compile the strings, then call
+ * emitNativeStrConcatEnd.
  */
-static void emitJoinStart(void) { emitGetNative("@arrJoin"); }
+static void emitNativeStrConcatStart(void) { emitGetNative("@strConcat"); }
 
-static void emitJoinEnd(int count, int line) {
+static void emitNativeStrConcatEnd(int count, int line) {
   assert(count <= UINT8_MAX);
 
   currentLine = line;
   emitBytes(OP_ARRAY, (uint8_t)count);
-  emitStringConstant("", 0);
-  emitBytes(OP_CALL, 2);
+  emitBytes(OP_CALL, 1);
 }
 
 /**
@@ -736,13 +736,13 @@ static void compileInterpString(AstNode *node) {
     return;
   }
 
-  emitJoinStart();
+  emitNativeStrConcatStart();
 
   for (int i = 0; i < is->count; i++) {
     compileInterpPart(&is->parts[i]);
   }
 
-  emitJoinEnd(is->count, node->line);
+  emitNativeStrConcatEnd(is->count, node->line);
 }
 
 /**
@@ -815,13 +815,13 @@ static bool compileStringConcatChain(AstNode *node) {
   // Start at the first string's line, not the last `+`'s, so line numbers
   // don't jump backwards partway through the expression.
   currentLine = operands[0]->line;
-  emitJoinStart();
+  emitNativeStrConcatStart();
 
   for (int i = 0; i < count; i++) {
     compileExpr(operands[i]);
   }
 
-  emitJoinEnd(count, node->line);
+  emitNativeStrConcatEnd(count, node->line);
   return true;
 }
 

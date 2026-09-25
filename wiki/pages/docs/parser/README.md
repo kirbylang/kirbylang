@@ -496,7 +496,7 @@ typedef struct {
 ### Interpolated Strings
 
 `$"Hello {name}!"`. The type checker sets each part's `conversion`, and the
-compiler joins the parts with `@arrJoin`.
+compiler joins the parts with `@strConcat`.
 
 ```c
 typedef enum {

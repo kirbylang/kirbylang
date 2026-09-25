@@ -37,8 +37,8 @@
   - New AST node: `NODE_INTERP_STRING`
   - Placeholders can be a `string`, `f64`, or `bool`
   - `\{` and `\}` write literal braces. A bare `}` is an error.
-  - Compiles to `@arrJoin([...], "")`. No new opcode.
-- Three or more strings joined with `+` compile to one `@arrJoin([...], "")`
+  - Compiles to `@strConcat([...])`. No new opcode.
+- Three or more strings joined with `+` compile to one `@strConcat([...])`
   instead of an `OP_ADD` per `+`
 - Unit literal expression: `()`.
 - New native functions:

@@ -2,67 +2,61 @@
 0000    1 OP_NIL
 0001    | OP_RETURN
 == <script> ==
-0000    1 OP_GET_GLOBAL       0 '@arrJoin'
+0000    1 OP_GET_GLOBAL       0 '@strConcat'
 0002    | OP_CONSTANT         1 '['
 0004    | OP_GET_GLOBAL       2 '@strTrim'
 0006    | OP_CONSTANT         3 '  hello  '
 0008    | OP_CALL             1
 0010    | OP_CONSTANT         4 ']'
 0012    | OP_ARRAY            3
-0014    | OP_CONSTANT         5 ''
-0016    | OP_CALL             2
-0018    | OP_PRINT
-0019    2 OP_GET_GLOBAL       6 '@arrJoin'
-0021    | OP_CONSTANT         7 '['
-0023    | OP_GET_GLOBAL       8 '@strTrim'
-0025    | OP_CONSTANT         9 '	
+0014    | OP_CALL             1
+0016    | OP_PRINT
+0017    2 OP_GET_GLOBAL       5 '@strConcat'
+0019    | OP_CONSTANT         6 '['
+0021    | OP_GET_GLOBAL       7 '@strTrim'
+0023    | OP_CONSTANT         8 '	
  hi 
 '
-0027    | OP_CALL             1
-0029    | OP_CONSTANT        10 ']'
-0031    | OP_ARRAY            3
-0033    | OP_CONSTANT        11 ''
-0035    | OP_CALL             2
-0037    | OP_PRINT
-0038    3 OP_GET_GLOBAL      12 '@arrJoin'
-0040    | OP_CONSTANT        13 '['
-0042    | OP_GET_GLOBAL      14 '@strTrim'
-0044    | OP_CONSTANT        15 'no-trim'
-0046    | OP_CALL             1
-0048    | OP_CONSTANT        16 ']'
-0050    | OP_ARRAY            3
-0052    | OP_CONSTANT        17 ''
-0054    | OP_CALL             2
-0056    | OP_PRINT
-0057    4 OP_GET_GLOBAL      18 '@arrJoin'
-0059    | OP_CONSTANT        19 '['
-0061    | OP_GET_GLOBAL      20 '@strTrim'
-0063    | OP_CONSTANT        21 '   '
+0025    | OP_CALL             1
+0027    | OP_CONSTANT         9 ']'
+0029    | OP_ARRAY            3
+0031    | OP_CALL             1
+0033    | OP_PRINT
+0034    3 OP_GET_GLOBAL      10 '@strConcat'
+0036    | OP_CONSTANT        11 '['
+0038    | OP_GET_GLOBAL      12 '@strTrim'
+0040    | OP_CONSTANT        13 'no-trim'
+0042    | OP_CALL             1
+0044    | OP_CONSTANT        14 ']'
+0046    | OP_ARRAY            3
+0048    | OP_CALL             1
+0050    | OP_PRINT
+0051    4 OP_GET_GLOBAL      15 '@strConcat'
+0053    | OP_CONSTANT        16 '['
+0055    | OP_GET_GLOBAL      17 '@strTrim'
+0057    | OP_CONSTANT        18 '   '
+0059    | OP_CALL             1
+0061    | OP_CONSTANT        19 ']'
+0063    | OP_ARRAY            3
 0065    | OP_CALL             1
-0067    | OP_CONSTANT        22 ']'
-0069    | OP_ARRAY            3
-0071    | OP_CONSTANT        23 ''
-0073    | OP_CALL             2
-0075    | OP_PRINT
-0076    5 OP_GET_GLOBAL      24 '@arrJoin'
-0078    | OP_CONSTANT        25 '['
-0080    | OP_GET_GLOBAL      26 '@strTrim'
-0082    | OP_CONSTANT        27 ''
-0084    | OP_CALL             1
-0086    | OP_CONSTANT        28 ']'
-0088    | OP_ARRAY            3
-0090    | OP_CONSTANT        29 ''
-0092    | OP_CALL             2
-0094    | OP_PRINT
-0095    6 OP_GET_GLOBAL      30 '@arrJoin'
-0097    | OP_CONSTANT        31 '['
-0099    | OP_GET_GLOBAL      32 '@strTrim'
-0101    | OP_CONSTANT        33 ' a  b '
-0103    | OP_CALL             1
-0105    | OP_CONSTANT        34 ']'
-0107    | OP_ARRAY            3
-0109    | OP_CONSTANT        35 ''
-0111    | OP_CALL             2
-0113    | OP_PRINT
-0114    7 OP_NIL
-0115    | OP_RETURN
+0067    | OP_PRINT
+0068    5 OP_GET_GLOBAL      20 '@strConcat'
+0070    | OP_CONSTANT        21 '['
+0072    | OP_GET_GLOBAL      22 '@strTrim'
+0074    | OP_CONSTANT        23 ''
+0076    | OP_CALL             1
+0078    | OP_CONSTANT        24 ']'
+0080    | OP_ARRAY            3
+0082    | OP_CALL             1
+0084    | OP_PRINT
+0085    6 OP_GET_GLOBAL      25 '@strConcat'
+0087    | OP_CONSTANT        26 '['
+0089    | OP_GET_GLOBAL      27 '@strTrim'
+0091    | OP_CONSTANT        28 ' a  b '
+0093    | OP_CALL             1
+0095    | OP_CONSTANT        29 ']'
+0097    | OP_ARRAY            3
+0099    | OP_CALL             1
+0101    | OP_PRINT
+0102    7 OP_NIL
+0103    | OP_RETURN

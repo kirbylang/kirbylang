@@ -9,7 +9,7 @@
 0008    8 OP_GET_GLOBAL       4 'describe'
 0010    | OP_CALL             0
 0012    | OP_PRINT
-0013    9 OP_GET_GLOBAL       5 '@arrJoin'
+0013    9 OP_GET_GLOBAL       5 '@strConcat'
 0015    | OP_CONSTANT         6 'a '
 0017    | OP_GET_GLOBAL       7 'name'
 0019    | OP_CONSTANT         8 ' b '
@@ -20,25 +20,23 @@
 0028    | OP_CLOSE_BLOCK_EXPR    1
 0030    | OP_CONSTANT        10 ' c'
 0032    | OP_ARRAY            5
-0034    | OP_CONSTANT        11 ''
-0036    | OP_CALL             2
-0038    | OP_PRINT
-0039   10 OP_GET_GLOBAL      12 '@arrJoin'
-0041    | OP_CONSTANT        13 'a'
-0043    | OP_CONSTANT        14 'b'
-0045    | OP_GET_LOCAL        3
-0047    | OP_CLOSE_BLOCK_EXPR    1
-0049    | OP_CONSTANT        15 'c'
-0051    | OP_GET_GLOBAL      16 'name'
-0053    | OP_ARRAY            4
-0055    | OP_CONSTANT        17 ''
-0057    | OP_CALL             2
-0059    | OP_PRINT
-0060   11 OP_NIL
-0061    | OP_RETURN
+0034    | OP_CALL             1
+0036    | OP_PRINT
+0037   10 OP_GET_GLOBAL      11 '@strConcat'
+0039    | OP_CONSTANT        12 'a'
+0041    | OP_CONSTANT        13 'b'
+0043    | OP_GET_LOCAL        3
+0045    | OP_CLOSE_BLOCK_EXPR    1
+0047    | OP_CONSTANT        14 'c'
+0049    | OP_GET_GLOBAL      15 'name'
+0051    | OP_ARRAY            4
+0053    | OP_CALL             1
+0055    | OP_PRINT
+0056   11 OP_NIL
+0057    | OP_RETURN
 == describe ==
 0000    4 OP_CONSTANT         0 'Hello'
-0002    5 OP_GET_GLOBAL       1 '@arrJoin'
+0002    5 OP_GET_GLOBAL       1 '@strConcat'
 0004    | OP_GET_LOCAL        1
 0006    | OP_CONSTANT         2 ', '
 0008    | OP_GET_GLOBAL       3 '@numberToString'
@@ -58,6 +56,5 @@
 0033    | OP_CLOSE_BLOCK_EXPR    1
 0035    | OP_CALL             1
 0037    | OP_ARRAY            7
-0039    | OP_CONSTANT        10 ''
-0041    | OP_CALL             2
-0043    | OP_RETURN
+0039    | OP_CALL             1
+0041    | OP_RETURN

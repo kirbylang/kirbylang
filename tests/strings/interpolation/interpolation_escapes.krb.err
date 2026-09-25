@@ -4,14 +4,13 @@
 == <script> ==
 0000    1 OP_CONSTANT         1 'World'
 0002    | OP_DEFINE_GLOBAL    0 'name'
-0004    3 OP_GET_GLOBAL       2 '@arrJoin'
+0004    3 OP_GET_GLOBAL       2 '@strConcat'
 0006    | OP_CONSTANT         3 '{name} is '
 0008    | OP_GET_GLOBAL       4 'name'
 0010    | OP_ARRAY            2
-0012    | OP_CONSTANT         5 ''
-0014    | OP_CALL             2
-0016    | OP_PRINT
-0017    4 OP_CONSTANT         6 'tab:	quote:"'
-0019    | OP_PRINT
-0020    5 OP_NIL
-0021    | OP_RETURN
+0012    | OP_CALL             1
+0014    | OP_PRINT
+0015    4 OP_CONSTANT         5 'tab:	quote:"'
+0017    | OP_PRINT
+0018    5 OP_NIL
+0019    | OP_RETURN

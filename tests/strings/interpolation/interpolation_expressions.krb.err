@@ -21,7 +21,7 @@
 0031    | OP_CONSTANT        12 'b'
 0033    | OP_ARRAY            2
 0035    | OP_DEFINE_GLOBAL   10 'items'
-0037    9 OP_GET_GLOBAL      13 '@arrJoin'
+0037    9 OP_GET_GLOBAL      13 '@strConcat'
 0039    | OP_CONSTANT        14 'sum='
 0041    | OP_GET_GLOBAL      15 '@numberToString'
 0043    | OP_GET_GLOBAL      16 'p'
@@ -31,41 +31,37 @@
 0051    | OP_ADD
 0052    | OP_CALL             1
 0054    | OP_ARRAY            2
-0056    | OP_CONSTANT        20 ''
-0058    | OP_CALL             2
-0060    | OP_PRINT
-0061   10 OP_GET_GLOBAL      21 '@arrJoin'
-0063    | OP_CONSTANT        22 'first='
-0065    | OP_GET_GLOBAL      23 'items'
-0067    | OP_CONSTANT        24 '0.000000'
-0069    | OP_GET_INDEX
-0070    | OP_ARRAY            2
-0072    | OP_CONSTANT        25 ''
-0074    | OP_CALL             2
-0076    | OP_PRINT
-0077   11 OP_GET_GLOBAL      26 '@arrJoin'
-0079    | OP_CONSTANT        27 'struct='
-0081    | OP_GET_GLOBAL      28 '@numberToString'
-0083    | OP_GET_GLOBAL      29 'Point'
-0085    | OP_CONSTANT        30 'x'
-0087    | OP_CONSTANT        31 '5.000000'
-0089    | OP_CONSTANT        32 'y'
-0091    | OP_CONSTANT        33 '6.000000'
-0093    | OP_STRUCT_INIT      2
-0095    | OP_GET_PROPERTY    34 'x'
+0056    | OP_CALL             1
+0058    | OP_PRINT
+0059   10 OP_GET_GLOBAL      20 '@strConcat'
+0061    | OP_CONSTANT        21 'first='
+0063    | OP_GET_GLOBAL      22 'items'
+0065    | OP_CONSTANT        23 '0.000000'
+0067    | OP_GET_INDEX
+0068    | OP_ARRAY            2
+0070    | OP_CALL             1
+0072    | OP_PRINT
+0073   11 OP_GET_GLOBAL      24 '@strConcat'
+0075    | OP_CONSTANT        25 'struct='
+0077    | OP_GET_GLOBAL      26 '@numberToString'
+0079    | OP_GET_GLOBAL      27 'Point'
+0081    | OP_CONSTANT        28 'x'
+0083    | OP_CONSTANT        29 '5.000000'
+0085    | OP_CONSTANT        30 'y'
+0087    | OP_CONSTANT        31 '6.000000'
+0089    | OP_STRUCT_INIT      2
+0091    | OP_GET_PROPERTY    32 'x'
+0093    | OP_CALL             1
+0095    | OP_ARRAY            2
 0097    | OP_CALL             1
-0099    | OP_ARRAY            2
-0101    | OP_CONSTANT        35 ''
-0103    | OP_CALL             2
-0105    | OP_PRINT
-0106   12 OP_GET_GLOBAL      36 '@arrJoin'
-0108    | OP_CONSTANT        37 'call='
-0110    | OP_GET_GLOBAL      38 '@strToUpper'
-0112    | OP_CONSTANT        39 'shout'
-0114    | OP_CALL             1
-0116    | OP_ARRAY            2
-0118    | OP_CONSTANT        40 ''
-0120    | OP_CALL             2
-0122    | OP_PRINT
-0123   13 OP_NIL
-0124    | OP_RETURN
+0099    | OP_PRINT
+0100   12 OP_GET_GLOBAL      33 '@strConcat'
+0102    | OP_CONSTANT        34 'call='
+0104    | OP_GET_GLOBAL      35 '@strToUpper'
+0106    | OP_CONSTANT        36 'shout'
+0108    | OP_CALL             1
+0110    | OP_ARRAY            2
+0112    | OP_CALL             1
+0114    | OP_PRINT
+0115   13 OP_NIL
+0116    | OP_RETURN

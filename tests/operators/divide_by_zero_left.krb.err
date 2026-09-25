@@ -59,9 +59,9 @@
 0011    | OP_GET_LOCAL        1
 0013    | OP_ADD
 0014    | OP_PRINT
-0015    4 OP_JUMP            15 -> 48
+0015    4 OP_JUMP            15 -> 46
 0018    | OP_POP
-0019    5 OP_GET_GLOBAL       1 '@arrJoin'
+0019    5 OP_GET_GLOBAL       1 '@strConcat'
 0021    | OP_CONSTANT         2 'FAIL '
 0023    | OP_GET_LOCAL        1
 0025    | OP_CONSTANT         3 ': expected '
@@ -73,8 +73,7 @@
 0037    | OP_GET_LOCAL        2
 0039    | OP_CALL             1
 0041    | OP_ARRAY            6
-0043    | OP_CONSTANT         7 ''
-0045    | OP_CALL             2
-0047    | OP_PRINT
-0048    8 OP_NIL
-0049    | OP_RETURN
+0043    | OP_CALL             1
+0045    | OP_PRINT
+0046    8 OP_NIL
+0047    | OP_RETURN

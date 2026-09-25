@@ -4,7 +4,7 @@
 == <script> ==
 0000    1 OP_TRUE
 0001    | OP_DEFINE_GLOBAL    0 'ok'
-0003    3 OP_GET_GLOBAL       1 '@arrJoin'
+0003    3 OP_GET_GLOBAL       1 '@strConcat'
 0005    | OP_CONSTANT         2 'ok='
 0007    | OP_GET_GLOBAL       3 '@boolToString'
 0009    | OP_GET_GLOBAL       4 'ok'
@@ -15,8 +15,7 @@
 0019    | OP_NOT
 0020    | OP_CALL             1
 0022    | OP_ARRAY            4
-0024    | OP_CONSTANT         8 ''
-0026    | OP_CALL             2
-0028    | OP_PRINT
-0029    4 OP_NIL
-0030    | OP_RETURN
+0024    | OP_CALL             1
+0026    | OP_PRINT
+0027    4 OP_NIL
+0028    | OP_RETURN

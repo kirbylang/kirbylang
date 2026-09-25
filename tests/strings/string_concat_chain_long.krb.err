@@ -13,7 +13,7 @@
 0015    6 OP_NIL
 0016    | OP_RETURN
 == repeat ==
-0000    2 OP_GET_GLOBAL       0 '@arrJoin'
+0000    2 OP_GET_GLOBAL       0 '@strConcat'
 0002    | OP_GET_LOCAL        1
 0004    | OP_GET_LOCAL        1
 0006    | OP_GET_LOCAL        1
@@ -270,96 +270,95 @@
 0508    | OP_GET_LOCAL        1
 0510    | OP_GET_LOCAL        1
 0512    | OP_ARRAY          255
-0514    | OP_CONSTANT         1 ''
-0516    | OP_CALL             2
-0518    | OP_GET_LOCAL        1
-0520    | OP_ADD
-0521    | OP_GET_LOCAL        1
-0523    | OP_ADD
-0524    | OP_GET_LOCAL        1
-0526    | OP_ADD
-0527    | OP_GET_LOCAL        1
-0529    | OP_ADD
-0530    | OP_GET_LOCAL        1
-0532    | OP_ADD
-0533    | OP_GET_LOCAL        1
-0535    | OP_ADD
-0536    | OP_GET_LOCAL        1
-0538    | OP_ADD
-0539    | OP_GET_LOCAL        1
-0541    | OP_ADD
-0542    | OP_GET_LOCAL        1
-0544    | OP_ADD
-0545    | OP_GET_LOCAL        1
-0547    | OP_ADD
-0548    | OP_GET_LOCAL        1
-0550    | OP_ADD
-0551    | OP_GET_LOCAL        1
-0553    | OP_ADD
-0554    | OP_GET_LOCAL        1
-0556    | OP_ADD
-0557    | OP_GET_LOCAL        1
-0559    | OP_ADD
-0560    | OP_GET_LOCAL        1
-0562    | OP_ADD
-0563    | OP_GET_LOCAL        1
-0565    | OP_ADD
-0566    | OP_GET_LOCAL        1
-0568    | OP_ADD
-0569    | OP_GET_LOCAL        1
-0571    | OP_ADD
-0572    | OP_GET_LOCAL        1
-0574    | OP_ADD
-0575    | OP_GET_LOCAL        1
-0577    | OP_ADD
-0578    | OP_GET_LOCAL        1
-0580    | OP_ADD
-0581    | OP_GET_LOCAL        1
-0583    | OP_ADD
-0584    | OP_GET_LOCAL        1
-0586    | OP_ADD
-0587    | OP_GET_LOCAL        1
-0589    | OP_ADD
-0590    | OP_GET_LOCAL        1
-0592    | OP_ADD
-0593    | OP_GET_LOCAL        1
-0595    | OP_ADD
-0596    | OP_GET_LOCAL        1
-0598    | OP_ADD
-0599    | OP_GET_LOCAL        1
-0601    | OP_ADD
-0602    | OP_GET_LOCAL        1
-0604    | OP_ADD
-0605    | OP_GET_LOCAL        1
-0607    | OP_ADD
-0608    | OP_GET_LOCAL        1
-0610    | OP_ADD
-0611    | OP_GET_LOCAL        1
-0613    | OP_ADD
-0614    | OP_GET_LOCAL        1
-0616    | OP_ADD
-0617    | OP_GET_LOCAL        1
-0619    | OP_ADD
-0620    | OP_GET_LOCAL        1
-0622    | OP_ADD
-0623    | OP_GET_LOCAL        1
-0625    | OP_ADD
-0626    | OP_GET_LOCAL        1
-0628    | OP_ADD
-0629    | OP_GET_LOCAL        1
-0631    | OP_ADD
-0632    | OP_GET_LOCAL        1
-0634    | OP_ADD
-0635    | OP_GET_LOCAL        1
-0637    | OP_ADD
-0638    | OP_GET_LOCAL        1
-0640    | OP_ADD
-0641    | OP_GET_LOCAL        1
-0643    | OP_ADD
-0644    | OP_GET_LOCAL        1
-0646    | OP_ADD
-0647    | OP_GET_LOCAL        1
-0649    | OP_ADD
-0650    | OP_GET_LOCAL        1
-0652    | OP_ADD
-0653    | OP_RETURN
+0514    | OP_CALL             1
+0516    | OP_GET_LOCAL        1
+0518    | OP_ADD
+0519    | OP_GET_LOCAL        1
+0521    | OP_ADD
+0522    | OP_GET_LOCAL        1
+0524    | OP_ADD
+0525    | OP_GET_LOCAL        1
+0527    | OP_ADD
+0528    | OP_GET_LOCAL        1
+0530    | OP_ADD
+0531    | OP_GET_LOCAL        1
+0533    | OP_ADD
+0534    | OP_GET_LOCAL        1
+0536    | OP_ADD
+0537    | OP_GET_LOCAL        1
+0539    | OP_ADD
+0540    | OP_GET_LOCAL        1
+0542    | OP_ADD
+0543    | OP_GET_LOCAL        1
+0545    | OP_ADD
+0546    | OP_GET_LOCAL        1
+0548    | OP_ADD
+0549    | OP_GET_LOCAL        1
+0551    | OP_ADD
+0552    | OP_GET_LOCAL        1
+0554    | OP_ADD
+0555    | OP_GET_LOCAL        1
+0557    | OP_ADD
+0558    | OP_GET_LOCAL        1
+0560    | OP_ADD
+0561    | OP_GET_LOCAL        1
+0563    | OP_ADD
+0564    | OP_GET_LOCAL        1
+0566    | OP_ADD
+0567    | OP_GET_LOCAL        1
+0569    | OP_ADD
+0570    | OP_GET_LOCAL        1
+0572    | OP_ADD
+0573    | OP_GET_LOCAL        1
+0575    | OP_ADD
+0576    | OP_GET_LOCAL        1
+0578    | OP_ADD
+0579    | OP_GET_LOCAL        1
+0581    | OP_ADD
+0582    | OP_GET_LOCAL        1
+0584    | OP_ADD
+0585    | OP_GET_LOCAL        1
+0587    | OP_ADD
+0588    | OP_GET_LOCAL        1
+0590    | OP_ADD
+0591    | OP_GET_LOCAL        1
+0593    | OP_ADD
+0594    | OP_GET_LOCAL        1
+0596    | OP_ADD
+0597    | OP_GET_LOCAL        1
+0599    | OP_ADD
+0600    | OP_GET_LOCAL        1
+0602    | OP_ADD
+0603    | OP_GET_LOCAL        1
+0605    | OP_ADD
+0606    | OP_GET_LOCAL        1
+0608    | OP_ADD
+0609    | OP_GET_LOCAL        1
+0611    | OP_ADD
+0612    | OP_GET_LOCAL        1
+0614    | OP_ADD
+0615    | OP_GET_LOCAL        1
+0617    | OP_ADD
+0618    | OP_GET_LOCAL        1
+0620    | OP_ADD
+0621    | OP_GET_LOCAL        1
+0623    | OP_ADD
+0624    | OP_GET_LOCAL        1
+0626    | OP_ADD
+0627    | OP_GET_LOCAL        1
+0629    | OP_ADD
+0630    | OP_GET_LOCAL        1
+0632    | OP_ADD
+0633    | OP_GET_LOCAL        1
+0635    | OP_ADD
+0636    | OP_GET_LOCAL        1
+0638    | OP_ADD
+0639    | OP_GET_LOCAL        1
+0641    | OP_ADD
+0642    | OP_GET_LOCAL        1
+0644    | OP_ADD
+0645    | OP_GET_LOCAL        1
+0647    | OP_ADD
+0648    | OP_GET_LOCAL        1
+0650    | OP_ADD
+0651    | OP_RETURN
