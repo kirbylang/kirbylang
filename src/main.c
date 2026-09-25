@@ -29,13 +29,13 @@ const char *help_message =
     "\n"
     "Examples:\n"
     "\n"
-    "krb --help                            # -h is the short option\n"
-    "krb --version                         # -v is the short option\n"
-    "krb --file path/to/file.krb           # -f is the short option\n"
-    "krb --repl                            # -r is the short option\n"
-    "krb --compile path/to/file.krb        # -c is the short option\n"
-    "krb --parse path/to/file.krb          # -p is the short option\n"
-    "krb --execute 'print \"Hello World\";'  # -x is the short option\n"
+    "krb --help                         # -h is the short option\n"
+    "krb --version                      # -v is the short option\n"
+    "krb --file path/to/file.krb        # -f is the short option\n"
+    "krb --repl                         # -r is the short option\n"
+    "krb --compile path/to/file.krb     # -c is the short option\n"
+    "krb --parse path/to/file.krb       # -p is the short option\n"
+    "krb --exec 'print \"Hello World\";'  # -x is the short option\n"
     "";
 
 const char *short_options = "hvrfxclp";
