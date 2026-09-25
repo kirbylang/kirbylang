@@ -22,16 +22,32 @@ static char *readFile(const char *path);
 static CompiledUnit *compileSource(const char *source, bool typecheck);
 static void runFile(const char *path);
 static void runCode(const char *source);
+static void compileFile(const char *path);
 
 const char *help_message =
-    "Usage: krb [-h] [-v] [-r|-f [path]|-c [source]|-l [path]|-p [path]] \n";
+    "Usage: krb [-h] [-v] [-r|-f [path]|-x [source]|-l [path]|-p [path]]\n"
+    "\n"
+    "Examples:\n"
+    "\n"
+    "krb --help                         # -h is the short option\n"
+    "krb --version                      # -v is the short option\n"
+    "krb --file path/to/file.krb        # -f is the short option\n"
+    "krb --repl                         # -r is the short option\n"
+    "krb --compile path/to/file.krb     # -c is the short option\n"
+    "krb --parse path/to/file.krb       # -p is the short option\n"
+    "krb --exec 'print \"Hello World\";'  # -x is the short option\n"
+    "";
 
-const char *short_options = "hvrfclp";
-static struct option long_options[] = {
-    {"help", no_argument, 0, 'h'},  {"version", no_argument, 0, 'v'},
-    {"file", no_argument, 0, 'f'},  {"repl", no_argument, 0, 'r'},
-    {"code", no_argument, 0, 'c'},  {"lex", no_argument, 0, 'l'},
-    {"parse", no_argument, 0, 'p'}, {0, 0, 0, 0}};
+const char *short_options = "hvrfxclp";
+static struct option long_options[] = {{"help", no_argument, 0, 'h'},
+                                       {"version", no_argument, 0, 'v'},
+                                       {"file", no_argument, 0, 'f'},
+                                       {"repl", no_argument, 0, 'r'},
+                                       {"exec", no_argument, 0, 'x'},
+                                       {"compile", no_argument, 0, 'c'},
+                                       {"lex", no_argument, 0, 'l'},
+                                       {"parse", no_argument, 0, 'p'},
+                                       {0, 0, 0, 0}};
 
 int main(int argc, char *argv[]) {
   int saved_argc = argc;
@@ -48,7 +64,8 @@ int main(int argc, char *argv[]) {
                             &long_index)) != -1) {
     switch (opt) {
     case 'h':
-      printf("%s\n", help_message);
+      fprintf(stderr, "kirby %s\n\n", KIRBY_VERSION);
+      fprintf(stderr, "%s\n", help_message);
       return 0;
 
     case 'v':
@@ -111,7 +128,17 @@ int main(int argc, char *argv[]) {
       free(ast);
       return 0;
     }
-    case 'c':
+    case 'c': {
+      typchkSessionBegin();
+      compileFile("stdlib/stdlib.krb");
+      compileFile(argv[optind]);
+      compilerSessionEnd();
+      typchkSessionEnd();
+      free(saved_argv);
+      fprintf(stderr, "Compiled!\n");
+      return 0;
+    }
+    case 'x':
       initVM(saved_argc, saved_argv);
       typchkSessionBegin();
       runFile("stdlib/stdlib.krb");
@@ -125,6 +152,7 @@ int main(int argc, char *argv[]) {
     }
   }
 
+  fprintf(stderr, "kirby %s\n\n", KIRBY_VERSION);
   printf("%s", help_message);
   return 64;
 }
@@ -227,6 +255,16 @@ static CompiledUnit *compileSource(const char *source, bool typecheck) {
   free(ast);
 
   return unit;
+}
+
+static void compileFile(const char *path) {
+  char *source = readFile(path);
+  CompiledUnit *unit = compileSource(source, /*typecheck=*/true);
+  free(source);
+
+  if (unit == NULL) {
+    exit(EXIT_CODE_COMPILER_ERR);
+  }
 }
 
 static void runFile(const char *path) {
