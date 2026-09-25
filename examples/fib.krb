@@ -11,16 +11,10 @@ print "Fibonacci";
 var arg = @argv(4) ?? @prompt("n: ");
 var n = @parseNumber(arg);
 
-print n;
-print "";
+print $"{n}\n";
 
 var start = @clock();
 
-print "Result:";
-print "";
-print fib(n);
+print $"Result:\n{fib(n)}\n";
 
-print "";
-
-print "Time Taken:";
-print @clock() - start;
+print $"Time Taken: {@clock() - start}";

@@ -1,9 +1,6 @@
 #!/usr/bin/env krb -f
 
-var name = @argv(4);
+var name: string = @prompt("Name: ");
+var n: f64 = @parseNumber(@prompt("!#: "));
 
-if (name == nil) {
-    name = @prompt("Name: ");
-}
-
-print "Hello " + name;
+print $"Hello {name}{@strRepeat("!", n)}";
