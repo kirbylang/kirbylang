@@ -26,6 +26,7 @@
 ## Next: 0.4.0
 
 - Decouple compiler, GC, and VM
+- Build `stdlib/stdlib.krb` into the binary, so `krb` runs from any directory
 - Structs
   - [Accessibility modifiers `pub`](https://github.com/kirbylang/kirbylang/issues/9)
     - New token: `TOKEN_PUB`
