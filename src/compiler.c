@@ -56,6 +56,7 @@ static void emitBytes(uint8_t byte1, uint8_t byte2);
 static void declareVariable(Token *name, bool isMutable);
 static void defineVariable(uint8_t global);
 static void markInitialized(void);
+static int currentStackHeight(void);
 static void beginScope(void);
 static void endScope(void);
 
@@ -103,7 +104,10 @@ static void initCompiler(FnCompiler *compiler, FunctionType functionType,
   compiler->enclosing = current;
   compiler->type = functionType;
   compiler->localCount = 0;
-  compiler->operandCount = 0;
+  // Starts at 1 because slot 0 holds the function, or `self` in a method.
+  compiler->stackHeight = 1;
+  compiler->isReachable = true;
+  compiler->bytesCounted = 0;
   compiler->scopeDepth = 0;
   compiler->upvalueCount = 0;
   compiler->fnIndex = cuAddFunction(compilingUnit);
@@ -274,16 +278,9 @@ static void addLocal(Token name, bool isMutable) {
     }
   }
 
-  // Uninitialized locals are waiting on their initializer, so their values
-  // aren't on the stack yet.
-  int onStack = 0;
-  for (int i = 0; i < current->localCount; i++) {
-    if (isInitialized(&current->locals[i]))
-      onStack++;
-  }
-
+  // Its value is pushed next, so it lands at the current stack height.
   Local *local = &current->locals[current->localCount];
-  local->slot = onStack + current->operandCount;
+  local->slot = currentStackHeight();
   current->localCount++;
   local->name = name;
   local->depth = LOCAL_UNINITIALIZED;
@@ -394,6 +391,58 @@ static void defineVariable(uint8_t global) {
   emitBytes(OP_DEFINE_GLOBAL, global);
 }
 
+static void applyStackEffect(OpCode op, int count) {
+  const OpInfo *info = opInfo(op);
+
+  current->stackHeight += info->stackEffect + info->perCount * count;
+
+  // Nothing falls through these, so the next instruction is only reached by
+  // a jump.
+  if (op == OP_JUMP || op == OP_LOOP || op == OP_RETURN)
+    current->isReachable = false;
+}
+
+/**
+ * Applies the stack effect of each instruction emitted since the last call.
+ *
+ * Only called between instructions, never partway through writing one, so
+ * each instruction can be read whole. Every instruction is counted, so code
+ * that pushes a value doesn't have to remember to update the height.
+ */
+static void countEmittedCode(void) {
+  while (current->bytesCounted < currentFn()->codeCount) {
+    uint8_t *code = &currentFn()->code[current->bytesCounted];
+    OpCode op = (OpCode)code[0];
+    const OpInfo *info = opInfo(op);
+    assert(info != NULL && info->isKnownOp);
+
+    int length = 1 + info->operandBytes;
+
+    // A closure's length depends on its function: 2 more bytes per captured
+    // variable, which OpInfo can't hold.
+    if (op == OP_CLOSURE) {
+      int fnIndex = currentFn()->constants[code[1]].as.functionIndex;
+      length += 2 * cuGetFnByIndex(compilingUnit, fnIndex)->upvalueCount;
+    }
+
+    int count = info->countOperand >= 0 ? code[1 + info->countOperand] : 0;
+
+    applyStackEffect(op, count);
+    current->bytesCounted += length;
+  }
+}
+
+static int currentStackHeight(void) {
+  countEmittedCode();
+  return current->stackHeight;
+}
+
+// Catches up first, so code already emitted isn't counted on top of `height`.
+static void resetStackHeight(int height) {
+  countEmittedCode();
+  current->stackHeight = height;
+}
+
 static void emitByte(uint8_t byte) {
   cuWriteByte(currentFn(), byte, currentLine);
 }
@@ -414,15 +463,35 @@ static void emitLoop(int loopStart) {
   emitByte(offset & 0xff);
 }
 
+/**
+ * Until patched, the jump's operand holds the stack height at the jump.
+ * patchJump needs it to know the height of the code the jump lands on.
+ */
 static int emitJump(uint8_t instruction) {
   TRACELN("  compiler.emitJump()");
 
+  int height = currentStackHeight();
+
   emitByte(instruction);
-  emitBytes(0xff, 0xff);
+  emitBytes((height >> 8) & 0xff, height & 0xff);
   return currentFn()->codeCount - 2;
 }
 
 static void patchJump(int offset) {
+  int heightAtJump =
+      (currentFn()->code[offset] << 8) | currentFn()->code[offset + 1];
+
+  // If nothing falls through to here, this jump is the only way in, so the
+  // code starts at the jump's height. Otherwise both ways in must agree.
+  int height = currentStackHeight();
+
+  if (current->isReachable) {
+    assert(hadError || height == heightAtJump);
+  } else {
+    resetStackHeight(heightAtJump);
+    current->isReachable = true;
+  }
+
   int jump = currentFn()->codeCount - offset - 2;
 
   if (jump > UINT16_MAX) {
@@ -582,25 +651,19 @@ static void compileCall(CallNode *c) {
   if (c->callee->kind == NODE_GET) {
     GetNode *g = &c->callee->as.get;
     compileExpr(g->object);
-    current->operandCount++;
     uint8_t name = identifierConstant(&g->name);
     for (int i = 0; i < c->argCount; i++) {
       compileExpr(c->args[i]);
-      current->operandCount++;
     }
-    current->operandCount -= 1 + c->argCount;
     emitBytes(OP_INVOKE, name);
     emitByte((uint8_t)c->argCount);
     return;
   }
 
   compileExpr(c->callee);
-  current->operandCount++;
   for (int i = 0; i < c->argCount; i++) {
     compileExpr(c->args[i]);
-    current->operandCount++;
   }
-  current->operandCount -= 1 + c->argCount;
   emitBytes(OP_CALL, (uint8_t)c->argCount);
 }
 
@@ -667,9 +730,7 @@ static void compileExpr(AstNode *node) {
   case NODE_BINARY: {
     BinaryNode *b = &node->as.binary;
     compileExpr(b->left);
-    current->operandCount++;
     compileExpr(b->right);
-    current->operandCount--;
     switch (b->op.type) {
     case TOKEN_BANG_EQUAL:
       emitBytes(OP_EQUAL, OP_NOT);
@@ -772,20 +833,15 @@ static void compileExpr(AstNode *node) {
 
     VarRef ref = resolveVariable(&si->name);
     emitBytes(ref.getOp, ref.arg);
-    current->operandCount++;
 
     for (int i = 0; i < si->fieldCount; i++) {
       StructInitFieldNode *field = &si->fields[i];
 
       currentLine = field->name.line;
       emitBytes(OP_CONSTANT, identifierConstant(&field->name));
-      current->operandCount++;
 
       compileExpr(field->value);
-      current->operandCount++;
     }
-
-    current->operandCount -= 1 + 2 * si->fieldCount;
 
     currentLine = si->endLine;
     emitBytes(OP_STRUCT_INIT, (uint8_t)si->fieldCount);
@@ -804,9 +860,7 @@ static void compileExpr(AstNode *node) {
     SetNode *s = &node->as.set;
     compileExpr(s->object);
     uint8_t name = identifierConstant(&s->name);
-    current->operandCount++;
     compileExpr(s->value);
-    current->operandCount--;
     emitBytes(OP_SET_PROPERTY, name);
     break;
   }
@@ -833,9 +887,7 @@ static void compileExpr(AstNode *node) {
   case NODE_INDEX_GET: {
     IndexGetNode *ig = &node->as.indexGet;
     compileExpr(ig->object);
-    current->operandCount++;
     compileExpr(ig->index);
-    current->operandCount--;
     emitByte(OP_GET_INDEX);
     break;
   }
@@ -843,11 +895,8 @@ static void compileExpr(AstNode *node) {
   case NODE_INDEX_SET: {
     IndexSetNode *is = &node->as.indexSet;
     compileExpr(is->object);
-    current->operandCount++;
     compileExpr(is->index);
-    current->operandCount++;
     compileExpr(is->value);
-    current->operandCount -= 2;
     emitByte(OP_SET_INDEX);
     break;
   }
@@ -859,9 +908,7 @@ static void compileExpr(AstNode *node) {
     }
     for (int i = 0; i < arr->count; i++) {
       compileExpr(arr->items[i]);
-      current->operandCount++;
     }
-    current->operandCount -= arr->count;
     emitBytes(OP_ARRAY, (uint8_t)arr->count);
     break;
   }
@@ -948,6 +995,9 @@ static void compileFunction(FunctionNode *fn, FunctionType type) {
   for (int i = 0; i < fn->arity; i++) {
     declareVariable(&fn->params[i], /*isMutable=*/true);
     markInitialized();
+    // Arguments are already on the stack when the call starts, so no
+    // instruction pushes them.
+    resetStackHeight(currentStackHeight() + 1);
   }
 
   if (fn->exprBody != NULL) {
@@ -1235,6 +1285,9 @@ static void compileStmt(AstNode *node) {
   if (node == NULL)
     return;
 
+  int heightBefore = currentStackHeight();
+  int localsBefore = current->localCount;
+
   currentLine = node->line;
 
   switch (node->kind) {
@@ -1271,17 +1324,29 @@ static void compileStmt(AstNode *node) {
     compileFor(node);
     break;
 
-  case NODE_RETURN:
+  // These leave through a jump or return, so code right after them never
+  // runs. Restoring the height keeps that dead code consistent with the
+  // locals still in scope.
+  case NODE_RETURN: {
+    int height = currentStackHeight();
     compileReturn(node);
+    resetStackHeight(height);
     break;
+  }
 
-  case NODE_BREAK:
+  case NODE_BREAK: {
+    int height = currentStackHeight();
     compileBreak(node);
+    resetStackHeight(height);
     break;
+  }
 
-  case NODE_CONTINUE:
+  case NODE_CONTINUE: {
+    int height = currentStackHeight();
     compileContinue(node);
+    resetStackHeight(height);
     break;
+  }
 
   case NODE_FUNCTION:
     compileFunctionDeclStmt(node);
@@ -1304,6 +1369,14 @@ static void compileStmt(AstNode *node) {
     compilerErrorAtNode(node, "Internal error: not a valid statement node.");
     break;
   }
+
+  countEmittedCode();
+
+  // A statement leaves only the locals it declares on the stack. Anything
+  // else means an OpInfo entry is wrong.
+  assert(hadError || !current->isReachable ||
+         current->stackHeight - heightBefore ==
+             current->localCount - localsBefore);
 }
 
 CompiledUnit *compile(AstNode **ast, int count, int endLine) {

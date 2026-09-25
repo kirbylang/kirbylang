@@ -1,6 +1,8 @@
 #ifndef kirby_opcode_h
 #define kirby_opcode_h
 
+#include <stdbool.h>
+
 /**
  * Kirby's bytecode instruction set.
  */
@@ -48,6 +50,51 @@ typedef enum {
   OP_GET_INDEX,        // 39
   OP_SET_INDEX,        // 40
   OP_CLOSE_BLOCK_EXPR, // 41
+  // Sentinel
+  OP_COUNT,
 } OpCode;
+
+/**
+ * How an instruction is encoded and how it changes the stack. The compiler
+ * follows these to track the stack height as it emits bytecode.
+ */
+typedef struct {
+  /**
+   * Is this a known OP code?
+   *
+   * The other fields in OpInfo are 0 if this if false.
+   */
+  bool isKnownOp;
+
+  /**
+   * How many operand bytes will be present after this OP code? `0` if this OP
+   * is an operand.
+   *
+   * Special Case: `OP_CLOSURE` is also followed by 2 bytes per variable its
+   * function captures.
+   */
+  int operandBytes;
+
+  /**
+   * What is the affect this OP has on the stack height? e.g. push = +1, pop =
+   * -1
+   *
+   * `perCount` adds to this.
+   */
+  int stackEffect;
+
+  /**
+   * Which operand byte holds a count, such as OP_CALL's argCount, or -1 when
+   * the effect is fixed.
+   */
+  int countOperand;
+
+  /**
+   * Stack change per unit of that count, e.g. -1 per argument for OP_CALL.
+   */
+  int perCount;
+} OpInfo;
+
+const OpInfo *opInfo(OpCode op);
 
 #endif

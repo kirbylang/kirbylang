@@ -1,0 +1,27 @@
+struct Box {
+    pub var value: f64;
+}
+
+impl Box {
+    pub fun add(self, a: f64, b: f64): f64 {
+        self.value + a + b
+    }
+}
+
+fun run(): f64 {
+    var box = Box { value: { let n = 1; n } };
+    let items = [10, 20, 30];
+
+    let sum = box.add(1, { let n = 2; n });
+    box.value = { let n = 3; n * 2 };
+    let picked = items[{ let n = 1; n }];
+    items[{ let i = 2; i }] = { let n = 4; n * 10 };
+
+    print box.value;
+    print picked;
+    print items;
+
+    sum
+}
+
+print run();

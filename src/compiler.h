@@ -65,10 +65,23 @@ struct FnCompiler {
   Upvalue upvalues[UINT8_COUNT];
   int scopeDepth;
   /**
-   * Values pushed for an instruction that hasn't run yet, e.g. the left
-   * operand of `a + b` while `b` compiles.
+   * Values on the stack when the instruction at `bytesCounted` runs,
+   * counting slot 0. A new local's slot is this height, so it counts
+   * operands of an unfinished expression as well as locals. Read and write
+   * it through currentStackHeight and resetStackHeight, which bring it up to
+   * date with the bytecode emitted so far.
    */
-  int operandCount;
+  int stackHeight;
+  /**
+   * How much of the function's bytecode `stackHeight` accounts for.
+   */
+  int bytesCounted;
+  /**
+   * False when the last instruction was a jump, loop, or return. Nothing
+   * falls through to the next instruction, so its stack height comes from
+   * the jump that lands on it (see patchJump).
+   */
+  bool isReachable;
 
   struct LoopCompiler *enclosingLoop;
 };

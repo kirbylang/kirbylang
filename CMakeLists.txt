@@ -62,6 +62,7 @@ set(KIRBY_SOURCES
     src/loader.c
     src/native.c
     src/object.c
+    src/opcode.c
     src/parser.c
     src/resolved_impl_targets.c
     src/scanner.c
@@ -258,6 +259,23 @@ if(BUILD_TESTS)
     add_test(
         NAME kirby-token-unit-test
         COMMAND kirby-token-unit-test
+    )
+
+    add_executable(kirby-opcode-unit-test
+        unit/opcode.c
+    )
+
+    target_link_libraries(kirby-opcode-unit-test
+        PRIVATE
+            kirby_core_debug
+    )
+
+    configure_kirby_target(kirby-opcode-unit-test)
+    enable_coverage(kirby-opcode-unit-test)
+
+    add_test(
+        NAME kirby-opcode-unit-test
+        COMMAND kirby-opcode-unit-test
     )
 
     add_executable(kirby-types-unit-test
