@@ -123,6 +123,26 @@ int main(void) {
                      (int)(sizeof(interpEscapedBraceExpected) /
                            sizeof(interpEscapedBraceExpected[0])));
 
+  TokenType interpDoubledBracesExpected[] = {
+      TOKEN_INTERP_STRING, // $"{{x}}" -- literal braces, no placeholder
+      TOKEN_EOF,
+  };
+
+  assert_token_types("$\"{{x}}\"", interpDoubledBracesExpected,
+                     (int)(sizeof(interpDoubledBracesExpected) /
+                           sizeof(interpDoubledBracesExpected[0])));
+
+  TokenType interpBracesAroundPlaceholderExpected[] = {
+      TOKEN_INTERP_START, // $"{{{
+      TOKEN_IDENTIFIER,   // x
+      TOKEN_INTERP_END,   // }}}"
+      TOKEN_EOF,
+  };
+
+  assert_token_types("$\"{{{x}}}\"", interpBracesAroundPlaceholderExpected,
+                     (int)(sizeof(interpBracesAroundPlaceholderExpected) /
+                           sizeof(interpBracesAroundPlaceholderExpected[0])));
+
   TokenType loneDollarExpected[] = {
       TOKEN_ERROR,
       TOKEN_IDENTIFIER,

@@ -368,8 +368,10 @@ static Token string(Scanner *scanner) {
 }
 
 /**
- * Scans the literal text of an interpolated string up to the next unescaped
- * `{` (a placeholder starts) or the closing `"` (the string ends).
+ * Scans the literal text of an interpolated string up to the next single `{`
+ * (a placeholder starts) or the closing `"` (the string ends).
+ *
+ * Literal `{` and `}` are written as `print $"{{Hello}}" // {Hello}`
  *
  * `isFirst` is true right after `$"`, and false right after the `}` that
  * closes a placeholder.
@@ -377,7 +379,15 @@ static Token string(Scanner *scanner) {
 static Token interpSegment(Scanner *scanner, bool isFirst) {
   TRACELN("scanner.interpSegment()");
 
-  while (peek(scanner) != '"' && peek(scanner) != '{' && !isAtEnd(scanner)) {
+  while (peek(scanner) != '"' && !isAtEnd(scanner)) {
+    if (peek(scanner) == '{') {
+      // `{{` is a literal brace, not a placeholder.
+      if (peekNext(scanner) != '{')
+        break;
+
+      advance(scanner);
+    }
+
     if (peek(scanner) == '\n') {
       scanner->line++;
     }

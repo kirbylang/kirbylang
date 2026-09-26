@@ -51,14 +51,18 @@
       "patterns": [
         {
           "name": "constant.character.escape.krb",
-          "match": "\\\\[nrt\"\\\\{}]"
+          "match": "\\{\\{|\\}\\}"
+        },
+        {
+          "name": "constant.character.escape.krb",
+          "match": "\\\\[nrt\"\\\\]"
         },
         {
           "name": "invalid.illegal.unknown-escape.krb",
           "match": "\\\\."
         },
         {
-          "name": "invalid.illegal.unescaped-brace.krb",
+          "name": "invalid.illegal.single-brace.krb",
           "match": "}"
         },
         {

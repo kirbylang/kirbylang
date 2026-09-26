@@ -225,8 +225,8 @@ static AstNode *number(Parser *parser, bool canAssign) {
  * Builds a string literal node from the raw text between the quotes,
  * replacing escape sequences.
  *
- * `isInterp` is true for text from an interpolated string, which also allows
- * the `\{` and `\}` escapes and rejects a bare `}`.
+ * `isInterp` is true for text from an interpolated string, where `{{` and
+ * `}}` are literal braces and a single `}` is an error.
  */
 static AstNode *stringLiteral(Parser *parser, const char *chars, int length,
                               bool isInterp) {
@@ -254,13 +254,6 @@ static AstNode *stringLiteral(Parser *parser, const char *chars, int length,
       case '\\':
         buffer[out++] = '\\';
         break;
-      case '{':
-      case '}':
-        if (isInterp) {
-          buffer[out++] = chars[i];
-          break;
-        }
-        // fall through
       default: {
         char msg[48];
         snprintf(msg, sizeof(msg), "Invalid escape sequence: \\%c", chars[i]);
@@ -268,8 +261,16 @@ static AstNode *stringLiteral(Parser *parser, const char *chars, int length,
         break;
       }
       }
-    } else if (isInterp && chars[i] == '}') {
-      parse_error(parser, "Unescaped '}' in interpolated string. Use '\\}'.");
+    } else if (isInterp && (chars[i] == '{' || chars[i] == '}')) {
+      // The scanner only leaves `{` in text doubled, so `{{` and `}}` are
+      // literal braces and anything else is a single `}`.
+      if (i + 1 < length && chars[i + 1] == chars[i]) {
+        buffer[out++] = chars[i];
+        i++;
+      } else {
+        parse_error(parser, "Single '}' in interpolated string. Write '}}' for "
+                            "a literal '}'.");
+      }
     } else {
       buffer[out++] = chars[i];
     }

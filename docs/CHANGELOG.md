@@ -38,7 +38,8 @@
   - New AST node: `NODE_INTERP_STRING`
   - Placeholders can be a `string`, `f64`, `bool`, or a type that implements
     `Display`, which converts with its `toString()`
-  - `\{` and `\}` write literal braces. A bare `}` is an error.
+  - `{{` and `}}` write literal braces: `$"{{{n}}}" // {n}`
+    - A single `}` is an error: `$"Hello }" // Error at '$"Hello }"': Single '}' in interpolate string. Write '}}' for a literal '}'.`
   - Compiles to `@strConcat([...])`. No new opcode.
 - Three or more strings joined with `+` compile to one `@strConcat([...])`
   instead of an `OP_ADD` per `+`
