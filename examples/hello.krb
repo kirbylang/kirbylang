@@ -6,4 +6,4 @@ if (name == nil) {
     name = @prompt("Name: ");
 }
 
-print "Hello " + name;
+@println("Hello " + name);

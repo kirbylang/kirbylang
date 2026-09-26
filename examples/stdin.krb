@@ -6,4 +6,4 @@
 
 var text = @stdin();
 
-print text;
+@println(text);

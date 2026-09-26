@@ -2,8 +2,8 @@
 
 var name = @prompt("What's your name? ");
 
-print "Hello " + name;
+@println("Hello " + name);
 
 var age = @prompt("How old are you? ");
 
-print "Age: " + age;
+@println("Age: " + age);
