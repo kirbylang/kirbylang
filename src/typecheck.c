@@ -625,7 +625,7 @@ static Type *typchkInferBinary(TypeEnv *env, AstNode *node) {
  */
 static bool chooseStringConversion(Type *type, StringConversion *conversion) {
   if (typesEqual(type, typeString())) {
-    *conversion = STRING_CONVERSION_NONE;
+    *conversion = STRING_CONVERSION_STRING;
   } else if (typesEqual(type, typeF64())) {
     *conversion = STRING_CONVERSION_NUMBER;
   } else if (typesEqual(type, typeBool())) {
@@ -830,8 +830,15 @@ static Type *typchkInferCall(TypeEnv *env, AstNode *node) {
 
   Type *calleeType = typchkInfer(env, c->callee);
 
-  if (calleeType == NULL)
+  if (calleeType == NULL) {
+    for (int i = 0; i < c->argCount; i++) {
+      AstNode *arg = c->args[i];
+
+      typchkInfer(env, arg);
+    }
+
     return NULL;
+  }
 
   return typchkCheckCallAgainstFunctionType(env, node, calleeType);
 }

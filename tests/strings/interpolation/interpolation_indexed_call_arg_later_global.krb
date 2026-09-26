@@ -1,0 +1,7 @@
+fun report(): unit {
+    handlers[0]($"n={1} ok={true}");
+}
+
+let handlers = [fun (s: string): unit { @println(s); }];
+
+report();

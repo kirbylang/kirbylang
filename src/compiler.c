@@ -738,7 +738,11 @@ static void compileNativeCall(const char *name, AstNode *arg) {
  */
 static void compileToString(AstNode *expr, StringConversion conversion) {
   switch (conversion) {
-  case STRING_CONVERSION_NONE:
+  case STRING_CONVERSION_UNDEFINED:
+    compilerErrorAtNode(expr, "Internal error: no string conversion was chosen "
+                              "for this placeholder.");
+    break;
+  case STRING_CONVERSION_STRING:
     compileExpr(expr);
     break;
   case STRING_CONVERSION_NUMBER:

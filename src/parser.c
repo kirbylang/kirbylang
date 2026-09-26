@@ -359,7 +359,7 @@ static AstNode *interpolation(Parser *parser, bool canAssign) {
 
   for (int i = 0; i < parts.count; i++) {
     is->parts[i].expr = parts.data[i];
-    is->parts[i].conversion = STRING_CONVERSION_NONE;
+    is->parts[i].conversion = STRING_CONVERSION_UNDEFINED;
   }
 
   arrayNodeDataFree(&parts);

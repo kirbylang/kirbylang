@@ -1,0 +1,53 @@
+== <script> ==
+0000    1 OP_NIL
+0001    | OP_RETURN
+== <script> ==
+0000   13 OP_CLOSURE          1 <fn report>
+0002    | OP_DEFINE_GLOBAL    0 'report'
+0004    1 OP_STRUCT           2 'Logger'
+0006    | OP_DEFINE_GLOBAL    2 'Logger'
+0008    | OP_GET_GLOBAL       3 'Logger'
+0010    2 OP_NIL
+0011    | OP_FIELD            4 'prefix' public
+0014    3 OP_POP
+0015    5 OP_GET_GLOBAL       5 'Logger'
+0017    8 OP_CLOSURE          7 <fn log>
+0019    | OP_METHOD           6 'log'
+0021    9 OP_POP
+0022   15 OP_GET_GLOBAL       9 'Logger'
+0024    | OP_CONSTANT        10 'prefix'
+0026    | OP_CONSTANT        11 '> '
+0028    | OP_STRUCT_INIT      1
+0030    | OP_DEFINE_GLOBAL    8 'logger'
+0032   17 OP_GET_GLOBAL      12 'report'
+0034    | OP_CALL             0
+0036    | OP_POP
+0037   18 OP_NIL
+0038    | OP_RETURN
+== report ==
+0000   12 OP_GET_GLOBAL       0 'logger'
+0002    | OP_GET_GLOBAL       2 '@strConcat'
+0004    | OP_CONSTANT         3 'n='
+0006    | OP_GET_GLOBAL       4 '@numberToString'
+0008    | OP_CONSTANT         5 '1'
+0010    | OP_CALL             1
+0012    | OP_CONSTANT         6 ' ok='
+0014    | OP_GET_GLOBAL       7 '@boolToString'
+0016    | OP_TRUE
+0017    | OP_CALL             1
+0019    | OP_ARRAY            4
+0021    | OP_CALL             1
+0023    | OP_INVOKE        (1 args)    1 'log'
+0026    | OP_POP
+0027   13 OP_NIL
+0028    | OP_RETURN
+== log ==
+0000    7 OP_GET_GLOBAL       0 '@println'
+0002    | OP_GET_LOCAL        0
+0004    | OP_GET_PROPERTY     1 'prefix'
+0006    | OP_GET_LOCAL        1
+0008    | OP_ADD
+0009    | OP_CALL             1
+0011    | OP_POP
+0012    8 OP_NIL
+0013    | OP_RETURN
