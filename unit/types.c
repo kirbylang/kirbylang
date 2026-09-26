@@ -43,10 +43,10 @@ static void test_struct_equality_is_nominal(void) {
       {tokenFromCString("magnitude"), typeF64()},
   };
 
-  Type *point = typeStruct(pointName, pointFields, 2, NULL, 0, NULL, 0);
+  Type *point = typeStruct(pointName, pointFields, 2);
   Type *pointAgain =
-      typeStruct(otherPointName, vectorLikeFields, 1, NULL, 0, NULL, 0);
-  Type *vector = typeStruct(vectorName, pointFields, 2, NULL, 0, NULL, 0);
+      typeStruct(otherPointName, vectorLikeFields, 1);
+  Type *vector = typeStruct(vectorName, pointFields, 2);
 
   assert(typesEqual(point, pointAgain)); // same name -> equal, fields ignored
   assert(!typesEqual(point, vector));    // different name -> not equal
@@ -80,7 +80,7 @@ static void test_struct_field_lookup(void) {
       {tokenFromCString("label"), typeString()},
   };
   Type *point =
-      typeStruct(tokenFromCString("Point"), fields, 2, NULL, 0, NULL, 0);
+      typeStruct(tokenFromCString("Point"), fields, 2);
 
   assert(typeStructFieldLookup(point, tokenFromCString("x")) == typeF64());
   assert(typeStructFieldLookup(point, tokenFromCString("label")) ==
@@ -98,7 +98,7 @@ static void test_type_to_string(void) {
   assert(strcmp(typeToString(typeF64()), "f64") == 0);
 
   Type *point =
-      typeStruct(tokenFromCString("Point"), NULL, 0, NULL, 0, NULL, 0);
+      typeStruct(tokenFromCString("Point"), NULL, 0);
   assert(strcmp(typeToString(point), "Point") == 0);
 
   Type *addParams[] = {typeF64(), typeF64()};
@@ -150,16 +150,15 @@ static void test_struct_method_lookup(void) {
   Type *accountParams[] = {typeF64()};
   Type *newAccount = typeFunction(
       accountParams, 1,
-      typeStruct(tokenFromCString("Account"), NULL, 0, NULL, 0, NULL, 0));
+      typeStruct(tokenFromCString("Account"), NULL, 0));
 
-  UninternedTypeMember instanceMethods[] = {
-      {tokenFromCString("deposit"), deposit}};
-  UninternedTypeMember staticMethods[] = {
-      {tokenFromCString("new"), newAccount}};
   UninternedTypeMember fields[] = {{tokenFromCString("balance"), typeF64()}};
 
-  Type *accountStruct = typeStruct(tokenFromCString("Account"), fields, 1,
-                                   staticMethods, 1, instanceMethods, 1);
+  Type *accountStruct = typeStruct(tokenFromCString("Account"), fields, 1);
+  typeStructAddStaticMethod(accountStruct, tokenFromCString("new"), newAccount,
+                            /*isPublic=*/true);
+  typeStructAddInstanceMethod(accountStruct, tokenFromCString("deposit"),
+                              deposit, /*isPublic=*/true);
 
   // Instance methods and static methods live in separate lookups --
   // a static method isn't found via the instance lookup and vice versa.
@@ -189,7 +188,7 @@ static void test_incremental_struct_construction(void) {
   // The self-referential case: struct Node { var next: Node; } --
   // register the placeholder first, then set fields onto the *same*
   // pointer, so the field's own type (Node) is the real, complete one.
-  Type *node = typeStruct(tokenFromCString("Node"), NULL, 0, NULL, 0, NULL, 0);
+  Type *node = typeStruct(tokenFromCString("Node"), NULL, 0);
   UninternedTypeMember fields[] = {{tokenFromCString("next"), node}};
   typeStructSetFields(node, fields, 1);
 
@@ -201,7 +200,7 @@ static void test_incremental_struct_methods_across_multiple_calls(void) {
   // Simulates multiple impl blocks contributing methods to the same
   // struct one at a time, in any order.
   Type *counter =
-      typeStruct(tokenFromCString("Counter"), NULL, 0, NULL, 0, NULL, 0);
+      typeStruct(tokenFromCString("Counter"), NULL, 0);
 
   Type *newType = typeFunction(NULL, 0, counter);
   typeStructAddStaticMethod(counter, tokenFromCString("new"), newType,
@@ -243,7 +242,7 @@ static void test_struct_trait_method_lookup_is_separate_from_instance(void) {
   // methods, so a static trait method (e.g. Default.default()) can't be
   // called as if it were an instance method or vice versa.
   Type *accountStruct =
-      typeStruct(tokenFromCString("Account"), NULL, 0, NULL, 0, NULL, 0);
+      typeStruct(tokenFromCString("Account"), NULL, 0);
 
   Type *toStringType = typeFunction(NULL, 0, typeString());
   typeStructAddTraitMethod(accountStruct, tokenFromCString("toString"),
@@ -283,7 +282,7 @@ static void test_struct_trait_coherence_bookkeeping(void) {
   InternedName eq = internTokenName(eqName);
 
   Type *point =
-      typeStruct(tokenFromCString("Point"), NULL, 0, NULL, 0, NULL, 0);
+      typeStruct(tokenFromCString("Point"), NULL, 0);
 
   assert(!typeStructImplementsTrait(point, display));
   assert(!typeStructImplementsTrait(point, eq));
@@ -382,7 +381,7 @@ static void test_self_placeholder_is_singleton_and_always_equal(void) {
 
 static void test_substitute_self_replaces_placeholder(void) {
   Type *point =
-      typeStruct(tokenFromCString("Point"), NULL, 0, NULL, 0, NULL, 0);
+      typeStruct(tokenFromCString("Point"), NULL, 0);
 
   // Bare Self.
   assert(typeSubstituteSelf(typeSelfPlaceholder(), point) == point);

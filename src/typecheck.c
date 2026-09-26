@@ -2046,7 +2046,7 @@ bool typchkCheckProgram(AstNode **program, int count) {
   for (int i = 0; i < count; i++) {
     if (program[i]->kind == NODE_STRUCT) {
       StructNode *sn = &program[i]->as.struct_;
-      Type *placeholder = typeStruct(sn->name, NULL, 0, NULL, 0, NULL, 0);
+      Type *placeholder = typeStruct(sn->name, NULL, 0);
 
       if (sn->genericParamCount > 0) {
         typeStructMarkGeneric(placeholder);
