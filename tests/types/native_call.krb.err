@@ -17,16 +17,16 @@
 0024    | OP_CONSTANT        10 '42'
 0026    | OP_CALL             1
 0028    | OP_DEFINE_GLOBAL    8 'parsed'
-0030    6 OP_GET_GLOBAL      11 'rounded'
+0030    6 OP_GET_GLOBAL       2 'rounded'
 0032    | OP_PRINT
-0033    7 OP_GET_GLOBAL      12 'missing'
+0033    7 OP_GET_GLOBAL       5 'missing'
 0035    | OP_PRINT
-0036    8 OP_GET_GLOBAL      13 'parsed'
+0036    8 OP_GET_GLOBAL       8 'parsed'
 0038    | OP_PRINT
-0039    9 OP_GET_GLOBAL      14 '@numberToString'
-0041    | OP_GET_GLOBAL      15 'parsed'
+0039    9 OP_GET_GLOBAL      11 '@numberToString'
+0041    | OP_GET_GLOBAL       8 'parsed'
 0043    | OP_CALL             1
-0045    | OP_CONSTANT        16 '!'
+0045    | OP_CONSTANT        12 '!'
 0047    | OP_ADD
 0048    | OP_PRINT
 0049   10 OP_NIL

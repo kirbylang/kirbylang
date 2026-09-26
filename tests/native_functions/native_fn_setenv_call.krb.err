@@ -8,7 +8,7 @@
 0006    | OP_CALL             2
 0008    | OP_PRINT
 0009    3 OP_GET_GLOBAL       3 '@getenv'
-0011    | OP_CONSTANT         4 'HELLO'
+0011    | OP_CONSTANT         1 'HELLO'
 0013    | OP_CALL             1
 0015    | OP_PRINT
 0016    4 OP_NIL

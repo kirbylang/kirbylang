@@ -8,33 +8,33 @@
 0005    | OP_CONSTANT         2 '3'
 0007    | OP_CALL             2
 0009    | OP_PRINT
-0010    2 OP_GET_GLOBAL       3 '@pow'
-0012    | OP_CONSTANT         4 '2'
+0010    2 OP_GET_GLOBAL       0 '@pow'
+0012    | OP_CONSTANT         3 '2'
 0014    | OP_NEGATE
-0015    | OP_CONSTANT         5 '2'
+0015    | OP_CONSTANT         3 '2'
 0017    | OP_NEGATE
 0018    | OP_CALL             2
 0020    | OP_PRINT
-0021    3 OP_GET_GLOBAL       6 '@pow'
-0023    | OP_CONSTANT         7 '0'
-0025    | OP_CONSTANT         8 '0'
+0021    3 OP_GET_GLOBAL       0 '@pow'
+0023    | OP_CONSTANT         4 '0'
+0025    | OP_CONSTANT         4 '0'
 0027    | OP_CALL             2
 0029    | OP_PRINT
-0030    4 OP_GET_GLOBAL       9 '@pow'
-0032    | OP_CONSTANT        10 '0'
-0034    | OP_CONSTANT        11 '2'
+0030    4 OP_GET_GLOBAL       0 '@pow'
+0032    | OP_CONSTANT         4 '0'
+0034    | OP_CONSTANT         3 '2'
 0036    | OP_CALL             2
 0038    | OP_PRINT
-0039    5 OP_GET_GLOBAL      12 '@pow'
-0041    | OP_CONSTANT        13 '4'
-0043    | OP_CONSTANT        14 '0.5'
+0039    5 OP_GET_GLOBAL       0 '@pow'
+0041    | OP_CONSTANT         5 '4'
+0043    | OP_CONSTANT         6 '0.5'
 0045    | OP_NEGATE
 0046    | OP_CALL             2
 0048    | OP_PRINT
-0049    6 OP_GET_GLOBAL      15 '@pow'
-0051    | OP_CONSTANT        16 '3'
+0049    6 OP_GET_GLOBAL       0 '@pow'
+0051    | OP_CONSTANT         2 '3'
 0053    | OP_NEGATE
-0054    | OP_CONSTANT        17 '2'
+0054    | OP_CONSTANT         3 '2'
 0056    | OP_CALL             2
 0058    | OP_PRINT
 0059    7 OP_NIL

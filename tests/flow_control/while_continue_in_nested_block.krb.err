@@ -4,21 +4,21 @@
 == <script> ==
 0000    1 OP_CONSTANT         1 '0'
 0002    | OP_DEFINE_GLOBAL    0 'i'
-0004    2 OP_GET_GLOBAL       2 'i'
-0006    | OP_CONSTANT         3 '4'
+0004    2 OP_GET_GLOBAL       0 'i'
+0006    | OP_CONSTANT         2 '4'
 0008    | OP_LESS
 0009    | OP_JUMP_IF_FALSE    9 -> 50
 0012    | OP_POP
-0013    3 OP_GET_GLOBAL       5 'i'
-0015    | OP_CONSTANT         6 '1'
+0013    3 OP_GET_GLOBAL       0 'i'
+0015    | OP_CONSTANT         3 '1'
 0017    | OP_ADD
-0018    | OP_SET_GLOBAL       4 'i'
+0018    | OP_SET_GLOBAL       0 'i'
 0020    | OP_POP
-0021    6 OP_GET_GLOBAL       7 'i'
-0023    | OP_CONSTANT         8 '100'
+0021    6 OP_GET_GLOBAL       0 'i'
+0023    | OP_CONSTANT         4 '100'
 0025    | OP_MULTIPLY
-0026    7 OP_GET_GLOBAL       9 'i'
-0028    | OP_CONSTANT        10 '2'
+0026    7 OP_GET_GLOBAL       0 'i'
+0028    | OP_CONSTANT         5 '2'
 0030    | OP_EQUAL
 0031    | OP_JUMP_IF_FALSE   31 -> 42
 0034    | OP_POP
@@ -31,7 +31,7 @@
 0046    9 OP_POP
 0047   10 OP_LOOP            47 -> 4
 0050    | OP_POP
-0051   11 OP_CONSTANT        11 'done'
+0051   11 OP_CONSTANT         6 'done'
 0053    | OP_PRINT
 0054   12 OP_NIL
 0055    | OP_RETURN

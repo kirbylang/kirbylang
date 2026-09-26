@@ -13,15 +13,15 @@
 0016    | OP_ARRAY            3
 0018    | OP_DEFINE_GLOBAL    4 'b'
 0020    3 OP_GET_GLOBAL       9 '@arrConcat'
-0022    | OP_GET_GLOBAL      10 'a'
-0024    | OP_GET_GLOBAL      11 'b'
+0022    | OP_GET_GLOBAL       0 'a'
+0024    | OP_GET_GLOBAL       4 'b'
 0026    | OP_CALL             2
 0028    | OP_DEFINE_GLOBAL    8 'c'
-0030    5 OP_GET_GLOBAL      12 'a'
+0030    5 OP_GET_GLOBAL       0 'a'
 0032    | OP_PRINT
-0033    6 OP_GET_GLOBAL      13 'b'
+0033    6 OP_GET_GLOBAL       4 'b'
 0035    | OP_PRINT
-0036    7 OP_GET_GLOBAL      14 'c'
+0036    7 OP_GET_GLOBAL       8 'c'
 0038    | OP_PRINT
 0039    8 OP_NIL
 0040    | OP_RETURN

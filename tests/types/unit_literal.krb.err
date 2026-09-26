@@ -8,12 +8,12 @@
 0006    | OP_DEFINE_GLOBAL    2 'alsoNothing'
 0008    1 OP_NIL
 0009    | OP_DEFINE_GLOBAL    4 'nothing'
-0011    3 OP_GET_GLOBAL       5 'nothing'
+0011    3 OP_GET_GLOBAL       4 'nothing'
 0013    | OP_PRINT
-0014    9 OP_GET_GLOBAL       6 'doNothing'
+0014    9 OP_GET_GLOBAL       0 'doNothing'
 0016    | OP_CALL             0
 0018    | OP_POP
-0019   13 OP_GET_GLOBAL       7 'alsoNothing'
+0019   13 OP_GET_GLOBAL       2 'alsoNothing'
 0021    | OP_CALL             0
 0023    | OP_POP
 0024   15 OP_NIL

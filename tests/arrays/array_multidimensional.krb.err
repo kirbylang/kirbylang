@@ -10,28 +10,28 @@
 0010    | OP_ARRAY            2
 0012    | OP_ARRAY            2
 0014    | OP_DEFINE_GLOBAL    0 'array'
-0016    3 OP_GET_GLOBAL       5 'array'
-0018    | OP_CONSTANT         6 '0'
+0016    3 OP_GET_GLOBAL       0 'array'
+0018    | OP_CONSTANT         5 '0'
 0020    | OP_GET_INDEX
-0021    | OP_CONSTANT         7 '0'
+0021    | OP_CONSTANT         5 '0'
 0023    | OP_GET_INDEX
 0024    | OP_PRINT
-0025    4 OP_GET_GLOBAL       8 'array'
-0027    | OP_CONSTANT         9 '0'
+0025    4 OP_GET_GLOBAL       0 'array'
+0027    | OP_CONSTANT         5 '0'
 0029    | OP_GET_INDEX
-0030    | OP_CONSTANT        10 '1'
+0030    | OP_CONSTANT         6 '1'
 0032    | OP_GET_INDEX
 0033    | OP_PRINT
-0034    5 OP_GET_GLOBAL      11 'array'
-0036    | OP_CONSTANT        12 '1'
+0034    5 OP_GET_GLOBAL       0 'array'
+0036    | OP_CONSTANT         6 '1'
 0038    | OP_GET_INDEX
-0039    | OP_CONSTANT        13 '0'
+0039    | OP_CONSTANT         5 '0'
 0041    | OP_GET_INDEX
 0042    | OP_PRINT
-0043    6 OP_GET_GLOBAL      14 'array'
-0045    | OP_CONSTANT        15 '1'
+0043    6 OP_GET_GLOBAL       0 'array'
+0045    | OP_CONSTANT         6 '1'
 0047    | OP_GET_INDEX
-0048    | OP_CONSTANT        16 '1'
+0048    | OP_CONSTANT         6 '1'
 0050    | OP_GET_INDEX
 0051    | OP_PRINT
 0052    7 OP_NIL

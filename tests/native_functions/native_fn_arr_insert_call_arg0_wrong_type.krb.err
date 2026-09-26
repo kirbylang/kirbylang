@@ -5,9 +5,9 @@
 0000    1 OP_FALSE
 0001    | OP_DEFINE_GLOBAL    0 'value'
 0003    3 OP_GET_GLOBAL       1 '@arrInsert'
-0005    | OP_GET_GLOBAL       2 'value'
-0007    | OP_CONSTANT         3 '0'
-0009    | OP_CONSTANT         4 'Hello'
+0005    | OP_GET_GLOBAL       0 'value'
+0007    | OP_CONSTANT         2 '0'
+0009    | OP_CONSTANT         3 'Hello'
 0011    | OP_CALL             3
 0013    | OP_POP
 0014    4 OP_NIL

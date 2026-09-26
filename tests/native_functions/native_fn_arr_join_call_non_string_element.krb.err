@@ -7,13 +7,13 @@
 0004    | OP_ARRAY            2
 0006    | OP_DEFINE_GLOBAL    0 'parts'
 0008    4 OP_GET_GLOBAL       3 '@arrPush'
-0010    | OP_GET_GLOBAL       4 'parts'
-0012    | OP_CONSTANT         5 '2'
+0010    | OP_GET_GLOBAL       0 'parts'
+0012    | OP_CONSTANT         4 '2'
 0014    | OP_CALL             2
 0016    | OP_POP
-0017    6 OP_GET_GLOBAL       6 '@arrJoin'
-0019    | OP_GET_GLOBAL       7 'parts'
-0021    | OP_CONSTANT         8 ', '
+0017    6 OP_GET_GLOBAL       5 '@arrJoin'
+0019    | OP_GET_GLOBAL       0 'parts'
+0021    | OP_CONSTANT         6 ', '
 0023    | OP_CALL             2
 0025    | OP_POP
 0026    7 OP_NIL

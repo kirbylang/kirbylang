@@ -10,9 +10,9 @@
 0010    | OP_ARRAY            5
 0012    | OP_DEFINE_GLOBAL    0 'array'
 0014    3 OP_GET_GLOBAL       7 '@arrSlice'
-0016    | OP_GET_GLOBAL       8 'array'
-0018    | OP_CONSTANT         9 '1'
-0020    | OP_CONSTANT        10 '4'
+0016    | OP_GET_GLOBAL       0 'array'
+0018    | OP_CONSTANT         8 '1'
+0020    | OP_CONSTANT         9 '4'
 0022    | OP_NIL
 0023    | OP_CALL             4
 0025    | OP_DEFINE_GLOBAL    6 'slice'

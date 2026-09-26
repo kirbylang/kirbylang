@@ -9,13 +9,13 @@
 0008    | OP_CALL             2
 0010    | OP_CALL             1
 0012    | OP_PRINT
-0013    2 OP_GET_GLOBAL       4 '@strSplit'
-0015    | OP_CONSTANT         5 ''
-0017    | OP_CONSTANT         6 ','
+0013    2 OP_GET_GLOBAL       1 '@strSplit'
+0015    | OP_CONSTANT         2 ''
+0017    | OP_CONSTANT         3 ','
 0019    | OP_CALL             2
-0021    | OP_CONSTANT         7 '0'
+0021    | OP_CONSTANT         4 '0'
 0023    | OP_GET_INDEX
-0024    | OP_CONSTANT         8 ''
+0024    | OP_CONSTANT         2 ''
 0026    | OP_EQUAL
 0027    | OP_PRINT
 0028    3 OP_NIL

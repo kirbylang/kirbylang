@@ -8,7 +8,7 @@
 0006    | OP_ARRAY            3
 0008    | OP_DEFINE_GLOBAL    0 'array'
 0010    3 OP_GET_GLOBAL       5 '@arrPop'
-0012    | OP_GET_GLOBAL       6 'array'
+0012    | OP_GET_GLOBAL       0 'array'
 0014    | OP_TRUE
 0015    | OP_CALL             2
 0017    | OP_DEFINE_GLOBAL    4 'popped'

@@ -6,16 +6,16 @@
 0002    | OP_CONSTANT         1 'Hello, World 123!'
 0004    | OP_CALL             1
 0006    | OP_PRINT
-0007    2 OP_GET_GLOBAL       2 '@strToLower'
-0009    | OP_CONSTANT         3 'ALREADY lower'
+0007    2 OP_GET_GLOBAL       0 '@strToLower'
+0009    | OP_CONSTANT         2 'ALREADY lower'
 0011    | OP_CALL             1
 0013    | OP_PRINT
-0014    3 OP_GET_GLOBAL       4 '@strToLower'
-0016    | OP_CONSTANT         5 ''
+0014    3 OP_GET_GLOBAL       0 '@strToLower'
+0016    | OP_CONSTANT         3 ''
 0018    | OP_CALL             1
 0020    | OP_PRINT
-0021    4 OP_GET_GLOBAL       6 '@strToLower'
-0023    | OP_CONSTANT         7 'CAFÉ'
+0021    4 OP_GET_GLOBAL       0 '@strToLower'
+0023    | OP_CONSTANT         4 'CAFÉ'
 0025    | OP_CALL             1
 0027    | OP_PRINT
 0028    5 OP_NIL

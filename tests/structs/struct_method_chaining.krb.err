@@ -4,26 +4,26 @@
 == <script> ==
 0000    1 OP_STRUCT           0 'Chain'
 0002    | OP_DEFINE_GLOBAL    0 'Chain'
-0004    | OP_GET_GLOBAL       1 'Chain'
+0004    | OP_GET_GLOBAL       0 'Chain'
 0006    2 OP_NIL
-0007    | OP_FIELD            2 'value' private
+0007    | OP_FIELD            1 'value' private
 0010    3 OP_POP
-0011    5 OP_GET_GLOBAL       3 'Chain'
-0013    6 OP_CLOSURE          5 <fn new>
-0015    | OP_METHOD           4 'new'
-0017    8 OP_CLOSURE          7 <fn plus>
-0019    | OP_METHOD           6 'plus'
-0021   10 OP_CLOSURE          9 <fn get>
-0023    | OP_METHOD           8 'get'
+0011    5 OP_GET_GLOBAL       0 'Chain'
+0013    6 OP_CLOSURE          3 <fn new>
+0015    | OP_METHOD           2 'new'
+0017    8 OP_CLOSURE          5 <fn plus>
+0019    | OP_METHOD           4 'plus'
+0021   10 OP_CLOSURE          7 <fn get>
+0023    | OP_METHOD           6 'get'
 0025   11 OP_POP
-0026   13 OP_GET_GLOBAL      10 'Chain'
-0028    | OP_CONSTANT        12 '1'
-0030    | OP_INVOKE        (1 args)   11 'new'
-0033    | OP_CONSTANT        14 '2'
-0035    | OP_INVOKE        (1 args)   13 'plus'
-0038    | OP_CONSTANT        16 '3'
-0040    | OP_INVOKE        (1 args)   15 'plus'
-0043    | OP_INVOKE        (0 args)   17 'get'
+0026   13 OP_GET_GLOBAL       0 'Chain'
+0028    | OP_CONSTANT         8 '1'
+0030    | OP_INVOKE        (1 args)    2 'new'
+0033    | OP_CONSTANT         9 '2'
+0035    | OP_INVOKE        (1 args)    4 'plus'
+0038    | OP_CONSTANT        10 '3'
+0040    | OP_INVOKE        (1 args)    4 'plus'
+0043    | OP_INVOKE        (0 args)    6 'get'
 0046    | OP_PRINT
 0047   14 OP_NIL
 0048    | OP_RETURN
