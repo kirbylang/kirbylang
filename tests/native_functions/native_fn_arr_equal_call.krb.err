@@ -2,9 +2,9 @@
 0000    1 OP_NIL
 0001    | OP_RETURN
 == <script> ==
-0000    1 OP_CONSTANT         1 '1.000000'
-0002    | OP_CONSTANT         2 '2.000000'
-0004    | OP_CONSTANT         3 '3.000000'
+0000    1 OP_CONSTANT         1 '1'
+0002    | OP_CONSTANT         2 '2'
+0004    | OP_CONSTANT         3 '3'
 0006    | OP_ARRAY            3
 0008    | OP_DEFINE_GLOBAL    0 'a'
 0010    2 OP_GET_GLOBAL       5 'a'
@@ -31,8 +31,8 @@
 0049    | OP_CALL             2
 0051    | OP_PRINT
 0052   11 OP_GET_GLOBAL      19 'c'
-0054    | OP_CONSTANT        20 '0.000000'
-0056    | OP_CONSTANT        21 '100.000000'
+0054    | OP_CONSTANT        20 '0'
+0056    | OP_CONSTANT        21 '100'
 0058    | OP_SET_INDEX
 0059    | OP_POP
 0060   13 OP_CONSTANT        22 'After'

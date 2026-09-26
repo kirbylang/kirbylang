@@ -14,4 +14,4 @@ if (!@fileExists(path)) {
 
 let fileText = @readFileToString(path);
 
-print fileText;
+@println(fileText);

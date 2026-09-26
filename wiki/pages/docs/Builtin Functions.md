@@ -387,6 +387,40 @@ print @argv(1);
 ```
 
 ## IO
+### `@print`
+
+Write a value to stdout, the way `print` does, without a newline. A struct that implements `Display` is written with its `toString()`.
+
+```kirby
+@print("Loading");
+@print("...");
+```
+
+### `@println`
+
+Write a value to stdout, the way `print` does, followed by a newline. A struct that implements `Display` is written with its `toString()`.
+
+```kirby
+@println("Hello, World");
+@println(0.1 + 0.2); // 0.30000000000000004
+```
+
+### `@eprint`
+
+Write a value to stderr without a newline. A struct that implements `Display` is written with its `toString()`.
+
+```kirby
+@eprint("error: ");
+```
+
+### `@eprintln`
+
+Write a value to stderr, followed by a newline. A struct that implements `Display` is written with its `toString()`.
+
+```kirby
+@eprintln("something failed");
+```
+
 ### `@fileExists`
 
 Return if a file or path exists at a given path.

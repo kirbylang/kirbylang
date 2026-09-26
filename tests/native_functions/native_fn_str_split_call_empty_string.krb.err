@@ -13,7 +13,7 @@
 0015    | OP_CONSTANT         5 ''
 0017    | OP_CONSTANT         6 ','
 0019    | OP_CALL             2
-0021    | OP_CONSTANT         7 '0.000000'
+0021    | OP_CONSTANT         7 '0'
 0023    | OP_GET_INDEX
 0024    | OP_CONSTANT         8 ''
 0026    | OP_EQUAL

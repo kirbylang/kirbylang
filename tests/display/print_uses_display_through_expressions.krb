@@ -1,0 +1,17 @@
+struct Box {
+    pub var value: f64;
+}
+
+impl Display for Box {
+    fun toString(self): string = "Box(" + @numberToString(self.value) + ")";
+}
+
+fun show(box: Box): unit {
+    print box;
+}
+
+let boxes = [Box { value: 1 }, Box { value: 2 }];
+
+show(Box { value: 3 });
+print boxes[1];
+print { let b = Box { value: 4 }; b };

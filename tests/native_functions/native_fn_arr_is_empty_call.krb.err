@@ -7,9 +7,9 @@
 0004    | OP_CALL             1
 0006    | OP_PRINT
 0007    2 OP_GET_GLOBAL       1 '@arrIsEmpty'
-0009    | OP_CONSTANT         2 '1.000000'
-0011    | OP_CONSTANT         3 '2.000000'
-0013    | OP_CONSTANT         4 '3.000000'
+0009    | OP_CONSTANT         2 '1'
+0011    | OP_CONSTANT         3 '2'
+0013    | OP_CONSTANT         4 '3'
 0015    | OP_ARRAY            3
 0017    | OP_CALL             1
 0019    | OP_PRINT

@@ -23,7 +23,7 @@
 == new ==
 0000    6 OP_GET_GLOBAL       0 'Counter'
 0002    | OP_CONSTANT         1 'count'
-0004    | OP_CONSTANT         2 '7.000000'
+0004    | OP_CONSTANT         2 '7'
 0006    | OP_STRUCT_INIT      1
 0008    | OP_RETURN
 == read ==

@@ -1,0 +1,9 @@
+#!/usr/bin/env krb -f
+
+var name = @prompt("What's your name? ");
+
+@println("Hello " + name);
+
+var age = @prompt("How old are you? ");
+
+@println("Age: " + age);

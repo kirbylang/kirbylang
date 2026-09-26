@@ -7,13 +7,13 @@
 0004    | OP_DEFINE_GLOBAL    0 'array'
 0006    3 OP_GET_GLOBAL       2 '@arrInsert'
 0008    | OP_GET_GLOBAL       3 'array'
-0010    | OP_CONSTANT         4 '0.000000'
+0010    | OP_CONSTANT         4 '0'
 0012    | OP_CONSTANT         5 'Hello'
 0014    | OP_CALL             3
 0016    | OP_POP
 0017    4 OP_GET_GLOBAL       6 '@arrInsert'
 0019    | OP_GET_GLOBAL       7 'array'
-0021    | OP_CONSTANT         8 '1.000000'
+0021    | OP_CONSTANT         8 '1'
 0023    | OP_CONSTANT         9 'World'
 0025    | OP_CALL             3
 0027    | OP_POP

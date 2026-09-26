@@ -53,6 +53,7 @@ static void emitNumberConstant(double number);
 static void emitStringConstant(const char *chars, int length);
 static void emitByte(uint8_t byte);
 static void emitBytes(uint8_t byte1, uint8_t byte2);
+static void emitDisplayToString(void);
 static void declareVariable(Token *name, bool isMutable);
 static void defineVariable(uint8_t global);
 static void markInitialized(void);
@@ -83,6 +84,17 @@ static void compilerErrorAtToken(Token *token, const char *message) {
 
 static void compilerErrorAtNode(AstNode *node, const char *message) {
   compilerErrorAt(node->line, NULL, 0, message);
+}
+
+/**
+ * Reports a failed check of the stack height the compiler tracks. A failure
+ * means an OpInfo entry is wrong, and compiling on would give locals the
+ * wrong slots, so it's checked in every build rather than with assert.
+ */
+static void checkStackHeight(bool ok, int line) {
+  if (!ok && !hadError)
+    compilerErrorAt(line, NULL, 0,
+                    "Internal compiler error: stack height mismatch.");
 }
 
 /**
@@ -414,7 +426,16 @@ static void countEmittedCode(void) {
     uint8_t *code = &currentFn()->code[current->bytesCounted];
     OpCode op = (OpCode)code[0];
     const OpInfo *info = opInfo(op);
-    assert(info != NULL && info->isKnownOp);
+
+    // Without an entry the instruction's length is unknown, so counting
+    // can't go on.
+    if (info == NULL || !info->isKnownOp) {
+      if (!hadError)
+        compilerErrorAt(currentLine, NULL, 0,
+                        "Internal compiler error: opcode has no OpInfo entry.");
+      current->bytesCounted = currentFn()->codeCount;
+      return;
+    }
 
     int length = 1 + info->operandBytes;
 
@@ -486,7 +507,7 @@ static void patchJump(int offset) {
   int height = currentStackHeight();
 
   if (current->isReachable) {
-    assert(hadError || height == heightAtJump);
+    checkStackHeight(height == heightAtJump, currentLine);
   } else {
     resetStackHeight(heightAtJump);
     current->isReachable = true;
@@ -663,6 +684,9 @@ static void compileCall(CallNode *c) {
   compileExpr(c->callee);
   for (int i = 0; i < c->argCount; i++) {
     compileExpr(c->args[i]);
+
+    if (i == 0 && c->argUsesDisplay)
+      emitDisplayToString();
   }
   emitBytes(OP_CALL, (uint8_t)c->argCount);
 }
@@ -823,6 +847,15 @@ static bool compileStringConcatChain(AstNode *node) {
 
   emitNativeStrConcatEnd(count, node->line);
   return true;
+}
+
+// Replaces the value on top of the stack with the string its Display impl's
+// toString() returns.
+static void emitDisplayToString(void) {
+  Token toString = tokenFromCString("toString");
+
+  emitBytes(OP_INVOKE, identifierConstant(&toString));
+  emitByte(0);
 }
 
 /**
@@ -1464,6 +1497,10 @@ static void compileStmt(AstNode *node) {
 
   case NODE_PRINT:
     compileExpr(node->as.print.expr);
+
+    if (node->as.print.usesDisplay)
+      emitDisplayToString();
+
     emitByte(OP_PRINT);
     break;
 
@@ -1540,9 +1577,10 @@ static void compileStmt(AstNode *node) {
 
   // A statement leaves only the locals it declares on the stack. Anything
   // else means an OpInfo entry is wrong.
-  assert(hadError || !current->isReachable ||
-         current->stackHeight - heightBefore ==
-             current->localCount - localsBefore);
+  checkStackHeight(!current->isReachable ||
+                       current->stackHeight - heightBefore ==
+                           current->localCount - localsBefore,
+                   node->line);
 }
 
 CompiledUnit *compile(AstNode **ast, int count, int endLine) {

@@ -7,7 +7,7 @@
 0004    | OP_DEFINE_GLOBAL    0 'parts'
 0006    2 OP_GET_GLOBAL       2 '@arrPush'
 0008    | OP_GET_GLOBAL       3 'parts'
-0010    | OP_CONSTANT         4 '1.000000'
+0010    | OP_CONSTANT         4 '1'
 0012    | OP_CALL             2
 0014    | OP_POP
 0015    4 OP_GET_GLOBAL       5 '@strConcat'

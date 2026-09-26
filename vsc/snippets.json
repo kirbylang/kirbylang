@@ -296,6 +296,34 @@
     ],
     "description": "Write a string to a file at a path"
   },
+  "Native: @print": {
+    "prefix": "@print",
+    "body": [
+      "@print(${1:value})$0"
+    ],
+    "description": "Write a value to stdout, the way `print` does, without a newline"
+  },
+  "Native: @println": {
+    "prefix": "@println",
+    "body": [
+      "@println(${1:value})$0"
+    ],
+    "description": "Write a value to stdout, the way `print` does, followed by a newline"
+  },
+  "Native: @eprint": {
+    "prefix": "@eprint",
+    "body": [
+      "@eprint(${1:value})$0"
+    ],
+    "description": "Write a value to stderr without a newline"
+  },
+  "Native: @eprintln": {
+    "prefix": "@eprintln",
+    "body": [
+      "@eprintln(${1:value})$0"
+    ],
+    "description": "Write a value to stderr, followed by a newline"
+  },
   "Native: @numberToString": {
     "prefix": "@numberToString",
     "body": [

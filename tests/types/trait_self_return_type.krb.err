@@ -16,9 +16,9 @@
 0021   12 OP_POP
 0022   14 OP_GET_GLOBAL       8 'Point'
 0024    | OP_CONSTANT         9 'x'
-0026    | OP_CONSTANT        10 '3.000000'
+0026    | OP_CONSTANT        10 '3'
 0028    | OP_CONSTANT        11 'y'
-0030    | OP_CONSTANT        12 '4.000000'
+0030    | OP_CONSTANT        12 '4'
 0032    | OP_STRUCT_INIT      2
 0034    | OP_DEFINE_GLOBAL    7 'p'
 0036   15 OP_GET_GLOBAL      14 'p'

@@ -110,6 +110,11 @@ typedef struct {
 
 typedef struct {
   AstNode *expr;
+  /**
+   * The value's type implements Display, so it prints through toString().
+   * Set by the type checker, because the compiler has no types.
+   */
+  bool usesDisplay;
 } PrintNode;
 
 typedef struct {
@@ -128,6 +133,13 @@ typedef struct {
   Token paren;
   AstNode **args;
   int argCount;
+  /**
+   * A call to @print, @println, @eprint, or @eprintln whose argument's type
+   * implements Display, so it's converted with toString() first. Natives
+   * can't call Kirby methods, so the compiler does it. Set by the type
+   * checker, because the compiler has no types.
+   */
+  bool argUsesDisplay;
 } CallNode;
 
 typedef struct {

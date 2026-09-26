@@ -17,7 +17,7 @@
   - `u#` (e.g. `123u8`), `i#`, `f#`, `number`
 - Lambda body expressions `var sum = fun (a, b) a + b;`
 - Native Functions
-  - [ ] `print`, `println`, `eprint`, `eprintln`
+  - [x] `print`, `println`, `eprint`, `eprintln`
   - [ ] `arrSort(array, fn)`
   - [ ] `arrMap(array, fn)`
 - Macros
@@ -25,6 +25,7 @@
 ## Next: 0.4.0
 
 - Decouple compiler, GC, and VM
+- Build `stdlib/stdlib.krb` into the binary, so `krb` runs from any directory
 - Structs
   - [Accessibility modifiers `pub`](https://github.com/kirbylang/kirbylang/issues/9)
     - New token: `TOKEN_PUB`
@@ -41,10 +42,17 @@
 - Three or more strings joined with `+` compile to one `@strConcat([...])`
   instead of an `OP_ADD` per `+`
 - Unit literal expression: `()`.
+- Numbers print with as many digits as they need and no more: `10`, not
+  `10.000000`, and `0.1 + 0.2` as `0.30000000000000004`. Numbers from `1e-6` up
+  to `1e21` print in plain decimal form, others in exponent form (`1e-7`,
+  `1e+21`). `print`, `@numberToString`, and printed arrays all use this format.
 - New native functions:
   - `@assert(condition, message)`
   - `@panic(message)`
   - `@boolToString(b)`
+  - Output: `@print(value)`, `@println(value)`, `@eprint(value)`,
+    `@eprintln(value)`. They write a value the way `print` does, using a
+    struct's `Display` impl when it has one
   - Math: `@floor(n)`, `@round(n)`, `@trunc(n)`, `@abs(n)`, `@sqrt(n)`, `@pow(base, exponent`, `@min(a, b)`, `@max(a, b)`
   - Arrays: `@arrJoin(array, separator)`
     - Every element must already be a string. There is no implicit conversion
@@ -68,7 +76,8 @@
       `@strSplit`
     - Still unchecked, pending generics: `@len`, `@typeof`, `@instanceOf`,
       `@is`, `@isNumber`, `@isFunction`, `@isBool`, `@isString`, `@isNil`,
-      `@strConcat`, and the `@arr*` family
+      `@strConcat`, `@print`, `@println`, `@eprint`, `@eprintln`, and the `@arr*`
+      family
     - Still unchecked, pending `Option[T]`: `@argv`, `@prompt`, `@stdin`,
       `@strIndexOf`
     - Still unchecked, pending more than two parameters: `@strSlice`,
@@ -108,6 +117,8 @@
     - Builtin traits, always in scope: `Display`, `Eq`, `Ord`, `Default`
     - A circular supertrait chain (`trait A: A {}`, or `trait A: B {} trait B: A {}`) is a compile error
     - Require structs to implement `Eq` trait for `==`/`!=`
+    - `print` uses a struct's `Display` impl: it prints what `toString()`
+      returns
     - Limitations
       - `impl Trait for` a primitive type (`f64`, `string`, `bool`, `unit`) isn't supported yet -- needs the same static call-resolution work operator overloading does
       - No real operator overloading yet. `Eq` is only a typecheck. `==` still runs identify equality

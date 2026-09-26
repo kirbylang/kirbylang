@@ -6,14 +6,15 @@ fun fib(n: f64): f64 {
   fib(n - 2) + fib(n - 1)
 }
 
-print "Fibonacci";
+@println("Fibonacci");
 
-var arg = @argv(4) ?? @prompt("n: ");
-var n = @parseNumber(arg);
+let arg = @argv(4) ?? @prompt("n: ");
+let start = @clock();
 
 print $"{n}\n";
 
-var start = @clock();
+let end = @clock();
+let time_taken = end - start;
 
 print $"Result:\n{fib(n)}\n";
 

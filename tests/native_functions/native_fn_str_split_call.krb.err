@@ -14,7 +14,7 @@
 0017    | OP_CALL             1
 0019    | OP_PRINT
 0020    4 OP_GET_GLOBAL       7 'parts'
-0022    | OP_CONSTANT         8 '1.000000'
+0022    | OP_CONSTANT         8 '1'
 0024    | OP_GET_INDEX
 0025    | OP_PRINT
 0026    5 OP_GET_GLOBAL       9 '@strSplit'

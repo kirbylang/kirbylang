@@ -4,7 +4,7 @@
 == <script> ==
 0000    1 OP_GET_GLOBAL       0 '@strSlice'
 0002    | OP_CONSTANT         1 'hello'
-0004    | OP_CONSTANT         2 '1.000000'
+0004    | OP_CONSTANT         2 '1'
 0006    | OP_CONSTANT         3 'y'
 0008    | OP_CALL             3
 0010    | OP_PRINT

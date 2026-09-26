@@ -9,5 +9,5 @@ fun fizzbuzz(n: f64): string =
 var limit = @parseNumber(@prompt("limit: "));
 
 for (var i = 1; i <= limit; i = i + 1) {
-    print fizzbuzz(i);
+    @println(fizzbuzz(i));
 }

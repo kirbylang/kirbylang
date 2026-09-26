@@ -12,9 +12,9 @@
 0014    4 OP_POP
 0015    6 OP_GET_GLOBAL       5 'Point'
 0017    | OP_CONSTANT         6 'x'
-0019    | OP_CONSTANT         7 '1.000000'
+0019    | OP_CONSTANT         7 '1'
 0021    | OP_CONSTANT         8 'y'
-0023    | OP_CONSTANT         9 '2.000000'
+0023    | OP_CONSTANT         9 '2'
 0025    | OP_STRUCT_INIT      2
 0027    | OP_DEFINE_GLOBAL    4 'p'
 0029    7 OP_CONSTANT        11 'a'
@@ -36,7 +36,7 @@
 0059   10 OP_GET_GLOBAL      20 '@strConcat'
 0061    | OP_CONSTANT        21 'first='
 0063    | OP_GET_GLOBAL      22 'items'
-0065    | OP_CONSTANT        23 '0.000000'
+0065    | OP_CONSTANT        23 '0'
 0067    | OP_GET_INDEX
 0068    | OP_ARRAY            2
 0070    | OP_CALL             1
@@ -46,9 +46,9 @@
 0077    | OP_GET_GLOBAL      26 '@numberToString'
 0079    | OP_GET_GLOBAL      27 'Point'
 0081    | OP_CONSTANT        28 'x'
-0083    | OP_CONSTANT        29 '5.000000'
+0083    | OP_CONSTANT        29 '5'
 0085    | OP_CONSTANT        30 'y'
-0087    | OP_CONSTANT        31 '6.000000'
+0087    | OP_CONSTANT        31 '6'
 0089    | OP_STRUCT_INIT      2
 0091    | OP_GET_PROPERTY    32 'x'
 0093    | OP_CALL             1

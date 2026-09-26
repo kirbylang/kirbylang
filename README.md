@@ -37,7 +37,7 @@ let builder = StringBuilder.default()
     .add(" ")
     .add("World");
 
-print builder.toString();
+@println(builder);
 ```
 
 ## Documentation

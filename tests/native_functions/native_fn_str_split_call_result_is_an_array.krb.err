@@ -13,7 +13,7 @@
 0016    | OP_CALL             2
 0018    | OP_PRINT
 0019    3 OP_GET_GLOBAL       7 'parts'
-0021    | OP_CONSTANT         8 '0.000000'
+0021    | OP_CONSTANT         8 '0'
 0023    | OP_GET_INDEX
 0024    | OP_PRINT
 0025    4 OP_NIL

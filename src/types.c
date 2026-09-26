@@ -194,31 +194,11 @@ static void appendMemberWithVisibility(TypeMember **array, bool **isPublicArray,
   *count = newCount;
 }
 
-Type *typeStruct(Token name, UninternedTypeMember *fields, int fieldCount,
-                 UninternedTypeMember *staticMethods, int staticMethodCount,
-                 UninternedTypeMember *instanceMethods,
-                 int instanceMethodCount) {
+Type *typeStruct(Token name, UninternedTypeMember *fields, int fieldCount) {
   Type *type = allocType(TYPE_STRUCT);
   type->as.struct_.name = internTokenName(name);
   type->as.struct_.fields = internMembers(fields, fieldCount);
   type->as.struct_.fieldCount = fieldCount;
-
-  for (int i = 0; i < staticMethodCount; i++) {
-    appendMemberWithVisibility(
-        &type->as.struct_.staticMethods, &type->as.struct_.staticMethodIsPublic,
-        &type->as.struct_.staticMethodCount, staticMethods[i].name,
-        staticMethods[i].type,
-        /*isPublic=*/&type->as.struct_.staticMethodIsPublic[i]);
-  }
-
-  for (int i = 0; i < instanceMethodCount; i++) {
-    appendMemberWithVisibility(
-        &type->as.struct_.instanceMethods,
-        &type->as.struct_.instanceMethodIsPublic,
-        &type->as.struct_.instanceMethodCount, instanceMethods[i].name,
-        instanceMethods[i].type,
-        /*isPublic=*/&type->as.struct_.instanceMethodIsPublic[i]);
-  }
 
   return type;
 }

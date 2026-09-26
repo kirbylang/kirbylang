@@ -7,7 +7,7 @@
 0004    | OP_GET_GLOBAL       1 'Struct'
 0006    | OP_POP
 0007    3 OP_GET_GLOBAL       2 'Struct'
-0009    | OP_CONSTANT         3 '123.000000'
+0009    | OP_CONSTANT         3 '123'
 0011    | OP_CALL             1
 0013    | OP_POP
 0014    4 OP_NIL

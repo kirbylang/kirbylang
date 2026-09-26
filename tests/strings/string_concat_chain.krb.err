@@ -25,10 +25,10 @@
 0037    | OP_ARRAY            4
 0039    | OP_CALL             1
 0041    | OP_PRINT
-0042    7 OP_CONSTANT        15 '1.000000'
-0044    | OP_CONSTANT        16 '2.000000'
+0042    7 OP_CONSTANT        15 '1'
+0044    | OP_CONSTANT        16 '2'
 0046    | OP_ADD
-0047    | OP_CONSTANT        17 '3.000000'
+0047    | OP_CONSTANT        17 '3'
 0049    | OP_ADD
 0050    | OP_PRINT
 0051    8 OP_NIL
