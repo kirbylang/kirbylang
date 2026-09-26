@@ -529,8 +529,8 @@ static Type *typchkInferUnary(TypeEnv *env, AstNode *node) {
 // Infer the type of a binary expression
 // Does the type have a Display impl, and so a toString() method?
 static bool typeImplementsDisplay(Type *type) {
-  return typeStructImplementsTrait(type,
-                                   internTokenName(tokenFromCString("Display")));
+  return typeStructImplementsTrait(
+      type, internTokenName(tokenFromCString("Display")));
 }
 
 static Type *typchkInferBinary(TypeEnv *env, AstNode *node) {
@@ -717,6 +717,20 @@ static void typchkCheckNativeConstantArgs(AstNode *node) {
 }
 
 // Infer the type of a call expression
+// Is this @print, @println, @eprint, or @eprintln?
+static bool isPrintNative(Token *name) {
+  static const char *printNatives[] = {"@print", "@println", "@eprint",
+                                       "@eprintln"};
+
+  for (size_t i = 0; i < sizeof(printNatives) / sizeof(*printNatives); i++) {
+    if ((int)strlen(printNatives[i]) == name->length &&
+        memcmp(printNatives[i], name->start, (size_t)name->length) == 0)
+      return true;
+  }
+
+  return false;
+}
+
 static Type *typchkInferCall(TypeEnv *env, AstNode *node) {
   CallNode *c = &node->as.call;
 
@@ -730,8 +744,12 @@ static Type *typchkInferCall(TypeEnv *env, AstNode *node) {
     if (calleeType == NULL) {
       // Unable to resolve called function (possible a native function)
       // Run typchkInfer over args to report any type errors they might contain
-      for (int i = 0; i < c->argCount; i++)
-        typchkInfer(env, c->args[i]);
+      for (int i = 0; i < c->argCount; i++) {
+        Type *argType = typchkInfer(env, c->args[i]);
+
+        if (i == 0 && isPrintNative(name) && typeImplementsDisplay(argType))
+          c->argUsesDisplay = true;
+      }
 
       return NULL;
     }

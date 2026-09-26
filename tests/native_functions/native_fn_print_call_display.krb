@@ -1,0 +1,16 @@
+struct Box {
+    pub var value: f64;
+}
+
+impl Display for Box {
+    fun toString(self): string = "Box(" + @numberToString(self.value) + ")";
+}
+
+let box = Box { value: 123 };
+
+@print(box);
+@println("");
+@println(box);
+@eprint(box);
+@eprintln(box);
+@println(Box { value: 1 });
