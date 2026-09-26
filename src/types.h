@@ -116,10 +116,7 @@ Type *typeSelfPlaceholder(void);
 
 // Allocates a new struct type
 // Returns pointer to the new type in the types arena
-Type *typeStruct(Token name, UninternedTypeMember *fields, int fieldCount,
-                 UninternedTypeMember *staticMethods, int staticMethodCount,
-                 UninternedTypeMember *instanceMethods,
-                 int instanceMethodCount);
+Type *typeStruct(Token name, UninternedTypeMember *fields, int fieldCount);
 
 // Allocates a new function type
 // Returns pointer to the new type in the types arena
