@@ -19,7 +19,7 @@
 0026    | OP_METHOD           9 'toString'
 0028    9 OP_POP
 0029   15 OP_GET_GLOBAL      12 'Box'
-0031    | OP_CONSTANT        14 '100.000000'
+0031    | OP_CONSTANT        14 '100'
 0033    | OP_INVOKE        (1 args)   13 'new'
 0036    | OP_DEFINE_GLOBAL   11 'box'
 0038   16 OP_GET_GLOBAL      16 'box'

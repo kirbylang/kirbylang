@@ -35,6 +35,10 @@
   - Deprecate the call syntax e.g. `Point()`
 - [`continue` keyword](https://github.com/kirbylang/kirbylang/issues/13)
 - Unit literal expression: `()`.
+- Numbers print with as many digits as they need and no more: `10`, not
+  `10.000000`, and `0.1 + 0.2` as `0.30000000000000004`. Numbers from `1e-6` up
+  to `1e21` print in plain decimal form, others in exponent form (`1e-7`,
+  `1e+21`). `print`, `@numberToString`, and printed arrays all use this format.
 - New native functions:
   - `@assert(condition, message)`
   - `@panic(message)`

@@ -2,14 +2,14 @@
 0000    1 OP_NIL
 0001    | OP_RETURN
 == <script> ==
-0000    1 OP_CONSTANT         1 '1.000000'
-0002    | OP_CONSTANT         2 '2.000000'
-0004    | OP_CONSTANT         3 '3.000000'
+0000    1 OP_CONSTANT         1 '1'
+0002    | OP_CONSTANT         2 '2'
+0004    | OP_CONSTANT         3 '3'
 0006    | OP_ARRAY            3
 0008    | OP_DEFINE_GLOBAL    0 'array'
 0010    3 OP_GET_GLOBAL       5 '@arrRemove'
 0012    | OP_GET_GLOBAL       6 'array'
-0014    | OP_CONSTANT         7 '0.000000'
+0014    | OP_CONSTANT         7 '0'
 0016    | OP_CALL             2
 0018    | OP_DEFINE_GLOBAL    4 'removed'
 0020    5 OP_GET_GLOBAL       8 'array'

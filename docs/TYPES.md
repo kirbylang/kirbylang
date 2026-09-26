@@ -131,7 +131,7 @@ impl Display for Box {
 
 let box = Box { value: 123 };
 
-box.toString(); // "123.000000"
+box.toString(); // "123"
 ```
 
 ##### Ord

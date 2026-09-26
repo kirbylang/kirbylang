@@ -14,7 +14,7 @@
 0017   12 OP_POP
 0018   14 OP_GET_GLOBAL       7 'Counter'
 0020    | OP_CONSTANT         8 'count'
-0022    | OP_CONSTANT         9 '7.000000'
+0022    | OP_CONSTANT         9 '7'
 0024    | OP_STRUCT_INIT      1
 0026    | OP_INVOKE        (0 args)   10 'reader'
 0029    | OP_DEFINE_GLOBAL    6 'read'

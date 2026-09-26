@@ -15,8 +15,8 @@
 0019    | OP_METHOD           5 'new'
 0021    8 OP_POP
 0022   10 OP_GET_GLOBAL       8 'Point'
-0024    | OP_CONSTANT        10 '1.000000'
-0026    | OP_CONSTANT        11 '2.000000'
+0024    | OP_CONSTANT        10 '1'
+0026    | OP_CONSTANT        11 '2'
 0028    | OP_INVOKE        (2 args)    9 'new'
 0031    | OP_DEFINE_GLOBAL    7 'p'
 0033   11 OP_GET_GLOBAL      12 'p'

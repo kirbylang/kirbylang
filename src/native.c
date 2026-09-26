@@ -828,11 +828,11 @@ static Value numberToStringNative(VM *vm, int argCount, Value *args) {
 
   Value value = args[0];
 
-  char buffer[32];
+  char buffer[NUMBER_STRING_MAX];
 
-  int length = snprintf(buffer, sizeof(buffer), "%.15g", value.as.number);
+  formatNumber(value.as.number, buffer, sizeof(buffer));
 
-  return OBJ_VAL(copyString(vm->gc, buffer, length));
+  return OBJ_VAL(copyString(vm->gc, buffer, (int)strlen(buffer)));
 }
 
 static Value floorNative(VM *vm, int argCount, Value *args) {

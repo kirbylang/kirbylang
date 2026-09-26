@@ -15,7 +15,7 @@
 0019    | OP_METHOD           6 'balance'
 0021    9 OP_POP
 0022   11 OP_GET_GLOBAL       8 'Account'
-0024    | OP_CONSTANT        10 '250.000000'
+0024    | OP_CONSTANT        10 '250'
 0026    | OP_INVOKE        (1 args)    9 'withBalance'
 0029    | OP_INVOKE        (0 args)   11 'balance'
 0032    | OP_PRINT

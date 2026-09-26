@@ -3,15 +3,15 @@
 0001    | OP_RETURN
 == <script> ==
 0000    1 OP_GET_GLOBAL       0 '@sqrt'
-0002    | OP_CONSTANT         1 '16.000000'
+0002    | OP_CONSTANT         1 '16'
 0004    | OP_CALL             1
 0006    | OP_PRINT
 0007    2 OP_GET_GLOBAL       2 '@sqrt'
-0009    | OP_CONSTANT         3 '2.250000'
+0009    | OP_CONSTANT         3 '2.25'
 0011    | OP_CALL             1
 0013    | OP_PRINT
 0014    3 OP_GET_GLOBAL       4 '@sqrt'
-0016    | OP_CONSTANT         5 '0.000000'
+0016    | OP_CONSTANT         5 '0'
 0018    | OP_CALL             1
 0020    | OP_PRINT
 0021    4 OP_NIL

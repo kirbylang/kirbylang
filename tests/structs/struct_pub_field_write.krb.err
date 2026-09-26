@@ -10,11 +10,11 @@
 0010    3 OP_POP
 0011    5 OP_GET_GLOBAL       4 'Point'
 0013    | OP_CONSTANT         5 'x'
-0015    | OP_CONSTANT         6 '1.000000'
+0015    | OP_CONSTANT         6 '1'
 0017    | OP_STRUCT_INIT      1
 0019    | OP_DEFINE_GLOBAL    3 'p'
 0021    7 OP_GET_GLOBAL       7 'p'
-0023    | OP_CONSTANT         9 '9.000000'
+0023    | OP_CONSTANT         9 '9'
 0025    | OP_SET_PROPERTY     8 'x'
 0027    | OP_POP
 0028    9 OP_GET_GLOBAL      10 'p'

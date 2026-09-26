@@ -18,12 +18,12 @@
 0024   11 OP_POP
 0025   13 OP_GET_GLOBAL      10 'Money'
 0027    | OP_CONSTANT        11 'cents'
-0029    | OP_CONSTANT        12 '500.000000'
+0029    | OP_CONSTANT        12 '500'
 0031    | OP_STRUCT_INIT      1
 0033    | OP_DEFINE_GLOBAL    9 'a'
 0035   14 OP_GET_GLOBAL      14 'Money'
 0037    | OP_CONSTANT        15 'cents'
-0039    | OP_CONSTANT        16 '300.000000'
+0039    | OP_CONSTANT        16 '300'
 0041    | OP_STRUCT_INIT      1
 0043    | OP_DEFINE_GLOBAL   13 'b'
 0045   16 OP_GET_GLOBAL      17 'a'

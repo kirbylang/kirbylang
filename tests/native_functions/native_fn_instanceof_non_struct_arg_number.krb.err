@@ -11,7 +11,7 @@
 0011    | OP_DEFINE_GLOBAL    2 'instance'
 0013    5 OP_GET_GLOBAL       4 '@instanceOf'
 0015    | OP_GET_GLOBAL       5 'instance'
-0017    | OP_CONSTANT         6 '123.000000'
+0017    | OP_CONSTANT         6 '123'
 0019    | OP_CALL             2
 0021    | OP_PRINT
 0022    6 OP_NIL

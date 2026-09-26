@@ -9,7 +9,7 @@
 0008    | OP_CALL             1
 0010    | OP_PRINT
 0011    4 OP_GET_GLOBAL       4 '@ceil'
-0013    | OP_CONSTANT         5 '2.500000'
+0013    | OP_CONSTANT         5 '2.5'
 0015    | OP_CALL             1
 0017    | OP_PRINT
 0018    5 OP_NIL
