@@ -17,11 +17,11 @@
 0023    | OP_METHOD           8 'get'
 0025   11 OP_POP
 0026   13 OP_GET_GLOBAL      10 'Chain'
-0028    | OP_CONSTANT        12 '1.000000'
+0028    | OP_CONSTANT        12 '1'
 0030    | OP_INVOKE        (1 args)   11 'new'
-0033    | OP_CONSTANT        14 '2.000000'
+0033    | OP_CONSTANT        14 '2'
 0035    | OP_INVOKE        (1 args)   13 'plus'
-0038    | OP_CONSTANT        16 '3.000000'
+0038    | OP_CONSTANT        16 '3'
 0040    | OP_INVOKE        (1 args)   15 'plus'
 0043    | OP_INVOKE        (0 args)   17 'get'
 0046    | OP_PRINT

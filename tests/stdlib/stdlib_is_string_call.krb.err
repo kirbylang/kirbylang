@@ -7,7 +7,7 @@
 0004    | OP_CALL             1
 0006    | OP_PRINT
 0007    2 OP_GET_GLOBAL       2 '@isString'
-0009    | OP_CONSTANT         3 '12345.000000'
+0009    | OP_CONSTANT         3 '12345'
 0011    | OP_CALL             1
 0013    | OP_PRINT
 0014    3 OP_GET_GLOBAL       4 '@isString'

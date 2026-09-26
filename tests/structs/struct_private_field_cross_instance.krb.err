@@ -15,10 +15,10 @@
 0019    | OP_METHOD           6 'sum'
 0021   11 OP_POP
 0022   13 OP_GET_GLOBAL       8 'Point'
-0024    | OP_CONSTANT        10 '3.000000'
+0024    | OP_CONSTANT        10 '3'
 0026    | OP_INVOKE        (1 args)    9 'at'
 0029    | OP_GET_GLOBAL      12 'Point'
-0031    | OP_CONSTANT        14 '4.000000'
+0031    | OP_CONSTANT        14 '4'
 0033    | OP_INVOKE        (1 args)   13 'at'
 0036    | OP_INVOKE        (1 args)   11 'sum'
 0039    | OP_PRINT

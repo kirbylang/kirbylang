@@ -13,7 +13,7 @@
 0015   14 OP_NIL
 0016    | OP_RETURN
 == outer ==
-0000    2 OP_CONSTANT         0 '123.000000'
+0000    2 OP_CONSTANT         0 '123'
 0002    6 OP_CLOSURE          1 <fn inner>
 0004      |                     local 1
 0006    8 OP_GET_LOCAL        2

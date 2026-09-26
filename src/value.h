@@ -51,6 +51,19 @@ void initValueArray(ValueArray *array);
 void writeValueArray(struct GC *gc, ValueArray *array, Value value);
 void freeValueArray(struct GC *gc, ValueArray *array);
 
+/**
+ * Room for any number formatted by formatNumber, including the '\0'.
+ */
+#define NUMBER_STRING_MAX 32
+
+/**
+ * Formats a number with as many digits as it needs and no more: the fewest
+ * digits that read back as exactly the same number. Numbers from 1e-6 up to
+ * 1e21 are written in plain decimal form, others in exponent form, e.g. `10`,
+ * `123.456`, `0.000025`, `1e-7`, `1e+21`.
+ */
+void formatNumber(double value, char *buffer, size_t size);
+
 void valueToString(Value value, char *buffer, size_t size);
 void valueTypeToString(Value value, char *buffer, size_t size);
 void printValue(Value value);

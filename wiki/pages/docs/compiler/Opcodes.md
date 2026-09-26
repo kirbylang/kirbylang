@@ -107,14 +107,14 @@ Bytecode
 Code
 
 ```
-print 1 + 1;
+print 1 + 2;
 ```
 
 Bytecode
 
 ```
-0000    1 OP_CONSTANT         0 '1.000000'
-0002    | OP_CONSTANT         1 '1.000000'
+0000    1 OP_CONSTANT         0 '1'
+0002    | OP_CONSTANT         1 '2'
 0004    | OP_ADD
 0005    | OP_PRINT
 0006    | OP_NIL

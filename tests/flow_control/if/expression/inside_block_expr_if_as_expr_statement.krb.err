@@ -13,7 +13,7 @@
 0014    | OP_POP
 0015    | OP_NIL
 0016    | OP_POP
-0017    6 OP_CONSTANT         2 '5.000000'
+0017    6 OP_CONSTANT         2 '5'
 0019    7 OP_CLOSE_BLOCK_EXPR    0
 0021    | OP_DEFINE_GLOBAL    0 'x'
 0023    8 OP_GET_GLOBAL       3 'x'

@@ -13,7 +13,7 @@
 0015    | OP_METHOD           4 'new'
 0017   13 OP_POP
 0018   15 OP_GET_GLOBAL       7 'Struct'
-0020    | OP_CONSTANT         9 '123.000000'
+0020    | OP_CONSTANT         9 '123'
 0022    | OP_INVOKE        (1 args)    8 'new'
 0025    | OP_DEFINE_GLOBAL    6 'instance'
 0027   17 OP_GET_GLOBAL      10 'instance'

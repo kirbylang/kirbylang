@@ -11,7 +11,7 @@
 0010    | OP_CALL             1
 0012    | OP_PRINT
 0013    3 OP_GET_GLOBAL       3 '@isBool'
-0015    | OP_CONSTANT         4 '12345.000000'
+0015    | OP_CONSTANT         4 '12345'
 0017    | OP_CALL             1
 0019    | OP_PRINT
 0020    4 OP_GET_GLOBAL       5 '@isBool'
