@@ -527,6 +527,12 @@ static Type *typchkInferUnary(TypeEnv *env, AstNode *node) {
 }
 
 // Infer the type of a binary expression
+// Does the type have a Display impl, and so a toString() method?
+static bool typeImplementsDisplay(Type *type) {
+  return typeStructImplementsTrait(type,
+                                   internTokenName(tokenFromCString("Display")));
+}
+
 static Type *typchkInferBinary(TypeEnv *env, AstNode *node) {
   BinaryNode *b = &node->as.binary;
   Type *leftType = typchkInfer(env, b->left);
@@ -1384,9 +1390,11 @@ void typchkCheckStmt(TypeEnv *env, AstNode *node) {
   case NODE_EXPR_STMT:
     typchkInfer(env, node->as.exprStmt.expr);
     break;
-  case NODE_PRINT:
-    typchkInfer(env, node->as.print.expr);
+  case NODE_PRINT: {
+    Type *type = typchkInfer(env, node->as.print.expr);
+    node->as.print.usesDisplay = typeImplementsDisplay(type);
     break;
+  }
   case NODE_VAR_DECL:
     typchkCheckVarDecl(env, node);
     break;

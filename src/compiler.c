@@ -687,6 +687,15 @@ static void compileCall(CallNode *c) {
   emitBytes(OP_CALL, (uint8_t)c->argCount);
 }
 
+// Replaces the value on top of the stack with the string its Display impl's
+// toString() returns.
+static void emitDisplayToString(void) {
+  Token toString = tokenFromCString("toString");
+
+  emitBytes(OP_INVOKE, identifierConstant(&toString));
+  emitByte(0);
+}
+
 /**
  * Is there a receiver in scope for `self` to refer to?
  *
@@ -1318,6 +1327,10 @@ static void compileStmt(AstNode *node) {
 
   case NODE_PRINT:
     compileExpr(node->as.print.expr);
+
+    if (node->as.print.usesDisplay)
+      emitDisplayToString();
+
     emitByte(OP_PRINT);
     break;
 
