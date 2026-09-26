@@ -82,6 +82,11 @@ void cuWriteByte(CompiledFn *compiledFn, uint8_t byte, int line) {
   compiledFn->codeCount++;
 }
 
+/**
+ * Add a constant to a compiled function.
+ *
+ * Returns the index of the constant in the function's constants list.
+ */
 int cuAddConstant(CompiledFn *compiledFn, CompiledConst compiledConst) {
   for (int i = 0; i < compiledFn->constantCount; i++) {
     if (compiledConstantsAreEqual(compiledFn->constants[i], compiledConst))
