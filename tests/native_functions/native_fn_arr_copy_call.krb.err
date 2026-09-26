@@ -7,22 +7,22 @@
 0004    | OP_CONSTANT         3 '3'
 0006    | OP_ARRAY            3
 0008    | OP_DEFINE_GLOBAL    0 'a'
-0010    2 OP_GET_GLOBAL       5 'a'
+0010    2 OP_GET_GLOBAL       0 'a'
 0012    | OP_DEFINE_GLOBAL    4 'b'
-0014    3 OP_GET_GLOBAL       7 '@arrCopy'
-0016    | OP_GET_GLOBAL       8 'a'
+0014    3 OP_GET_GLOBAL       6 '@arrCopy'
+0016    | OP_GET_GLOBAL       0 'a'
 0018    | OP_CALL             1
-0020    | OP_DEFINE_GLOBAL    6 'c'
-0022    5 OP_GET_GLOBAL       9 'a'
-0024    | OP_CONSTANT        10 '0'
-0026    | OP_CONSTANT        11 '100'
+0020    | OP_DEFINE_GLOBAL    5 'c'
+0022    5 OP_GET_GLOBAL       0 'a'
+0024    | OP_CONSTANT         7 '0'
+0026    | OP_CONSTANT         8 '100'
 0028    | OP_SET_INDEX
 0029    | OP_POP
-0030    7 OP_GET_GLOBAL      12 'a'
+0030    7 OP_GET_GLOBAL       0 'a'
 0032    | OP_PRINT
-0033    8 OP_GET_GLOBAL      13 'b'
+0033    8 OP_GET_GLOBAL       4 'b'
 0035    | OP_PRINT
-0036    9 OP_GET_GLOBAL      14 'c'
+0036    9 OP_GET_GLOBAL       5 'c'
 0038    | OP_PRINT
 0039   10 OP_NIL
 0040    | OP_RETURN

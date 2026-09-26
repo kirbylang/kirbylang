@@ -21,7 +21,7 @@
 0030    4 OP_GET_LOCAL        2
 0032    | OP_CONSTANT         4 '2'
 0034    | OP_MODULO
-0035    | OP_CONSTANT         5 '0'
+0035    | OP_CONSTANT         0 '0'
 0037    | OP_EQUAL
 0038    | OP_JUMP_IF_FALSE   38 -> 49
 0041    | OP_POP

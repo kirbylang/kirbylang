@@ -4,14 +4,14 @@
 == <script> ==
 0000    1 OP_TRUE
 0001    | OP_DEFINE_GLOBAL    0 'cond'
-0003    3 OP_GET_GLOBAL       1 'cond'
+0003    3 OP_GET_GLOBAL       0 'cond'
 0005    | OP_JUMP_IF_FALSE    5 -> 21
 0008    | OP_POP
-0009    4 OP_GET_GLOBAL       3 'cond'
+0009    4 OP_GET_GLOBAL       0 'cond'
 0011    | OP_NOT
-0012    | OP_SET_GLOBAL       2 'cond'
+0012    | OP_SET_GLOBAL       0 'cond'
 0014    | OP_POP
-0015    5 OP_CONSTANT         4 'Hello World'
+0015    5 OP_CONSTANT         1 'Hello World'
 0017    | OP_PRINT
 0018    6 OP_LOOP            18 -> 3
 0021    | OP_POP

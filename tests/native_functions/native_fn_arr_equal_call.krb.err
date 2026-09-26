@@ -7,49 +7,49 @@
 0004    | OP_CONSTANT         3 '3'
 0006    | OP_ARRAY            3
 0008    | OP_DEFINE_GLOBAL    0 'a'
-0010    2 OP_GET_GLOBAL       5 'a'
+0010    2 OP_GET_GLOBAL       0 'a'
 0012    | OP_DEFINE_GLOBAL    4 'b'
-0014    3 OP_GET_GLOBAL       7 '@arrCopy'
-0016    | OP_GET_GLOBAL       8 'a'
+0014    3 OP_GET_GLOBAL       6 '@arrCopy'
+0016    | OP_GET_GLOBAL       0 'a'
 0018    | OP_CALL             1
-0020    | OP_DEFINE_GLOBAL    6 'c'
-0022    5 OP_CONSTANT         9 'Before'
+0020    | OP_DEFINE_GLOBAL    5 'c'
+0022    5 OP_CONSTANT         7 'Before'
 0024    | OP_PRINT
-0025    7 OP_GET_GLOBAL      10 '@arrEqual'
-0027    | OP_GET_GLOBAL      11 'a'
-0029    | OP_GET_GLOBAL      12 'b'
+0025    7 OP_GET_GLOBAL       8 '@arrEqual'
+0027    | OP_GET_GLOBAL       0 'a'
+0029    | OP_GET_GLOBAL       4 'b'
 0031    | OP_CALL             2
 0033    | OP_PRINT
-0034    8 OP_GET_GLOBAL      13 '@arrEqual'
-0036    | OP_GET_GLOBAL      14 'b'
-0038    | OP_GET_GLOBAL      15 'c'
+0034    8 OP_GET_GLOBAL       8 '@arrEqual'
+0036    | OP_GET_GLOBAL       4 'b'
+0038    | OP_GET_GLOBAL       5 'c'
 0040    | OP_CALL             2
 0042    | OP_PRINT
-0043    9 OP_GET_GLOBAL      16 '@arrEqual'
-0045    | OP_GET_GLOBAL      17 'a'
-0047    | OP_GET_GLOBAL      18 'c'
+0043    9 OP_GET_GLOBAL       8 '@arrEqual'
+0045    | OP_GET_GLOBAL       0 'a'
+0047    | OP_GET_GLOBAL       5 'c'
 0049    | OP_CALL             2
 0051    | OP_PRINT
-0052   11 OP_GET_GLOBAL      19 'c'
-0054    | OP_CONSTANT        20 '0'
-0056    | OP_CONSTANT        21 '100'
+0052   11 OP_GET_GLOBAL       5 'c'
+0054    | OP_CONSTANT         9 '0'
+0056    | OP_CONSTANT        10 '100'
 0058    | OP_SET_INDEX
 0059    | OP_POP
-0060   13 OP_CONSTANT        22 'After'
+0060   13 OP_CONSTANT        11 'After'
 0062    | OP_PRINT
-0063   15 OP_GET_GLOBAL      23 '@arrEqual'
-0065    | OP_GET_GLOBAL      24 'a'
-0067    | OP_GET_GLOBAL      25 'b'
+0063   15 OP_GET_GLOBAL       8 '@arrEqual'
+0065    | OP_GET_GLOBAL       0 'a'
+0067    | OP_GET_GLOBAL       4 'b'
 0069    | OP_CALL             2
 0071    | OP_PRINT
-0072   16 OP_GET_GLOBAL      26 '@arrEqual'
-0074    | OP_GET_GLOBAL      27 'b'
-0076    | OP_GET_GLOBAL      28 'c'
+0072   16 OP_GET_GLOBAL       8 '@arrEqual'
+0074    | OP_GET_GLOBAL       4 'b'
+0076    | OP_GET_GLOBAL       5 'c'
 0078    | OP_CALL             2
 0080    | OP_PRINT
-0081   17 OP_GET_GLOBAL      29 '@arrEqual'
-0083    | OP_GET_GLOBAL      30 'a'
-0085    | OP_GET_GLOBAL      31 'c'
+0081   17 OP_GET_GLOBAL       8 '@arrEqual'
+0083    | OP_GET_GLOBAL       0 'a'
+0085    | OP_GET_GLOBAL       5 'c'
 0087    | OP_CALL             2
 0089    | OP_PRINT
 0090   18 OP_NIL

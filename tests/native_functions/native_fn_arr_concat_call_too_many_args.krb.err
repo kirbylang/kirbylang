@@ -13,8 +13,8 @@
 0016    | OP_ARRAY            3
 0018    | OP_DEFINE_GLOBAL    4 'b'
 0020    4 OP_GET_GLOBAL       8 '@arrConcat'
-0022    | OP_GET_GLOBAL       9 'a'
-0024    | OP_GET_GLOBAL      10 'b'
+0022    | OP_GET_GLOBAL       0 'a'
+0024    | OP_GET_GLOBAL       4 'b'
 0026    | OP_ARRAY            0
 0028    | OP_CALL             3
 0030    | OP_POP

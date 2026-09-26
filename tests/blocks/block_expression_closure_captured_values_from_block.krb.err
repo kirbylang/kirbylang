@@ -8,7 +8,7 @@
 0006    6 OP_GET_LOCAL        2
 0008    7 OP_CLOSE_BLOCK_EXPR    2
 0010    | OP_DEFINE_GLOBAL    0 'closure'
-0012    9 OP_GET_GLOBAL       3 'closure'
+0012    9 OP_GET_GLOBAL       0 'closure'
 0014    | OP_CALL             0
 0016    | OP_PRINT
 0017   10 OP_NIL

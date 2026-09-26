@@ -8,34 +8,34 @@
 0006    | OP_CONSTANT         3 '+'
 0008    | OP_CALL             3
 0010    | OP_PRINT
-0011    2 OP_GET_GLOBAL       4 '@strReplace'
-0013    | OP_CONSTANT         5 'hello'
-0015    | OP_CONSTANT         6 'l'
-0017    | OP_CONSTANT         7 'L'
+0011    2 OP_GET_GLOBAL       0 '@strReplace'
+0013    | OP_CONSTANT         4 'hello'
+0015    | OP_CONSTANT         5 'l'
+0017    | OP_CONSTANT         6 'L'
 0019    | OP_CALL             3
 0021    | OP_PRINT
-0022    3 OP_GET_GLOBAL       8 '@strReplace'
-0024    | OP_CONSTANT         9 'hello'
-0026    | OP_CONSTANT        10 'xyz'
-0028    | OP_CONSTANT        11 '!'
+0022    3 OP_GET_GLOBAL       0 '@strReplace'
+0024    | OP_CONSTANT         4 'hello'
+0026    | OP_CONSTANT         7 'xyz'
+0028    | OP_CONSTANT         8 '!'
 0030    | OP_CALL             3
 0032    | OP_PRINT
-0033    4 OP_GET_GLOBAL      12 '@strReplace'
-0035    | OP_CONSTANT        13 'hello'
-0037    | OP_CONSTANT        14 'hello'
-0039    | OP_CONSTANT        15 ''
+0033    4 OP_GET_GLOBAL       0 '@strReplace'
+0035    | OP_CONSTANT         4 'hello'
+0037    | OP_CONSTANT         4 'hello'
+0039    | OP_CONSTANT         9 ''
 0041    | OP_CALL             3
 0043    | OP_PRINT
-0044    5 OP_GET_GLOBAL      16 '@strReplace'
-0046    | OP_CONSTANT        17 'abc'
-0048    | OP_CONSTANT        18 'b'
-0050    | OP_CONSTANT        19 '1234'
+0044    5 OP_GET_GLOBAL       0 '@strReplace'
+0046    | OP_CONSTANT        10 'abc'
+0048    | OP_CONSTANT        11 'b'
+0050    | OP_CONSTANT        12 '1234'
 0052    | OP_CALL             3
 0054    | OP_PRINT
-0055    6 OP_GET_GLOBAL      20 '@strReplace'
-0057    | OP_CONSTANT        21 ''
-0059    | OP_CONSTANT        22 'a'
-0061    | OP_CONSTANT        23 'b'
+0055    6 OP_GET_GLOBAL       0 '@strReplace'
+0057    | OP_CONSTANT         9 ''
+0059    | OP_CONSTANT        13 'a'
+0061    | OP_CONSTANT        11 'b'
 0063    | OP_CALL             3
 0065    | OP_PRINT
 0066    7 OP_NIL

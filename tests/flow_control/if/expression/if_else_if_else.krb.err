@@ -4,17 +4,17 @@
 == <script> ==
 0000    6 OP_CLOSURE          1 <fn test>
 0002    | OP_DEFINE_GLOBAL    0 'test'
-0004    1 OP_GET_GLOBAL       2 'test'
+0004    1 OP_GET_GLOBAL       0 'test'
 0006    | OP_TRUE
 0007    | OP_FALSE
 0008    | OP_CALL             2
 0010    | OP_PRINT
-0011    2 OP_GET_GLOBAL       3 'test'
+0011    2 OP_GET_GLOBAL       0 'test'
 0013    | OP_FALSE
 0014    | OP_TRUE
 0015    | OP_CALL             2
 0017    | OP_PRINT
-0018    3 OP_GET_GLOBAL       4 'test'
+0018    3 OP_GET_GLOBAL       0 'test'
 0020    | OP_FALSE
 0021    | OP_FALSE
 0022    | OP_CALL             2

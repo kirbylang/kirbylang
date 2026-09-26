@@ -4,13 +4,13 @@
 == <script> ==
 0000    1 OP_STRUCT           0 'Struct'
 0002    | OP_DEFINE_GLOBAL    0 'Struct'
-0004    | OP_GET_GLOBAL       1 'Struct'
+0004    | OP_GET_GLOBAL       0 'Struct'
 0006    2 OP_NIL
-0007    | OP_FIELD            2 'value' private
+0007    | OP_FIELD            1 'value' private
 0010    3 OP_POP
-0011    5 OP_GET_GLOBAL       3 'Struct'
-0013   14 OP_CLOSURE          5 <fn new>
-0015    | OP_METHOD           4 'new'
+0011    5 OP_GET_GLOBAL       0 'Struct'
+0013   14 OP_CLOSURE          3 <fn new>
+0015    | OP_METHOD           2 'new'
 0017   15 OP_POP
 0018    | OP_NIL
 0019    | OP_RETURN

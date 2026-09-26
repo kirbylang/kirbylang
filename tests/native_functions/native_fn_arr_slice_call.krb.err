@@ -10,17 +10,17 @@
 0010    | OP_ARRAY            5
 0012    | OP_DEFINE_GLOBAL    0 'array'
 0014    3 OP_GET_GLOBAL       7 '@arrSlice'
-0016    | OP_GET_GLOBAL       8 'array'
-0018    | OP_CONSTANT         9 '1'
-0020    | OP_CONSTANT        10 '4'
+0016    | OP_GET_GLOBAL       0 'array'
+0018    | OP_CONSTANT         8 '1'
+0020    | OP_CONSTANT         9 '4'
 0022    | OP_CALL             3
 0024    | OP_DEFINE_GLOBAL    6 'slice'
-0026    5 OP_GET_GLOBAL      11 '@arrEqual'
-0028    | OP_CONSTANT        12 '20'
-0030    | OP_CONSTANT        13 '30'
-0032    | OP_CONSTANT        14 '40'
+0026    5 OP_GET_GLOBAL      10 '@arrEqual'
+0028    | OP_CONSTANT         2 '20'
+0030    | OP_CONSTANT         3 '30'
+0032    | OP_CONSTANT         4 '40'
 0034    | OP_ARRAY            3
-0036    | OP_GET_GLOBAL      15 'slice'
+0036    | OP_GET_GLOBAL       6 'slice'
 0038    | OP_CALL             2
 0040    | OP_PRINT
 0041    6 OP_NIL

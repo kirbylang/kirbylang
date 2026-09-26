@@ -4,10 +4,10 @@
 == <script> ==
 0000    8 OP_CLOSURE          1 <fn outer>
 0002    | OP_DEFINE_GLOBAL    0 'outer'
-0004   10 OP_GET_GLOBAL       3 'outer'
+0004   10 OP_GET_GLOBAL       0 'outer'
 0006    | OP_CALL             0
 0008    | OP_DEFINE_GLOBAL    2 'closure'
-0010   11 OP_GET_GLOBAL       4 'closure'
+0010   11 OP_GET_GLOBAL       2 'closure'
 0012    | OP_CALL             0
 0014    | OP_POP
 0015   12 OP_NIL

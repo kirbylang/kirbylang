@@ -18,7 +18,7 @@
 0025    | OP_POP
 0026    | OP_LOOP            26 -> 6
 0029    4 OP_GET_GLOBAL       4 '@arrPush'
-0031    | OP_GET_GLOBAL       5 'a'
+0031    | OP_GET_GLOBAL       0 'a'
 0033    | OP_GET_LOCAL        1
 0035    | OP_CALL             2
 0037    | OP_POP

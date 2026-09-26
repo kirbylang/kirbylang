@@ -8,13 +8,13 @@
 0006    | OP_DEFINE_GLOBAL    2 'count'
 0008    5 OP_CONSTANT         5 'Kirby'
 0010    | OP_DEFINE_GLOBAL    4 'name'
-0012    9 OP_GET_GLOBAL       6 'count'
+0012    9 OP_GET_GLOBAL       2 'count'
 0014    | OP_PRINT
-0015   10 OP_GET_GLOBAL       7 'name'
+0015   10 OP_GET_GLOBAL       4 'name'
 0017    | OP_PRINT
-0018   11 OP_GET_GLOBAL       8 'add'
-0020    | OP_CONSTANT         9 '1'
-0022    | OP_CONSTANT        10 '2'
+0018   11 OP_GET_GLOBAL       0 'add'
+0020    | OP_CONSTANT         6 '1'
+0022    | OP_CONSTANT         7 '2'
 0024    | OP_CALL             2
 0026    | OP_PRINT
 0027   12 OP_NIL

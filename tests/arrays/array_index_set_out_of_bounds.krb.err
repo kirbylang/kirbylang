@@ -7,9 +7,9 @@
 0004    | OP_CONSTANT         3 '3'
 0006    | OP_ARRAY            3
 0008    | OP_DEFINE_GLOBAL    0 'array'
-0010    3 OP_GET_GLOBAL       4 'array'
-0012    | OP_CONSTANT         5 '10'
-0014    | OP_CONSTANT         6 '100'
+0010    3 OP_GET_GLOBAL       0 'array'
+0012    | OP_CONSTANT         4 '10'
+0014    | OP_CONSTANT         5 '100'
 0016    | OP_SET_INDEX
 0017    | OP_POP
 0018    4 OP_NIL

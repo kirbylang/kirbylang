@@ -10,7 +10,7 @@
 0010    | OP_CALL             2
 0012    6 OP_CLOSE_BLOCK_EXPR    2
 0014    | OP_DEFINE_GLOBAL    0 'result'
-0016    8 OP_GET_GLOBAL       4 'result'
+0016    8 OP_GET_GLOBAL       0 'result'
 0018    | OP_PRINT
 0019    9 OP_NIL
 0020    | OP_RETURN

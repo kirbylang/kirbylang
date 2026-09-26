@@ -9,10 +9,10 @@
 0005    3 OP_FALSE
 0006    | OP_POP
 0007    4 OP_CONSTANT         1 '1'
-0009    | OP_CONSTANT         2 '1'
+0009    | OP_CONSTANT         1 '1'
 0011    | OP_ADD
 0012    | OP_POP
-0013    5 OP_CONSTANT         3 'Hello World'
+0013    5 OP_CONSTANT         2 'Hello World'
 0015    | OP_POP
 0016    6 OP_NIL
 0017    | OP_POP

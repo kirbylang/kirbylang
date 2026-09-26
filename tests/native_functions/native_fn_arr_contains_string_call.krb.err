@@ -7,8 +7,8 @@
 0004    | OP_ARRAY            2
 0006    | OP_DEFINE_GLOBAL    0 'array'
 0008    3 OP_GET_GLOBAL       3 '@arrContains'
-0010    | OP_GET_GLOBAL       4 'array'
-0012    | OP_CONSTANT         5 'Hello'
+0010    | OP_GET_GLOBAL       0 'array'
+0012    | OP_CONSTANT         1 'Hello'
 0014    | OP_CALL             2
 0016    | OP_PRINT
 0017    4 OP_NIL

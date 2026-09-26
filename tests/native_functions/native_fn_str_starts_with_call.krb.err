@@ -7,24 +7,24 @@
 0004    | OP_CONSTANT         2 'he'
 0006    | OP_CALL             2
 0008    | OP_PRINT
-0009    2 OP_GET_GLOBAL       3 '@strStartsWith'
-0011    | OP_CONSTANT         4 'hello'
-0013    | OP_CONSTANT         5 'lo'
+0009    2 OP_GET_GLOBAL       0 '@strStartsWith'
+0011    | OP_CONSTANT         1 'hello'
+0013    | OP_CONSTANT         3 'lo'
 0015    | OP_CALL             2
 0017    | OP_PRINT
-0018    3 OP_GET_GLOBAL       6 '@strStartsWith'
-0020    | OP_CONSTANT         7 'hello'
-0022    | OP_CONSTANT         8 ''
+0018    3 OP_GET_GLOBAL       0 '@strStartsWith'
+0020    | OP_CONSTANT         1 'hello'
+0022    | OP_CONSTANT         4 ''
 0024    | OP_CALL             2
 0026    | OP_PRINT
-0027    4 OP_GET_GLOBAL       9 '@strStartsWith'
-0029    | OP_CONSTANT        10 'he'
-0031    | OP_CONSTANT        11 'hello'
+0027    4 OP_GET_GLOBAL       0 '@strStartsWith'
+0029    | OP_CONSTANT         2 'he'
+0031    | OP_CONSTANT         1 'hello'
 0033    | OP_CALL             2
 0035    | OP_PRINT
-0036    5 OP_GET_GLOBAL      12 '@strStartsWith'
-0038    | OP_CONSTANT        13 'hello'
-0040    | OP_CONSTANT        14 'hello'
+0036    5 OP_GET_GLOBAL       0 '@strStartsWith'
+0038    | OP_CONSTANT         1 'hello'
+0040    | OP_CONSTANT         1 'hello'
 0042    | OP_CALL             2
 0044    | OP_PRINT
 0045    6 OP_NIL
