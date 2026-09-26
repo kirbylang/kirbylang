@@ -1,0 +1,25 @@
+== <script> ==
+0000    1 OP_NIL
+0001    | OP_RETURN
+== <script> ==
+0000    1 OP_STRUCT           0 'Box'
+0002    | OP_DEFINE_GLOBAL    0 'Box'
+0004    | OP_GET_GLOBAL       1 'Box'
+0006    2 OP_NIL
+0007    | OP_FIELD            2 'value' public
+0010    3 OP_POP
+0011    7 OP_GET_GLOBAL       3 'Box'
+0013    8 OP_CLOSURE          5 <fn toString>
+0015    | OP_METHOD           4 'toString'
+0017    9 OP_POP
+0018    5 OP_GET_GLOBAL       6 'Box'
+0020    | OP_CONSTANT         7 'value'
+0022    | OP_CONSTANT         8 '1.000000'
+0024    | OP_STRUCT_INIT      1
+0026    | OP_INVOKE        (0 args)    9 'toString'
+0029    | OP_PRINT
+0030   10 OP_NIL
+0031    | OP_RETURN
+== toString ==
+0000    8 OP_CONSTANT         0 'a box'
+0002    | OP_RETURN

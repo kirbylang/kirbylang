@@ -1,0 +1,45 @@
+== <script> ==
+0000    1 OP_NIL
+0001    | OP_RETURN
+== <script> ==
+0000    1 OP_STRUCT           0 'Box'
+0002    | OP_DEFINE_GLOBAL    0 'Box'
+0004    | OP_GET_GLOBAL       1 'Box'
+0006    2 OP_NIL
+0007    | OP_FIELD            2 'value' public
+0010    3 OP_POP
+0011    9 OP_STRUCT           3 'Plain'
+0013    | OP_DEFINE_GLOBAL    3 'Plain'
+0015    | OP_GET_GLOBAL       4 'Plain'
+0017   10 OP_NIL
+0018    | OP_FIELD            5 'value' public
+0021   11 OP_POP
+0022    5 OP_GET_GLOBAL       6 'Box'
+0024    6 OP_CLOSURE          8 <fn toString>
+0026    | OP_METHOD           7 'toString'
+0028    7 OP_POP
+0029   13 OP_GET_GLOBAL      10 'Box'
+0031    | OP_CONSTANT        11 'value'
+0033    | OP_CONSTANT        12 '123.000000'
+0035    | OP_STRUCT_INIT      1
+0037    | OP_DEFINE_GLOBAL    9 'box'
+0039   15 OP_GET_GLOBAL      13 'box'
+0041    | OP_INVOKE        (0 args)   14 'toString'
+0044    | OP_PRINT
+0045   16 OP_GET_GLOBAL      15 'Plain'
+0047    | OP_CONSTANT        16 'value'
+0049    | OP_CONSTANT        17 '1.000000'
+0051    | OP_STRUCT_INIT      1
+0053    | OP_PRINT
+0054   17 OP_NIL
+0055    | OP_RETURN
+== toString ==
+0000    6 OP_CONSTANT         0 'Box('
+0002    | OP_GET_GLOBAL       1 '@numberToString'
+0004    | OP_GET_LOCAL        0
+0006    | OP_GET_PROPERTY     2 'value'
+0008    | OP_CALL             1
+0010    | OP_ADD
+0011    | OP_CONSTANT         3 ')'
+0013    | OP_ADD
+0014    | OP_RETURN

@@ -104,6 +104,11 @@ typedef struct {
 
 typedef struct {
   AstNode *expr;
+  /**
+   * The value's type implements Display, so it prints through toString().
+   * Set by the type checker, because the compiler has no types.
+   */
+  bool usesDisplay;
 } PrintNode;
 
 typedef struct {

@@ -1,0 +1,9 @@
+struct Box {
+    pub var value: f64;
+}
+
+print Box { value: 1 };
+
+impl Display for Box {
+    fun toString(self): string = "a box";
+}

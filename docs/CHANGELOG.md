@@ -100,6 +100,8 @@
     - Builtin traits, always in scope: `Display`, `Eq`, `Ord`, `Default`
     - A circular supertrait chain (`trait A: A {}`, or `trait A: B {} trait B: A {}`) is a compile error
     - Require structs to implement `Eq` trait for `==`/`!=`
+    - `print` uses a struct's `Display` impl: it prints what `toString()`
+      returns
     - Limitations
       - `impl Trait for` a primitive type (`f64`, `string`, `bool`, `unit`) isn't supported yet -- needs the same static call-resolution work operator overloading does
       - No real operator overloading yet. `Eq` is only a typecheck. `==` still runs identify equality
