@@ -16,29 +16,29 @@
 0021    7 OP_POP
 0022   13 OP_GET_GLOBAL       9 'Box'
 0024    | OP_CONSTANT        10 'value'
-0026    | OP_CONSTANT        11 '1.000000'
+0026    | OP_CONSTANT        11 '1'
 0028    | OP_STRUCT_INIT      1
 0030    | OP_GET_GLOBAL      12 'Box'
 0032    | OP_CONSTANT        13 'value'
-0034    | OP_CONSTANT        14 '2.000000'
+0034    | OP_CONSTANT        14 '2'
 0036    | OP_STRUCT_INIT      1
 0038    | OP_ARRAY            2
 0040    | OP_DEFINE_GLOBAL    8 'boxes'
 0042   15 OP_GET_GLOBAL      15 'show'
 0044    | OP_GET_GLOBAL      16 'Box'
 0046    | OP_CONSTANT        17 'value'
-0048    | OP_CONSTANT        18 '3.000000'
+0048    | OP_CONSTANT        18 '3'
 0050    | OP_STRUCT_INIT      1
 0052    | OP_CALL             1
 0054    | OP_POP
 0055   16 OP_GET_GLOBAL      19 'boxes'
-0057    | OP_CONSTANT        20 '1.000000'
+0057    | OP_CONSTANT        20 '1'
 0059    | OP_GET_INDEX
 0060    | OP_INVOKE        (0 args)   21 'toString'
 0063    | OP_PRINT
 0064   17 OP_GET_GLOBAL      22 'Box'
 0066    | OP_CONSTANT        23 'value'
-0068    | OP_CONSTANT        24 '4.000000'
+0068    | OP_CONSTANT        24 '4'
 0070    | OP_STRUCT_INIT      1
 0072    | OP_GET_LOCAL        1
 0074    | OP_CLOSE_BLOCK_EXPR    1

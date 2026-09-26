@@ -18,7 +18,7 @@
 - [String interpolation](https://github.com/kirbylang/kirbylang/issues/15)
 - Lambda body expressions `var sum = fun (a, b) a + b;`
 - Native Functions
-  - [ ] `print`, `println`, `eprint`, `eprintln`
+  - [x] `print`, `println`, `eprint`, `eprintln`
   - [ ] `arrSort(array, fn)`
   - [ ] `arrMap(array, fn)`
 - Macros
@@ -42,6 +42,9 @@
 - New native functions:
   - `@assert(condition, message)`
   - `@panic(message)`
+  - Output: `@print(value)`, `@println(value)`, `@eprint(value)`,
+    `@eprintln(value)`. They write a value the way `print` does, using a
+    struct's `Display` impl when it has one
   - Math: `@floor(n)`, `@round(n)`, `@trunc(n)`, `@abs(n)`, `@sqrt(n)`, `@pow(base, exponent`, `@min(a, b)`, `@max(a, b)`
   - Arrays: `@arrJoin(array, separator)`
     - Every element must already be a string. There is no implicit conversion
@@ -63,8 +66,8 @@
       `@strEndsWith`, `@strTrim`, `@strToUpper`, `@strToLower`, `@strRepeat`,
       `@strSplit`
     - Still unchecked, pending generics: `@len`, `@typeof`, `@instanceOf`,
-      `@is`, `@isNumber`, `@isFunction`, `@isBool`, `@isString`, `@isNil`, and
-      the `@arr*` family
+      `@is`, `@isNumber`, `@isFunction`, `@isBool`, `@isString`, `@isNil`,
+      `@print`, `@println`, `@eprint`, `@eprintln`, and the `@arr*` family
     - Still unchecked, pending `Option[T]`: `@argv`, `@prompt`, `@stdin`,
       `@strIndexOf`
     - Still unchecked, pending more than two parameters: `@strSlice`,

@@ -53,6 +53,7 @@ static void emitNumberConstant(double number);
 static void emitStringConstant(const char *chars, int length);
 static void emitByte(uint8_t byte);
 static void emitBytes(uint8_t byte1, uint8_t byte2);
+static void emitDisplayToString(void);
 static void declareVariable(Token *name, bool isMutable);
 static void defineVariable(uint8_t global);
 static void markInitialized(void);
@@ -683,6 +684,9 @@ static void compileCall(CallNode *c) {
   compileExpr(c->callee);
   for (int i = 0; i < c->argCount; i++) {
     compileExpr(c->args[i]);
+
+    if (i == 0 && c->argUsesDisplay)
+      emitDisplayToString();
   }
   emitBytes(OP_CALL, (uint8_t)c->argCount);
 }

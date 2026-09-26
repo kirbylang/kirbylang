@@ -20,7 +20,7 @@
 0028    7 OP_POP
 0029   13 OP_GET_GLOBAL      10 'Box'
 0031    | OP_CONSTANT        11 'value'
-0033    | OP_CONSTANT        12 '123.000000'
+0033    | OP_CONSTANT        12 '123'
 0035    | OP_STRUCT_INIT      1
 0037    | OP_DEFINE_GLOBAL    9 'box'
 0039   15 OP_GET_GLOBAL      13 'box'
@@ -28,7 +28,7 @@
 0044    | OP_PRINT
 0045   16 OP_GET_GLOBAL      15 'Plain'
 0047    | OP_CONSTANT        16 'value'
-0049    | OP_CONSTANT        17 '1.000000'
+0049    | OP_CONSTANT        17 '1'
 0051    | OP_STRUCT_INIT      1
 0053    | OP_PRINT
 0054   17 OP_NIL

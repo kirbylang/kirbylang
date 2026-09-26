@@ -256,6 +256,36 @@ static Value lenNative(VM *vm, int argCount, Value *args) {
   }
 }
 
+// @print, @println, @eprint, and @eprintln write a value the way the print
+// statement does. A value whose type implements Display arrives already
+// converted: the compiler calls its toString() first.
+
+static Value printNative(VM *vm, int argCount, Value *args) {
+  assertArgCount(vm, "@print", 1, argCount);
+  printValue(args[0]);
+  return NIL_VAL;
+}
+
+static Value printlnNative(VM *vm, int argCount, Value *args) {
+  assertArgCount(vm, "@println", 1, argCount);
+  printValue(args[0]);
+  printf("\n");
+  return NIL_VAL;
+}
+
+static Value eprintNative(VM *vm, int argCount, Value *args) {
+  assertArgCount(vm, "@eprint", 1, argCount);
+  printValueToErr(args[0]);
+  return NIL_VAL;
+}
+
+static Value eprintlnNative(VM *vm, int argCount, Value *args) {
+  assertArgCount(vm, "@eprintln", 1, argCount);
+  printValueToErr(args[0]);
+  fprintf(stderr, "\n");
+  return NIL_VAL;
+}
+
 static Value typeofNative(VM *vm, int argCount, Value *args) {
   assertArgCount(vm, "@typeof", 1, argCount);
 
@@ -1308,6 +1338,10 @@ const NativeDefinition nativeDefinitions[] = {
     {"@setenv", setEnvNative},
     {"@len", lenNative},
     {"@typeof", typeofNative},
+    {"@print", printNative},
+    {"@println", printlnNative},
+    {"@eprint", eprintNative},
+    {"@eprintln", eprintlnNative},
     {"@argv", argvNative},
     {"@argc", argcNative},
     {"@parseNumber", parseNumberNative},

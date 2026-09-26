@@ -14,7 +14,7 @@
 0017    9 OP_POP
 0018    5 OP_GET_GLOBAL       6 'Box'
 0020    | OP_CONSTANT         7 'value'
-0022    | OP_CONSTANT         8 '1.000000'
+0022    | OP_CONSTANT         8 '1'
 0024    | OP_STRUCT_INIT      1
 0026    | OP_INVOKE        (0 args)    9 'toString'
 0029    | OP_PRINT

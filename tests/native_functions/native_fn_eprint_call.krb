@@ -1,0 +1,4 @@
+@eprint("error: ");
+@eprintln("something failed");
+@eprintln(42);
+@println("stdout is separate");
