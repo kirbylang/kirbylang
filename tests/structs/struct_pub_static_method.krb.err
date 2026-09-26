@@ -4,17 +4,17 @@
 == <script> ==
 0000    1 OP_STRUCT           0 'Point'
 0002    | OP_DEFINE_GLOBAL    0 'Point'
-0004    | OP_GET_GLOBAL       1 'Point'
+0004    | OP_GET_GLOBAL       0 'Point'
 0006    2 OP_NIL
-0007    | OP_FIELD            2 'x' public
+0007    | OP_FIELD            1 'x' public
 0010    3 OP_POP
-0011    5 OP_GET_GLOBAL       3 'Point'
-0013    6 OP_CLOSURE          5 <fn origin>
-0015    | OP_METHOD           4 'origin'
+0011    5 OP_GET_GLOBAL       0 'Point'
+0013    6 OP_CLOSURE          3 <fn origin>
+0015    | OP_METHOD           2 'origin'
 0017    7 OP_POP
-0018    9 OP_GET_GLOBAL       6 'Point'
-0020    | OP_INVOKE        (0 args)    7 'origin'
-0023    | OP_GET_PROPERTY     8 'x'
+0018    9 OP_GET_GLOBAL       0 'Point'
+0020    | OP_INVOKE        (0 args)    2 'origin'
+0023    | OP_GET_PROPERTY     1 'x'
 0025    | OP_PRINT
 0026   10 OP_NIL
 0027    | OP_RETURN

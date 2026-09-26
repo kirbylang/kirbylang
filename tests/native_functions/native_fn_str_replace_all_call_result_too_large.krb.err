@@ -7,10 +7,10 @@
 0004    | OP_CONSTANT         2 'a'
 0006    | OP_CONSTANT         3 '1000000'
 0008    | OP_CALL             2
-0010    | OP_CONSTANT         4 'a'
-0012    | OP_GET_GLOBAL       5 '@strRepeat'
-0014    | OP_CONSTANT         6 'b'
-0016    | OP_CONSTANT         7 '3000'
+0010    | OP_CONSTANT         2 'a'
+0012    | OP_GET_GLOBAL       1 '@strRepeat'
+0014    | OP_CONSTANT         4 'b'
+0016    | OP_CONSTANT         5 '3000'
 0018    | OP_CALL             2
 0020    | OP_CALL             3
 0022    | OP_PRINT

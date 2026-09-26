@@ -7,14 +7,14 @@
 0003    | OP_CONSTANT         1 'never shown'
 0005    | OP_CALL             2
 0007    | OP_POP
-0008    2 OP_GET_GLOBAL       2 '@assert'
-0010    | OP_CONSTANT         3 '1'
-0012    | OP_CONSTANT         4 '2'
+0008    2 OP_GET_GLOBAL       0 '@assert'
+0010    | OP_CONSTANT         2 '1'
+0012    | OP_CONSTANT         3 '2'
 0014    | OP_LESS
-0015    | OP_CONSTANT         5 'math works'
+0015    | OP_CONSTANT         4 'math works'
 0017    | OP_CALL             2
 0019    | OP_POP
-0020    3 OP_CONSTANT         6 'after'
+0020    3 OP_CONSTANT         5 'after'
 0022    | OP_PRINT
 0023    4 OP_NIL
 0024    | OP_RETURN

@@ -7,11 +7,11 @@
 0003    3 OP_GET_GLOBAL       1 '@strConcat'
 0005    | OP_CONSTANT         2 'ok='
 0007    | OP_GET_GLOBAL       3 '@boolToString'
-0009    | OP_GET_GLOBAL       4 'ok'
+0009    | OP_GET_GLOBAL       0 'ok'
 0011    | OP_CALL             1
-0013    | OP_CONSTANT         5 ', not ok='
-0015    | OP_GET_GLOBAL       6 '@boolToString'
-0017    | OP_GET_GLOBAL       7 'ok'
+0013    | OP_CONSTANT         4 ', not ok='
+0015    | OP_GET_GLOBAL       3 '@boolToString'
+0017    | OP_GET_GLOBAL       0 'ok'
 0019    | OP_NOT
 0020    | OP_CALL             1
 0022    | OP_ARRAY            4

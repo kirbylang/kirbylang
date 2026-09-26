@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include "common.h"
 #include "compiled_unit.h"
@@ -16,6 +17,7 @@
 
 static void *xrealloc(void *ptr, size_t size);
 static void cuInitFn(CompiledFn *compiledfn);
+static bool compiledConstantsAreEqual(CompiledConst a, CompiledConst b);
 
 void cuInit(CompiledUnit *compiledUnit) {
   stringSetInit(&compiledUnit->strings);
@@ -83,9 +85,14 @@ void cuWriteByte(CompiledFn *compiledFn, uint8_t byte, int line) {
 /**
  * Add a constant to a compiled function.
  *
- * Returns the index of the constant in the function's constants.
+ * Returns the index of the constant in the function's constants list.
  */
 int cuAddConstant(CompiledFn *compiledFn, CompiledConst compiledConst) {
+  for (int i = 0; i < compiledFn->constantCount; i++) {
+    if (compiledConstantsAreEqual(compiledFn->constants[i], compiledConst))
+      return i;
+  }
+
   if (compiledFn->constantCount + 1 > compiledFn->constantCapacity) {
     int cap = compiledFn->constantCapacity < CU_FN_CONST_MIN_SIZE
                   ? CU_FN_CONST_MIN_SIZE
@@ -98,6 +105,29 @@ int cuAddConstant(CompiledFn *compiledFn, CompiledConst compiledConst) {
 
   compiledFn->constants[compiledFn->constantCount] = compiledConst;
   return compiledFn->constantCount++;
+}
+
+static bool compiledConstantsAreEqual(CompiledConst a, CompiledConst b) {
+  if (a.kind != b.kind)
+    return false;
+
+  switch (a.kind) {
+  case CONST_NUMBER:
+    // Compare the bits, so 0 and -0 stay separate and NaN matches itself.
+    return memcmp(&a.as.number, &b.as.number, sizeof(double)) == 0;
+  case CONST_BOOL:
+    return a.as.boolean == b.as.boolean;
+  case CONST_NIL:
+    return true;
+  case CONST_STRING:
+    // Strings are interned, so equal strings share an offset.
+    return a.as.string.offset == b.as.string.offset &&
+           a.as.string.length == b.as.string.length;
+  case CONST_FUNCTION:
+    return false;
+  }
+
+  return false;
 }
 
 #define CU_FN_UPVALUE_GROW_SIZE 2

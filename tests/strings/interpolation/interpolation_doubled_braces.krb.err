@@ -10,43 +10,43 @@
 0010    | OP_CONSTANT         5 '{123}'
 0012    | OP_CALL             1
 0014    | OP_POP
-0015    5 OP_GET_GLOBAL       6 '@println'
-0017    | OP_GET_GLOBAL       7 '@strConcat'
-0019    | OP_CONSTANT         8 '{'
-0021    | OP_GET_GLOBAL       9 '@numberToString'
-0023    | OP_GET_GLOBAL      10 'n'
+0015    5 OP_GET_GLOBAL       4 '@println'
+0017    | OP_GET_GLOBAL       6 '@strConcat'
+0019    | OP_CONSTANT         7 '{'
+0021    | OP_GET_GLOBAL       8 '@numberToString'
+0023    | OP_GET_GLOBAL       0 'n'
 0025    | OP_CALL             1
-0027    | OP_CONSTANT        11 '}'
+0027    | OP_CONSTANT         9 '}'
 0029    | OP_ARRAY            3
 0031    | OP_CALL             1
 0033    | OP_CALL             1
 0035    | OP_POP
-0036    6 OP_GET_GLOBAL      12 '@println'
-0038    | OP_GET_GLOBAL      13 '@strConcat'
-0040    | OP_CONSTANT        14 '{name} is '
-0042    | OP_GET_GLOBAL      15 'name'
+0036    6 OP_GET_GLOBAL       4 '@println'
+0038    | OP_GET_GLOBAL       6 '@strConcat'
+0040    | OP_CONSTANT        10 '{name} is '
+0042    | OP_GET_GLOBAL       2 'name'
 0044    | OP_ARRAY            2
 0046    | OP_CALL             1
 0048    | OP_CALL             1
 0050    | OP_POP
-0051    7 OP_GET_GLOBAL      16 '@println'
-0053    | OP_CONSTANT        17 'a { b } c'
+0051    7 OP_GET_GLOBAL       4 '@println'
+0053    | OP_CONSTANT        11 'a { b } c'
 0055    | OP_CALL             1
 0057    | OP_POP
-0058    8 OP_GET_GLOBAL      18 '@println'
-0060    | OP_CONSTANT        19 '{{'
+0058    8 OP_GET_GLOBAL       4 '@println'
+0060    | OP_CONSTANT        12 '{{'
 0062    | OP_CALL             1
 0064    | OP_POP
-0065    9 OP_GET_GLOBAL      20 '@println'
-0067    | OP_CONSTANT        21 '}}'
+0065    9 OP_GET_GLOBAL       4 '@println'
+0067    | OP_CONSTANT        13 '}}'
 0069    | OP_CALL             1
 0071    | OP_POP
-0072   10 OP_GET_GLOBAL      22 '@println'
-0074    | OP_CONSTANT        23 '{'
+0072   10 OP_GET_GLOBAL       4 '@println'
+0074    | OP_CONSTANT         7 '{'
 0076    | OP_CALL             1
 0078    | OP_POP
-0079   11 OP_GET_GLOBAL      24 '@println'
-0081    | OP_CONSTANT        25 '}'
+0079   11 OP_GET_GLOBAL       4 '@println'
+0081    | OP_CONSTANT         9 '}'
 0083    | OP_CALL             1
 0085    | OP_POP
 0086   12 OP_NIL

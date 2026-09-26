@@ -7,7 +7,7 @@
 0004    5 OP_CLOSURE          3 <fn lambda0x1>
 0006    | OP_ARRAY            1
 0008    | OP_DEFINE_GLOBAL    2 'handlers'
-0010    7 OP_GET_GLOBAL       4 'report'
+0010    7 OP_GET_GLOBAL       0 'report'
 0012    | OP_CALL             0
 0014    | OP_POP
 0015    8 OP_NIL

@@ -11,50 +11,50 @@
 0012    | OP_ARRAY            3
 0014    | OP_CALL             1
 0016    | OP_PRINT
-0017    2 OP_GET_GLOBAL       5 '@strConcat'
-0019    | OP_CONSTANT         6 '['
-0021    | OP_GET_GLOBAL       7 '@strTrim'
-0023    | OP_CONSTANT         8 '	
+0017    2 OP_GET_GLOBAL       0 '@strConcat'
+0019    | OP_CONSTANT         1 '['
+0021    | OP_GET_GLOBAL       2 '@strTrim'
+0023    | OP_CONSTANT         5 '	
  hi 
 '
 0025    | OP_CALL             1
-0027    | OP_CONSTANT         9 ']'
+0027    | OP_CONSTANT         4 ']'
 0029    | OP_ARRAY            3
 0031    | OP_CALL             1
 0033    | OP_PRINT
-0034    3 OP_GET_GLOBAL      10 '@strConcat'
-0036    | OP_CONSTANT        11 '['
-0038    | OP_GET_GLOBAL      12 '@strTrim'
-0040    | OP_CONSTANT        13 'no-trim'
+0034    3 OP_GET_GLOBAL       0 '@strConcat'
+0036    | OP_CONSTANT         1 '['
+0038    | OP_GET_GLOBAL       2 '@strTrim'
+0040    | OP_CONSTANT         6 'no-trim'
 0042    | OP_CALL             1
-0044    | OP_CONSTANT        14 ']'
+0044    | OP_CONSTANT         4 ']'
 0046    | OP_ARRAY            3
 0048    | OP_CALL             1
 0050    | OP_PRINT
-0051    4 OP_GET_GLOBAL      15 '@strConcat'
-0053    | OP_CONSTANT        16 '['
-0055    | OP_GET_GLOBAL      17 '@strTrim'
-0057    | OP_CONSTANT        18 '   '
+0051    4 OP_GET_GLOBAL       0 '@strConcat'
+0053    | OP_CONSTANT         1 '['
+0055    | OP_GET_GLOBAL       2 '@strTrim'
+0057    | OP_CONSTANT         7 '   '
 0059    | OP_CALL             1
-0061    | OP_CONSTANT        19 ']'
+0061    | OP_CONSTANT         4 ']'
 0063    | OP_ARRAY            3
 0065    | OP_CALL             1
 0067    | OP_PRINT
-0068    5 OP_GET_GLOBAL      20 '@strConcat'
-0070    | OP_CONSTANT        21 '['
-0072    | OP_GET_GLOBAL      22 '@strTrim'
-0074    | OP_CONSTANT        23 ''
+0068    5 OP_GET_GLOBAL       0 '@strConcat'
+0070    | OP_CONSTANT         1 '['
+0072    | OP_GET_GLOBAL       2 '@strTrim'
+0074    | OP_CONSTANT         8 ''
 0076    | OP_CALL             1
-0078    | OP_CONSTANT        24 ']'
+0078    | OP_CONSTANT         4 ']'
 0080    | OP_ARRAY            3
 0082    | OP_CALL             1
 0084    | OP_PRINT
-0085    6 OP_GET_GLOBAL      25 '@strConcat'
-0087    | OP_CONSTANT        26 '['
-0089    | OP_GET_GLOBAL      27 '@strTrim'
-0091    | OP_CONSTANT        28 ' a  b '
+0085    6 OP_GET_GLOBAL       0 '@strConcat'
+0087    | OP_CONSTANT         1 '['
+0089    | OP_GET_GLOBAL       2 '@strTrim'
+0091    | OP_CONSTANT         9 ' a  b '
 0093    | OP_CALL             1
-0095    | OP_CONSTANT        29 ']'
+0095    | OP_CONSTANT         4 ']'
 0097    | OP_ARRAY            3
 0099    | OP_CALL             1
 0101    | OP_PRINT

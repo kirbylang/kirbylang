@@ -10,21 +10,21 @@
 0010    | OP_DEFINE_GLOBAL    4 'afterALoop'
 0012   24 OP_CLOSURE          7 <fn returnsUnit>
 0014    | OP_DEFINE_GLOBAL    6 'returnsUnit'
-0016   26 OP_GET_GLOBAL       8 'branches'
+0016   26 OP_GET_GLOBAL       0 'branches'
 0018    | OP_TRUE
 0019    | OP_CALL             1
 0021    | OP_PRINT
-0022   27 OP_GET_GLOBAL       9 'branches'
+0022   27 OP_GET_GLOBAL       0 'branches'
 0024    | OP_FALSE
 0025    | OP_CALL             1
 0027    | OP_PRINT
-0028   28 OP_GET_GLOBAL      10 'trailingValue'
+0028   28 OP_GET_GLOBAL       2 'trailingValue'
 0030    | OP_CALL             0
 0032    | OP_PRINT
-0033   29 OP_GET_GLOBAL      11 'afterALoop'
+0033   29 OP_GET_GLOBAL       4 'afterALoop'
 0035    | OP_CALL             0
 0037    | OP_PRINT
-0038   30 OP_GET_GLOBAL      12 'returnsUnit'
+0038   30 OP_GET_GLOBAL       6 'returnsUnit'
 0040    | OP_CALL             0
 0042    | OP_POP
 0043   31 OP_NIL
@@ -41,7 +41,7 @@
 0015    | OP_RETURN
 == trailingValue ==
 0000   10 OP_CONSTANT         0 '2'
-0002    | OP_CONSTANT         1 '2'
+0002    | OP_CONSTANT         0 '2'
 0004    | OP_MULTIPLY
 0005   11 OP_GET_LOCAL        1
 0007    | OP_RETURN

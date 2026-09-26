@@ -7,7 +7,7 @@
 0004    | OP_ARRAY            2
 0006    | OP_DEFINE_GLOBAL    0 'numbers'
 0008    2 OP_GET_GLOBAL       3 '@strConcat'
-0010    | OP_GET_GLOBAL       4 'numbers'
+0010    | OP_GET_GLOBAL       0 'numbers'
 0012    | OP_CALL             1
 0014    | OP_PRINT
 0015    3 OP_NIL

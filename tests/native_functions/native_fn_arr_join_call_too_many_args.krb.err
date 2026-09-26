@@ -7,9 +7,9 @@
 0004    | OP_ARRAY            2
 0006    | OP_DEFINE_GLOBAL    0 'parts'
 0008    3 OP_GET_GLOBAL       3 '@arrJoin'
-0010    | OP_GET_GLOBAL       4 'parts'
-0012    | OP_CONSTANT         5 ', '
-0014    | OP_CONSTANT         6 'extra'
+0010    | OP_GET_GLOBAL       0 'parts'
+0012    | OP_CONSTANT         4 ', '
+0014    | OP_CONSTANT         5 'extra'
 0016    | OP_CALL             3
 0018    | OP_POP
 0019    4 OP_NIL

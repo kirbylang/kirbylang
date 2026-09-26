@@ -6,11 +6,11 @@
 0002    | OP_DEFINE_GLOBAL    0 'name'
 0004    3 OP_GET_GLOBAL       2 '@strConcat'
 0006    | OP_CONSTANT         3 '{name} is '
-0008    | OP_GET_GLOBAL       4 'name'
+0008    | OP_GET_GLOBAL       0 'name'
 0010    | OP_ARRAY            2
 0012    | OP_CALL             1
 0014    | OP_PRINT
-0015    4 OP_CONSTANT         5 'tab:	quote:"'
+0015    4 OP_CONSTANT         4 'tab:	quote:"'
 0017    | OP_PRINT
 0018    5 OP_NIL
 0019    | OP_RETURN

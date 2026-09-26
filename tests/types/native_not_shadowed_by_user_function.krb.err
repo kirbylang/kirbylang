@@ -4,12 +4,12 @@
 == <script> ==
 0000    1 OP_CLOSURE          1 <fn ceil>
 0002    | OP_DEFINE_GLOBAL    0 'ceil'
-0004    3 OP_GET_GLOBAL       2 'ceil'
-0006    | OP_CONSTANT         3 'hello'
+0004    3 OP_GET_GLOBAL       0 'ceil'
+0006    | OP_CONSTANT         2 'hello'
 0008    | OP_CALL             1
 0010    | OP_PRINT
-0011    4 OP_GET_GLOBAL       4 '@ceil'
-0013    | OP_CONSTANT         5 '2.5'
+0011    4 OP_GET_GLOBAL       3 '@ceil'
+0013    | OP_CONSTANT         4 '2.5'
 0015    | OP_CALL             1
 0017    | OP_PRINT
 0018    5 OP_NIL

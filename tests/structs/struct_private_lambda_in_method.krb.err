@@ -4,19 +4,19 @@
 == <script> ==
 0000    1 OP_STRUCT           0 'Counter'
 0002    | OP_DEFINE_GLOBAL    0 'Counter'
-0004    | OP_GET_GLOBAL       1 'Counter'
+0004    | OP_GET_GLOBAL       0 'Counter'
 0006    2 OP_NIL
-0007    | OP_FIELD            2 'count' private
+0007    | OP_FIELD            1 'count' private
 0010    3 OP_POP
-0011    5 OP_GET_GLOBAL       3 'Counter'
-0013    6 OP_CLOSURE          5 <fn new>
-0015    | OP_METHOD           4 'new'
-0017   13 OP_CLOSURE          7 <fn read>
-0019    | OP_METHOD           6 'read'
+0011    5 OP_GET_GLOBAL       0 'Counter'
+0013    6 OP_CLOSURE          3 <fn new>
+0015    | OP_METHOD           2 'new'
+0017   13 OP_CLOSURE          5 <fn read>
+0019    | OP_METHOD           4 'read'
 0021   14 OP_POP
-0022   16 OP_GET_GLOBAL       8 'Counter'
-0024    | OP_INVOKE        (0 args)    9 'new'
-0027    | OP_INVOKE        (0 args)   10 'read'
+0022   16 OP_GET_GLOBAL       0 'Counter'
+0024    | OP_INVOKE        (0 args)    2 'new'
+0027    | OP_INVOKE        (0 args)    4 'read'
 0030    | OP_PRINT
 0031   17 OP_NIL
 0032    | OP_RETURN

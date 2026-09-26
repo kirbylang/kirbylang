@@ -8,28 +8,28 @@
 0006    | OP_CONSTANT         3 '5'
 0008    | OP_CALL             3
 0010    | OP_PRINT
-0011    2 OP_GET_GLOBAL       4 '@strSlice'
-0013    | OP_CONSTANT         5 'hello world'
-0015    | OP_CONSTANT         6 '6'
-0017    | OP_CONSTANT         7 '11'
+0011    2 OP_GET_GLOBAL       0 '@strSlice'
+0013    | OP_CONSTANT         1 'hello world'
+0015    | OP_CONSTANT         4 '6'
+0017    | OP_CONSTANT         5 '11'
 0019    | OP_CALL             3
 0021    | OP_PRINT
-0022    3 OP_GET_GLOBAL       8 '@strSlice'
-0024    | OP_CONSTANT         9 'hello'
-0026    | OP_CONSTANT        10 '1'
-0028    | OP_CONSTANT        11 '3'
+0022    3 OP_GET_GLOBAL       0 '@strSlice'
+0024    | OP_CONSTANT         6 'hello'
+0026    | OP_CONSTANT         7 '1'
+0028    | OP_CONSTANT         8 '3'
 0030    | OP_CALL             3
 0032    | OP_PRINT
-0033    4 OP_GET_GLOBAL      12 '@strSlice'
-0035    | OP_CONSTANT        13 'hello'
-0037    | OP_CONSTANT        14 '2'
-0039    | OP_CONSTANT        15 '2'
+0033    4 OP_GET_GLOBAL       0 '@strSlice'
+0035    | OP_CONSTANT         6 'hello'
+0037    | OP_CONSTANT         9 '2'
+0039    | OP_CONSTANT         9 '2'
 0041    | OP_CALL             3
 0043    | OP_PRINT
-0044    5 OP_GET_GLOBAL      16 '@strSlice'
-0046    | OP_CONSTANT        17 ''
-0048    | OP_CONSTANT        18 '0'
-0050    | OP_CONSTANT        19 '0'
+0044    5 OP_GET_GLOBAL       0 '@strSlice'
+0046    | OP_CONSTANT        10 ''
+0048    | OP_CONSTANT         2 '0'
+0050    | OP_CONSTANT         2 '0'
 0052    | OP_CALL             3
 0054    | OP_PRINT
 0055    6 OP_NIL

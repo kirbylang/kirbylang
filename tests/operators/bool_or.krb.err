@@ -56,7 +56,7 @@
 0085    | OP_JUMP_IF_FALSE   85 -> 91
 0088    | OP_JUMP            88 -> 96
 0091    | OP_POP
-0092    | OP_GET_GLOBAL       2 'should_not_call'
+0092    | OP_GET_GLOBAL       0 'should_not_call'
 0094    | OP_CALL             0
 0096    | OP_PRINT
 0097   19 OP_NIL

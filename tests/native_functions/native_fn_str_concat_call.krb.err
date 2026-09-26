@@ -10,19 +10,19 @@
 0010    | OP_ARRAY            4
 0012    | OP_CALL             1
 0014    | OP_PRINT
-0015    2 OP_GET_GLOBAL       5 '@strConcat'
-0017    | OP_CONSTANT         6 'one'
+0015    2 OP_GET_GLOBAL       0 '@strConcat'
+0017    | OP_CONSTANT         5 'one'
 0019    | OP_ARRAY            1
 0021    | OP_CALL             1
 0023    | OP_PRINT
-0024    3 OP_GET_GLOBAL       7 '@strConcat'
+0024    3 OP_GET_GLOBAL       0 '@strConcat'
 0026    | OP_ARRAY            0
 0028    | OP_CALL             1
 0030    | OP_PRINT
-0031    4 OP_GET_GLOBAL       8 '@typeof'
-0033    | OP_GET_GLOBAL       9 '@strConcat'
-0035    | OP_CONSTANT        10 'a'
-0037    | OP_CONSTANT        11 'b'
+0031    4 OP_GET_GLOBAL       6 '@typeof'
+0033    | OP_GET_GLOBAL       0 '@strConcat'
+0035    | OP_CONSTANT         7 'a'
+0037    | OP_CONSTANT         8 'b'
 0039    | OP_ARRAY            2
 0041    | OP_CALL             1
 0043    | OP_CALL             1

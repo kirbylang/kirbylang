@@ -11,7 +11,7 @@
 0011    6 OP_GET_LOCAL        1
 0013    | OP_PRINT
 0014    7 OP_POP
-0015    9 OP_GET_GLOBAL       4 'b'
+0015    9 OP_GET_GLOBAL       0 'b'
 0017    | OP_PRINT
 0018   10 OP_NIL
 0019    | OP_RETURN
