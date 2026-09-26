@@ -1,3 +1,6 @@
+// setenv is POSIX, not C99, so <stdlib.h> only declares it when asked to.
+#define _POSIX_C_SOURCE 200112L
+
 #include "sys/stat.h"
 #include <limits.h>
 #include <math.h>
