@@ -378,12 +378,13 @@ typedef struct {
 } ArrayNode;
 
 /**
- * How a piece of a joined string becomes a string.
+ * How a value becomes a string, e.g. in an interpolated string.
  */
 typedef enum {
-  STRING_CONVERSION_NONE,   // already a string
-  STRING_CONVERSION_NUMBER, // @numberToString
-  STRING_CONVERSION_BOOL,   // @boolToString
+  STRING_CONVERSION_NONE,    // already a string
+  STRING_CONVERSION_NUMBER,  // @numberToString
+  STRING_CONVERSION_BOOL,    // @boolToString
+  STRING_CONVERSION_DISPLAY, // toString(), from the type's Display impl
 } StringConversion;
 
 typedef struct {

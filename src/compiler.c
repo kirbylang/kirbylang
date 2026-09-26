@@ -729,44 +729,54 @@ static void compileNativeCall(const char *name, AstNode *arg) {
   emitBytes(OP_CALL, 1);
 }
 
-// Leaves the part, converted to a string, on the stack. Conversions differ
-// in shape, e.g. a native call wraps the value but a method call would follow
-// it, so each one compiles its own way.
-static void compileInterpPart(InterpPart *part) {
-  switch (part->conversion) {
+/**
+ * Compiles `expr` and converts its value to a string, leaving the string on
+ * the stack.
+ *
+ * Conversions differ in shape: a native call wraps the value, but
+ * Display's toString() is called on the value after it's compiled.
+ */
+static void compileToString(AstNode *expr, StringConversion conversion) {
+  switch (conversion) {
   case STRING_CONVERSION_NONE:
-    compileExpr(part->expr);
+    compileExpr(expr);
     break;
   case STRING_CONVERSION_NUMBER:
-    compileNativeCall("@numberToString", part->expr);
+    compileNativeCall("@numberToString", expr);
     break;
   case STRING_CONVERSION_BOOL:
-    compileNativeCall("@boolToString", part->expr);
+    compileNativeCall("@boolToString", expr);
+    break;
+  case STRING_CONVERSION_DISPLAY:
+    compileExpr(expr);
+    emitDisplayToString();
     break;
   }
 }
 
 static void compileInterpString(AstNode *node) {
-  InterpStringNode *is = &node->as.interpString;
+  InterpStringNode *interpString = &node->as.interpString;
 
-  if (is->count > UINT8_MAX) {
+  if (interpString->count > UINT8_MAX) {
     compilerErrorAtNode(node, "Too many parts in interpolated string.");
     return;
   }
 
   // A single part needs no join.
-  if (is->count == 1) {
-    compileInterpPart(&is->parts[0]);
+  if (interpString->count == 1) {
+    compileToString(interpString->parts[0].expr,
+                    interpString->parts[0].conversion);
     return;
   }
 
   emitNativeStrConcatStart();
 
-  for (int i = 0; i < is->count; i++) {
-    compileInterpPart(&is->parts[i]);
+  for (int i = 0; i < interpString->count; i++) {
+    compileToString(interpString->parts[i].expr,
+                    interpString->parts[i].conversion);
   }
 
-  emitNativeStrConcatEnd(is->count, node->line);
+  emitNativeStrConcatEnd(interpString->count, node->line);
 }
 
 /**

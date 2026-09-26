@@ -619,6 +619,26 @@ static Type *typchkInferBinary(TypeEnv *env, AstNode *node) {
   }
 }
 
+/**
+ * Chooses how a value of this type becomes a string. Returns false when it
+ * can't: only strings, f64, bool, and types that implement Display can.
+ */
+static bool chooseStringConversion(Type *type, StringConversion *conversion) {
+  if (typesEqual(type, typeString())) {
+    *conversion = STRING_CONVERSION_NONE;
+  } else if (typesEqual(type, typeF64())) {
+    *conversion = STRING_CONVERSION_NUMBER;
+  } else if (typesEqual(type, typeBool())) {
+    *conversion = STRING_CONVERSION_BOOL;
+  } else if (typeImplementsDisplay(type)) {
+    *conversion = STRING_CONVERSION_DISPLAY;
+  } else {
+    return false;
+  }
+
+  return true;
+}
+
 // Infer the type of an interpolated string. Also records how each placeholder
 // becomes a string, because the compiler has no types to decide that itself.
 static Type *typchkInferInterpString(TypeEnv *env, AstNode *node) {
@@ -647,16 +667,10 @@ static Type *typchkInferInterpString(TypeEnv *env, AstNode *node) {
       continue;
     }
 
-    if (typesEqual(type, typeString())) {
-      part->conversion = STRING_CONVERSION_NONE;
-    } else if (typesEqual(type, typeF64())) {
-      part->conversion = STRING_CONVERSION_NUMBER;
-    } else if (typesEqual(type, typeBool())) {
-      part->conversion = STRING_CONVERSION_BOOL;
-    } else {
+    if (!chooseStringConversion(type, &part->conversion)) {
       typchkErrorAtNodeFmt(part->expr,
-                           "Can't interpolate %s. Only string, f64, and bool "
-                           "can be interpolated.",
+                           "Can't interpolate %s. Only string, f64, bool, and "
+                           "types that implement Display can be interpolated.",
                            typeToString(type));
     }
   }
