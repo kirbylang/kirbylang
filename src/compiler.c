@@ -86,6 +86,17 @@ static void compilerErrorAtNode(AstNode *node, const char *message) {
 }
 
 /**
+ * Reports a failed check of the stack height the compiler tracks. A failure
+ * means an OpInfo entry is wrong, and compiling on would give locals the
+ * wrong slots, so it's checked in every build rather than with assert.
+ */
+static void checkStackHeight(bool ok, int line) {
+  if (!ok && !hadError)
+    compilerErrorAt(line, NULL, 0,
+                    "Internal compiler error: stack height mismatch.");
+}
+
+/**
  * Generic error handler
  *
  * Line number is recorded as 0.
@@ -414,7 +425,16 @@ static void countEmittedCode(void) {
     uint8_t *code = &currentFn()->code[current->bytesCounted];
     OpCode op = (OpCode)code[0];
     const OpInfo *info = opInfo(op);
-    assert(info != NULL && info->isKnownOp);
+
+    // Without an entry the instruction's length is unknown, so counting
+    // can't go on.
+    if (info == NULL || !info->isKnownOp) {
+      if (!hadError)
+        compilerErrorAt(currentLine, NULL, 0,
+                        "Internal compiler error: opcode has no OpInfo entry.");
+      current->bytesCounted = currentFn()->codeCount;
+      return;
+    }
 
     int length = 1 + info->operandBytes;
 
@@ -486,7 +506,7 @@ static void patchJump(int offset) {
   int height = currentStackHeight();
 
   if (current->isReachable) {
-    assert(hadError || height == heightAtJump);
+    checkStackHeight(height == heightAtJump, currentLine);
   } else {
     resetStackHeight(heightAtJump);
     current->isReachable = true;
@@ -1374,9 +1394,10 @@ static void compileStmt(AstNode *node) {
 
   // A statement leaves only the locals it declares on the stack. Anything
   // else means an OpInfo entry is wrong.
-  assert(hadError || !current->isReachable ||
-         current->stackHeight - heightBefore ==
-             current->localCount - localsBefore);
+  checkStackHeight(!current->isReachable ||
+                       current->stackHeight - heightBefore ==
+                           current->localCount - localsBefore,
+                   node->line);
 }
 
 CompiledUnit *compile(AstNode **ast, int count, int endLine) {
