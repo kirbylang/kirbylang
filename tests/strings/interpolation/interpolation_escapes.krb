@@ -1,0 +1,4 @@
+let name = "World";
+
+print $"{{name}} is {name}";
+print $"tab:\tquote:\"";

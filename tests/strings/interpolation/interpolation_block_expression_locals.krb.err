@@ -1,0 +1,60 @@
+== <script> ==
+0000    1 OP_NIL
+0001    | OP_RETURN
+== <script> ==
+0000    6 OP_CLOSURE          1 <fn describe>
+0002    | OP_DEFINE_GLOBAL    0 'describe'
+0004    1 OP_CONSTANT         3 'World'
+0006    | OP_DEFINE_GLOBAL    2 'name'
+0008    8 OP_GET_GLOBAL       0 'describe'
+0010    | OP_CALL             0
+0012    | OP_PRINT
+0013    9 OP_GET_GLOBAL       4 '@strConcat'
+0015    | OP_CONSTANT         5 'a '
+0017    | OP_GET_GLOBAL       2 'name'
+0019    | OP_CONSTANT         6 ' b '
+0021    | OP_CONSTANT         7 'x'
+0023    | OP_GET_LOCAL        5
+0025    | OP_GET_LOCAL        5
+0027    | OP_ADD
+0028    | OP_CLOSE_BLOCK_EXPR    1
+0030    | OP_CONSTANT         8 ' c'
+0032    | OP_ARRAY            5
+0034    | OP_CALL             1
+0036    | OP_PRINT
+0037   10 OP_GET_GLOBAL       4 '@strConcat'
+0039    | OP_CONSTANT         9 'a'
+0041    | OP_CONSTANT        10 'b'
+0043    | OP_GET_LOCAL        3
+0045    | OP_CLOSE_BLOCK_EXPR    1
+0047    | OP_CONSTANT        11 'c'
+0049    | OP_GET_GLOBAL       2 'name'
+0051    | OP_ARRAY            4
+0053    | OP_CALL             1
+0055    | OP_PRINT
+0056   11 OP_NIL
+0057    | OP_RETURN
+== describe ==
+0000    4 OP_CONSTANT         0 'Hello'
+0002    5 OP_GET_GLOBAL       1 '@strConcat'
+0004    | OP_GET_LOCAL        1
+0006    | OP_CONSTANT         2 ', '
+0008    | OP_GET_GLOBAL       3 '@numberToString'
+0010    | OP_CONSTANT         4 '2'
+0012    | OP_GET_LOCAL        6
+0014    | OP_CONSTANT         5 '3'
+0016    | OP_MULTIPLY
+0017    | OP_CLOSE_BLOCK_EXPR    1
+0019    | OP_CALL             1
+0021    | OP_CONSTANT         6 ' times '
+0023    | OP_GET_GLOBAL       7 'name'
+0025    | OP_CONSTANT         8 ' and '
+0027    | OP_GET_GLOBAL       9 '@boolToString'
+0029    | OP_TRUE
+0030    | OP_GET_LOCAL       10
+0032    | OP_NOT
+0033    | OP_CLOSE_BLOCK_EXPR    1
+0035    | OP_CALL             1
+0037    | OP_ARRAY            7
+0039    | OP_CALL             1
+0041    | OP_RETURN

@@ -15,7 +15,6 @@
 - [Type System](https://github.com/kirbylang/kirbylang/issues/17)
 - Number types
   - `u#` (e.g. `123u8`), `i#`, `f#`, `number`
-- [String interpolation](https://github.com/kirbylang/kirbylang/issues/15)
 - Lambda body expressions `var sum = fun (a, b) a + b;`
 - Native Functions
   - [x] `print`, `println`, `eprint`, `eprintln`
@@ -34,6 +33,16 @@
   - Hoist structs during compilation
   - Deprecate the call syntax e.g. `Point()`
 - [`continue` keyword](https://github.com/kirbylang/kirbylang/issues/13)
+- [String interpolation](https://github.com/kirbylang/kirbylang/issues/15): `$"Hello {name}!"`
+  - New tokens: `TOKEN_INTERP_STRING`, `TOKEN_INTERP_START`, `TOKEN_INTERP_MIDDLE`, `TOKEN_INTERP_END`
+  - New AST node: `NODE_INTERP_STRING`
+  - Placeholders can be a `string`, `f64`, `bool`, or a type that implements
+    `Display`, which converts with its `toString()`
+  - `{{` and `}}` write literal braces: `$"{{{n}}}" // {n}`
+    - A single `}` is an error: `$"Hello }" // Error at '$"Hello }"': Single '}' in interpolate string. Write '}}' for a literal '}'.`
+  - Compiles to `@strConcat([...])`. No new opcode.
+- Three or more strings joined with `+` compile to one `@strConcat([...])`
+  instead of an `OP_ADD` per `+`
 - Unit literal expression: `()`.
 - Numbers print with as many digits as they need and no more: `10`, not
   `10.000000`, and `0.1 + 0.2` as `0.30000000000000004`. Numbers from `1e-6` up
@@ -42,6 +51,7 @@
 - New native functions:
   - `@assert(condition, message)`
   - `@panic(message)`
+  - `@boolToString(b)`
   - Output: `@print(value)`, `@println(value)`, `@eprint(value)`,
     `@eprintln(value)`. They write a value the way `print` does, using a
     struct's `Display` impl when it has one
@@ -49,7 +59,7 @@
   - Arrays: `@arrJoin(array, separator)`
     - Every element must already be a string. There is no implicit conversion
       to string, so joining numbers means mapping `@numberToString` first
-  - Strings: `@strContains(s, sub)`, `@strIndexOf(s, sub)`, `@strSlice(s, start, end)`, `@strSplit(s, sep)`, `@strTrim(s)`, `@strToUpper(s)`, `@strToLower(s)`, `@strStartsWith(s, prefix)`, `@strEndsWith(s, suffix)`, `@strRepeat(s, count)`, `@strReplace(s, old, new)`, `@strReplaceAll(s, old, new)`
+  - Strings: `@strConcat(strings)`, `@strContains(s, sub)`, `@strIndexOf(s, sub)`, `@strSlice(s, start, end)`, `@strSplit(s, sep)`, `@strTrim(s)`, `@strToUpper(s)`, `@strToLower(s)`, `@strStartsWith(s, prefix)`, `@strEndsWith(s, suffix)`, `@strRepeat(s, count)`, `@strReplace(s, old, new)`, `@strReplaceAll(s, old, new)`
 - Native functions are now prefixed with `@` (e.g. `len(x)` becomes `@len(x)`)
   - `@` is now a reserved character identifiers
   - `__version__()` is now `@version()`
@@ -60,6 +70,7 @@
     - Calls to a native with a signature are checked like any other call
     - `@clock`, `@version`, `@exit`, `@rand`, `@rand01`, `@randBetween`,
       `@ceil`, `@readFileToString`, `@writeStringToFile`, `@numberToString`,
+      `@boolToString`,
       `@fileExists`, `@getenv`, `@setenv`, `@argc`, `@parseNumber`, `@strIsEmpty`,
       `@assert`, `@panic`, `@floor`, `@round`, `@trunc`, `@abs`, `@sqrt`,
       `@pow`, `@min`, `@max`, `@strContains`, `@strStartsWith`,
@@ -67,7 +78,8 @@
       `@strSplit`
     - Still unchecked, pending generics: `@len`, `@typeof`, `@instanceOf`,
       `@is`, `@isNumber`, `@isFunction`, `@isBool`, `@isString`, `@isNil`,
-      `@print`, `@println`, `@eprint`, `@eprintln`, and the `@arr*` family
+      `@strConcat`, `@print`, `@println`, `@eprint`, `@eprintln`, and the `@arr*`
+      family
     - Still unchecked, pending `Option[T]`: `@argv`, `@prompt`, `@stdin`,
       `@strIndexOf`
     - Still unchecked, pending more than two parameters: `@strSlice`,

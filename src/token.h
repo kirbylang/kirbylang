@@ -35,6 +35,11 @@ typedef enum {
   TOKEN_IDENTIFIER,
   TOKEN_STRING,
   TOKEN_NUMBER,
+  // Interpolated strings.
+  TOKEN_INTERP_STRING, // $"text" -- no placeholders
+  TOKEN_INTERP_START,  // $"text{
+  TOKEN_INTERP_MIDDLE, // }text{
+  TOKEN_INTERP_END,    // }text"
   // Keywords.
   TOKEN_AND,
   TOKEN_STRUCT,

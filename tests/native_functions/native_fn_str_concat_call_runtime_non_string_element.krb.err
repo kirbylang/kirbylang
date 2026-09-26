@@ -1,0 +1,20 @@
+== <script> ==
+0000    1 OP_NIL
+0001    | OP_RETURN
+== <script> ==
+0000    1 OP_CONSTANT         1 'a'
+0002    | OP_ARRAY            1
+0004    | OP_DEFINE_GLOBAL    0 'parts'
+0006    2 OP_GET_GLOBAL       2 '@arrPush'
+0008    | OP_GET_GLOBAL       0 'parts'
+0010    | OP_CONSTANT         3 '1'
+0012    | OP_CALL             2
+0014    | OP_POP
+0015    4 OP_GET_GLOBAL       4 '@strConcat'
+0017    | OP_GET_GLOBAL       0 'parts'
+0019    | OP_CALL             1
+0021    | OP_PRINT
+0022    5 OP_NIL
+0023    | OP_RETURN
+function strConcat expects every element of argument 1 to be a string but element 1 is a number.
+[line 4] in script

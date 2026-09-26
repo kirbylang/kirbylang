@@ -1,0 +1,40 @@
+== <script> ==
+0000    1 OP_NIL
+0001    | OP_RETURN
+== <script> ==
+0000    3 OP_CLOSURE          1 <fn report>
+0002    | OP_DEFINE_GLOBAL    0 'report'
+0004    5 OP_CLOSURE          3 <fn lambda0x1>
+0006    | OP_ARRAY            1
+0008    | OP_DEFINE_GLOBAL    2 'handlers'
+0010    7 OP_GET_GLOBAL       0 'report'
+0012    | OP_CALL             0
+0014    | OP_POP
+0015    8 OP_NIL
+0016    | OP_RETURN
+== report ==
+0000    2 OP_GET_GLOBAL       0 'handlers'
+0002    | OP_CONSTANT         1 '0'
+0004    | OP_GET_INDEX
+0005    | OP_GET_GLOBAL       2 '@strConcat'
+0007    | OP_CONSTANT         3 'n='
+0009    | OP_GET_GLOBAL       4 '@numberToString'
+0011    | OP_CONSTANT         5 '1'
+0013    | OP_CALL             1
+0015    | OP_CONSTANT         6 ' ok='
+0017    | OP_GET_GLOBAL       7 '@boolToString'
+0019    | OP_TRUE
+0020    | OP_CALL             1
+0022    | OP_ARRAY            4
+0024    | OP_CALL             1
+0026    | OP_CALL             1
+0028    | OP_POP
+0029    3 OP_NIL
+0030    | OP_RETURN
+== lambda0x1 ==
+0000    5 OP_GET_GLOBAL       0 '@println'
+0002    | OP_GET_LOCAL        1
+0004    | OP_CALL             1
+0006    | OP_POP
+0007    | OP_NIL
+0008    | OP_RETURN

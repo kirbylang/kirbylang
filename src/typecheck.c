@@ -381,6 +381,7 @@ static Type *typchkInferIndexGet(TypeEnv *env, AstNode *node);
 static Type *typchkInferIndexSet(TypeEnv *env, AstNode *node);
 static Type *typchkInferStructInit(TypeEnv *env, AstNode *node);
 static Type *typchkInferArray(TypeEnv *env, AstNode *node);
+static Type *typchkInferInterpString(TypeEnv *env, AstNode *node);
 static Type *typchkInferIf(TypeEnv *env, AstNode *node);
 static Type *typchkInferBlock(TypeEnv *env, AstNode *node);
 static Type *typchkCheckBlockContents(TypeEnv *env, BlockNode *block,
@@ -426,6 +427,8 @@ Type *typchkInfer(TypeEnv *env, AstNode *node) {
     return typchkInferStructInit(env, node);
   case NODE_ARRAY:
     return typchkInferArray(env, node);
+  case NODE_INTERP_STRING:
+    return typchkInferInterpString(env, node);
   case NODE_IF:
     return typchkInferIf(env, node);
   case NODE_BLOCK:
@@ -547,8 +550,10 @@ static Type *typchkInferBinary(TypeEnv *env, AstNode *node) {
       return typeF64();
 
     if (typesEqual(leftType, typeString()) &&
-        typesEqual(rightType, typeString()))
+        typesEqual(rightType, typeString())) {
+      b->isStringConcat = true;
       return typeString();
+    }
 
     typchkErrorAtTokenFmt(&b->op,
                           "'+' needs two f64s or two strings, got %s and %s.",
@@ -612,6 +617,65 @@ static Type *typchkInferBinary(TypeEnv *env, AstNode *node) {
     typchkErrorAtToken(&b->op, "Internal: unhandled binary operator.");
     return NULL;
   }
+}
+
+/**
+ * Chooses how a value of this type becomes a string. Returns false when it
+ * can't: only strings, f64, bool, and types that implement Display can.
+ */
+static bool chooseStringConversion(Type *type, StringConversion *conversion) {
+  if (typesEqual(type, typeString())) {
+    *conversion = STRING_CONVERSION_STRING;
+  } else if (typesEqual(type, typeF64())) {
+    *conversion = STRING_CONVERSION_NUMBER;
+  } else if (typesEqual(type, typeBool())) {
+    *conversion = STRING_CONVERSION_BOOL;
+  } else if (typeImplementsDisplay(type)) {
+    *conversion = STRING_CONVERSION_DISPLAY;
+  } else {
+    return false;
+  }
+
+  return true;
+}
+
+// Infer the type of an interpolated string. Also records how each placeholder
+// becomes a string, because the compiler has no types to decide that itself.
+static Type *typchkInferInterpString(TypeEnv *env, AstNode *node) {
+  InterpStringNode *is = &node->as.interpString;
+
+  for (int i = 0; i < is->count; i++) {
+    InterpPart *part = &is->parts[i];
+
+    // A NULL type means either an error was already reported, or the type
+    // isn't known. Only the second needs its own error.
+    bool hadErrorBefore = hadError;
+    hadError = false;
+
+    Type *type = typchkInfer(env, part->expr);
+
+    bool partHadError = hadError;
+    hadError = hadErrorBefore || partHadError;
+
+    if (type == NULL) {
+      if (!partHadError) {
+        typchkErrorAtNode(part->expr,
+                          "Can't tell the type of this placeholder. Declare it "
+                          "before this line, or give it a type, e.g. 'let n: "
+                          "f64 = ...;'.");
+      }
+      continue;
+    }
+
+    if (!chooseStringConversion(type, &part->conversion)) {
+      typchkErrorAtNodeFmt(part->expr,
+                           "Can't interpolate %s. Only string, f64, bool, and "
+                           "types that implement Display can be interpolated.",
+                           typeToString(type));
+    }
+  }
+
+  return typeString();
 }
 
 // Infer the type of an variable/identifier expression
@@ -766,8 +830,15 @@ static Type *typchkInferCall(TypeEnv *env, AstNode *node) {
 
   Type *calleeType = typchkInfer(env, c->callee);
 
-  if (calleeType == NULL)
+  if (calleeType == NULL) {
+    for (int i = 0; i < c->argCount; i++) {
+      AstNode *arg = c->args[i];
+
+      typchkInfer(env, arg);
+    }
+
     return NULL;
+  }
 
   return typchkCheckCallAgainstFunctionType(env, node, calleeType);
 }

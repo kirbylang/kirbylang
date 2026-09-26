@@ -221,13 +221,16 @@ static AstNode *number(Parser *parser, bool canAssign) {
   return node;
 }
 
-static AstNode *string_(Parser *parser, bool canAssign) {
-  (void)canAssign;
-
+/**
+ * Builds a string literal node from the raw text between the quotes,
+ * replacing escape sequences.
+ *
+ * `isInterp` is true for text from an interpolated string, where `{{` and
+ * `}}` are literal braces and a single `}` is an error.
+ */
+static AstNode *stringLiteral(Parser *parser, const char *chars, int length,
+                              bool isInterp) {
   AstNode *node = astAlloc(NODE_LITERAL, parser->previous.line);
-
-  const char *chars = parser->previous.start + 1;
-  int length = parser->previous.length - 2;
 
   char *buffer = (char *)astAllocRaw((size_t)length + 1);
   int out = 0;
@@ -258,6 +261,16 @@ static AstNode *string_(Parser *parser, bool canAssign) {
         break;
       }
       }
+    } else if (isInterp && (chars[i] == '{' || chars[i] == '}')) {
+      // The scanner only leaves `{` in text doubled, so `{{` and `}}` are
+      // literal braces and anything else is a single `}`.
+      if (i + 1 < length && chars[i + 1] == chars[i]) {
+        buffer[out++] = chars[i];
+        i++;
+      } else {
+        parse_error(parser, "Single '}' in interpolated string. Write '}}' for "
+                            "a literal '}'.");
+      }
     } else {
       buffer[out++] = chars[i];
     }
@@ -267,6 +280,89 @@ static AstNode *string_(Parser *parser, bool canAssign) {
   node->as.literal.kind = LITERAL_STRING;
   node->as.literal.as.string.chars = buffer;
   node->as.literal.as.string.length = out;
+
+  return node;
+}
+
+static AstNode *string_(Parser *parser, bool canAssign) {
+  (void)canAssign;
+
+  // Drop the quotes: "text"
+  return stringLiteral(parser, parser->previous.start + 1,
+                       parser->previous.length - 2, false);
+}
+
+// An interpolated string without placeholders: $"text"
+static AstNode *interpString(Parser *parser, bool canAssign) {
+  (void)canAssign;
+
+  // Drop `$"` and `"`
+  return stringLiteral(parser, parser->previous.start + 2,
+                       parser->previous.length - 3, true);
+}
+
+/**
+ * Adds a literal text segment's node to `parts`, dropping the `skipStart`
+ * leading and one trailing delimiter characters. Empty text is left out.
+ */
+static void interpText(Parser *parser, ArrayNodeData *parts, int skipStart) {
+  Token token = parser->previous;
+  int length = token.length - skipStart - 1;
+
+  if (length > 0) {
+    arrayNodeDataWrite(
+        parts, stringLiteral(parser, token.start + skipStart, length, true));
+  }
+}
+
+// An interpolated string with placeholders: $"text{expr}text{expr}text"
+static AstNode *interpolation(Parser *parser, bool canAssign) {
+  (void)canAssign;
+
+  int line = parser->previous.line;
+
+  ArrayNodeData parts;
+  arrayNodeDataInit(&parts);
+
+  // `$"text{`
+  interpText(parser, &parts, 2);
+
+  for (;;) {
+    if (check(parser, TOKEN_INTERP_MIDDLE) || check(parser, TOKEN_INTERP_END)) {
+      error_at_current(parser, "Expect expression inside '{}'.");
+    } else {
+      arrayNodeDataWrite(&parts, expression(parser));
+    }
+
+    // `}text{`
+    if (match(parser, TOKEN_INTERP_MIDDLE)) {
+      interpText(parser, &parts, 1);
+      continue;
+    }
+
+    // `}text"`
+    if (match(parser, TOKEN_INTERP_END)) {
+      interpText(parser, &parts, 1);
+    } else {
+      error_at_current(parser, "Expect '}' after placeholder expression.");
+    }
+
+    break;
+  }
+
+  AstNode *node = astAlloc(NODE_INTERP_STRING, line);
+  InterpStringNode *is = &node->as.interpString;
+
+  is->count = parts.count;
+  is->parts =
+      (InterpPart *)astAllocRaw((size_t)parts.count * sizeof(InterpPart));
+
+  for (int i = 0; i < parts.count; i++) {
+    is->parts[i].expr = parts.data[i];
+    is->parts[i].conversion = STRING_CONVERSION_UNDEFINED;
+  }
+
+  arrayNodeDataFree(&parts);
 
   return node;
 }
@@ -647,6 +743,10 @@ static ParseRule rules[] = {
     [TOKEN_IDENTIFIER] = {variable, NULL, PREC_NONE},
     [TOKEN_STRING] = {string_, NULL, PREC_NONE},
     [TOKEN_NUMBER] = {number, NULL, PREC_NONE},
+    [TOKEN_INTERP_STRING] = {interpString, NULL, PREC_NONE},
+    [TOKEN_INTERP_START] = {interpolation, NULL, PREC_NONE},
+    [TOKEN_INTERP_MIDDLE] = {NULL, NULL, PREC_NONE},
+    [TOKEN_INTERP_END] = {NULL, NULL, PREC_NONE},
     [TOKEN_AND] = {NULL, and_, PREC_AND},
     [TOKEN_STRUCT] = {NULL, NULL, PREC_NONE},
     [TOKEN_IMPL] = {NULL, NULL, PREC_NONE},

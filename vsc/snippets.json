@@ -331,6 +331,13 @@
     ],
     "description": "Convert a number to a string"
   },
+  "Native: @boolToString": {
+    "prefix": "@boolToString",
+    "body": [
+      "@boolToString(${1:value})$0"
+    ],
+    "description": "Convert a boolean to a string"
+  },
   "Native: @fileExists": {
     "prefix": "@fileExists",
     "body": [
@@ -498,6 +505,13 @@
       "@arrJoin(${1:array}, ${2:separator})$0"
     ],
     "description": "Join an array of strings into one string"
+  },
+  "Native: @strConcat": {
+    "prefix": "@strConcat",
+    "body": [
+      "@strConcat(${1:strings})$0"
+    ],
+    "description": "Concatenate an array of strings into one string"
   },
   "Native: @is": {
     "prefix": "@is",

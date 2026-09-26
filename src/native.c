@@ -645,18 +645,13 @@ static Value arrReverseNative(VM *vm, int argCount, Value *args) {
 }
 
 /**
- * Concatenate every element of an array into one string, separated by a
- * separator string. Elements must already be strings; the language has no
- * implicit conversion to string.
+ * Joins an array of strings into one string, with `separator` between them.
+ * `name` is the calling native, for error messages.
+ *
+ * Measures first so the result is allocated and copied once.
  */
-static Value arrJoinNative(VM *vm, int argCount, Value *args) {
-  assertArgCount(vm, "@arrJoin", 2, argCount);
-  assertArgIsArray(vm, "@arrJoin", args, 0);
-  assertArgIsString(vm, "@arrJoin", args, 1);
-
-  ObjArray *array = AS_ARRAY(args[0]);
-  ObjString *separator = AS_STRING(args[1]);
-
+static Value joinStrings(VM *vm, const char *name, ObjArray *array,
+                         const char *separator, int separatorLength) {
   int length = 0;
 
   for (int i = 0; i < array->count; i++) {
@@ -666,9 +661,9 @@ static Value arrJoinNative(VM *vm, int argCount, Value *args) {
       valueTypeToString(array->values[i], type, sizeof(type));
 
       runtimeError(vm,
-                   "function arrJoin expects every element of argument 1 to be "
+                   "function %s expects every element of argument 1 to be "
                    "a string but element %d is a %s.",
-                   i, type);
+                   name, i, type);
       exit(EXIT_CODE_RUNTIME_ERR);
     }
 
@@ -676,7 +671,7 @@ static Value arrJoinNative(VM *vm, int argCount, Value *args) {
   }
 
   if (array->count > 1) {
-    length += separator->length * (array->count - 1);
+    length += separatorLength * (array->count - 1);
   }
 
   // args stay on the VM stack for the duration of a native call, so the array
@@ -686,8 +681,8 @@ static Value arrJoinNative(VM *vm, int argCount, Value *args) {
 
   for (int i = 0; i < array->count; i++) {
     if (i > 0) {
-      memcpy(chars + offset, separator->chars, separator->length);
-      offset += separator->length;
+      memcpy(chars + offset, separator, separatorLength);
+      offset += separatorLength;
     }
 
     ObjString *element = AS_STRING(array->values[i]);
@@ -699,6 +694,34 @@ static Value arrJoinNative(VM *vm, int argCount, Value *args) {
   chars[length] = '\0';
 
   return OBJ_VAL(takeString(vm->gc, chars, length));
+}
+
+/**
+ * Concatenate every element of an array into one string, separated by a
+ * separator string. Elements must already be strings; the language has no
+ * implicit conversion to string.
+ */
+static Value arrJoinNative(VM *vm, int argCount, Value *args) {
+  assertArgCount(vm, "@arrJoin", 2, argCount);
+  assertArgIsArray(vm, "@arrJoin", args, 0);
+  assertArgIsString(vm, "@arrJoin", args, 1);
+
+  ObjString *separator = AS_STRING(args[1]);
+
+  return joinStrings(vm, "arrJoin", AS_ARRAY(args[0]), separator->chars,
+                     separator->length);
+}
+
+/**
+ * Concatenate an array of strings into one string. Interpolated strings and
+ * `+` chains of three or more strings compile to this, after converting any
+ * non-string values themselves.
+ */
+static Value strConcatNative(VM *vm, int argCount, Value *args) {
+  assertArgCount(vm, "@strConcat", 1, argCount);
+  assertArgIsArray(vm, "@strConcat", args, 0);
+
+  return joinStrings(vm, "strConcat", AS_ARRAY(args[0]), "", 0);
 }
 
 static Value stdinNative(VM *vm, int argCount, Value *args) {
@@ -866,6 +889,15 @@ static Value numberToStringNative(VM *vm, int argCount, Value *args) {
   formatNumber(value.as.number, buffer, sizeof(buffer));
 
   return OBJ_VAL(copyString(vm->gc, buffer, (int)strlen(buffer)));
+}
+
+static Value boolToStringNative(VM *vm, int argCount, Value *args) {
+  assertArgCount(vm, "@boolToString", 1, argCount);
+  assertArgIsBool(vm, "@boolToString", args, 0);
+
+  const char *text = AS_BOOL(args[0]) ? "true" : "false";
+
+  return OBJ_VAL(copyString(vm->gc, text, (int)strlen(text)));
 }
 
 static Value floorNative(VM *vm, int argCount, Value *args) {
@@ -1333,6 +1365,7 @@ const NativeDefinition nativeDefinitions[] = {
     {"@readFileToString", readFileToStringNative},
     {"@writeStringToFile", writeStringToFileNative},
     {"@numberToString", numberToStringNative},
+    {"@boolToString", boolToStringNative},
     {"@fileExists", fileExistsNative},
     {"@getenv", getEnvNative},
     {"@setenv", setEnvNative},
@@ -1361,6 +1394,7 @@ const NativeDefinition nativeDefinitions[] = {
     {"@arrConcat", arrConcatNative},
     {"@arrReverse", arrReverseNative},
     {"@arrJoin", arrJoinNative},
+    {"@strConcat", strConcatNative},
     {"@is", isNative},
     {"@isNumber", isNumberNative},
     {"@isFunction", isFunctionNative},
@@ -1406,6 +1440,7 @@ const NativeSignature nativeSignatures[] = {
     {"@readFileToString", {NATIVE_STRING}, 1, NATIVE_STRING},
     {"@writeStringToFile", {NATIVE_STRING, NATIVE_STRING}, 2, NATIVE_UNIT},
     {"@numberToString", {NATIVE_F64}, 1, NATIVE_STRING},
+    {"@boolToString", {NATIVE_BOOL}, 1, NATIVE_STRING},
     {"@fileExists", {NATIVE_STRING}, 1, NATIVE_BOOL},
     {"@getenv", {NATIVE_STRING}, 1, NATIVE_STRING},
     {"@setenv", {NATIVE_STRING, NATIVE_STRING}, 2, NATIVE_UNIT},

@@ -1,0 +1,4 @@
+let parts = ["a"];
+@arrPush(parts, 1);
+
+print @strConcat(parts);
