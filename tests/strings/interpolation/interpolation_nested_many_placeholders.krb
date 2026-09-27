@@ -1,0 +1,6 @@
+let a = "Hello World";
+let b = 123;
+let c = true;
+
+print $"outer {$"inner {a} and {b}"} then {c} end";
+print $"1{$"2{$"3{a}{b}"}{c}"}{a}";
