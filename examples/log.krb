@@ -51,7 +51,7 @@ impl Logger {
             return;
         }
 
-        @println($"{Logger.level_to_label(level)} {self.prefix}{msg}");
+        @eprintln($"{Logger.level_to_label(level)} {self.prefix}{msg}");
     }
 
     pub fun fatal(self, msg: string): unit = self.log(LOG_LEVEL_FATAL, msg);
