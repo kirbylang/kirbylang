@@ -51,7 +51,8 @@
       to string, so joining numbers means mapping `@numberToString` first
   - Strings: `@strContains(s, sub)`, `@strIndexOf(s, sub)`, `@strSlice(s, start, end)`, `@strSplit(s, sep)`, `@strTrim(s)`, `@strToUpper(s)`, `@strToLower(s)`, `@strStartsWith(s, prefix)`, `@strEndsWith(s, suffix)`, `@strRepeat(s, count)`, `@strReplace(s, old, new)`, `@strReplaceAll(s, old, new)`
 - Native functions are now prefixed with `@` (e.g. `len(x)` becomes `@len(x)`)
-  - `@` is now a reserved character identifiers
+  - `@` is now a reserved character in declarations and assignment expressions
+    - This prevents native functions from being reassigned
   - `__version__()` is now `@version()`
 - Initial implementation of types and typechecker
   - Limitations
