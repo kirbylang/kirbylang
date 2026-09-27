@@ -816,6 +816,11 @@ static void compileExpr(AstNode *node) {
 
   case NODE_ASSIGN: {
     AssignNode *a = &node->as.assign;
+
+    if (a->name.length > 0 && a->name.start[0] == '@') {
+      compilerErrorAtToken(&a->name, "'@' is a reserved character");
+    }
+
     VarRef ref = resolveVariable(&a->name);
     if (!ref.isMutable) {
       compilerErrorAtToken(&a->name, "Cannot assign to immutable binding");
