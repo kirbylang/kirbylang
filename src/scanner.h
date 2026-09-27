@@ -17,8 +17,8 @@ typedef struct {
   const char *current;
   int line;
   /**
-   * How many interpolated strings have an open placeholder, e.g. 1 while
-   * scanning `x` in `$"a{x}"`.
+   * How many placeholders the scanner is inside, e.g. 1 while scanning `x` in
+   * `$"a{x}"`, and 0 while scanning `b` in `$"a{x}b{y}"`.
    */
   int interpDepth;
   /**

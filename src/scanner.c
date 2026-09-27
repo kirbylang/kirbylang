@@ -22,7 +22,8 @@ static TokenType identifierType(Scanner *scanner);
 static Token identifier(Scanner *scanner);
 static Token number(Scanner *scanner);
 static Token string(Scanner *scanner);
-static Token interpSegment(Scanner *scanner, bool isFirst);
+static Token interpSegment(Scanner *scanner, TokenType placeholderType,
+                           TokenType endType);
 static void skipWhitespace(Scanner *scanner);
 
 /**
@@ -65,7 +66,7 @@ Token scanToken(Scanner *scanner) {
 
   if (c == '$' && peek(scanner) == '"') {
     advance(scanner);
-    return interpSegment(scanner, true);
+    return interpSegment(scanner, TOKEN_INTERP_START, TOKEN_INTERP_STRING);
   }
 
   if (isDigit(c))
@@ -86,8 +87,10 @@ Token scanToken(Scanner *scanner) {
       int *open = &scanner->interpBraces[scanner->interpDepth - 1];
 
       // This `}` closes the placeholder, not a brace inside it.
-      if (*open == 0)
-        return interpSegment(scanner, false);
+      if (*open == 0) {
+        scanner->interpDepth--;
+        return interpSegment(scanner, TOKEN_INTERP_MIDDLE, TOKEN_INTERP_END);
+      }
 
       (*open)--;
     }
@@ -373,10 +376,11 @@ static Token string(Scanner *scanner) {
  *
  * Literal `{` and `}` are written as `print $"{{Hello}}" // {Hello}`
  *
- * `isFirst` is true right after `$"`, and false right after the `}` that
- * closes a placeholder.
+ * Returns `placeholderType` when the text ends at `{`, and `endType` when it
+ * ends at `"`.
  */
-static Token interpSegment(Scanner *scanner, bool isFirst) {
+static Token interpSegment(Scanner *scanner, TokenType placeholderType,
+                           TokenType endType) {
   TRACELN("scanner.interpSegment()");
 
   while (peek(scanner) != '"' && !isAtEnd(scanner)) {
@@ -403,22 +407,15 @@ static Token interpSegment(Scanner *scanner, bool isFirst) {
     return errorToken(scanner, "Unterminated string.");
 
   if (advance(scanner) == '{') {
-    if (isFirst) {
-      if (scanner->interpDepth == MAX_INTERP_DEPTH)
-        return errorToken(scanner, "Interpolated strings nested too deeply.");
+    if (scanner->interpDepth == MAX_INTERP_DEPTH)
+      return errorToken(scanner, "Interpolated strings nested too deeply.");
 
-      scanner->interpBraces[scanner->interpDepth++] = 0;
-    }
-
-    return makeToken(scanner,
-                     isFirst ? TOKEN_INTERP_START : TOKEN_INTERP_MIDDLE);
+    // A placeholder opens.
+    scanner->interpBraces[scanner->interpDepth++] = 0;
+    return makeToken(scanner, placeholderType);
   }
 
-  if (isFirst)
-    return makeToken(scanner, TOKEN_INTERP_STRING);
-
-  scanner->interpDepth--;
-  return makeToken(scanner, TOKEN_INTERP_END);
+  return makeToken(scanner, endType);
 }
 
 static void skipWhitespace(Scanner *scanner) {

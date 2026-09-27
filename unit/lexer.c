@@ -5,6 +5,7 @@
 #include <string.h>
 
 #include "../src/lexer.h"
+#include "../src/scanner.h"
 #include "../src/token.h"
 #include "../src/token_stream.h"
 
@@ -19,6 +20,26 @@ static void assert_token_types(const char *source, TokenType *expected,
   }
 
   tsFree(&tokens);
+}
+
+/**
+ * Builds `levels` interpolated strings, each nested in the previous one's
+ * placeholder: `$"{$"{x}"}"` for 2 levels.
+ */
+static char *nested_interp_source(int levels) {
+  char *source = malloc((size_t)levels * 5 + 2);
+  char *p = source;
+
+  for (int i = 0; i < levels; i++)
+    p += sprintf(p, "$\"{");
+
+  *p++ = 'x';
+
+  for (int i = 0; i < levels; i++)
+    p += sprintf(p, "}\"");
+
+  *p = '\0';
+  return source;
 }
 
 int main(void) {
@@ -152,6 +173,77 @@ int main(void) {
   assert_token_types(
       "$x", loneDollarExpected,
       (int)(sizeof(loneDollarExpected) / sizeof(loneDollarExpected[0])));
+
+  TokenType interpNestedManyPlaceholdersExpected[] = {
+      TOKEN_INTERP_START,  // $"a{
+      TOKEN_INTERP_START,  // $"b{
+      TOKEN_IDENTIFIER,    // c
+      TOKEN_INTERP_MIDDLE, // }d{
+      TOKEN_IDENTIFIER,    // e
+      TOKEN_INTERP_END,    // }f"
+      TOKEN_INTERP_MIDDLE, // }g{
+      TOKEN_IDENTIFIER,    // h
+      TOKEN_INTERP_END,    // }i"
+      TOKEN_EOF,
+  };
+
+  assert_token_types("$\"a{$\"b{c}d{e}f\"}g{h}i\"",
+                     interpNestedManyPlaceholdersExpected,
+                     (int)(sizeof(interpNestedManyPlaceholdersExpected) /
+                           sizeof(interpNestedManyPlaceholdersExpected[0])));
+
+  TokenType interpNestedInsideBracesExpected[] = {
+      TOKEN_INTERP_START, // $"{
+      TOKEN_LEFT_BRACE,   // {
+      TOKEN_INTERP_START, // $"{
+      TOKEN_IDENTIFIER,   // x
+      TOKEN_INTERP_END,   // }"
+      TOKEN_RIGHT_BRACE,  // }
+      TOKEN_INTERP_END,   // }"
+      TOKEN_EOF,
+  };
+
+  assert_token_types("$\"{ { $\"{x}\" } }\"",
+                     interpNestedInsideBracesExpected,
+                     (int)(sizeof(interpNestedInsideBracesExpected) /
+                           sizeof(interpNestedInsideBracesExpected[0])));
+
+  // Nesting up to the limit scans cleanly.
+  {
+    char *source = nested_interp_source(MAX_INTERP_DEPTH);
+    TokenStream tokens = lex(source);
+
+    assert(tokens.count == MAX_INTERP_DEPTH * 2 + 2);
+
+    for (int i = 0; i < MAX_INTERP_DEPTH; i++)
+      assert(tsAdvance(&tokens).type == TOKEN_INTERP_START);
+
+    assert(tsAdvance(&tokens).type == TOKEN_IDENTIFIER);
+
+    for (int i = 0; i < MAX_INTERP_DEPTH; i++)
+      assert(tsAdvance(&tokens).type == TOKEN_INTERP_END);
+
+    assert(tsAdvance(&tokens).type == TOKEN_EOF);
+
+    tsFree(&tokens);
+    free(source);
+  }
+
+  // One level past the limit is an error at the innermost string.
+  {
+    char *source = nested_interp_source(MAX_INTERP_DEPTH + 1);
+    TokenStream tokens = lex(source);
+
+    for (int i = 0; i < MAX_INTERP_DEPTH; i++)
+      assert(tsAdvance(&tokens).type == TOKEN_INTERP_START);
+
+    Token error = tsAdvance(&tokens);
+    assert(error.type == TOKEN_ERROR);
+    assert(tokenTextEquals(&error, "Interpolated strings nested too deeply."));
+
+    tsFree(&tokens);
+    free(source);
+  }
 
   return 0;
 }
