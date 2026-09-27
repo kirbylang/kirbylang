@@ -381,7 +381,7 @@ typedef struct {
  * How a value becomes a string, e.g. in an interpolated string.
  */
 typedef enum {
-  STRING_CONVERSION_UNDEFINED, // no string conversation avaliable
+  STRING_CONVERSION_UNDEFINED, // not yet chosen by the type checker
   STRING_CONVERSION_STRING,    // already a string
   STRING_CONVERSION_NUMBER,    // @numberToString
   STRING_CONVERSION_BOOL,      // @boolToString
