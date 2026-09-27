@@ -1,0 +1,14 @@
+struct Box {
+    pub var value: f64;
+}
+
+impl Display for Box {
+    fun toString(self): string = $"Box({self.value})";
+}
+
+let box = Box { value: 123 };
+let boxes = [Box { value: 1 }, Box { value: 2 }];
+
+@println($"one: {box}");
+@println($"two: {boxes[0]} and {boxes[1]}");
+@println($"{box}");

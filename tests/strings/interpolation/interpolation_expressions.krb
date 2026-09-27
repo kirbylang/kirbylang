@@ -1,0 +1,12 @@
+struct Point {
+    pub var x: f64;
+    pub var y: f64;
+}
+
+let p = Point { x: 1, y: 2 };
+let items = ["a", "b"];
+
+print $"sum={p.x + p.y}";
+print $"first={items[0]}";
+print $"struct={ Point { x: 5, y: 6 }.x }";
+print $"call={@strToUpper("shout")}";

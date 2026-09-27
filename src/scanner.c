@@ -22,6 +22,8 @@ static TokenType identifierType(Scanner *scanner);
 static Token identifier(Scanner *scanner);
 static Token number(Scanner *scanner);
 static Token string(Scanner *scanner);
+static Token interpSegment(Scanner *scanner, TokenType placeholderType,
+                           TokenType endType);
 static void skipWhitespace(Scanner *scanner);
 
 /**
@@ -33,6 +35,7 @@ void initScanner(Scanner *scanner, const char *source) {
   scanner->start = source;
   scanner->current = source;
   scanner->line = 1;
+  scanner->interpDepth = 0;
 }
 
 /**
@@ -61,6 +64,11 @@ Token scanToken(Scanner *scanner) {
   if (c == '@' && isAlpha(peek(scanner)))
     return identifier(scanner);
 
+  if (c == '$' && peek(scanner) == '"') {
+    advance(scanner);
+    return interpSegment(scanner, TOKEN_INTERP_START, TOKEN_INTERP_STRING);
+  }
+
   if (isDigit(c))
     return number(scanner);
 
@@ -70,8 +78,23 @@ Token scanToken(Scanner *scanner) {
   case ')':
     return makeToken(scanner, TOKEN_RIGHT_PAREN);
   case '{':
+    if (scanner->interpDepth > 0)
+      scanner->interpBraces[scanner->interpDepth - 1]++;
+
     return makeToken(scanner, TOKEN_LEFT_BRACE);
   case '}':
+    if (scanner->interpDepth > 0) {
+      int *open = &scanner->interpBraces[scanner->interpDepth - 1];
+
+      // This `}` closes the placeholder, not a brace inside it.
+      if (*open == 0) {
+        scanner->interpDepth--;
+        return interpSegment(scanner, TOKEN_INTERP_MIDDLE, TOKEN_INTERP_END);
+      }
+
+      (*open)--;
+    }
+
     return makeToken(scanner, TOKEN_RIGHT_BRACE);
   case '[':
     return makeToken(scanner, TOKEN_LEFT_BRACKET);
@@ -345,6 +368,54 @@ static Token string(Scanner *scanner) {
   // The closing quote.
   advance(scanner);
   return makeToken(scanner, TOKEN_STRING);
+}
+
+/**
+ * Scans the literal text of an interpolated string up to the next single `{`
+ * (a placeholder starts) or the closing `"` (the string ends).
+ *
+ * Literal `{` and `}` are written as `print $"{{Hello}}" // {Hello}`
+ *
+ * Returns `placeholderType` when the text ends at `{`, and `endType` when it
+ * ends at `"`.
+ */
+static Token interpSegment(Scanner *scanner, TokenType placeholderType,
+                           TokenType endType) {
+  TRACELN("scanner.interpSegment()");
+
+  while (peek(scanner) != '"' && !isAtEnd(scanner)) {
+    if (peek(scanner) == '{') {
+      // `{{` is a literal brace, not a placeholder.
+      if (peekNext(scanner) != '{')
+        break;
+
+      advance(scanner);
+    }
+
+    if (peek(scanner) == '\n') {
+      scanner->line++;
+    }
+
+    if (peek(scanner) == '\\' && peekNext(scanner) != '\0') {
+      advance(scanner);
+    }
+
+    advance(scanner);
+  }
+
+  if (isAtEnd(scanner))
+    return errorToken(scanner, "Unterminated string.");
+
+  if (advance(scanner) == '{') {
+    if (scanner->interpDepth == MAX_INTERP_DEPTH)
+      return errorToken(scanner, "Interpolated strings nested too deeply.");
+
+    // A placeholder opens.
+    scanner->interpBraces[scanner->interpDepth++] = 0;
+    return makeToken(scanner, placeholderType);
+  }
+
+  return makeToken(scanner, endType);
 }
 
 static void skipWhitespace(Scanner *scanner) {

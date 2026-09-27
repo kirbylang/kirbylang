@@ -29,7 +29,7 @@ impl Default for StringBuilder {
 }
 
 impl Display for StringBuilder {
-    fun toString(self): string = @arrJoin(self.value, "");
+    fun toString(self): string = @strConcat(self.value);
 }
 
 let builder = StringBuilder.default()

@@ -1,0 +1,10 @@
+let name = "World";
+
+fun describe(): string {
+    let greeting = "Hello";
+    $"{greeting}, { { let n = 2; n * 3 } } times {name} and { { let b = true; !b } }"
+}
+
+print describe();
+print $"a {name} b { { let s = "x"; s + s } } c";
+print "a" + { let s = "b"; s } + "c" + name;

@@ -542,6 +542,17 @@ static void printNode(StrBuf *sb, AstNode *node) {
     sb_append(sb, ")");
     break;
 
+  case NODE_INTERP_STRING:
+    sb_append(sb, "(interp");
+
+    for (int i = 0; i < node->as.interpString.count; i++) {
+      sb_append(sb, " ");
+      printNode(sb, node->as.interpString.parts[i].expr);
+    }
+
+    sb_append(sb, ")");
+    break;
+
   case NODE_COUNT:
     sb_append(sb, "<invalid>");
     break;

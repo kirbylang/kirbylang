@@ -3,6 +3,7 @@
   "patterns": [
     { "include": "#comments" },
     { "include": "#shebang" },
+    { "include": "#interpolated-strings" },
     { "include": "#strings" },
     { "include": "#numbers" },
     { "include": "#struct-declaration" },
@@ -41,6 +42,53 @@
           "name": "invalid.illegal.unknown-escape.krb",
           "match": "\\\\."
         }
+      ]
+    },
+    "interpolated-strings": {
+      "name": "string.quoted.double.interpolated.krb",
+      "begin": "\\$\"",
+      "end": "\"",
+      "patterns": [
+        {
+          "name": "constant.character.escape.krb",
+          "match": "\\{\\{|\\}\\}"
+        },
+        {
+          "name": "constant.character.escape.krb",
+          "match": "\\\\[nrt\"\\\\]"
+        },
+        {
+          "name": "invalid.illegal.unknown-escape.krb",
+          "match": "\\\\."
+        },
+        {
+          "name": "invalid.illegal.single-brace.krb",
+          "match": "}"
+        },
+        {
+          "name": "meta.embedded.placeholder.krb",
+          "begin": "\\{",
+          "end": "\\}",
+          "beginCaptures": {
+            "0": { "name": "punctuation.section.embedded.begin.krb" }
+          },
+          "endCaptures": {
+            "0": { "name": "punctuation.section.embedded.end.krb" }
+          },
+          "contentName": "source.krb",
+          "patterns": [
+            { "include": "#placeholder-braces" },
+            { "include": "$self" }
+          ]
+        }
+      ]
+    },
+    "placeholder-braces": {
+      "begin": "\\{",
+      "end": "\\}",
+      "patterns": [
+        { "include": "#placeholder-braces" },
+        { "include": "$self" }
       ]
     },
     "numbers": {

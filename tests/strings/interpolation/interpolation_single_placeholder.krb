@@ -1,0 +1,5 @@
+let name = "World";
+let n = 42;
+
+print $"{name}";
+print $"{n}";

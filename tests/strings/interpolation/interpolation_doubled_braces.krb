@@ -1,0 +1,11 @@
+let n = 123;
+let name = "World";
+
+@println($"{{123}}");
+@println($"{{{n}}}");
+@println($"{{name}} is {name}");
+@println($"a {{ b }} c");
+@println($"{{{{");
+@println($"}}}}");
+@println($"{{");
+@println($"}}");

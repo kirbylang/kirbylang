@@ -47,7 +47,7 @@ static void test_primitive_type_names(void) {
 }
 
 int main(void) {
-  assert(NumberOfDefinedTokens == 52);
+  assert(NumberOfDefinedTokens == 56);
   assert(strcmp(tokenTypeToString(TOKEN_AND), "TOKEN_AND") == 0);
   test_tokens_equal();
   test_token_text_equals();

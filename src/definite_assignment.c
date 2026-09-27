@@ -182,6 +182,14 @@ static void daaCheckAssignmentExpr(DaaSet *daa, AstNode *node) {
 
     break;
   }
+  case NODE_INTERP_STRING: {
+    InterpStringNode *interpString = &node->as.interpString;
+
+    for (int i = 0; i < interpString->count; i++)
+      daaCheckAssignmentExpr(daa, interpString->parts[i].expr);
+
+    break;
+  }
   case NODE_IF:
   case NODE_BLOCK:
     daaCheckAssignmentStmt(daa, node);

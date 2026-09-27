@@ -1,0 +1,17 @@
+struct Logger {
+    pub var prefix: string;
+}
+
+impl Logger {
+    pub fun log(self, msg: string): unit {
+        @println(self.prefix + msg);
+    }
+}
+
+fun report(): unit {
+    logger.log($"n={1} ok={true}");
+}
+
+let logger = Logger { prefix: "> " };
+
+report();

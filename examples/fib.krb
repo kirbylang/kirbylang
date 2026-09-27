@@ -11,11 +11,11 @@ fun fib(n: f64): f64 {
 let arg = @argv(4) ?? @prompt("n: ");
 let start = @clock();
 
-let n = @parseNumber(arg);
-let result = fib(n);
+print $"{n}\n";
 
 let end = @clock();
 let time_taken = end - start;
 
-@println("Result: " + @numberToString(result));
-@println("Time Taken: " + @numberToString(time_taken));
+print $"Result:\n{fib(n)}\n";
+
+print $"Time Taken: {@clock() - start}";

@@ -1,0 +1,97 @@
+fun main(): unit {
+    let logger = Logger.default()
+        .with_level(LOG_LEVEL_TRACE)
+        .with_prefix("> ");
+
+    logger.info("Start");
+
+    for (var i = 0; i < 10; i = i + 1) {
+        let random_level = @randBetween(LOG_LEVEL_FATAL, LOG_LEVEL_TRACE);
+        let message = $"Message {i}...";
+
+        logger.log(random_level, message);
+    }
+
+    logger.info("Finished!");
+}
+
+type LogLevel = f64;
+
+// TODO: Enums will replace this
+let LOG_LEVEL_NONE = 0;
+let LOG_LEVEL_FATAL = 1;
+let LOG_LEVEL_ERROR = 2;
+let LOG_LEVEL_WARN = 3;
+let LOG_LEVEL_INFO = 4;
+let LOG_LEVEL_DEBUG = 5;
+let LOG_LEVEL_TRACE = 6;
+
+struct Logger {
+    var prefix: string;
+    var level: LogLevel;
+}
+
+impl Logger {
+    pub fun with_level(self, level: LogLevel): Self {
+        Logger.assert_valid_level(level);
+
+        self.level = level;
+        self
+    }
+
+    pub fun with_prefix(self, prefix: string): Self {
+        self.prefix = prefix;
+        self
+    }
+
+    pub fun log(self, level: LogLevel, msg: string): unit {
+        Logger.assert_valid_level(level);
+
+        if (level > self.level) {
+            return;
+        }
+
+        @println($"{Logger.level_to_label(level)} {self.prefix}{msg}");
+    }
+
+    pub fun fatal(self, msg: string): unit = self.log(LOG_LEVEL_FATAL, msg);
+    pub fun error(self, msg: string): unit = self.log(LOG_LEVEL_ERROR, msg);
+    pub fun warn(self, msg: string): unit = self.log(LOG_LEVEL_WARN, msg);
+    pub fun info(self, msg: string): unit =  self.log(LOG_LEVEL_INFO, msg);
+    pub fun debug(self, msg: string): unit = self.log(LOG_LEVEL_DEBUG, msg);
+    pub fun trace(self, msg: string): unit = self.log(LOG_LEVEL_TRACE, msg);
+
+    fun assert_valid_level(level: LogLevel): unit =
+        @assert(
+            level >= LOG_LEVEL_NONE and level <= LOG_LEVEL_TRACE,
+            $"Log level {level} invalid. Must be between {LOG_LEVEL_NONE} and {LOG_LEVEL_TRACE}"
+        );
+
+    fun level_to_label(level: LogLevel): string {
+        if (level == LOG_LEVEL_FATAL) {
+            "FATAL"
+        } else if (level == LOG_LEVEL_ERROR) {
+            "ERROR"
+        } else if (level == LOG_LEVEL_WARN) {
+            "WARN "
+        } else if (level == LOG_LEVEL_INFO) {
+            "INFO "
+        } else if (level == LOG_LEVEL_DEBUG) {
+            "DEBUG"
+        } else if (level == LOG_LEVEL_TRACE) {
+            "TRACE"
+        } else {
+            @panic("Unknown log type");
+            "" // TODO: Panic doesn't shortcircut the typechecker yet
+        } 
+    }
+}
+
+impl Default for Logger {
+    fun default(): Self = Self {
+        level: LOG_LEVEL_INFO,
+        prefix: "| ",
+    };
+}
+
+main();

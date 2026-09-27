@@ -519,4 +519,21 @@ if(BUILD_TESTS)
         NAME kirby-vm-repl-immutability-unit-test
         COMMAND kirby-vm-repl-immutability-unit-test
     )
+
+    add_executable(kirby-compiler-string-conversion-unit-test
+        unit/compiler_string_conversion.c
+    )
+
+    target_link_libraries(kirby-compiler-string-conversion-unit-test
+        PRIVATE
+            kirby_core_debug
+    )
+
+    configure_kirby_target(kirby-compiler-string-conversion-unit-test)
+    enable_coverage(kirby-compiler-string-conversion-unit-test)
+
+    add_test(
+        NAME kirby-compiler-string-conversion-unit-test
+        COMMAND kirby-compiler-string-conversion-unit-test
+    )
 endif()

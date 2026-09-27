@@ -1,0 +1,4 @@
+let name = "World";
+
+print $"a { { let s = $"b {name} c"; s + "!" } } d";
+print $"x { { let t = $"{name}"; { t + "?" } } } y";

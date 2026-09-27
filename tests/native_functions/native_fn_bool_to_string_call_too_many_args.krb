@@ -1,0 +1,1 @@
+print @boolToString(true, false);

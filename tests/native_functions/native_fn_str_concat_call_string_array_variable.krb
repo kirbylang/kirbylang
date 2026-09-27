@@ -1,0 +1,3 @@
+let parts = ["Hello", ", ", "World"];
+
+print @strConcat(parts);

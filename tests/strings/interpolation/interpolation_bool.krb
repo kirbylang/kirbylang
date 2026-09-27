@@ -1,0 +1,3 @@
+let ok = true;
+
+print $"ok={ok}, not ok={!ok}";

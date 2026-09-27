@@ -551,6 +551,16 @@ print @isString("Hello World"); // true
 print @isString(123); // false
 ```
 
+## Booleans
+
+### `@boolToString`
+
+Convert a boolean to a string.
+
+```kirby
+print @boolToString(true); // "true"
+```
+
 ## Numbers
 
 ### `@numberToString`
@@ -665,6 +675,15 @@ Get the part of a string from `start` up to, but not including, `end`. Both are 
 ```kirby
 print @strSlice("hello world", 0, 5); // hello
 print @strSlice("hello world", 6, 11); // world
+```
+
+### `@strConcat`
+
+Concatenate an array of strings into one string. Every element must already be a string.
+
+```kirby
+print @strConcat(["Hello", ", ", "World"]); // Hello, World
+print @strConcat([]); // an empty string
 ```
 
 ### `@strSplit`
