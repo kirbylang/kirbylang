@@ -1,3 +1,5 @@
+#!/usr/bin/env krb run
+
 fun main(): unit {
     let logger = Logger.default()
         .with_level(LOG_LEVEL_TRACE)

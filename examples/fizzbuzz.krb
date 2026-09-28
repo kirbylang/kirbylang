@@ -1,4 +1,4 @@
-#!/usr/bin/env krb -f
+#!/usr/bin/env krb run
 
 fun fizzbuzz(n: f64): string =
     if (n % 5 == 0 and n % 3 == 0) "FizzBuzz"

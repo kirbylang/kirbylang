@@ -1,4 +1,4 @@
-#!/usr/bin/env krb -f
+#!/usr/bin/env krb run
 
 var path = @prompt("File: ");
 var text = @prompt("Text: ");

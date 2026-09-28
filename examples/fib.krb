@@ -1,4 +1,4 @@
-#!/usr/bin/env krb -f
+#!/usr/bin/env krb run
 
 fun fib(n: f64): f64 {
   if (n < 2) return n;
@@ -8,10 +8,12 @@ fun fib(n: f64): f64 {
 
 @println("Fibonacci");
 
-let arg = @argv(4) ?? @prompt("n: ");
+let arg: string = @argv(4) ?? @prompt("n: ");
 let start = @clock();
 
-print $"{n}\n";
+print $"{arg}\n";
+
+let n = @parseNumber(arg);
 
 let end = @clock();
 let time_taken = end - start;

@@ -1,7 +1,7 @@
-#!/usr/bin/env krb -f
+#!/usr/bin/env krb run
 
 if (@argc() != 4) {
-  print "Usage: krb -f examples/cat.krb <file>";
+  print "Usage: krb example cat <file>";
   @exit(1);
 }
 

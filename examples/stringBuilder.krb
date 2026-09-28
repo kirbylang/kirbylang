@@ -1,4 +1,4 @@
-#!/usr/bin/env krb -f
+#!/usr/bin/env krb run
 
 struct StringBuilder {
     var value: Array;

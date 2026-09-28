@@ -1,4 +1,4 @@
-#!/usr/bin/env krb -f
+#!/usr/bin/env krb run
 
 var name = @prompt("What's your name? ");
 
