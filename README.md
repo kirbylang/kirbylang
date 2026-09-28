@@ -10,7 +10,7 @@
 An aspiring embeddable scripting language.
 
 ```kirby
-#!/usr/bin/env krb -f
+#!/usr/bin/env krb run
 
 struct StringBuilder {
     var value: Array;
@@ -48,6 +48,7 @@ let builder = StringBuilder.default()
   - [Proposals](./docs/PROPOSALS.md)
   - [Types](./docs/TYPES.md)
   - [CLI](./docs/CLI.md)
+  - [Example Kirby Project](./example_project/README.md)
 - [Tests](./tests/README.md)
 - [Scripts](./scripts/README.md)
 - [Important Files](./docs/DEVELOPMENT.md#important-files)

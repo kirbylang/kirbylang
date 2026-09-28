@@ -104,3 +104,6 @@ release-dry bump: (_release bump "--dry-run")
 
 _release bump *flags:
     ./scripts/increment-version.sh {{ bump }} {{ flags }}
+
+project *args:
+    cd example_project && just {{ args }}

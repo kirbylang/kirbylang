@@ -109,7 +109,7 @@ run_exit_test() {
 }
 
 # Collect first — don't pipe into the loop. krb reads stdin (prompt(), the
-# `-f` tests), and a while-read loop would let it swallow the file list.
+# `run` tests), and a while-read loop would let it swallow the file list.
 files=()
 while IFS= read -r file; do
     files+=("$file")
@@ -150,7 +150,7 @@ for file_in in "${files[@]}"; do
 
     set +e
 
-    run_cmd=( "$BIN" -f "$file_in" -- "${extra_args[@]:-}" )
+    run_cmd=( "$BIN" run "$file_in" "${extra_args[@]:-}" )
 
     stdin_cmd=()
     [[ -f "$input_file" ]] && stdin_cmd=( cat "$input_file" )

@@ -1,0 +1,9 @@
+for (;;) {
+    let input = @prompt("Echo: ");
+
+    if (input == "/exit") {
+        break;
+    }
+
+    @println(input);
+}
