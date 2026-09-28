@@ -1,7 +1,0 @@
-
-
-@println($"Hello World from Kirby {@version()}!
-
-This is the default binary/entry point for a Kirby project.
-
-");
