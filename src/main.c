@@ -33,41 +33,53 @@ char *doc = ""
             "bin = \"bin/main.krb\"\n";
 
 const char *help_message =
-    "Usage: krb [-h] [-v] [-r|-f [path]|-x [source]|-l [path]|-p [path]]\n"
+    "Usage: krb [-h] [-v] <command> [args]\n"
+    "\n"
+    "Commands:\n"
+    "\n"
+    "  run [path] [args...]   Run a file. Without a path, runs the \"bin\" "
+    "file\n"
+    "                         from kirby.project.toml. Extra args are passed\n"
+    "                         to the script\n"
+    "  repl                   Start the interactive REPL\n"
+    "  exec <source>          Run source code given as a string\n"
+    "  compile <path>         Compile a file without running it\n"
+    "  lex <path>             Print the tokens of a file\n"
+    "  parse <path>           Print the AST of a file\n"
     "\n"
     "Examples:\n"
     "\n"
-    "krb --help                         # -h is the short option\n"
-    "krb --version                      # -v is the short option\n"
-    "krb --file path/to/file.krb        # -f is the short option\n"
-    "krb --repl                         # -r is the short option\n"
-    "krb --compile path/to/file.krb     # -c is the short option\n"
-    "krb --parse path/to/file.krb       # -p is the short option\n"
-    "krb --exec 'print \"Hello World\";'  # -x is the short option\n"
+    "krb --help                        # -h is the short option\n"
+    "krb --version                     # -v is the short option\n"
+    "krb run path/to/file.krb\n"
+    "krb run                           # runs the project's \"bin\" file\n"
+    "krb run -- arg1 arg2              # passes args to the project's \"bin\"\n"
+    "krb repl\n"
+    "krb compile path/to/file.krb\n"
+    "krb parse path/to/file.krb\n"
+    "krb exec 'print \"Hello World\";'\n"
     "";
 
-const char *short_options = "hvrfxclp";
+const char *short_options = "hv";
 static struct option long_options[] = {{"help", no_argument, 0, 'h'},
                                        {"version", no_argument, 0, 'v'},
-                                       {"file", no_argument, 0, 'f'},
-                                       {"repl", no_argument, 0, 'r'},
-                                       {"exec", no_argument, 0, 'x'},
-                                       {"compile", no_argument, 0, 'c'},
-                                       {"lex", no_argument, 0, 'l'},
-                                       {"parse", no_argument, 0, 'p'},
                                        {0, 0, 0, 0}};
 
-int main(int argc, char *argv[]) {
-  int saved_argc = argc;
-  char **saved_argv = malloc(sizeof(char *) * (argc + 1));
-  for (int i = 0; i < argc; i++) {
-    saved_argv[i] = argv[i];
-  }
-  saved_argv[argc] = NULL;
+typedef int (*CommandFn)(int argc, char *argv[]);
 
-  int opt;
-  int long_index = 0;
+typedef struct {
+  const char *name;
+  CommandFn fn;
+} Command;
 
+static int usageError(void) {
+  fprintf(stderr, "kirby %s\n\n", KIRBY_VERSION);
+  fprintf(stderr, "%s", help_message);
+  return 64;
+}
+
+/* Reads kirby.project.toml from the current directory, if present. */
+static KirbyProject loadProject(void) {
   KirbyProject krb_project = {0};
 
   char errbuf[200];
@@ -86,18 +98,155 @@ int main(int argc, char *argv[]) {
     }
   }
 
-  // // Loop over all keys in a table.
-  // int l = toml_table_len(tbl);
-  // for (int i = 0; i < l; i++) {
-  //   int keylen;
-  //   const char *key = toml_table_key(tbl, i, &keylen);
+  return krb_project;
+}
 
-  //   toml_value_t value = toml_table_string(tbl, key);
+/* Starts the VM and type checker, then loads the standard library. */
+static void sessionBegin(int argc, char *argv[]) {
+  initVM(argc, argv);
+  typchkSessionBegin();
+  runCode(KIRBY_STDLIB);
+}
 
-  //   char *str_value = value.u.s;
+static void sessionEnd(void) {
+  compilerSessionEnd();
+  typchkSessionEnd();
+  freeVM();
+}
 
-  //   printf("key #%d: %s = %s\n", i, key, str_value);
-  // }
+/* krb run [path] [args...]
+ * With no path, or "--" in place of the path, the project's "bin" file runs. */
+static int cmdRun(int argc, char *argv[]) {
+  char *file = NULL;
+
+  if (argc >= 3 && strcmp(argv[2], "--") != 0) {
+    file = argv[2];
+  } else {
+    file = loadProject().bin;
+  }
+
+  if (file == NULL) {
+    fprintf(stderr, "No file was passed\n");
+    exit(1);
+  }
+
+  sessionBegin(argc, argv);
+  runFile(file);
+  sessionEnd();
+  return 0;
+}
+
+/* krb repl */
+static int cmdRepl(int argc, char *argv[]) {
+  sessionBegin(argc, argv);
+  repl();
+  sessionEnd();
+  return 0;
+}
+
+/* krb exec <source> */
+static int cmdExec(int argc, char *argv[]) {
+  if (argc < 3)
+    return usageError();
+
+  sessionBegin(argc, argv);
+  runCode(argv[2]);
+  sessionEnd();
+  return 0;
+}
+
+/* krb compile <path> */
+static int cmdCompile(int argc, char *argv[]) {
+  if (argc < 3)
+    return usageError();
+
+  typchkSessionBegin();
+  compileCode(KIRBY_STDLIB);
+  compileFile(argv[2]);
+  compilerSessionEnd();
+  typchkSessionEnd();
+  fprintf(stderr, "Compiled!\n");
+  return 0;
+}
+
+/* krb lex <path> */
+static int cmdLex(int argc, char *argv[]) {
+  if (argc < 3)
+    return usageError();
+
+  const char *source = readFile(argv[2]);
+  TokenStream tokens = lex(source);
+
+  for (int i = 0; i < tokens.count; i++) {
+    Token token = tsAdvance(&tokens);
+
+    printf("%s\n", tokenTypeToString(token.type));
+  }
+
+  tsFree(&tokens);
+  return 0;
+}
+
+/* krb parse <path> */
+static int cmdParse(int argc, char *argv[]) {
+  if (argc < 3)
+    return usageError();
+
+  int outCount = 0;
+  bool hadError = false;
+  int endLine = 0;
+
+  const char *source = readFile(argv[2]);
+  AstNode **ast = parse(source, &outCount, &hadError, &endLine);
+
+  for (int i = 0; i < outCount; i++) {
+    StrBuf ast_node_sb;
+    sb_init(&ast_node_sb);
+
+    print_ast(&ast_node_sb, ast[i]);
+    printf("%s\n", ast_node_sb.data);
+
+    sb_free(&ast_node_sb);
+  }
+
+  astFreeAll();
+  free(ast);
+  return 0;
+}
+
+static const Command commands[] = {
+    {"run", cmdRun},         {"repl", cmdRepl}, {"exec", cmdExec},
+    {"compile", cmdCompile}, {"lex", cmdLex},   {"parse", cmdParse},
+};
+
+static const Command *findCommand(const char *name) {
+  size_t count = sizeof(commands) / sizeof(commands[0]);
+
+  for (size_t i = 0; i < count; i++) {
+    if (strcmp(commands[i].name, name) == 0)
+      return &commands[i];
+  }
+
+  return NULL;
+}
+
+int main(int argc, char *argv[]) {
+  /* A first argument without a leading '-' is a command name. Commands are
+   * matched before getopt runs so that getopt never reorders or consumes
+   * the script's own arguments. */
+  if (argc >= 2 && argv[1][0] != '-') {
+    const Command *command = findCommand(argv[1]);
+
+    if (command == NULL) {
+      fprintf(stderr, "Unknown command \"%s\".\n\n", argv[1]);
+      return usageError();
+    }
+
+    return command->fn(argc, argv);
+  }
+
+  int opt;
+  int long_index = 0;
 
   while ((opt = getopt_long(argc, argv, short_options, long_options,
                             &long_index)) != -1) {
@@ -106,106 +255,13 @@ int main(int argc, char *argv[]) {
       fprintf(stderr, "kirby %s\n\n", KIRBY_VERSION);
       fprintf(stderr, "%s\n", help_message);
       return 0;
-
     case 'v':
       printf("%s\n", KIRBY_VERSION);
-      return 0;
-    case 'r':
-      initVM(saved_argc, saved_argv);
-      typchkSessionBegin();
-      runCode(KIRBY_STDLIB);
-      repl();
-      compilerSessionEnd();
-      typchkSessionEnd();
-      freeVM();
-      free(saved_argv);
-      return 0;
-    case 'f':
-      initVM(saved_argc, saved_argv);
-      typchkSessionBegin();
-      runCode(KIRBY_STDLIB);
-      char *file = krb_project.bin;
-      char *bin_arg = argv[optind];
-
-      if (bin_arg != NULL) {
-        file = bin_arg;
-      }
-
-      if (file == NULL) {
-        fprintf(stderr, "No file was passed\n");
-        exit(1);
-      }
-
-      runFile(file);
-      compilerSessionEnd();
-      typchkSessionEnd();
-      freeVM();
-      free(saved_argv);
-      return 0;
-    case 'l': {
-      const char *source = readFile(argv[optind]);
-      TokenStream tokens = lex(source);
-
-      for (int i = 0; i < tokens.count; i++) {
-        Token token = tsAdvance(&tokens);
-
-        printf("%s\n", tokenTypeToString(token.type));
-      }
-
-      free(saved_argv);
-      tsFree(&tokens);
-      return 0;
-    }
-    case 'p': {
-      int outCount = 0;
-      bool hadError = false;
-
-      const char *source = readFile(argv[optind]);
-
-      int endLine = 0;
-      AstNode **ast = parse(source, &outCount, &hadError, &endLine);
-
-      for (int i = 0; i < outCount; i++) {
-        StrBuf ast_node_sb;
-        sb_init(&ast_node_sb);
-
-        print_ast(&ast_node_sb, ast[i]);
-        printf("%s\n", ast_node_sb.data);
-
-        sb_free(&ast_node_sb);
-      }
-
-      astFreeAll();
-      free(ast);
-      return 0;
-    }
-    case 'c': {
-      typchkSessionBegin();
-      compileCode(KIRBY_STDLIB);
-      compileFile(argv[optind]);
-      compilerSessionEnd();
-      typchkSessionEnd();
-      free(saved_argv);
-      fprintf(stderr, "Compiled!\n");
-      return 0;
-    }
-    case 'x':
-      initVM(saved_argc, saved_argv);
-      typchkSessionBegin();
-      runCode(KIRBY_STDLIB);
-      char *source = argv[optind];
-      runCode(source);
-      compilerSessionEnd();
-      typchkSessionEnd();
-      freeVM();
-      free(saved_argv);
       return 0;
     }
   }
 
-  fprintf(stderr, "kirby %s\n\n", KIRBY_VERSION);
-  printf("%s", help_message);
-  return 64;
+  return usageError();
 }
 
 static void repl(void) {

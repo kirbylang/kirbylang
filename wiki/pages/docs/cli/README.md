@@ -1,4 +1,8 @@
-# CLI
+---
+aliases:
+  - cli
+---
+The `krb` binary allows you to lex, parse, compile, and run [[projects]] `*.krb` files, execute arbitrary Kirby code, and provides a REPL.
 
 ```
 kirby 0.3.0

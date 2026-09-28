@@ -2,7 +2,7 @@ default:
     echo "No command given. Run 'just run' or 'just cat <path>' instead."
 
 run:
-    krb -f
+    krb run
 
 cat *path:
-    krb -f examples/cat.krb {{ path }}
+    krb run examples/cat.krb {{ path }}

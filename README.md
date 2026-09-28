@@ -10,7 +10,7 @@
 An aspiring embeddable scripting language.
 
 ```kirby
-#!/usr/bin/env krb -f
+#!/usr/bin/env krb run
 
 struct StringBuilder {
     var value: Array;

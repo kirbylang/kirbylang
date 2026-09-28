@@ -70,7 +70,7 @@ export function activate(context: vscode.ExtensionContext) {
     terminal.show();
 
     terminal.sendText(
-      `${shellQuote(executable)} -f ${shellQuote(document.uri.fsPath)}`,
+      `${shellQuote(executable)} run ${shellQuote(document.uri.fsPath)}`,
     );
   });
 

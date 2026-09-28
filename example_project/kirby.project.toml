@@ -1,3 +1,4 @@
-# This is an example kirby.project.toml
-
+# Default Kirby file to run
 bin = "bin/main.krb"
+
+examples = "examples"

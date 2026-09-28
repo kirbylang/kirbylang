@@ -1,8 +1,8 @@
 # Example Kirby Project
 
 ```
-krb -f
-krb -f examples/cat.krb kirby.project.toml
+krb run
+krb run examples/cat.krb kirby.project.toml
 ```
 
 ## Project
