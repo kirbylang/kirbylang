@@ -1,7 +1,7 @@
 # CLI
 
 ```
-kirby 0.3.0
+kirby 0.0.0
 
 Usage: krb [-h] [-v] <command> [args]
 
