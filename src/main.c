@@ -1,3 +1,4 @@
+#include "../lib/toml-c/toml-c.h"
 #include <getopt.h>
 #include <readline/history.h>
 #include <readline/readline.h>
@@ -10,11 +11,12 @@
 #include "debug.h"
 #include "lexer.h"
 #include "parser.h"
+#include "project.h"
 #include "resolved_impl_targets.h"
+#include "stdlib_source.h"
 #include "strbuf.h"
 #include "token_stream.h"
 #include "typecheck.h"
-#include "stdlib_source.h"
 #include "version.h"
 #include "vm.h"
 
@@ -22,9 +24,13 @@ static void repl(void);
 static char *readFile(const char *path);
 static CompiledUnit *compileSource(const char *source, bool typecheck);
 static void runFile(const char *path);
+static char *readFileNoExit(const char *path);
 static void runCode(const char *source);
 static void compileFile(const char *path);
 static void compileCode(const char *source);
+
+char *doc = ""
+            "bin = \"bin/main.krb\"\n";
 
 const char *help_message =
     "Usage: krb [-h] [-v] [-r|-f [path]|-x [source]|-l [path]|-p [path]]\n"
@@ -62,6 +68,37 @@ int main(int argc, char *argv[]) {
   int opt;
   int long_index = 0;
 
+  KirbyProject krb_project = {0};
+
+  char errbuf[200];
+
+  char *tomlsource = readFileNoExit("kirby.project.toml");
+
+  if (tomlsource != NULL) {
+    toml_table_t *project = toml_parse(tomlsource, errbuf, sizeof(errbuf));
+
+    if (project) {
+      toml_value_t bin_value = toml_table_string(project, "bin");
+
+      if (bin_value.ok) {
+        krb_project.bin = bin_value.u.s;
+      }
+    }
+  }
+
+  // // Loop over all keys in a table.
+  // int l = toml_table_len(tbl);
+  // for (int i = 0; i < l; i++) {
+  //   int keylen;
+  //   const char *key = toml_table_key(tbl, i, &keylen);
+
+  //   toml_value_t value = toml_table_string(tbl, key);
+
+  //   char *str_value = value.u.s;
+
+  //   printf("key #%d: %s = %s\n", i, key, str_value);
+  // }
+
   while ((opt = getopt_long(argc, argv, short_options, long_options,
                             &long_index)) != -1) {
     switch (opt) {
@@ -87,7 +124,19 @@ int main(int argc, char *argv[]) {
       initVM(saved_argc, saved_argv);
       typchkSessionBegin();
       runCode(KIRBY_STDLIB);
-      runFile(argv[optind]);
+      char *file = krb_project.bin;
+      char *bin_arg = argv[optind];
+
+      if (bin_arg != NULL) {
+        file = bin_arg;
+      }
+
+      if (file == NULL) {
+        fprintf(stderr, "No file was passed\n");
+        exit(1);
+      }
+
+      runFile(file);
       compilerSessionEnd();
       typchkSessionEnd();
       freeVM();
@@ -215,6 +264,35 @@ static char *readFile(const char *path) {
   if (file == NULL) {
     fprintf(stderr, "Could not open file \"%s\".\n", path);
     exit(EXIT_CODE_OS_ERR);
+  }
+
+  fseek(file, 0L, SEEK_END);
+  size_t fileSize = ftell(file);
+  rewind(file);
+
+  char *buffer = (char *)malloc(fileSize + 1);
+
+  if (buffer == NULL) {
+    fprintf(stderr, "Not enough memory to read \"%s\".\n", path);
+    exit(EXIT_CODE_OS_ERR);
+  }
+  size_t bytesRead = fread(buffer, sizeof(char), fileSize, file);
+  buffer[bytesRead] = '\0';
+
+  fclose(file);
+  return buffer;
+}
+
+static char *readFileNoExit(const char *path) {
+  if (path == NULL) {
+    fprintf(stderr, "%s", help_message);
+    exit(64);
+  }
+
+  FILE *file = fopen(path, "rb");
+
+  if (file == NULL) {
+    return NULL;
   }
 
   fseek(file, 0L, SEEK_END);
