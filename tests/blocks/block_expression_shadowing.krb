@@ -5,4 +5,4 @@ print {
   a
 };
 
-print a;
+@println(a);

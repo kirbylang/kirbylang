@@ -1,5 +1,5 @@
 Parse a string into a number.
 
 ```kirby
-print @parseNumber("123"); // 123
+@println(@parseNumber("123")); // 123
 ```

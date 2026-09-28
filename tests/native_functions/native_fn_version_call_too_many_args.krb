@@ -1,1 +1,1 @@
-print @version(true);
+@println(@version(true));

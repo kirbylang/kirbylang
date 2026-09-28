@@ -13,11 +13,11 @@ impl Eq for Box {
 let a = Box.default();
 let b = Box.default();
 
-print a == a;
-print a.equals(a);
+@println(a == a);
+@println(a.equals(a));
 
-print b == b;
-print b.equals(b);
+@println(b == b);
+@println(b.equals(b));
 
-print a == b;
-print a.equals(b);
+@println(a == b);
+@println(a.equals(b));

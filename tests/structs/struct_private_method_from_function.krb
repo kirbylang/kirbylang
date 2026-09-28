@@ -6,4 +6,4 @@ impl Greeter {
 
 fun callIt(g: Greeter): string = g.greet();
 
-print callIt(Greeter {});
+@println(callIt(Greeter {}));

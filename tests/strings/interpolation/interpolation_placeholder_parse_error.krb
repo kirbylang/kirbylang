@@ -1,1 +1,1 @@
-print $"a {1 + } b";
+@println($"a {1 + } b");

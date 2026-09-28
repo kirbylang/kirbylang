@@ -4,4 +4,4 @@ impl Greeter {
     pub fun greet(self): string = "Hello World";
 }
 
-print Greeter {}.greet();
+@println(Greeter {}.greet());

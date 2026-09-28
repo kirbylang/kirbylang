@@ -1,1 +1,1 @@
-print @strStartsWith();
+@println(@strStartsWith());

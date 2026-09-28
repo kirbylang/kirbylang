@@ -6,4 +6,4 @@ var instance = Struct {};
 
 instance.hello = "World";
 
-print instance.hello;
+@println(instance.hello);

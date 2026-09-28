@@ -1,1 +1,1 @@
-print $"unterminated {1};
+@println($"unterminated {1});

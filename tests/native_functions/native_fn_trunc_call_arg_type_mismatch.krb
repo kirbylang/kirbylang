@@ -1,1 +1,1 @@
-print @trunc("x");
+@println(@trunc("x"));

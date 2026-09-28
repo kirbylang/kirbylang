@@ -1,1 +1,1 @@
-print @strContains("abc", 2);
+@println(@strContains("abc", 2));

@@ -3,7 +3,7 @@ Concatenates every element of an array into one string, separated by a separator
 ```kirby
 var parts = ["kirby", "is", "a", "language"];
 
-print @arrJoin(parts, " "); // kirby is a language
-print @arrJoin(parts, ", "); // kirby, is, a, language
-print @arrJoin(parts, ""); // kirbyisalanguage
+@println(@arrJoin(parts, " ")); // kirby is a language
+@println(@arrJoin(parts, ", ")); // kirby, is, a, language
+@println(@arrJoin(parts, "")); // kirbyisalanguage
 ```

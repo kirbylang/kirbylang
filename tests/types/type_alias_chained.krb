@@ -2,4 +2,4 @@ type A = B;
 type B = f64;
 
 let value: A = 7;
-print value;
+@println(value);

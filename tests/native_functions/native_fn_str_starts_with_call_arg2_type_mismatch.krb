@@ -1,1 +1,1 @@
-print @strStartsWith("abc", 2);
+@println(@strStartsWith("abc", 2));

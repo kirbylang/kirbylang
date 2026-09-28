@@ -1,5 +1,5 @@
 Convert a number to a string.
 
 ```kirby
-print @numberToString(123); // "123"
+@println(@numberToString(123)); // "123"
 ```

@@ -9,4 +9,4 @@ impl Point {
 }
 
 let p: Coord = Point.new(3);
-print p.x;
+@println(p.x);

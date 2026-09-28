@@ -1,1 +1,1 @@
-print @strRepeat("ab", 2, 1, 2);
+@println(@strRepeat("ab", 2, 1, 2));

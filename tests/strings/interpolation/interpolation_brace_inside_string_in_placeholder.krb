@@ -1,7 +1,7 @@
 let name = "World";
 
-print $"{ "}" }";
-print $"{ "{" }";
-print $"{ "{}" } and {name}";
-print $"a { "}" + name + "{" } b";
-print $"{ "{{x}}" }";
+@println($"{ "}" }");
+@println($"{ "{" }");
+@println($"{ "{}" } and {name}");
+@println($"a { "}" + name + "{" } b");
+@println($"{ "{{x}}" }");

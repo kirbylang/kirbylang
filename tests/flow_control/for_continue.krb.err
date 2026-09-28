@@ -6,7 +6,7 @@
 0002    | OP_GET_LOCAL        1
 0004    | OP_CONSTANT         1 '10'
 0006    | OP_LESS
-0007    | OP_JUMP_IF_FALSE    7 -> 57
+0007    | OP_JUMP_IF_FALSE    7 -> 61
 0010    | OP_POP
 0011    | OP_JUMP            11 -> 25
 0014    | OP_GET_LOCAL        1
@@ -29,13 +29,15 @@
 0043    | OP_LOOP            43 -> 14
 0046    | OP_JUMP            46 -> 50
 0049    | OP_POP
-0050    6 OP_GET_LOCAL        2
-0052    | OP_PRINT
-0053    7 OP_POP
-0054    | OP_LOOP            54 -> 14
-0057    | OP_POP
-0058    | OP_POP
-0059    8 OP_NIL
-0060    | OP_RETURN
+0050    6 OP_GET_GLOBAL       5 '@println'
+0052    | OP_GET_LOCAL        2
+0054    | OP_CALL             1
+0056    | OP_POP
+0057    7 OP_POP
+0058    | OP_LOOP            58 -> 14
+0061    | OP_POP
+0062    | OP_POP
+0063    8 OP_NIL
+0064    | OP_RETURN
 Undefined variable 'i'.
 [line 2] in script

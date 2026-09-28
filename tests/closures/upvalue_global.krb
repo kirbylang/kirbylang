@@ -5,7 +5,7 @@ fun main(): unit {
   var a = "initial";
 
   fun set(): unit { a = "updated"; }
-  fun get(): unit { print a; }
+  fun get(): unit { @println(a); }
 
   globalSet = set;
   globalGet = get;

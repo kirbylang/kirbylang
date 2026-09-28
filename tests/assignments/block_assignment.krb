@@ -2,7 +2,7 @@ var a = 123;
 
 {
     var a = 456;
-    print a;
+    @println(a);
 }
 
-print a;
+@println(a);

@@ -9,4 +9,4 @@ impl Coord {
 }
 
 let p = Point { x: 42 };
-print p.getX();
+@println(p.getX());

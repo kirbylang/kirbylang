@@ -5,7 +5,7 @@
 0000    1 OP_CONSTANT         1 '0'
 0002    | OP_DEFINE_GLOBAL    0 'i'
 0004    3 OP_TRUE
-0005    | OP_JUMP_IF_FALSE    5 -> 55
+0005    | OP_JUMP_IF_FALSE    5 -> 59
 0008    | OP_POP
 0009    4 OP_GET_GLOBAL       0 'i'
 0011    | OP_CONSTANT         2 '1'
@@ -20,17 +20,19 @@
 0026    | OP_LOOP            26 -> 4
 0029    | OP_JUMP            29 -> 33
 0032    | OP_POP
-0033    8 OP_GET_GLOBAL       0 'i'
-0035    | OP_PRINT
-0036   10 OP_GET_GLOBAL       0 'i'
-0038    | OP_CONSTANT         4 '10'
-0040    | OP_EQUAL
-0041    | OP_JUMP_IF_FALSE   41 -> 51
-0044    | OP_POP
-0045    | OP_JUMP            45 -> 56
-0048    | OP_JUMP            48 -> 52
-0051    | OP_POP
-0052   11 OP_LOOP            52 -> 4
+0033    8 OP_GET_GLOBAL       4 '@println'
+0035    | OP_GET_GLOBAL       0 'i'
+0037    | OP_CALL             1
+0039    | OP_POP
+0040   10 OP_GET_GLOBAL       0 'i'
+0042    | OP_CONSTANT         5 '10'
+0044    | OP_EQUAL
+0045    | OP_JUMP_IF_FALSE   45 -> 55
+0048    | OP_POP
+0049    | OP_JUMP            49 -> 60
+0052    | OP_JUMP            52 -> 56
 0055    | OP_POP
-0056   12 OP_NIL
-0057    | OP_RETURN
+0056   11 OP_LOOP            56 -> 4
+0059    | OP_POP
+0060   12 OP_NIL
+0061    | OP_RETURN

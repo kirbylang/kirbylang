@@ -123,4 +123,4 @@ let identifier98 = 98;
 let identifier99 = 99;
 
 let p = Point.new(identifier0, identifier99);
-print p.toString();
+@println(p.toString());

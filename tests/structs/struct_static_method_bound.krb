@@ -2,7 +2,7 @@ struct Struct {}
 
 impl Struct {
     pub fun hello(): unit {
-        print "Hello World";
+        @println("Hello World");
     }
 }
 

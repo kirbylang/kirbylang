@@ -14,4 +14,4 @@ impl Struct {
 
 var instance = Struct.new(123);
 
-print instance.value;
+@println(instance.value);

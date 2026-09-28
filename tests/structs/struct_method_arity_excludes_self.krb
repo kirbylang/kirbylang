@@ -2,7 +2,7 @@ struct Greeter {}
 
 impl Greeter {
     pub fun greet(self, name: string): unit {
-        print "Hello " + name;
+        @println("Hello " + name);
     }
 }
 

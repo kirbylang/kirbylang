@@ -6,54 +6,66 @@
 0002    | OP_DEFINE_GLOBAL    0 'id'
 0004    7 OP_CLOSURE          3 <fn inFunction>
 0006    | OP_DEFINE_GLOBAL    2 'inFunction'
-0008    9 OP_CONSTANT         4 '1'
-0010    | OP_CONSTANT         5 '2'
-0012    | OP_GET_LOCAL        2
-0014    | OP_CONSTANT         6 '3'
-0016    | OP_MULTIPLY
-0017    | OP_CLOSE_BLOCK_EXPR    1
-0019    | OP_ADD
-0020    | OP_PRINT
-0021   10 OP_CONSTANT         7 '0'
-0023    | OP_CONSTANT         5 '2'
-0025    | OP_GET_LOCAL        2
-0027    | OP_CLOSE_BLOCK_EXPR    1
-0029    | OP_ARRAY            2
-0031    | OP_PRINT
-0032   11 OP_GET_GLOBAL       0 'id'
-0034    | OP_CONSTANT         5 '2'
-0036    | OP_GET_LOCAL        2
-0038    | OP_CONSTANT         6 '3'
-0040    | OP_MULTIPLY
-0041    | OP_CLOSE_BLOCK_EXPR    1
-0043    | OP_CALL             1
-0045    | OP_PRINT
-0046   12 OP_GET_GLOBAL       2 'inFunction'
-0048    | OP_CALL             0
-0050    | OP_PRINT
-0051   13 OP_GET_GLOBAL       0 'id'
-0053    | OP_CONSTANT         8 '5'
-0055    | OP_CLOSURE          9 <fn lambda0x1>
-0057      |                     local 2
-0059    | OP_GET_LOCAL        3
-0061    | OP_CALL             0
-0063    | OP_CLOSE_BLOCK_EXPR    2
-0065    | OP_CALL             1
-0067    | OP_PRINT
-0068   14 OP_GET_GLOBAL       0 'id'
-0070    | OP_CONSTANT         4 '1'
-0072    | OP_CONSTANT         4 '1'
-0074    | OP_CONSTANT         5 '2'
-0076    | OP_GET_LOCAL        3
-0078    | OP_GET_LOCAL        4
-0080    | OP_ADD
-0081    | OP_CLOSE_BLOCK_EXPR    1
-0083    | OP_CLOSE_BLOCK_EXPR    1
-0085    | OP_ADD
-0086    | OP_CALL             1
-0088    | OP_PRINT
-0089   15 OP_NIL
-0090    | OP_RETURN
+0008    9 OP_GET_GLOBAL       4 '@println'
+0010    | OP_CONSTANT         5 '1'
+0012    | OP_CONSTANT         6 '2'
+0014    | OP_GET_LOCAL        3
+0016    | OP_CONSTANT         7 '3'
+0018    | OP_MULTIPLY
+0019    | OP_CLOSE_BLOCK_EXPR    1
+0021    | OP_ADD
+0022    | OP_CALL             1
+0024    | OP_POP
+0025   10 OP_GET_GLOBAL       4 '@println'
+0027    | OP_CONSTANT         8 '0'
+0029    | OP_CONSTANT         6 '2'
+0031    | OP_GET_LOCAL        3
+0033    | OP_CLOSE_BLOCK_EXPR    1
+0035    | OP_ARRAY            2
+0037    | OP_CALL             1
+0039    | OP_POP
+0040   11 OP_GET_GLOBAL       4 '@println'
+0042    | OP_GET_GLOBAL       0 'id'
+0044    | OP_CONSTANT         6 '2'
+0046    | OP_GET_LOCAL        3
+0048    | OP_CONSTANT         7 '3'
+0050    | OP_MULTIPLY
+0051    | OP_CLOSE_BLOCK_EXPR    1
+0053    | OP_CALL             1
+0055    | OP_CALL             1
+0057    | OP_POP
+0058   12 OP_GET_GLOBAL       4 '@println'
+0060    | OP_GET_GLOBAL       2 'inFunction'
+0062    | OP_CALL             0
+0064    | OP_CALL             1
+0066    | OP_POP
+0067   13 OP_GET_GLOBAL       4 '@println'
+0069    | OP_GET_GLOBAL       0 'id'
+0071    | OP_CONSTANT         9 '5'
+0073    | OP_CLOSURE         10 <fn lambda0x1>
+0075      |                     local 3
+0077    | OP_GET_LOCAL        4
+0079    | OP_CALL             0
+0081    | OP_CLOSE_BLOCK_EXPR    2
+0083    | OP_CALL             1
+0085    | OP_CALL             1
+0087    | OP_POP
+0088   14 OP_GET_GLOBAL       4 '@println'
+0090    | OP_GET_GLOBAL       0 'id'
+0092    | OP_CONSTANT         5 '1'
+0094    | OP_CONSTANT         5 '1'
+0096    | OP_CONSTANT         6 '2'
+0098    | OP_GET_LOCAL        4
+0100    | OP_GET_LOCAL        5
+0102    | OP_ADD
+0103    | OP_CLOSE_BLOCK_EXPR    1
+0105    | OP_CLOSE_BLOCK_EXPR    1
+0107    | OP_ADD
+0108    | OP_CALL             1
+0110    | OP_CALL             1
+0112    | OP_POP
+0113   15 OP_NIL
+0114    | OP_RETURN
 == id ==
 0000    1 OP_GET_LOCAL        1
 0002    | OP_RETURN

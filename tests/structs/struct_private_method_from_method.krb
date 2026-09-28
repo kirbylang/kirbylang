@@ -10,4 +10,4 @@ impl Greeter {
     pub fun greet(self): string = "Hello " + self.subject();
 }
 
-print Greeter.new().greet();
+@println(Greeter.new().greet());

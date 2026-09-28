@@ -1,1 +1,1 @@
-print @boolToString(@len("abc"));
+@println(@boolToString(@len("abc")));

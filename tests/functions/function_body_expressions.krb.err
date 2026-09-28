@@ -6,12 +6,14 @@
 0002    | OP_DEFINE_GLOBAL    0 'sum'
 0004    1 OP_CONSTANT         3 '10'
 0006    | OP_DEFINE_GLOBAL    2 'n'
-0008    5 OP_GET_GLOBAL       0 'sum'
-0010    | OP_CONSTANT         4 '50'
-0012    | OP_CALL             1
-0014    | OP_PRINT
-0015    6 OP_NIL
-0016    | OP_RETURN
+0008    5 OP_GET_GLOBAL       4 '@println'
+0010    | OP_GET_GLOBAL       0 'sum'
+0012    | OP_CONSTANT         5 '50'
+0014    | OP_CALL             1
+0016    | OP_CALL             1
+0018    | OP_POP
+0019    6 OP_NIL
+0020    | OP_RETURN
 == sum ==
 0000    3 OP_GET_LOCAL        1
 0002    | OP_GET_GLOBAL       0 'n'

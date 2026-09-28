@@ -1,1 +1,1 @@
-print @instanceOf(1, 2, 3);
+@println(@instanceOf(1, 2, 3));

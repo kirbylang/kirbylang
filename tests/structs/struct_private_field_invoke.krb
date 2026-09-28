@@ -4,4 +4,4 @@ struct Holder {
 
 var h = Holder {};
 
-print h.callback();
+@println(h.callback());

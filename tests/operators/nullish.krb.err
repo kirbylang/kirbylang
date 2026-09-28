@@ -6,63 +6,81 @@
 0002    | OP_DEFINE_GLOBAL    0 'should_not_call'
 0004   20 OP_CLOSURE          3 <fn returns_nil>
 0006    | OP_DEFINE_GLOBAL    2 'returns_nil'
-0008    1 OP_NIL
-0009    | OP_JUMP_IF_NOT_NIL    9 -> 15
-0012    | OP_POP
-0013    | OP_CONSTANT         4 '123'
-0015    | OP_PRINT
-0016    2 OP_NIL
-0017    | OP_JUMP_IF_NOT_NIL   17 -> 28
-0020    | OP_POP
-0021    | OP_NIL
-0022    | OP_JUMP_IF_NOT_NIL   22 -> 28
-0025    | OP_POP
-0026    | OP_CONSTANT         5 '456'
-0028    | OP_PRINT
-0029    3 OP_CONSTANT         6 '789'
-0031    | OP_JUMP_IF_NOT_NIL   31 -> 37
-0034    | OP_POP
-0035    | OP_CONSTANT         7 '0'
-0037    | OP_PRINT
-0038   10 OP_CONSTANT         8 'Hello World'
-0040    | OP_JUMP_IF_NOT_NIL   40 -> 48
-0043    | OP_POP
-0044    | OP_GET_GLOBAL       0 'should_not_call'
-0046    | OP_CALL             0
-0048    | OP_PRINT
-0049   12 OP_FALSE
-0050    | OP_JUMP_IF_NOT_NIL   50 -> 58
-0053    | OP_POP
-0054    | OP_GET_GLOBAL       0 'should_not_call'
-0056    | OP_CALL             0
-0058    | OP_JUMP_IF_FALSE   58 -> 68
-0061    | OP_POP
-0062   13 OP_CONSTANT         9 'True condition met'
-0064    | OP_PRINT
-0065   14 OP_JUMP            65 -> 72
-0068    | OP_POP
-0069   15 OP_CONSTANT        10 'False condition met'
-0071    | OP_PRINT
-0072   22 OP_GET_GLOBAL       2 'returns_nil'
-0074    | OP_CALL             0
-0076    | OP_JUMP_IF_NOT_NIL   76 -> 81
-0079    | OP_POP
-0080    | OP_TRUE
-0081    | OP_JUMP_IF_FALSE   81 -> 91
+0008    1 OP_GET_GLOBAL       4 '@println'
+0010    | OP_NIL
+0011    | OP_JUMP_IF_NOT_NIL   11 -> 17
+0014    | OP_POP
+0015    | OP_CONSTANT         5 '123'
+0017    | OP_CALL             1
+0019    | OP_POP
+0020    2 OP_GET_GLOBAL       4 '@println'
+0022    | OP_NIL
+0023    | OP_JUMP_IF_NOT_NIL   23 -> 34
+0026    | OP_POP
+0027    | OP_NIL
+0028    | OP_JUMP_IF_NOT_NIL   28 -> 34
+0031    | OP_POP
+0032    | OP_CONSTANT         6 '456'
+0034    | OP_CALL             1
+0036    | OP_POP
+0037    3 OP_GET_GLOBAL       4 '@println'
+0039    | OP_CONSTANT         7 '789'
+0041    | OP_JUMP_IF_NOT_NIL   41 -> 47
+0044    | OP_POP
+0045    | OP_CONSTANT         8 '0'
+0047    | OP_CALL             1
+0049    | OP_POP
+0050   10 OP_GET_GLOBAL       4 '@println'
+0052    | OP_CONSTANT         9 'Hello World'
+0054    | OP_JUMP_IF_NOT_NIL   54 -> 62
+0057    | OP_POP
+0058    | OP_GET_GLOBAL       0 'should_not_call'
+0060    | OP_CALL             0
+0062    | OP_CALL             1
+0064    | OP_POP
+0065   12 OP_FALSE
+0066    | OP_JUMP_IF_NOT_NIL   66 -> 74
+0069    | OP_POP
+0070    | OP_GET_GLOBAL       0 'should_not_call'
+0072    | OP_CALL             0
+0074    | OP_JUMP_IF_FALSE   74 -> 88
+0077    | OP_POP
+0078   13 OP_GET_GLOBAL       4 '@println'
+0080    | OP_CONSTANT        10 'True condition met'
+0082    | OP_CALL             1
 0084    | OP_POP
-0085   23 OP_CONSTANT         9 'True condition met'
-0087    | OP_PRINT
-0088   24 OP_JUMP            88 -> 95
-0091    | OP_POP
-0092   25 OP_CONSTANT        10 'False condition met'
-0094    | OP_PRINT
-0095   26 OP_NIL
-0096    | OP_RETURN
+0085   14 OP_JUMP            85 -> 96
+0088    | OP_POP
+0089   15 OP_GET_GLOBAL       4 '@println'
+0091    | OP_CONSTANT        11 'False condition met'
+0093    | OP_CALL             1
+0095    | OP_POP
+0096   22 OP_GET_GLOBAL       2 'returns_nil'
+0098    | OP_CALL             0
+0100    | OP_JUMP_IF_NOT_NIL  100 -> 105
+0103    | OP_POP
+0104    | OP_TRUE
+0105    | OP_JUMP_IF_FALSE  105 -> 119
+0108    | OP_POP
+0109   23 OP_GET_GLOBAL       4 '@println'
+0111    | OP_CONSTANT        10 'True condition met'
+0113    | OP_CALL             1
+0115    | OP_POP
+0116   24 OP_JUMP           116 -> 127
+0119    | OP_POP
+0120   25 OP_GET_GLOBAL       4 '@println'
+0122    | OP_CONSTANT        11 'False condition met'
+0124    | OP_CALL             1
+0126    | OP_POP
+0127   26 OP_NIL
+0128    | OP_RETURN
 == should_not_call ==
-0000    6 OP_CONSTANT         0 'Should not print'
-0002    | OP_PRINT
-0003    7 OP_FALSE
-0004    | OP_RETURN
+0000    6 OP_GET_GLOBAL       0 '@println'
+0002    | OP_CONSTANT         1 'Should not print'
+0004    | OP_CALL             1
+0006    | OP_POP
+0007    7 OP_FALSE
+0008    | OP_RETURN
 == returns_nil ==
 0000   19 OP_NIL
 0001    | OP_RETURN

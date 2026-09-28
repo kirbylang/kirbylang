@@ -2,27 +2,39 @@
 0000    1 OP_NIL
 0001    | OP_RETURN
 == <script> ==
-0000    1 OP_CONSTANT         0 '1'
-0002    | OP_CONSTANT         1 '2'
-0004    | OP_CONSTANT         2 '3'
-0006    | OP_CONSTANT         3 '4'
-0008    | OP_ARRAY            4
-0010    | OP_PRINT
-0011    2 OP_CONSTANT         4 'Hello'
-0013    | OP_CONSTANT         5 'World'
-0015    | OP_ARRAY            2
-0017    | OP_PRINT
-0018    3 OP_TRUE
-0019    | OP_FALSE
-0020    | OP_ARRAY            2
-0022    | OP_PRINT
-0023    4 OP_NIL
-0024    | OP_ARRAY            1
-0026    | OP_PRINT
-0027    5 OP_GET_GLOBAL       6 '@version'
-0029    | OP_ARRAY            1
-0031    | OP_PRINT
-0032    6 OP_ARRAY            0
-0034    | OP_PRINT
-0035    7 OP_NIL
-0036    | OP_RETURN
+0000    1 OP_GET_GLOBAL       0 '@println'
+0002    | OP_CONSTANT         1 '1'
+0004    | OP_CONSTANT         2 '2'
+0006    | OP_CONSTANT         3 '3'
+0008    | OP_CONSTANT         4 '4'
+0010    | OP_ARRAY            4
+0012    | OP_CALL             1
+0014    | OP_POP
+0015    2 OP_GET_GLOBAL       0 '@println'
+0017    | OP_CONSTANT         5 'Hello'
+0019    | OP_CONSTANT         6 'World'
+0021    | OP_ARRAY            2
+0023    | OP_CALL             1
+0025    | OP_POP
+0026    3 OP_GET_GLOBAL       0 '@println'
+0028    | OP_TRUE
+0029    | OP_FALSE
+0030    | OP_ARRAY            2
+0032    | OP_CALL             1
+0034    | OP_POP
+0035    4 OP_GET_GLOBAL       0 '@println'
+0037    | OP_NIL
+0038    | OP_ARRAY            1
+0040    | OP_CALL             1
+0042    | OP_POP
+0043    5 OP_GET_GLOBAL       0 '@println'
+0045    | OP_GET_GLOBAL       7 '@version'
+0047    | OP_ARRAY            1
+0049    | OP_CALL             1
+0051    | OP_POP
+0052    6 OP_GET_GLOBAL       0 '@println'
+0054    | OP_ARRAY            0
+0056    | OP_CALL             1
+0058    | OP_POP
+0059    7 OP_NIL
+0060    | OP_RETURN

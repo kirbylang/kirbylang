@@ -1,1 +1,1 @@
-print @strToUpper("abc", 1, 2);
+@println(@strToUpper("abc", 1, 2));

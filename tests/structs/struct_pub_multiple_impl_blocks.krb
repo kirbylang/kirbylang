@@ -20,4 +20,4 @@ var counter = Counter.new();
 counter.increment();
 counter.increment();
 
-print counter.get();
+@println(counter.get());

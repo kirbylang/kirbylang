@@ -1,1 +1,1 @@
-print @readFileToString();
+@println(@readFileToString());

@@ -1,1 +1,1 @@
-print @sqrt(-1);
+@println(@sqrt(-1));

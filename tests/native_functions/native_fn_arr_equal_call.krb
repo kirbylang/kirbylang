@@ -2,16 +2,16 @@ var a = [1, 2, 3];
 var b = a;
 var c = @arrCopy(a);
 
-print "Before";
+@println("Before");
 
-print @arrEqual(a, b);
-print @arrEqual(b, c);
-print @arrEqual(a, c);
+@println(@arrEqual(a, b));
+@println(@arrEqual(b, c));
+@println(@arrEqual(a, c));
 
 c[0] = 100;
 
-print "After";
+@println("After");
 
-print @arrEqual(a, b);
-print @arrEqual(b, c);
-print @arrEqual(a, c);
+@println(@arrEqual(a, b));
+@println(@arrEqual(b, c));
+@println(@arrEqual(a, c));

@@ -1,3 +1,3 @@
 struct Struct {}
 
-print @instanceOf(123, Struct);
+@println(@instanceOf(123, Struct));

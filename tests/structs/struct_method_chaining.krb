@@ -10,4 +10,4 @@ impl Chain {
     pub fun get(self): f64 = self.value;
 }
 
-print Chain.new(1).plus(2).plus(3).get();
+@println(Chain.new(1).plus(2).plus(3).get());

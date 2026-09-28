@@ -5,4 +5,4 @@ impl Struct {
 }
 
 var s = Struct.new();
-print s;
+@println(s);

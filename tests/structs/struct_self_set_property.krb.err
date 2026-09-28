@@ -25,18 +25,22 @@
 0038    | OP_CONSTANT         9 'Hello'
 0040    | OP_INVOKE        (1 args)    4 'set'
 0043    | OP_POP
-0044   21 OP_GET_GLOBAL       8 'instance'
-0046    | OP_INVOKE        (0 args)    6 'get'
-0049    | OP_PRINT
-0050   23 OP_GET_GLOBAL       8 'instance'
-0052    | OP_CONSTANT        10 'World'
-0054    | OP_INVOKE        (1 args)    4 'set'
-0057    | OP_POP
-0058   25 OP_GET_GLOBAL       8 'instance'
-0060    | OP_INVOKE        (0 args)    6 'get'
-0063    | OP_PRINT
-0064   26 OP_NIL
-0065    | OP_RETURN
+0044   21 OP_GET_GLOBAL      10 '@println'
+0046    | OP_GET_GLOBAL       8 'instance'
+0048    | OP_INVOKE        (0 args)    6 'get'
+0051    | OP_CALL             1
+0053    | OP_POP
+0054   23 OP_GET_GLOBAL       8 'instance'
+0056    | OP_CONSTANT        11 'World'
+0058    | OP_INVOKE        (1 args)    4 'set'
+0061    | OP_POP
+0062   25 OP_GET_GLOBAL      10 '@println'
+0064    | OP_GET_GLOBAL       8 'instance'
+0066    | OP_INVOKE        (0 args)    6 'get'
+0069    | OP_CALL             1
+0071    | OP_POP
+0072   26 OP_NIL
+0073    | OP_RETURN
 == default ==
 0000   14 OP_GET_GLOBAL       0 'Struct'
 0002    | OP_CONSTANT         1 'value'

@@ -1,4 +1,4 @@
-print @min(3, 7);
-print @min(7, 3);
-print @min(-1, -5);
-print @min(2, 2);
+@println(@min(3, 7));
+@println(@min(7, 3));
+@println(@min(-1, -5));
+@println(@min(2, 2));

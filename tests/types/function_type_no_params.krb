@@ -1,6 +1,6 @@
 var greeter: fun () => unit;
 
-fun greet(): unit { print "hi"; }
+fun greet(): unit { @println("hi"); }
 
 greeter = greet;
 

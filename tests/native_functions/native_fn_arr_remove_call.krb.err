@@ -12,9 +12,13 @@
 0014    | OP_CONSTANT         6 '0'
 0016    | OP_CALL             2
 0018    | OP_DEFINE_GLOBAL    4 'removed'
-0020    5 OP_GET_GLOBAL       0 'array'
-0022    | OP_PRINT
-0023    6 OP_GET_GLOBAL       4 'removed'
-0025    | OP_PRINT
-0026    7 OP_NIL
-0027    | OP_RETURN
+0020    5 OP_GET_GLOBAL       7 '@println'
+0022    | OP_GET_GLOBAL       0 'array'
+0024    | OP_CALL             1
+0026    | OP_POP
+0027    6 OP_GET_GLOBAL       7 '@println'
+0029    | OP_GET_GLOBAL       4 'removed'
+0031    | OP_CALL             1
+0033    | OP_POP
+0034    7 OP_NIL
+0035    | OP_RETURN

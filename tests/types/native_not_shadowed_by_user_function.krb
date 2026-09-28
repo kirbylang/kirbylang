@@ -1,4 +1,4 @@
 fun ceil(value: string): string = value + "!";
 
-print ceil("hello");
-print @ceil(2.5);
+@println(ceil("hello"));
+@println(@ceil(2.5));

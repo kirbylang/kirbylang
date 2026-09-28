@@ -4,4 +4,4 @@ struct Box {
 
 let box = Box { value: 100 };
 
-print box.value;
+@println(box.value);

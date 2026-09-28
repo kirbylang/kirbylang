@@ -2,5 +2,5 @@ var array = [1, 2, 3];
 
 var popped = @arrPop(array);
 
-print array;
-print popped;
+@println(array);
+@println(popped);

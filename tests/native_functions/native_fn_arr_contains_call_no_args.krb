@@ -1,1 +1,1 @@
-print @arrContains();
+@println(@arrContains());

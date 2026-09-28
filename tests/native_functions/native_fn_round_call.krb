@@ -1,5 +1,5 @@
-print @round(2.4);
-print @round(2.6);
-print @round(2.5);
-print @round(-2.5);
-print @round(7);
+@println(@round(2.4));
+@println(@round(2.6));
+@println(@round(2.5));
+@println(@round(-2.5));
+@println(@round(7));

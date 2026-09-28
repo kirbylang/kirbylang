@@ -1,1 +1,1 @@
-print @strEndsWith("abc", "c", 1, 2);
+@println(@strEndsWith("abc", "c", 1, 2));

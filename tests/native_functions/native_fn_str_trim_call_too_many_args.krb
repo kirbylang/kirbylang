@@ -1,1 +1,1 @@
-print @strTrim("abc", 1, 2);
+@println(@strTrim("abc", 1, 2));

@@ -1,9 +1,9 @@
-print "Hello\nWorld";
+@println("Hello\nWorld");
 
-print "Hello\r\nWorld";
+@println("Hello\r\nWorld");
 
-print "\tHello\n\tWorld";
+@println("\tHello\n\tWorld");
 
-print "Hello \"World\"";
+@println("Hello \"World\"");
 
-print "\\Hello\\World\\";
+@println("\\Hello\\World\\");

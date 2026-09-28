@@ -1,1 +1,1 @@
-print @strReplace("a", 2, "c");
+@println(@strReplace("a", 2, "c"));

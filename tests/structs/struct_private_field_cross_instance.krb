@@ -10,4 +10,4 @@ impl Point {
     pub fun sum(self, other: Point): f64 = self.x + other.x;
 }
 
-print Point.at(3).sum(Point.at(4));
+@println(Point.at(3).sum(Point.at(4)));

@@ -1,1 +1,1 @@
-print "left" and "right";
+@println("left" and "right");

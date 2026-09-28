@@ -1,5 +1,5 @@
 {
   let x = 1;
-  print x;
+  @println(x);
   x = 2;
 }

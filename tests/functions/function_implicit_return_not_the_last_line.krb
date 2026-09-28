@@ -3,4 +3,4 @@ fun sum(a, b) {
     b + a
 }
 
-print sum(1, 2);
+@println(sum(1, 2));

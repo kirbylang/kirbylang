@@ -1,1 +1,1 @@
-print @abs(2.5, 1, 2);
+@println(@abs(2.5, 1, 2));

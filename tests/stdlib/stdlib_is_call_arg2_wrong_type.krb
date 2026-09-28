@@ -1,1 +1,1 @@
-print @is(true, true);
+@println(@is(true, true));

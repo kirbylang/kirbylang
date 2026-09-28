@@ -19,4 +19,4 @@ var builder = StringBuilder { string: "" }
     .add(" ")
     .add("World");
 
-print builder.to_string();
+@println(builder.to_string());

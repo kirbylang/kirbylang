@@ -14,11 +14,13 @@
 0017    8 OP_CLOSURE          5 <fn add>
 0019    | OP_METHOD           4 'add'
 0021    9 OP_POP
-0022   27 OP_GET_GLOBAL       0 'run'
-0024    | OP_CALL             0
-0026    | OP_PRINT
-0027   28 OP_NIL
-0028    | OP_RETURN
+0022   27 OP_GET_GLOBAL       6 '@println'
+0024    | OP_GET_GLOBAL       0 'run'
+0026    | OP_CALL             0
+0028    | OP_CALL             1
+0030    | OP_POP
+0031   28 OP_NIL
+0032    | OP_RETURN
 == run ==
 0000   12 OP_GET_GLOBAL       0 'Box'
 0002    | OP_CONSTANT         1 'value'
@@ -60,15 +62,21 @@
 0071    | OP_CLOSE_BLOCK_EXPR    1
 0073    | OP_SET_INDEX
 0074    | OP_POP
-0075   20 OP_GET_LOCAL        1
-0077    | OP_GET_PROPERTY     1 'value'
-0079    | OP_PRINT
-0080   21 OP_GET_LOCAL        4
-0082    | OP_PRINT
-0083   22 OP_GET_LOCAL        2
-0085    | OP_PRINT
-0086   24 OP_GET_LOCAL        3
-0088    | OP_RETURN
+0075   20 OP_GET_GLOBAL      10 '@println'
+0077    | OP_GET_LOCAL        1
+0079    | OP_GET_PROPERTY     1 'value'
+0081    | OP_CALL             1
+0083    | OP_POP
+0084   21 OP_GET_GLOBAL      10 '@println'
+0086    | OP_GET_LOCAL        4
+0088    | OP_CALL             1
+0090    | OP_POP
+0091   22 OP_GET_GLOBAL      10 '@println'
+0093    | OP_GET_LOCAL        2
+0095    | OP_CALL             1
+0097    | OP_POP
+0098   24 OP_GET_LOCAL        3
+0100    | OP_RETURN
 == add ==
 0000    7 OP_GET_LOCAL        0
 0002    | OP_GET_PROPERTY     0 'value'

@@ -3,7 +3,7 @@ struct Struct {}
 impl Struct {
     pub fun printSelf(self): fun () => unit {
         fun innerClosure(): unit {
-            print self;
+            @println(self);
         }
 
         return innerClosure;

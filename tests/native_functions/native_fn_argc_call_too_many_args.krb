@@ -1,1 +1,1 @@
-print @argc(1, 2, 3);
+@println(@argc(1, 2, 3));

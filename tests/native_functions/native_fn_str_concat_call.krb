@@ -1,4 +1,4 @@
-print @strConcat(["Hello", ", ", "World", "!"]);
-print @strConcat(["one"]);
-print @strConcat([]);
-print @typeof(@strConcat(["a", "b"]));
+@println(@strConcat(["Hello", ", ", "World", "!"]));
+@println(@strConcat(["one"]));
+@println(@strConcat([]));
+@println(@typeof(@strConcat(["a", "b"])));

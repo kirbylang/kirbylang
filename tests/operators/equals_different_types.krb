@@ -1,1 +1,1 @@
-print "Hello" == 123;
+@println("Hello" == 123);

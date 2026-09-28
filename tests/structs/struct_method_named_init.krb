@@ -12,5 +12,5 @@ impl Struct {
 
 var instance = Struct {};
 
-print instance.init();
-print Struct.init2();
+@println(instance.init());
+@println(Struct.init2());

@@ -1,16 +1,16 @@
 Get a value's type.
 
 ```kirby
-print @typeof(true); // "bool"
-print @typeof(123); // "number"
-print @typeof("Hello World"); // "string"
-print @typeof([]); // "array"
+@println(@typeof(true)); // "bool"
+@println(@typeof(123)); // "number"
+@println(@typeof("Hello World")); // "string"
+@println(@typeof([])); // "array"
 
 struct Food {}
 
-print @typeof(Food); // struct
+@println(@typeof(Food)); // struct
 
 let food = Food {};
 
-print @typeof(food); // instance
+@println(@typeof(food)); // instance
 ```

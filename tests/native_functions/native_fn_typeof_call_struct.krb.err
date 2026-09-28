@@ -6,9 +6,11 @@
 0002    | OP_DEFINE_GLOBAL    0 'Struct'
 0004    | OP_GET_GLOBAL       0 'Struct'
 0006    | OP_POP
-0007    3 OP_GET_GLOBAL       1 '@typeof'
-0009    | OP_GET_GLOBAL       0 'Struct'
-0011    | OP_CALL             1
-0013    | OP_PRINT
-0014    4 OP_NIL
-0015    | OP_RETURN
+0007    3 OP_GET_GLOBAL       1 '@println'
+0009    | OP_GET_GLOBAL       2 '@typeof'
+0011    | OP_GET_GLOBAL       0 'Struct'
+0013    | OP_CALL             1
+0015    | OP_CALL             1
+0017    | OP_POP
+0018    4 OP_NIL
+0019    | OP_RETURN

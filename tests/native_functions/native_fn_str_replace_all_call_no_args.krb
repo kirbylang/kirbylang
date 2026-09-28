@@ -1,1 +1,1 @@
-print @strReplaceAll();
+@println(@strReplaceAll());

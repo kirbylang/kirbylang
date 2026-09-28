@@ -1,18 +1,18 @@
-print false or true;
-print false || true;
+@println(false or true);
+@println(false || true);
 
-print true or false;
-print true || false;
+@println(true or false);
+@println(true || false);
 
-print true or true;
-print true || true;
+@println(true or true);
+@println(true || true);
 
-print false or false;
-print false || false;
+@println(false or false);
+@println(false || false);
 
 fun should_not_call (): bool {
-    print "Should not print";
+    @println("Should not print");
     return false;
 }
 
-print true or should_not_call();
+@println(true or should_not_call());

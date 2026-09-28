@@ -6,4 +6,4 @@ var h = Holder {
     callback: fun () { "called" }
 };
 
-print h.callback();
+@println(h.callback());

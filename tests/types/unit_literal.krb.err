@@ -8,20 +8,24 @@
 0006    | OP_DEFINE_GLOBAL    2 'alsoNothing'
 0008    1 OP_NIL
 0009    | OP_DEFINE_GLOBAL    4 'nothing'
-0011    3 OP_GET_GLOBAL       4 'nothing'
-0013    | OP_PRINT
-0014    9 OP_GET_GLOBAL       0 'doNothing'
-0016    | OP_CALL             0
-0018    | OP_POP
-0019   13 OP_GET_GLOBAL       2 'alsoNothing'
-0021    | OP_CALL             0
-0023    | OP_POP
-0024   15 OP_NIL
-0025    | OP_NIL
-0026    | OP_EQUAL
-0027    | OP_PRINT
-0028   16 OP_NIL
-0029    | OP_RETURN
+0011    3 OP_GET_GLOBAL       5 '@println'
+0013    | OP_GET_GLOBAL       4 'nothing'
+0015    | OP_CALL             1
+0017    | OP_POP
+0018    9 OP_GET_GLOBAL       0 'doNothing'
+0020    | OP_CALL             0
+0022    | OP_POP
+0023   13 OP_GET_GLOBAL       2 'alsoNothing'
+0025    | OP_CALL             0
+0027    | OP_POP
+0028   15 OP_GET_GLOBAL       5 '@println'
+0030    | OP_NIL
+0031    | OP_NIL
+0032    | OP_EQUAL
+0033    | OP_CALL             1
+0035    | OP_POP
+0036   16 OP_NIL
+0037    | OP_RETURN
 == doNothing ==
 0000    6 OP_NIL
 0001    | OP_RETURN

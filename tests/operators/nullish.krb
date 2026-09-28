@@ -1,18 +1,18 @@
-print nil ?? 123;
-print nil ?? nil ?? 456;
-print 789 ?? 000;
+@println(nil ?? 123);
+@println(nil ?? nil ?? 456);
+@println(789 ?? 000);
 
 fun should_not_call (): bool {
-    print "Should not print";
+    @println("Should not print");
     return false;
 }
 
-print "Hello World" ?? should_not_call();
+@println("Hello World" ?? should_not_call());
 
 if (false ?? should_not_call()) {
-    print "True condition met";
+    @println("True condition met");
 } else {
-    print "False condition met";
+    @println("False condition met");
 }
 
 fun returns_nil (): unit {
@@ -20,7 +20,7 @@ fun returns_nil (): unit {
 }
 
 if (returns_nil() ?? true) {
-    print "True condition met";
+    @println("True condition met");
 } else {
-    print "False condition met";
+    @println("False condition met");
 }

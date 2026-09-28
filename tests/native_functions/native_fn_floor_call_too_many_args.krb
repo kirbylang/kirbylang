@@ -1,1 +1,1 @@
-print @floor(2.5, 1, 2);
+@println(@floor(2.5, 1, 2));

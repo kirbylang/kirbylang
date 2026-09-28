@@ -5,7 +5,7 @@ var a = [1, 2, 3];
 var b = a;
 var c = @arrCopy(a);
 
-print @arrEqual(a, b); // true
-print @arrEqual(b, c); // false
-print @arrEqual(a, c); // false
+@println(@arrEqual(a, b)); // true
+@println(@arrEqual(b, c)); // false
+@println(@arrEqual(a, c)); // false
 ```

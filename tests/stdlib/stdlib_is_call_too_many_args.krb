@@ -1,1 +1,1 @@
-print @is(true, "bool", nil);
+@println(@is(true, "bool", nil));

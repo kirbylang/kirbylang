@@ -18,5 +18,5 @@ impl Bag {
 
 var b1 = Box.zero();
 var b2 = Bag.empty();
-print b1.value;
-print b2.items;
+@println(b1.value);
+@println(b2.items);

@@ -1,1 +1,1 @@
-print @min();
+@println(@min());

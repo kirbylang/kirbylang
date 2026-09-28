@@ -7,11 +7,11 @@ impl Display for Box {
 }
 
 fun show(box: Box): unit {
-    print box;
+    @println(box);
 }
 
 let boxes = [Box { value: 1 }, Box { value: 2 }];
 
 show(Box { value: 3 });
-print boxes[1];
-print { let b = Box { value: 4 }; b };
+@println(boxes[1]);
+@println({ let b = Box { value: 4 }; b });

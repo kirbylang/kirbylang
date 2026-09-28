@@ -1,6 +1,6 @@
 Returns if a string starts with another string.
 
 ```kirby
-print @strStartsWith("hello", "he"); // true
-print @strStartsWith("hello", "lo"); // false
+@println(@strStartsWith("hello", "he")); // true
+@println(@strStartsWith("hello", "lo")); // false
 ```

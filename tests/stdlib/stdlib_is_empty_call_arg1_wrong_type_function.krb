@@ -1,1 +1,1 @@
-print @strIsEmpty(@ceil);
+@println(@strIsEmpty(@ceil));

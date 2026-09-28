@@ -1,2 +1,2 @@
-for (var i = 0; i < 3; i = i + 1) { var a = "a"; print a; }
-print "done";
+for (var i = 0; i < 3; i = i + 1) { var a = "a"; @println(a); }
+@println("done");

@@ -1,7 +1,7 @@
-print @argc();
-print @argv(0);
-print @argv(1);
-print @argv(2);
-print @argv(3);
-print @argv(4);
-print @argv(99);
+@println(@argc());
+@println(@argv(0));
+@println(@argv(1));
+@println(@argv(2));
+@println(@argv(3));
+@println(@argv(4));
+@println(@argv(99));

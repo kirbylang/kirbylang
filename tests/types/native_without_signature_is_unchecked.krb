@@ -3,4 +3,4 @@
 
 let length: string = @len("abc");
 
-print length;
+@println(length);

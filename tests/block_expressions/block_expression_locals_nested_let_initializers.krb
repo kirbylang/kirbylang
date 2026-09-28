@@ -15,5 +15,5 @@ fun afterLocals(): f64 {
     x + y
 }
 
-print nested();
-print afterLocals();
+@println(nested());
+@println(afterLocals());

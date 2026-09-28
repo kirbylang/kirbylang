@@ -1,2 +1,2 @@
 let name = "a";
-print "a {name} b";
+@println("a {name} b");

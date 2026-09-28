@@ -8,5 +8,5 @@ impl Default for Point {
 }
 
 var origin: Point = Point.default();
-print origin.x;
-print origin.y;
+@println(origin.x);
+@println(origin.y);

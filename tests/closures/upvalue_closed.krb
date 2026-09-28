@@ -1,7 +1,7 @@
 fun outer(): fun () => unit {
   var x = "outside";
   fun inner(): unit {
-    print x;
+    @println(x);
   }
 
   return inner;

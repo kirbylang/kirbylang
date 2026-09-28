@@ -8,5 +8,5 @@ impl Point {
 }
 
 var p = Point.new(1, 2);
-print p.x;
-print p.y;
+@println(p.x);
+@println(p.y);

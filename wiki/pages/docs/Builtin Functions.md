@@ -16,9 +16,9 @@ This also makes `@` a reserved character in identifiers.
 Get the length of a string or array.
 
 ```kirby
-print @len("Hello, World!");
+@println(@len("Hello, World!"));
 
-print @len([1, 2 ,3]);
+@println(@len([1, 2 ,3]));
 ```
 
 ## Math
@@ -28,9 +28,9 @@ print @len([1, 2 ,3]);
 Get a number without its sign.
 
 ```kirby
-print @abs(-3.5); // 3.5
+@println(@abs(-3.5)); // 3.5
 
-print @abs(3.5); // 3.5
+@println(@abs(3.5)); // 3.5
 ```
 
 ### `@ceil`
@@ -38,7 +38,7 @@ print @abs(3.5); // 3.5
 Round a number up.
 
 ```
-print @ceil(1.6); // 2
+@println(@ceil(1.6)); // 2
 ```
 
 ### `@floor`
@@ -46,9 +46,9 @@ print @ceil(1.6); // 2
 Round a number down to the nearest whole number.
 
 ```kirby
-print @floor(2.7); // 2
+@println(@floor(2.7)); // 2
 
-print @floor(-2.5); // -3
+@println(@floor(-2.5)); // -3
 ```
 
 ### `@max`
@@ -56,9 +56,9 @@ print @floor(-2.5); // -3
 Get the larger of two numbers.
 
 ```kirby
-print @max(3, 7); // 7
+@println(@max(3, 7)); // 7
 
-print @max(-1, -5); // -1
+@println(@max(-1, -5)); // -1
 ```
 
 ### `@min`
@@ -66,9 +66,9 @@ print @max(-1, -5); // -1
 Get the smaller of two numbers.
 
 ```kirby
-print @min(3, 7); // 3
+@println(@min(3, 7)); // 3
 
-print @min(-1, -5); // -5
+@println(@min(-1, -5)); // -5
 ```
 
 ### `@pow`
@@ -76,9 +76,9 @@ print @min(-1, -5); // -5
 Raise a number to a power. It is an error to raise `0` to a negative power, or a negative number to a fractional power.
 
 ```kirby
-print @pow(2, 10); // 1024
+@println(@pow(2, 10)); // 1024
 
-print @pow(9, 0.5); // 3
+@println(@pow(9, 0.5)); // 3
 ```
 
 ### `@round`
@@ -86,11 +86,11 @@ print @pow(9, 0.5); // 3
 Round a number to the nearest whole number. Halves round away from zero.
 
 ```kirby
-print @round(2.4); // 2
+@println(@round(2.4)); // 2
 
-print @round(2.5); // 3
+@println(@round(2.5)); // 3
 
-print @round(-2.5); // -3
+@println(@round(-2.5)); // -3
 ```
 
 ### `@sqrt`
@@ -98,9 +98,9 @@ print @round(-2.5); // -3
 Get the square root of a number. A negative number is an error. When the argument is a constant, such as `@sqrt(-1)`, the error is reported before the program runs.
 
 ```kirby
-print @sqrt(16); // 4
+@println(@sqrt(16)); // 4
 
-print @sqrt(2.25); // 1.5
+@println(@sqrt(2.25)); // 1.5
 ```
 
 ### `@trunc`
@@ -108,9 +108,9 @@ print @sqrt(2.25); // 1.5
 Remove a number's fractional part, moving toward zero.
 
 ```kirby
-print @trunc(2.7); // 2
+@println(@trunc(2.7)); // 2
 
-print @trunc(-2.7); // -2
+@println(@trunc(-2.7)); // -2
 ```
 
 ## Arrays
@@ -124,7 +124,7 @@ var array = [1, 2, 3];
 
 @arrClear(array);
 
-print array; // []
+@println(array); // []
 ```
 
 ### `@arrConcat`
@@ -136,9 +136,9 @@ var a = [1, 2, 3];
 var b = [4, 5, 6];
 var c = @arrConcat(a, b);
 
-print a; // [1, 2, 3]
-print b; // [4, 5, 6]
-print c; // [1, 2, 3, 4, 5, 6]
+@println(a); // [1, 2, 3]
+@println(b); // [4, 5, 6]
+@println(c); // [1, 2, 3, 4, 5, 6]
 ```
 
 ### `@arrContains`
@@ -148,8 +148,8 @@ Returns if an array contains a value.
 ```kirby
 var array = [1, 2, 3];
 
-print @arrContains(array, 2); // true
-print @arrContains(array, 99); // false
+@println(@arrContains(array, 2)); // true
+@println(@arrContains(array, 99)); // false
 ```
 
 ### `@arrCopy`
@@ -163,9 +163,9 @@ var c = @arrCopy(a);
 
 a[0] = 100;
 
-print a; // [100, 2, 3]
-print b; // [100, 2, 3]
-print c; // [1, 2, 3]
+@println(a); // [100, 2, 3]
+@println(b); // [100, 2, 3]
+@println(c); // [1, 2, 3]
 ```
 
 ### `@arrEqual`
@@ -177,9 +177,9 @@ var a = [1, 2, 3];
 var b = a;
 var c = @arrCopy(a);
 
-print @arrEqual(a, b); // true
-print @arrEqual(b, c); // false
-print @arrEqual(a, c); // false
+@println(@arrEqual(a, b)); // true
+@println(@arrEqual(b, c)); // false
+@println(@arrEqual(a, c)); // false
 ```
 
 ### `@arrInsert`
@@ -192,7 +192,7 @@ var array = [];
 @arrInsert(array, 0, "Hello");
 @arrInsert(array, 1, "World");
 
-print array; // [Hello, World]
+@println(array); // [Hello, World]
 ```
 
 ### `@arrIsEmpty`
@@ -200,8 +200,8 @@ print array; // [Hello, World]
 Returns if an array is empty or not.
 
 ```kirby
-print @arrIsEmpty([]);
-print @arrIsEmpty([1, 2, 3]);
+@println(@arrIsEmpty([]));
+@println(@arrIsEmpty([1, 2, 3]));
 ```
 
 ### `@arrJoin`
@@ -211,9 +211,9 @@ Concatenates every element of an array into one string, separated by a separator
 ```kirby
 var parts = ["kirby", "is", "a", "language"];
 
-print @arrJoin(parts, " "); // kirby is a language
-print @arrJoin(parts, ", "); // kirby, is, a, language
-print @arrJoin(parts, ""); // kirbyisalanguage
+@println(@arrJoin(parts, " ")); // kirby is a language
+@println(@arrJoin(parts, ", ")); // kirby, is, a, language
+@println(@arrJoin(parts, "")); // kirbyisalanguage
 ```
 
 ### `@arrPop`
@@ -224,8 +224,8 @@ Pop a value onto the end of an array and return it.
 var array = ["Hello", "World"];
 var poppedValue = @arrPop(array);
 
-print array; // [Hello]
-print poppedValue; // World
+@println(array); // [Hello]
+@println(poppedValue); // World
 ```
 
 ### `@arrPush`
@@ -238,7 +238,7 @@ var array = [];
 @arrPush(array, "Hello");
 @arrPush(array, "World");
 
-print array; // [Hello, World]
+@println(array); // [Hello, World]
 ```
 
 ### `@arrRemove`
@@ -250,7 +250,7 @@ var array = [1, 2, 3];
 
 @arrRemove(array, 0);
 
-print array; // [2, 3]
+@println(array); // [2, 3]
 ```
 
 ### `@arrReverse`
@@ -262,7 +262,7 @@ var array = [1, 2, 3];
 
 @arrReverse(array);
 
-print array; // [3, 2, 1]
+@println(array); // [3, 2, 1]
 ```
 
 ### `@arrSlice`
@@ -273,7 +273,7 @@ Pop a value onto the end of an array and return it.
 var array = [10, 20, 30, 40, 50];
 var slice = @arrSlice(array, 1, 4);
 
-print @arrEqual([20, 30, 40], slice);
+@println(@arrEqual([20, 30, 40], slice));
 ```
 
 ## Errors
@@ -303,7 +303,7 @@ Exit (code 70) with an error message.
 Get the current version of the kirby language.
 
 ```kirby
-print @version(); // 0.0.0
+@println(@version()); // 0.0.0
 ```
 
 ### `@clock`
@@ -311,7 +311,7 @@ print @version(); // 0.0.0
 Get the number of seconds that have passed since the program started.
 
 ```kirby
-print @clock();
+@println(@clock());
 ```
 
 ### `@exit`
@@ -335,12 +335,13 @@ let exit_code = -1;
 
 @exit(exit_code); // Runtime error
 ```
+
 ### `@getenv`
 
 Get an environment variable's value.
 
 ```kirby
-print @getenv("PATH");
+@println(@getenv("PATH"));
 ```
 
 ### `@setEnv`
@@ -350,7 +351,7 @@ Set an environment variable to a string value.
 ```kirby
 @setenv("NAME", "WORLD");
 
-print "Hello " + @getenv("NAME");
+@println("Hello " + @getenv("NAME"));
 ```
 
 ### `@prompt`
@@ -360,7 +361,7 @@ Read in text from `stdin` until newline (NL) is encountered. An optional message
 ```kirby
 var name = @prompt("Name: ");
 
-print "Hello " + name;
+@println("Hello " + name);
 ```
 
 ### `@stdin`
@@ -376,17 +377,19 @@ var text = @stdin();
 The number of arguments passed to the program.
 
 ```kirby
-print @argc(); // 2
+@println(@argc()); // 2
 ```
+
 ### @argv
 
 Access the arguments passed to the program by index.
 
 ```kirby
-print @argv(1);
+@println(@argv(1));
 ```
 
 ## IO
+
 ### `@print`
 
 Write a value to stdout, the way `print` does, without a newline. A struct that implements `Display` is written with its `toString()`.
@@ -429,13 +432,14 @@ Return if a file or path exists at a given path.
 let path = @prompt("File Path: ");
 
 if (!@fileExists(path)) {
-  print "File doesn't exist '" + path + "'";
-  
+  @println("File doesn't exist '" + path + "'");
+
   @exit(1)
 }
 
-print path;
+@println(path);
 ```
+
 ### `@readFileToString`
 
 Read a file at path to string.
@@ -443,7 +447,7 @@ Read a file at path to string.
 ```kirby
 let text = @readFileToString("./path/to/file.txt");
 
-print text;
+@println(text);
 ```
 
 ### `@writeStringToFile`
@@ -468,7 +472,7 @@ struct Food {}
 
 let food = Food();
 
-print @instanceOf(food, Food); // true
+@println(@instanceOf(food, Food)); // true
 ```
 
 ### `@typeof`
@@ -476,18 +480,18 @@ print @instanceOf(food, Food); // true
 Get a value's type.
 
 ```kirby
-print @typeof(true); // "bool"
-print @typeof(123); // "number"
-print @typeof("Hello World"); // "string"
-print @typeof([]); // "array"
+@println(@typeof(true)); // "bool"
+@println(@typeof(123)); // "number"
+@println(@typeof("Hello World")); // "string"
+@println(@typeof([])); // "array"
 
 struct Food {}
 
-print @typeof(Food); // struct
+@println(@typeof(Food)); // struct
 
 let food = Food {};
 
-print @typeof(food); // instance
+@println(@typeof(food)); // instance
 ```
 
 ### `@is`
@@ -497,9 +501,9 @@ Returns whether a value is of the named type.
 The second argument is one of `"bool"`, `"string"`, `"number"`, `"function"` or `"nil"`.
 
 ```kirby
-print @is(true, "bool"); // true
+@println(@is(true, "bool")); // true
 
-print @is(12345, "string"); // false
+@println(@is(12345, "string")); // false
 ```
 
 ### `@isBool`
@@ -507,9 +511,9 @@ print @is(12345, "string"); // false
 Returns if value is a bool or not.
 
 ```kirby
-print @isBool(false); // true
+@println(@isBool(false)); // true
 
-print @isBool(123); // false
+@println(@isBool(123)); // false
 ```
 
 ### `@isFunction`
@@ -519,9 +523,9 @@ Returns if value is a function or not.
 ```kirby
 fun sum(a, b) = a + b;
 
-print @isFunction(@ceil); // true
-print @isFunction(sum); // true
-print @isFunction(123); // false
+@println(@isFunction(@ceil)); // true
+@println(@isFunction(sum)); // true
+@println(@isFunction(123)); // false
 ```
 
 ### `@isNil`
@@ -529,8 +533,8 @@ print @isFunction(123); // false
 Returns if value is a nil or not.
 
 ```kirby
-print @isNil(nil); // true
-print @isNil(123); // false
+@println(@isNil(nil)); // true
+@println(@isNil(123)); // false
 ```
 
 ### `@isNumber`
@@ -538,8 +542,8 @@ print @isNil(123); // false
 Returns if value is a number or not.
 
 ```kirby
-print @isNumber(123); // true
-print @isNumber("Hello World"); // false
+@println(@isNumber(123)); // true
+@println(@isNumber("Hello World")); // false
 ```
 
 ### `@isString`
@@ -547,8 +551,8 @@ print @isNumber("Hello World"); // false
 Returns if value is a string or not.
 
 ```kirby
-print @isString("Hello World"); // true
-print @isString(123); // false
+@println(@isString("Hello World")); // true
+@println(@isString(123)); // false
 ```
 
 ## Booleans
@@ -558,7 +562,7 @@ print @isString(123); // false
 Convert a boolean to a string.
 
 ```kirby
-print @boolToString(true); // "true"
+@println(@boolToString(true)); // "true"
 ```
 
 ## Numbers
@@ -568,7 +572,7 @@ print @boolToString(true); // "true"
 Convert a number to a string.
 
 ```kirby
-print @numberToString(123); // "123"
+@println(@numberToString(123)); // "123"
 ```
 
 ### `@parseNumber`
@@ -576,7 +580,7 @@ print @numberToString(123); // "123"
 Parse a string into a number.
 
 ```kirby
-print @parseNumber("123"); // 123
+@println(@parseNumber("123")); // 123
 ```
 
 ## Random
@@ -586,7 +590,7 @@ print @parseNumber("123"); // 123
 Get a random number.
 
 ```kirby
-print @rand(); // 1145892349
+@println(@rand()); // 1145892349
 ```
 
 ### `@rand01`
@@ -594,7 +598,7 @@ print @rand(); // 1145892349
 Randomly get 0 or 1.
 
 ```kirby
-print @rand01(); // 0
+@println(@rand01()); // 0
 ```
 
 ### `@randBetween`
@@ -602,7 +606,7 @@ print @rand01(); // 0
 Get a random number between min and max.
 
 ```kirby
-print @randBetween(1, 10); // 3
+@println(@randBetween(1, 10)); // 3
 ```
 
 ## Strings
@@ -612,8 +616,8 @@ print @randBetween(1, 10); // 3
 Returns if a string contains another string.
 
 ```kirby
-print @strContains("hello world", "lo wo"); // true
-print @strContains("hello", "xyz"); // false
+@println(@strContains("hello world", "lo wo")); // true
+@println(@strContains("hello", "xyz")); // false
 ```
 
 ### `@strEndsWith`
@@ -621,8 +625,8 @@ print @strContains("hello", "xyz"); // false
 Returns if a string ends with another string.
 
 ```kirby
-print @strEndsWith("hello", "lo"); // true
-print @strEndsWith("hello", "he"); // false
+@println(@strEndsWith("hello", "lo")); // true
+@println(@strEndsWith("hello", "he")); // false
 ```
 
 ### `@strIndexOf`
@@ -630,8 +634,8 @@ print @strEndsWith("hello", "he"); // false
 Get the position where a string first appears in another string, counting from 0. Returns `nil` if it does not appear.
 
 ```kirby
-print @strIndexOf("hello world", "world"); // 6
-print @strIndexOf("hello", "xyz"); // nil
+@println(@strIndexOf("hello world", "world")); // 6
+@println(@strIndexOf("hello", "xyz")); // nil
 ```
 
 ### `@strIsEmpty`
@@ -639,8 +643,8 @@ print @strIndexOf("hello", "xyz"); // nil
 Returns if a string's length is zero or not.
 
 ```kirby
-print @strIsEmpty(""); // true
-print @strIsEmpty("Hello World"); // false
+@println(@strIsEmpty("")); // true
+@println(@strIsEmpty("Hello World")); // false
 ```
 
 ### `@strRepeat`
@@ -648,8 +652,8 @@ print @strIsEmpty("Hello World"); // false
 Repeat a string a number of times. The count must be a whole number, zero or more.
 
 ```kirby
-print @strRepeat("ab", 3); // ababab
-print @strRepeat("ab", 0); // (empty string)
+@println(@strRepeat("ab", 3)); // ababab
+@println(@strRepeat("ab", 0)); // (empty string)
 ```
 
 ### `@strReplace`
@@ -657,7 +661,7 @@ print @strRepeat("ab", 0); // (empty string)
 Replace the first place a string appears in another string. Returns the string unchanged if it does not appear, or if the string to replace is empty.
 
 ```kirby
-print @strReplace("a-b-c", "-", "+"); // a+b-c
+@println(@strReplace("a-b-c", "-", "+")); // a+b-c
 ```
 
 ### `@strReplaceAll`
@@ -665,7 +669,7 @@ print @strReplace("a-b-c", "-", "+"); // a+b-c
 Replace every place a string appears in another string. Returns the string unchanged if it does not appear, or if the string to replace is empty.
 
 ```kirby
-print @strReplaceAll("a-b-c", "-", "+"); // a+b+c
+@println(@strReplaceAll("a-b-c", "-", "+")); // a+b+c
 ```
 
 ### `@strSlice`
@@ -673,8 +677,8 @@ print @strReplaceAll("a-b-c", "-", "+"); // a+b+c
 Get the part of a string from `start` up to, but not including, `end`. Both are whole positions from 0 to the length of the string. It is an error if either is outside the string, is not a whole number, or if `start` is after `end`.
 
 ```kirby
-print @strSlice("hello world", 0, 5); // hello
-print @strSlice("hello world", 6, 11); // world
+@println(@strSlice("hello world", 0, 5)); // hello
+@println(@strSlice("hello world", 6, 11)); // world
 ```
 
 ### `@strConcat`
@@ -682,8 +686,8 @@ print @strSlice("hello world", 6, 11); // world
 Concatenate an array of strings into one string. Every element must already be a string.
 
 ```kirby
-print @strConcat(["Hello", ", ", "World"]); // Hello, World
-print @strConcat([]); // an empty string
+@println(@strConcat(["Hello", ", ", "World"])); // Hello, World
+@println(@strConcat([])); // an empty string
 ```
 
 ### `@strSplit`
@@ -691,8 +695,8 @@ print @strConcat([]); // an empty string
 Split a string into an array of strings at each place the separator appears. An empty separator splits the string into single character strings.
 
 ```kirby
-print @strSplit("a,b,c", ","); // [a, b, c]
-print @strSplit("abc", ""); // [a, b, c]
+@println(@strSplit("a,b,c", ",")); // [a, b, c]
+@println(@strSplit("abc", "")); // [a, b, c]
 ```
 
 ### `@strStartsWith`
@@ -700,8 +704,8 @@ print @strSplit("abc", ""); // [a, b, c]
 Returns if a string starts with another string.
 
 ```kirby
-print @strStartsWith("hello", "he"); // true
-print @strStartsWith("hello", "lo"); // false
+@println(@strStartsWith("hello", "he")); // true
+@println(@strStartsWith("hello", "lo")); // false
 ```
 
 ### `@strToLower`
@@ -709,7 +713,7 @@ print @strStartsWith("hello", "lo"); // false
 Change the letters `A` to `Z` in a string to lower case. Other characters are not changed.
 
 ```kirby
-print @strToLower("Hello, World!"); // hello, world!
+@println(@strToLower("Hello, World!")); // hello, world!
 ```
 
 ### `@strToUpper`
@@ -717,7 +721,7 @@ print @strToLower("Hello, World!"); // hello, world!
 Change the letters `a` to `z` in a string to upper case. Other characters are not changed.
 
 ```kirby
-print @strToUpper("Hello, World!"); // HELLO, WORLD!
+@println(@strToUpper("Hello, World!")); // HELLO, WORLD!
 ```
 
 ### `@strTrim`
@@ -725,6 +729,5 @@ print @strToUpper("Hello, World!"); // HELLO, WORLD!
 Remove spaces, tabs, and newlines from both ends of a string.
 
 ```kirby
-print "[" + @strTrim("  hello  ") + "]"; // [hello]
+@println("[" + @strTrim("  hello  ") + "]"); // [hello]
 ```
-

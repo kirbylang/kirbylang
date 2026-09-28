@@ -6,22 +6,30 @@
 0002    | OP_CONSTANT         2 'World'
 0004    | OP_ARRAY            2
 0006    | OP_DEFINE_GLOBAL    0 'parts'
-0008    3 OP_GET_GLOBAL       3 '@arrJoin'
-0010    | OP_GET_GLOBAL       0 'parts'
-0012    | OP_CONSTANT         4 ' '
-0014    | OP_CALL             2
-0016    | OP_PRINT
-0017    4 OP_GET_GLOBAL       3 '@arrJoin'
-0019    | OP_GET_GLOBAL       0 'parts'
-0021    | OP_CONSTANT         5 ', '
-0023    | OP_CALL             2
-0025    | OP_PRINT
-0026    5 OP_GET_GLOBAL       3 '@arrJoin'
-0028    | OP_GET_GLOBAL       0 'parts'
-0030    | OP_CONSTANT         6 ''
-0032    | OP_CALL             2
-0034    | OP_PRINT
-0035    6 OP_GET_GLOBAL       0 'parts'
-0037    | OP_PRINT
-0038    7 OP_NIL
-0039    | OP_RETURN
+0008    3 OP_GET_GLOBAL       3 '@println'
+0010    | OP_GET_GLOBAL       4 '@arrJoin'
+0012    | OP_GET_GLOBAL       0 'parts'
+0014    | OP_CONSTANT         5 ' '
+0016    | OP_CALL             2
+0018    | OP_CALL             1
+0020    | OP_POP
+0021    4 OP_GET_GLOBAL       3 '@println'
+0023    | OP_GET_GLOBAL       4 '@arrJoin'
+0025    | OP_GET_GLOBAL       0 'parts'
+0027    | OP_CONSTANT         6 ', '
+0029    | OP_CALL             2
+0031    | OP_CALL             1
+0033    | OP_POP
+0034    5 OP_GET_GLOBAL       3 '@println'
+0036    | OP_GET_GLOBAL       4 '@arrJoin'
+0038    | OP_GET_GLOBAL       0 'parts'
+0040    | OP_CONSTANT         7 ''
+0042    | OP_CALL             2
+0044    | OP_CALL             1
+0046    | OP_POP
+0047    6 OP_GET_GLOBAL       3 '@println'
+0049    | OP_GET_GLOBAL       0 'parts'
+0051    | OP_CALL             1
+0053    | OP_POP
+0054    7 OP_NIL
+0055    | OP_RETURN

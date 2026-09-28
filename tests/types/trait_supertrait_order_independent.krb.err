@@ -26,12 +26,14 @@
 0039    | OP_CONSTANT         9 '300'
 0041    | OP_STRUCT_INIT      1
 0043    | OP_DEFINE_GLOBAL    8 'b'
-0045   16 OP_GET_GLOBAL       6 'a'
-0047    | OP_GET_GLOBAL       8 'b'
-0049    | OP_INVOKE        (1 args)    2 'cmp'
-0052    | OP_PRINT
-0053   17 OP_NIL
-0054    | OP_RETURN
+0045   16 OP_GET_GLOBAL      10 '@println'
+0047    | OP_GET_GLOBAL       6 'a'
+0049    | OP_GET_GLOBAL       8 'b'
+0051    | OP_INVOKE        (1 args)    2 'cmp'
+0054    | OP_CALL             1
+0056    | OP_POP
+0057   17 OP_NIL
+0058    | OP_RETURN
 == cmp ==
 0000    6 OP_GET_LOCAL        0
 0002    | OP_GET_PROPERTY     0 'cents'

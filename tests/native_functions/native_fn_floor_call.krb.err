@@ -2,18 +2,24 @@
 0000    1 OP_NIL
 0001    | OP_RETURN
 == <script> ==
-0000    1 OP_GET_GLOBAL       0 '@floor'
-0002    | OP_CONSTANT         1 '2.7'
-0004    | OP_CALL             1
-0006    | OP_PRINT
-0007    2 OP_GET_GLOBAL       0 '@floor'
-0009    | OP_CONSTANT         2 '2.5'
-0011    | OP_NEGATE
-0012    | OP_CALL             1
-0014    | OP_PRINT
-0015    3 OP_GET_GLOBAL       0 '@floor'
-0017    | OP_CONSTANT         3 '3'
-0019    | OP_CALL             1
-0021    | OP_PRINT
-0022    4 OP_NIL
-0023    | OP_RETURN
+0000    1 OP_GET_GLOBAL       0 '@println'
+0002    | OP_GET_GLOBAL       1 '@floor'
+0004    | OP_CONSTANT         2 '2.7'
+0006    | OP_CALL             1
+0008    | OP_CALL             1
+0010    | OP_POP
+0011    2 OP_GET_GLOBAL       0 '@println'
+0013    | OP_GET_GLOBAL       1 '@floor'
+0015    | OP_CONSTANT         3 '2.5'
+0017    | OP_NEGATE
+0018    | OP_CALL             1
+0020    | OP_CALL             1
+0022    | OP_POP
+0023    3 OP_GET_GLOBAL       0 '@println'
+0025    | OP_GET_GLOBAL       1 '@floor'
+0027    | OP_CONSTANT         4 '3'
+0029    | OP_CALL             1
+0031    | OP_CALL             1
+0033    | OP_POP
+0034    4 OP_NIL
+0035    | OP_RETURN

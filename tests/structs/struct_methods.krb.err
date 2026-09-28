@@ -15,14 +15,18 @@
 0018    8 OP_GET_GLOBAL       0 'Struct'
 0020    | OP_STRUCT_INIT      0
 0022    | OP_DEFINE_GLOBAL    5 'instance'
-0024   10 OP_GET_GLOBAL       5 'instance'
-0026    | OP_GET_PROPERTY     1 'hello'
-0028    | OP_PRINT
-0029   11 OP_GET_GLOBAL       5 'instance'
-0031    | OP_GET_PROPERTY     3 'world'
-0033    | OP_PRINT
-0034   12 OP_NIL
-0035    | OP_RETURN
+0024   10 OP_GET_GLOBAL       6 '@println'
+0026    | OP_GET_GLOBAL       5 'instance'
+0028    | OP_GET_PROPERTY     1 'hello'
+0030    | OP_CALL             1
+0032    | OP_POP
+0033   11 OP_GET_GLOBAL       6 '@println'
+0035    | OP_GET_GLOBAL       5 'instance'
+0037    | OP_GET_PROPERTY     3 'world'
+0039    | OP_CALL             1
+0041    | OP_POP
+0042   12 OP_NIL
+0043    | OP_RETURN
 == hello ==
 0000    4 OP_NIL
 0001    | OP_RETURN

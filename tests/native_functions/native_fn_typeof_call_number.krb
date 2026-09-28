@@ -1,1 +1,1 @@
-print @typeof(123);
+@println(@typeof(123));

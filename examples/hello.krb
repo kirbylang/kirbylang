@@ -3,4 +3,4 @@
 var name: string = @prompt("Name: ");
 var n: f64 = @parseNumber(@prompt("!#: "));
 
-print $"Hello {name}{@strRepeat("!", n)}";
+@println($"Hello {name}{@strRepeat("!", n)}");

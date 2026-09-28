@@ -1,1 +1,1 @@
-print @fileExists(false);
+@println(@fileExists(false));

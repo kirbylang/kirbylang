@@ -6,4 +6,4 @@ var closure = {
   inner
 };
 
-print closure();
+@println(closure());

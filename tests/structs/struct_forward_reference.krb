@@ -5,5 +5,5 @@ struct Point {
     pub var y: f64;
 }
 
-print p.x;
-print p.y;
+@println(p.x);
+@println(p.y);

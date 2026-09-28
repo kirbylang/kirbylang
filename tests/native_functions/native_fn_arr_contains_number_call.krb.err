@@ -7,15 +7,19 @@
 0004    | OP_CONSTANT         3 '3'
 0006    | OP_ARRAY            3
 0008    | OP_DEFINE_GLOBAL    0 'array'
-0010    3 OP_GET_GLOBAL       4 '@arrContains'
-0012    | OP_GET_GLOBAL       0 'array'
-0014    | OP_CONSTANT         2 '2'
-0016    | OP_CALL             2
-0018    | OP_PRINT
-0019    4 OP_GET_GLOBAL       4 '@arrContains'
-0021    | OP_GET_GLOBAL       0 'array'
-0023    | OP_CONSTANT         5 '100'
-0025    | OP_CALL             2
-0027    | OP_PRINT
-0028    5 OP_NIL
-0029    | OP_RETURN
+0010    3 OP_GET_GLOBAL       4 '@println'
+0012    | OP_GET_GLOBAL       5 '@arrContains'
+0014    | OP_GET_GLOBAL       0 'array'
+0016    | OP_CONSTANT         2 '2'
+0018    | OP_CALL             2
+0020    | OP_CALL             1
+0022    | OP_POP
+0023    4 OP_GET_GLOBAL       4 '@println'
+0025    | OP_GET_GLOBAL       5 '@arrContains'
+0027    | OP_GET_GLOBAL       0 'array'
+0029    | OP_CONSTANT         6 '100'
+0031    | OP_CALL             2
+0033    | OP_CALL             1
+0035    | OP_POP
+0036    5 OP_NIL
+0037    | OP_RETURN

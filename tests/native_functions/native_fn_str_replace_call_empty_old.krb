@@ -1,1 +1,1 @@
-print @strReplace("abc", "", "x");
+@println(@strReplace("abc", "", "x"));

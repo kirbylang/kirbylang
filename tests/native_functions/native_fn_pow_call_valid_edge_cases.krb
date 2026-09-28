@@ -1,6 +1,6 @@
-print @pow(-8, 3);
-print @pow(-2, -2);
-print @pow(0, 0);
-print @pow(0, 2);
-print @pow(4, -0.5);
-print @pow(-3, 2);
+@println(@pow(-8, 3));
+@println(@pow(-2, -2));
+@println(@pow(0, 0));
+@println(@pow(0, 2));
+@println(@pow(4, -0.5));
+@println(@pow(-3, 2));

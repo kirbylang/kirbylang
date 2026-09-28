@@ -1,1 +1,1 @@
-print @setenv("Hello", "World", "!");
+@println(@setenv("Hello", "World", "!"));

@@ -2,5 +2,5 @@ var array = [1, 2, 3];
 
 var removed = @arrRemove(array, 0);
 
-print array;
-print removed;
+@println(array);
+@println(removed);

@@ -3,5 +3,5 @@ Read in text from `stdin` until newline (NL) is encountered. An optional message
 ```kirby
 var name = @prompt("Name: ");
 
-print "Hello " + name;
+@println("Hello " + name);
 ```

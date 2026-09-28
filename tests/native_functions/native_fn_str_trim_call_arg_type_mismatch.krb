@@ -1,1 +1,1 @@
-print @strTrim(1);
+@println(@strTrim(1));

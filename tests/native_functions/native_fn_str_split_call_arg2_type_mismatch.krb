@@ -1,1 +1,1 @@
-print @strSplit("a,b", 2);
+@println(@strSplit("a,b", 2));

@@ -4,12 +4,12 @@ test(false);
 fun test (value: bool): unit {
   var x = {
     if (true) {
-      print "Hello";
+      @println("Hello");
     }
 
     "World"
   };
 
-  print x;
+  @println(x);
 }
 

@@ -4,4 +4,4 @@ fun run(f: fun (f64) => f64, x: f64): f64 = f(x);
 
 apply = run;
 
-print apply(fun (x) { x + 1 }, 5);
+@println(apply(fun (x) { x + 1 }, 5));

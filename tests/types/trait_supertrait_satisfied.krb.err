@@ -26,20 +26,26 @@
 0039    | OP_CONSTANT         9 '300'
 0041    | OP_STRUCT_INIT      1
 0043    | OP_DEFINE_GLOBAL    8 'b'
-0045   16 OP_GET_GLOBAL       6 'a'
-0047    | OP_GET_GLOBAL       8 'b'
-0049    | OP_INVOKE        (1 args)    4 'cmp'
-0052    | OP_PRINT
-0053   17 OP_GET_GLOBAL       6 'a'
-0055    | OP_GET_GLOBAL       8 'b'
-0057    | OP_INVOKE        (1 args)    2 'equals'
-0060    | OP_PRINT
-0061   18 OP_GET_GLOBAL       6 'a'
-0063    | OP_GET_GLOBAL       6 'a'
-0065    | OP_INVOKE        (1 args)    2 'equals'
-0068    | OP_PRINT
-0069   19 OP_NIL
-0070    | OP_RETURN
+0045   16 OP_GET_GLOBAL      10 '@println'
+0047    | OP_GET_GLOBAL       6 'a'
+0049    | OP_GET_GLOBAL       8 'b'
+0051    | OP_INVOKE        (1 args)    4 'cmp'
+0054    | OP_CALL             1
+0056    | OP_POP
+0057   17 OP_GET_GLOBAL      10 '@println'
+0059    | OP_GET_GLOBAL       6 'a'
+0061    | OP_GET_GLOBAL       8 'b'
+0063    | OP_INVOKE        (1 args)    2 'equals'
+0066    | OP_CALL             1
+0068    | OP_POP
+0069   18 OP_GET_GLOBAL      10 '@println'
+0071    | OP_GET_GLOBAL       6 'a'
+0073    | OP_GET_GLOBAL       6 'a'
+0075    | OP_INVOKE        (1 args)    2 'equals'
+0078    | OP_CALL             1
+0080    | OP_POP
+0081   19 OP_NIL
+0082    | OP_RETURN
 == equals ==
 0000    6 OP_GET_LOCAL        0
 0002    | OP_GET_PROPERTY     0 'cents'

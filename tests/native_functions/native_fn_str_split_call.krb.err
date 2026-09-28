@@ -7,45 +7,63 @@
 0004    | OP_CONSTANT         3 ','
 0006    | OP_CALL             2
 0008    | OP_DEFINE_GLOBAL    0 'parts'
-0010    2 OP_GET_GLOBAL       0 'parts'
-0012    | OP_PRINT
-0013    3 OP_GET_GLOBAL       4 '@len'
-0015    | OP_GET_GLOBAL       0 'parts'
-0017    | OP_CALL             1
-0019    | OP_PRINT
-0020    4 OP_GET_GLOBAL       0 'parts'
-0022    | OP_CONSTANT         5 '1'
-0024    | OP_GET_INDEX
-0025    | OP_PRINT
-0026    5 OP_GET_GLOBAL       1 '@strSplit'
-0028    | OP_CONSTANT         6 'a,b,,c'
-0030    | OP_CONSTANT         3 ','
-0032    | OP_CALL             2
-0034    | OP_PRINT
-0035    6 OP_GET_GLOBAL       1 '@strSplit'
-0037    | OP_CONSTANT         7 'a,b,'
-0039    | OP_CONSTANT         3 ','
-0041    | OP_CALL             2
-0043    | OP_PRINT
-0044    7 OP_GET_GLOBAL       1 '@strSplit'
-0046    | OP_CONSTANT         8 ',a'
-0048    | OP_CONSTANT         3 ','
-0050    | OP_CALL             2
-0052    | OP_PRINT
-0053    8 OP_GET_GLOBAL       1 '@strSplit'
-0055    | OP_CONSTANT         9 'abc'
+0010    2 OP_GET_GLOBAL       4 '@println'
+0012    | OP_GET_GLOBAL       0 'parts'
+0014    | OP_CALL             1
+0016    | OP_POP
+0017    3 OP_GET_GLOBAL       4 '@println'
+0019    | OP_GET_GLOBAL       5 '@len'
+0021    | OP_GET_GLOBAL       0 'parts'
+0023    | OP_CALL             1
+0025    | OP_CALL             1
+0027    | OP_POP
+0028    4 OP_GET_GLOBAL       4 '@println'
+0030    | OP_GET_GLOBAL       0 'parts'
+0032    | OP_CONSTANT         6 '1'
+0034    | OP_GET_INDEX
+0035    | OP_CALL             1
+0037    | OP_POP
+0038    5 OP_GET_GLOBAL       4 '@println'
+0040    | OP_GET_GLOBAL       1 '@strSplit'
+0042    | OP_CONSTANT         7 'a,b,,c'
+0044    | OP_CONSTANT         3 ','
+0046    | OP_CALL             2
+0048    | OP_CALL             1
+0050    | OP_POP
+0051    6 OP_GET_GLOBAL       4 '@println'
+0053    | OP_GET_GLOBAL       1 '@strSplit'
+0055    | OP_CONSTANT         8 'a,b,'
 0057    | OP_CONSTANT         3 ','
 0059    | OP_CALL             2
-0061    | OP_PRINT
-0062    9 OP_GET_GLOBAL       1 '@strSplit'
-0064    | OP_CONSTANT        10 'a--b--c'
-0066    | OP_CONSTANT        11 '--'
-0068    | OP_CALL             2
-0070    | OP_PRINT
-0071   10 OP_GET_GLOBAL       1 '@strSplit'
-0073    | OP_CONSTANT        12 'aaa'
-0075    | OP_CONSTANT        13 'aa'
-0077    | OP_CALL             2
-0079    | OP_PRINT
-0080   11 OP_NIL
-0081    | OP_RETURN
+0061    | OP_CALL             1
+0063    | OP_POP
+0064    7 OP_GET_GLOBAL       4 '@println'
+0066    | OP_GET_GLOBAL       1 '@strSplit'
+0068    | OP_CONSTANT         9 ',a'
+0070    | OP_CONSTANT         3 ','
+0072    | OP_CALL             2
+0074    | OP_CALL             1
+0076    | OP_POP
+0077    8 OP_GET_GLOBAL       4 '@println'
+0079    | OP_GET_GLOBAL       1 '@strSplit'
+0081    | OP_CONSTANT        10 'abc'
+0083    | OP_CONSTANT         3 ','
+0085    | OP_CALL             2
+0087    | OP_CALL             1
+0089    | OP_POP
+0090    9 OP_GET_GLOBAL       4 '@println'
+0092    | OP_GET_GLOBAL       1 '@strSplit'
+0094    | OP_CONSTANT        11 'a--b--c'
+0096    | OP_CONSTANT        12 '--'
+0098    | OP_CALL             2
+0100    | OP_CALL             1
+0102    | OP_POP
+0103   10 OP_GET_GLOBAL       4 '@println'
+0105    | OP_GET_GLOBAL       1 '@strSplit'
+0107    | OP_CONSTANT        13 'aaa'
+0109    | OP_CONSTANT        14 'aa'
+0111    | OP_CALL             2
+0113    | OP_CALL             1
+0115    | OP_POP
+0116   11 OP_NIL
+0117    | OP_RETURN

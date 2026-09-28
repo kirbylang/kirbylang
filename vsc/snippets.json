@@ -212,7 +212,7 @@
   "Print": {
     "prefix": "print",
     "body": [
-      "print ${1};$0"
+      "@println(${1});$0"
     ],
     "description": "Create a print statement"
   },

@@ -4,4 +4,4 @@ fun fn(condition: bool): f64 {
     }
 }
 
-print fn(true);
+@println(fn(true));

@@ -15,4 +15,4 @@ impl Display for Box {
 let box = Box.new(100);
 var n: f64 = box.toString();
 
-print n;
+@println(n);
