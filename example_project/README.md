@@ -2,7 +2,7 @@
 
 ```
 krb run
-krb run examples/cat.krb kirby.project.toml
+krb example cat kirby.project.toml
 ```
 
 ## Project
@@ -10,7 +10,11 @@ krb run examples/cat.krb kirby.project.toml
 ### kirby.project.toml
 
 ```toml
+# Default Kirby file to run
 bin = "bin/main.krb"
+
+# Directory of examples
+examples = "examples"
 ```
 
 ### Layout

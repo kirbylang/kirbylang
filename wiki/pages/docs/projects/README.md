@@ -43,6 +43,8 @@ krb run path/to/file.krb
 
 ## Example
 
+Run a file from the project's examples directory by name, without the `.krb` extension. The directory is set by `examples` in `kirby.project.toml` and defaults to `examples`.
+
 ```shell
-krb example cat README.md # krb -f examples/cat.krb README.md
+krb example cat README.md # krb run examples/cat.krb README.md
 ```

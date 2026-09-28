@@ -41,6 +41,10 @@ const char *help_message =
     "file\n"
     "                         from kirby.project.toml. Extra args are passed\n"
     "                         to the script\n"
+    "  example <name> [args...]\n"
+    "                         Run <name>.krb from the project's examples\n"
+    "                         directory (\"examples\" in kirby.project.toml,\n"
+    "                         defaults to \"examples\")\n"
     "  repl                   Start the interactive REPL\n"
     "  exec <source>          Run source code given as a string\n"
     "  compile <path>         Compile a file without running it\n"
@@ -54,6 +58,7 @@ const char *help_message =
     "krb run path/to/file.krb\n"
     "krb run                           # runs the project's \"bin\" file\n"
     "krb run -- arg1 arg2              # passes args to the project's \"bin\"\n"
+    "krb example hello                 # runs examples/hello.krb\n"
     "krb repl\n"
     "krb compile path/to/file.krb\n"
     "krb parse path/to/file.krb\n"
@@ -95,6 +100,12 @@ static KirbyProject loadProject(void) {
       if (bin_value.ok) {
         krb_project.bin = bin_value.u.s;
       }
+
+      toml_value_t examples_value = toml_table_string(project, "examples");
+
+      if (examples_value.ok) {
+        krb_project.examples = examples_value.u.s;
+      }
     }
   }
 
@@ -114,6 +125,13 @@ static void sessionEnd(void) {
   freeVM();
 }
 
+/* Runs the file at path with the standard library loaded. */
+static void runProgram(int argc, char *argv[], const char *path) {
+  sessionBegin(argc, argv);
+  runFile(path);
+  sessionEnd();
+}
+
 /* krb run [path] [args...]
  * With no path, or "--" in place of the path, the project's "bin" file runs. */
 static int cmdRun(int argc, char *argv[]) {
@@ -130,9 +148,33 @@ static int cmdRun(int argc, char *argv[]) {
     exit(1);
   }
 
-  sessionBegin(argc, argv);
-  runFile(file);
-  sessionEnd();
+  runProgram(argc, argv, file);
+  return 0;
+}
+
+/* krb example <name> [args...]
+ * Runs <examples>/<name>.krb. <examples> is the "examples" field of
+ * kirby.project.toml, or "examples" when not set. */
+static int cmdExample(int argc, char *argv[]) {
+  if (argc < 3)
+    return usageError();
+
+  KirbyProject project = loadProject();
+  const char *dir = project.examples != NULL ? project.examples : "examples";
+  const char *name = argv[2];
+
+  size_t length = strlen(dir) + strlen("/") + strlen(name) + strlen(".krb") + 1;
+  char *file = malloc(length);
+
+  if (file == NULL) {
+    fprintf(stderr, "Not enough memory to run example \"%s\".\n", name);
+    exit(EXIT_CODE_OS_ERR);
+  }
+
+  snprintf(file, length, "%s/%s.krb", dir, name);
+
+  runProgram(argc, argv, file);
+  free(file);
   return 0;
 }
 
@@ -215,8 +257,9 @@ static int cmdParse(int argc, char *argv[]) {
 }
 
 static const Command commands[] = {
-    {"run", cmdRun},         {"repl", cmdRepl}, {"exec", cmdExec},
-    {"compile", cmdCompile}, {"lex", cmdLex},   {"parse", cmdParse},
+    {"run", cmdRun},   {"example", cmdExample}, {"repl", cmdRepl},
+    {"exec", cmdExec}, {"compile", cmdCompile}, {"lex", cmdLex},
+    {"parse", cmdParse},
 };
 
 static const Command *findCommand(const char *name) {

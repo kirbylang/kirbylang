@@ -5,4 +5,4 @@ run:
     krb run
 
 cat *path:
-    krb run examples/cat.krb {{ path }}
+    krb example cat {{ path }}
