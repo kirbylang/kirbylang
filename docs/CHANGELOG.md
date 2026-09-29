@@ -139,6 +139,7 @@
     - `krb compile <path>`
     - `krb parse <path>`
     - `krb lex <path>`
+- Removal of the `print` statement. Replaced by the builtin `@print`, `@println`, `@eprint`, `@eprintln` functions
 
 - Refine shadow binding rules
 
