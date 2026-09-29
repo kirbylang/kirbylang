@@ -23,9 +23,9 @@ Preview first. This changes nothing:
 Then run it for real:
 
 ```shell
-./scripts/increment-version.sh -M   # major: 0.3.0 -> 1.0.0
-./scripts/increment-version.sh -m   # minor: 0.3.0 -> 0.4.0
-./scripts/increment-version.sh -p   # patch: 0.3.0 -> 0.3.1
+./scripts/increment-version.sh -M   # major: 0.0.0 -> 1.0.0
+./scripts/increment-version.sh -m   # minor: 0.0.0 -> 0.1.0
+./scripts/increment-version.sh -p   # patch: 0.0.0 -> 0.0.1
 ```
 
 Options:
@@ -37,9 +37,7 @@ Options:
 | `-y`, `--yes`     | Skip the confirmation prompt                  |
 | `--gh-release`    | Do not use. The workflow creates the release. |
 
-Environment: `REMOTE` (default `origin`), `RELEASE_BRANCH` (default `main`).
-
-## What the script does
+## Script
 
 1. Checks you are on `main`, the tree is clean, and you match `origin/main`.
 2. Checks `## Next` in the changelog has entries and the tag is not taken.
@@ -57,7 +55,7 @@ Environment: `REMOTE` (default `origin`), `RELEASE_BRANCH` (default `main`).
 If anything fails before the push, the script puts the repo back exactly as it
 found it: no leftover edits, commit, or tag.
 
-## What GitHub does
+## Github
 
 Pushing a tag like `v0.4.0` starts [`release.yml`](../.github/workflows/release.yml):
 
@@ -81,21 +79,3 @@ git push origin :refs/tags/v0.4.0
 git tag -a v0.4.0 -m "Release v0.4.0"
 git push origin v0.4.0
 ```
-
-`VERSION.txt` already says `0.4.0`, so the tag check still passes.
-
-## Notes
-
-- **The release notes come from Git history, not the changelog.** GitHub
-  builds them from commits and PRs. The changelog is written by hand and lives
-  in the repo only.
-- **The version test never needs re-snapshotting.**
-  `tests/native_functions/native_fn_version_call.krb` compares `@version()` to
-  `VERSION.txt` (read by its `.krb.env` file) and prints `true`. Run the tests
-  from the repo root so that relative path resolves.
-- **Branch protection.** The script pushes straight to `main`. If `main` ever
-  requires pull requests, add yourself to the ruleset's bypass list, or split
-  the script so the version commit goes through a PR and the tag is pushed
-  after it merges.
-- **Version source of truth** is `VERSION.txt`. `tools/semver/semver.sh` reads
-  it and works from any folder.
