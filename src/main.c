@@ -47,6 +47,9 @@ const char *help_message =
     "                         Run <name>.krb from the project's examples\n"
     "                         directory (\"examples\" in kirby.project.toml,\n"
     "                         defaults to \"examples\")\n"
+    "  config                 Print config in 'kirby.project.toml'\n"
+    "  config [key]           Print config by key\n"
+    "                         Supported: bin, examples\n"
     "  repl                   Start the interactive REPL\n"
     "  exec <source>          Run source code given as a string\n"
     "  compile <path>         Compile a file without running it\n"
@@ -62,6 +65,9 @@ const char *help_message =
     "krb run                           # runs the project's \"bin\" file\n"
     "krb run -- arg1 arg2              # passes args to the project's \"bin\"\n"
     "krb example hello                 # runs examples/hello.krb\n"
+    "krb config                        # print kirby.project.toml\n"
+    "krb config bin                    # print 'bin' kirby.project.toml\n"
+    "krb config examples               # print 'examples' kirby.project.toml\n"
     "krb repl\n"
     "krb compile path/to/file.krb\n"
     "krb parse path/to/file.krb\n"
@@ -288,7 +294,7 @@ static int cmdConfig(int argc, char *argv[]) {
     KirbyProject krb_project = loadProject();
 
     switch (argc) {
-    case 3:
+    case 3: {
       char *arg = argv[2];
 
       if (strcmp(arg, "bin") == 0) {
@@ -313,6 +319,7 @@ static int cmdConfig(int argc, char *argv[]) {
       }
 
       break;
+    }
 
     default: {
       // Print the `kirby.config.toml` file

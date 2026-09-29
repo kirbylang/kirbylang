@@ -15,6 +15,9 @@ Commands:
                          Run <name>.krb from the project's examples
                          directory ("examples" in kirby.project.toml,
                          defaults to "examples")
+  config                 Print config in 'kirby.project.toml'
+  config [key]           Print config by key
+                         Supported: bin, examples
   repl                   Start the interactive REPL
   exec <source>          Run source code given as a string
   compile <path>         Compile a file without running it
@@ -30,6 +33,9 @@ krb run path/to/file.krb          # runs the file
 krb run                           # runs the project's "bin" file
 krb run -- arg1 arg2              # passes args to the project's "bin"
 krb example hello                 # runs examples/hello.krb
+krb config                        # print kirby.project.toml
+krb config bin                    # print 'bin' kirby.project.toml
+krb config examples               # print 'examples' kirby.project.toml
 krb repl
 krb compile path/to/file.krb
 krb parse path/to/file.krb
