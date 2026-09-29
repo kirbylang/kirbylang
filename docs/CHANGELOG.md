@@ -22,7 +22,7 @@
   - [ ] `arrMap(array, fn)`
 - Macros
 
-## Next: 0.4.0
+## Next
 
 - Decouple compiler, GC, and VM
 - Build `stdlib/stdlib.krb` into the binary, so `krb` runs from any directory
