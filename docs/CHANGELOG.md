@@ -25,6 +25,9 @@
 ## Next
 
 - Add `krb init` to intialize a new Kirby project
+- Add `krb config` to view the project's `kirby.project.toml` configuration
+  - `krb config bin` Prints the `bin` value
+  - `krb config examples` Prints the `examples` value
 
 ## 0.4.0
 

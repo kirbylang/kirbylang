@@ -1,2 +1,2 @@
-# bin = "bin/main.krb"
-# examples = "examples"
+bin = "bin/main.krb"
+examples = "examples"
