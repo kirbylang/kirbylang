@@ -1,4 +1,2 @@
-# Default Kirby file to run
-bin = "bin/main.krb"
-
-examples = "examples"
+# bin = "bin/main.krb"
+# examples = "examples"

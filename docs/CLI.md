@@ -1,12 +1,13 @@
 # CLI
 
 ```
-kirby 0.0.0
+kirby 0.4.0
 
 Usage: krb [-h] [-v] <command> [args]
 
 Commands:
 
+  init                   Initialize a new kirby project in the current directory
   run [path] [args...]   Run a file. Without a path, runs the "bin" file
                          from kirby.project.toml. Extra args are passed
                          to the script
@@ -24,7 +25,8 @@ Examples:
 
 krb --help                        # -h is the short option
 krb --version                     # -v is the short option
-krb run path/to/file.krb
+krb init                          # initialize a new Kirby project
+krb run path/to/file.krb          # runs the file
 krb run                           # runs the project's "bin" file
 krb run -- arg1 arg2              # passes args to the project's "bin"
 krb example hello                 # runs examples/hello.krb
