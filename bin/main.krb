@@ -1,0 +1,6 @@
+@print($"kirby {@version()}
+
+This is the Kirby language's Kirby project binary.
+
+https://github.com/kirbylang/kirbylang
+");

@@ -47,6 +47,9 @@ const char *help_message =
     "                         Run <name>.krb from the project's examples\n"
     "                         directory (\"examples\" in kirby.project.toml,\n"
     "                         defaults to \"examples\")\n"
+    "  config                 Print config in 'kirby.project.toml'\n"
+    "  config [key]           Print config by key\n"
+    "                         Supported: bin, examples\n"
     "  repl                   Start the interactive REPL\n"
     "  exec <source>          Run source code given as a string\n"
     "  compile <path>         Compile a file without running it\n"
@@ -62,6 +65,9 @@ const char *help_message =
     "krb run                           # runs the project's \"bin\" file\n"
     "krb run -- arg1 arg2              # passes args to the project's \"bin\"\n"
     "krb example hello                 # runs examples/hello.krb\n"
+    "krb config                        # print kirby.project.toml\n"
+    "krb config bin                    # print 'bin' kirby.project.toml\n"
+    "krb config examples               # print 'examples' kirby.project.toml\n"
     "krb repl\n"
     "krb compile path/to/file.krb\n"
     "krb parse path/to/file.krb\n"
@@ -277,11 +283,65 @@ static int cmdParse(int argc, char *argv[]) {
   return 0;
 }
 
+/* krb config */
+static int cmdConfig(int argc, char *argv[]) {
+  FILE *fp = fopen("kirby.project.toml", "r");
+
+  if (fp == NULL) {
+    fprintf(stderr,
+            "Error: kirby.project.toml not found. Try running `krb init`.\n");
+  } else {
+    KirbyProject krb_project = loadProject();
+
+    switch (argc) {
+    case 3: {
+      char *arg = argv[2];
+
+      if (strcmp(arg, "bin") == 0) {
+        if (krb_project.bin == NULL) {
+          fprintf(stderr,
+                  "The project bin is undefined in the config. "
+                  "Update 'kirby.project.toml' with 'bin=\"bin/main.krb\"'.\n");
+        } else {
+          fprintf(stderr, "%s\n", krb_project.bin);
+        }
+      }
+
+      if (strcmp(arg, "examples") == 0) {
+        if (krb_project.examples == NULL) {
+          fprintf(
+              stderr,
+              "The examples directory is missing from the config. "
+              "Update 'kirby.project.toml' with 'examples=\"examples\"'.\n");
+        } else {
+          fprintf(stderr, "%s\n", krb_project.bin);
+        }
+      }
+
+      break;
+    }
+
+    default: {
+      // Print the `kirby.config.toml` file
+
+      char buf[4096];
+      size_t n;
+
+      while ((n = fread(buf, 1, sizeof buf, fp)) > 0) {
+        fwrite(buf, 1, n, stdout);
+      }
+      break;
+    }
+    }
+  }
+
+  return 0;
+}
+
 static const Command commands[] = {
     {"init", cmdInit}, {"run", cmdRun},     {"example", cmdExample},
     {"repl", cmdRepl}, {"exec", cmdExec},   {"compile", cmdCompile},
-    {"lex", cmdLex},   {"parse", cmdParse},
-};
+    {"lex", cmdLex},   {"parse", cmdParse}, {"config", cmdConfig}};
 
 static const Command *findCommand(const char *name) {
   size_t count = sizeof(commands) / sizeof(commands[0]);
