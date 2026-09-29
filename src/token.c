@@ -86,8 +86,6 @@ const char *tokenTypeToString(TokenType type) {
     return "TOKEN_NIL";
   case TOKEN_OR:
     return "TOKEN_OR";
-  case TOKEN_PRINT:
-    return "TOKEN_PRINT";
   case TOKEN_PUB:
     return "TOKEN_PUB";
   case TOKEN_RETURN:

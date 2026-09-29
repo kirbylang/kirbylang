@@ -165,14 +165,14 @@ static void test_definite_assignment_top_level_uninitialized_var(void) {
   // reasoning involved.
   bool ok = typecheckSource("var x: f64;\n"
                             "x = 5;\n"
-                            "print x;\n");
+                            "@println(x);\n");
   assert(ok);
 }
 
 static void test_definite_assignment_top_level_read_before_assign_errors(void) {
   typchkResetError();
   bool ok = typecheckSource("var x: f64;\n"
-                            "print x;\n");
+                            "@println(x);\n");
   assert(!ok);
 }
 

@@ -6,4 +6,4 @@ impl Struct {
 
 var instance = Struct {};
 
-print instance.hello;
+@println(instance.hello);

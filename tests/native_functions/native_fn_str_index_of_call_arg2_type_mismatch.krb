@@ -1,1 +1,1 @@
-print @strIndexOf("a", 2);
+@println(@strIndexOf("a", 2));

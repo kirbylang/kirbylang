@@ -2,24 +2,30 @@
 0000    1 OP_NIL
 0001    | OP_RETURN
 == <script> ==
-0000    1 OP_GET_GLOBAL       0 '@strSplit'
-0002    | OP_CONSTANT         1 'abc'
-0004    | OP_CONSTANT         2 ''
-0006    | OP_CALL             2
-0008    | OP_PRINT
-0009    2 OP_GET_GLOBAL       3 '@len'
-0011    | OP_GET_GLOBAL       0 '@strSplit'
-0013    | OP_CONSTANT         1 'abc'
-0015    | OP_CONSTANT         2 ''
-0017    | OP_CALL             2
-0019    | OP_CALL             1
-0021    | OP_PRINT
-0022    3 OP_GET_GLOBAL       3 '@len'
-0024    | OP_GET_GLOBAL       0 '@strSplit'
-0026    | OP_CONSTANT         2 ''
-0028    | OP_CONSTANT         2 ''
-0030    | OP_CALL             2
-0032    | OP_CALL             1
-0034    | OP_PRINT
-0035    4 OP_NIL
-0036    | OP_RETURN
+0000    1 OP_GET_GLOBAL       0 '@println'
+0002    | OP_GET_GLOBAL       1 '@strSplit'
+0004    | OP_CONSTANT         2 'abc'
+0006    | OP_CONSTANT         3 ''
+0008    | OP_CALL             2
+0010    | OP_CALL             1
+0012    | OP_POP
+0013    2 OP_GET_GLOBAL       0 '@println'
+0015    | OP_GET_GLOBAL       4 '@len'
+0017    | OP_GET_GLOBAL       1 '@strSplit'
+0019    | OP_CONSTANT         2 'abc'
+0021    | OP_CONSTANT         3 ''
+0023    | OP_CALL             2
+0025    | OP_CALL             1
+0027    | OP_CALL             1
+0029    | OP_POP
+0030    3 OP_GET_GLOBAL       0 '@println'
+0032    | OP_GET_GLOBAL       4 '@len'
+0034    | OP_GET_GLOBAL       1 '@strSplit'
+0036    | OP_CONSTANT         3 ''
+0038    | OP_CONSTANT         3 ''
+0040    | OP_CALL             2
+0042    | OP_CALL             1
+0044    | OP_CALL             1
+0046    | OP_POP
+0047    4 OP_NIL
+0048    | OP_RETURN

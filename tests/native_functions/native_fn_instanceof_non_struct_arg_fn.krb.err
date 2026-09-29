@@ -11,13 +11,15 @@
 0011    3 OP_GET_GLOBAL       2 'Struct'
 0013    | OP_STRUCT_INIT      0
 0015    | OP_DEFINE_GLOBAL    3 'instance'
-0017    7 OP_GET_GLOBAL       4 '@instanceOf'
-0019    | OP_GET_GLOBAL       3 'instance'
-0021    | OP_GET_GLOBAL       0 'test'
-0023    | OP_CALL             2
-0025    | OP_PRINT
-0026    8 OP_NIL
-0027    | OP_RETURN
+0017    7 OP_GET_GLOBAL       4 '@println'
+0019    | OP_GET_GLOBAL       5 '@instanceOf'
+0021    | OP_GET_GLOBAL       3 'instance'
+0023    | OP_GET_GLOBAL       0 'test'
+0025    | OP_CALL             2
+0027    | OP_CALL             1
+0029    | OP_POP
+0030    8 OP_NIL
+0031    | OP_RETURN
 == test ==
 0000    5 OP_NIL
 0001    | OP_RETURN

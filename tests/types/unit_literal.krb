@@ -1,6 +1,6 @@
 let nothing: unit = ();
 
-print nothing;
+@println(nothing);
 
 fun doNothing(): unit {
     return ();
@@ -12,4 +12,4 @@ fun alsoNothing(): unit = ();
 
 alsoNothing();
 
-print () == ();
+@println(() == ());

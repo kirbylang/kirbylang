@@ -10,4 +10,4 @@ impl Point {
     pub fun x(self): f64 = self._x;
 }
 
-print Point.origin().x();
+@println(Point.origin().x());

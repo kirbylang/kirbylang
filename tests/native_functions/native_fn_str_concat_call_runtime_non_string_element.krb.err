@@ -10,11 +10,13 @@
 0010    | OP_CONSTANT         3 '1'
 0012    | OP_CALL             2
 0014    | OP_POP
-0015    4 OP_GET_GLOBAL       4 '@strConcat'
-0017    | OP_GET_GLOBAL       0 'parts'
-0019    | OP_CALL             1
-0021    | OP_PRINT
-0022    5 OP_NIL
-0023    | OP_RETURN
+0015    4 OP_GET_GLOBAL       4 '@println'
+0017    | OP_GET_GLOBAL       5 '@strConcat'
+0019    | OP_GET_GLOBAL       0 'parts'
+0021    | OP_CALL             1
+0023    | OP_CALL             1
+0025    | OP_POP
+0026    5 OP_NIL
+0027    | OP_RETURN
 function strConcat expects every element of argument 1 to be a string but element 1 is a number.
 [line 4] in script

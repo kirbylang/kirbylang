@@ -2,6 +2,6 @@ fun function(): unit {
     return;
 }
 
-print function;
+@println(function);
 
-print function();
+@println(function());

@@ -1,179 +1,179 @@
-print @exit;
-print @typeof(@exit);
+@println(@exit);
+@println(@typeof(@exit));
 
-print @version;
-print @typeof(@version);
+@println(@version);
+@println(@typeof(@version));
 
-print @rand;
-print @typeof(@rand);
+@println(@rand);
+@println(@typeof(@rand));
 
-print @rand01;
-print @typeof(@rand01);
+@println(@rand01);
+@println(@typeof(@rand01));
 
-print @randBetween;
-print @typeof(@randBetween);
+@println(@randBetween);
+@println(@typeof(@randBetween));
 
-print @ceil;
-print @typeof(@ceil);
+@println(@ceil);
+@println(@typeof(@ceil));
 
-print @readFileToString;
-print @typeof(@readFileToString);
+@println(@readFileToString);
+@println(@typeof(@readFileToString));
 
-print @writeStringToFile;
-print @typeof(@writeStringToFile);
+@println(@writeStringToFile);
+@println(@typeof(@writeStringToFile));
 
-print @fileExists;
-print @typeof(@fileExists);
+@println(@fileExists);
+@println(@typeof(@fileExists));
 
-print @getenv;
-print @typeof(@getenv);
+@println(@getenv);
+@println(@typeof(@getenv));
 
-print @setenv;
-print @typeof(@setenv);
+@println(@setenv);
+@println(@typeof(@setenv));
 
-print @len;
-print @typeof(@len);
+@println(@len);
+@println(@typeof(@len));
 
-print @typeof;
-print @typeof(@typeof);
+@println(@typeof);
+@println(@typeof(@typeof));
 
-print @argc;
-print @typeof(@argc);
+@println(@argc);
+@println(@typeof(@argc));
 
-print @argv;
-print @typeof(@argv);
+@println(@argv);
+@println(@typeof(@argv));
 
-print @clock;
-print @typeof(@clock);
+@println(@clock);
+@println(@typeof(@clock));
 
-print @prompt;
-print @typeof(@prompt);
+@println(@prompt);
+@println(@typeof(@prompt));
 
-print @stdin;
-print @typeof(@stdin);
+@println(@stdin);
+@println(@typeof(@stdin));
 
-print @instanceOf;
-print @typeof(@instanceOf);
+@println(@instanceOf);
+@println(@typeof(@instanceOf));
 
-print @parseNumber;
-print @typeof(@parseNumber);
+@println(@parseNumber);
+@println(@typeof(@parseNumber));
 
-print @numberToString;
-print @typeof(@numberToString);
+@println(@numberToString);
+@println(@typeof(@numberToString));
 
-print @arrPush;
-print @typeof(@arrPush);
+@println(@arrPush);
+@println(@typeof(@arrPush));
 
-print @arrPop;
-print @typeof(@arrPop);
+@println(@arrPop);
+@println(@typeof(@arrPop));
 
-print @arrInsert;
-print @typeof(@arrInsert);
+@println(@arrInsert);
+@println(@typeof(@arrInsert));
 
-print @arrRemove;
-print @typeof(@arrRemove);
+@println(@arrRemove);
+@println(@typeof(@arrRemove));
 
-print @arrCopy;
-print @typeof(@arrCopy);
+@println(@arrCopy);
+@println(@typeof(@arrCopy));
 
-print @arrIsEmpty;
-print @typeof(@arrIsEmpty);
+@println(@arrIsEmpty);
+@println(@typeof(@arrIsEmpty));
 
-print @arrEqual;
-print @typeof(@arrEqual);
+@println(@arrEqual);
+@println(@typeof(@arrEqual));
 
-print @arrSlice;
-print @typeof(@arrSlice);
+@println(@arrSlice);
+@println(@typeof(@arrSlice));
 
-print @arrConcat;
-print @typeof(@arrConcat);
+@println(@arrConcat);
+@println(@typeof(@arrConcat));
 
-print @arrReverse;
-print @typeof(@arrReverse);
+@println(@arrReverse);
+@println(@typeof(@arrReverse));
 
-print @is;
-print @typeof(@is);
+@println(@is);
+@println(@typeof(@is));
 
-print @isNumber;
-print @typeof(@isNumber);
+@println(@isNumber);
+@println(@typeof(@isNumber));
 
-print @isFunction;
-print @typeof(@isFunction);
+@println(@isFunction);
+@println(@typeof(@isFunction));
 
-print @isBool;
-print @typeof(@isBool);
+@println(@isBool);
+@println(@typeof(@isBool));
 
-print @isNil;
-print @typeof(@isNil);
+@println(@isNil);
+@println(@typeof(@isNil));
 
-print @isString;
-print @typeof(@isString);
+@println(@isString);
+@println(@typeof(@isString));
 
-print @strIsEmpty;
-print @typeof(@strIsEmpty);
+@println(@strIsEmpty);
+@println(@typeof(@strIsEmpty));
 
-print @assert;
-print @typeof(@assert);
+@println(@assert);
+@println(@typeof(@assert));
 
-print @panic;
-print @typeof(@panic);
+@println(@panic);
+@println(@typeof(@panic));
 
-print @floor;
-print @typeof(@floor);
+@println(@floor);
+@println(@typeof(@floor));
 
-print @round;
-print @typeof(@round);
+@println(@round);
+@println(@typeof(@round));
 
-print @trunc;
-print @typeof(@trunc);
+@println(@trunc);
+@println(@typeof(@trunc));
 
-print @abs;
-print @typeof(@abs);
+@println(@abs);
+@println(@typeof(@abs));
 
-print @sqrt;
-print @typeof(@sqrt);
+@println(@sqrt);
+@println(@typeof(@sqrt));
 
-print @pow;
-print @typeof(@pow);
+@println(@pow);
+@println(@typeof(@pow));
 
-print @min;
-print @typeof(@min);
+@println(@min);
+@println(@typeof(@min));
 
-print @max;
-print @typeof(@max);
+@println(@max);
+@println(@typeof(@max));
 
-print @strContains;
-print @typeof(@strContains);
+@println(@strContains);
+@println(@typeof(@strContains));
 
-print @strIndexOf;
-print @typeof(@strIndexOf);
+@println(@strIndexOf);
+@println(@typeof(@strIndexOf));
 
-print @strSlice;
-print @typeof(@strSlice);
+@println(@strSlice);
+@println(@typeof(@strSlice));
 
-print @strSplit;
-print @typeof(@strSplit);
+@println(@strSplit);
+@println(@typeof(@strSplit));
 
-print @strTrim;
-print @typeof(@strTrim);
+@println(@strTrim);
+@println(@typeof(@strTrim));
 
-print @strToUpper;
-print @typeof(@strToUpper);
+@println(@strToUpper);
+@println(@typeof(@strToUpper));
 
-print @strToLower;
-print @typeof(@strToLower);
+@println(@strToLower);
+@println(@typeof(@strToLower));
 
-print @strStartsWith;
-print @typeof(@strStartsWith);
+@println(@strStartsWith);
+@println(@typeof(@strStartsWith));
 
-print @strEndsWith;
-print @typeof(@strEndsWith);
+@println(@strEndsWith);
+@println(@typeof(@strEndsWith));
 
-print @strRepeat;
-print @typeof(@strRepeat);
+@println(@strRepeat);
+@println(@typeof(@strRepeat));
 
-print @strReplace;
-print @typeof(@strReplace);
+@println(@strReplace);
+@println(@typeof(@strReplace));
 
-print @strReplaceAll;
-print @typeof(@strReplaceAll);
+@println(@strReplaceAll);
+@println(@typeof(@strReplaceAll));

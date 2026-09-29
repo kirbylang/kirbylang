@@ -19,4 +19,4 @@ impl Box {
 let box = Box.new(100);
 var n: f64 = box.get();
 
-print n;
+@println(n);

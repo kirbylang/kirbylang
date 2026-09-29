@@ -10,5 +10,5 @@ impl Counter {
 
 var c = Counter.new();
 
-print c.count();
-print c.count;
+@println(c.count());
+@println(c.count);

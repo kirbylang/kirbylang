@@ -1,4 +1,4 @@
-print @strRepeat("ab", 3);
-print @strRepeat("x", 1);
-print @strRepeat("ab", 0);
-print @strRepeat("", 5);
+@println(@strRepeat("ab", 3));
+@println(@strRepeat("x", 1));
+@println(@strRepeat("ab", 0));
+@println(@strRepeat("", 5));

@@ -39,7 +39,7 @@ static void test_function_signatures_survive_the_unit_that_declared_them(void) {
   assert(checkUnit("fun double(x: f64): f64 = x * 2;"));
 
   typchkResetError();
-  assert(!checkUnit("print double(1, 2);"));
+  assert(!checkUnit("@println(double(1, 2));"));
 
   typchkSessionEnd();
   typchkResetError();
@@ -56,10 +56,10 @@ static void test_struct_types_survive_the_unit_that_declared_them(void) {
                    "  pub fun new(x: f64): Point = Point { x: x };\n"
                    "}"));
 
-  assert(checkUnit("let p: Point = Point.new(1);\nprint p.x;"));
+  assert(checkUnit("let p: Point = Point.new(1);\n@println(p.x);"));
 
   typchkResetError();
-  assert(!checkUnit("print Point.new(1).nope;"));
+  assert(!checkUnit("@println(Point.new(1).nope);"));
 
   typchkSessionEnd();
   typchkResetError();
@@ -70,7 +70,7 @@ static void test_an_error_in_one_unit_doesnt_fail_the_next(void) {
   typchkSessionBegin();
 
   assert(!checkUnit("let x: f64 = \"no\";"));
-  assert(checkUnit("print 1 + 2;"));
+  assert(checkUnit("@println(1 + 2);"));
 
   typchkSessionEnd();
 }
@@ -82,7 +82,7 @@ static void test_units_are_independent_without_a_session(void) {
 
   // No session, so the second unit never learned `double` -- it falls
   // through to the unresolved-callee path and stays unchecked.
-  assert(checkUnit("print double(1, 2);"));
+  assert(checkUnit("@println(double(1, 2));"));
 
   typchkResetError();
 }

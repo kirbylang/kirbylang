@@ -4,4 +4,4 @@ impl Struct {
     fun hello(self): unit {}
 }
 
-print Struct.hello;
+@println(Struct.hello);

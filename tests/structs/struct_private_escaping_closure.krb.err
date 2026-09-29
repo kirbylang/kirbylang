@@ -18,11 +18,13 @@
 0024    | OP_STRUCT_INIT      1
 0026    | OP_INVOKE        (0 args)    2 'reader'
 0029    | OP_DEFINE_GLOBAL    4 'read'
-0031   16 OP_GET_GLOBAL       4 'read'
-0033    | OP_CALL             0
-0035    | OP_PRINT
-0036   17 OP_NIL
-0037    | OP_RETURN
+0031   16 OP_GET_GLOBAL       6 '@println'
+0033    | OP_GET_GLOBAL       4 'read'
+0035    | OP_CALL             0
+0037    | OP_CALL             1
+0039    | OP_POP
+0040   17 OP_NIL
+0041    | OP_RETURN
 == reader ==
 0000    8 OP_CLOSURE          0 <fn lambda0x1>
 0002      |                     local 0

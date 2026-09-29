@@ -19,4 +19,4 @@ var counter = Counter { count: 0 };
 counter.increment();
 counter.increment();
 
-print counter.get();
+@println(counter.get());

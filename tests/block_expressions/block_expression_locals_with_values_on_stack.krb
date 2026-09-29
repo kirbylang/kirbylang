@@ -6,9 +6,9 @@ fun inFunction(): f64 {
     x
 }
 
-print 1 + { let n = 2; n * 3 };
-print [0, { let n = 2; n }];
-print id({ let n = 2; n * 3 });
-print inFunction();
-print id({ let n = 5; let f = fun (): f64 { n }; f() });
-print id(1 + { let a = 1; { let b = 2; a + b } });
+@println(1 + { let n = 2; n * 3 });
+@println([0, { let n = 2; n }]);
+@println(id({ let n = 2; n * 3 }));
+@println(inFunction());
+@println(id({ let n = 5; let f = fun (): f64 { n }; f() }));
+@println(id(1 + { let a = 1; { let b = 2; a + b } }));

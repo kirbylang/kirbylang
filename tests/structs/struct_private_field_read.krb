@@ -4,4 +4,4 @@ struct Account {
 
 var a = Account {};
 
-print a.balance;
+@println(a.balance);

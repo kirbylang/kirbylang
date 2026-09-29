@@ -17,11 +17,17 @@
 0024    | OP_GET_GLOBAL       4 'b'
 0026    | OP_CALL             2
 0028    | OP_DEFINE_GLOBAL    8 'c'
-0030    5 OP_GET_GLOBAL       0 'a'
-0032    | OP_PRINT
-0033    6 OP_GET_GLOBAL       4 'b'
-0035    | OP_PRINT
-0036    7 OP_GET_GLOBAL       8 'c'
-0038    | OP_PRINT
-0039    8 OP_NIL
-0040    | OP_RETURN
+0030    5 OP_GET_GLOBAL      10 '@println'
+0032    | OP_GET_GLOBAL       0 'a'
+0034    | OP_CALL             1
+0036    | OP_POP
+0037    6 OP_GET_GLOBAL      10 '@println'
+0039    | OP_GET_GLOBAL       4 'b'
+0041    | OP_CALL             1
+0043    | OP_POP
+0044    7 OP_GET_GLOBAL      10 '@println'
+0046    | OP_GET_GLOBAL       8 'c'
+0048    | OP_CALL             1
+0050    | OP_POP
+0051    8 OP_NIL
+0052    | OP_RETURN

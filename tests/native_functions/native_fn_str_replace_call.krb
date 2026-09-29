@@ -1,6 +1,6 @@
-print @strReplace("a-b-c", "-", "+");
-print @strReplace("hello", "l", "L");
-print @strReplace("hello", "xyz", "!");
-print @strReplace("hello", "hello", "");
-print @strReplace("abc", "b", "1234");
-print @strReplace("", "a", "b");
+@println(@strReplace("a-b-c", "-", "+"));
+@println(@strReplace("hello", "l", "L"));
+@println(@strReplace("hello", "xyz", "!"));
+@println(@strReplace("hello", "hello", ""));
+@println(@strReplace("abc", "b", "1234"));
+@println(@strReplace("", "a", "b"));

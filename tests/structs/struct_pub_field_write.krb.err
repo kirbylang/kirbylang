@@ -17,8 +17,10 @@
 0023    | OP_CONSTANT         4 '9'
 0025    | OP_SET_PROPERTY     1 'x'
 0027    | OP_POP
-0028    9 OP_GET_GLOBAL       2 'p'
-0030    | OP_GET_PROPERTY     1 'x'
-0032    | OP_PRINT
-0033   10 OP_NIL
-0034    | OP_RETURN
+0028    9 OP_GET_GLOBAL       5 '@println'
+0030    | OP_GET_GLOBAL       2 'p'
+0032    | OP_GET_PROPERTY     1 'x'
+0034    | OP_CALL             1
+0036    | OP_POP
+0037   10 OP_NIL
+0038    | OP_RETURN

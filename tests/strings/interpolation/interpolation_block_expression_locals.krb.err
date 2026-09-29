@@ -6,34 +6,40 @@
 0002    | OP_DEFINE_GLOBAL    0 'describe'
 0004    1 OP_CONSTANT         3 'World'
 0006    | OP_DEFINE_GLOBAL    2 'name'
-0008    8 OP_GET_GLOBAL       0 'describe'
-0010    | OP_CALL             0
-0012    | OP_PRINT
-0013    9 OP_GET_GLOBAL       4 '@strConcat'
-0015    | OP_CONSTANT         5 'a '
-0017    | OP_GET_GLOBAL       2 'name'
-0019    | OP_CONSTANT         6 ' b '
-0021    | OP_CONSTANT         7 'x'
-0023    | OP_GET_LOCAL        5
-0025    | OP_GET_LOCAL        5
-0027    | OP_ADD
-0028    | OP_CLOSE_BLOCK_EXPR    1
-0030    | OP_CONSTANT         8 ' c'
-0032    | OP_ARRAY            5
-0034    | OP_CALL             1
-0036    | OP_PRINT
-0037   10 OP_GET_GLOBAL       4 '@strConcat'
-0039    | OP_CONSTANT         9 'a'
-0041    | OP_CONSTANT        10 'b'
-0043    | OP_GET_LOCAL        3
-0045    | OP_CLOSE_BLOCK_EXPR    1
-0047    | OP_CONSTANT        11 'c'
-0049    | OP_GET_GLOBAL       2 'name'
-0051    | OP_ARRAY            4
-0053    | OP_CALL             1
-0055    | OP_PRINT
-0056   11 OP_NIL
-0057    | OP_RETURN
+0008    8 OP_GET_GLOBAL       4 '@println'
+0010    | OP_GET_GLOBAL       0 'describe'
+0012    | OP_CALL             0
+0014    | OP_CALL             1
+0016    | OP_POP
+0017    9 OP_GET_GLOBAL       4 '@println'
+0019    | OP_GET_GLOBAL       5 '@strConcat'
+0021    | OP_CONSTANT         6 'a '
+0023    | OP_GET_GLOBAL       2 'name'
+0025    | OP_CONSTANT         7 ' b '
+0027    | OP_CONSTANT         8 'x'
+0029    | OP_GET_LOCAL        6
+0031    | OP_GET_LOCAL        6
+0033    | OP_ADD
+0034    | OP_CLOSE_BLOCK_EXPR    1
+0036    | OP_CONSTANT         9 ' c'
+0038    | OP_ARRAY            5
+0040    | OP_CALL             1
+0042    | OP_CALL             1
+0044    | OP_POP
+0045   10 OP_GET_GLOBAL       4 '@println'
+0047    | OP_GET_GLOBAL       5 '@strConcat'
+0049    | OP_CONSTANT        10 'a'
+0051    | OP_CONSTANT        11 'b'
+0053    | OP_GET_LOCAL        4
+0055    | OP_CLOSE_BLOCK_EXPR    1
+0057    | OP_CONSTANT        12 'c'
+0059    | OP_GET_GLOBAL       2 'name'
+0061    | OP_ARRAY            4
+0063    | OP_CALL             1
+0065    | OP_CALL             1
+0067    | OP_POP
+0068   11 OP_NIL
+0069    | OP_RETURN
 == describe ==
 0000    4 OP_CONSTANT         0 'Hello'
 0002    5 OP_GET_GLOBAL       1 '@strConcat'

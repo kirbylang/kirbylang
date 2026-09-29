@@ -5,4 +5,4 @@ struct Struct {
 
 var instance = Struct {};
 
-print instance.value;
+@println(instance.value);

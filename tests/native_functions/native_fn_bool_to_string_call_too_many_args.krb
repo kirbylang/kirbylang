@@ -1,1 +1,1 @@
-print @boolToString(true, false);
+@println(@boolToString(true, false));

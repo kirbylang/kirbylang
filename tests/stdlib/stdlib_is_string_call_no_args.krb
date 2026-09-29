@@ -1,1 +1,1 @@
-print @isString();
+@println(@isString());

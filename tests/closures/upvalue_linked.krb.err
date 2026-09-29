@@ -29,17 +29,23 @@
 0039   20 OP_NIL
 0040    | OP_RETURN
 == f ==
-0000    4 OP_GET_UPVALUE      0
-0002    | OP_PRINT
-0003    5 OP_NIL
-0004    | OP_RETURN
+0000    4 OP_GET_GLOBAL       0 '@println'
+0002    | OP_GET_UPVALUE      0
+0004    | OP_CALL             1
+0006    | OP_POP
+0007    5 OP_NIL
+0008    | OP_RETURN
 == g ==
-0000    8 OP_GET_UPVALUE      0
-0002    | OP_PRINT
-0003    9 OP_NIL
-0004    | OP_RETURN
+0000    8 OP_GET_GLOBAL       0 '@println'
+0002    | OP_GET_UPVALUE      0
+0004    | OP_CALL             1
+0006    | OP_POP
+0007    9 OP_NIL
+0008    | OP_RETURN
 == h ==
-0000   12 OP_GET_UPVALUE      0
-0002    | OP_PRINT
-0003   13 OP_NIL
-0004    | OP_RETURN
+0000   12 OP_GET_GLOBAL       0 '@println'
+0002    | OP_GET_UPVALUE      0
+0004    | OP_CALL             1
+0006    | OP_POP
+0007   13 OP_NIL
+0008    | OP_RETURN

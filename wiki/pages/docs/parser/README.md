@@ -54,7 +54,6 @@ struct AstNode {
 		IndexSetNode indexSet;
 		SelfNode self_;
 		ExprStmtNode exprStmt;
-		PrintNode print;
 		VarDeclNode varDecl;
 		BlockNode block;
 		IfNode if_;
@@ -162,14 +161,6 @@ Expressions followed by a semicolon.
 typedef struct {
 AstNode *expr;
 } ExprStmtNode;
-```
-
-### Print Statement
-
-```c
-typedef struct {
-AstNode *expr;
-} PrintNode;
 ```
 
 ### Calling Functions

@@ -1,1 +1,1 @@
-print @max("x", 3);
+@println(@max("x", 3));

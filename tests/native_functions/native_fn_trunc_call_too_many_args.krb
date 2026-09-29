@@ -1,1 +1,1 @@
-print @trunc(2.5, 1, 2);
+@println(@trunc(2.5, 1, 2));

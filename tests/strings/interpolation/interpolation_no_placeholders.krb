@@ -1,2 +1,2 @@
-print $"plain text";
-print $"";
+@println($"plain text");
+@println($"");

@@ -13,5 +13,5 @@ impl Cloneable for Point {
 
 var p = Point { x: 3, y: 4 };
 var p2: Point = p.clone();
-print p2.x;
-print p2.y;
+@println(p2.x);
+@println(p2.y);

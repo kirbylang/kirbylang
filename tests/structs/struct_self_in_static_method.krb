@@ -2,6 +2,6 @@ struct Struct {}
 
 impl Struct {
     fun hello(): unit {
-        print self;
+        @println(self);
     }
 }

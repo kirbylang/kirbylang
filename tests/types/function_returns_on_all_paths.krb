@@ -13,18 +13,18 @@ fun trailingValue(): f64 {
 
 fun afterALoop(): string {
     for (var i = 0; i < 3; i = i + 1) {
-        print i;
+        @println(i);
     }
 
     return "done";
 }
 
 fun returnsUnit(): unit {
-    print "nothing to return";
+    @println("nothing to return");
 }
 
-print branches(true);
-print branches(false);
-print trailingValue();
-print afterALoop();
+@println(branches(true));
+@println(branches(false));
+@println(trailingValue());
+@println(afterALoop());
 returnsUnit();

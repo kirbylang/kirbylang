@@ -5,6 +5,6 @@ var array = ["Hello", "World"];
 
 var poppedValue = @arrPop(array);
 
-print array; // [Hello]
-print poppedValue; // World
+@println(array); // [Hello]
+@println(poppedValue); // World
 ```

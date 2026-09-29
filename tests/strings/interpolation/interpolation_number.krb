@@ -1,4 +1,4 @@
 let count = 3;
 
-print $"count={count}";
-print $"pi is roughly {3.14159}";
+@println($"count={count}");
+@println($"pi is roughly {3.14159}");

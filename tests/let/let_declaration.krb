@@ -1,8 +1,8 @@
 let name = "John";
-print name;
+@println(name);
 
 let n = 42;
-print n;
+@println(n);
 
 let flag = true;
-print flag;
+@println(flag);

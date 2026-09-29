@@ -1,1 +1,1 @@
-print @strSplit(1, ",");
+@println(@strSplit(1, ","));

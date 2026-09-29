@@ -4,13 +4,15 @@
 == <script> ==
 0000    1 OP_CLOSURE          1 <fn lambda0x1>
 0002    | OP_DEFINE_GLOBAL    0 'add'
-0004    3 OP_GET_GLOBAL       0 'add'
-0006    | OP_CONSTANT         2 '1'
-0008    | OP_CONSTANT         3 '2'
-0010    | OP_CALL             2
-0012    | OP_PRINT
-0013    4 OP_NIL
-0014    | OP_RETURN
+0004    3 OP_GET_GLOBAL       2 '@println'
+0006    | OP_GET_GLOBAL       0 'add'
+0008    | OP_CONSTANT         3 '1'
+0010    | OP_CONSTANT         4 '2'
+0012    | OP_CALL             2
+0014    | OP_CALL             1
+0016    | OP_POP
+0017    4 OP_NIL
+0018    | OP_RETURN
 == lambda0x1 ==
 0000    1 OP_GET_LOCAL        1
 0002    | OP_GET_LOCAL        2

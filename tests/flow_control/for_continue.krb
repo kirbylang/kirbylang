@@ -3,5 +3,5 @@ for (var j = 0; j < 10; j = j + 1) {
 
     if (k % 2 == 0) continue;
 
-    print k;
+    @println(k);
 }

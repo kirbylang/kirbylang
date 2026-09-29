@@ -16,25 +16,33 @@
 0020    5 OP_GET_GLOBAL       1 'StructB'
 0022    | OP_STRUCT_INIT      0
 0024    | OP_DEFINE_GLOBAL    3 'instanceB'
-0026    7 OP_GET_GLOBAL       4 '@instanceOf'
-0028    | OP_GET_GLOBAL       2 'instanceA'
-0030    | OP_GET_GLOBAL       0 'StructA'
-0032    | OP_CALL             2
-0034    | OP_PRINT
-0035    8 OP_GET_GLOBAL       4 '@instanceOf'
-0037    | OP_GET_GLOBAL       3 'instanceB'
-0039    | OP_GET_GLOBAL       1 'StructB'
-0041    | OP_CALL             2
-0043    | OP_PRINT
-0044    9 OP_GET_GLOBAL       4 '@instanceOf'
-0046    | OP_GET_GLOBAL       2 'instanceA'
-0048    | OP_GET_GLOBAL       1 'StructB'
-0050    | OP_CALL             2
-0052    | OP_PRINT
-0053   10 OP_GET_GLOBAL       4 '@instanceOf'
-0055    | OP_GET_GLOBAL       3 'instanceB'
-0057    | OP_GET_GLOBAL       0 'StructA'
-0059    | OP_CALL             2
-0061    | OP_PRINT
-0062   11 OP_NIL
-0063    | OP_RETURN
+0026    7 OP_GET_GLOBAL       4 '@println'
+0028    | OP_GET_GLOBAL       5 '@instanceOf'
+0030    | OP_GET_GLOBAL       2 'instanceA'
+0032    | OP_GET_GLOBAL       0 'StructA'
+0034    | OP_CALL             2
+0036    | OP_CALL             1
+0038    | OP_POP
+0039    8 OP_GET_GLOBAL       4 '@println'
+0041    | OP_GET_GLOBAL       5 '@instanceOf'
+0043    | OP_GET_GLOBAL       3 'instanceB'
+0045    | OP_GET_GLOBAL       1 'StructB'
+0047    | OP_CALL             2
+0049    | OP_CALL             1
+0051    | OP_POP
+0052    9 OP_GET_GLOBAL       4 '@println'
+0054    | OP_GET_GLOBAL       5 '@instanceOf'
+0056    | OP_GET_GLOBAL       2 'instanceA'
+0058    | OP_GET_GLOBAL       1 'StructB'
+0060    | OP_CALL             2
+0062    | OP_CALL             1
+0064    | OP_POP
+0065   10 OP_GET_GLOBAL       4 '@println'
+0067    | OP_GET_GLOBAL       5 '@instanceOf'
+0069    | OP_GET_GLOBAL       3 'instanceB'
+0071    | OP_GET_GLOBAL       0 'StructA'
+0073    | OP_CALL             2
+0075    | OP_CALL             1
+0077    | OP_POP
+0078   11 OP_NIL
+0079    | OP_RETURN

@@ -4,4 +4,4 @@ impl Point {
     fun origin(): Point = Point {};
 }
 
-print Point.origin();
+@println(Point.origin());

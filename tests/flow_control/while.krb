@@ -2,5 +2,5 @@ var cond = true;
 
 while (cond) {
     cond = !cond;
-    print "Hello World";
+    @println("Hello World");
 }

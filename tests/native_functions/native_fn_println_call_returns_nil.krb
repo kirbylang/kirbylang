@@ -1,1 +1,1 @@
-print @typeof(@println("x"));
+@println(@typeof(@println("x")));

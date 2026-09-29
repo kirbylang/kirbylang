@@ -3,7 +3,7 @@ let b = 10;
 {
   var b = 20;
   b = 21;
-  print b;
+  @println(b);
 }
 
-print b;
+@println(b);

@@ -2,32 +2,46 @@
 0000    1 OP_NIL
 0001    | OP_RETURN
 == <script> ==
-0000    1 OP_GET_GLOBAL       0 '@argc'
-0002    | OP_CALL             0
-0004    | OP_PRINT
-0005    2 OP_GET_GLOBAL       1 '@argv'
-0007    | OP_CONSTANT         2 '0'
-0009    | OP_CALL             1
-0011    | OP_PRINT
-0012    3 OP_GET_GLOBAL       1 '@argv'
-0014    | OP_CONSTANT         3 '1'
-0016    | OP_CALL             1
-0018    | OP_PRINT
-0019    4 OP_GET_GLOBAL       1 '@argv'
-0021    | OP_CONSTANT         4 '2'
-0023    | OP_CALL             1
-0025    | OP_PRINT
-0026    5 OP_GET_GLOBAL       1 '@argv'
-0028    | OP_CONSTANT         5 '3'
-0030    | OP_CALL             1
-0032    | OP_PRINT
-0033    6 OP_GET_GLOBAL       1 '@argv'
-0035    | OP_CONSTANT         6 '4'
+0000    1 OP_GET_GLOBAL       0 '@println'
+0002    | OP_GET_GLOBAL       1 '@argc'
+0004    | OP_CALL             0
+0006    | OP_CALL             1
+0008    | OP_POP
+0009    2 OP_GET_GLOBAL       0 '@println'
+0011    | OP_GET_GLOBAL       2 '@argv'
+0013    | OP_CONSTANT         3 '0'
+0015    | OP_CALL             1
+0017    | OP_CALL             1
+0019    | OP_POP
+0020    3 OP_GET_GLOBAL       0 '@println'
+0022    | OP_GET_GLOBAL       2 '@argv'
+0024    | OP_CONSTANT         4 '1'
+0026    | OP_CALL             1
+0028    | OP_CALL             1
+0030    | OP_POP
+0031    4 OP_GET_GLOBAL       0 '@println'
+0033    | OP_GET_GLOBAL       2 '@argv'
+0035    | OP_CONSTANT         5 '2'
 0037    | OP_CALL             1
-0039    | OP_PRINT
-0040    7 OP_GET_GLOBAL       1 '@argv'
-0042    | OP_CONSTANT         7 '99'
-0044    | OP_CALL             1
-0046    | OP_PRINT
-0047    | OP_NIL
-0048    | OP_RETURN
+0039    | OP_CALL             1
+0041    | OP_POP
+0042    5 OP_GET_GLOBAL       0 '@println'
+0044    | OP_GET_GLOBAL       2 '@argv'
+0046    | OP_CONSTANT         6 '3'
+0048    | OP_CALL             1
+0050    | OP_CALL             1
+0052    | OP_POP
+0053    6 OP_GET_GLOBAL       0 '@println'
+0055    | OP_GET_GLOBAL       2 '@argv'
+0057    | OP_CONSTANT         7 '4'
+0059    | OP_CALL             1
+0061    | OP_CALL             1
+0063    | OP_POP
+0064    7 OP_GET_GLOBAL       0 '@println'
+0066    | OP_GET_GLOBAL       2 '@argv'
+0068    | OP_CONSTANT         8 '99'
+0070    | OP_CALL             1
+0072    | OP_CALL             1
+0074    | OP_POP
+0075    | OP_NIL
+0076    | OP_RETURN

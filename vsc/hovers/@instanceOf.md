@@ -5,5 +5,5 @@ struct Food {}
 
 let food = Food();
 
-print @instanceOf(food, Food); // true
+@println(@instanceOf(food, Food)); // true
 ```

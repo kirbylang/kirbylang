@@ -27,14 +27,18 @@
 0041   17 OP_GET_GLOBAL       6 'c'
 0043    | OP_INVOKE        (0 args)    4 'increment'
 0046    | OP_POP
-0047   19 OP_GET_GLOBAL       6 'c'
-0049    | OP_GET_PROPERTY     1 'count'
-0051    | OP_PRINT
-0052   20 OP_GET_GLOBAL       6 'c'
-0054    | OP_INVOKE        (0 args)    2 'toString'
-0057    | OP_PRINT
-0058   21 OP_NIL
-0059    | OP_RETURN
+0047   19 OP_GET_GLOBAL       8 '@println'
+0049    | OP_GET_GLOBAL       6 'c'
+0051    | OP_GET_PROPERTY     1 'count'
+0053    | OP_CALL             1
+0055    | OP_POP
+0056   20 OP_GET_GLOBAL       8 '@println'
+0058    | OP_GET_GLOBAL       6 'c'
+0060    | OP_INVOKE        (0 args)    2 'toString'
+0063    | OP_CALL             1
+0065    | OP_POP
+0066   21 OP_NIL
+0067    | OP_RETURN
 == toString ==
 0000   12 OP_CONSTANT         0 'Counter'
 0002    | OP_RETURN

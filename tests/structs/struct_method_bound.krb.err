@@ -23,9 +23,11 @@
 0033   14 OP_NIL
 0034    | OP_RETURN
 == greet ==
-0000    5 OP_CONSTANT         0 'Hello '
-0002    | OP_GET_LOCAL        1
-0004    | OP_ADD
-0005    | OP_PRINT
-0006    6 OP_NIL
-0007    | OP_RETURN
+0000    5 OP_GET_GLOBAL       0 '@println'
+0002    | OP_CONSTANT         1 'Hello '
+0004    | OP_GET_LOCAL        1
+0006    | OP_ADD
+0007    | OP_CALL             1
+0009    | OP_POP
+0010    6 OP_NIL
+0011    | OP_RETURN

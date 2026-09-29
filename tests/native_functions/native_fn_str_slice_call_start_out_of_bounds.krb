@@ -1,1 +1,1 @@
-print @strSlice("hello", 6, 6);
+@println(@strSlice("hello", 6, 6));

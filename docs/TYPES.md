@@ -20,7 +20,7 @@ An array holds items that all share one type. Generic types aren't supported yet
 ```
 let arr: Array = [1, 2, 3];
 
-print list[0];
+@println(list[0]);
 ```
 
 ### Structs
@@ -34,7 +34,7 @@ struct Box {
 
 let box: Box = Box { value: 100 };
 
-print box.value;
+@println(box.value);
 ```
 
 #### Generics
@@ -66,7 +66,7 @@ impl Display for Point {
     fun toString(self): string = "Point";
 }
 
-print (Point { x: 1, y: 2 }).toString();
+@println((Point { x: 1, y: 2 }).toString());
 ```
 
 #### Builtin traits
@@ -214,7 +214,7 @@ fun sum(a: f64, b: f64): f64 = a + b;
 
 let sum2: fun (f64, f64) => f64 = sum;
 
-print sum2(1, 2);
+@println(sum2(1, 2));
 ```
 
 ### Lambdas
@@ -224,7 +224,7 @@ Lambdas use the same type syntax.
 ```
 let sum: fun (f64, f64) => f64 = fun (a: f64, b: f64): f64 { a + b };
 
-print sum(1, 2);
+@println(sum(1, 2));
 ```
 
 A lambda's parameter types can be left off when the type it is checked
@@ -233,7 +233,7 @@ against already supplies them.
 ```
 let double: fun (f64) => f64 = fun (n) { n * 2 };
 
-print double(21);
+@println(double(21));
 ```
 
 ### Native Functions
@@ -243,7 +243,7 @@ Native functions start with `@` (a reserved character in user code).
 ```
 let round: fun (f64) => f64 = @ceil;
 
-print round(1.2);
+@println(round(1.2));
 ```
 
 A native whose type can't be spelled yet has no signature, and calls to it
@@ -259,7 +259,7 @@ type Number = f64;
 
 let count: Number = 42;
 
-print count;
+@println(count);
 ```
 
 ## Operators

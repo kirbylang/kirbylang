@@ -1,1 +1,1 @@
-print @argv(false);
+@println(@argv(false));

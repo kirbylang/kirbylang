@@ -4,10 +4,10 @@ test(false, false);
 
 fun test (a: bool, b: bool): unit {
     if (a) {
-        print "Hello";
+        @println("Hello");
     } else if (b) {
-        print "World";
+        @println("World");
     } else {
-        print "Goodbye";
+        @println("Goodbye");
     }
 }

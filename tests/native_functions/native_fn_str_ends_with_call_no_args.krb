@@ -1,1 +1,1 @@
-print @strEndsWith();
+@println(@strEndsWith());

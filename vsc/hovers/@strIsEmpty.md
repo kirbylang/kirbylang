@@ -1,6 +1,6 @@
 Returns if a string's length is zero or not.
 
 ```kirby
-print @strIsEmpty(""); // true
-print @strIsEmpty("Hello World"); // false
+@println(@strIsEmpty("")); // true
+@println(@strIsEmpty("Hello World")); // false
 ```

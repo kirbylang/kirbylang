@@ -1,1 +1,1 @@
-print @len([]);
+@println(@len([]));

@@ -5,7 +5,7 @@ struct Struct {
 var instance = Struct {};
 
 fun fn(): unit {
-    print "Hello World";
+    @println("Hello World");
 }
 
 instance.fn = fn;

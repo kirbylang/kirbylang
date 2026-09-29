@@ -31,5 +31,5 @@ krb example hello                 # runs examples/hello.krb
 krb repl
 krb compile path/to/file.krb
 krb parse path/to/file.krb
-krb exec 'print "Hello World";'
+krb exec '@println("Hello World");'
 ```

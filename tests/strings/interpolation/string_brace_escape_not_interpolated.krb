@@ -1,1 +1,1 @@
-print "a \{ b";
+@println("a \{ b");

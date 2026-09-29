@@ -9,5 +9,5 @@ impl Eq for Point {
 
 var a = Point { x: 1, y: 2 };
 
-print a == a;
-print a.equals(a);
+@println(a == a);
+@println(a.equals(a));

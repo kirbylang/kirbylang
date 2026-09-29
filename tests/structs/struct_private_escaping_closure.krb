@@ -13,4 +13,4 @@ impl Counter {
 
 var read = Counter { count: 7 }.reader();
 
-print read();
+@println(read());

@@ -8,5 +8,5 @@ var point = Point {
     y: 2,
 };
 
-print point.x;
-print point.y;
+@println(point.x);
+@println(point.y);

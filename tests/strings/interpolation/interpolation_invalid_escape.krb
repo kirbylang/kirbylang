@@ -1,1 +1,1 @@
-print $"a \q b";
+@println($"a \q b");

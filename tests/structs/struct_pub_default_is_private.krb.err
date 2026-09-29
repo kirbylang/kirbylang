@@ -19,14 +19,18 @@
 0026    | OP_CONSTANT         7 'hidden'
 0028    | OP_INVOKE        (2 args)    3 'new'
 0031    | OP_DEFINE_GLOBAL    5 'c'
-0033   16 OP_GET_GLOBAL       5 'c'
-0035    | OP_GET_PROPERTY     1 'label'
-0037    | OP_PRINT
-0038   17 OP_GET_GLOBAL       5 'c'
-0040    | OP_GET_PROPERTY     2 'token'
-0042    | OP_PRINT
-0043   18 OP_NIL
-0044    | OP_RETURN
+0033   16 OP_GET_GLOBAL       8 '@println'
+0035    | OP_GET_GLOBAL       5 'c'
+0037    | OP_GET_PROPERTY     1 'label'
+0039    | OP_CALL             1
+0041    | OP_POP
+0042   17 OP_GET_GLOBAL       8 '@println'
+0044    | OP_GET_GLOBAL       5 'c'
+0046    | OP_GET_PROPERTY     2 'token'
+0048    | OP_CALL             1
+0050    | OP_POP
+0051   18 OP_NIL
+0052    | OP_RETURN
 == new ==
 0000    8 OP_GET_GLOBAL       0 'Config'
 0002    9 OP_CONSTANT         1 'label'

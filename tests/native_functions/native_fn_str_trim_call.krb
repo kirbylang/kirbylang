@@ -1,6 +1,6 @@
-print "[" + @strTrim("  hello  ") + "]";
-print "[" + @strTrim("\t\n hi \r\n") + "]";
-print "[" + @strTrim("no-trim") + "]";
-print "[" + @strTrim("   ") + "]";
-print "[" + @strTrim("") + "]";
-print "[" + @strTrim(" a  b ") + "]";
+@println("[" + @strTrim("  hello  ") + "]");
+@println("[" + @strTrim("\t\n hi \r\n") + "]");
+@println("[" + @strTrim("no-trim") + "]");
+@println("[" + @strTrim("   ") + "]");
+@println("[" + @strTrim("") + "]");
+@println("[" + @strTrim(" a  b ") + "]");

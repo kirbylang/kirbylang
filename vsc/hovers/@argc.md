@@ -1,5 +1,5 @@
 The number of arguments passed to the program.
 
 ```kirby
-print @argc(); // 2
+@println(@argc()); // 2
 ```

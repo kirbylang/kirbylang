@@ -17,7 +17,9 @@
 0023    | OP_CONSTANT         6 'World'
 0025    | OP_CALL             3
 0027    | OP_POP
-0028    6 OP_GET_GLOBAL       0 'array'
-0030    | OP_PRINT
-0031    7 OP_NIL
-0032    | OP_RETURN
+0028    6 OP_GET_GLOBAL       7 '@println'
+0030    | OP_GET_GLOBAL       0 'array'
+0032    | OP_CALL             1
+0034    | OP_POP
+0035    7 OP_NIL
+0036    | OP_RETURN

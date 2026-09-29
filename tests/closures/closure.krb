@@ -10,4 +10,4 @@ fun outer (): fun () => f64 {
 
 var inner = outer();
 
-print inner();
+@println(inner());

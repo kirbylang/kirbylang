@@ -5,7 +5,7 @@ while (true) {
 
     if (i == 3) continue;
     
-    print i;
+    @println(i);
 
     if (i == 10) break;
 }

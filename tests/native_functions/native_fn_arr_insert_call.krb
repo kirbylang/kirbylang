@@ -3,4 +3,4 @@ var array = ["Testing"];
 @arrInsert(array, 0, "Hello");
 @arrInsert(array, 1, "World");
 
-print array;
+@println(array);

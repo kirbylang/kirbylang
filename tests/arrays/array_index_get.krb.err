@@ -7,9 +7,11 @@
 0004    | OP_CONSTANT         3 '3'
 0006    | OP_ARRAY            3
 0008    | OP_DEFINE_GLOBAL    0 'array'
-0010    3 OP_GET_GLOBAL       0 'array'
-0012    | OP_CONSTANT         2 '2'
-0014    | OP_GET_INDEX
-0015    | OP_PRINT
-0016    4 OP_NIL
-0017    | OP_RETURN
+0010    3 OP_GET_GLOBAL       4 '@println'
+0012    | OP_GET_GLOBAL       0 'array'
+0014    | OP_CONSTANT         2 '2'
+0016    | OP_GET_INDEX
+0017    | OP_CALL             1
+0019    | OP_POP
+0020    4 OP_NIL
+0021    | OP_RETURN

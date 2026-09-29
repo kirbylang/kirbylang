@@ -13,5 +13,5 @@ impl Config {
 
 var c = Config.new("visible", "hidden");
 
-print c.label;
-print c.token;
+@println(c.label);
+@println(c.token);

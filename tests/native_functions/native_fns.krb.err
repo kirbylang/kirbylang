@@ -2,365 +2,605 @@
 0000    1 OP_NIL
 0001    | OP_RETURN
 == <script> ==
-0000    1 OP_GET_GLOBAL       0 '@exit'
-0002    | OP_PRINT
-0003    2 OP_GET_GLOBAL       1 '@typeof'
-0005    | OP_GET_GLOBAL       0 '@exit'
-0007    | OP_CALL             1
-0009    | OP_PRINT
-0010    4 OP_GET_GLOBAL       2 '@version'
-0012    | OP_PRINT
-0013    5 OP_GET_GLOBAL       1 '@typeof'
-0015    | OP_GET_GLOBAL       2 '@version'
-0017    | OP_CALL             1
-0019    | OP_PRINT
-0020    7 OP_GET_GLOBAL       3 '@rand'
-0022    | OP_PRINT
-0023    8 OP_GET_GLOBAL       1 '@typeof'
-0025    | OP_GET_GLOBAL       3 '@rand'
-0027    | OP_CALL             1
-0029    | OP_PRINT
-0030   10 OP_GET_GLOBAL       4 '@rand01'
-0032    | OP_PRINT
-0033   11 OP_GET_GLOBAL       1 '@typeof'
-0035    | OP_GET_GLOBAL       4 '@rand01'
-0037    | OP_CALL             1
-0039    | OP_PRINT
-0040   13 OP_GET_GLOBAL       5 '@randBetween'
-0042    | OP_PRINT
-0043   14 OP_GET_GLOBAL       1 '@typeof'
-0045    | OP_GET_GLOBAL       5 '@randBetween'
-0047    | OP_CALL             1
-0049    | OP_PRINT
-0050   16 OP_GET_GLOBAL       6 '@ceil'
-0052    | OP_PRINT
-0053   17 OP_GET_GLOBAL       1 '@typeof'
-0055    | OP_GET_GLOBAL       6 '@ceil'
-0057    | OP_CALL             1
-0059    | OP_PRINT
-0060   19 OP_GET_GLOBAL       7 '@readFileToString'
-0062    | OP_PRINT
-0063   20 OP_GET_GLOBAL       1 '@typeof'
-0065    | OP_GET_GLOBAL       7 '@readFileToString'
+0000    1 OP_GET_GLOBAL       0 '@println'
+0002    | OP_GET_GLOBAL       1 '@exit'
+0004    | OP_CALL             1
+0006    | OP_POP
+0007    2 OP_GET_GLOBAL       0 '@println'
+0009    | OP_GET_GLOBAL       2 '@typeof'
+0011    | OP_GET_GLOBAL       1 '@exit'
+0013    | OP_CALL             1
+0015    | OP_CALL             1
+0017    | OP_POP
+0018    4 OP_GET_GLOBAL       0 '@println'
+0020    | OP_GET_GLOBAL       3 '@version'
+0022    | OP_CALL             1
+0024    | OP_POP
+0025    5 OP_GET_GLOBAL       0 '@println'
+0027    | OP_GET_GLOBAL       2 '@typeof'
+0029    | OP_GET_GLOBAL       3 '@version'
+0031    | OP_CALL             1
+0033    | OP_CALL             1
+0035    | OP_POP
+0036    7 OP_GET_GLOBAL       0 '@println'
+0038    | OP_GET_GLOBAL       4 '@rand'
+0040    | OP_CALL             1
+0042    | OP_POP
+0043    8 OP_GET_GLOBAL       0 '@println'
+0045    | OP_GET_GLOBAL       2 '@typeof'
+0047    | OP_GET_GLOBAL       4 '@rand'
+0049    | OP_CALL             1
+0051    | OP_CALL             1
+0053    | OP_POP
+0054   10 OP_GET_GLOBAL       0 '@println'
+0056    | OP_GET_GLOBAL       5 '@rand01'
+0058    | OP_CALL             1
+0060    | OP_POP
+0061   11 OP_GET_GLOBAL       0 '@println'
+0063    | OP_GET_GLOBAL       2 '@typeof'
+0065    | OP_GET_GLOBAL       5 '@rand01'
 0067    | OP_CALL             1
-0069    | OP_PRINT
-0070   22 OP_GET_GLOBAL       8 '@writeStringToFile'
-0072    | OP_PRINT
-0073   23 OP_GET_GLOBAL       1 '@typeof'
-0075    | OP_GET_GLOBAL       8 '@writeStringToFile'
-0077    | OP_CALL             1
-0079    | OP_PRINT
-0080   25 OP_GET_GLOBAL       9 '@fileExists'
-0082    | OP_PRINT
-0083   26 OP_GET_GLOBAL       1 '@typeof'
-0085    | OP_GET_GLOBAL       9 '@fileExists'
+0069    | OP_CALL             1
+0071    | OP_POP
+0072   13 OP_GET_GLOBAL       0 '@println'
+0074    | OP_GET_GLOBAL       6 '@randBetween'
+0076    | OP_CALL             1
+0078    | OP_POP
+0079   14 OP_GET_GLOBAL       0 '@println'
+0081    | OP_GET_GLOBAL       2 '@typeof'
+0083    | OP_GET_GLOBAL       6 '@randBetween'
+0085    | OP_CALL             1
 0087    | OP_CALL             1
-0089    | OP_PRINT
-0090   28 OP_GET_GLOBAL      10 '@getenv'
-0092    | OP_PRINT
-0093   29 OP_GET_GLOBAL       1 '@typeof'
-0095    | OP_GET_GLOBAL      10 '@getenv'
-0097    | OP_CALL             1
-0099    | OP_PRINT
-0100   31 OP_GET_GLOBAL      11 '@setenv'
-0102    | OP_PRINT
-0103   32 OP_GET_GLOBAL       1 '@typeof'
-0105    | OP_GET_GLOBAL      11 '@setenv'
-0107    | OP_CALL             1
-0109    | OP_PRINT
-0110   34 OP_GET_GLOBAL      12 '@len'
-0112    | OP_PRINT
-0113   35 OP_GET_GLOBAL       1 '@typeof'
-0115    | OP_GET_GLOBAL      12 '@len'
-0117    | OP_CALL             1
-0119    | OP_PRINT
-0120   37 OP_GET_GLOBAL       1 '@typeof'
-0122    | OP_PRINT
-0123   38 OP_GET_GLOBAL       1 '@typeof'
-0125    | OP_GET_GLOBAL       1 '@typeof'
-0127    | OP_CALL             1
-0129    | OP_PRINT
-0130   40 OP_GET_GLOBAL      13 '@argc'
-0132    | OP_PRINT
-0133   41 OP_GET_GLOBAL       1 '@typeof'
-0135    | OP_GET_GLOBAL      13 '@argc'
-0137    | OP_CALL             1
-0139    | OP_PRINT
-0140   43 OP_GET_GLOBAL      14 '@argv'
-0142    | OP_PRINT
-0143   44 OP_GET_GLOBAL       1 '@typeof'
-0145    | OP_GET_GLOBAL      14 '@argv'
-0147    | OP_CALL             1
-0149    | OP_PRINT
-0150   46 OP_GET_GLOBAL      15 '@clock'
-0152    | OP_PRINT
-0153   47 OP_GET_GLOBAL       1 '@typeof'
-0155    | OP_GET_GLOBAL      15 '@clock'
+0089    | OP_POP
+0090   16 OP_GET_GLOBAL       0 '@println'
+0092    | OP_GET_GLOBAL       7 '@ceil'
+0094    | OP_CALL             1
+0096    | OP_POP
+0097   17 OP_GET_GLOBAL       0 '@println'
+0099    | OP_GET_GLOBAL       2 '@typeof'
+0101    | OP_GET_GLOBAL       7 '@ceil'
+0103    | OP_CALL             1
+0105    | OP_CALL             1
+0107    | OP_POP
+0108   19 OP_GET_GLOBAL       0 '@println'
+0110    | OP_GET_GLOBAL       8 '@readFileToString'
+0112    | OP_CALL             1
+0114    | OP_POP
+0115   20 OP_GET_GLOBAL       0 '@println'
+0117    | OP_GET_GLOBAL       2 '@typeof'
+0119    | OP_GET_GLOBAL       8 '@readFileToString'
+0121    | OP_CALL             1
+0123    | OP_CALL             1
+0125    | OP_POP
+0126   22 OP_GET_GLOBAL       0 '@println'
+0128    | OP_GET_GLOBAL       9 '@writeStringToFile'
+0130    | OP_CALL             1
+0132    | OP_POP
+0133   23 OP_GET_GLOBAL       0 '@println'
+0135    | OP_GET_GLOBAL       2 '@typeof'
+0137    | OP_GET_GLOBAL       9 '@writeStringToFile'
+0139    | OP_CALL             1
+0141    | OP_CALL             1
+0143    | OP_POP
+0144   25 OP_GET_GLOBAL       0 '@println'
+0146    | OP_GET_GLOBAL      10 '@fileExists'
+0148    | OP_CALL             1
+0150    | OP_POP
+0151   26 OP_GET_GLOBAL       0 '@println'
+0153    | OP_GET_GLOBAL       2 '@typeof'
+0155    | OP_GET_GLOBAL      10 '@fileExists'
 0157    | OP_CALL             1
-0159    | OP_PRINT
-0160   49 OP_GET_GLOBAL      16 '@prompt'
-0162    | OP_PRINT
-0163   50 OP_GET_GLOBAL       1 '@typeof'
-0165    | OP_GET_GLOBAL      16 '@prompt'
-0167    | OP_CALL             1
-0169    | OP_PRINT
-0170   52 OP_GET_GLOBAL      17 '@stdin'
-0172    | OP_PRINT
-0173   53 OP_GET_GLOBAL       1 '@typeof'
-0175    | OP_GET_GLOBAL      17 '@stdin'
+0159    | OP_CALL             1
+0161    | OP_POP
+0162   28 OP_GET_GLOBAL       0 '@println'
+0164    | OP_GET_GLOBAL      11 '@getenv'
+0166    | OP_CALL             1
+0168    | OP_POP
+0169   29 OP_GET_GLOBAL       0 '@println'
+0171    | OP_GET_GLOBAL       2 '@typeof'
+0173    | OP_GET_GLOBAL      11 '@getenv'
+0175    | OP_CALL             1
 0177    | OP_CALL             1
-0179    | OP_PRINT
-0180   55 OP_GET_GLOBAL      18 '@instanceOf'
-0182    | OP_PRINT
-0183   56 OP_GET_GLOBAL       1 '@typeof'
-0185    | OP_GET_GLOBAL      18 '@instanceOf'
-0187    | OP_CALL             1
-0189    | OP_PRINT
-0190   58 OP_GET_GLOBAL      19 '@parseNumber'
-0192    | OP_PRINT
-0193   59 OP_GET_GLOBAL       1 '@typeof'
-0195    | OP_GET_GLOBAL      19 '@parseNumber'
-0197    | OP_CALL             1
-0199    | OP_PRINT
-0200   61 OP_GET_GLOBAL      20 '@numberToString'
-0202    | OP_PRINT
-0203   62 OP_GET_GLOBAL       1 '@typeof'
-0205    | OP_GET_GLOBAL      20 '@numberToString'
-0207    | OP_CALL             1
-0209    | OP_PRINT
-0210   64 OP_GET_GLOBAL      21 '@arrPush'
-0212    | OP_PRINT
-0213   65 OP_GET_GLOBAL       1 '@typeof'
-0215    | OP_GET_GLOBAL      21 '@arrPush'
-0217    | OP_CALL             1
-0219    | OP_PRINT
-0220   67 OP_GET_GLOBAL      22 '@arrPop'
-0222    | OP_PRINT
-0223   68 OP_GET_GLOBAL       1 '@typeof'
-0225    | OP_GET_GLOBAL      22 '@arrPop'
-0227    | OP_CALL             1
-0229    | OP_PRINT
-0230   70 OP_GET_GLOBAL      23 '@arrInsert'
-0232    | OP_PRINT
-0233   71 OP_GET_GLOBAL       1 '@typeof'
-0235    | OP_GET_GLOBAL      23 '@arrInsert'
-0237    | OP_CALL             1
-0239    | OP_PRINT
-0240   73 OP_GET_GLOBAL      24 '@arrRemove'
-0242    | OP_PRINT
-0243   74 OP_GET_GLOBAL       1 '@typeof'
-0245    | OP_GET_GLOBAL      24 '@arrRemove'
+0179    | OP_POP
+0180   31 OP_GET_GLOBAL       0 '@println'
+0182    | OP_GET_GLOBAL      12 '@setenv'
+0184    | OP_CALL             1
+0186    | OP_POP
+0187   32 OP_GET_GLOBAL       0 '@println'
+0189    | OP_GET_GLOBAL       2 '@typeof'
+0191    | OP_GET_GLOBAL      12 '@setenv'
+0193    | OP_CALL             1
+0195    | OP_CALL             1
+0197    | OP_POP
+0198   34 OP_GET_GLOBAL       0 '@println'
+0200    | OP_GET_GLOBAL      13 '@len'
+0202    | OP_CALL             1
+0204    | OP_POP
+0205   35 OP_GET_GLOBAL       0 '@println'
+0207    | OP_GET_GLOBAL       2 '@typeof'
+0209    | OP_GET_GLOBAL      13 '@len'
+0211    | OP_CALL             1
+0213    | OP_CALL             1
+0215    | OP_POP
+0216   37 OP_GET_GLOBAL       0 '@println'
+0218    | OP_GET_GLOBAL       2 '@typeof'
+0220    | OP_CALL             1
+0222    | OP_POP
+0223   38 OP_GET_GLOBAL       0 '@println'
+0225    | OP_GET_GLOBAL       2 '@typeof'
+0227    | OP_GET_GLOBAL       2 '@typeof'
+0229    | OP_CALL             1
+0231    | OP_CALL             1
+0233    | OP_POP
+0234   40 OP_GET_GLOBAL       0 '@println'
+0236    | OP_GET_GLOBAL      14 '@argc'
+0238    | OP_CALL             1
+0240    | OP_POP
+0241   41 OP_GET_GLOBAL       0 '@println'
+0243    | OP_GET_GLOBAL       2 '@typeof'
+0245    | OP_GET_GLOBAL      14 '@argc'
 0247    | OP_CALL             1
-0249    | OP_PRINT
-0250   76 OP_GET_GLOBAL      25 '@arrCopy'
-0252    | OP_PRINT
-0253   77 OP_GET_GLOBAL       1 '@typeof'
-0255    | OP_GET_GLOBAL      25 '@arrCopy'
-0257    | OP_CALL             1
-0259    | OP_PRINT
-0260   79 OP_GET_GLOBAL      26 '@arrIsEmpty'
-0262    | OP_PRINT
-0263   80 OP_GET_GLOBAL       1 '@typeof'
-0265    | OP_GET_GLOBAL      26 '@arrIsEmpty'
+0249    | OP_CALL             1
+0251    | OP_POP
+0252   43 OP_GET_GLOBAL       0 '@println'
+0254    | OP_GET_GLOBAL      15 '@argv'
+0256    | OP_CALL             1
+0258    | OP_POP
+0259   44 OP_GET_GLOBAL       0 '@println'
+0261    | OP_GET_GLOBAL       2 '@typeof'
+0263    | OP_GET_GLOBAL      15 '@argv'
+0265    | OP_CALL             1
 0267    | OP_CALL             1
-0269    | OP_PRINT
-0270   82 OP_GET_GLOBAL      27 '@arrEqual'
-0272    | OP_PRINT
-0273   83 OP_GET_GLOBAL       1 '@typeof'
-0275    | OP_GET_GLOBAL      27 '@arrEqual'
-0277    | OP_CALL             1
-0279    | OP_PRINT
-0280   85 OP_GET_GLOBAL      28 '@arrSlice'
-0282    | OP_PRINT
-0283   86 OP_GET_GLOBAL       1 '@typeof'
-0285    | OP_GET_GLOBAL      28 '@arrSlice'
-0287    | OP_CALL             1
-0289    | OP_PRINT
-0290   88 OP_GET_GLOBAL      29 '@arrConcat'
-0292    | OP_PRINT
-0293   89 OP_GET_GLOBAL       1 '@typeof'
-0295    | OP_GET_GLOBAL      29 '@arrConcat'
-0297    | OP_CALL             1
-0299    | OP_PRINT
-0300   91 OP_GET_GLOBAL      30 '@arrReverse'
-0302    | OP_PRINT
-0303   92 OP_GET_GLOBAL       1 '@typeof'
-0305    | OP_GET_GLOBAL      30 '@arrReverse'
-0307    | OP_CALL             1
-0309    | OP_PRINT
-0310   94 OP_GET_GLOBAL      31 '@is'
-0312    | OP_PRINT
-0313   95 OP_GET_GLOBAL       1 '@typeof'
-0315    | OP_GET_GLOBAL      31 '@is'
-0317    | OP_CALL             1
-0319    | OP_PRINT
-0320   97 OP_GET_GLOBAL      32 '@isNumber'
-0322    | OP_PRINT
-0323   98 OP_GET_GLOBAL       1 '@typeof'
-0325    | OP_GET_GLOBAL      32 '@isNumber'
-0327    | OP_CALL             1
-0329    | OP_PRINT
-0330  100 OP_GET_GLOBAL      33 '@isFunction'
-0332    | OP_PRINT
-0333  101 OP_GET_GLOBAL       1 '@typeof'
-0335    | OP_GET_GLOBAL      33 '@isFunction'
+0269    | OP_POP
+0270   46 OP_GET_GLOBAL       0 '@println'
+0272    | OP_GET_GLOBAL      16 '@clock'
+0274    | OP_CALL             1
+0276    | OP_POP
+0277   47 OP_GET_GLOBAL       0 '@println'
+0279    | OP_GET_GLOBAL       2 '@typeof'
+0281    | OP_GET_GLOBAL      16 '@clock'
+0283    | OP_CALL             1
+0285    | OP_CALL             1
+0287    | OP_POP
+0288   49 OP_GET_GLOBAL       0 '@println'
+0290    | OP_GET_GLOBAL      17 '@prompt'
+0292    | OP_CALL             1
+0294    | OP_POP
+0295   50 OP_GET_GLOBAL       0 '@println'
+0297    | OP_GET_GLOBAL       2 '@typeof'
+0299    | OP_GET_GLOBAL      17 '@prompt'
+0301    | OP_CALL             1
+0303    | OP_CALL             1
+0305    | OP_POP
+0306   52 OP_GET_GLOBAL       0 '@println'
+0308    | OP_GET_GLOBAL      18 '@stdin'
+0310    | OP_CALL             1
+0312    | OP_POP
+0313   53 OP_GET_GLOBAL       0 '@println'
+0315    | OP_GET_GLOBAL       2 '@typeof'
+0317    | OP_GET_GLOBAL      18 '@stdin'
+0319    | OP_CALL             1
+0321    | OP_CALL             1
+0323    | OP_POP
+0324   55 OP_GET_GLOBAL       0 '@println'
+0326    | OP_GET_GLOBAL      19 '@instanceOf'
+0328    | OP_CALL             1
+0330    | OP_POP
+0331   56 OP_GET_GLOBAL       0 '@println'
+0333    | OP_GET_GLOBAL       2 '@typeof'
+0335    | OP_GET_GLOBAL      19 '@instanceOf'
 0337    | OP_CALL             1
-0339    | OP_PRINT
-0340  103 OP_GET_GLOBAL      34 '@isBool'
-0342    | OP_PRINT
-0343  104 OP_GET_GLOBAL       1 '@typeof'
-0345    | OP_GET_GLOBAL      34 '@isBool'
-0347    | OP_CALL             1
-0349    | OP_PRINT
-0350  106 OP_GET_GLOBAL      35 '@isNil'
-0352    | OP_PRINT
-0353  107 OP_GET_GLOBAL       1 '@typeof'
-0355    | OP_GET_GLOBAL      35 '@isNil'
+0339    | OP_CALL             1
+0341    | OP_POP
+0342   58 OP_GET_GLOBAL       0 '@println'
+0344    | OP_GET_GLOBAL      20 '@parseNumber'
+0346    | OP_CALL             1
+0348    | OP_POP
+0349   59 OP_GET_GLOBAL       0 '@println'
+0351    | OP_GET_GLOBAL       2 '@typeof'
+0353    | OP_GET_GLOBAL      20 '@parseNumber'
+0355    | OP_CALL             1
 0357    | OP_CALL             1
-0359    | OP_PRINT
-0360  109 OP_GET_GLOBAL      36 '@isString'
-0362    | OP_PRINT
-0363  110 OP_GET_GLOBAL       1 '@typeof'
-0365    | OP_GET_GLOBAL      36 '@isString'
-0367    | OP_CALL             1
-0369    | OP_PRINT
-0370  112 OP_GET_GLOBAL      37 '@strIsEmpty'
-0372    | OP_PRINT
-0373  113 OP_GET_GLOBAL       1 '@typeof'
-0375    | OP_GET_GLOBAL      37 '@strIsEmpty'
-0377    | OP_CALL             1
-0379    | OP_PRINT
-0380  115 OP_GET_GLOBAL      38 '@assert'
-0382    | OP_PRINT
-0383  116 OP_GET_GLOBAL       1 '@typeof'
-0385    | OP_GET_GLOBAL      38 '@assert'
-0387    | OP_CALL             1
-0389    | OP_PRINT
-0390  118 OP_GET_GLOBAL      39 '@panic'
-0392    | OP_PRINT
-0393  119 OP_GET_GLOBAL       1 '@typeof'
-0395    | OP_GET_GLOBAL      39 '@panic'
-0397    | OP_CALL             1
-0399    | OP_PRINT
-0400  121 OP_GET_GLOBAL      40 '@floor'
-0402    | OP_PRINT
-0403  122 OP_GET_GLOBAL       1 '@typeof'
-0405    | OP_GET_GLOBAL      40 '@floor'
-0407    | OP_CALL             1
-0409    | OP_PRINT
-0410  124 OP_GET_GLOBAL      41 '@round'
-0412    | OP_PRINT
-0413  125 OP_GET_GLOBAL       1 '@typeof'
-0415    | OP_GET_GLOBAL      41 '@round'
-0417    | OP_CALL             1
-0419    | OP_PRINT
-0420  127 OP_GET_GLOBAL      42 '@trunc'
-0422    | OP_PRINT
-0423  128 OP_GET_GLOBAL       1 '@typeof'
-0425    | OP_GET_GLOBAL      42 '@trunc'
+0359    | OP_POP
+0360   61 OP_GET_GLOBAL       0 '@println'
+0362    | OP_GET_GLOBAL      21 '@numberToString'
+0364    | OP_CALL             1
+0366    | OP_POP
+0367   62 OP_GET_GLOBAL       0 '@println'
+0369    | OP_GET_GLOBAL       2 '@typeof'
+0371    | OP_GET_GLOBAL      21 '@numberToString'
+0373    | OP_CALL             1
+0375    | OP_CALL             1
+0377    | OP_POP
+0378   64 OP_GET_GLOBAL       0 '@println'
+0380    | OP_GET_GLOBAL      22 '@arrPush'
+0382    | OP_CALL             1
+0384    | OP_POP
+0385   65 OP_GET_GLOBAL       0 '@println'
+0387    | OP_GET_GLOBAL       2 '@typeof'
+0389    | OP_GET_GLOBAL      22 '@arrPush'
+0391    | OP_CALL             1
+0393    | OP_CALL             1
+0395    | OP_POP
+0396   67 OP_GET_GLOBAL       0 '@println'
+0398    | OP_GET_GLOBAL      23 '@arrPop'
+0400    | OP_CALL             1
+0402    | OP_POP
+0403   68 OP_GET_GLOBAL       0 '@println'
+0405    | OP_GET_GLOBAL       2 '@typeof'
+0407    | OP_GET_GLOBAL      23 '@arrPop'
+0409    | OP_CALL             1
+0411    | OP_CALL             1
+0413    | OP_POP
+0414   70 OP_GET_GLOBAL       0 '@println'
+0416    | OP_GET_GLOBAL      24 '@arrInsert'
+0418    | OP_CALL             1
+0420    | OP_POP
+0421   71 OP_GET_GLOBAL       0 '@println'
+0423    | OP_GET_GLOBAL       2 '@typeof'
+0425    | OP_GET_GLOBAL      24 '@arrInsert'
 0427    | OP_CALL             1
-0429    | OP_PRINT
-0430  130 OP_GET_GLOBAL      43 '@abs'
-0432    | OP_PRINT
-0433  131 OP_GET_GLOBAL       1 '@typeof'
-0435    | OP_GET_GLOBAL      43 '@abs'
-0437    | OP_CALL             1
-0439    | OP_PRINT
-0440  133 OP_GET_GLOBAL      44 '@sqrt'
-0442    | OP_PRINT
-0443  134 OP_GET_GLOBAL       1 '@typeof'
-0445    | OP_GET_GLOBAL      44 '@sqrt'
+0429    | OP_CALL             1
+0431    | OP_POP
+0432   73 OP_GET_GLOBAL       0 '@println'
+0434    | OP_GET_GLOBAL      25 '@arrRemove'
+0436    | OP_CALL             1
+0438    | OP_POP
+0439   74 OP_GET_GLOBAL       0 '@println'
+0441    | OP_GET_GLOBAL       2 '@typeof'
+0443    | OP_GET_GLOBAL      25 '@arrRemove'
+0445    | OP_CALL             1
 0447    | OP_CALL             1
-0449    | OP_PRINT
-0450  136 OP_GET_GLOBAL      45 '@pow'
-0452    | OP_PRINT
-0453  137 OP_GET_GLOBAL       1 '@typeof'
-0455    | OP_GET_GLOBAL      45 '@pow'
-0457    | OP_CALL             1
-0459    | OP_PRINT
-0460  139 OP_GET_GLOBAL      46 '@min'
-0462    | OP_PRINT
-0463  140 OP_GET_GLOBAL       1 '@typeof'
-0465    | OP_GET_GLOBAL      46 '@min'
-0467    | OP_CALL             1
-0469    | OP_PRINT
-0470  142 OP_GET_GLOBAL      47 '@max'
-0472    | OP_PRINT
-0473  143 OP_GET_GLOBAL       1 '@typeof'
-0475    | OP_GET_GLOBAL      47 '@max'
-0477    | OP_CALL             1
-0479    | OP_PRINT
-0480  145 OP_GET_GLOBAL      48 '@strContains'
-0482    | OP_PRINT
-0483  146 OP_GET_GLOBAL       1 '@typeof'
-0485    | OP_GET_GLOBAL      48 '@strContains'
-0487    | OP_CALL             1
-0489    | OP_PRINT
-0490  148 OP_GET_GLOBAL      49 '@strIndexOf'
-0492    | OP_PRINT
-0493  149 OP_GET_GLOBAL       1 '@typeof'
-0495    | OP_GET_GLOBAL      49 '@strIndexOf'
-0497    | OP_CALL             1
-0499    | OP_PRINT
-0500  151 OP_GET_GLOBAL      50 '@strSlice'
-0502    | OP_PRINT
-0503  152 OP_GET_GLOBAL       1 '@typeof'
-0505    | OP_GET_GLOBAL      50 '@strSlice'
-0507    | OP_CALL             1
-0509    | OP_PRINT
-0510  154 OP_GET_GLOBAL      51 '@strSplit'
-0512    | OP_PRINT
-0513  155 OP_GET_GLOBAL       1 '@typeof'
-0515    | OP_GET_GLOBAL      51 '@strSplit'
+0449    | OP_POP
+0450   76 OP_GET_GLOBAL       0 '@println'
+0452    | OP_GET_GLOBAL      26 '@arrCopy'
+0454    | OP_CALL             1
+0456    | OP_POP
+0457   77 OP_GET_GLOBAL       0 '@println'
+0459    | OP_GET_GLOBAL       2 '@typeof'
+0461    | OP_GET_GLOBAL      26 '@arrCopy'
+0463    | OP_CALL             1
+0465    | OP_CALL             1
+0467    | OP_POP
+0468   79 OP_GET_GLOBAL       0 '@println'
+0470    | OP_GET_GLOBAL      27 '@arrIsEmpty'
+0472    | OP_CALL             1
+0474    | OP_POP
+0475   80 OP_GET_GLOBAL       0 '@println'
+0477    | OP_GET_GLOBAL       2 '@typeof'
+0479    | OP_GET_GLOBAL      27 '@arrIsEmpty'
+0481    | OP_CALL             1
+0483    | OP_CALL             1
+0485    | OP_POP
+0486   82 OP_GET_GLOBAL       0 '@println'
+0488    | OP_GET_GLOBAL      28 '@arrEqual'
+0490    | OP_CALL             1
+0492    | OP_POP
+0493   83 OP_GET_GLOBAL       0 '@println'
+0495    | OP_GET_GLOBAL       2 '@typeof'
+0497    | OP_GET_GLOBAL      28 '@arrEqual'
+0499    | OP_CALL             1
+0501    | OP_CALL             1
+0503    | OP_POP
+0504   85 OP_GET_GLOBAL       0 '@println'
+0506    | OP_GET_GLOBAL      29 '@arrSlice'
+0508    | OP_CALL             1
+0510    | OP_POP
+0511   86 OP_GET_GLOBAL       0 '@println'
+0513    | OP_GET_GLOBAL       2 '@typeof'
+0515    | OP_GET_GLOBAL      29 '@arrSlice'
 0517    | OP_CALL             1
-0519    | OP_PRINT
-0520  157 OP_GET_GLOBAL      52 '@strTrim'
-0522    | OP_PRINT
-0523  158 OP_GET_GLOBAL       1 '@typeof'
-0525    | OP_GET_GLOBAL      52 '@strTrim'
-0527    | OP_CALL             1
-0529    | OP_PRINT
-0530  160 OP_GET_GLOBAL      53 '@strToUpper'
-0532    | OP_PRINT
-0533  161 OP_GET_GLOBAL       1 '@typeof'
-0535    | OP_GET_GLOBAL      53 '@strToUpper'
+0519    | OP_CALL             1
+0521    | OP_POP
+0522   88 OP_GET_GLOBAL       0 '@println'
+0524    | OP_GET_GLOBAL      30 '@arrConcat'
+0526    | OP_CALL             1
+0528    | OP_POP
+0529   89 OP_GET_GLOBAL       0 '@println'
+0531    | OP_GET_GLOBAL       2 '@typeof'
+0533    | OP_GET_GLOBAL      30 '@arrConcat'
+0535    | OP_CALL             1
 0537    | OP_CALL             1
-0539    | OP_PRINT
-0540  163 OP_GET_GLOBAL      54 '@strToLower'
-0542    | OP_PRINT
-0543  164 OP_GET_GLOBAL       1 '@typeof'
-0545    | OP_GET_GLOBAL      54 '@strToLower'
-0547    | OP_CALL             1
-0549    | OP_PRINT
-0550  166 OP_GET_GLOBAL      55 '@strStartsWith'
-0552    | OP_PRINT
-0553  167 OP_GET_GLOBAL       1 '@typeof'
-0555    | OP_GET_GLOBAL      55 '@strStartsWith'
-0557    | OP_CALL             1
-0559    | OP_PRINT
-0560  169 OP_GET_GLOBAL      56 '@strEndsWith'
-0562    | OP_PRINT
-0563  170 OP_GET_GLOBAL       1 '@typeof'
-0565    | OP_GET_GLOBAL      56 '@strEndsWith'
-0567    | OP_CALL             1
-0569    | OP_PRINT
-0570  172 OP_GET_GLOBAL      57 '@strRepeat'
-0572    | OP_PRINT
-0573  173 OP_GET_GLOBAL       1 '@typeof'
-0575    | OP_GET_GLOBAL      57 '@strRepeat'
-0577    | OP_CALL             1
-0579    | OP_PRINT
-0580  175 OP_GET_GLOBAL      58 '@strReplace'
-0582    | OP_PRINT
-0583  176 OP_GET_GLOBAL       1 '@typeof'
-0585    | OP_GET_GLOBAL      58 '@strReplace'
-0587    | OP_CALL             1
-0589    | OP_PRINT
-0590  178 OP_GET_GLOBAL      59 '@strReplaceAll'
-0592    | OP_PRINT
-0593  179 OP_GET_GLOBAL       1 '@typeof'
-0595    | OP_GET_GLOBAL      59 '@strReplaceAll'
-0597    | OP_CALL             1
-0599    | OP_PRINT
-0600  180 OP_NIL
-0601    | OP_RETURN
+0539    | OP_POP
+0540   91 OP_GET_GLOBAL       0 '@println'
+0542    | OP_GET_GLOBAL      31 '@arrReverse'
+0544    | OP_CALL             1
+0546    | OP_POP
+0547   92 OP_GET_GLOBAL       0 '@println'
+0549    | OP_GET_GLOBAL       2 '@typeof'
+0551    | OP_GET_GLOBAL      31 '@arrReverse'
+0553    | OP_CALL             1
+0555    | OP_CALL             1
+0557    | OP_POP
+0558   94 OP_GET_GLOBAL       0 '@println'
+0560    | OP_GET_GLOBAL      32 '@is'
+0562    | OP_CALL             1
+0564    | OP_POP
+0565   95 OP_GET_GLOBAL       0 '@println'
+0567    | OP_GET_GLOBAL       2 '@typeof'
+0569    | OP_GET_GLOBAL      32 '@is'
+0571    | OP_CALL             1
+0573    | OP_CALL             1
+0575    | OP_POP
+0576   97 OP_GET_GLOBAL       0 '@println'
+0578    | OP_GET_GLOBAL      33 '@isNumber'
+0580    | OP_CALL             1
+0582    | OP_POP
+0583   98 OP_GET_GLOBAL       0 '@println'
+0585    | OP_GET_GLOBAL       2 '@typeof'
+0587    | OP_GET_GLOBAL      33 '@isNumber'
+0589    | OP_CALL             1
+0591    | OP_CALL             1
+0593    | OP_POP
+0594  100 OP_GET_GLOBAL       0 '@println'
+0596    | OP_GET_GLOBAL      34 '@isFunction'
+0598    | OP_CALL             1
+0600    | OP_POP
+0601  101 OP_GET_GLOBAL       0 '@println'
+0603    | OP_GET_GLOBAL       2 '@typeof'
+0605    | OP_GET_GLOBAL      34 '@isFunction'
+0607    | OP_CALL             1
+0609    | OP_CALL             1
+0611    | OP_POP
+0612  103 OP_GET_GLOBAL       0 '@println'
+0614    | OP_GET_GLOBAL      35 '@isBool'
+0616    | OP_CALL             1
+0618    | OP_POP
+0619  104 OP_GET_GLOBAL       0 '@println'
+0621    | OP_GET_GLOBAL       2 '@typeof'
+0623    | OP_GET_GLOBAL      35 '@isBool'
+0625    | OP_CALL             1
+0627    | OP_CALL             1
+0629    | OP_POP
+0630  106 OP_GET_GLOBAL       0 '@println'
+0632    | OP_GET_GLOBAL      36 '@isNil'
+0634    | OP_CALL             1
+0636    | OP_POP
+0637  107 OP_GET_GLOBAL       0 '@println'
+0639    | OP_GET_GLOBAL       2 '@typeof'
+0641    | OP_GET_GLOBAL      36 '@isNil'
+0643    | OP_CALL             1
+0645    | OP_CALL             1
+0647    | OP_POP
+0648  109 OP_GET_GLOBAL       0 '@println'
+0650    | OP_GET_GLOBAL      37 '@isString'
+0652    | OP_CALL             1
+0654    | OP_POP
+0655  110 OP_GET_GLOBAL       0 '@println'
+0657    | OP_GET_GLOBAL       2 '@typeof'
+0659    | OP_GET_GLOBAL      37 '@isString'
+0661    | OP_CALL             1
+0663    | OP_CALL             1
+0665    | OP_POP
+0666  112 OP_GET_GLOBAL       0 '@println'
+0668    | OP_GET_GLOBAL      38 '@strIsEmpty'
+0670    | OP_CALL             1
+0672    | OP_POP
+0673  113 OP_GET_GLOBAL       0 '@println'
+0675    | OP_GET_GLOBAL       2 '@typeof'
+0677    | OP_GET_GLOBAL      38 '@strIsEmpty'
+0679    | OP_CALL             1
+0681    | OP_CALL             1
+0683    | OP_POP
+0684  115 OP_GET_GLOBAL       0 '@println'
+0686    | OP_GET_GLOBAL      39 '@assert'
+0688    | OP_CALL             1
+0690    | OP_POP
+0691  116 OP_GET_GLOBAL       0 '@println'
+0693    | OP_GET_GLOBAL       2 '@typeof'
+0695    | OP_GET_GLOBAL      39 '@assert'
+0697    | OP_CALL             1
+0699    | OP_CALL             1
+0701    | OP_POP
+0702  118 OP_GET_GLOBAL       0 '@println'
+0704    | OP_GET_GLOBAL      40 '@panic'
+0706    | OP_CALL             1
+0708    | OP_POP
+0709  119 OP_GET_GLOBAL       0 '@println'
+0711    | OP_GET_GLOBAL       2 '@typeof'
+0713    | OP_GET_GLOBAL      40 '@panic'
+0715    | OP_CALL             1
+0717    | OP_CALL             1
+0719    | OP_POP
+0720  121 OP_GET_GLOBAL       0 '@println'
+0722    | OP_GET_GLOBAL      41 '@floor'
+0724    | OP_CALL             1
+0726    | OP_POP
+0727  122 OP_GET_GLOBAL       0 '@println'
+0729    | OP_GET_GLOBAL       2 '@typeof'
+0731    | OP_GET_GLOBAL      41 '@floor'
+0733    | OP_CALL             1
+0735    | OP_CALL             1
+0737    | OP_POP
+0738  124 OP_GET_GLOBAL       0 '@println'
+0740    | OP_GET_GLOBAL      42 '@round'
+0742    | OP_CALL             1
+0744    | OP_POP
+0745  125 OP_GET_GLOBAL       0 '@println'
+0747    | OP_GET_GLOBAL       2 '@typeof'
+0749    | OP_GET_GLOBAL      42 '@round'
+0751    | OP_CALL             1
+0753    | OP_CALL             1
+0755    | OP_POP
+0756  127 OP_GET_GLOBAL       0 '@println'
+0758    | OP_GET_GLOBAL      43 '@trunc'
+0760    | OP_CALL             1
+0762    | OP_POP
+0763  128 OP_GET_GLOBAL       0 '@println'
+0765    | OP_GET_GLOBAL       2 '@typeof'
+0767    | OP_GET_GLOBAL      43 '@trunc'
+0769    | OP_CALL             1
+0771    | OP_CALL             1
+0773    | OP_POP
+0774  130 OP_GET_GLOBAL       0 '@println'
+0776    | OP_GET_GLOBAL      44 '@abs'
+0778    | OP_CALL             1
+0780    | OP_POP
+0781  131 OP_GET_GLOBAL       0 '@println'
+0783    | OP_GET_GLOBAL       2 '@typeof'
+0785    | OP_GET_GLOBAL      44 '@abs'
+0787    | OP_CALL             1
+0789    | OP_CALL             1
+0791    | OP_POP
+0792  133 OP_GET_GLOBAL       0 '@println'
+0794    | OP_GET_GLOBAL      45 '@sqrt'
+0796    | OP_CALL             1
+0798    | OP_POP
+0799  134 OP_GET_GLOBAL       0 '@println'
+0801    | OP_GET_GLOBAL       2 '@typeof'
+0803    | OP_GET_GLOBAL      45 '@sqrt'
+0805    | OP_CALL             1
+0807    | OP_CALL             1
+0809    | OP_POP
+0810  136 OP_GET_GLOBAL       0 '@println'
+0812    | OP_GET_GLOBAL      46 '@pow'
+0814    | OP_CALL             1
+0816    | OP_POP
+0817  137 OP_GET_GLOBAL       0 '@println'
+0819    | OP_GET_GLOBAL       2 '@typeof'
+0821    | OP_GET_GLOBAL      46 '@pow'
+0823    | OP_CALL             1
+0825    | OP_CALL             1
+0827    | OP_POP
+0828  139 OP_GET_GLOBAL       0 '@println'
+0830    | OP_GET_GLOBAL      47 '@min'
+0832    | OP_CALL             1
+0834    | OP_POP
+0835  140 OP_GET_GLOBAL       0 '@println'
+0837    | OP_GET_GLOBAL       2 '@typeof'
+0839    | OP_GET_GLOBAL      47 '@min'
+0841    | OP_CALL             1
+0843    | OP_CALL             1
+0845    | OP_POP
+0846  142 OP_GET_GLOBAL       0 '@println'
+0848    | OP_GET_GLOBAL      48 '@max'
+0850    | OP_CALL             1
+0852    | OP_POP
+0853  143 OP_GET_GLOBAL       0 '@println'
+0855    | OP_GET_GLOBAL       2 '@typeof'
+0857    | OP_GET_GLOBAL      48 '@max'
+0859    | OP_CALL             1
+0861    | OP_CALL             1
+0863    | OP_POP
+0864  145 OP_GET_GLOBAL       0 '@println'
+0866    | OP_GET_GLOBAL      49 '@strContains'
+0868    | OP_CALL             1
+0870    | OP_POP
+0871  146 OP_GET_GLOBAL       0 '@println'
+0873    | OP_GET_GLOBAL       2 '@typeof'
+0875    | OP_GET_GLOBAL      49 '@strContains'
+0877    | OP_CALL             1
+0879    | OP_CALL             1
+0881    | OP_POP
+0882  148 OP_GET_GLOBAL       0 '@println'
+0884    | OP_GET_GLOBAL      50 '@strIndexOf'
+0886    | OP_CALL             1
+0888    | OP_POP
+0889  149 OP_GET_GLOBAL       0 '@println'
+0891    | OP_GET_GLOBAL       2 '@typeof'
+0893    | OP_GET_GLOBAL      50 '@strIndexOf'
+0895    | OP_CALL             1
+0897    | OP_CALL             1
+0899    | OP_POP
+0900  151 OP_GET_GLOBAL       0 '@println'
+0902    | OP_GET_GLOBAL      51 '@strSlice'
+0904    | OP_CALL             1
+0906    | OP_POP
+0907  152 OP_GET_GLOBAL       0 '@println'
+0909    | OP_GET_GLOBAL       2 '@typeof'
+0911    | OP_GET_GLOBAL      51 '@strSlice'
+0913    | OP_CALL             1
+0915    | OP_CALL             1
+0917    | OP_POP
+0918  154 OP_GET_GLOBAL       0 '@println'
+0920    | OP_GET_GLOBAL      52 '@strSplit'
+0922    | OP_CALL             1
+0924    | OP_POP
+0925  155 OP_GET_GLOBAL       0 '@println'
+0927    | OP_GET_GLOBAL       2 '@typeof'
+0929    | OP_GET_GLOBAL      52 '@strSplit'
+0931    | OP_CALL             1
+0933    | OP_CALL             1
+0935    | OP_POP
+0936  157 OP_GET_GLOBAL       0 '@println'
+0938    | OP_GET_GLOBAL      53 '@strTrim'
+0940    | OP_CALL             1
+0942    | OP_POP
+0943  158 OP_GET_GLOBAL       0 '@println'
+0945    | OP_GET_GLOBAL       2 '@typeof'
+0947    | OP_GET_GLOBAL      53 '@strTrim'
+0949    | OP_CALL             1
+0951    | OP_CALL             1
+0953    | OP_POP
+0954  160 OP_GET_GLOBAL       0 '@println'
+0956    | OP_GET_GLOBAL      54 '@strToUpper'
+0958    | OP_CALL             1
+0960    | OP_POP
+0961  161 OP_GET_GLOBAL       0 '@println'
+0963    | OP_GET_GLOBAL       2 '@typeof'
+0965    | OP_GET_GLOBAL      54 '@strToUpper'
+0967    | OP_CALL             1
+0969    | OP_CALL             1
+0971    | OP_POP
+0972  163 OP_GET_GLOBAL       0 '@println'
+0974    | OP_GET_GLOBAL      55 '@strToLower'
+0976    | OP_CALL             1
+0978    | OP_POP
+0979  164 OP_GET_GLOBAL       0 '@println'
+0981    | OP_GET_GLOBAL       2 '@typeof'
+0983    | OP_GET_GLOBAL      55 '@strToLower'
+0985    | OP_CALL             1
+0987    | OP_CALL             1
+0989    | OP_POP
+0990  166 OP_GET_GLOBAL       0 '@println'
+0992    | OP_GET_GLOBAL      56 '@strStartsWith'
+0994    | OP_CALL             1
+0996    | OP_POP
+0997  167 OP_GET_GLOBAL       0 '@println'
+0999    | OP_GET_GLOBAL       2 '@typeof'
+1001    | OP_GET_GLOBAL      56 '@strStartsWith'
+1003    | OP_CALL             1
+1005    | OP_CALL             1
+1007    | OP_POP
+1008  169 OP_GET_GLOBAL       0 '@println'
+1010    | OP_GET_GLOBAL      57 '@strEndsWith'
+1012    | OP_CALL             1
+1014    | OP_POP
+1015  170 OP_GET_GLOBAL       0 '@println'
+1017    | OP_GET_GLOBAL       2 '@typeof'
+1019    | OP_GET_GLOBAL      57 '@strEndsWith'
+1021    | OP_CALL             1
+1023    | OP_CALL             1
+1025    | OP_POP
+1026  172 OP_GET_GLOBAL       0 '@println'
+1028    | OP_GET_GLOBAL      58 '@strRepeat'
+1030    | OP_CALL             1
+1032    | OP_POP
+1033  173 OP_GET_GLOBAL       0 '@println'
+1035    | OP_GET_GLOBAL       2 '@typeof'
+1037    | OP_GET_GLOBAL      58 '@strRepeat'
+1039    | OP_CALL             1
+1041    | OP_CALL             1
+1043    | OP_POP
+1044  175 OP_GET_GLOBAL       0 '@println'
+1046    | OP_GET_GLOBAL      59 '@strReplace'
+1048    | OP_CALL             1
+1050    | OP_POP
+1051  176 OP_GET_GLOBAL       0 '@println'
+1053    | OP_GET_GLOBAL       2 '@typeof'
+1055    | OP_GET_GLOBAL      59 '@strReplace'
+1057    | OP_CALL             1
+1059    | OP_CALL             1
+1061    | OP_POP
+1062  178 OP_GET_GLOBAL       0 '@println'
+1064    | OP_GET_GLOBAL      60 '@strReplaceAll'
+1066    | OP_CALL             1
+1068    | OP_POP
+1069  179 OP_GET_GLOBAL       0 '@println'
+1071    | OP_GET_GLOBAL       2 '@typeof'
+1073    | OP_GET_GLOBAL      60 '@strReplaceAll'
+1075    | OP_CALL             1
+1077    | OP_CALL             1
+1079    | OP_POP
+1080  180 OP_NIL
+1081    | OP_RETURN

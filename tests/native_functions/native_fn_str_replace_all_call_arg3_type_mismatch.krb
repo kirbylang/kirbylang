@@ -1,1 +1,1 @@
-print @strReplaceAll("a", "b", 3);
+@println(@strReplaceAll("a", "b", 3));

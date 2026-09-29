@@ -31,27 +31,33 @@
 0050    | OP_STRUCT_INIT      1
 0052    | OP_CALL             1
 0054    | OP_POP
-0055   16 OP_GET_GLOBAL       6 'boxes'
-0057    | OP_CONSTANT         7 '1'
-0059    | OP_GET_INDEX
-0060    | OP_INVOKE        (0 args)    4 'toString'
-0063    | OP_PRINT
-0064   17 OP_GET_GLOBAL       2 'Box'
-0066    | OP_CONSTANT         3 'value'
-0068    | OP_CONSTANT        10 '4'
-0070    | OP_STRUCT_INIT      1
-0072    | OP_GET_LOCAL        1
-0074    | OP_CLOSE_BLOCK_EXPR    1
-0076    | OP_INVOKE        (0 args)    4 'toString'
-0079    | OP_PRINT
-0080   18 OP_NIL
-0081    | OP_RETURN
+0055   16 OP_GET_GLOBAL      10 '@println'
+0057    | OP_GET_GLOBAL       6 'boxes'
+0059    | OP_CONSTANT         7 '1'
+0061    | OP_GET_INDEX
+0062    | OP_INVOKE        (0 args)    4 'toString'
+0065    | OP_CALL             1
+0067    | OP_POP
+0068   17 OP_GET_GLOBAL      10 '@println'
+0070    | OP_GET_GLOBAL       2 'Box'
+0072    | OP_CONSTANT         3 'value'
+0074    | OP_CONSTANT        11 '4'
+0076    | OP_STRUCT_INIT      1
+0078    | OP_GET_LOCAL        2
+0080    | OP_CLOSE_BLOCK_EXPR    1
+0082    | OP_INVOKE        (0 args)    4 'toString'
+0085    | OP_CALL             1
+0087    | OP_POP
+0088   18 OP_NIL
+0089    | OP_RETURN
 == show ==
-0000   10 OP_GET_LOCAL        1
-0002    | OP_INVOKE        (0 args)    0 'toString'
-0005    | OP_PRINT
-0006   11 OP_NIL
-0007    | OP_RETURN
+0000   10 OP_GET_GLOBAL       0 '@println'
+0002    | OP_GET_LOCAL        1
+0004    | OP_INVOKE        (0 args)    1 'toString'
+0007    | OP_CALL             1
+0009    | OP_POP
+0010   11 OP_NIL
+0011    | OP_RETURN
 == toString ==
 0000    6 OP_GET_GLOBAL       0 '@strConcat'
 0002    | OP_CONSTANT         1 'Box('

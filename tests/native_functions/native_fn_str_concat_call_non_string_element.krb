@@ -1,2 +1,2 @@
 let numbers = [1, 2];
-print @strConcat(numbers);
+@println(@strConcat(numbers));

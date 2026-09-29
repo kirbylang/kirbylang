@@ -7,4 +7,4 @@ impl Display for Point {
 }
 
 var p = Point { x: 1 };
-print p.toString();
+@println(p.toString());

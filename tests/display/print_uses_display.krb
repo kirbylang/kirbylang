@@ -12,5 +12,5 @@ struct Plain {
 
 let box = Box { value: 123 };
 
-print box;
-print Plain { value: 1 };
+@println(box);
+@println(Plain { value: 1 });

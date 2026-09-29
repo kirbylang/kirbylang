@@ -1,1 +1,1 @@
-print @round(2.5, 1, 2);
+@println(@round(2.5, 1, 2));

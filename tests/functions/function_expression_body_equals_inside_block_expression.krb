@@ -5,4 +5,4 @@ var result = {
     map(10, pow)
 };
 
-print result;
+@println(result);

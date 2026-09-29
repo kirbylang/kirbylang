@@ -13,4 +13,4 @@ impl Eq for Money {
 var a = Money { cents: 500 };
 var b = Money { cents: 300 };
 
-print a.cmp(b);
+@println(a.cmp(b));

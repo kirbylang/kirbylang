@@ -3,10 +3,10 @@ test(false);
 
 fun test (a: bool): unit = {
   var x = {
-    print "before";
+    @println("before");
 
     if (a) "Hello" else "World"
   };
 
-  print x;
+  @println(x);
 };

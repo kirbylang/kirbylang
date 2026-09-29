@@ -25,15 +25,19 @@
 0037    | OP_CONSTANT         9 '2'
 0039    | OP_STRUCT_INIT      2
 0041    | OP_DEFINE_GLOBAL    7 'a'
-0043   16 OP_GET_GLOBAL       7 'a'
-0045    | OP_INVOKE        (0 args)    3 'toString'
-0048    | OP_PRINT
-0049   17 OP_GET_GLOBAL       7 'a'
-0051    | OP_GET_GLOBAL       7 'a'
-0053    | OP_INVOKE        (1 args)    5 'equals'
-0056    | OP_PRINT
-0057   18 OP_NIL
-0058    | OP_RETURN
+0043   16 OP_GET_GLOBAL      10 '@println'
+0045    | OP_GET_GLOBAL       7 'a'
+0047    | OP_INVOKE        (0 args)    3 'toString'
+0050    | OP_CALL             1
+0052    | OP_POP
+0053   17 OP_GET_GLOBAL      10 '@println'
+0055    | OP_GET_GLOBAL       7 'a'
+0057    | OP_GET_GLOBAL       7 'a'
+0059    | OP_INVOKE        (1 args)    5 'equals'
+0062    | OP_CALL             1
+0064    | OP_POP
+0065   18 OP_NIL
+0066    | OP_RETURN
 == toString ==
 0000    7 OP_CONSTANT         0 'Point'
 0002    | OP_RETURN

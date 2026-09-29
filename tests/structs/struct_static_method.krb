@@ -11,5 +11,5 @@ impl Point {
 
 var point = Point.origin();
 
-print point.x;
-print point.y;
+@println(point.x);
+@println(point.y);

@@ -1,15 +1,15 @@
 {
   var a = 1;
   fun f(): unit {
-    print a;
+    @println(a);
   }
   var b = 2;
   fun g(): unit {
-    print b;
+    @println(b);
   }
   var c = 3;
   fun h(): unit {
-    print c;
+    @println(c);
   }
 
   f();

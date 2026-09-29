@@ -1,1 +1,1 @@
-print true;
+@println(true);

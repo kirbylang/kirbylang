@@ -1,7 +1,7 @@
-print @strReplaceAll("a-b-c", "-", "+");
-print @strReplaceAll("banana", "an", "AN");
-print @strReplaceAll("aaa", "aa", "b");
-print @strReplaceAll("hello", "xyz", "!");
-print @strReplaceAll("abab", "ab", "");
-print @strReplaceAll("a.b.c", ".", "..");
-print @strReplaceAll("", "a", "b");
+@println(@strReplaceAll("a-b-c", "-", "+"));
+@println(@strReplaceAll("banana", "an", "AN"));
+@println(@strReplaceAll("aaa", "aa", "b"));
+@println(@strReplaceAll("hello", "xyz", "!"));
+@println(@strReplaceAll("abab", "ab", ""));
+@println(@strReplaceAll("a.b.c", ".", ".."));
+@println(@strReplaceAll("", "a", "b"));

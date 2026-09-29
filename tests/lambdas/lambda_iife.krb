@@ -1,1 +1,1 @@
-print (fun (message: string) { message })("Hello World");
+@println((fun (message: string) { message })("Hello World"));

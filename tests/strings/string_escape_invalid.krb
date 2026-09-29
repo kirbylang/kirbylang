@@ -1,1 +1,1 @@
-print "Hello\kWorld";
+@println("Hello\kWorld");

@@ -6,6 +6,6 @@ for (var i = 0; i < 10; i = i + 1) {
         continue;
     }
 
-    print "Hello World";
+    @println("Hello World");
 }
 ```

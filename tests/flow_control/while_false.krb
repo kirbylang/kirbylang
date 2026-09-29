@@ -1,5 +1,5 @@
 while (false) {
-    print "Hello";
+    @println("Hello");
 }
 
-print "World";
+@println("World");

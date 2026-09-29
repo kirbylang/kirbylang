@@ -2,8 +2,8 @@ var i = 0;
 while (i < 5) {
   var doubled = i * 2;
   if (i == 3) break;
-  print doubled;
+  @println(doubled);
   i = i + 1;
 }
 var after = "still alive";
-print after;
+@println(after);

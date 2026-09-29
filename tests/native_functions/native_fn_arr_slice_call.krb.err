@@ -15,13 +15,15 @@
 0020    | OP_CONSTANT         9 '4'
 0022    | OP_CALL             3
 0024    | OP_DEFINE_GLOBAL    6 'slice'
-0026    5 OP_GET_GLOBAL      10 '@arrEqual'
-0028    | OP_CONSTANT         2 '20'
-0030    | OP_CONSTANT         3 '30'
-0032    | OP_CONSTANT         4 '40'
-0034    | OP_ARRAY            3
-0036    | OP_GET_GLOBAL       6 'slice'
-0038    | OP_CALL             2
-0040    | OP_PRINT
-0041    6 OP_NIL
-0042    | OP_RETURN
+0026    5 OP_GET_GLOBAL      10 '@println'
+0028    | OP_GET_GLOBAL      11 '@arrEqual'
+0030    | OP_CONSTANT         2 '20'
+0032    | OP_CONSTANT         3 '30'
+0034    | OP_CONSTANT         4 '40'
+0036    | OP_ARRAY            3
+0038    | OP_GET_GLOBAL       6 'slice'
+0040    | OP_CALL             2
+0042    | OP_CALL             1
+0044    | OP_POP
+0045    6 OP_NIL
+0046    | OP_RETURN

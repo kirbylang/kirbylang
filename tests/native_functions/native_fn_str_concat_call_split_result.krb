@@ -1,1 +1,1 @@
-print @strConcat(@strSplit("a,b,c", ","));
+@println(@strConcat(@strSplit("a,b,c", ",")));

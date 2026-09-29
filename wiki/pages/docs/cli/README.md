@@ -2,6 +2,7 @@
 aliases:
   - cli
 ---
+
 The `krb` binary allows you to lex, parse, compile, and run [[projects]] `*.krb` files, execute arbitrary Kirby code, and provides a REPL.
 
 ```
@@ -35,5 +36,5 @@ krb example hello                 # runs examples/hello.krb
 krb repl
 krb compile path/to/file.krb
 krb parse path/to/file.krb
-krb exec 'print "Hello World";'
+krb exec '@println("Hello World");'
 ```

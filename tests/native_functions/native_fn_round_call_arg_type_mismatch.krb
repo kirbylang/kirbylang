@@ -1,1 +1,1 @@
-print @round("x");
+@println(@round("x"));

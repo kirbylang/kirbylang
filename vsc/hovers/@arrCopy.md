@@ -7,7 +7,7 @@ var c = @arrCopy(a);
 
 a[0] = 100;
 
-print a; // [100, 2, 3]
-print b; // [100, 2, 3]
-print c; // [1, 2, 3]
+@println(a); // [100, 2, 3]
+@println(b); // [100, 2, 3]
+@println(c); // [1, 2, 3]
 ```

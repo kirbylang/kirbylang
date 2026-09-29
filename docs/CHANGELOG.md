@@ -139,6 +139,7 @@
     - `krb compile <path>`
     - `krb parse <path>`
     - `krb lex <path>`
+- Removal of the `print` statement. Replaced by the builtin `@print`, `@println`, `@eprint`, `@eprintln` functions
 
 - Refine shadow binding rules
 
@@ -177,9 +178,9 @@
 - Block expressions: `var sum = { 5 + 10 };`
   - New bytecode op: `OP_CLOSE_BLOCK_EXPR n`
 - If expressions
-  - `print if (true) "Hello" else "World"; // Hello`
-  - `print if (value > 9000) "Over 9000!" else if (value == 42) "Life, Universe, Everything" else "Error"; // Error`
-  - `print if (false) 123; // nil`
+  - `@println(if (true) "Hello" else "World"); // Hello`
+  - `@println(if (value > 9000) "Over 9000!" else if (value == 42) "Life, Universe, Everything" else "Error"); // Error`
+  - `@println(if (false) 123); // nil`
 - Lambdas
   - `var sum = fun (a, b) { a + b };`
 - A shared library is now generated on build: `libkirby.{so,dylib,dll}`

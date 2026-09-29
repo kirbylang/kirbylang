@@ -1,1 +1,1 @@
-print @getenv("KIRBY_TEST");
+@println(@getenv("KIRBY_TEST"));

@@ -1,5 +1,5 @@
 fun fn(): f64 {
-    print "no return here";
+    @println("no return here");
 }
 
-print fn();
+@println(fn());

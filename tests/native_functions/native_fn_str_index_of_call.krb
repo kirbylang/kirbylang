@@ -1,7 +1,7 @@
-print @strIndexOf("hello world", "o");
-print @strIndexOf("hello world", "world");
-print @strIndexOf("hello", "xyz");
-print @strIndexOf("hello", "");
-print @strIndexOf("", "a");
-print @strIndexOf("", "");
-print @strIndexOf("aaa", "aa");
+@println(@strIndexOf("hello world", "o"));
+@println(@strIndexOf("hello world", "world"));
+@println(@strIndexOf("hello", "xyz"));
+@println(@strIndexOf("hello", ""));
+@println(@strIndexOf("", "a"));
+@println(@strIndexOf("", ""));
+@println(@strIndexOf("aaa", "aa"));

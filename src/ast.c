@@ -269,12 +269,6 @@ static void printNode(StrBuf *sb, AstNode *node) {
     printNode(sb, node->as.exprStmt.expr);
     break;
 
-  case NODE_PRINT:
-    sb_append(sb, "(print ");
-    printNode(sb, node->as.print.expr);
-    sb_append(sb, ")");
-    break;
-
   case NODE_VAR_DECL:
     sb_append(sb, node->as.varDecl.isMutable ? "(var " : "(let ");
     sb_append_token(sb, node->as.varDecl.name);

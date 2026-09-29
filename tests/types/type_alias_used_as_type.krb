@@ -6,6 +6,6 @@ let name: Text = "Kirby";
 
 fun add(a: Number, b: Number): Number = a + b;
 
-print count;
-print name;
-print add(1, 2);
+@println(count);
+@println(name);
+@println(add(1, 2));

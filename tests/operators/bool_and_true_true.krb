@@ -1,2 +1,2 @@
-print true and true;
-print true && true;
+@println(true and true);
+@println(true && true);

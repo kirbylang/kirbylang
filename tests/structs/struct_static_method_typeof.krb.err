@@ -10,13 +10,15 @@
 0009    4 OP_CLOSURE          2 <fn hello>
 0011    | OP_METHOD           1 'hello'
 0013    5 OP_POP
-0014    7 OP_GET_GLOBAL       3 '@typeof'
-0016    | OP_GET_GLOBAL       0 'Struct'
-0018    | OP_GET_PROPERTY     1 'hello'
-0020    | OP_CALL             1
-0022    | OP_PRINT
-0023    8 OP_NIL
-0024    | OP_RETURN
+0014    7 OP_GET_GLOBAL       3 '@println'
+0016    | OP_GET_GLOBAL       4 '@typeof'
+0018    | OP_GET_GLOBAL       0 'Struct'
+0020    | OP_GET_PROPERTY     1 'hello'
+0022    | OP_CALL             1
+0024    | OP_CALL             1
+0026    | OP_POP
+0027    8 OP_NIL
+0028    | OP_RETURN
 == hello ==
 0000    4 OP_NIL
 0001    | OP_RETURN

@@ -18,8 +18,8 @@ var instance = Struct.default();
 
 instance.set("Hello");
 
-print instance.get();
+@println(instance.get());
 
 instance.set("World");
 
-print instance.get();
+@println(instance.get());

@@ -57,8 +57,7 @@ static void test_scope_shadowing(void) {
 static void test_struct_and_function_registries(void) {
   TypeEnv *env = typchkTypeEnvCreate();
 
-  Type *point =
-      typeStruct(tokenFromCString("Point"), NULL, 0);
+  Type *point = typeStruct(tokenFromCString("Point"), NULL, 0);
   typchkTypeEnvRegisterStruct(env, tokenFromCString("Point"), point);
   assert(typchkTypeEnvLookupStruct(env, tokenFromCString("Point")) == point);
   assert(typchkTypeEnvLookupStruct(env, tokenFromCString("Missing")) == NULL);
@@ -88,8 +87,7 @@ static void test_resolve_primitives(void) {
 
 static void test_resolve_registered_struct(void) {
   TypeEnv *env = typchkTypeEnvCreate();
-  Type *point =
-      typeStruct(tokenFromCString("Point"), NULL, 0);
+  Type *point = typeStruct(tokenFromCString("Point"), NULL, 0);
   typchkTypeEnvRegisterStruct(env, tokenFromCString("Point"), point);
 
   assert(typchkResolveType(env, parseFirstVarType("var x: Point;")) == point);
@@ -357,8 +355,7 @@ static void test_struct_instance_field_and_method_access(void) {
   UninternedTypeMember fields[] = {{tokenFromCString("balance"), typeF64()}};
   Type *f64ToF64Params[] = {typeF64()};
   Type *depositType = typeFunction(f64ToF64Params, 1, typeF64());
-  Type *account =
-      typeStruct(tokenFromCString("Account"), fields, 1);
+  Type *account = typeStruct(tokenFromCString("Account"), fields, 1);
   typeStructAddInstanceMethod(account, tokenFromCString("deposit"), depositType,
                               /*isPublic=*/true);
   typchkTypeEnvRegisterStruct(env, tokenFromCString("Account"), account);
@@ -385,12 +382,10 @@ static void test_struct_static_method_access(void) {
   TypeEnv *env = typchkTypeEnvCreate();
   typchkTypeEnvBeginScope(env);
 
-  Type *pointType =
-      typeStruct(tokenFromCString("Point"), NULL, 0);
+  Type *pointType = typeStruct(tokenFromCString("Point"), NULL, 0);
   Type *newParams[] = {typeF64(), typeF64()};
   Type *newType = typeFunction(newParams, 2, pointType);
-  Type *point =
-      typeStruct(tokenFromCString("Point"), NULL, 0);
+  Type *point = typeStruct(tokenFromCString("Point"), NULL, 0);
   typeStructAddStaticMethod(point, tokenFromCString("new"), newType,
                             /*isPublic=*/true);
 
@@ -424,17 +419,15 @@ static void test_local_variable_shadows_struct_name_for_get(void) {
   // shadowing the struct name (matching how a local shadows a global of
   // the same name at the bytecode level today), not accidentally hit
   // static-method lookup against the real Point struct.
-  Type *originType = typeFunction(
-      NULL, 0,
-      typeStruct(tokenFromCString("Point"), NULL, 0));
+  Type *originType =
+      typeFunction(NULL, 0, typeStruct(tokenFromCString("Point"), NULL, 0));
   Type *pointStructType = typeStruct(tokenFromCString("Point"), NULL, 0);
   typeStructAddStaticMethod(pointStructType, tokenFromCString("origin"),
                             originType, /*isPublic=*/true);
   typchkTypeEnvRegisterStruct(env, tokenFromCString("Point"), pointStructType);
 
   UninternedTypeMember otherFields[] = {{tokenFromCString("x"), typeF64()}};
-  Type *otherType =
-      typeStruct(tokenFromCString("Other"), otherFields, 1);
+  Type *otherType = typeStruct(tokenFromCString("Other"), otherFields, 1);
   typchkTypeEnvDeclare(env, tokenFromCString("Point"),
                        otherType); // shadows the struct
 
@@ -456,8 +449,7 @@ static void test_struct_unknown_field_errors(void) {
   typchkResetError();
   TypeEnv *env = typchkTypeEnvCreate();
   typchkTypeEnvBeginScope(env);
-  Type *point =
-      typeStruct(tokenFromCString("Point"), NULL, 0);
+  Type *point = typeStruct(tokenFromCString("Point"), NULL, 0);
   typchkTypeEnvDeclare(env, tokenFromCString("p"), point);
 
   int outCount = 0;
@@ -479,8 +471,7 @@ static void test_struct_init(void) {
   typchkTypeEnvBeginScope(env);
   UninternedTypeMember fields[] = {{tokenFromCString("x"), typeF64()},
                                    {tokenFromCString("y"), typeF64()}};
-  Type *point =
-      typeStruct(tokenFromCString("Point"), fields, 2);
+  Type *point = typeStruct(tokenFromCString("Point"), fields, 2);
   typchkTypeEnvRegisterStruct(env, tokenFromCString("Point"), point);
 
   int outCount = 0;
@@ -501,8 +492,7 @@ static void test_struct_init_wrong_field_type_errors(void) {
   TypeEnv *env = typchkTypeEnvCreate();
   typchkTypeEnvBeginScope(env);
   UninternedTypeMember fields[] = {{tokenFromCString("x"), typeF64()}};
-  Type *point =
-      typeStruct(tokenFromCString("Point"), fields, 1);
+  Type *point = typeStruct(tokenFromCString("Point"), fields, 1);
   typchkTypeEnvRegisterStruct(env, tokenFromCString("Point"), point);
 
   int outCount = 0;
@@ -522,8 +512,7 @@ static void test_self_type(void) {
   typchkResetError();
   TypeEnv *env = typchkTypeEnvCreate();
   typchkTypeEnvBeginScope(env);
-  Type *point =
-      typeStruct(tokenFromCString("Point"), NULL, 0);
+  Type *point = typeStruct(tokenFromCString("Point"), NULL, 0);
   // Sets self-type directly to test typchkInferSelf() in isolation, rather
   // than going through a whole method body via typchkCheckFunctionBody().
   typchkTypeEnvSetSelfType(env, point);
@@ -614,7 +603,7 @@ static void test_if_expression_missing_else_with_non_unit_branch_errors(void) {
 static void test_if_statement_with_unit_branches_is_fine(void) {
   typchkResetError();
   TypeEnv *env =
-      checkProgram("fun test(a: bool): unit { if (a) { print \"hi\"; } }");
+      checkProgram("fun test(a: bool): unit { if (a) { @println(\"hi\"); } }");
   assert(!typchkHadError());
   typchkTypeEnvDestroy(env);
 }
@@ -702,7 +691,7 @@ static void test_while_loop(void) {
 
 static void test_while_condition_not_bool_errors(void) {
   typchkResetError();
-  TypeEnv *env = checkProgram("while (\"x\") { print 1; }");
+  TypeEnv *env = checkProgram("while (\"x\") { @println(1); }");
   assert(typchkHadError());
   typchkTypeEnvDestroy(env);
   typchkResetError();
@@ -711,7 +700,7 @@ static void test_while_condition_not_bool_errors(void) {
 static void test_for_loop_scopes_its_variable(void) {
   typchkResetError();
   TypeEnv *env =
-      checkProgram("for (var i = 0; i < 10; i = i + 1) { print i; }");
+      checkProgram("for (var i = 0; i < 10; i = i + 1) { @println(i); }");
   assert(!typchkHadError());
   typchkTypeEnvDestroy(env);
 }
@@ -779,7 +768,7 @@ static void test_struct_private_instance_method_uncallable_from_outside(void) {
                             "impl Greeter {\n"
                             "  fun greet(self): string = \"hi\";\n"
                             "}\n"
-                            "print Greeter {}.greet();\n");
+                            "@println(Greeter {}.greet());\n");
   assert(!ok);
 }
 
@@ -789,7 +778,7 @@ static void test_struct_private_static_method_uncallable_from_outside(void) {
                             "impl Point {\n"
                             "  fun origin(): Point = Point {};\n"
                             "}\n"
-                            "print Point.origin();\n");
+                            "@println(Point.origin());\n");
   assert(!ok);
 }
 
@@ -821,7 +810,7 @@ static void test_program_fully_typed_struct_and_methods(void) {
       "  pub fun sum(self): f64 = self.x + self.y;\n"
       "}\n"
       "var p = Point.new(1, 2);\n"
-      "print p.sum();\n");
+      "@println(p.sum());\n");
   assert(ok);
 }
 
@@ -871,7 +860,7 @@ static void test_program_multiple_impl_blocks(void) {
                             "  pub fun get(self): f64 = self.count;\n"
                             "}\n"
                             "var c = Counter.new();\n"
-                            "print c.get();\n");
+                            "@println(c.get());\n");
   assert(ok);
 }
 
@@ -884,7 +873,7 @@ static void test_program_impl_before_struct_declaration(void) {
                             "  pub var x: f64;\n"
                             "}\n"
                             "var p = Point.origin();\n"
-                            "print p.x;\n");
+                            "@println(p.x);\n");
   assert(ok);
 }
 
@@ -895,7 +884,7 @@ static void test_program_mutually_recursive_functions(void) {
       "isOdd(n - 1); }\n"
       "fun isOdd(n: f64): bool { if (n == 0) return false; return "
       "isEven(n - 1); }\n"
-      "print isEven(10);\n");
+      "@println(isEven(10));\n");
   assert(ok);
 }
 
@@ -910,7 +899,7 @@ static void test_program_method_body_type_error_caught(void) {
 
 static void test_program_body_falling_off_the_end_errors(void) {
   typchkResetError();
-  bool ok = typecheckSource("fun f(): f64 { print 1; }\n");
+  bool ok = typecheckSource("fun f(): f64 { @println(1); }\n");
   assert(!ok);
 }
 
@@ -929,14 +918,14 @@ static void test_program_return_on_both_branches_is_fine(void) {
 
 static void test_program_unit_body_needs_no_return(void) {
   typchkResetError();
-  bool ok = typecheckSource("fun f(): unit { print 1; }\n");
+  bool ok = typecheckSource("fun f(): unit { @println(1); }\n");
   assert(ok);
 }
 
 static void test_program_lambda_falling_off_the_end_errors(void) {
   typchkResetError();
   bool ok =
-      typecheckSource("let f: fun () => f64 = fun (): f64 { print 1; };\n");
+      typecheckSource("let f: fun () => f64 = fun (): f64 { @println(1); };\n");
   assert(!ok);
 }
 
@@ -960,7 +949,7 @@ static void test_type_alias_chained(void) {
   bool ok = typecheckSource("type A = B;\n"
                             "type B = f64\n;"
                             "let value: A = 7;\n"
-                            "print value;\n");
+                            "@println(value);\n");
   assert(ok);
 }
 
@@ -982,7 +971,7 @@ static void test_type_alias_to_struct(void) {
                             "  pub fun new(x: f64): Coord = Point { x: x };\n"
                             "}\n"
                             "let p: Coord = Point.new(3);\n"
-                            "print p.x;\n");
+                            "@println(p.x);\n");
   assert(ok);
 }
 
@@ -993,9 +982,9 @@ static void test_type_alias_used_as_type(void) {
                             "let count: Number = 42;\n"
                             "let name: Text = \"Kirby\";\n"
                             "fun add(a: Number, b: Number): Number = a + b;\n"
-                            "print count;\n"
-                            "print name;\n"
-                            "print add(1, 2);\n");
+                            "@println(count);\n"
+                            "@println(name);\n"
+                            "@println(add(1, 2));\n");
   assert(ok);
 }
 
@@ -1015,7 +1004,7 @@ static void test_program_trait_basic_impl_and_call(void) {
                             "  pub fun toString(self): string = \"Point\";\n"
                             "}\n"
                             "var p = Point { x: 1 };\n"
-                            "print p.toString();\n");
+                            "@println(p.toString());\n");
   assert(ok);
 }
 
@@ -1076,7 +1065,7 @@ static void test_program_trait_supertrait_satisfied(void) {
       "}\n"
       "var a = Money { cents: 1 };\n"
       "var b = Money { cents: 2 };\n"
-      "print a.cmp(b);\n");
+      "@println(a.cmp(b));\n");
   assert(ok);
 }
 
@@ -1111,7 +1100,7 @@ static void test_program_trait_self_substitution_in_return_type(void) {
                       "}\n"
                       "var p = Point { x: 1 };\n"
                       "var p2: Point = p.clone();\n"
-                      "print p2.x;\n");
+                      "@println(p2.x);\n");
   assert(ok);
 }
 
@@ -1122,7 +1111,7 @@ static void test_program_trait_static_method_via_struct_name(void) {
                             "  pub fun default(): Self = Point { x: 0 };\n"
                             "}\n"
                             "var p: Point = Point.default();\n"
-                            "print p.x;\n");
+                            "@println(p.x);\n");
   assert(ok);
 }
 
@@ -1133,7 +1122,7 @@ static void test_program_trait_static_method_called_as_instance_fails(void) {
                             "  pub fun default(): Self = Point { x: 0 };\n"
                             "}\n"
                             "var p = Point { x: 1 };\n"
-                            "print p.default();\n");
+                            "@println(p.default());\n");
   assert(!ok);
 }
 
@@ -1142,7 +1131,7 @@ static void test_program_equality_requires_eq_for_structs(void) {
   bool ok = typecheckSource("struct Point { pub var x: f64; }\n"
                             "var a = Point { x: 1 };\n"
                             "var b = Point { x: 1 };\n"
-                            "print a == b;\n");
+                            "@println(a == b);\n");
   assert(!ok);
 }
 
@@ -1154,7 +1143,7 @@ static void test_program_equality_ok_once_eq_implemented(void) {
       "  pub fun equals(self, other: Self): bool = self.x == other.x;\n"
       "}\n"
       "var a = Point { x: 1 };\n"
-      "print a == a;\n");
+      "@println(a == a);\n");
   assert(ok);
 }
 
@@ -1162,9 +1151,9 @@ static void test_program_equality_between_primitives_unaffected(void) {
   // The Eq requirement only applies to structs -- primitives never needed
   // an impl for `==` and still don't.
   typchkResetError();
-  bool ok = typecheckSource("print 1 == 1;\n"
-                            "print \"a\" == \"a\";\n"
-                            "print true == false;\n");
+  bool ok = typecheckSource("@println(1 == 1);\n"
+                            "@println(\"a\" == \"a\");\n"
+                            "@println(true == false);\n");
   assert(ok);
 }
 
@@ -1196,8 +1185,8 @@ static void test_program_trait_alongside_plain_impl(void) {
       "}\n"
       "var c = Counter { count: 0 };\n"
       "c.increment();\n"
-      "print c.count;\n"
-      "print c.toString();\n");
+      "@println(c.count);\n"
+      "@println(c.toString());\n");
   assert(ok);
 }
 
@@ -1208,7 +1197,7 @@ static void test_program_trait_method_without_pub_is_callable(void) {
                             "  fun toString(self): string = \"Point\";\n"
                             "}\n"
                             "var p = Point { x: 1 };\n"
-                            "print p.toString();\n");
+                            "@println(p.toString());\n");
   assert(ok);
 }
 
@@ -1243,7 +1232,7 @@ static void test_program_self_as_param_type_in_plain_impl(void) {
       "var a = Point { x: 1 };\n"
       "var b = Point { x: 2 };\n"
       "var c: Point = a.combine(b);\n"
-      "print c.x;\n");
+      "@println(c.x);\n");
   assert(ok);
 }
 
@@ -1258,7 +1247,7 @@ static void test_program_self_in_trait_impl_struct_init(void) {
                             "}\n"
                             "var p = Point { x: 5 };\n"
                             "var p2: Point = p.clone();\n"
-                            "print p2.x;\n");
+                            "@println(p2.x);\n");
   assert(ok);
 }
 
@@ -1295,7 +1284,7 @@ static void test_program_self_as_static_method_receiver(void) {
                             "  pub fun zero(): Self = Self.wrap(0);\n"
                             "}\n"
                             "var b: Box = Box.zero();\n"
-                            "print b.value;\n");
+                            "@println(b.value);\n");
   assert(ok);
 }
 

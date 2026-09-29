@@ -1,8 +1,8 @@
 var a = "global";
 
-print {
+@println({
   var a = "local";
   a
-};
+});
 
-print a;
+@println(a);

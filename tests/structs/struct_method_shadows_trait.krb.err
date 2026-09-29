@@ -25,10 +25,12 @@
 0038   16 OP_GET_GLOBAL       7 'box'
 0040    | OP_INVOKE        (0 args)    2 'toString'
 0043    | OP_DEFINE_GLOBAL    9 'n'
-0045   18 OP_GET_GLOBAL       9 'n'
-0047    | OP_PRINT
-0048   19 OP_NIL
-0049    | OP_RETURN
+0045   18 OP_GET_GLOBAL      10 '@println'
+0047    | OP_GET_GLOBAL       9 'n'
+0049    | OP_CALL             1
+0051    | OP_POP
+0052   19 OP_NIL
+0053    | OP_RETURN
 == toString ==
 0000   12 OP_CONSTANT         0 'Hello World'
 0002    | OP_RETURN

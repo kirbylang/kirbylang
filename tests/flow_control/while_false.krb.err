@@ -3,13 +3,17 @@
 0001    | OP_RETURN
 == <script> ==
 0000    1 OP_FALSE
-0001    | OP_JUMP_IF_FALSE    1 -> 11
+0001    | OP_JUMP_IF_FALSE    1 -> 15
 0004    | OP_POP
-0005    2 OP_CONSTANT         0 'Hello'
-0007    | OP_PRINT
-0008    3 OP_LOOP             8 -> 0
+0005    2 OP_GET_GLOBAL       0 '@println'
+0007    | OP_CONSTANT         1 'Hello'
+0009    | OP_CALL             1
 0011    | OP_POP
-0012    5 OP_CONSTANT         1 'World'
-0014    | OP_PRINT
-0015    6 OP_NIL
-0016    | OP_RETURN
+0012    3 OP_LOOP            12 -> 0
+0015    | OP_POP
+0016    5 OP_GET_GLOBAL       0 '@println'
+0018    | OP_CONSTANT         2 'World'
+0020    | OP_CALL             1
+0022    | OP_POP
+0023    6 OP_NIL
+0024    | OP_RETURN

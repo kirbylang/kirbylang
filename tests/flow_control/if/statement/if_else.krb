@@ -3,8 +3,8 @@ test(false);
 
 fun test(value: bool): unit {
     if (value) {
-        print "Hello";
+        @println("Hello");
     } else {
-        print "World";
+        @println("World");
     }
 }

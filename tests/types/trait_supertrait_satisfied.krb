@@ -13,6 +13,6 @@ impl Ord for Money {
 var a = Money { cents: 500 };
 var b = Money { cents: 300 };
 
-print a.cmp(b);
-print a.equals(b);
-print a.equals(a);
+@println(a.cmp(b));
+@println(a.equals(b));
+@println(a.equals(a));

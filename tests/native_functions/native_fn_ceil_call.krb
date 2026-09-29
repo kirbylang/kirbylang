@@ -1,1 +1,1 @@
-print @ceil(1.2);
+@println(@ceil(1.2));

@@ -1,2 +1,2 @@
-print 10 % 2;
-print 100 % 6;
+@println(10 % 2);
+@println(100 % 6);

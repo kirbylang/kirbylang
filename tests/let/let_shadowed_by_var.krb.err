@@ -8,10 +8,14 @@
 0006    5 OP_CONSTANT         3 '21'
 0008    | OP_SET_LOCAL        1
 0010    | OP_POP
-0011    6 OP_GET_LOCAL        1
-0013    | OP_PRINT
-0014    7 OP_POP
-0015    9 OP_GET_GLOBAL       0 'b'
-0017    | OP_PRINT
-0018   10 OP_NIL
-0019    | OP_RETURN
+0011    6 OP_GET_GLOBAL       4 '@println'
+0013    | OP_GET_LOCAL        1
+0015    | OP_CALL             1
+0017    | OP_POP
+0018    7 OP_POP
+0019    9 OP_GET_GLOBAL       4 '@println'
+0021    | OP_GET_GLOBAL       0 'b'
+0023    | OP_CALL             1
+0025    | OP_POP
+0026   10 OP_NIL
+0027    | OP_RETURN

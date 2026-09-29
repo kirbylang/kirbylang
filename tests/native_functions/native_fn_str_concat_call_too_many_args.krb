@@ -1,1 +1,1 @@
-print @strConcat(["a"], ["b"]);
+@println(@strConcat(["a"], ["b"]));

@@ -13,4 +13,4 @@ impl Counter {
     }
 }
 
-print Counter.new().read();
+@println(Counter.new().read());

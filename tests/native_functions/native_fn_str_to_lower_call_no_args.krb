@@ -1,1 +1,1 @@
-print @strToLower();
+@println(@strToLower());

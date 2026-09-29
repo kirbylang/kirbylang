@@ -14,7 +14,9 @@
 0015    | OP_CONSTANT         4 'math works'
 0017    | OP_CALL             2
 0019    | OP_POP
-0020    3 OP_CONSTANT         5 'after'
-0022    | OP_PRINT
-0023    4 OP_NIL
-0024    | OP_RETURN
+0020    3 OP_GET_GLOBAL       5 '@println'
+0022    | OP_CONSTANT         6 'after'
+0024    | OP_CALL             1
+0026    | OP_POP
+0027    4 OP_NIL
+0028    | OP_RETURN

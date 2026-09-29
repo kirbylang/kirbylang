@@ -31,11 +31,13 @@
 0051   27 OP_CONSTANT        13 'World'
 0053    | OP_INVOKE        (1 args)    8 'add'
 0056    | OP_DEFINE_GLOBAL   10 'builder'
-0058   29 OP_GET_GLOBAL      10 'builder'
-0060    | OP_INVOKE        (0 args)    4 'toString'
-0063    | OP_PRINT
-0064   30 OP_NIL
-0065    | OP_RETURN
+0058   29 OP_GET_GLOBAL      14 '@println'
+0060    | OP_GET_GLOBAL      10 'builder'
+0062    | OP_INVOKE        (0 args)    4 'toString'
+0065    | OP_CALL             1
+0067    | OP_POP
+0068   30 OP_NIL
+0069    | OP_RETURN
 == default ==
 0000   17 OP_GET_GLOBAL       0 'StringBuilder'
 0002    | OP_CONSTANT         2 ''

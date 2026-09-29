@@ -4,18 +4,20 @@
 == <script> ==
 0000    1 OP_TRUE
 0001    | OP_DEFINE_GLOBAL    0 'ok'
-0003    3 OP_GET_GLOBAL       1 '@strConcat'
-0005    | OP_CONSTANT         2 'ok='
-0007    | OP_GET_GLOBAL       3 '@boolToString'
-0009    | OP_GET_GLOBAL       0 'ok'
-0011    | OP_CALL             1
-0013    | OP_CONSTANT         4 ', not ok='
-0015    | OP_GET_GLOBAL       3 '@boolToString'
-0017    | OP_GET_GLOBAL       0 'ok'
-0019    | OP_NOT
-0020    | OP_CALL             1
-0022    | OP_ARRAY            4
-0024    | OP_CALL             1
-0026    | OP_PRINT
-0027    4 OP_NIL
-0028    | OP_RETURN
+0003    3 OP_GET_GLOBAL       1 '@println'
+0005    | OP_GET_GLOBAL       2 '@strConcat'
+0007    | OP_CONSTANT         3 'ok='
+0009    | OP_GET_GLOBAL       4 '@boolToString'
+0011    | OP_GET_GLOBAL       0 'ok'
+0013    | OP_CALL             1
+0015    | OP_CONSTANT         5 ', not ok='
+0017    | OP_GET_GLOBAL       4 '@boolToString'
+0019    | OP_GET_GLOBAL       0 'ok'
+0021    | OP_NOT
+0022    | OP_CALL             1
+0024    | OP_ARRAY            4
+0026    | OP_CALL             1
+0028    | OP_CALL             1
+0030    | OP_POP
+0031    4 OP_NIL
+0032    | OP_RETURN

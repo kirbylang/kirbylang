@@ -5,5 +5,5 @@ var array = [1, 2, 3];
 
 @arrRemove(array, 0);
 
-print array; // [2, 3]
+@println(array); // [2, 3]
 ```

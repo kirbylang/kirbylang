@@ -1,5 +1,5 @@
 Access the arguments passed to the program by index.
 
 ```kirby
-print @argv(1);
+@println(@argv(1));
 ```

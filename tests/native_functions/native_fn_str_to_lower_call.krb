@@ -1,4 +1,4 @@
-print @strToLower("Hello, World 123!");
-print @strToLower("ALREADY lower");
-print @strToLower("");
-print @strToLower("CAFÉ");
+@println(@strToLower("Hello, World 123!"));
+@println(@strToLower("ALREADY lower"));
+@println(@strToLower(""));
+@println(@strToLower("CAFÉ"));

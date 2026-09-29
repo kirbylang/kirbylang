@@ -17,11 +17,11 @@ fun run(): f64 {
     let picked = items[{ let n = 1; n }];
     items[{ let i = 2; i }] = { let n = 4; n * 10 };
 
-    print box.value;
-    print picked;
-    print items;
+    @println(box.value);
+    @println(picked);
+    @println(items);
 
     sum
 }
 
-print run();
+@println(run());

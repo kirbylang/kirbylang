@@ -1,1 +1,1 @@
-print $"a {missing} b";
+@println($"a {missing} b");
