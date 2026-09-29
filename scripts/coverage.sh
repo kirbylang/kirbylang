@@ -4,8 +4,14 @@ set -euo pipefail
 
 BUILD_TESTS=ON ENABLE_COVERAGE=ON ./scripts/build.sh
 
-./scripts/tests.sh
+./scripts/verify.sh
 
-lcov --capture --directory . --output-file lcov.info 
+lcov \
+    --capture\
+    --directory .\
+    --exclude 'lib/*'\
+    --exclude 'unit/*'\
+    --exclude '/Library/Developer/CommandLineTools/*'\
+    --output-file lcov.info 
 
 genhtml lcov.info --output-directory build/coverage_html
