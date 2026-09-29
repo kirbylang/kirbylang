@@ -17,6 +17,9 @@ set -euo pipefail
 #                       (omit this if .github/workflows/release.yml does it)
 #   -h, --help          Show this help
 #
+# The release commit contains VERSION.txt and docs/CHANGELOG.md. The changelog
+# entries under "## Next" move under a new "## X.Y.Z" heading.
+#
 # Env: REMOTE (default: origin), RELEASE_BRANCH (default: main)
 # -----------------------------------------------------------------------------
 
@@ -30,10 +33,11 @@ ASSUME_YES=false
 GH_RELEASE=false
 
 # Rollback bookkeeping
-COMMIT_CREATED=false
+CHANGES_STARTED=false
 TAG_CREATED=false
 PUSHED=false
 TAG=""
+START_HEAD=""
 
 die() {
     printf '⚠️  %s\n' "$*" >&2
@@ -57,6 +61,40 @@ set_bump() {
     BUMP="$1"
 }
 
+CHANGELOG="docs/CHANGELOG.md"
+
+changelog_has_next_heading() {
+    grep -qE '^## Next[[:space:]]*$' "$CHANGELOG"
+}
+
+# Succeeds when the "## Next" section has at least one non-blank line.
+changelog_next_has_entries() {
+    awk '
+        /^## Next[[:space:]]*$/ { in_next = 1; next }
+        in_next && /^## /       { exit }
+        in_next && NF           { found = 1 }
+        END                     { exit !found }
+    ' "$CHANGELOG"
+}
+
+# Keep an empty "## Next" and put the old entries under "## $1".
+rotate_changelog() {
+    local tmp
+    tmp="$(mktemp)"
+    awk -v version="$1" '
+        !done && /^## Next[[:space:]]*$/ {
+            print "## Next"
+            print ""
+            print "## " version
+            done = 1
+            next
+        }
+        { print }
+    ' "$CHANGELOG" >"$tmp"
+    cat "$tmp" >"$CHANGELOG"
+    rm -f "$tmp"
+}
+
 rollback() {
     local status=$?
     # Nothing to undo once the push has landed.
@@ -69,10 +107,11 @@ rollback() {
         git tag -d "$TAG" >/dev/null 2>&1 || true
         echo "   Deleted tag ${TAG}"
     fi
-    if $COMMIT_CREATED; then
+    if $CHANGES_STARTED; then
         # Safe because we required a clean tree before starting.
-        git reset --hard HEAD~1 >/dev/null
-        echo "   Reverted the release commit"
+        git reset --hard "$START_HEAD" >/dev/null
+        git clean -fdq -- tests/ docs/CHANGELOG.md
+        echo "   Restored the tree to ${START_HEAD:0:8}"
     fi
 }
 
@@ -141,6 +180,12 @@ REMOTE_HEAD="$(git rev-parse "${REMOTE}/${RELEASE_BRANCH}")"
 [[ "$LOCAL_HEAD" == "$REMOTE_HEAD" ]] ||
     die "Local ${RELEASE_BRANCH} differs from ${REMOTE}/${RELEASE_BRANCH}. Pull or push first."
 
+[[ -f "$CHANGELOG" ]] || die "${CHANGELOG} not found."
+changelog_has_next_heading ||
+    die "${CHANGELOG} has no '## Next' heading."
+changelog_next_has_entries ||
+    die "The '## Next' section in ${CHANGELOG} is empty. Nothing to release."
+
 # -----------------------------------------------------------------------------
 # Compute the new version
 # -----------------------------------------------------------------------------
@@ -176,32 +221,45 @@ fi
 trap rollback EXIT
 
 # -----------------------------------------------------------------------------
-# Bump, rebuild, re-snapshot, verify
+# Bump, rebuild, verify
 # -----------------------------------------------------------------------------
+START_HEAD="$LOCAL_HEAD"
+CHANGES_STARTED=true
+
 echo "==> Writing VERSION.txt"
 if $DRY_RUN; then
     printf '   [dry-run] echo %s > VERSION.txt\n' "$VERSION"
 else
-    printf '%s\n' "$VERSION" > VERSION.txt
+    printf '%s\n' "$VERSION" >VERSION.txt
 fi
 
-# The build regenerates version.c from VERSION.txt. This MUST happen before the
-# snapshot update, or the version snapshot captures the previous version.
+echo "==> Updating ${CHANGELOG}"
+if $DRY_RUN; then
+    printf '   [dry-run] move "## Next" entries under "## %s"\n' "$VERSION"
+else
+    rotate_changelog "$VERSION"
+fi
+
+# The build regenerates version.c from VERSION.txt, so the tests below see
+# the new version.
 echo "==> Building"
 run ./scripts/build.sh
 
-echo "==> Updating snapshots"
-run ./scripts/tests.sh --update
-
-echo "==> Verifying test suite"
+echo "==> Running test suite"
 run ./scripts/tests.sh
 
-# Stage everything the update touched, not just the one known file.
+# The release commit must hold exactly these two files. Anything else means
+# a build or test step changed something it should not have.
+if ! $DRY_RUN; then
+    unexpected="$(git status --porcelain | grep -vE ' (VERSION\.txt|docs/CHANGELOG\.md)$' || true)"
+    [[ -z "$unexpected" ]] ||
+        die "Unexpected changes, refusing to commit:"$'\n'"${unexpected}"
+fi
+
 echo "==> Committing"
-run git add VERSION.txt tests/
+run git add VERSION.txt "$CHANGELOG"
 if ! $DRY_RUN; then
     git commit -m "Increment version to ${TAG}"
-    COMMIT_CREATED=true
 fi
 
 echo "==> Tagging"

@@ -15,8 +15,9 @@ done
 
 shift $(($OPTIND - 1))
 
-# Read version from ../../VERSION.txt
-version=`cat VERSION.txt`
+# Read version from ../../VERSION.txt, relative to this script
+script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+version=$(cat "$script_dir/../../VERSION.txt")
 
 # Build array from version string.
 
