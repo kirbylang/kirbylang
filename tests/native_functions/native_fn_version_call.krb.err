@@ -11,13 +11,15 @@
 0012    | OP_DEFINE_GLOBAL    2 'expected_version'
 0014    4 OP_GET_GLOBAL       5 '@println'
 0016    | OP_GET_GLOBAL       6 '@strConcat'
-0018    | OP_CONSTANT         7 'Expected '
-0020    | OP_GET_GLOBAL       2 'expected_version'
-0022    | OP_CONSTANT         8 ' and got '
+0018    | OP_CONSTANT         7 '@version() returns version from VERSION.txt: '
+0020    | OP_GET_GLOBAL       8 '@boolToString'
+0022    | OP_GET_GLOBAL       2 'expected_version'
 0024    | OP_GET_GLOBAL       0 'version'
-0026    | OP_ARRAY            4
-0028    | OP_CALL             1
-0030    | OP_CALL             1
-0032    | OP_POP
-0033    5 OP_NIL
-0034    | OP_RETURN
+0026    | OP_EQUAL
+0027    | OP_CALL             1
+0029    | OP_ARRAY            2
+0031    | OP_CALL             1
+0033    | OP_CALL             1
+0035    | OP_POP
+0036    5 OP_NIL
+0037    | OP_RETURN

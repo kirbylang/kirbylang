@@ -1,1 +1,1 @@
-Expected 0.3.0 and got 0.3.0
+@version() returns version from VERSION.txt: true
