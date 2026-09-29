@@ -37,6 +37,8 @@ const char *help_message =
     "\n"
     "Commands:\n"
     "\n"
+    "  init                   Initialize a new kirby project in the current "
+    "directory\n"
     "  run [path] [args...]   Run a file. Without a path, runs the \"bin\" "
     "file\n"
     "                         from kirby.project.toml. Extra args are passed\n"
@@ -55,7 +57,8 @@ const char *help_message =
     "\n"
     "krb --help                        # -h is the short option\n"
     "krb --version                     # -v is the short option\n"
-    "krb run path/to/file.krb\n"
+    "krb init                          # initialize a new Kirby project\n"
+    "krb run path/to/file.krb          # runs the file\n"
     "krb run                           # runs the project's \"bin\" file\n"
     "krb run -- arg1 arg2              # passes args to the project's \"bin\"\n"
     "krb example hello                 # runs examples/hello.krb\n"
@@ -130,6 +133,24 @@ static void runProgram(int argc, char *argv[], const char *path) {
   sessionBegin(argc, argv);
   runFile(path);
   sessionEnd();
+}
+
+/* krb init */
+static int cmdInit(int argc, char *argv[]) {
+
+  FILE *fp = fopen("kirby.project.toml", "wx");
+
+  if (fp == NULL) {
+    fprintf(stderr, "Error: Project already initialized\n");
+  } else {
+    fprintf(fp, "# bin = \"bin/main.krb\"\n");
+    fprintf(fp, "# examples = \"examples\"\n");
+    fclose(fp);
+
+    fprintf(stderr, "Initialized new Kirby project!\n");
+  }
+
+  return 0;
 }
 
 /* krb run [path] [args...]
@@ -257,9 +278,9 @@ static int cmdParse(int argc, char *argv[]) {
 }
 
 static const Command commands[] = {
-    {"run", cmdRun},     {"example", cmdExample}, {"repl", cmdRepl},
-    {"exec", cmdExec},   {"compile", cmdCompile}, {"lex", cmdLex},
-    {"parse", cmdParse},
+    {"init", cmdInit}, {"run", cmdRun},     {"example", cmdExample},
+    {"repl", cmdRepl}, {"exec", cmdExec},   {"compile", cmdCompile},
+    {"lex", cmdLex},   {"parse", cmdParse},
 };
 
 static const Command *findCommand(const char *name) {
