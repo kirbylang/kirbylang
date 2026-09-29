@@ -40,6 +40,10 @@ let builder = StringBuilder.default()
 @println(builder);
 ```
 
+## What Is It?
+
+This is an interpreted language (bytecode VM) heavily inspired from my favorite parts of different languages.
+
 ## Documentation
 
 - [Documentation](./wiki/README.md)
@@ -57,9 +61,13 @@ let builder = StringBuilder.default()
 
 ## Learning Project
 
-This is a highly modified implementation of clox, from the [Crafting Interpreters](https://craftinginterpreters.com/) book. I highly recommend the free online version then purchasing a physical copy.
+This is a learning project for me. It started as my introduction to C. I've used many other languages (Rust, Javascript/Typescript, C#, Java, Python, Ruby, PHP) but never having to deal with manual memory management.
 
-This is also a learning project for me. Specifically to learn C (coming from a Rust/Typescript/Java background) and to explore implementing a type system.
+This is a heavily modified version of the clox implementation, from the [Crafting Interpreters](https://craftinginterpreters.com/) book. I highly recommend checking out the (free) online version before purchasing a physical copy. It has beautiful illustrations.
+
+On the language implementation side of things, this is my project for learning how to explore things like a type system, modules/namespaces, tooling like a linter and formatter.
+
+My long term plan is to get the language in a good spot with types and modules before rewriting (by hand, no LLMs) in Rust. It's a langauge I'm very comfortable implementing langauges in at this point. Plus [E2E tests](./tests/README.md) can be used to validate the second implementation.
 
 ## AI
 
