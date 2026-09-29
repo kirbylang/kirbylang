@@ -1479,11 +1479,6 @@ void typchkCheckStmt(TypeEnv *env, AstNode *node) {
   case NODE_EXPR_STMT:
     typchkInfer(env, node->as.exprStmt.expr);
     break;
-  case NODE_PRINT: {
-    Type *type = typchkInfer(env, node->as.print.expr);
-    node->as.print.usesDisplay = typeImplementsDisplay(type);
-    break;
-  }
   case NODE_VAR_DECL:
     typchkCheckVarDecl(env, node);
     break;

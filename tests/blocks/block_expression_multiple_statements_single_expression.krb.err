@@ -2,12 +2,14 @@
 0000    1 OP_NIL
 0001    | OP_RETURN
 == <script> ==
-0000    2 OP_CONSTANT         0 '10'
-0002    3 OP_CONSTANT         1 '50'
-0004    5 OP_GET_LOCAL        1
-0006    | OP_GET_LOCAL        2
-0008    | OP_ADD
-0009    6 OP_CLOSE_BLOCK_EXPR    2
-0011    | OP_PRINT
-0012    7 OP_NIL
-0013    | OP_RETURN
+0000    1 OP_GET_GLOBAL       0 '@println'
+0002    2 OP_CONSTANT         1 '10'
+0004    3 OP_CONSTANT         2 '50'
+0006    5 OP_GET_LOCAL        2
+0008    | OP_GET_LOCAL        3
+0010    | OP_ADD
+0011    6 OP_CLOSE_BLOCK_EXPR    2
+0013    | OP_CALL             1
+0015    | OP_POP
+0016    | OP_NIL
+0017    | OP_RETURN

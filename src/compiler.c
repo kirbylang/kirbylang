@@ -1514,15 +1514,6 @@ static void compileStmt(AstNode *node) {
     emitByte(OP_POP);
     break;
 
-  case NODE_PRINT:
-    compileExpr(node->as.print.expr);
-
-    if (node->as.print.usesDisplay)
-      emitDisplayToString();
-
-    emitByte(OP_PRINT);
-    break;
-
   case NODE_VAR_DECL:
     compileVarDecl(node);
     break;

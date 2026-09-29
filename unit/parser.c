@@ -78,7 +78,7 @@ int main(void) {
              "(call (get \"Hello World\" fn))\n");
 
   assert_ast("../tests/blocks/block_expression_operation_sum.krb",
-             "(print (+ 10 (block (value 20))))\n");
+             "(call @println (+ 10 (block (value 20))))\n");
 
   assert_ast("../tests/strings/string_concat.krb",
              "(call @println (+ (+ \"Hello\" \" \") \"World\"))\n");

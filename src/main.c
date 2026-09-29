@@ -62,7 +62,7 @@ const char *help_message =
     "krb repl\n"
     "krb compile path/to/file.krb\n"
     "krb parse path/to/file.krb\n"
-    "krb exec 'print \"Hello World\";'\n"
+    "krb exec '@println(\"Hello World\");'\n"
     "";
 
 const char *short_options = "hv";
@@ -257,8 +257,8 @@ static int cmdParse(int argc, char *argv[]) {
 }
 
 static const Command commands[] = {
-    {"run", cmdRun},   {"example", cmdExample}, {"repl", cmdRepl},
-    {"exec", cmdExec}, {"compile", cmdCompile}, {"lex", cmdLex},
+    {"run", cmdRun},     {"example", cmdExample}, {"repl", cmdRepl},
+    {"exec", cmdExec},   {"compile", cmdCompile}, {"lex", cmdLex},
     {"parse", cmdParse},
 };
 

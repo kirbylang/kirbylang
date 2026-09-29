@@ -1,4 +1,4 @@
 let name = "World";
 
-print $"Hello
-{name}!";
+@println($"Hello
+{name}!");

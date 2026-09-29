@@ -210,10 +210,6 @@ bool daaCheckAssignmentStmt(DaaSet *daa, AstNode *node) {
     daaCheckAssignmentExpr(daa, node->as.exprStmt.expr);
     return false;
 
-  case NODE_PRINT:
-    daaCheckAssignmentExpr(daa, node->as.print.expr);
-    return false;
-
   case NODE_VAR_DECL: {
     VarDeclNode *varDecl = &node->as.varDecl;
 

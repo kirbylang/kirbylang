@@ -147,7 +147,6 @@ static void synchronize(Parser *p) {
     case TOKEN_FOR:
     case TOKEN_IF:
     case TOKEN_WHILE:
-    case TOKEN_PRINT:
     case TOKEN_RETURN:
     case TOKEN_RIGHT_BRACE:
       return;
@@ -758,7 +757,6 @@ static ParseRule rules[] = {
     [TOKEN_NIL] = {literal, NULL, PREC_NONE},
     [TOKEN_OR] = {NULL, or_, PREC_OR},
     [TOKEN_QUESTION_QUESTION] = {NULL, nullish_, PREC_OR},
-    [TOKEN_PRINT] = {NULL, NULL, PREC_NONE},
     [TOKEN_RETURN] = {NULL, NULL, PREC_NONE},
     [TOKEN_SELF] = {self_, NULL, PREC_NONE},
     [TOKEN_TRUE] = {literal, NULL, PREC_NONE},
@@ -827,18 +825,6 @@ static AstNode *blockStatement(Parser *p) {
 
   AstNode *node = astAlloc(NODE_BLOCK, line);
   node->as.block = block;
-
-  return node;
-}
-
-static AstNode *printStatement(Parser *p) {
-  int line = p->previous.line;
-  AstNode *expr = expression(p);
-
-  consume(p, TOKEN_SEMICOLON, "Expect ';' after value.");
-
-  AstNode *node = astAlloc(NODE_PRINT, line);
-  node->as.print.expr = expr;
 
   return node;
 }
@@ -1067,8 +1053,6 @@ static AstNode *returnStatement(Parser *p) {
 static AstNode *statement(Parser *p, bool *isTail) {
   *isTail = false;
 
-  if (match(p, TOKEN_PRINT))
-    return printStatement(p);
   if (match(p, TOKEN_IF))
     return ifStatement(p, isTail);
   if (match(p, TOKEN_WHILE))

@@ -23,7 +23,6 @@ typedef enum {
   NODE_INDEX_GET,
   NODE_INDEX_SET,
   NODE_EXPR_STMT,
-  NODE_PRINT,
   NODE_VAR_DECL,
   NODE_BLOCK,
   NODE_IF,
@@ -432,7 +431,6 @@ struct AstNode {
     IndexSetNode indexSet;
     SelfNode self_;
     ExprStmtNode exprStmt;
-    PrintNode print;
     VarDeclNode varDecl;
     BlockNode block;
     IfNode if_;

@@ -17,7 +17,7 @@ typedef enum {
   OP_DIVIDE,          // 7
   OP_MODULO,          // 8
   OP_NEGATE,          // 9
-  OP_PRINT,           // 10
+  OP_PRINT,           // 10; TODO: Remove this
   OP_RETURN,          // 11
   OP_EQUAL,           // 12
   OP_NOT,             // 13

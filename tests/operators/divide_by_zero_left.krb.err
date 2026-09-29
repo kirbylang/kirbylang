@@ -61,21 +61,23 @@
 0015    | OP_ADD
 0016    | OP_CALL             1
 0018    | OP_POP
-0019    4 OP_JUMP            19 -> 50
+0019    4 OP_JUMP            19 -> 54
 0022    | OP_POP
-0023    5 OP_GET_GLOBAL       2 '@strConcat'
-0025    | OP_CONSTANT         3 'FAIL '
-0027    | OP_GET_LOCAL        1
-0029    | OP_CONSTANT         4 ': expected '
-0031    | OP_GET_GLOBAL       5 '@numberToString'
-0033    | OP_GET_LOCAL        3
-0035    | OP_CALL             1
-0037    6 OP_CONSTANT         6 ' got '
-0039    | OP_GET_GLOBAL       5 '@numberToString'
-0041    | OP_GET_LOCAL        2
-0043    | OP_CALL             1
-0045    | OP_ARRAY            6
-0047    | OP_CALL             1
-0049    | OP_PRINT
-0050    8 OP_NIL
-0051    | OP_RETURN
+0023    5 OP_GET_GLOBAL       0 '@println'
+0025    | OP_GET_GLOBAL       2 '@strConcat'
+0027    | OP_CONSTANT         3 'FAIL '
+0029    | OP_GET_LOCAL        1
+0031    | OP_CONSTANT         4 ': expected '
+0033    | OP_GET_GLOBAL       5 '@numberToString'
+0035    | OP_GET_LOCAL        3
+0037    | OP_CALL             1
+0039    6 OP_CONSTANT         6 ' got '
+0041    | OP_GET_GLOBAL       5 '@numberToString'
+0043    | OP_GET_LOCAL        2
+0045    | OP_CALL             1
+0047    | OP_ARRAY            6
+0049    | OP_CALL             1
+0051    | OP_CALL             1
+0053    | OP_POP
+0054    8 OP_NIL
+0055    | OP_RETURN

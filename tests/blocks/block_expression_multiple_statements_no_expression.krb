@@ -1,4 +1,4 @@
-print {
+@println({
     var a = 10;
     var b = 50;
-};
+});
