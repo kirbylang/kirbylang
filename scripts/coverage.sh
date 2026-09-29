@@ -12,7 +12,7 @@ lcov \
     --exclude 'lib/*'\
     --exclude 'unit/*'\
     --exclude '/Library/Developer/CommandLineTools/*'\
-    --ignore-errors unused
+    --ignore-errors unused \
     --output-file lcov.info 
 
 genhtml lcov.info --output-directory build/coverage_html
