@@ -24,6 +24,8 @@
 
 ## Next
 
+## 0.4.0
+
 - Decouple compiler, GC, and VM
 - Build `stdlib/stdlib.krb` into the binary, so `krb` runs from any directory
 - Structs
