@@ -24,6 +24,8 @@
 
 ## Next
 
+- Add `krb init` to intialize a new Kirby project
+
 ## 0.4.0
 
 - Decouple compiler, GC, and VM
