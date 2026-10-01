@@ -76,6 +76,7 @@ set(KIRBY_SOURCES
     src/gc.c
     src/loader.c
     src/native.c
+    src/native_signatures.c
     src/object.c
     src/opcode.c
     src/parser.c
@@ -173,6 +174,37 @@ configure_kirby_target(kirbylib)
 enable_coverage(kirbylib)
 
 # -----------------------------------------------------------------------------
+# Runtime-only library (static)
+#
+# The VM, garbage collector and natives, without the parser, type checker or
+# compiler.
+# -----------------------------------------------------------------------------
+
+set(KIRBY_RUNTIME_SOURCES
+    src/asserts.c
+    src/chunk.c
+    src/common.c
+    src/compiled_unit.c
+    src/gc.c
+    src/hashtable.c
+    src/loader.c
+    src/native.c
+    src/object.c
+    src/stringset.c
+    src/strbuf.c
+    src/value.c
+    src/vm.c
+    ${VERSION_C}
+)
+
+add_library(kirby_runtime STATIC
+    ${KIRBY_RUNTIME_SOURCES}
+)
+
+configure_kirby_target(kirby_runtime)
+enable_coverage(kirby_runtime)
+
+# -----------------------------------------------------------------------------
 # Debug runtime library
 # -----------------------------------------------------------------------------
 
@@ -258,6 +290,23 @@ if(BUILD_TESTS)
     add_test(
         NAME kirby-version-unit-test
         COMMAND kirby-version-unit-test
+    )
+
+    add_executable(kirby-runtime-link-unit-test
+        unit/runtime_link.c
+    )
+
+    target_link_libraries(kirby-runtime-link-unit-test
+        PRIVATE
+            kirby_runtime
+    )
+
+    configure_kirby_target(kirby-runtime-link-unit-test)
+    enable_coverage(kirby-runtime-link-unit-test)
+
+    add_test(
+        NAME kirby-runtime-link-unit-test
+        COMMAND kirby-runtime-link-unit-test
     )
 
     add_executable(kirby-token-unit-test
