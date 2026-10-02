@@ -143,8 +143,13 @@ for file_in in "${files[@]}"; do
     actual_err="$TMP_DIR/$base.krb.err"
     mkdir -p "$(dirname "$actual_err")"
 
+    # One argument per line, so an argument can hold spaces or be empty.
     extra_args=()
-    [[ -f "$argv_file" ]] && read -r -a extra_args < "$argv_file"
+    if [[ -f "$argv_file" ]]; then
+        while IFS= read -r line || [[ -n "$line" ]]; do
+            extra_args+=("$line")
+        done < "$argv_file"
+    fi
 
     echo "🔬 $file_in ${extra_args[*]:-}"
 

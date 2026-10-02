@@ -1,0 +1,4 @@
+6
+run
+./tests/native_functions/native_fn_script_args_with_spaces_and_empty.krb
+two words
