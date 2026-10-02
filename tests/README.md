@@ -10,6 +10,7 @@ The language's E2E tests are file based:
 | `test.krb.exit` | Expected exit code       |
 | `test.krb.in`   | Text sent to `stdin`     |
 | `test.krb.env`  | Environment Variables    |
+| `test.krb.skip-packaged` | Skip this test with `--packaged` |
 
 ## Writing A Test
 
@@ -41,6 +42,26 @@ Output additional information when running tests.
 ```shell
 ./scripts/tests.sh --verbose
 ```
+
+## Packaged Programs
+
+`--packaged` runs every test again, but builds each one into an executable with
+`krb build` and runs that, then compares with the same snapshots.
+
+```shell
+./scripts/tests.sh --packaged
+```
+
+A test whose output depends on how it was started, such as one that prints
+`@argv(0)`, can opt out by adding a `test.krb.skip-packaged` file. Say why in the
+file.
+
+If the build fails, the build's `stderr` must be the end of the snapshot's,
+because `krb run` prints the standard library's bytecode before a compile error
+and `krb build` does not. `--packaged` can't be used with `--update`.
+
+`./scripts/test-build.sh` tests `krb build` itself: its arguments, its errors,
+and damaged programs.
 
 ## Update Snapshots
 

@@ -79,6 +79,7 @@ set(KIRBY_SOURCES
     src/native_signatures.c
     src/object.c
     src/opcode.c
+    src/packaged_program.c
     src/parser.c
     src/resolved_impl_targets.c
     src/scanner.c
@@ -88,6 +89,7 @@ set(KIRBY_SOURCES
     src/token.c
     src/typecheck.c
     src/types.c
+    src/unit_bytes.c
     src/value.c
     src/vm.c
     ${VERSION_C}
@@ -190,8 +192,10 @@ set(KIRBY_RUNTIME_SOURCES
     src/loader.c
     src/native.c
     src/object.c
+    src/packaged_program.c
     src/stringset.c
     src/strbuf.c
+    src/unit_bytes.c
     src/value.c
     src/vm.c
     ${VERSION_C}
@@ -225,6 +229,29 @@ enable_coverage(kirby_core_debug)
 if(ENABLE_MEMCHECK)
     target_compile_options(kirby_core_debug PUBLIC -fsanitize=address)
     target_link_options(kirby_core_debug PUBLIC -fsanitize=address)
+endif()
+
+# -----------------------------------------------------------------------------
+# Debug runtime-only library (static)
+# -----------------------------------------------------------------------------
+
+add_library(kirby_runtime_debug STATIC
+    ${KIRBY_RUNTIME_SOURCES}
+    src/debug.c
+)
+
+target_compile_definitions(kirby_runtime_debug
+    PRIVATE
+        DEBUG_PRINT_CODE
+        DEBUG_STRESS_GC
+)
+
+configure_kirby_target(kirby_runtime_debug)
+enable_coverage(kirby_runtime_debug)
+
+if(ENABLE_MEMCHECK)
+    target_compile_options(kirby_runtime_debug PUBLIC -fsanitize=address)
+    target_link_options(kirby_runtime_debug PUBLIC -fsanitize=address)
 endif()
 
 # -----------------------------------------------------------------------------
@@ -270,6 +297,48 @@ if(ENABLE_MEMCHECK)
 endif()
 
 # -----------------------------------------------------------------------------
+# Runtime for packaged programs
+#
+# `krb build` copies this executable and attaches a compiled program to it.
+# -----------------------------------------------------------------------------
+
+add_executable(krb-runtime
+    src/launcher.c
+)
+
+target_link_libraries(krb-runtime
+    PRIVATE
+        kirby_runtime
+)
+
+configure_kirby_target(krb-runtime)
+enable_coverage(krb-runtime)
+
+# -----------------------------------------------------------------------------
+# Debug runtime for packaged programs
+#
+# Prints the same bytecode as kirby-test, so the E2E snapshots also cover a
+# packaged program.
+# -----------------------------------------------------------------------------
+
+add_executable(kirby-test-runtime
+    src/launcher.c
+)
+
+target_link_libraries(kirby-test-runtime
+    PRIVATE
+        kirby_runtime_debug
+)
+
+configure_kirby_target(kirby-test-runtime)
+enable_coverage(kirby-test-runtime)
+
+if(ENABLE_MEMCHECK)
+    target_compile_options(kirby-test-runtime PUBLIC -fsanitize=address)
+    target_link_options(kirby-test-runtime PUBLIC -fsanitize=address)
+endif()
+
+# -----------------------------------------------------------------------------
 # Unit tests
 # -----------------------------------------------------------------------------
 
@@ -307,6 +376,40 @@ if(BUILD_TESTS)
     add_test(
         NAME kirby-runtime-link-unit-test
         COMMAND kirby-runtime-link-unit-test
+    )
+
+    add_executable(kirby-unit-bytes-unit-test
+        unit/unit_bytes.c
+    )
+
+    target_link_libraries(kirby-unit-bytes-unit-test
+        PRIVATE
+            kirby_runtime
+    )
+
+    configure_kirby_target(kirby-unit-bytes-unit-test)
+    enable_coverage(kirby-unit-bytes-unit-test)
+
+    add_test(
+        NAME kirby-unit-bytes-unit-test
+        COMMAND kirby-unit-bytes-unit-test
+    )
+
+    add_executable(kirby-packaged-program-unit-test
+        unit/packaged_program.c
+    )
+
+    target_link_libraries(kirby-packaged-program-unit-test
+        PRIVATE
+            kirby_runtime
+    )
+
+    configure_kirby_target(kirby-packaged-program-unit-test)
+    enable_coverage(kirby-packaged-program-unit-test)
+
+    add_test(
+        NAME kirby-packaged-program-unit-test
+        COMMAND kirby-packaged-program-unit-test
     )
 
     add_executable(kirby-token-unit-test

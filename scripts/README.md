@@ -22,6 +22,17 @@ Run `./scripts/tests.sh` or `just test` to run the tests in `./test` folder.
 ./scripts/tests.sh PATTERN
 ```
 
+## Test (Packaged Programs)
+
+Run `./scripts/tests.sh --packaged` or `just test-packaged` to build every test
+into an executable with `krb build` and run that instead.
+
+Run `./scripts/test-build.sh` or `just test-build` to test `krb build` itself.
+
+Run `./scripts/test-args.sh` or `just test-args` to test the arguments a script
+sees when it is started with `krb run`, `krb example`, `krb exec`, `krb repl` or
+built with `krb build`.
+
 ## Test (Update Snapshots)
 
 Run `./scripts/tests.sh --update` or `just test-update` to run the tests and update the snapshot files.

@@ -55,6 +55,18 @@ install:
 test *args: build
     ./scripts/tests.sh {{ args }}
 
+# Run the tests again, building each program into an executable first
+test-packaged *args: build
+    ./scripts/tests.sh --packaged {{ args }}
+
+# Run the tests of 'krb build'
+test-build: build
+    ./scripts/test-build.sh
+
+# Run the tests of the arguments a script sees
+test-args: build
+    ./scripts/test-args.sh
+
 # Run the tests with memory checking enabled
 test-with-memcheck *args: build-memcheck
     ./scripts/tests.sh {{ args }}

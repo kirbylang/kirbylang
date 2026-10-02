@@ -24,6 +24,13 @@ void sb_append(StrBuf *sb, const char *text) {
   sb->len += len;
 }
 
+void sb_append_bytes(StrBuf *sb, const void *bytes, size_t length) {
+  sb_ensure(sb, length);
+  memcpy(sb->data + sb->len, bytes, length);
+  sb->len += length;
+  sb->data[sb->len] = '\0';
+}
+
 void sb_appendf(StrBuf *sb, const char *fmt, ...) {
   va_list args;
   va_start(args, fmt);
