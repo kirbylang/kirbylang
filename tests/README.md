@@ -13,10 +13,10 @@ The language's E2E tests are file based:
 
 ## Writing A Test
 
-1. Create a new file in the [`tests`](./) directory: `./tests/new_test.krb`
+1. Create a new file in the [`tests/run`](./run) directory: `./tests/run/new_test.krb`
 2. Add test kirby code
 3. Implement feature being tested
-4. [Update snapshots](#update-snapshots) which will create `./tests/new_test.krb.out`, `./tests/new_test.krb.err`, `./tests/new_test.krb.exit` files
+4. [Update snapshots](#update-snapshots) which will create `./tests/run/new_test.krb.out`, `./tests/run/new_test.krb.err`, `./tests/run/new_test.krb.exit` files
 5. Validate new snapshots. Confirm no other snapshots updated.
 6. Commit snapshots if everything is verified
 

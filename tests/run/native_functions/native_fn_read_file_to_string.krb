@@ -1,0 +1,1 @@
+@println(@readFileToString("tests/run/native_functions/native_fn_read_file_to_string.krb"));

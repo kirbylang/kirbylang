@@ -1,0 +1,7 @@
+4
+./build/kirby-test
+run
+./tests/run/native_functions/native_fn_argc_and_argv.krb
+--test
+nil
+nil

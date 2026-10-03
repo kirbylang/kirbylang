@@ -10,7 +10,7 @@
       "request": "launch",
       "program": "${workspaceFolder}/build/krb",
       "args": [
-        "${workspaceFolder}/tests/native_functions/native_fn_exit_call_no_args_passed.krb"
+        "${workspaceFolder}/tests/run/native_functions/native_fn_exit_call_no_args_passed.krb"
       ],
       "stopAtEntry": false,
       "cwd": "${fileDirname}",
