@@ -303,7 +303,7 @@ endif()
 # -----------------------------------------------------------------------------
 
 add_executable(krb-runtime
-    src/launcher.c
+    src/runtime.c
 )
 
 target_link_libraries(krb-runtime
@@ -322,7 +322,7 @@ enable_coverage(krb-runtime)
 # -----------------------------------------------------------------------------
 
 add_executable(kirby-test-runtime
-    src/launcher.c
+    src/runtime.c
 )
 
 target_link_libraries(kirby-test-runtime
