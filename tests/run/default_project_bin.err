@@ -1,0 +1,21 @@
+== <script> ==
+0000    1 OP_NIL
+0001    | OP_RETURN
+== <script> ==
+0000    1 OP_GET_GLOBAL       0 '@print'
+0002    | OP_GET_GLOBAL       1 '@strConcat'
+0004    | OP_CONSTANT         2 'kirby '
+0006    | OP_GET_GLOBAL       3 '@version'
+0008    | OP_CALL             0
+0010    6 OP_CONSTANT         4 '
+
+This is the Kirby language's Kirby project binary.
+
+https://github.com/kirbylang/kirbylang
+'
+0012    1 OP_ARRAY            3
+0014    | OP_CALL             1
+0016    | OP_CALL             1
+0018    | OP_POP
+0019    7 OP_NIL
+0020    | OP_RETURN
