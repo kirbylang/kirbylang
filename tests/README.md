@@ -10,7 +10,7 @@ other files that belong to it are named after it:
 | `test.krb.out`  | Expected `stdout` output                                   |
 | `test.krb.err`  | Expected `stderr` output                                   |
 | `test.krb.exit` | Expected exit code                                         |
-| `test.krb.in`   | Text sent to `stdin`                                       |
+| `test.krb.in`   | Text sent to `stdin`, which is empty without this file     |
 | `test.krb.env`  | Environment Variables                                      |
 
 Every file in `tests/` must belong to a test, so a program without an `.argv`
@@ -84,6 +84,16 @@ The tests are run using the [tests.sh](../scripts/tests.sh) script.
 ```shell
 ./scripts/tests.sh pattern
 ```
+
+### Configuration
+
+| Variable    | Default              | Description                     |
+| ----------- | -------------------- | ------------------------------- |
+| `BIN`       | `./build/kirby-test` | The program the tests run       |
+| `TESTS_DIR` | `./tests`            | The folder that holds the tests |
+
+The `.err` snapshots hold the bytecode listing, so `BIN` must be a build that
+prints it, such as `kirby-test`. The release build `krb` does not.
 
 ### Verbose
 

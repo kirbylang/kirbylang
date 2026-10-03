@@ -3,6 +3,10 @@
 set -euo pipefail
 
 BIN="${BIN:-./build/kirby-test}"
+
+# The folder that holds the tests. Any .argv file under it is a test.
+TESTS_DIR="${TESTS_DIR:-./tests}"
+TESTS_DIR="${TESTS_DIR%/}"
 DIFF="diff -u"
 
 UPDATE=0
@@ -41,7 +45,7 @@ TOTAL=0
 #   <name>.out   expected stdout
 #   <name>.err   expected stderr
 #   <name>.exit  expected exit code
-#   <name>.in    stdin
+#   <name>.in    stdin, which is empty without this file
 #   <name>.env   environment variables, sourced before BIN runs
 SIDECARS=".out .err .exit .in .env"
 
@@ -107,7 +111,7 @@ run_exit_test() {
         if [[ "$actual_code" == "139" ]]; then
             message="SEGFAULT"
         elif [[ "$actual_code" == "134" ]]; then
-            message="OUT OF BOUNDS"
+            message="ABORTED"
         else
             message="got $actual_code, expected $expected_code"
         fi
@@ -120,15 +124,18 @@ run_exit_test() {
     fi
 }
 
-# Every file in tests/ must belong to a test. Dotfiles and the README do not.
+# Every file in the tests folder must belong to a test. Dotfiles, dot folders
+# and the README do not.
 check_every_file_is_claimed() {
     local all="$TMP_DIR/all-files.txt"
     local claimed="$TMP_DIR/claimed-files.txt"
 
-    find ./tests -type f ! -path '*/.*' ! -path './tests/README.md' \
+    find "$TESTS_DIR" -mindepth 1 -name '.*' -prune -o \
+        -type f ! -path "$TESTS_DIR/README.md" -print \
         | LC_ALL=C sort >"$all"
 
-    find ./tests -type f -name '*.argv' ! -path '*/.*' | while IFS= read -r argv_path; do
+    find "$TESTS_DIR" -mindepth 1 -name '.*' -prune -o \
+        -type f -name '*.argv' -print | while IFS= read -r argv_path; do
         stem="${argv_path%.argv}"
         echo "$argv_path"
 
@@ -160,7 +167,8 @@ check_every_file_is_claimed
 argv_files=()
 while IFS= read -r argv_path; do
     argv_files+=("$argv_path")
-done < <(find ./tests -type f -name '*.argv' ! -path '*/.*' | LC_ALL=C sort)
+done < <(find "$TESTS_DIR" -mindepth 1 -name '.*' -prune -o \
+    -type f -name '*.argv' -print | LC_ALL=C sort)
 
 if [[ ${#argv_files[@]} -eq 0 ]]; then
     echo "No tests found" >&2
@@ -168,14 +176,14 @@ if [[ ${#argv_files[@]} -eq 0 ]]; then
 fi
 
 for argv_file in "${argv_files[@]}"; do
-    name="${argv_file#./tests/}"
+    name="${argv_file#"$TESTS_DIR"/}"
     name="${name%.argv}"
 
     should_run "$name" || continue
 
     SUITES=$((SUITES + 1))
 
-    file="./tests/$name"
+    file="$TESTS_DIR/$name"
     expected_out="$file.out"
     expected_err="$file.err"
     expected_exit="$file.exit"
@@ -236,7 +244,7 @@ for argv_file in "${argv_files[@]}"; do
     if [[ ${#stdin_cmd[@]} -gt 0 ]]; then
         "${stdin_cmd[@]}" | "${run_cmd[@]}" >"$actual_out" 2>"$actual_err"
     else
-        "${run_cmd[@]}" >"$actual_out" 2>"$actual_err"
+        "${run_cmd[@]}" >"$actual_out" 2>"$actual_err" </dev/null
     fi
 
     exit_code=$?
