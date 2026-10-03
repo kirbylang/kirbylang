@@ -68,160 +68,160 @@ void assert_ast(const char *path, const char *expected) {
 }
 
 int main(void) {
-  assert_ast("../tests/empty.krb", "");
+  assert_ast("../tests/run/empty.krb", "");
 
-  assert_ast("../tests/arrays/array_empty.krb", "(array)\n");
+  assert_ast("../tests/run/arrays/array_empty.krb", "(array)\n");
 
-  assert_ast("../tests/comments.krb", "(call @println \"Hello World\")\n");
+  assert_ast("../tests/run/comments.krb", "(call @println \"Hello World\")\n");
 
-  assert_ast("../tests/method_invoke_on_non_instance_string.krb",
+  assert_ast("../tests/run/method_invoke_on_non_instance_string.krb",
              "(call (get \"Hello World\" fn))\n");
 
-  assert_ast("../tests/blocks/block_expression_operation_sum.krb",
+  assert_ast("../tests/run/blocks/block_expression_operation_sum.krb",
              "(call @println (+ 10 (block (value 20))))\n");
 
-  assert_ast("../tests/strings/string_concat.krb",
+  assert_ast("../tests/run/strings/string_concat.krb",
              "(call @println (+ (+ \"Hello\" \" \") \"World\"))\n");
 
-  assert_ast("../tests/primitives/bool_false.krb", "(call @println false)\n");
+  assert_ast("../tests/run/primitives/bool_false.krb", "(call @println false)\n");
 
-  assert_ast("../tests/native_functions/native_fn_len_call.krb",
+  assert_ast("../tests/run/native_functions/native_fn_len_call.krb",
              "(call @println (call @len \"Hello World\"))\n");
 
-  assert_ast("../tests/flow_control/for.krb",
+  assert_ast("../tests/run/flow_control/for.krb",
              "(for (var i 0) (< i 10) (assign i (+ i 1)) (block (call @println "
              "\"done\")))\n");
 
-  assert_ast("../tests/flow_control/if/expression/if_else.krb",
+  assert_ast("../tests/run/flow_control/if/expression/if_else.krb",
              ""
              "(call @println (call test true))\n"
              "(call @println (call test false))\n"
              "(fun test (a : bool) : string (if a (block (value \"Hello\")) "
              "\"World\"))\n");
 
-  assert_ast("../tests/functions/function_body_expressions.krb",
+  assert_ast("../tests/run/functions/function_body_expressions.krb",
              "(var n 10)\n"
              "(fun sum (a : f64) : f64 (+ a n))\n"
              "(call @println (call sum 50))\n");
 
-  assert_ast("../tests/functions/function_implicit_return.krb",
+  assert_ast("../tests/run/functions/function_implicit_return.krb",
              "(fun sum (a : f64 b : f64) : f64 (block (value (+ a "
              "b))))\n"
              "(call @println (call sum 1 2))\n");
 
-  assert_ast("../tests/functions/function_return_semicolon.krb",
+  assert_ast("../tests/run/functions/function_return_semicolon.krb",
              "(fun function () : unit (block (return)))\n"
              "(call @println function)\n"
              "(call @println (call function))\n");
 
   assert_ast(
-      "../tests/closures/upvalue_closed.krb",
+      "../tests/run/closures/upvalue_closed.krb",
       "(fun outer () : (fun () => unit) (block (var x \"outside\")"
       " (fun inner () : unit (block (call @println x))) (return inner)))\n"
       "(var closure (call outer))\n"
       "(call closure)\n");
 
-  assert_ast("../tests/assignments/block_assignment_edge_case.krb",
+  assert_ast("../tests/run/assignments/block_assignment_edge_case.krb",
              "(block (var a \"outer\") (block (var a a)))\n");
 
-  assert_ast("../tests/arrays/array_index_get.krb",
+  assert_ast("../tests/run/arrays/array_index_get.krb",
              "(var array (array 1 2 3))\n"
              "(call @println (index-get array 2))\n");
 
-  assert_ast("../tests/arrays/array_index_set.krb",
+  assert_ast("../tests/run/arrays/array_index_set.krb",
              "(var array (array 1 2 3))\n"
              "(index-set array 2 100)\n"
              "(call @println (index-get array 2))\n");
 
-  assert_ast("../tests/arrays/array_multidimensional.krb",
+  assert_ast("../tests/run/arrays/array_multidimensional.krb",
              "(var array (array (array 10 20) (array 30 40)))\n"
              "(call @println (index-get (index-get array 0) 0))\n"
              "(call @println (index-get (index-get array 0) 1))\n"
              "(call @println (index-get (index-get array 1) 0))\n"
              "(call @println (index-get (index-get array 1) 1))\n");
 
-  assert_ast("../tests/types/var_type_annotation.krb",
+  assert_ast("../tests/run/types/var_type_annotation.krb",
              "(var name : string \"Hello\")\n"
              "(call @println name)\n");
 
-  assert_ast("../tests/types/let_type_annotation.krb",
+  assert_ast("../tests/run/types/let_type_annotation.krb",
              "(let count : f64 3)\n"
              "(call @println count)\n");
 
-  assert_ast("../tests/types/var_no_annotation.krb", "(var x 5)\n"
+  assert_ast("../tests/run/types/var_no_annotation.krb", "(var x 5)\n"
                                                      "(call @println x)\n");
 
-  assert_ast("../tests/types/struct_field_annotation.krb",
+  assert_ast("../tests/run/types/struct_field_annotation.krb",
              "(struct Point (pub-field x : f64) (pub-field y : f64))\n"
              "(impl Point (pub-static new))\n"
              "(var p (call (get Point new) 1 2))\n"
              "(call @println (get p x))\n"
              "(call @println (get p y))\n");
 
-  assert_ast("../tests/types/struct_field_no_annotation.krb",
+  assert_ast("../tests/run/types/struct_field_no_annotation.krb",
              "(struct Point (pub-field x) (pub-field y))\n"
              "(impl Point (pub-static new))\n"
              "(var p (call (get Point new) 1 2))\n"
              "(call @println (get p x))\n"
              "(call @println (get p y))\n");
 
-  assert_ast("../tests/types/function_typed_params.krb",
+  assert_ast("../tests/run/types/function_typed_params.krb",
              "(fun add (a : f64 b : f64) : f64 (+ a b))\n"
              "(call @println (call add 1 2))\n");
 
-  assert_ast("../tests/types/function_return_type.krb",
+  assert_ast("../tests/run/types/function_return_type.krb",
              "(fun add (a : f64 b : f64) : f64 (+ a b))\n"
              "(call @println (call add 1 2))\n");
 
-  assert_ast("../tests/types/function_typed_params_and_return.krb",
+  assert_ast("../tests/run/types/function_typed_params_and_return.krb",
              "(fun add (a : f64 b : f64) : f64 (+ a b))\n"
              "(call @println (call add 1 2))\n");
 
-  assert_ast("../tests/types/lambda_typed_params.krb",
+  assert_ast("../tests/run/types/lambda_typed_params.krb",
              "(var add (lambda (a : f64 b : f64) (block (value (+ a "
              "b)))))\n"
              "(call @println (call add 1 2))\n");
 
-  assert_ast("../tests/types/function_no_annotation.krb",
+  assert_ast("../tests/run/types/function_no_annotation.krb",
              "(fun add (a b) (+ a b))\n"
              "(call @println (call add 1 2))\n");
 
-  assert_ast("../tests/types/generic_type_var.krb",
+  assert_ast("../tests/run/types/generic_type_var.krb",
              "(let value : Wrapper[f64] 123)\n"
              "(call @println value)\n");
 
   assert_ast(
-      "../tests/types/generic_type_nested.krb",
+      "../tests/run/types/generic_type_nested.krb",
       "(let value : Array[Array[f64]] (array (array 1) (array 2) (array 3)))\n"
       "(call @println value)\n");
 
-  assert_ast("../tests/types/generic_type_struct.krb",
+  assert_ast("../tests/run/types/generic_type_struct.krb",
              "(struct Box (pub-field value : Wrapper[f64]))\n"
              "(let box (struct-init Box (field value 100)))\n"
              "(call @println (get box value))\n");
 
-  assert_ast("../tests/types/generic_type_and_array_brackets_dont_conflict.krb",
+  assert_ast("../tests/run/types/generic_type_and_array_brackets_dont_conflict.krb",
              "(var typed : Array[f64] (array))\n"
              "(var numbers (array 1 2 3))\n"
              "(call @println (index-get numbers 0))\n"
              "(call @println (index-get numbers 1))\n");
 
-  assert_ast("../tests/types/type_alias_simple.krb", "(type Wrapper f64)\n");
+  assert_ast("../tests/run/types/type_alias_simple.krb", "(type Wrapper f64)\n");
 
-  assert_ast("../tests/types/type_alias_generic.krb", "(type Wrapper[T] T)\n");
+  assert_ast("../tests/run/types/type_alias_generic.krb", "(type Wrapper[T] T)\n");
 
-  assert_ast("../tests/types/function_type_var.krb",
+  assert_ast("../tests/run/types/function_type_var.krb",
              "(var handler : (fun (f64) => f64) (lambda (x) (block (value "
              "(+ x 1)))))\n"
              "(call @println (call handler 1))\n");
 
-  assert_ast("../tests/types/function_type_no_params.krb",
+  assert_ast("../tests/run/types/function_type_no_params.krb",
              "(var greeter : (fun () => unit))\n"
              "(fun greet () : unit (block (call @println \"hi\")))\n"
              "(assign greeter greet)\n"
              "(call greeter)\n");
 
-  assert_ast("../tests/types/function_type_nested.krb",
+  assert_ast("../tests/run/types/function_type_nested.krb",
              "(var apply : (fun ((fun (f64) => f64) f64) => f64))\n"
              "(fun run (f : (fun (f64) => f64) x : f64) : f64 (call f "
              "x))\n"
@@ -229,31 +229,31 @@ int main(void) {
              "(call @println (call apply (lambda (x) (block (value (+ x 1)))) "
              "5))\n");
 
-  assert_ast("../tests/types/generic_struct.krb",
+  assert_ast("../tests/run/types/generic_struct.krb",
              "(struct Box[T] (pub-field value : T))\n"
              "(impl Box[T] (pub-static new) (pub-method get))\n"
              "(var b (call (get Box new) 5))\n"
              "(call @println (call (get b get)))\n");
 
-  assert_ast("../tests/types/generic_function.krb",
+  assert_ast("../tests/run/types/generic_function.krb",
              "(fun sum[T] (a : T b : T) : T (+ a b))\n"
              "(call @println (call sum 1 2))\n");
 
-  assert_ast("../tests/types/generic_function_multi_param.krb",
+  assert_ast("../tests/run/types/generic_function_multi_param.krb",
              "(fun first[T U] (a : T b : U) : T a)\n"
              "(call @println (call first 1 \"two\"))\n");
 
-  assert_ast("../tests/types/trait_basic.krb",
+  assert_ast("../tests/run/types/trait_basic.krb",
              "(struct Point (pub-field x : f64) (pub-field y : f64))\n"
              "(impl Display for Point (pub-method toString))\n"
              "(var p (struct-init Point (field x 1) (field y 2)))\n"
              "(call @println (call (get p toString)))\n");
 
-  assert_ast("../tests/types/trait_supertrait.krb",
+  assert_ast("../tests/run/types/trait_supertrait.krb",
              "(trait MyEq (method equals (self other : Self) : bool))\n"
              "(trait MyOrd : MyEq (method cmp (self other : Self) : f64))\n");
 
-  assert_ast("../tests/types/trait_static_method.krb",
+  assert_ast("../tests/run/types/trait_static_method.krb",
              "(trait Constructible (static-method make () : Self))\n");
 
   return 0;
