@@ -3,24 +3,15 @@
 The language's E2E tests are file based. A test is a `.argv` file, and the
 other files that belong to it are named after it:
 
-| Example File    | Description                                                |
-| --------------- | ---------------------------------------------------------- |
-| `test.krb.argv` | Arguments for `krb`, one per line. This file is the test   |
-| `test.krb`      | The program the arguments refer to, if any (`$file`)       |
-| `test.krb.out`  | Expected `stdout` output                                   |
-| `test.krb.err`  | Expected `stderr` output                                   |
-| `test.krb.exit` | Expected exit code                                         |
-| `test.krb.in`   | Text sent to `stdin`, which is empty without this file     |
-| `test.krb.env`  | Environment Variables                                      |
-
-Every file in `tests/` must belong to a test, so a program without an `.argv`
-file is reported instead of being skipped. Dotfiles, folders named `fixtures` and
-this README are ignored.
-
-The folders are only for organization. `tests/run` holds the tests of the
-language. `tests/exec`, `tests/example` and `tests/repl` hold the tests of those
-`krb` subcommands. In a `repl` test, the `.in` file is what is typed into the
-REPL. `tests/fixtures` holds files that tests use, such as a project.
+| Example File    | Description                                              |
+| --------------- | -------------------------------------------------------- |
+| `test.krb.argv` | Arguments for `krb`, one per line. This file is the test |
+| `test.krb`      | The program the arguments refer to, if any (`$file`)     |
+| `test.krb.out`  | Expected `stdout` output                                 |
+| `test.krb.err`  | Expected `stderr` output                                 |
+| `test.krb.exit` | Expected exit code                                       |
+| `test.krb.in`   | Text sent to `stdin`, which is empty without this file   |
+| `test.krb.env`  | Environment Variables                                    |
 
 ## The `.argv` File
 

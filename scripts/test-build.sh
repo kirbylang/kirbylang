@@ -1,8 +1,6 @@
 #!/usr/bin/env bash
 
-# Tests of 'krb build' itself: its arguments, its errors, and the programs it
-# makes. That a built program behaves like 'krb run' for a set of the tests in
-# tests/ is checked by './scripts/tests-packaged.sh'.
+# Tests of 'krb build' itself that a snapshot can't check (yet).
 
 set -uo pipefail
 
@@ -122,10 +120,6 @@ capture "$BIN" build hello.krb -o with-flag --runtime runtimes/other-runtime
 capture ./with-flag
 check "uses the runtime given with --runtime" "Hello, packaged world!" "$out"
 
-capture "$BIN" build hello.krb -o missing --runtime runtimes/nope
-check "fails when the runtime is missing" "71" "$code"
-check_contains "says which runtime" "runtimes/nope" "$err"
-
 cp "$RUNTIME_BIN" same-file
 capture "$BIN" build hello.krb -o same-file --runtime same-file
 check "refuses to overwrite its own runtime" "71" "$code"
@@ -134,34 +128,10 @@ echo
 echo "A build that fails"
 
 capture "$BIN" build broken.krb -o broken
-check "exits with the compile error code" "65" "$code"
 check "leaves no output" "no" "$([[ -e broken ]] && echo yes || echo no)"
 
 capture "$BIN" build nope.krb -o nope
-check "exits with the OS error code when the file is missing" "71" "$code"
-check_contains "says which file" "nope.krb" "$err"
 check "leaves no output" "no" "$([[ -e nope ]] && echo yes || echo no)"
-
-echo
-echo "Wrong arguments"
-
-capture "$BIN" build
-check "no arguments" "64" "$code"
-
-capture "$BIN" build hello.krb
-check "no -o" "64" "$code"
-
-capture "$BIN" build -o app
-check "no path" "64" "$code"
-
-capture "$BIN" build hello.krb -o
-check "-o without a name" "64" "$code"
-
-capture "$BIN" build hello.krb extra.krb -o app
-check "two paths" "64" "$code"
-
-capture "$BIN" build hello.krb -o app --nonsense
-check "an unknown option" "64" "$code"
 
 echo
 echo "The runtime on its own"
