@@ -1,98 +1,257 @@
-.\" Man page for kirby (main.c)
-.TH KIRBY 1 "May 2026" "0.2.0" "Kirby Manual"
+.\" Man page for krb, the Kirby command line tool (src/main.c).
+.TH KRB 1 "October 3, 2026" "Kirby" "Kirby Manual"
 .SH NAME
-kirby \- a language interpreter
+krb \- run, build and explore programs written in Kirby
 .SH SYNOPSIS
-.B kirby
-.RB [ -h ]
-.RB [ -v ]
-.RB [ -r ]
-.RB [ -f \fIfile\fR ]
-.RB [ -c \fIsource\fR ]
+.B krb
+.RB [ \-h ]
+.RB [ \-v ]
+.br
+.B krb
+.I command
+.RI [ args ...]
 .SH DESCRIPTION
-.B kirby
-is the command‑line driver for a Kirby interpreter written in C.  It
-initialises the virtual machine, loads the standard library, and then
-executes code according to the selected mode.
-
-The program supports the following operation modes:
-
+.B krb
+is the command line tool of the Kirby language, a small scripting language
+with a compiler and a virtual machine.
+It runs Kirby source files, starts an interactive session, builds a program
+into a single executable, and shows how a file is tokenized and parsed.
+.PP
+The first argument is the command, unless it starts with
+.BR \- .
+Everything after the command belongs to the command, or to the script that it
+runs.
+A script's own arguments are never read as options of
+.BR krb .
+.SH OPTIONS
+Options are only read when no command is given.
 .TP
 .BR \-h ", " \-\-help
-Print a short usage summary and exit.
-
+Print the version and a usage summary to standard error, and exit with status
+0.
 .TP
 .BR \-v ", " \-\-version
-Print the interpreter version (the value of
-.BR KIRBY_VERSION )
-and exit.
-
+Print the Kirby version to standard output, and exit with status 0.
+.PP
+With no command and no option, or with a command that does not exist,
+.B krb
+prints the usage summary to standard error and exits with status 64.
+.SH COMMANDS
 .TP
-.BR \-r ", " \-\-repl
-Start an interactive Read‑Eval‑Print Loop (REPL) after loading the
-standard library.  The REPL reads lines from the user via
-.BR readline (3),
-stores history, and evaluates each line using
-.BR interpret (3).
-Typing
-.I exit
-or sending EOF terminates the REPL.
-
+\fBinit\fR
+Create
+.B kirby.project.toml
+in the current directory, with its settings commented out.
+If the file already exists, print an error and leave it as it is.
 .TP
-.BR \-f " " \fIfile\fR ", " \-\-file=\fIfile\fR
-Execute the Kirby source file
-.I file
-after the standard library has been loaded.  The file path must be
-provided as the next command‑line argument after the option.
-
-.TP
-.BR \-c " " \fIsource\fR ", " \-\-code=\fIsource\fR
-Interpret the literal Kirby source code supplied on the command line
+\fBrun\fR [\fIpath\fR] [\fIargs\fR...]
+Compile and run the Kirby file at
+.IR path .
+.I args
+are the script's own arguments.
+Without a path, or with
+.B \-\-
+in place of one, run the file named by
+.B bin
 in
-.I source,
-again after loading the standard library.
-
-If none of the above options are given, the program prints the usage
-message and exits with status 64.
-
-.SH OPTIONS
+.BR kirby.project.toml .
+For example,
+.B krb run \-\- one two
+gives
+.B one two
+to that file.
+If the project has no bin file, print a message and exit with status 1.
 .TP
-.B \-h, \-\-help
-Show the help message.
+\fBexample\fR \fIname\fR [\fIargs\fR...]
+Run
+.IR name .krb
+from the project's examples folder.
+.I args
+are the script's own arguments.
 .TP
-.B \-v, \-\-version
-Show the version string.
+\fBconfig\fR [\fIkey\fR]
+Print the project settings from
+.B kirby.project.toml
+in the current directory.
+With no key, print the file.
+With
+.B bin
+or
+.BR examples ,
+print the value of that setting.
+If there is no
+.BR kirby.project.toml ,
+say so and suggest
+.BR "krb init" .
 .TP
-.B \-r, \-\-repl
-Run the REPL.
+\fBrepl\fR
+Start an interactive session.
+Each line that is typed is evaluated as it is entered.
+Type
+.B help
+to print the address of the documentation, and
+.B exit
+or press Ctrl\-D to quit.
+The REPL takes no arguments.
 .TP
-.B \-f, \-\-file
-Run a file; the next argument is taken as the file path.
+\fBexec\fR \fIsource\fR [\fIargs\fR...]
+Run the Kirby source code given as the string
+.IR source .
+.I args
+are the script's own arguments.
 .TP
-.B \-c, \-\-code
-Run a string of source code; the next argument is interpreted as the
-source.
-
+\fBcompile\fR \fIpath\fR
+Compile the file at
+.I path
+without running it.
+On success print
+.B Compiled!\&
+to standard error.
+A compile error is reported and ends with status 65.
+.TP
+\fBbuild\fR \fIpath\fR \fB\-o\fR \fIoutput\fR [\fB\-\-runtime\fR \fIruntime\fR]
+Build the file at
+.I path
+into a single executable at
+.I output
+that runs it.
+The executable is a copy of the runtime, which has the virtual machine but no
+compiler, with the compiled program attached to it.
+It needs neither
+.B krb
+nor the source file, and it receives its arguments the way
+.B krb run
+passes them.
+.IP
+The runtime is
+.B krb\-runtime
+in the same directory as
+.BR krb ,
+unless
+.B \-\-runtime
+names a different one.
+It must be the same version of Kirby as
+.BR krb ,
+or the executable refuses to run.
+An
+.I output
+that already exists is replaced.
+.B build
+is supported on Linux and macOS.
+.TP
+\fBlex\fR \fIpath\fR
+Print the tokens of the file at
+.IR path ,
+one per line.
+.TP
+\fBparse\fR \fIpath\fR
+Print the syntax tree of the file at
+.I path
+as an expression, such as
+.BR "(call @println (+ 1 2))" .
+.SH SCRIPT ARGUMENTS
+A script reads its arguments with
+.B @argc()
+and
+.BR @argv(\fIindex\fR) .
+.PP
+.B @argv(0)
+is the program: the path given to
+.BR "krb run" ,
+the path of the file that
+.B krb example
+runs,
+.B exec
+for
+.BR "krb exec" ,
+.B repl
+in the REPL, and the path that a built executable was started with.
+.B @argv(1)
+onward are the script's own arguments, and an index past the last one gives
+.BR nil .
+.B @argc()
+counts the program and the arguments, so
+.B krb run file.krb a b
+and a built
+.B ./app a b
+both see 3.
+.SH PROJECT FILE
+.B krb run
+without a path,
+.B krb example
+and
+.B krb config
+read
+.B kirby.project.toml
+from the current directory.
+It is a TOML file with two settings, both strings:
+.TP
+.B bin
+The file that
+.B krb run
+runs when it is given no path, such as
+.BR bin/main.krb .
+.TP
+.B examples
+The folder that
+.B krb example
+looks in.
+The default is
+.BR examples .
+.PP
+.B krb init
+creates the file with both settings commented out.
+.SH FILES
+.TP
+.B kirby.project.toml
+The settings of a project, read from the current directory.
+.TP
+.B krb\-runtime
+The runtime that
+.B krb build
+copies.
+It is installed next to
+.BR krb .
 .SH EXIT STATUS
 .TP
-0
-Successful execution or when the user exits the REPL.
+.B 0
+Success, or the REPL was left.
 .TP
-64
-Invalid command‑line usage (no valid option supplied).
+.B 1
+.B krb run
+was given no path and the project has no bin file.
 .TP
-65
-Compilation error in the executed source.
+.B 64
+The command line was wrong: no command, a command that does not exist, or
+arguments that the command does not accept.
+The usage summary is printed to standard error.
 .TP
-70
-Runtime error in the executed source.
+.B 65
+A compile error in the program.
 .TP
-Other non‑zero values
-Returned by internal calls such as
-.BR malloc (3)
-or
-.BR fopen (3)
- on failure.
-
+.B 70
+A runtime error in the program.
+.TP
+.B 71
+An error from the operating system, such as a file that cannot be opened or
+written.
+.PP
+A script can end with its own status by calling
+.BR @exit() .
+.SH EXAMPLES
+.nf
+krb run path/to/file.krb          # run a file
+krb run                           # run the project's bin file
+krb run \-\- arg1 arg2              # give arguments to the project's bin file
+krb example hello                 # run examples/hello.krb
+krb exec \(aq@println("Hello World");\(aq
+krb build path/to/file.krb \-o app # make ./app, which runs the file
+krb parse path/to/file.krb
+krb init                          # start a project in this folder
+krb config bin                    # print the bin setting
+krb repl
+.fi
+.SH SEE ALSO
+The Kirby documentation: https://github.com/kirbylang/kirbylang#documentation
 .SH AUTHOR
 Kylee Tilley <kyleetilley@gmail.com>
