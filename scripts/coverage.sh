@@ -2,7 +2,7 @@
 
 set -euo pipefail
 
-BUILD_TESTS=ON ENABLE_COVERAGE=ON ./scripts/build.sh
+ENABLE_COVERAGE=ON ./scripts/build-tests.sh
 
 ./scripts/verify.sh
 

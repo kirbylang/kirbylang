@@ -2,4 +2,4 @@
 set -e
 
 cd build
-ctest --verbose
+ctest --verbose --no-tests=error
