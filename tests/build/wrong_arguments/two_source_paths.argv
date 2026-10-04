@@ -1,0 +1,5 @@
+build
+$file
+extra.krb
+-o
+app

@@ -31,7 +31,9 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: krb
-          path: ./build/krb
+          path: |
+            ./build/krb
+            ./build/krb-runtime
           if-no-files-found: error
           overwrite: true
 

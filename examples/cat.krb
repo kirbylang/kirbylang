@@ -1,11 +1,11 @@
 #!/usr/bin/env krb run
 
-if (@argc() != 4) {
+if (@argc() != 2) {
   @println("Usage: krb example cat <file>");
   @exit(1);
 }
 
-let path: string = @argv(3);
+let path: string = @argv(1);
 
 if (!@fileExists(path)) {
   @println($"File doesn't exist '{path}'");

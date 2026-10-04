@@ -1,4 +1,4 @@
-6
-run
-./tests/run/native_functions/native_fn_script_args_with_spaces_and_empty.krb
+4
 two words
+
+--help

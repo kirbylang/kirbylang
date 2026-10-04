@@ -1,0 +1,6 @@
+build
+$file
+-o
+does-not-exist/app
+--runtime
+runtimes/nope

@@ -1,0 +1,4 @@
+build
+$file
+-o
+does-not-exist/app

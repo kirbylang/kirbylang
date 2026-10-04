@@ -24,10 +24,29 @@
 
 ## Next
 
+- CMake finds readline with `find_library` and uses `-DCMAKE_PREFIX_PATH`. On
+  macOS it prefers Homebrew's readline to the system `libedit`, which shows no
+  prompt or echo for piped input
 - Add `krb init` to intialize a new Kirby project
 - Add `krb config` to view the project's `kirby.project.toml` configuration
   - `krb config bin` Prints the `bin` value
   - `krb config examples` Prints the `examples` value
+- Add `krb build <path> -o <output>` to build a file into a single executable
+  - The executable is a copy of `krb-runtime`, which has the VM but no
+    compiler, with the compiled program attached. `krb-runtime` is installed
+    next to `krb`. `--runtime <path>` names a different one
+  - Compiled code has a byte form for the first time: it starts with `KRBC`
+    and records the Kirby version, and a different version refuses to load it
+- Change `@argc` and `@argv` so a script sees the same arguments however it is
+  started
+  - `@argv(0)` is the program and `@argv(1)` onward are the script's own
+    arguments, so `krb run file.krb a b` and a built `./app a b` both have an
+    `@argc()` of 3
+  - `@argv(0)` is the path given to `krb run`, the path of the example for
+    `krb example`, `exec` for `krb exec` and `repl` for `krb repl`
+  - Before, a script also saw `krb`, the command and the path, so its first
+    argument was `@argv(3)`. The `cat`, `env` and `fib` examples are updated
+  - `krb exec <source>` now passes the arguments after the source to the script
 
 ## 0.4.0
 

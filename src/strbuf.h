@@ -15,6 +15,8 @@ typedef struct {
 void sb_init(StrBuf *sb);
 void sb_ensure(StrBuf *sb, size_t extra);
 void sb_append(StrBuf *sb, const char *text);
+/** Append `length` bytes, which may include NUL. */
+void sb_append_bytes(StrBuf *sb, const void *bytes, size_t length);
 void sb_appendf(StrBuf *sb, const char *fmt, ...);
 void sb_free(StrBuf *sb);
 
