@@ -97,6 +97,49 @@ set(KIRBY_SOURCES
 )
 
 # -----------------------------------------------------------------------------
+# readline
+# -----------------------------------------------------------------------------
+
+# The REPL uses GNU readline. macOS ships libedit in its place, which shows no
+# prompt and no echo when input is piped, so Homebrew's readline is preferred
+# there. It is keg-only, so it is not on the default search paths. A prefix
+# given with -DCMAKE_PREFIX_PATH is searched first.
+if(APPLE)
+    find_program(BREW_EXECUTABLE brew)
+
+    if(BREW_EXECUTABLE)
+        execute_process(
+            COMMAND ${BREW_EXECUTABLE} --prefix readline
+            OUTPUT_VARIABLE BREW_READLINE_PREFIX
+            OUTPUT_STRIP_TRAILING_WHITESPACE
+            ERROR_QUIET
+        )
+
+        if(BREW_READLINE_PREFIX)
+            list(APPEND CMAKE_PREFIX_PATH ${BREW_READLINE_PREFIX})
+        endif()
+    endif()
+endif()
+
+find_library(READLINE_LIBRARY NAMES readline)
+find_path(READLINE_INCLUDE_DIR NAMES readline/readline.h)
+
+if(NOT READLINE_LIBRARY OR NOT READLINE_INCLUDE_DIR)
+    message(FATAL_ERROR
+        "readline was not found. Install it (libreadline-dev, or "
+        "`brew install readline`) or point CMAKE_PREFIX_PATH at it.")
+endif()
+
+message(STATUS "readline: ${READLINE_LIBRARY}")
+
+if(APPLE AND READLINE_LIBRARY MATCHES "^(/usr/lib|.*\\.sdk/usr/lib)")
+    message(WARNING
+        "Using the system readline, which is libedit. It shows no prompt or "
+        "echo for piped input, so the REPL test fails. Run `brew install "
+        "readline`.")
+endif()
+
+# -----------------------------------------------------------------------------
 # Shared configuration helpers
 # -----------------------------------------------------------------------------
 
@@ -108,6 +151,12 @@ function(configure_kirby_target TARGET_NAME)
             ${GENERATED_DIR}
     )
 
+    # BEFORE, so Homebrew's headers are used and not the SDK's libedit ones.
+    target_include_directories(${TARGET_NAME} BEFORE
+        PUBLIC
+            ${READLINE_INCLUDE_DIR}
+    )
+
     target_compile_options(${TARGET_NAME}
         PRIVATE
             -Wall
@@ -117,7 +166,7 @@ function(configure_kirby_target TARGET_NAME)
 
     target_link_libraries(${TARGET_NAME}
         PUBLIC
-            readline
+            ${READLINE_LIBRARY}
             m
     )
 

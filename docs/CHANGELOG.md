@@ -24,6 +24,9 @@
 
 ## Next
 
+- CMake finds readline with `find_library` and uses `-DCMAKE_PREFIX_PATH`. On
+  macOS it prefers Homebrew's readline to the system `libedit`, which shows no
+  prompt or echo for piped input
 - Add `krb init` to intialize a new Kirby project
 - Add `krb config` to view the project's `kirby.project.toml` configuration
   - `krb config bin` Prints the `bin` value
