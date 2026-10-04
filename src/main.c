@@ -443,7 +443,7 @@ static int cmdConfig(int argc, char *argv[]) {
                   "The project bin is undefined in the config. "
                   "Update 'kirby.project.toml' with 'bin=\"bin/main.krb\"'.\n");
         } else {
-          fprintf(stderr, "%s\n", krb_project.bin);
+          printf("%s\n", krb_project.bin);
         }
       }
 
@@ -454,7 +454,7 @@ static int cmdConfig(int argc, char *argv[]) {
               "The examples directory is missing from the config. "
               "Update 'kirby.project.toml' with 'examples=\"examples\"'.\n");
         } else {
-          fprintf(stderr, "%s\n", krb_project.examples);
+          printf("%s\n", krb_project.examples);
         }
       }
 
