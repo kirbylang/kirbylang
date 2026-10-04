@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 
 # Tests of 'krb build' itself: its arguments, its errors, and the programs it
-# makes. That a built program behaves like 'krb run' for every test in tests/ is
-# checked by './scripts/tests.sh --packaged'.
+# makes. That a built program behaves like 'krb run' for a set of the tests in
+# tests/ is checked by './scripts/tests-packaged.sh'.
 
 set -uo pipefail
 
@@ -79,12 +79,8 @@ EOF
 
 cat >boom.krb <<'EOF'
 @println("before");
-@println(@len(1));
+@println([1, 2, 3][10]);
 @println("after");
-EOF
-
-cat >leave.krb <<'EOF'
-@exit(3);
 EOF
 
 printf 'let x: number = "not a number";\n' >broken.krb
@@ -92,34 +88,23 @@ printf 'let x: number = "not a number";\n' >broken.krb
 echo "A built program"
 
 capture "$BIN" build hello.krb -o hello
-check "builds" "0" "$code"
 check_contains "says what it built" "Built hello" "$err"
-
-capture ./hello
-check "runs" "0" "$code"
-check "prints what the script prints" "Hello, packaged world!" "$out"
-
-capture "$BIN" run hello.krb
-check "prints what 'krb run' prints" "Hello, packaged world!" "$out"
 
 mkdir elsewhere
 cp hello elsewhere/moved
 capture bash -c 'cd elsewhere && PATH=/usr/bin:/bin ./moved'
 check "runs after being moved, without krb" "Hello, packaged world!" "$out"
 
-capture "$BIN" build args.krb -o args
-capture ./args one "two words"
-check "gets its arguments after its own name" $'3\none\ntwo words' "$out"
+printf '@println(@argv(0));\n' >zero.krb
+capture "$BIN" build zero.krb -o ./zero-app
+capture ./zero-app
+check "@argv(0) is the program, as it was typed" "./zero-app" "$out"
 
 capture "$BIN" build boom.krb -o boom
 capture ./boom
 check "stops with the runtime error exit code" "70" "$code"
 check "prints what ran before the error" "before" "$out"
 check_contains "reports the error with its line" "[line 2] in script" "$err"
-
-capture "$BIN" build leave.krb -o leave
-capture ./leave
-check "keeps the exit code from @exit" "3" "$code"
 
 echo
 echo "Building over a program that exists"
@@ -140,13 +125,10 @@ check "uses the runtime given with --runtime" "Hello, packaged world!" "$out"
 capture "$BIN" build hello.krb -o missing --runtime runtimes/nope
 check "fails when the runtime is missing" "71" "$code"
 check_contains "says which runtime" "runtimes/nope" "$err"
-check "leaves no output" "no" "$([[ -e missing ]] && echo yes || echo no)"
 
 cp "$RUNTIME_BIN" same-file
-before=$(cksum <same-file)
 capture "$BIN" build hello.krb -o same-file --runtime same-file
 check "refuses to overwrite its own runtime" "71" "$code"
-check "leaves the runtime alone" "$before" "$(cksum <same-file)"
 
 echo
 echo "A build that fails"

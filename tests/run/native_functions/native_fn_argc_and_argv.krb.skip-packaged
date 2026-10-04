@@ -1,2 +1,0 @@
-The test prints @argv(0), which is the script's path under krb run and the
-program's own path when it is built.

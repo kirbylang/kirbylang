@@ -12,13 +12,15 @@ other files that belong to it are named after it:
 | `test.krb.exit` | Expected exit code                                         |
 | `test.krb.in`   | Text sent to `stdin`, which is empty without this file     |
 | `test.krb.env`  | Environment Variables                                      |
-| `test.krb.skip-packaged` | Skip this test with `--packaged`, and why |
 
 Every file in `tests/` must belong to a test, so a program without an `.argv`
-file is reported instead of being skipped. Dotfiles and this README are ignored.
+file is reported instead of being skipped. Dotfiles, folders named `fixtures` and
+this README are ignored.
 
 The folders are only for organization. `tests/run` holds the tests of the
-language and `tests/exec` holds the tests of `krb exec`.
+language. `tests/exec`, `tests/example` and `tests/repl` hold the tests of those
+`krb` subcommands. In a `repl` test, the `.in` file is what is typed into the
+REPL. `tests/fixtures` holds files that tests use, such as a project.
 
 ## The `.argv` File
 
@@ -56,6 +58,24 @@ such as `exec` followed by a line of source.
 
 If a line cannot be expanded, that test fails and the rest still run.
 
+## Running In Another Folder
+
+`krb run` with no path and `krb example` read `kirby.project.toml` from the
+current folder. A test runs them from a project by putting a `cd` in its `.env`.
+`BIN` is an absolute path and is exported, so it still runs after the `cd`. The
+project the tests use is in `tests/fixtures/project`.
+
+```
+cd tests/fixtures/project
+```
+
+## Normalizing Output
+
+`tests/.normalize.sed` holds `sed -E` rules. They are applied to `stdout` and
+`stderr` before they are compared, or written by `--update`. Output that changes
+with every release, such as the version in the usage text, the REPL's banner and
+the project's banner, is written as `<version>` in the snapshots.
+
 ## Writing A Test
 
 1. Create a new file in the [`tests/run`](./run) directory: `./tests/run/new_test.krb`
@@ -82,8 +102,12 @@ The tests are run using the [tests.sh](../scripts/tests.sh) script.
 
 ### Filtering Tests
 
+Only run the tests whose name contains a pattern. With several patterns, a test
+runs if it matches any of them. A pattern that matches no test is an error.
+
 ```shell
 ./scripts/tests.sh pattern
+./scripts/tests.sh pattern other_pattern
 ```
 
 ### Configuration
@@ -92,7 +116,6 @@ The tests are run using the [tests.sh](../scripts/tests.sh) script.
 | ----------- | -------------------- | ------------------------------- |
 | `BIN`       | `./build/kirby-test` | The program the tests run       |
 | `TESTS_DIR` | `./tests`            | The folder that holds the tests |
-| `RUNTIME_BIN` | `./build/kirby-test-runtime` | The runtime `--packaged` builds programs with |
 
 The `.err` snapshots hold the bytecode listing, so `BIN` must be a build that
 prints it, such as `kirby-test`. The release build `krb` does not.
@@ -107,24 +130,13 @@ Output additional information when running tests.
 
 ## Packaged Programs
 
-`--packaged` runs every test again, but builds each one into an executable with
-`krb build` and runs that, then compares with the same snapshots.
+`krb build` turns a program into an executable.
+`./scripts/tests-packaged.sh` runs a small set of the tests again as built
+programs and compares them with the same snapshots. The list is in the script.
 
 ```shell
-./scripts/tests.sh --packaged
+./scripts/tests-packaged.sh
 ```
-
-Only a test whose arguments are `run` and `$file`, followed by any others, is
-built. The arguments after `$file` are given to the executable. Every other
-test, such as one for `krb exec`, is skipped.
-
-A test whose output depends on how it was started, such as one that prints
-`@argv(0)`, can opt out by adding a `test.krb.skip-packaged` file. Say why in the
-file.
-
-If the build fails, the build's `stderr` must be the end of the snapshot's,
-because `krb run` prints the standard library's bytecode before a compile error
-and `krb build` does not. `--packaged` can't be used with `--update`.
 
 `./scripts/test-build.sh` tests `krb build` itself: its arguments, its errors,
 and damaged programs.

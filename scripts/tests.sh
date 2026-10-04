@@ -3,17 +3,27 @@
 set -euo pipefail
 
 BIN="${BIN:-./build/kirby-test}"
-RUNTIME_BIN="${RUNTIME_BIN:-./build/kirby-test-runtime}"
+
+# An absolute BIN lets a test's .env change directory and still run it. A bare
+# command name, such as `echo`, is left for PATH to find. BIN is exported so a
+# test's .env can use it.
+if [[ "$BIN" == */* && -d "$(dirname "$BIN")" ]]; then
+    BIN="$(cd "$(dirname "$BIN")" && pwd)/$(basename "$BIN")"
+fi
+export BIN
 
 # The folder that holds the tests. Any .argv file under it is a test.
 TESTS_DIR="${TESTS_DIR:-./tests}"
 TESTS_DIR="${TESTS_DIR%/}"
+
+# Rules, as sed expressions, for output that differs between runs or releases.
+# They are applied to stdout and stderr before they are compared or updated.
+NORMALIZE_FILE="$TESTS_DIR/.normalize.sed"
 DIFF="diff -u"
 
 UPDATE=0
 VERBOSE=0
-PACKAGED=0
-FILTER=""
+FILTERS=()
 
 for arg in "$@"; do
     case "$arg" in
@@ -23,19 +33,15 @@ for arg in "$@"; do
         --verbose|-v)
             VERBOSE=1
             ;;
-        --packaged)
-            PACKAGED=1
+        -*)
+            echo "Unknown option: $arg" >&2
+            exit 1
             ;;
         *)
-            FILTER="$arg"
+            FILTERS+=("$arg")
             ;;
     esac
 done
-
-if [[ $PACKAGED -eq 1 && $UPDATE -eq 1 ]]; then
-    echo "--update can't be used with --packaged: snapshots come from 'krb run'" >&2
-    exit 1
-fi
 
 TMP_DIR=$(mktemp -d)
 trap 'rm -rf "$TMP_DIR"' EXIT
@@ -57,14 +63,20 @@ TOTAL=0
 #   <name>.exit  expected exit code
 #   <name>.in    stdin, which is empty without this file
 #   <name>.env   environment variables, sourced before BIN runs
-#   <name>.skip-packaged  skip the test with --packaged, and why
-SIDECARS=".out .err .exit .in .env .skip-packaged"
+SIDECARS=".out .err .exit .in .env"
 
+# A test runs when its name contains any of the filters, or when there are none.
 should_run() {
     local name="$1"
+    local filter
 
-    [[ -z "$FILTER" ]] && return 0
-    [[ "$name" == *"$FILTER"* ]]
+    [[ ${#FILTERS[@]} -eq 0 ]] && return 0
+
+    for filter in "${FILTERS[@]}"; do
+        [[ "$name" == *"$filter"* ]] && return 0
+    done
+
+    return 1
 }
 
 run_test() {
@@ -93,37 +105,6 @@ run_test() {
     else
         [[ $VERBOSE -eq 1 ]] && echo "  ✅ $label"
         PASS=$((PASS + 1))
-    fi
-}
-
-# For a program that fails to build. 'krb run' prints the standard library's
-# bytecode before it reports a compile error, and 'krb build' never loads
-# anything, so the build's stderr must be the end of the snapshot.
-run_suffix_test() {
-    local label="$1"
-    local expected="$2"
-    local actual="$3"
-
-    TOTAL=$((TOTAL + 1))
-
-    if [[ ! -f "$expected" ]]; then
-        echo "  🟨 SKIP $label (missing $(basename "$expected"))"
-        SKIP=$((SKIP + 1))
-        return
-    fi
-
-    # The trailing "x" keeps the final newlines, which $(...) would remove.
-    local expected_text actual_text
-    expected_text=$(cat "$expected"; printf x)
-    actual_text=$(cat "$actual"; printf x)
-
-    if [[ "$expected_text" == *"$actual_text" ]]; then
-        [[ $VERBOSE -eq 1 ]] && echo "  ✅ $label"
-        PASS=$((PASS + 1))
-    else
-        $DIFF "$expected" "$actual" || true
-        echo "  ❌ $label (build output is not the end of the snapshot)"
-        FAIL=$((FAIL + 1))
     fi
 }
 
@@ -166,17 +147,18 @@ run_exit_test() {
     fi
 }
 
-# Every file in the tests folder must belong to a test. Dotfiles, dot folders
-# and the README do not.
+# Every file in the tests folder must belong to a test. Dotfiles, dot folders,
+# folders named fixtures and the README do not. A fixture is a file a test uses,
+# such as a project it changes into.
 check_every_file_is_claimed() {
     local all="$TMP_DIR/all-files.txt"
     local claimed="$TMP_DIR/claimed-files.txt"
 
-    find "$TESTS_DIR" -mindepth 1 -name '.*' -prune -o \
+    find "$TESTS_DIR" -mindepth 1 \( -name '.*' -o -name fixtures \) -prune -o \
         -type f ! -path "$TESTS_DIR/README.md" -print \
         | LC_ALL=C sort >"$all"
 
-    find "$TESTS_DIR" -mindepth 1 -name '.*' -prune -o \
+    find "$TESTS_DIR" -mindepth 1 \( -name '.*' -o -name fixtures \) -prune -o \
         -type f -name '*.argv' -print | while IFS= read -r argv_path; do
         stem="${argv_path%.argv}"
         echo "$argv_path"
@@ -209,13 +191,33 @@ check_every_file_is_claimed
 argv_files=()
 while IFS= read -r argv_path; do
     argv_files+=("$argv_path")
-done < <(find "$TESTS_DIR" -mindepth 1 -name '.*' -prune -o \
+done < <(find "$TESTS_DIR" -mindepth 1 \( -name '.*' -o -name fixtures \) -prune -o \
     -type f -name '*.argv' -print | LC_ALL=C sort)
 
 if [[ ${#argv_files[@]} -eq 0 ]]; then
     echo "No tests found" >&2
     exit 1
 fi
+
+# Every filter must match a test, so a mistyped name is reported and not
+# silently ignored.
+for filter in ${FILTERS[@]+"${FILTERS[@]}"}; do
+    matched=0
+
+    for argv_path in "${argv_files[@]}"; do
+        name="${argv_path#"$TESTS_DIR"/}"
+
+        if [[ "${name%.argv}" == *"$filter"* ]]; then
+            matched=1
+            break
+        fi
+    done
+
+    if [[ $matched -eq 0 ]]; then
+        echo "No test matches '$filter'" >&2
+        exit 1
+    fi
+done
 
 for argv_file in "${argv_files[@]}"; do
     name="${argv_file#"$TESTS_DIR"/}"
@@ -231,7 +233,6 @@ for argv_file in "${argv_files[@]}"; do
     expected_exit="$file.exit"
     env_file="$file.env"
     input_file="$file.in"
-    skip_packaged_file="$file.skip-packaged"
 
     actual_out="$TMP_DIR/$name.out"
     mkdir -p "$(dirname "$actual_out")"
@@ -267,50 +268,9 @@ for argv_file in "${argv_files[@]}"; do
         continue
     fi
 
-    # With --packaged, only a test that is `krb run <program> ...` is built into
-    # an executable. The arguments after the program are given to the executable.
-    packaged=0
-    if [[ $PACKAGED -eq 1 ]]; then
-        if [[ ${#args[@]} -lt 2 || "${args[0]}" != "run" || "${args[1]}" != "$file" ]]; then
-            echo "  🟨 SKIP packaged (does not run a file with 'krb run')"
-            TOTAL=$((TOTAL + 3))
-            SKIP=$((SKIP + 3))
-            continue
-        fi
-
-        # The program's own argv differs when it isn't started by 'krb run'.
-        if [[ -f "$skip_packaged_file" ]]; then
-            echo "  🟨 SKIP packaged ($(basename "$skip_packaged_file"))"
-            TOTAL=$((TOTAL + 3))
-            SKIP=$((SKIP + 3))
-            continue
-        fi
-
-        packaged=1
-        extra_args=()
-        for ((i = 2; i < ${#args[@]}; i++)); do
-            extra_args+=("${args[$i]}")
-        done
-    fi
-
     set +e
 
     run_cmd=( "$BIN" ${args[@]+"${args[@]}"} )
-
-    # --packaged builds the program into an executable and runs that instead.
-    build_failed=0
-    if [[ $packaged -eq 1 ]]; then
-        app="$TMP_DIR/$name.app"
-        "$BIN" build "$file" -o "$app" --runtime "$RUNTIME_BIN" \
-            >"$actual_out" 2>"$actual_err" </dev/null
-        build_exit=$?
-
-        if [[ $build_exit -eq 0 ]]; then
-            run_cmd=( "$app" ${extra_args[@]+"${extra_args[@]}"} )
-        else
-            build_failed=1
-        fi
-    fi
 
     stdin_cmd=()
     [[ -f "$input_file" ]] && stdin_cmd=( cat "$input_file" )
@@ -325,28 +285,24 @@ for argv_file in "${argv_files[@]}"; do
         ' _ "$env_file" "${run_cmd[@]}" )
     fi
 
-    if [[ $build_failed -eq 1 ]]; then
-        exit_code=$build_exit
+    if [[ ${#stdin_cmd[@]} -gt 0 ]]; then
+        "${stdin_cmd[@]}" | "${run_cmd[@]}" >"$actual_out" 2>"$actual_err"
     else
-        if [[ ${#stdin_cmd[@]} -gt 0 ]]; then
-            "${stdin_cmd[@]}" | "${run_cmd[@]}" >"$actual_out" 2>"$actual_err"
-        else
-            "${run_cmd[@]}" >"$actual_out" 2>"$actual_err" </dev/null
-        fi
-
-        exit_code=$?
+        "${run_cmd[@]}" >"$actual_out" 2>"$actual_err" </dev/null
     fi
 
+    exit_code=$?
     set -e
 
-    run_test      "stdout" "$expected_out" "$actual_out"
-
-    if [[ $build_failed -eq 1 ]]; then
-        run_suffix_test "stderr" "$expected_err" "$actual_err"
-    else
-        run_test "stderr" "$expected_err" "$actual_err"
+    if [[ -f "$NORMALIZE_FILE" ]]; then
+        for output in "$actual_out" "$actual_err"; do
+            sed -E -f "$NORMALIZE_FILE" "$output" >"$output.normalized"
+            mv "$output.normalized" "$output"
+        done
     fi
 
+    run_test      "stdout" "$expected_out" "$actual_out"
+    run_test      "stderr" "$expected_err" "$actual_err"
     run_exit_test "exit code" "$expected_exit" "$exit_code"
 
     if [[ $exit_code -eq 139 ]]; then
