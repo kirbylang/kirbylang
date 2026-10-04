@@ -39,8 +39,12 @@ void packagedAddUnit(StrBuf *payload, const CompiledUnit *unit);
  * Make `outputPath` from the runtime executable at `runtimePath` with the
  * payload and a trailer attached, and mark it executable.
  *
+ * The program is written to a temporary file that replaces `outputPath` only
+ * once it is complete.
+ *
  * On failure returns false, writes a sentence saying why into `error`, and
- * leaves no output file behind.
+ * leaves `outputPath` as it was: an output that already exists keeps its
+ * contents, and no file is created if there was none.
  */
 bool packagedWrite(const char *runtimePath, const char *outputPath,
                    const StrBuf *payload, char *error, size_t errorSize);

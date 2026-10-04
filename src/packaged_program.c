@@ -3,6 +3,7 @@
 #endif
 
 #include <errno.h>
+#include <fcntl.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -99,6 +100,60 @@ static bool isSameFile(const struct stat *a, const struct stat *b) {
   return a->st_dev == b->st_dev && a->st_ino == b->st_ino;
 }
 
+/**
+ * Create a new file next to `outputPath` to write the program into. It is
+ * only moved to `outputPath` once it is complete, so a failure never touches
+ * an output that already exists. The file gets the permissions that `fopen`
+ * would give a new file, which keeps the user's umask in effect.
+ *
+ * On success the caller owns `*temporaryPath`.
+ */
+static FILE *openTemporaryOutput(const char *outputPath,
+                                 char **temporaryPath) {
+  size_t length = strlen(outputPath) + 32;
+  char *path = (char *)malloc(length);
+
+  if (path == NULL) {
+    errno = ENOMEM;
+    return NULL;
+  }
+
+  for (int attempt = 0; attempt < 100; attempt++) {
+    snprintf(path, length, "%s.tmp%ld-%d", outputPath, (long)getpid(),
+             attempt);
+
+    // O_EXCL so a file that is already there is never overwritten.
+    int descriptor = open(path, O_WRONLY | O_CREAT | O_EXCL, 0666);
+
+    if (descriptor < 0) {
+      if (errno == EEXIST) {
+        continue;
+      }
+
+      break;
+    }
+
+    FILE *file = fdopen(descriptor, "wb");
+
+    if (file == NULL) {
+      int problem = errno;
+      close(descriptor);
+      remove(path);
+      free(path);
+      errno = problem;
+      return NULL;
+    }
+
+    *temporaryPath = path;
+    return file;
+  }
+
+  int problem = errno;
+  free(path);
+  errno = problem;
+  return NULL;
+}
+
 bool packagedWrite(const char *runtimePath, const char *outputPath,
                    const StrBuf *payload, char *error, size_t errorSize) {
   FILE *runtime = fopen(runtimePath, "rb");
@@ -121,7 +176,8 @@ bool packagedWrite(const char *runtimePath, const char *outputPath,
     return false;
   }
 
-  FILE *output = fopen(outputPath, "wb");
+  char *temporaryPath = NULL;
+  FILE *output = openTemporaryOutput(outputPath, &temporaryPath);
 
   if (output == NULL) {
     snprintf(error, errorSize, "could not write \"%s\": %s", outputPath,
@@ -143,7 +199,13 @@ bool packagedWrite(const char *runtimePath, const char *outputPath,
 
   fclose(runtime);
 
-  if (ok && !makeExecutable(outputPath)) {
+  if (ok && !makeExecutable(temporaryPath)) {
+    ok = false;
+    problem = errno;
+  }
+
+  // Moving the finished file over the output replaces it in one step.
+  if (ok && rename(temporaryPath, outputPath) != 0) {
     ok = false;
     problem = errno;
   }
@@ -151,10 +213,12 @@ bool packagedWrite(const char *runtimePath, const char *outputPath,
   if (!ok) {
     snprintf(error, errorSize, "could not write \"%s\": %s", outputPath,
              strerror(problem));
-    remove(outputPath);
+    remove(temporaryPath);
+    free(temporaryPath);
     return false;
   }
 
+  free(temporaryPath);
   return true;
 }
 

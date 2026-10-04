@@ -6,10 +6,13 @@
 #undef NDEBUG
 
 #include <assert.h>
+#include <dirent.h>
+#include <signal.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/resource.h>
 #include <sys/stat.h>
 #include <unistd.h>
 
@@ -333,6 +336,95 @@ static void testTheRuntimeCanNotBeItsOwnOutput(void) {
   free(runtime);
 }
 
+static const char PREVIOUS_PROGRAM[] = "the program that was here before";
+
+// The number of files in the test folder, so a test can tell that nothing but
+// the files it made is there.
+static int countFiles(void) {
+  DIR *folder = opendir(directory);
+  assert(folder != NULL);
+
+  int count = 0;
+  struct dirent *entry;
+
+  while ((entry = readdir(folder)) != NULL) {
+    if (strcmp(entry->d_name, ".") != 0 && strcmp(entry->d_name, "..") != 0) {
+      count++;
+    }
+  }
+
+  closedir(folder);
+  return count;
+}
+
+static void testAFailedWriteLeavesAnExistingOutputAlone(void) {
+  char *runtime = newRuntime(0755);
+  char *output = pathTo("app");
+  writeFile(output, PREVIOUS_PROGRAM, sizeof PREVIOUS_PROGRAM, 0755);
+
+  CompiledUnit *unit = newUnit(1);
+  StrBuf payload;
+  sb_init(&payload);
+  packagedAddUnit(&payload, unit);
+
+  // A file size limit makes the write fail after it has started, as a full
+  // disk would. Going over the limit also raises SIGXFSZ, which is ignored so
+  // that the write fails with an error and the process carries on.
+  struct rlimit original;
+  assert(getrlimit(RLIMIT_FSIZE, &original) == 0);
+  void (*previousHandler)(int) = signal(SIGXFSZ, SIG_IGN);
+
+  struct rlimit small = original;
+  small.rlim_cur = 8;
+  assert(setrlimit(RLIMIT_FSIZE, &small) == 0);
+
+  char error[256] = "";
+  bool written = packagedWrite(runtime, output, &payload, error, sizeof error);
+
+  assert(setrlimit(RLIMIT_FSIZE, &original) == 0);
+  signal(SIGXFSZ, previousHandler);
+
+  assert(!written);
+  assert(strlen(error) > 0);
+
+  StrBuf kept = readFile(output);
+  assert(kept.len == sizeof PREVIOUS_PROGRAM);
+  assert(memcmp(kept.data, PREVIOUS_PROGRAM, sizeof PREVIOUS_PROGRAM) == 0);
+  assert(countFiles() == 2);  // the runtime and the output, nothing left over
+
+  sb_free(&kept);
+  sb_free(&payload);
+  freeUnit(unit);
+  free(runtime);
+  free(output);
+}
+
+static void testReplacingAnOutputGivesTheNewProgramAndLeavesNothingElse(void) {
+  char *runtime = newRuntime(0755);
+  char *output = pathTo("app");
+
+  // Longer than the new program, so a leftover tail would show.
+  char previous[512];
+  memset(previous, 'x', sizeof previous);
+  writeFile(output, previous, sizeof previous, 0755);
+
+  StrBuf payload;
+  sb_init(&payload);
+
+  char error[256] = "";
+  assert(packagedWrite(runtime, output, &payload, error, sizeof error));
+
+  StrBuf written = readFile(output);
+  assert(written.len == sizeof RUNTIME_BYTES + PACKAGED_TRAILER_SIZE);
+  assert(memcmp(written.data, RUNTIME_BYTES, sizeof RUNTIME_BYTES) == 0);
+  assert(countFiles() == 2);  // the runtime and the output, nothing left over
+
+  sb_free(&written);
+  sb_free(&payload);
+  free(runtime);
+  free(output);
+}
+
 static void testFindsItsOwnPath(void) {
   char *path = packagedSelfPath();
   assert(path != NULL);
@@ -370,6 +462,8 @@ int main(void) {
       testAMissingRuntimeIsAnErrorAndLeavesNoOutput,
       testAnOutputInAMissingFolderIsAnError,
       testTheRuntimeCanNotBeItsOwnOutput,
+      testAFailedWriteLeavesAnExistingOutputAlone,
+      testReplacingAnOutputGivesTheNewProgramAndLeavesNothingElse,
       testFindsItsOwnPath,
   };
 
