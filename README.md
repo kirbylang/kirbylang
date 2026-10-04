@@ -1,13 +1,11 @@
-![kirby programming language](./docs/kirby-logo.png)
-
 <div>
 <img src="https://github.com/kirbylang/kirbylang/actions/workflows/ci.yml/badge.svg" />
 <img src="https://github.com/kirbylang/kirbylang/actions/workflows/release.yml/badge.svg" />
 </div>
 
----
+![kirby programming language](./docs/kirby-logo.png)
 
-An aspiring embeddable scripting language.
+🐈‍⬛ An aspiring embeddable scripting language.
 
 ```kirby
 #!/usr/bin/env krb run
