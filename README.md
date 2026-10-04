@@ -1,4 +1,4 @@
-<h1>🐈‍⬛ kirby <small>programming language</small></h1>
+![kirby programming language](./docs/kirby-logo.png)
 
 <div>
 <img src="https://github.com/kirbylang/kirbylang/actions/workflows/ci.yml/badge.svg" />
