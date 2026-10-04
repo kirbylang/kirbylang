@@ -1,0 +1,5 @@
+> @println(@argc());
+1
+> @println(@argv(0));
+repl
+> 

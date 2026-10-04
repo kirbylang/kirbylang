@@ -21,6 +21,10 @@ Commands:
   repl                   Start the interactive REPL
   exec <source>          Run source code given as a string
   compile <path>         Compile a file without running it
+  build <path> -o <output> [--runtime <path>]
+                         Build a file into an executable that runs it.
+                         The runtime is krb-runtime next to krb, unless
+                         --runtime says otherwise
   lex <path>             Print the tokens of a file
   parse <path>           Print the AST of a file
 
@@ -38,6 +42,21 @@ krb config bin                    # print 'bin' kirby.project.toml
 krb config examples               # print 'examples' kirby.project.toml
 krb repl
 krb compile path/to/file.krb
+krb build path/to/file.krb -o app # builds ./app, which runs the file
 krb parse path/to/file.krb
 krb exec '@println("Hello World");'
 ```
+
+## Script Arguments
+
+However a script is started, `@argv(0)` is the program and `@argv(1)` onward are
+the script's own arguments.
+
+| Started with                | `@argv(0)`                   | `@argc()` for `a b` |
+| --------------------------- | ---------------------------- | ------------------- |
+| `krb run file.krb a b`      | `file.krb`                   | 3                   |
+| `krb run -- a b`            | the project's `bin` file     | 3                   |
+| `krb example name a b`      | `<examples>/name.krb`        | 3                   |
+| `krb exec '<code>' a b`     | `exec`                       | 3                   |
+| `krb repl`                  | `repl`                       | 1                   |
+| `./app a b` (`krb build`)   | `./app`, as it was typed     | 3                   |

@@ -8,7 +8,7 @@ fun fib(n: f64): f64 {
 
 @println("Fibonacci");
 
-let arg: string = @argv(4) ?? @prompt("n: ");
+let arg: string = @argv(1) ?? @prompt("n: ");
 let start = @clock();
 
 @println($"{arg}\n");

@@ -19,8 +19,18 @@ Run `./scripts/tests.sh` or `just test` to run the tests in `./test` folder.
 ### Filtering Tests
 
 ```sh
-./scripts/tests.sh PATTERN
+./scripts/tests.sh PATTERN [PATTERN...]
 ```
+
+## Test (Packaged Programs)
+
+Run `./scripts/tests-packaged.sh` or `just test-packaged` to run a set of the
+tests again as executables built with `krb build`. The list of tests, and what
+each group protects, is in the script. `./scripts/run-packaged.sh` is what it
+gives `tests.sh` to build and run each program.
+
+Run `./scripts/test-build.sh` or `just test-build` to test `krb build` itself
+and the programs it makes.
 
 ## Test (Update Snapshots)
 

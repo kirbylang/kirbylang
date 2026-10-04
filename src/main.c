@@ -10,6 +10,7 @@
 #include "compiler.h"
 #include "debug.h"
 #include "lexer.h"
+#include "packaged_program.h"
 #include "parser.h"
 #include "project.h"
 #include "resolved_impl_targets.h"
@@ -17,6 +18,7 @@
 #include "strbuf.h"
 #include "token_stream.h"
 #include "typecheck.h"
+#include "unit_bytes.h"
 #include "version.h"
 #include "vm.h"
 
@@ -53,6 +55,10 @@ const char *help_message =
     "  repl                   Start the interactive REPL\n"
     "  exec <source>          Run source code given as a string\n"
     "  compile <path>         Compile a file without running it\n"
+    "  build <path> -o <output> [--runtime <path>]\n"
+    "                         Build a file into an executable that runs it.\n"
+    "                         The runtime is krb-runtime next to krb, unless\n"
+    "                         --runtime says otherwise\n"
     "  lex <path>             Print the tokens of a file\n"
     "  parse <path>           Print the AST of a file\n"
     "\n"
@@ -70,6 +76,7 @@ const char *help_message =
     "krb config examples               # print 'examples' kirby.project.toml\n"
     "krb repl\n"
     "krb compile path/to/file.krb\n"
+    "krb build path/to/file.krb -o app # builds ./app, which runs the file\n"
     "krb parse path/to/file.krb\n"
     "krb exec '@println(\"Hello World\");'\n"
     "";
@@ -121,6 +128,30 @@ static KirbyProject loadProject(void) {
   return krb_project;
 }
 
+/* The arguments a script sees: the program first, then its own arguments from
+ * argv[first] on. The command that started it, such as "krb run", is left out.
+ * The caller frees the list. */
+static char **scriptArgv(char *program, int argc, char *argv[], int first,
+                         int *scriptArgc) {
+  int own = argc > first ? argc - first : 0;
+  char **list = malloc(sizeof(char *) * (size_t)(own + 2));
+
+  if (list == NULL) {
+    fprintf(stderr, "Not enough memory to run \"%s\".\n", program);
+    exit(EXIT_CODE_OS_ERR);
+  }
+
+  list[0] = program;
+
+  for (int i = 0; i < own; i++) {
+    list[i + 1] = argv[first + i];
+  }
+
+  list[own + 1] = NULL;
+  *scriptArgc = own + 1;
+  return list;
+}
+
 /* Starts the VM and type checker, then loads the standard library. */
 static void sessionBegin(int argc, char *argv[]) {
   initVM(argc, argv);
@@ -134,11 +165,16 @@ static void sessionEnd(void) {
   freeVM();
 }
 
-/* Runs the file at path with the standard library loaded. */
+/* Runs the file at path with the standard library loaded. The script's own
+ * arguments are the ones after the path, from argv[3]. */
 static void runProgram(int argc, char *argv[], const char *path) {
-  sessionBegin(argc, argv);
+  int scriptArgc;
+  char **args = scriptArgv((char *)path, argc, argv, 3, &scriptArgc);
+
+  sessionBegin(scriptArgc, args);
   runFile(path);
   sessionEnd();
+  free(args);
 }
 
 /* krb init */
@@ -205,22 +241,31 @@ static int cmdExample(int argc, char *argv[]) {
   return 0;
 }
 
-/* krb repl */
+/* krb repl
+ * Takes no arguments, so the REPL sees only itself. */
 static int cmdRepl(int argc, char *argv[]) {
-  sessionBegin(argc, argv);
+  int scriptArgc;
+  char **args = scriptArgv("repl", argc, argv, argc, &scriptArgc);
+
+  sessionBegin(scriptArgc, args);
   repl();
   sessionEnd();
+  free(args);
   return 0;
 }
 
-/* krb exec <source> */
+/* krb exec <source> [args...] */
 static int cmdExec(int argc, char *argv[]) {
   if (argc < 3)
     return usageError();
 
-  sessionBegin(argc, argv);
+  int scriptArgc;
+  char **args = scriptArgv("exec", argc, argv, 3, &scriptArgc);
+
+  sessionBegin(scriptArgc, args);
   runCode(argv[2]);
   sessionEnd();
+  free(args);
   return 0;
 }
 
@@ -235,6 +280,101 @@ static int cmdCompile(int argc, char *argv[]) {
   compilerSessionEnd();
   typchkSessionEnd();
   fprintf(stderr, "Compiled!\n");
+  return 0;
+}
+
+/* The runtime that `krb build` uses when --runtime is not given: krb-runtime in
+ * the folder krb runs from. */
+static char *defaultRuntimePath(void) {
+  char *self = packagedSelfPath();
+
+  if (self == NULL) {
+    fprintf(stderr, "Could not find where krb is. Use --runtime <path> to say "
+                    "where krb-runtime is.\n");
+    exit(EXIT_CODE_OS_ERR);
+  }
+
+  const char *name = "krb-runtime";
+  char *slash = strrchr(self, '/');
+  size_t folderLength = slash == NULL ? 0 : (size_t)(slash - self) + 1;
+  char *path = malloc(folderLength + strlen(name) + 1);
+
+  if (path == NULL) {
+    fprintf(stderr, "Not enough memory to build.\n");
+    exit(EXIT_CODE_OS_ERR);
+  }
+
+  memcpy(path, self, folderLength);
+  strcpy(path + folderLength, name);
+  free(self);
+  return path;
+}
+
+/* krb build <path> -o <output> [--runtime <path>]
+ * Compiles the file and the standard library, and attaches them to a copy of
+ * the runtime. Running <output> then does what `krb run <path>` does. */
+static int cmdBuild(int argc, char *argv[]) {
+  const char *path = NULL;
+  const char *output = NULL;
+  const char *runtime = NULL;
+
+  for (int i = 2; i < argc; i++) {
+    if (strcmp(argv[i], "-o") == 0 && i + 1 < argc) {
+      output = argv[++i];
+    } else if (strcmp(argv[i], "--runtime") == 0 && i + 1 < argc) {
+      runtime = argv[++i];
+    } else if (path == NULL && argv[i][0] != '-') {
+      path = argv[i];
+    } else {
+      return usageError();
+    }
+  }
+
+  if (path == NULL || output == NULL)
+    return usageError();
+
+  char *source = readFile(path);
+
+  typchkSessionBegin();
+
+  CompiledUnit *stdlib = compileSource(KIRBY_STDLIB, /*typecheck=*/true);
+
+  if (stdlib == NULL)
+    exit(EXIT_CODE_COMPILER_ERR);
+
+  CompiledUnit *program = compileSource(source, /*typecheck=*/true);
+  free(source);
+
+  if (program == NULL)
+    exit(EXIT_CODE_COMPILER_ERR);
+
+  StrBuf payload;
+  sb_init(&payload);
+  packagedAddUnit(&payload, stdlib);
+  packagedAddUnit(&payload, program);
+
+  freeCompiledUnit(stdlib);
+  free(stdlib);
+  freeCompiledUnit(program);
+  free(program);
+
+  compilerSessionEnd();
+  typchkSessionEnd();
+
+  char *runtimePath = runtime != NULL ? NULL : defaultRuntimePath();
+  char error[512];
+  bool written = packagedWrite(runtimePath != NULL ? runtimePath : runtime,
+                               output, &payload, error, sizeof error);
+
+  sb_free(&payload);
+  free(runtimePath);
+
+  if (!written) {
+    fprintf(stderr, "Could not build \"%s\": %s.\n", path, error);
+    exit(EXIT_CODE_OS_ERR);
+  }
+
+  fprintf(stderr, "Built %s\n", output);
   return 0;
 }
 
@@ -341,7 +481,8 @@ static int cmdConfig(int argc, char *argv[]) {
 static const Command commands[] = {
     {"init", cmdInit}, {"run", cmdRun},     {"example", cmdExample},
     {"repl", cmdRepl}, {"exec", cmdExec},   {"compile", cmdCompile},
-    {"lex", cmdLex},   {"parse", cmdParse}, {"config", cmdConfig}};
+    {"build", cmdBuild}, {"lex", cmdLex},   {"parse", cmdParse},
+    {"config", cmdConfig}};
 
 static const Command *findCommand(const char *name) {
   size_t count = sizeof(commands) / sizeof(commands[0]);

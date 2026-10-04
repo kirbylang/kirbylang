@@ -4,14 +4,26 @@ set -euo pipefail
 
 BIN="${BIN:-./build/kirby-test}"
 
+# An absolute BIN lets a test's .env change directory and still run it. A bare
+# command name, such as `echo`, is left for PATH to find. BIN is exported so a
+# test's .env can use it.
+if [[ "$BIN" == */* && -d "$(dirname "$BIN")" ]]; then
+    BIN="$(cd "$(dirname "$BIN")" && pwd)/$(basename "$BIN")"
+fi
+export BIN
+
 # The folder that holds the tests. Any .argv file under it is a test.
 TESTS_DIR="${TESTS_DIR:-./tests}"
 TESTS_DIR="${TESTS_DIR%/}"
+
+# Rules, as sed expressions, for output that differs between runs or releases.
+# They are applied to stdout and stderr before they are compared or updated.
+NORMALIZE_FILE="$TESTS_DIR/.normalize.sed"
 DIFF="diff -u"
 
 UPDATE=0
 VERBOSE=0
-FILTER=""
+FILTERS=()
 
 for arg in "$@"; do
     case "$arg" in
@@ -21,8 +33,12 @@ for arg in "$@"; do
         --verbose|-v)
             VERBOSE=1
             ;;
+        -*)
+            echo "Unknown option: $arg" >&2
+            exit 1
+            ;;
         *)
-            FILTER="$arg"
+            FILTERS+=("$arg")
             ;;
     esac
 done
@@ -49,11 +65,18 @@ TOTAL=0
 #   <name>.env   environment variables, sourced before BIN runs
 SIDECARS=".out .err .exit .in .env"
 
+# A test runs when its name contains any of the filters, or when there are none.
 should_run() {
     local name="$1"
+    local filter
 
-    [[ -z "$FILTER" ]] && return 0
-    [[ "$name" == *"$FILTER"* ]]
+    [[ ${#FILTERS[@]} -eq 0 ]] && return 0
+
+    for filter in "${FILTERS[@]}"; do
+        [[ "$name" == *"$filter"* ]] && return 0
+    done
+
+    return 1
 }
 
 run_test() {
@@ -124,17 +147,18 @@ run_exit_test() {
     fi
 }
 
-# Every file in the tests folder must belong to a test. Dotfiles, dot folders
-# and the README do not.
+# Every file in the tests folder must belong to a test. Dotfiles, dot folders,
+# folders named fixtures and the README do not. A fixture is a file a test uses,
+# such as a project it changes into.
 check_every_file_is_claimed() {
     local all="$TMP_DIR/all-files.txt"
     local claimed="$TMP_DIR/claimed-files.txt"
 
-    find "$TESTS_DIR" -mindepth 1 -name '.*' -prune -o \
+    find "$TESTS_DIR" -mindepth 1 \( -name '.*' -o -name fixtures \) -prune -o \
         -type f ! -path "$TESTS_DIR/README.md" -print \
         | LC_ALL=C sort >"$all"
 
-    find "$TESTS_DIR" -mindepth 1 -name '.*' -prune -o \
+    find "$TESTS_DIR" -mindepth 1 \( -name '.*' -o -name fixtures \) -prune -o \
         -type f -name '*.argv' -print | while IFS= read -r argv_path; do
         stem="${argv_path%.argv}"
         echo "$argv_path"
@@ -167,13 +191,33 @@ check_every_file_is_claimed
 argv_files=()
 while IFS= read -r argv_path; do
     argv_files+=("$argv_path")
-done < <(find "$TESTS_DIR" -mindepth 1 -name '.*' -prune -o \
+done < <(find "$TESTS_DIR" -mindepth 1 \( -name '.*' -o -name fixtures \) -prune -o \
     -type f -name '*.argv' -print | LC_ALL=C sort)
 
 if [[ ${#argv_files[@]} -eq 0 ]]; then
     echo "No tests found" >&2
     exit 1
 fi
+
+# Every filter must match a test, so a mistyped name is reported and not
+# silently ignored.
+for filter in ${FILTERS[@]+"${FILTERS[@]}"}; do
+    matched=0
+
+    for argv_path in "${argv_files[@]}"; do
+        name="${argv_path#"$TESTS_DIR"/}"
+
+        if [[ "${name%.argv}" == *"$filter"* ]]; then
+            matched=1
+            break
+        fi
+    done
+
+    if [[ $matched -eq 0 ]]; then
+        echo "No test matches '$filter'" >&2
+        exit 1
+    fi
+done
 
 for argv_file in "${argv_files[@]}"; do
     name="${argv_file#"$TESTS_DIR"/}"
@@ -249,6 +293,13 @@ for argv_file in "${argv_files[@]}"; do
 
     exit_code=$?
     set -e
+
+    if [[ -f "$NORMALIZE_FILE" ]]; then
+        for output in "$actual_out" "$actual_err"; do
+            sed -E -f "$NORMALIZE_FILE" "$output" >"$output.normalized"
+            mv "$output.normalized" "$output"
+        done
+    fi
 
     run_test      "stdout" "$expected_out" "$actual_out"
     run_test      "stderr" "$expected_err" "$actual_err"

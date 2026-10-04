@@ -65,7 +65,7 @@ jobs:
         run: |
           mkdir -p dist
           tar -czf "dist/${{ matrix.asset }}-${GITHUB_REF_NAME}.tar.gz" \
-            -C build krb
+            -C build krb krb-runtime
           cd dist && shasum -a 256 *.tar.gz > "${{ matrix.asset }}.sha256"
 
       - uses: actions/upload-artifact@v4
