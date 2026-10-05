@@ -108,8 +108,7 @@ static bool isSameFile(const struct stat *a, const struct stat *b) {
  *
  * On success the caller owns `*temporaryPath`.
  */
-static FILE *openTemporaryOutput(const char *outputPath,
-                                 char **temporaryPath) {
+static FILE *openTemporaryOutput(const char *outputPath, char **temporaryPath) {
   size_t length = strlen(outputPath) + 32;
   char *path = (char *)malloc(length);
 
@@ -119,8 +118,7 @@ static FILE *openTemporaryOutput(const char *outputPath,
   }
 
   for (int attempt = 0; attempt < 100; attempt++) {
-    snprintf(path, length, "%s.tmp%ld-%d", outputPath, (long)getpid(),
-             attempt);
+    snprintf(path, length, "%s.tmp%ld-%d", outputPath, (long)getpid(), attempt);
 
     // O_EXCL so a file that is already there is never overwritten.
     int descriptor = open(path, O_WRONLY | O_CREAT | O_EXCL, 0666);

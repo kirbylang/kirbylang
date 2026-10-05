@@ -271,15 +271,50 @@ static int cmdExec(int argc, char *argv[]) {
 
 /* krb compile <path> */
 static int cmdCompile(int argc, char *argv[]) {
-  if (argc < 3)
+  const char *path = NULL;
+  const char *output = NULL;
+
+  for (int i = 2; i < argc; i++) {
+    if (strcmp(argv[i], "-o") == 0 && i + 1 < argc) {
+      output = argv[++i];
+    } else if (path == NULL && argv[i][0] != '-') {
+      path = argv[i];
+    } else {
+      return usageError();
+    }
+  }
+
+  if (path == NULL /*|| output == NULL*/)
     return usageError();
 
+  char *source = readFile(path);
+
   typchkSessionBegin();
-  compileCode(KIRBY_STDLIB);
-  compileFile(argv[2]);
+
+  CompiledUnit *program = compileSource(source, /*typecheck=*/true);
+  free(source);
+
+  if (program == NULL)
+    exit(EXIT_CODE_COMPILER_ERR);
+
+  StrBuf payload;
+  sb_init(&payload);
+  packagedAddUnit(&payload, program);
+
+  freeCompiledUnit(program);
+  free(program);
+
   compilerSessionEnd();
   typchkSessionEnd();
-  fprintf(stderr, "Compiled!\n");
+
+  if (fwrite(payload.data, 1, payload.len, stdout) != payload.len) {
+    fprintf(stderr, "Error writing output\n");
+    sb_free(&payload);
+    exit(1);
+  }
+
+  sb_free(&payload);
+
   return 0;
 }
 
@@ -673,12 +708,55 @@ static void compileCode(const char *source) {
 }
 
 static void runFile(const char *path) {
+  fprintf(stderr, "Running: %s\n", path);
+
   char *source = readFile(path);
-  CompiledUnit *unit = compileSource(source, /*typecheck=*/true);
+
+  if (source == NULL) {
+    fprintf(stderr, "OOPS");
+    exit(1);
+  }
+
+  fprintf(stderr, "File opened\n");
+
+  UnitDecodeStatus status;
+  CompiledUnit *unit;
+
+  unit = unitDecode(source, strlen(source), &status);
+
+  fprintf(stderr, "Unit decoding\n");
+
+  if (status != UNIT_DECODE_OK) {
+    fprintf(stderr, "Could not decode unit\n");
+
+    if (status == UNIT_DECODE_BAD_FORMAT_VERSION) {
+      fprintf(stderr, "UNIT_DECODE_BAD_FORMAT_VERSION\n");
+    } else if (status == UNIT_DECODE_INVALID) {
+      fprintf(stderr, "UNIT_DECODE_INVALID\n");
+    } else if (status == UNIT_DECODE_TRUNCATED) {
+      fprintf(stderr, "UNIT_DECODE_TRUNCATED\n");
+    } else if (status == UNIT_DECODE_VERSION_MISMATCH) {
+      fprintf(stderr, "UNIT_DECODE_VERSION_MISMATCH\n");
+    }
+
+    exit(1);
+  }
+
+  if (status == UNIT_DECODE_BAD_MAGIC) {
+    unit = compileSource(source, /*typecheck=*/true);
+  } else {
+    fprintf(stderr, "Source is bytecode\n");
+  }
+
   free(source);
 
+  fprintf(stderr, "Source is freed\n");
+
   if (unit == NULL) {
+    fprintf(stderr, "Unit is null\n");
     exit(EXIT_CODE_COMPILER_ERR);
+  } else {
+    fprintf(stderr, "Unit is not null\n");
   }
 
   InterpretResult result = interpret(unit);

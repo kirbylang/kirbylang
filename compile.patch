@@ -1,0 +1,176 @@
+diff --git a/.gitignore b/.gitignore
+index a67336c2..eec854fd 100644
+--- a/.gitignore
++++ b/.gitignore
+@@ -1,3 +1,6 @@
++# Kirby: compiled krb files
++*.krbc
++
+ build/
+ .DS_Store
+ tests/.tmp
+diff --git a/src/main.c b/src/main.c
+index 042e0896..2057d3f0 100644
+--- a/src/main.c
++++ b/src/main.c
+@@ -271,15 +271,50 @@ static int cmdExec(int argc, char *argv[]) {
+ 
+ /* krb compile <path> */
+ static int cmdCompile(int argc, char *argv[]) {
+-  if (argc < 3)
++  const char *path = NULL;
++  const char *output = NULL;
++
++  for (int i = 2; i < argc; i++) {
++    if (strcmp(argv[i], "-o") == 0 && i + 1 < argc) {
++      output = argv[++i];
++    } else if (path == NULL && argv[i][0] != '-') {
++      path = argv[i];
++    } else {
++      return usageError();
++    }
++  }
++
++  if (path == NULL /*|| output == NULL*/)
+     return usageError();
+ 
++  char *source = readFile(path);
++
+   typchkSessionBegin();
+-  compileCode(KIRBY_STDLIB);
+-  compileFile(argv[2]);
++
++  CompiledUnit *program = compileSource(source, /*typecheck=*/true);
++  free(source);
++
++  if (program == NULL)
++    exit(EXIT_CODE_COMPILER_ERR);
++
++  StrBuf payload;
++  sb_init(&payload);
++  packagedAddUnit(&payload, program);
++
++  freeCompiledUnit(program);
++  free(program);
++
+   compilerSessionEnd();
+   typchkSessionEnd();
+-  fprintf(stderr, "Compiled!\n");
++
++  if (fwrite(payload.data, 1, payload.len, stdout) != payload.len) {
++    fprintf(stderr, "Error writing output\n");
++    sb_free(&payload);
++    exit(1);
++  }
++
++  sb_free(&payload);
++
+   return 0;
+ }
+ 
+@@ -673,12 +708,55 @@ static void compileCode(const char *source) {
+ }
+ 
+ static void runFile(const char *path) {
++  fprintf(stderr, "Running: %s\n", path);
++
+   char *source = readFile(path);
+-  CompiledUnit *unit = compileSource(source, /*typecheck=*/true);
++
++  if (source == NULL) {
++    fprintf(stderr, "OOPS");
++    exit(1);
++  }
++
++  fprintf(stderr, "File opened\n");
++
++  UnitDecodeStatus status;
++  CompiledUnit *unit;
++
++  unit = unitDecode(source, strlen(source), &status);
++
++  fprintf(stderr, "Unit decoding\n");
++
++  if (status != UNIT_DECODE_OK) {
++    fprintf(stderr, "Could not decode unit\n");
++
++    if (status == UNIT_DECODE_BAD_FORMAT_VERSION) {
++      fprintf(stderr, "UNIT_DECODE_BAD_FORMAT_VERSION\n");
++    } else if (status == UNIT_DECODE_INVALID) {
++      fprintf(stderr, "UNIT_DECODE_INVALID\n");
++    } else if (status == UNIT_DECODE_TRUNCATED) {
++      fprintf(stderr, "UNIT_DECODE_TRUNCATED\n");
++    } else if (status == UNIT_DECODE_VERSION_MISMATCH) {
++      fprintf(stderr, "UNIT_DECODE_VERSION_MISMATCH\n");
++    }
++
++    exit(1);
++  }
++
++  if (status == UNIT_DECODE_BAD_MAGIC) {
++    unit = compileSource(source, /*typecheck=*/true);
++  } else {
++    fprintf(stderr, "Source is bytecode\n");
++  }
++
+   free(source);
+ 
++  fprintf(stderr, "Source is freed\n");
++
+   if (unit == NULL) {
++    fprintf(stderr, "Unit is null\n");
+     exit(EXIT_CODE_COMPILER_ERR);
++  } else {
++    fprintf(stderr, "Unit is not null\n");
+   }
+ 
+   InterpretResult result = interpret(unit);
+diff --git a/src/packaged_program.c b/src/packaged_program.c
+index a594410d..c30508b0 100644
+--- a/src/packaged_program.c
++++ b/src/packaged_program.c
+@@ -108,8 +108,7 @@ static bool isSameFile(const struct stat *a, const struct stat *b) {
+  *
+  * On success the caller owns `*temporaryPath`.
+  */
+-static FILE *openTemporaryOutput(const char *outputPath,
+-                                 char **temporaryPath) {
++static FILE *openTemporaryOutput(const char *outputPath, char **temporaryPath) {
+   size_t length = strlen(outputPath) + 32;
+   char *path = (char *)malloc(length);
+ 
+@@ -119,8 +118,7 @@ static FILE *openTemporaryOutput(const char *outputPath,
+   }
+ 
+   for (int attempt = 0; attempt < 100; attempt++) {
+-    snprintf(path, length, "%s.tmp%ld-%d", outputPath, (long)getpid(),
+-             attempt);
++    snprintf(path, length, "%s.tmp%ld-%d", outputPath, (long)getpid(), attempt);
+ 
+     // O_EXCL so a file that is already there is never overwritten.
+     int descriptor = open(path, O_WRONLY | O_CREAT | O_EXCL, 0666);
+diff --git a/src/packaged_program.h b/src/packaged_program.h
+index a126b6dc..6c1f9c63 100644
+--- a/src/packaged_program.h
++++ b/src/packaged_program.h
+@@ -39,8 +39,8 @@ void packagedAddUnit(StrBuf *payload, const CompiledUnit *unit);
+  * Make `outputPath` from the runtime executable at `runtimePath` with the
+  * payload and a trailer attached, and mark it executable.
+  *
+- * The program is written to a temporary file that replaces `outputPath` only
+- * once it is complete.
++ * The program is written to a temporary file that replaces `outputPath`
++ * only once it is complete.
+  *
+  * On failure returns false, writes a sentence saying why into `error`, and
+  * leaves `outputPath` as it was: an output that already exists keeps its
+diff --git a/src/project.h b/src/project.h
+index fdca5b50..b5eeef15 100644
+--- a/src/project.h
++++ b/src/project.h
+@@ -1,4 +1,5 @@
+ typedef struct {
+   char *bin;
+   char *examples;
++  char *build;
+ } KirbyProject;

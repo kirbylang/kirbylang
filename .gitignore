@@ -1,3 +1,6 @@
+# Kirby: compiled krb files
+*.krbc
+
 build/
 .DS_Store
 tests/.tmp
