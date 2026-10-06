@@ -6,38 +6,38 @@
 0002    | OP_DEFINE_GLOBAL    0 'StringBuilder'
 0004    | OP_GET_GLOBAL       0 'StringBuilder'
 0006    2 OP_NIL
-0007    | OP_FIELD            1 'string' private
-0010    3 OP_POP
-0011   16 OP_GET_GLOBAL       0 'StringBuilder'
-0013   17 OP_CLOSURE          3 <fn default>
-0015    | OP_METHOD           2 'default'
-0017   18 OP_POP
-0018   20 OP_GET_GLOBAL       0 'StringBuilder'
-0020   21 OP_CLOSURE          5 <fn toString>
-0022    | OP_METHOD           4 'toString'
-0024   22 OP_POP
-0025    5 OP_GET_GLOBAL       0 'StringBuilder'
-0027    7 OP_CLOSURE          7 <fn new>
-0029    | OP_METHOD           6 'new'
-0031   13 OP_CLOSURE          9 <fn add>
-0033    | OP_METHOD           8 'add'
-0035   14 OP_POP
-0036   24 OP_GET_GLOBAL       0 'StringBuilder'
-0038    | OP_INVOKE        (0 args)    2 'default'
-0041   25 OP_CONSTANT        11 'Hello'
-0043    | OP_INVOKE        (1 args)    8 'add'
-0046   26 OP_CONSTANT        12 ' '
-0048    | OP_INVOKE        (1 args)    8 'add'
-0051   27 OP_CONSTANT        13 'World'
-0053    | OP_INVOKE        (1 args)    8 'add'
-0056    | OP_DEFINE_GLOBAL   10 'builder'
-0058   29 OP_GET_GLOBAL      14 '@println'
-0060    | OP_GET_GLOBAL      10 'builder'
-0062    | OP_INVOKE        (0 args)    4 'toString'
-0065    | OP_CALL             1
-0067    | OP_POP
-0068   30 OP_NIL
-0069    | OP_RETURN
+0007    | OP_FIELD            1 'string' private mutable
+0011    3 OP_POP
+0012   16 OP_GET_GLOBAL       0 'StringBuilder'
+0014   17 OP_CLOSURE          3 <fn default>
+0016    | OP_METHOD           2 'default'
+0018   18 OP_POP
+0019   20 OP_GET_GLOBAL       0 'StringBuilder'
+0021   21 OP_CLOSURE          5 <fn toString>
+0023    | OP_METHOD           4 'toString'
+0025   22 OP_POP
+0026    5 OP_GET_GLOBAL       0 'StringBuilder'
+0028    7 OP_CLOSURE          7 <fn new>
+0030    | OP_METHOD           6 'new'
+0032   13 OP_CLOSURE          9 <fn add>
+0034    | OP_METHOD           8 'add'
+0036   14 OP_POP
+0037   24 OP_GET_GLOBAL       0 'StringBuilder'
+0039    | OP_INVOKE        (0 args)    2 'default'
+0042   25 OP_CONSTANT        11 'Hello'
+0044    | OP_INVOKE        (1 args)    8 'add'
+0047   26 OP_CONSTANT        12 ' '
+0049    | OP_INVOKE        (1 args)    8 'add'
+0052   27 OP_CONSTANT        13 'World'
+0054    | OP_INVOKE        (1 args)    8 'add'
+0057    | OP_DEFINE_GLOBAL   10 'builder'
+0059   29 OP_GET_GLOBAL      14 '@println'
+0061    | OP_GET_GLOBAL      10 'builder'
+0063    | OP_INVOKE        (0 args)    4 'toString'
+0066    | OP_CALL             1
+0068    | OP_POP
+0069   30 OP_NIL
+0070    | OP_RETURN
 == default ==
 0000   17 OP_GET_GLOBAL       0 'StringBuilder'
 0002    | OP_CONSTANT         2 ''

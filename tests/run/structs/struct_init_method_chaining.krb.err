@@ -6,32 +6,32 @@
 0002    | OP_DEFINE_GLOBAL    0 'StringBuilder'
 0004    | OP_GET_GLOBAL       0 'StringBuilder'
 0006    2 OP_NIL
-0007    | OP_FIELD            1 'string' public
-0010    3 OP_POP
-0011    5 OP_GET_GLOBAL       0 'StringBuilder'
-0013   10 OP_CLOSURE          3 <fn add>
-0015    | OP_METHOD           2 'add'
-0017   14 OP_CLOSURE          5 <fn to_string>
-0019    | OP_METHOD           4 'to_string'
-0021   15 OP_POP
-0022   17 OP_GET_GLOBAL       0 'StringBuilder'
-0024    | OP_CONSTANT         1 'string'
-0026    | OP_CONSTANT         7 ''
-0028    | OP_STRUCT_INIT      1
-0030   18 OP_CONSTANT         8 'Hello'
-0032    | OP_INVOKE        (1 args)    2 'add'
-0035   19 OP_CONSTANT         9 ' '
-0037    | OP_INVOKE        (1 args)    2 'add'
-0040   20 OP_CONSTANT        10 'World'
-0042    | OP_INVOKE        (1 args)    2 'add'
-0045    | OP_DEFINE_GLOBAL    6 'builder'
-0047   22 OP_GET_GLOBAL      11 '@println'
-0049    | OP_GET_GLOBAL       6 'builder'
-0051    | OP_INVOKE        (0 args)    4 'to_string'
-0054    | OP_CALL             1
-0056    | OP_POP
-0057   23 OP_NIL
-0058    | OP_RETURN
+0007    | OP_FIELD            1 'string' public mutable
+0011    3 OP_POP
+0012    5 OP_GET_GLOBAL       0 'StringBuilder'
+0014   10 OP_CLOSURE          3 <fn add>
+0016    | OP_METHOD           2 'add'
+0018   14 OP_CLOSURE          5 <fn to_string>
+0020    | OP_METHOD           4 'to_string'
+0022   15 OP_POP
+0023   17 OP_GET_GLOBAL       0 'StringBuilder'
+0025    | OP_CONSTANT         1 'string'
+0027    | OP_CONSTANT         7 ''
+0029    | OP_STRUCT_INIT      1
+0031   18 OP_CONSTANT         8 'Hello'
+0033    | OP_INVOKE        (1 args)    2 'add'
+0036   19 OP_CONSTANT         9 ' '
+0038    | OP_INVOKE        (1 args)    2 'add'
+0041   20 OP_CONSTANT        10 'World'
+0043    | OP_INVOKE        (1 args)    2 'add'
+0046    | OP_DEFINE_GLOBAL    6 'builder'
+0048   22 OP_GET_GLOBAL      11 '@println'
+0050    | OP_GET_GLOBAL       6 'builder'
+0052    | OP_INVOKE        (0 args)    4 'to_string'
+0055    | OP_CALL             1
+0057    | OP_POP
+0058   23 OP_NIL
+0059    | OP_RETURN
 == add ==
 0000    7 OP_GET_LOCAL        0
 0002    | OP_GET_LOCAL        0

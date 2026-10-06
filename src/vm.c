@@ -848,6 +848,8 @@ static InterpretResult run(void) {
 
       int slot;
 
+      fprintf(stdout, "HELLO %s\n", name->chars);
+
       if (!structFieldSlot(instance->struct_, name, &slot)) {
         runtimeError(&vm, "Undefined field '%s'.", name->chars);
         return INTERPRET_RUNTIME_ERROR;
@@ -856,6 +858,11 @@ static InterpretResult run(void) {
       if (!canAccess(instance->struct_, instance->struct_->fieldPublic[slot])) {
         runtimeError(&vm, "Field '%s' is private to '%s'.", name->chars,
                      instance->struct_->name->chars);
+        return INTERPRET_RUNTIME_ERROR;
+      }
+
+      if (!instance->struct_->fieldMutable[slot]) {
+        runtimeError(&vm, "Field '%s' is immutable", name->chars);
         return INTERPRET_RUNTIME_ERROR;
       }
 
@@ -869,6 +876,7 @@ static InterpretResult run(void) {
     case OP_FIELD: {
       ObjString *field_name = READ_STRING();
       bool isPublic = READ_BYTE() != 0;
+      bool isMutable = READ_BYTE() != 0;
 
       Value value = peekStack(1);
 
@@ -895,6 +903,7 @@ static InterpretResult run(void) {
                NUMBER_VAL(struct_->fieldCount));
 
       struct_->fieldPublic[struct_->fieldCount] = isPublic;
+      struct_->fieldMutable[struct_->fieldCount] = isMutable;
 
       struct_->fieldCount++;
 

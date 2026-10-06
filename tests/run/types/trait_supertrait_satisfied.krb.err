@@ -6,46 +6,46 @@
 0002    | OP_DEFINE_GLOBAL    0 'Money'
 0004    | OP_GET_GLOBAL       0 'Money'
 0006    2 OP_NIL
-0007    | OP_FIELD            1 'cents' public
-0010    3 OP_POP
-0011    5 OP_GET_GLOBAL       0 'Money'
-0013    6 OP_CLOSURE          3 <fn equals>
-0015    | OP_METHOD           2 'equals'
-0017    7 OP_POP
-0018    9 OP_GET_GLOBAL       0 'Money'
-0020   10 OP_CLOSURE          5 <fn cmp>
-0022    | OP_METHOD           4 'cmp'
-0024   11 OP_POP
-0025   13 OP_GET_GLOBAL       0 'Money'
-0027    | OP_CONSTANT         1 'cents'
-0029    | OP_CONSTANT         7 '500'
-0031    | OP_STRUCT_INIT      1
-0033    | OP_DEFINE_GLOBAL    6 'a'
-0035   14 OP_GET_GLOBAL       0 'Money'
-0037    | OP_CONSTANT         1 'cents'
-0039    | OP_CONSTANT         9 '300'
-0041    | OP_STRUCT_INIT      1
-0043    | OP_DEFINE_GLOBAL    8 'b'
-0045   16 OP_GET_GLOBAL      10 '@println'
-0047    | OP_GET_GLOBAL       6 'a'
-0049    | OP_GET_GLOBAL       8 'b'
-0051    | OP_INVOKE        (1 args)    4 'cmp'
-0054    | OP_CALL             1
-0056    | OP_POP
-0057   17 OP_GET_GLOBAL      10 '@println'
-0059    | OP_GET_GLOBAL       6 'a'
-0061    | OP_GET_GLOBAL       8 'b'
-0063    | OP_INVOKE        (1 args)    2 'equals'
-0066    | OP_CALL             1
-0068    | OP_POP
-0069   18 OP_GET_GLOBAL      10 '@println'
-0071    | OP_GET_GLOBAL       6 'a'
-0073    | OP_GET_GLOBAL       6 'a'
-0075    | OP_INVOKE        (1 args)    2 'equals'
-0078    | OP_CALL             1
-0080    | OP_POP
-0081   19 OP_NIL
-0082    | OP_RETURN
+0007    | OP_FIELD            1 'cents' public mutable
+0011    3 OP_POP
+0012    5 OP_GET_GLOBAL       0 'Money'
+0014    6 OP_CLOSURE          3 <fn equals>
+0016    | OP_METHOD           2 'equals'
+0018    7 OP_POP
+0019    9 OP_GET_GLOBAL       0 'Money'
+0021   10 OP_CLOSURE          5 <fn cmp>
+0023    | OP_METHOD           4 'cmp'
+0025   11 OP_POP
+0026   13 OP_GET_GLOBAL       0 'Money'
+0028    | OP_CONSTANT         1 'cents'
+0030    | OP_CONSTANT         7 '500'
+0032    | OP_STRUCT_INIT      1
+0034    | OP_DEFINE_GLOBAL    6 'a'
+0036   14 OP_GET_GLOBAL       0 'Money'
+0038    | OP_CONSTANT         1 'cents'
+0040    | OP_CONSTANT         9 '300'
+0042    | OP_STRUCT_INIT      1
+0044    | OP_DEFINE_GLOBAL    8 'b'
+0046   16 OP_GET_GLOBAL      10 '@println'
+0048    | OP_GET_GLOBAL       6 'a'
+0050    | OP_GET_GLOBAL       8 'b'
+0052    | OP_INVOKE        (1 args)    4 'cmp'
+0055    | OP_CALL             1
+0057    | OP_POP
+0058   17 OP_GET_GLOBAL      10 '@println'
+0060    | OP_GET_GLOBAL       6 'a'
+0062    | OP_GET_GLOBAL       8 'b'
+0064    | OP_INVOKE        (1 args)    2 'equals'
+0067    | OP_CALL             1
+0069    | OP_POP
+0070   18 OP_GET_GLOBAL      10 '@println'
+0072    | OP_GET_GLOBAL       6 'a'
+0074    | OP_GET_GLOBAL       6 'a'
+0076    | OP_INVOKE        (1 args)    2 'equals'
+0079    | OP_CALL             1
+0081    | OP_POP
+0082   19 OP_NIL
+0083    | OP_RETURN
 == equals ==
 0000    6 OP_GET_LOCAL        0
 0002    | OP_GET_PROPERTY     0 'cents'

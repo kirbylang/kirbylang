@@ -1,0 +1,25 @@
+struct Box {
+    let value: f64;
+}
+
+impl Box {
+    pub fun new(value: f64): Self = Self { value: value };
+
+    pub fun get_value(self): f64 = self.value;
+
+    pub fun set_value(self, value: f64): unit {
+        self.value = value;
+    }
+}
+
+let box = Box.new(100);
+
+@println("START");
+
+@println(box.get_value());
+
+box.set_value(123);
+
+@println(box.get_value());
+
+@println("END");

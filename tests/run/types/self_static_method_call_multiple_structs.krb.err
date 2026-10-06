@@ -6,44 +6,44 @@
 0002    | OP_DEFINE_GLOBAL    0 'Box'
 0004    | OP_GET_GLOBAL       0 'Box'
 0006    2 OP_NIL
-0007    | OP_FIELD            1 'value' public
-0010    3 OP_POP
-0011   10 OP_STRUCT           2 'Bag'
-0013    | OP_DEFINE_GLOBAL    2 'Bag'
-0015    | OP_GET_GLOBAL       2 'Bag'
-0017   11 OP_NIL
-0018    | OP_FIELD            3 'items' public
-0021   12 OP_POP
-0022    5 OP_GET_GLOBAL       0 'Box'
-0024    6 OP_CLOSURE          5 <fn wrap>
-0026    | OP_METHOD           4 'wrap'
-0028    7 OP_CLOSURE          7 <fn zero>
-0030    | OP_METHOD           6 'zero'
-0032    8 OP_POP
-0033   14 OP_GET_GLOBAL       2 'Bag'
-0035   15 OP_CLOSURE          9 <fn of>
-0037    | OP_METHOD           8 'of'
-0039   16 OP_CLOSURE         11 <fn empty>
-0041    | OP_METHOD          10 'empty'
-0043   17 OP_POP
-0044   19 OP_GET_GLOBAL       0 'Box'
-0046    | OP_INVOKE        (0 args)    6 'zero'
-0049    | OP_DEFINE_GLOBAL   12 'b1'
-0051   20 OP_GET_GLOBAL       2 'Bag'
-0053    | OP_INVOKE        (0 args)   10 'empty'
-0056    | OP_DEFINE_GLOBAL   13 'b2'
-0058   21 OP_GET_GLOBAL      14 '@println'
-0060    | OP_GET_GLOBAL      12 'b1'
-0062    | OP_GET_PROPERTY     1 'value'
-0064    | OP_CALL             1
-0066    | OP_POP
-0067   22 OP_GET_GLOBAL      14 '@println'
-0069    | OP_GET_GLOBAL      13 'b2'
-0071    | OP_GET_PROPERTY     3 'items'
-0073    | OP_CALL             1
-0075    | OP_POP
-0076   23 OP_NIL
-0077    | OP_RETURN
+0007    | OP_FIELD            1 'value' public mutable
+0011    3 OP_POP
+0012   10 OP_STRUCT           2 'Bag'
+0014    | OP_DEFINE_GLOBAL    2 'Bag'
+0016    | OP_GET_GLOBAL       2 'Bag'
+0018   11 OP_NIL
+0019    | OP_FIELD            3 'items' public mutable
+0023   12 OP_POP
+0024    5 OP_GET_GLOBAL       0 'Box'
+0026    6 OP_CLOSURE          5 <fn wrap>
+0028    | OP_METHOD           4 'wrap'
+0030    7 OP_CLOSURE          7 <fn zero>
+0032    | OP_METHOD           6 'zero'
+0034    8 OP_POP
+0035   14 OP_GET_GLOBAL       2 'Bag'
+0037   15 OP_CLOSURE          9 <fn of>
+0039    | OP_METHOD           8 'of'
+0041   16 OP_CLOSURE         11 <fn empty>
+0043    | OP_METHOD          10 'empty'
+0045   17 OP_POP
+0046   19 OP_GET_GLOBAL       0 'Box'
+0048    | OP_INVOKE        (0 args)    6 'zero'
+0051    | OP_DEFINE_GLOBAL   12 'b1'
+0053   20 OP_GET_GLOBAL       2 'Bag'
+0055    | OP_INVOKE        (0 args)   10 'empty'
+0058    | OP_DEFINE_GLOBAL   13 'b2'
+0060   21 OP_GET_GLOBAL      14 '@println'
+0062    | OP_GET_GLOBAL      12 'b1'
+0064    | OP_GET_PROPERTY     1 'value'
+0066    | OP_CALL             1
+0068    | OP_POP
+0069   22 OP_GET_GLOBAL      14 '@println'
+0071    | OP_GET_GLOBAL      13 'b2'
+0073    | OP_GET_PROPERTY     3 'items'
+0075    | OP_CALL             1
+0077    | OP_POP
+0078   23 OP_NIL
+0079    | OP_RETURN
 == wrap ==
 0000    6 OP_GET_GLOBAL       0 'Box'
 0002    | OP_CONSTANT         1 'value'

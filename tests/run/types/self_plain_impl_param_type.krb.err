@@ -6,44 +6,44 @@
 0002    | OP_DEFINE_GLOBAL    0 'Point'
 0004    | OP_GET_GLOBAL       0 'Point'
 0006    2 OP_NIL
-0007    | OP_FIELD            1 'x' public
-0010    3 OP_NIL
-0011    | OP_FIELD            2 'y' public
-0014    4 OP_POP
-0015    6 OP_GET_GLOBAL       0 'Point'
-0017    7 OP_CLOSURE          4 <fn origin>
-0019    | OP_METHOD           3 'origin'
-0021   10 OP_CLOSURE          6 <fn translate>
-0023    | OP_METHOD           5 'translate'
-0025   12 OP_CLOSURE          8 <fn equals>
-0027    | OP_METHOD           7 'equals'
-0029   13 OP_POP
-0030   15 OP_GET_GLOBAL       0 'Point'
-0032    | OP_INVOKE        (0 args)    3 'origin'
-0035    | OP_DEFINE_GLOBAL    9 'p'
-0037   16 OP_GET_GLOBAL       9 'p'
-0039    | OP_CONSTANT        11 '3'
-0041    | OP_CONSTANT        12 '4'
-0043    | OP_INVOKE        (2 args)    5 'translate'
-0046    | OP_DEFINE_GLOBAL   10 'p2'
-0048   17 OP_GET_GLOBAL      13 '@println'
-0050    | OP_GET_GLOBAL      10 'p2'
-0052    | OP_GET_PROPERTY     1 'x'
-0054    | OP_CALL             1
-0056    | OP_POP
-0057   18 OP_GET_GLOBAL      13 '@println'
-0059    | OP_GET_GLOBAL      10 'p2'
-0061    | OP_GET_PROPERTY     2 'y'
-0063    | OP_CALL             1
-0065    | OP_POP
-0066   19 OP_GET_GLOBAL      13 '@println'
-0068    | OP_GET_GLOBAL      10 'p2'
+0007    | OP_FIELD            1 'x' public mutable
+0011    3 OP_NIL
+0012    | OP_FIELD            2 'y' public mutable
+0016    4 OP_POP
+0017    6 OP_GET_GLOBAL       0 'Point'
+0019    7 OP_CLOSURE          4 <fn origin>
+0021    | OP_METHOD           3 'origin'
+0023   10 OP_CLOSURE          6 <fn translate>
+0025    | OP_METHOD           5 'translate'
+0027   12 OP_CLOSURE          8 <fn equals>
+0029    | OP_METHOD           7 'equals'
+0031   13 OP_POP
+0032   15 OP_GET_GLOBAL       0 'Point'
+0034    | OP_INVOKE        (0 args)    3 'origin'
+0037    | OP_DEFINE_GLOBAL    9 'p'
+0039   16 OP_GET_GLOBAL       9 'p'
+0041    | OP_CONSTANT        11 '3'
+0043    | OP_CONSTANT        12 '4'
+0045    | OP_INVOKE        (2 args)    5 'translate'
+0048    | OP_DEFINE_GLOBAL   10 'p2'
+0050   17 OP_GET_GLOBAL      13 '@println'
+0052    | OP_GET_GLOBAL      10 'p2'
+0054    | OP_GET_PROPERTY     1 'x'
+0056    | OP_CALL             1
+0058    | OP_POP
+0059   18 OP_GET_GLOBAL      13 '@println'
+0061    | OP_GET_GLOBAL      10 'p2'
+0063    | OP_GET_PROPERTY     2 'y'
+0065    | OP_CALL             1
+0067    | OP_POP
+0068   19 OP_GET_GLOBAL      13 '@println'
 0070    | OP_GET_GLOBAL      10 'p2'
-0072    | OP_INVOKE        (1 args)    7 'equals'
-0075    | OP_CALL             1
-0077    | OP_POP
-0078   20 OP_NIL
-0079    | OP_RETURN
+0072    | OP_GET_GLOBAL      10 'p2'
+0074    | OP_INVOKE        (1 args)    7 'equals'
+0077    | OP_CALL             1
+0079    | OP_POP
+0080   20 OP_NIL
+0081    | OP_RETURN
 == origin ==
 0000    7 OP_GET_GLOBAL       0 'Point'
 0002    | OP_CONSTANT         1 'x'

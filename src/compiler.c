@@ -1304,6 +1304,7 @@ static void compileStructDecl(AstNode *node) {
     currentLine = field->declEndLine;
     emitBytes(OP_FIELD, constant);
     emitByte(field->isPublic ? 1 : 0);
+    emitByte(field->isMutable ? 1 : 0);
   }
 
   currentLine = sn->endLine;

@@ -1282,7 +1282,9 @@ static AstNode *structDeclaration(Parser *p) {
 
   consume(p, TOKEN_LEFT_BRACE, "Expect '{' before struct body.");
 
-  int fieldCap = 8, fieldCount = 0;
+  int fieldCap = 8;
+  int fieldCount = 0;
+
   VarDeclNode *fieldBuf = (VarDeclNode *)malloc(fieldCap * sizeof(VarDeclNode));
 
   while (!check(p, TOKEN_RIGHT_BRACE) && !is_at_end(p)) {
@@ -1313,6 +1315,28 @@ static AstNode *structDeclaration(Parser *p) {
       fieldBuf[fieldCount].initializer = NULL;
       fieldBuf[fieldCount].declaredType = fieldType;
       fieldBuf[fieldCount].isMutable = true;
+      fieldBuf[fieldCount].isPublic = isPublic;
+      fieldBuf[fieldCount].declEndLine = p->previous.line; // the ';'
+      fieldCount++;
+    } else if (match(p, TOKEN_LET)) {
+      consumeDeclarationIdentifier(p, "Expect field name.");
+      Token fieldName = p->previous;
+
+      AstNode *fieldType = NULL;
+      if (match(p, TOKEN_COLON)) {
+        fieldType = parseType(p);
+      }
+
+      if (match(p, TOKEN_EQUAL)) {
+        parse_error(p, "Struct fields don't support default values");
+      }
+
+      consume(p, TOKEN_SEMICOLON, "Expect ';' after field.");
+
+      fieldBuf[fieldCount].name = fieldName;
+      fieldBuf[fieldCount].initializer = NULL;
+      fieldBuf[fieldCount].declaredType = fieldType;
+      fieldBuf[fieldCount].isMutable = false;
       fieldBuf[fieldCount].isPublic = isPublic;
       fieldBuf[fieldCount].declEndLine = p->previous.line; // the ';'
       fieldCount++;
@@ -1569,7 +1593,8 @@ static AstNode *declaration(Parser *p) {
   } else if (match(p, TOKEN_TYPE)) {
     node = typeAliasDeclaration(p);
   } else if (check(p, TOKEN_FUN) &&
-             tsPeek(p->tokens).type != TOKEN_LEFT_PAREN && match(p, TOKEN_FUN)) {
+             tsPeek(p->tokens).type != TOKEN_LEFT_PAREN &&
+             match(p, TOKEN_FUN)) {
     node = functionDeclaration(p, /*isMethod=*/false);
   } else if (match(p, TOKEN_VAR)) {
     node = varDeclaration(p, /*isMutable=*/true);

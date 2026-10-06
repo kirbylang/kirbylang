@@ -6,51 +6,51 @@
 0002    | OP_DEFINE_GLOBAL    0 'Box'
 0004    | OP_GET_GLOBAL       0 'Box'
 0006    2 OP_NIL
-0007    | OP_FIELD            1 'value' public
-0010    3 OP_POP
-0011    5 OP_GET_GLOBAL       0 'Box'
-0013    6 OP_CLOSURE          3 <fn toString>
-0015    | OP_METHOD           2 'toString'
-0017    7 OP_POP
-0018    9 OP_GET_GLOBAL       0 'Box'
-0020    | OP_CONSTANT         1 'value'
-0022    | OP_CONSTANT         5 '123'
-0024    | OP_STRUCT_INIT      1
-0026    | OP_DEFINE_GLOBAL    4 'box'
-0028   11 OP_GET_GLOBAL       6 '@print'
-0030    | OP_GET_GLOBAL       4 'box'
-0032    | OP_INVOKE        (0 args)    2 'toString'
-0035    | OP_CALL             1
-0037    | OP_POP
-0038   12 OP_GET_GLOBAL       7 '@println'
-0040    | OP_CONSTANT         8 ''
-0042    | OP_CALL             1
-0044    | OP_POP
-0045   13 OP_GET_GLOBAL       7 '@println'
-0047    | OP_GET_GLOBAL       4 'box'
-0049    | OP_INVOKE        (0 args)    2 'toString'
-0052    | OP_CALL             1
-0054    | OP_POP
-0055   14 OP_GET_GLOBAL       9 '@eprint'
-0057    | OP_GET_GLOBAL       4 'box'
-0059    | OP_INVOKE        (0 args)    2 'toString'
-0062    | OP_CALL             1
-0064    | OP_POP
-0065   15 OP_GET_GLOBAL      10 '@eprintln'
-0067    | OP_GET_GLOBAL       4 'box'
-0069    | OP_INVOKE        (0 args)    2 'toString'
-0072    | OP_CALL             1
-0074    | OP_POP
-0075   16 OP_GET_GLOBAL       7 '@println'
-0077    | OP_GET_GLOBAL       0 'Box'
-0079    | OP_CONSTANT         1 'value'
-0081    | OP_CONSTANT        11 '1'
-0083    | OP_STRUCT_INIT      1
-0085    | OP_INVOKE        (0 args)    2 'toString'
-0088    | OP_CALL             1
-0090    | OP_POP
-0091   17 OP_NIL
-0092    | OP_RETURN
+0007    | OP_FIELD            1 'value' public mutable
+0011    3 OP_POP
+0012    5 OP_GET_GLOBAL       0 'Box'
+0014    6 OP_CLOSURE          3 <fn toString>
+0016    | OP_METHOD           2 'toString'
+0018    7 OP_POP
+0019    9 OP_GET_GLOBAL       0 'Box'
+0021    | OP_CONSTANT         1 'value'
+0023    | OP_CONSTANT         5 '123'
+0025    | OP_STRUCT_INIT      1
+0027    | OP_DEFINE_GLOBAL    4 'box'
+0029   11 OP_GET_GLOBAL       6 '@print'
+0031    | OP_GET_GLOBAL       4 'box'
+0033    | OP_INVOKE        (0 args)    2 'toString'
+0036    | OP_CALL             1
+0038    | OP_POP
+0039   12 OP_GET_GLOBAL       7 '@println'
+0041    | OP_CONSTANT         8 ''
+0043    | OP_CALL             1
+0045    | OP_POP
+0046   13 OP_GET_GLOBAL       7 '@println'
+0048    | OP_GET_GLOBAL       4 'box'
+0050    | OP_INVOKE        (0 args)    2 'toString'
+0053    | OP_CALL             1
+0055    | OP_POP
+0056   14 OP_GET_GLOBAL       9 '@eprint'
+0058    | OP_GET_GLOBAL       4 'box'
+0060    | OP_INVOKE        (0 args)    2 'toString'
+0063    | OP_CALL             1
+0065    | OP_POP
+0066   15 OP_GET_GLOBAL      10 '@eprintln'
+0068    | OP_GET_GLOBAL       4 'box'
+0070    | OP_INVOKE        (0 args)    2 'toString'
+0073    | OP_CALL             1
+0075    | OP_POP
+0076   16 OP_GET_GLOBAL       7 '@println'
+0078    | OP_GET_GLOBAL       0 'Box'
+0080    | OP_CONSTANT         1 'value'
+0082    | OP_CONSTANT        11 '1'
+0084    | OP_STRUCT_INIT      1
+0086    | OP_INVOKE        (0 args)    2 'toString'
+0089    | OP_CALL             1
+0091    | OP_POP
+0092   17 OP_NIL
+0093    | OP_RETURN
 == toString ==
 0000    6 OP_GET_GLOBAL       0 '@strConcat'
 0002    | OP_CONSTANT         1 'Box('
