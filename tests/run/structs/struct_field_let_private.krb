@@ -14,12 +14,8 @@ impl Box {
 
 let box = Box.new(100);
 
-@println("START");
-
 @println(box.get_value());
 
 box.set_value(123);
 
 @println(box.get_value());
-
-@println("END");

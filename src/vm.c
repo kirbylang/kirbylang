@@ -848,8 +848,6 @@ static InterpretResult run(void) {
 
       int slot;
 
-      fprintf(stdout, "HELLO %s\n", name->chars);
-
       if (!structFieldSlot(instance->struct_, name, &slot)) {
         runtimeError(&vm, "Undefined field '%s'.", name->chars);
         return INTERPRET_RUNTIME_ERROR;
