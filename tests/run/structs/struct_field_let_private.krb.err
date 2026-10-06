@@ -21,29 +21,21 @@
 0031    | OP_INVOKE        (1 args)    2 'new'
 0034    | OP_DEFINE_GLOBAL    8 'box'
 0036   17 OP_GET_GLOBAL      10 '@println'
-0038    | OP_CONSTANT        11 'START'
-0040    | OP_CALL             1
-0042    | OP_POP
-0043   19 OP_GET_GLOBAL      10 '@println'
-0045    | OP_GET_GLOBAL       8 'box'
-0047    | OP_INVOKE        (0 args)    4 'get_value'
-0050    | OP_CALL             1
-0052    | OP_POP
-0053   21 OP_GET_GLOBAL       8 'box'
-0055    | OP_CONSTANT        12 '123'
-0057    | OP_INVOKE        (1 args)    6 'set_value'
-0060    | OP_POP
-0061   23 OP_GET_GLOBAL      10 '@println'
-0063    | OP_GET_GLOBAL       8 'box'
-0065    | OP_INVOKE        (0 args)    4 'get_value'
-0068    | OP_CALL             1
-0070    | OP_POP
-0071   25 OP_GET_GLOBAL      10 '@println'
-0073    | OP_CONSTANT        13 'END'
-0075    | OP_CALL             1
-0077    | OP_POP
-0078   26 OP_NIL
-0079    | OP_RETURN
+0038    | OP_GET_GLOBAL       8 'box'
+0040    | OP_INVOKE        (0 args)    4 'get_value'
+0043    | OP_CALL             1
+0045    | OP_POP
+0046   19 OP_GET_GLOBAL       8 'box'
+0048    | OP_CONSTANT        11 '123'
+0050    | OP_INVOKE        (1 args)    6 'set_value'
+0053    | OP_POP
+0054   21 OP_GET_GLOBAL      10 '@println'
+0056    | OP_GET_GLOBAL       8 'box'
+0058    | OP_INVOKE        (0 args)    4 'get_value'
+0061    | OP_CALL             1
+0063    | OP_POP
+0064   22 OP_NIL
+0065    | OP_RETURN
 == new ==
 0000    6 OP_GET_GLOBAL       0 'Box'
 0002    | OP_CONSTANT         1 'value'
@@ -63,4 +55,4 @@
 0008    | OP_RETURN
 Field 'value' is immutable
 [line 11] in set_value()
-[line 21] in script
+[line 19] in script
