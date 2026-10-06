@@ -50,6 +50,7 @@
 - Fix `if`/`else` and lambdas failing as an implicit return, and a nested
   block's last expression wrongly returning from the whole function. Blocks
   and `if` now have one parser each, and only a function body returns its value
+- Add immutable struct fields `struct Box { let value: f64 }`
 
 ## 0.4.0
 
