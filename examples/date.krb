@@ -1,0 +1,14 @@
+let now = Date.now();
+
+@println(now);
+
+let now2 = Date.from(now.toString());
+
+@println(now2);
+
+@println(now == now2); // Equal pointer identity
+@println(now.equals(now2)); // Equal timestamps
+
+let date = Date.new(0);
+
+@assert(date.toString() == "1970-01-01 00:00:00", "Date did not initalize correctly");
