@@ -108,6 +108,8 @@ const char *tokenTypeToString(TokenType type) {
     return "TOKEN_BREAK";
   case TOKEN_CONTINUE:
     return "TOKEN_CONTINUE";
+  case TOKEN_QUESTION_QUESTION:
+    return "TOKEN_QUESTION_QUESTION";
   case TOKEN_ERROR:
     return "TOKEN_ERROR";
   case TOKEN_EOF:
