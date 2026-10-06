@@ -1,17 +1,24 @@
 struct Date {
-    pub let timestamp: f64;
-
-    pub let year: f64;
-    pub let month: f64;
-    pub let day: f64;
-    pub let hour: f64;
-    pub let minute: f64;
-    pub let second: f64;
+    let timestamp: f64;
+    let year: f64;
+    let month: f64;
+    let day: f64;
+    let hour: f64;
+    let minute: f64;
+    let second: f64;
 }
 
 impl Date {
-    pub fun new(timestamp: f64): Self = Self.timestamp_to_date(timestamp);
-    pub fun now(): Self = Self.timestamp_to_date(@now());
+    pub fun new(timestamp: f64): Self =
+        Self.timestamp_to_date(@floor(timestamp));
+    
+    pub fun now(): Self =
+        Self.timestamp_to_date(@now());
+
+    pub fun from_parts(year: f64, month: f64, day: f64, hour: f64, minute: f64, second: f64): Self {
+        Self.new(Self.date_to_timestamp(year, month, day, hour, minute, second))
+    }
+    
     pub fun from(value: string): Self {
         let parts: Array = @strSplit(value, " ");
         
@@ -61,6 +68,13 @@ impl Date {
             second: second,
         }
     }
+
+    pub fun get_year(self): f64 = self.year;
+    pub fun get_month(self): f64 = self.month;
+    pub fun get_day(self): f64 = self.day;
+    pub fun get_hour(self): f64 = self.hour;
+    pub fun get_minute(self): f64 = self.minute;
+    pub fun get_second(self): f64 = self.second;
 
     fun is_leap(year: f64): bool {
         year % 4 == 0 and (year % 100 != 0 or year % 400 == 0)
@@ -131,10 +145,24 @@ impl Date {
 
     fun date_from_civil(year: f64, month: f64, day: f64): f64 {
         year = year - if (month <= 2) 1 else 0;
-        let era = @floor(if (year >= 0) year / 400 else (year - 399) / 400);
-        let yoe = year - era * 400;                              // [0, 399]
-        let doy = @floor((153 * (if (month > 2) month - 3 else month + 9) + 2) / 5) + day - 1; // [0, 365]
-        let doe = yoe * 365 + @floor(yoe / 4) - @floor(yoe / 100) + doy;             // [0, 146096]
+        
+        let era = @floor(
+            if (year >= 0) year / 400
+            else (year - 399) / 400
+        );
+
+        // Year Of Era [0, 399]
+        let yoe = year - era * 400; 
+        
+        // Day Of Year [0, 365]
+        let doy = {
+            let month_adjustment = if (month > 2) month - 3 else month + 9;
+            
+            @floor((153 * month_adjustment + 2) / 5) + day - 1 
+        };
+        
+        // Day Of Era [0, 146096]
+        let doe = yoe * 365 + @floor(yoe / 4) - @floor(yoe / 100) + doy;             
         
         era * 146097 + doe - 719468
     }
