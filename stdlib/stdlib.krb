@@ -66,11 +66,11 @@ impl Date {
         return Self {
             timestamp: ts,
             year: year,
-            month: month,
-            day: day,
-            hour: hour,
-            minute: minute,
-            second: second,
+            month: @floor(month),
+            day: @floor(day),
+            hour: @floor(hour),
+            minute: @floor(minute),
+            second: @floor(second),
         };
     }
 }

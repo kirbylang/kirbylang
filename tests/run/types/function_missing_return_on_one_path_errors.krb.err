@@ -191,15 +191,25 @@
 0157   68 OP_CONSTANT        11 'year'
 0159    | OP_GET_LOCAL        7
 0161   69 OP_CONSTANT        12 'month'
-0163    | OP_GET_LOCAL        8
-0165   70 OP_CONSTANT        13 'day'
-0167    | OP_GET_LOCAL        9
-0169   71 OP_CONSTANT        14 'hour'
-0171    | OP_GET_LOCAL        4
-0173   72 OP_CONSTANT        15 'minute'
-0175    | OP_GET_LOCAL        5
-0177   73 OP_CONSTANT        16 'second'
-0179    | OP_GET_LOCAL        6
-0181   74 OP_STRUCT_INIT      7
-0183    | OP_RETURN
+0163    | OP_GET_GLOBAL      13 '@floor'
+0165    | OP_GET_LOCAL        8
+0167    | OP_CALL             1
+0169   70 OP_CONSTANT        14 'day'
+0171    | OP_GET_GLOBAL      13 '@floor'
+0173    | OP_GET_LOCAL        9
+0175    | OP_CALL             1
+0177   71 OP_CONSTANT        15 'hour'
+0179    | OP_GET_GLOBAL      13 '@floor'
+0181    | OP_GET_LOCAL        4
+0183    | OP_CALL             1
+0185   72 OP_CONSTANT        16 'minute'
+0187    | OP_GET_GLOBAL      13 '@floor'
+0189    | OP_GET_LOCAL        5
+0191    | OP_CALL             1
+0193   73 OP_CONSTANT        17 'second'
+0195    | OP_GET_GLOBAL      13 '@floor'
+0197    | OP_GET_LOCAL        6
+0199    | OP_CALL             1
+0201   74 OP_STRUCT_INIT      7
+0203    | OP_RETURN
 [line 1] Error at 'fn': 'fn' must return f64 on every path.
