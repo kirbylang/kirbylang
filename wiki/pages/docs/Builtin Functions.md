@@ -314,6 +314,16 @@ Get the number of seconds that have passed since the program started.
 @println(@clock());
 ```
 
+### `@now`
+
+Get the current number of seconds since 1970-01-01.
+
+```kirby
+let now: f64 = @now();
+
+@println(now);
+```
+
 ### `@exit`
 
 Exit with an exit code.

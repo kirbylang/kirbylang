@@ -197,6 +197,14 @@ static Value writeStringToFileNative(VM *vm, int argCount, Value *args) {
   return NIL_VAL;
 }
 
+static Value nowNative(VM *vm, int argCount, Value *args) {
+  assertArgCount(vm, "@now", 0, argCount);
+
+  time_t t = time(NULL);
+
+  return NUMBER_VAL(t);
+}
+
 static Value getEnvNative(VM *vm, int argCount, Value *args) {
   assertArgCount(vm, "@getenv", 1, argCount);
   assertArgIsString(vm, "@getenv", args, 0);
@@ -1423,7 +1431,7 @@ const NativeDefinition nativeDefinitions[] = {
     {"@strSlice", strSliceNative},
     {"@strReplace", strReplaceNative},
     {"@strReplaceAll", strReplaceAllNative},
-};
+    {"@now", nowNative}};
 
 const int nativeDefinitionCount =
     (int)(sizeof(nativeDefinitions) / sizeof(nativeDefinitions[0]));
