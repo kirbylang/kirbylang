@@ -1,0 +1,25 @@
+== <script> ==
+0000    1 OP_NIL
+0001    | OP_RETURN
+== <script> ==
+0000    3 OP_CLOSURE          1 <fn gt>
+0002    | OP_DEFINE_GLOBAL    0 'gt'
+0004    5 OP_GET_GLOBAL       2 '@println'
+0006    | OP_GET_GLOBAL       0 'gt'
+0008    | OP_CONSTANT         3 '10'
+0010    | OP_CALL             1
+0012    | OP_CONSTANT         4 '100'
+0014    | OP_CALL             1
+0016    | OP_CALL             1
+0018    | OP_POP
+0019    6 OP_NIL
+0020    | OP_RETURN
+== gt ==
+0000    2 OP_CLOSURE          0 <fn lambda0x1>
+0002      |                     local 1
+0004    | OP_RETURN
+== lambda0x1 ==
+0000    2 OP_GET_LOCAL        1
+0002    | OP_GET_UPVALUE      0
+0004    | OP_GREATER
+0005    | OP_RETURN
