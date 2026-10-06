@@ -1,4 +1,0 @@
-// Struct fields are declared with `var`. `let` fields aren't supported.
-struct Box {
-    pub let value: f64;
-}

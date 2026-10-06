@@ -8,19 +8,19 @@
 0006    | OP_DEFINE_GLOBAL    2 'Box'
 0008    | OP_GET_GLOBAL       2 'Box'
 0010    2 OP_NIL
-0011    | OP_FIELD            3 'value' public
-0014    3 OP_POP
-0015    5 OP_GET_GLOBAL       2 'Box'
-0017    8 OP_CLOSURE          5 <fn add>
-0019    | OP_METHOD           4 'add'
-0021    9 OP_POP
-0022   27 OP_GET_GLOBAL       6 '@println'
-0024    | OP_GET_GLOBAL       0 'run'
-0026    | OP_CALL             0
-0028    | OP_CALL             1
-0030    | OP_POP
-0031   28 OP_NIL
-0032    | OP_RETURN
+0011    | OP_FIELD            3 'value' public mutable
+0015    3 OP_POP
+0016    5 OP_GET_GLOBAL       2 'Box'
+0018    8 OP_CLOSURE          5 <fn add>
+0020    | OP_METHOD           4 'add'
+0022    9 OP_POP
+0023   27 OP_GET_GLOBAL       6 '@println'
+0025    | OP_GET_GLOBAL       0 'run'
+0027    | OP_CALL             0
+0029    | OP_CALL             1
+0031    | OP_POP
+0032   28 OP_NIL
+0033    | OP_RETURN
 == run ==
 0000   12 OP_GET_GLOBAL       0 'Box'
 0002    | OP_CONSTANT         1 'value'

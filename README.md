@@ -11,7 +11,7 @@
 #!/usr/bin/env krb run
 
 struct StringBuilder {
-    var value: Array;
+    let value: Array;
 }
 
 impl StringBuilder {

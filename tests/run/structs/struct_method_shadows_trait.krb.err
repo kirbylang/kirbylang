@@ -6,31 +6,31 @@
 0002    | OP_DEFINE_GLOBAL    0 'Box'
 0004    | OP_GET_GLOBAL       0 'Box'
 0006    2 OP_NIL
-0007    | OP_FIELD            1 'value' private
-0010    3 OP_POP
-0011   11 OP_GET_GLOBAL       0 'Box'
-0013   12 OP_CLOSURE          3 <fn toString>
-0015    | OP_METHOD           2 'toString'
-0017   13 OP_POP
-0018    5 OP_GET_GLOBAL       0 'Box'
-0020    6 OP_CLOSURE          5 <fn new>
-0022    | OP_METHOD           4 'new'
-0024    8 OP_CLOSURE          6 <fn toString>
-0026    | OP_METHOD           2 'toString'
-0028    9 OP_POP
-0029   15 OP_GET_GLOBAL       0 'Box'
-0031    | OP_CONSTANT         8 '100'
-0033    | OP_INVOKE        (1 args)    4 'new'
-0036    | OP_DEFINE_GLOBAL    7 'box'
-0038   16 OP_GET_GLOBAL       7 'box'
-0040    | OP_INVOKE        (0 args)    2 'toString'
-0043    | OP_DEFINE_GLOBAL    9 'n'
-0045   18 OP_GET_GLOBAL      10 '@println'
-0047    | OP_GET_GLOBAL       9 'n'
-0049    | OP_CALL             1
-0051    | OP_POP
-0052   19 OP_NIL
-0053    | OP_RETURN
+0007    | OP_FIELD            1 'value' private mutable
+0011    3 OP_POP
+0012   11 OP_GET_GLOBAL       0 'Box'
+0014   12 OP_CLOSURE          3 <fn toString>
+0016    | OP_METHOD           2 'toString'
+0018   13 OP_POP
+0019    5 OP_GET_GLOBAL       0 'Box'
+0021    6 OP_CLOSURE          5 <fn new>
+0023    | OP_METHOD           4 'new'
+0025    8 OP_CLOSURE          6 <fn toString>
+0027    | OP_METHOD           2 'toString'
+0029    9 OP_POP
+0030   15 OP_GET_GLOBAL       0 'Box'
+0032    | OP_CONSTANT         8 '100'
+0034    | OP_INVOKE        (1 args)    4 'new'
+0037    | OP_DEFINE_GLOBAL    7 'box'
+0039   16 OP_GET_GLOBAL       7 'box'
+0041    | OP_INVOKE        (0 args)    2 'toString'
+0044    | OP_DEFINE_GLOBAL    9 'n'
+0046   18 OP_GET_GLOBAL      10 '@println'
+0048    | OP_GET_GLOBAL       9 'n'
+0050    | OP_CALL             1
+0052    | OP_POP
+0053   19 OP_NIL
+0054    | OP_RETURN
 == toString ==
 0000   12 OP_CONSTANT         0 'Hello World'
 0002    | OP_RETURN

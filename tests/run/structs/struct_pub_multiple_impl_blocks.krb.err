@@ -6,34 +6,34 @@
 0002    | OP_DEFINE_GLOBAL    0 'Counter'
 0004    | OP_GET_GLOBAL       0 'Counter'
 0006    2 OP_NIL
-0007    | OP_FIELD            1 'count' private
-0010    3 OP_POP
-0011    5 OP_GET_GLOBAL       0 'Counter'
-0013    6 OP_CLOSURE          3 <fn new>
-0015    | OP_METHOD           2 'new'
-0017   10 OP_CLOSURE          5 <fn increment>
-0019    | OP_METHOD           4 'increment'
-0021   11 OP_POP
-0022   14 OP_GET_GLOBAL       0 'Counter'
-0024   15 OP_CLOSURE          7 <fn get>
-0026    | OP_METHOD           6 'get'
-0028   16 OP_POP
-0029   18 OP_GET_GLOBAL       0 'Counter'
-0031    | OP_INVOKE        (0 args)    2 'new'
-0034    | OP_DEFINE_GLOBAL    8 'counter'
-0036   20 OP_GET_GLOBAL       8 'counter'
-0038    | OP_INVOKE        (0 args)    4 'increment'
-0041    | OP_POP
-0042   21 OP_GET_GLOBAL       8 'counter'
-0044    | OP_INVOKE        (0 args)    4 'increment'
-0047    | OP_POP
-0048   23 OP_GET_GLOBAL       9 '@println'
-0050    | OP_GET_GLOBAL       8 'counter'
-0052    | OP_INVOKE        (0 args)    6 'get'
-0055    | OP_CALL             1
-0057    | OP_POP
-0058   24 OP_NIL
-0059    | OP_RETURN
+0007    | OP_FIELD            1 'count' private mutable
+0011    3 OP_POP
+0012    5 OP_GET_GLOBAL       0 'Counter'
+0014    6 OP_CLOSURE          3 <fn new>
+0016    | OP_METHOD           2 'new'
+0018   10 OP_CLOSURE          5 <fn increment>
+0020    | OP_METHOD           4 'increment'
+0022   11 OP_POP
+0023   14 OP_GET_GLOBAL       0 'Counter'
+0025   15 OP_CLOSURE          7 <fn get>
+0027    | OP_METHOD           6 'get'
+0029   16 OP_POP
+0030   18 OP_GET_GLOBAL       0 'Counter'
+0032    | OP_INVOKE        (0 args)    2 'new'
+0035    | OP_DEFINE_GLOBAL    8 'counter'
+0037   20 OP_GET_GLOBAL       8 'counter'
+0039    | OP_INVOKE        (0 args)    4 'increment'
+0042    | OP_POP
+0043   21 OP_GET_GLOBAL       8 'counter'
+0045    | OP_INVOKE        (0 args)    4 'increment'
+0048    | OP_POP
+0049   23 OP_GET_GLOBAL       9 '@println'
+0051    | OP_GET_GLOBAL       8 'counter'
+0053    | OP_INVOKE        (0 args)    6 'get'
+0056    | OP_CALL             1
+0058    | OP_POP
+0059   24 OP_NIL
+0060    | OP_RETURN
 == new ==
 0000    6 OP_GET_GLOBAL       0 'Counter'
 0002    | OP_CONSTANT         1 'count'

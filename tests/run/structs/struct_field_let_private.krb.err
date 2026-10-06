@@ -1,0 +1,58 @@
+== <script> ==
+0000    1 OP_NIL
+0001    | OP_RETURN
+== <script> ==
+0000    1 OP_STRUCT           0 'Box'
+0002    | OP_DEFINE_GLOBAL    0 'Box'
+0004    | OP_GET_GLOBAL       0 'Box'
+0006    2 OP_NIL
+0007    | OP_FIELD            1 'value' private immutable
+0011    3 OP_POP
+0012    5 OP_GET_GLOBAL       0 'Box'
+0014    6 OP_CLOSURE          3 <fn new>
+0016    | OP_METHOD           2 'new'
+0018    8 OP_CLOSURE          5 <fn get_value>
+0020    | OP_METHOD           4 'get_value'
+0022   12 OP_CLOSURE          7 <fn set_value>
+0024    | OP_METHOD           6 'set_value'
+0026   13 OP_POP
+0027   15 OP_GET_GLOBAL       0 'Box'
+0029    | OP_CONSTANT         9 '100'
+0031    | OP_INVOKE        (1 args)    2 'new'
+0034    | OP_DEFINE_GLOBAL    8 'box'
+0036   17 OP_GET_GLOBAL      10 '@println'
+0038    | OP_GET_GLOBAL       8 'box'
+0040    | OP_INVOKE        (0 args)    4 'get_value'
+0043    | OP_CALL             1
+0045    | OP_POP
+0046   19 OP_GET_GLOBAL       8 'box'
+0048    | OP_CONSTANT        11 '123'
+0050    | OP_INVOKE        (1 args)    6 'set_value'
+0053    | OP_POP
+0054   21 OP_GET_GLOBAL      10 '@println'
+0056    | OP_GET_GLOBAL       8 'box'
+0058    | OP_INVOKE        (0 args)    4 'get_value'
+0061    | OP_CALL             1
+0063    | OP_POP
+0064   22 OP_NIL
+0065    | OP_RETURN
+== new ==
+0000    6 OP_GET_GLOBAL       0 'Box'
+0002    | OP_CONSTANT         1 'value'
+0004    | OP_GET_LOCAL        1
+0006    | OP_STRUCT_INIT      1
+0008    | OP_RETURN
+== get_value ==
+0000    8 OP_GET_LOCAL        0
+0002    | OP_GET_PROPERTY     0 'value'
+0004    | OP_RETURN
+== set_value ==
+0000   11 OP_GET_LOCAL        0
+0002    | OP_GET_LOCAL        1
+0004    | OP_SET_PROPERTY     0 'value'
+0006    | OP_POP
+0007   12 OP_NIL
+0008    | OP_RETURN
+Field 'value' is immutable
+[line 11] in set_value()
+[line 19] in script

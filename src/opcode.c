@@ -41,7 +41,7 @@ static const OpInfo opInfos[OP_COUNT] = {
     [OP_STRUCT] = {true, 1, 1, -1, 0},
     // The struct and a name and value per field become the instance.
     [OP_STRUCT_INIT] = {true, 1, 0, 0, -2},
-    [OP_FIELD] = {true, 2, -1, -1, 0},
+    [OP_FIELD] = {true, 3, -1, -1, 0},
     [OP_GET_PROPERTY] = {true, 1, 0, -1, 0},
     [OP_SET_PROPERTY] = {true, 1, -1, -1, 0},
     [OP_METHOD] = {true, 1, -1, -1, 0},

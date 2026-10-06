@@ -859,6 +859,11 @@ static InterpretResult run(void) {
         return INTERPRET_RUNTIME_ERROR;
       }
 
+      if (!instance->struct_->fieldMutable[slot]) {
+        runtimeError(&vm, "Field '%s' is immutable", name->chars);
+        return INTERPRET_RUNTIME_ERROR;
+      }
+
       instance->fields[slot] = peekStack(0);
 
       Value value = popFromStack(); // value
@@ -869,6 +874,7 @@ static InterpretResult run(void) {
     case OP_FIELD: {
       ObjString *field_name = READ_STRING();
       bool isPublic = READ_BYTE() != 0;
+      bool isMutable = READ_BYTE() != 0;
 
       Value value = peekStack(1);
 
@@ -895,6 +901,7 @@ static InterpretResult run(void) {
                NUMBER_VAL(struct_->fieldCount));
 
       struct_->fieldPublic[struct_->fieldCount] = isPublic;
+      struct_->fieldMutable[struct_->fieldCount] = isMutable;
 
       struct_->fieldCount++;
 

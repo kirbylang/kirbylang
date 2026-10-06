@@ -99,6 +99,7 @@ typedef struct ObjStruct {
   Table fields;
   int fieldCount;
   bool fieldPublic[256];
+  bool fieldMutable[256];
 } ObjStruct;
 
 typedef struct {

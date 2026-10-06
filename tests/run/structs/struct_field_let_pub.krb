@@ -1,0 +1,11 @@
+struct Box {
+    pub let value: f64;
+}
+
+let box = Box { value: 100 };
+
+@println(box.value);
+
+box.value = 123;
+
+@println(box.value);

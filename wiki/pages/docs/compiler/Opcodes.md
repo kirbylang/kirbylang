@@ -33,7 +33,7 @@
 |  `30` | `OP_CLOSURE`          | `index`, `isLocal`, `upvalueIndex` |         +1 | See [below](#op_closure).                                                                       |
 |  `31` | `OP_STRUCT`           | `index`                            |         +1 |                                                                                                 |
 |  `32` | `OP_STRUCT_INIT`      | `initFieldCount`                   | -(2n+1) +1 | Pops the struct and a name and value per field.                                                 |
-|  `33` | `OP_FIELD`            | `index`, `isPublic`                |         -1 |                                                                                                 |
+|  `33` | `OP_FIELD`            | `index`, `isPublic`, `isMutable`   |         -1 |                                                                                                 |
 |  `34` | `OP_GET_PROPERTY`     | `index`                            |      -1 +1 |                                                                                                 |
 |  `35` | `OP_SET_PROPERTY`     | `index`                            |      -2 +1 | Pops the object and value, then pushes the value.                                               |
 |  `36` | `OP_METHOD`           | `index`                            |         -1 | Pops the method; the struct stays.                                                              |

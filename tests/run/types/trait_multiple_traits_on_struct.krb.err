@@ -6,38 +6,38 @@
 0002    | OP_DEFINE_GLOBAL    0 'Point'
 0004    | OP_GET_GLOBAL       0 'Point'
 0006    2 OP_NIL
-0007    | OP_FIELD            1 'x' public
-0010    3 OP_NIL
-0011    | OP_FIELD            2 'y' public
-0014    4 OP_POP
-0015    6 OP_GET_GLOBAL       0 'Point'
-0017    7 OP_CLOSURE          4 <fn toString>
-0019    | OP_METHOD           3 'toString'
-0021    8 OP_POP
-0022   10 OP_GET_GLOBAL       0 'Point'
-0024   11 OP_CLOSURE          6 <fn equals>
-0026    | OP_METHOD           5 'equals'
-0028   12 OP_POP
-0029   14 OP_GET_GLOBAL       0 'Point'
-0031    | OP_CONSTANT         1 'x'
-0033    | OP_CONSTANT         8 '1'
-0035    | OP_CONSTANT         2 'y'
-0037    | OP_CONSTANT         9 '2'
-0039    | OP_STRUCT_INIT      2
-0041    | OP_DEFINE_GLOBAL    7 'a'
-0043   16 OP_GET_GLOBAL      10 '@println'
-0045    | OP_GET_GLOBAL       7 'a'
-0047    | OP_INVOKE        (0 args)    3 'toString'
-0050    | OP_CALL             1
-0052    | OP_POP
-0053   17 OP_GET_GLOBAL      10 '@println'
-0055    | OP_GET_GLOBAL       7 'a'
+0007    | OP_FIELD            1 'x' public mutable
+0011    3 OP_NIL
+0012    | OP_FIELD            2 'y' public mutable
+0016    4 OP_POP
+0017    6 OP_GET_GLOBAL       0 'Point'
+0019    7 OP_CLOSURE          4 <fn toString>
+0021    | OP_METHOD           3 'toString'
+0023    8 OP_POP
+0024   10 OP_GET_GLOBAL       0 'Point'
+0026   11 OP_CLOSURE          6 <fn equals>
+0028    | OP_METHOD           5 'equals'
+0030   12 OP_POP
+0031   14 OP_GET_GLOBAL       0 'Point'
+0033    | OP_CONSTANT         1 'x'
+0035    | OP_CONSTANT         8 '1'
+0037    | OP_CONSTANT         2 'y'
+0039    | OP_CONSTANT         9 '2'
+0041    | OP_STRUCT_INIT      2
+0043    | OP_DEFINE_GLOBAL    7 'a'
+0045   16 OP_GET_GLOBAL      10 '@println'
+0047    | OP_GET_GLOBAL       7 'a'
+0049    | OP_INVOKE        (0 args)    3 'toString'
+0052    | OP_CALL             1
+0054    | OP_POP
+0055   17 OP_GET_GLOBAL      10 '@println'
 0057    | OP_GET_GLOBAL       7 'a'
-0059    | OP_INVOKE        (1 args)    5 'equals'
-0062    | OP_CALL             1
-0064    | OP_POP
-0065   18 OP_NIL
-0066    | OP_RETURN
+0059    | OP_GET_GLOBAL       7 'a'
+0061    | OP_INVOKE        (1 args)    5 'equals'
+0064    | OP_CALL             1
+0066    | OP_POP
+0067   18 OP_NIL
+0068    | OP_RETURN
 == toString ==
 0000    7 OP_CONSTANT         0 'Point'
 0002    | OP_RETURN
