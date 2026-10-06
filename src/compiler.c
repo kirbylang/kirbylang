@@ -45,7 +45,8 @@ typedef struct {
 
 static void compileExpr(AstNode *node);
 static void compileStmt(AstNode *node);
-static void compileBlockContents(BlockNode *block);
+static void compileBranchValue(AstNode *branch);
+static void compileBlockContents(BlockNode *block, bool returnsValue);
 static void compileFunction(FunctionNode *fn, FunctionType type);
 static uint8_t makeConstant(CompiledConst value, Token *tok);
 static uint8_t stringConstant(const char *chars, int length, Token *tok);
@@ -1144,7 +1145,7 @@ static void compileExpr(AstNode *node) {
 
     int thenJump = emitJump(OP_JUMP_IF_FALSE);
     emitByte(OP_POP);
-    compileExpr(f->thenBranch);
+    compileBranchValue(f->thenBranch);
 
     int elseJump = emitJump(OP_JUMP);
 
@@ -1152,7 +1153,7 @@ static void compileExpr(AstNode *node) {
     emitByte(OP_POP);
 
     if (f->elseBranch != NULL) {
-      compileExpr(f->elseBranch);
+      compileBranchValue(f->elseBranch);
     } else {
       emitByte(OP_NIL);
     }
@@ -1182,6 +1183,23 @@ static void compileExpr(AstNode *node) {
 
   default:
     compilerErrorAtNode(node, "Internal error: not a valid expression node.");
+    break;
+  }
+}
+
+// An `if` branch used as a value. A statement branch has no value of its own.
+static void compileBranchValue(AstNode *branch) {
+  switch (branch->kind) {
+  case NODE_RETURN:
+  case NODE_BREAK:
+  case NODE_CONTINUE:
+  case NODE_WHILE:
+  case NODE_FOR:
+    compileStmt(branch);
+    emitByte(OP_NIL);
+    break;
+  default:
+    compileExpr(branch);
     break;
   }
 }
@@ -1222,7 +1240,7 @@ static void compileFunction(FunctionNode *fn, FunctionType type) {
     compileExpr(fn->exprBody);
     emitValueReturn();
   } else {
-    compileBlockContents(&fn->body);
+    compileBlockContents(&fn->body, /*returnsValue=*/true);
   }
 
   currentLine = fn->bodyEndLine;
@@ -1483,7 +1501,9 @@ static void compileFor(AstNode *node) {
 
 // Used for function declarations (where an implicit return is used)
 // and block statements (where an implicit return is disguarded)
-static void compileBlockContents(BlockNode *block) {
+// Only a function body returns its final value. In any other block it is
+// discarded.
+static void compileBlockContents(BlockNode *block, bool returnsValue) {
   for (int i = 0; i < block->count; i++) {
     compileStmt(block->stmts[i]);
   }
@@ -1491,10 +1511,10 @@ static void compileBlockContents(BlockNode *block) {
   if (block->value != NULL) {
     compileExpr(block->value);
 
-    if (current->type == TYPE_SCRIPT) {
-      compilerErrorAtNode(block->value, "Expect ';' after expression.");
-    } else {
+    if (returnsValue) {
       emitValueReturn();
+    } else {
+      emitByte(OP_POP);
     }
   }
 }
@@ -1520,7 +1540,7 @@ static void compileStmt(AstNode *node) {
 
   case NODE_BLOCK:
     beginScope();
-    compileBlockContents(&node->as.block);
+    compileBlockContents(&node->as.block, /*returnsValue=*/false);
     currentLine = node->as.block.endLine;
     endScope();
     break;
@@ -1579,7 +1599,8 @@ static void compileStmt(AstNode *node) {
     break;
 
   default:
-    compilerErrorAtNode(node, "Internal error: not a valid statement node.");
+    compileExpr(node);
+    emitByte(OP_POP);
     break;
   }
 

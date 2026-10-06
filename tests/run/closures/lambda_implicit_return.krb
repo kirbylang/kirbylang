@@ -1,0 +1,8 @@
+fun gt(threshold: f64): fun (f64) => bool {
+  fun (value: f64): bool { value > threshold }
+}
+
+let greaterThanThree = gt(3);
+
+@println(greaterThanThree(5));
+@println(greaterThanThree(1));

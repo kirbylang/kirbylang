@@ -1,0 +1,35 @@
+== <script> ==
+0000    1 OP_NIL
+0001    | OP_RETURN
+== <script> ==
+0000    3 OP_CLOSURE          1 <fn fib>
+0002    | OP_DEFINE_GLOBAL    0 'fib'
+0004    5 OP_GET_GLOBAL       2 '@println'
+0006    | OP_GET_GLOBAL       0 'fib'
+0008    | OP_CONSTANT         3 '10'
+0010    | OP_CALL             1
+0012    | OP_CALL             1
+0014    | OP_POP
+0015    6 OP_NIL
+0016    | OP_RETURN
+== fib ==
+0000    2 OP_GET_LOCAL        1
+0002    | OP_CONSTANT         0 '2'
+0004    | OP_LESS
+0005    | OP_JUMP_IF_FALSE    5 -> 14
+0008    | OP_POP
+0009    | OP_GET_LOCAL        1
+0011    | OP_JUMP            11 -> 34
+0014    | OP_POP
+0015    | OP_GET_GLOBAL       1 'fib'
+0017    | OP_GET_LOCAL        1
+0019    | OP_CONSTANT         0 '2'
+0021    | OP_SUBTRACT
+0022    | OP_CALL             1
+0024    | OP_GET_GLOBAL       1 'fib'
+0026    | OP_GET_LOCAL        1
+0028    | OP_CONSTANT         2 '1'
+0030    | OP_SUBTRACT
+0031    | OP_CALL             1
+0033    | OP_ADD
+0034    | OP_RETURN

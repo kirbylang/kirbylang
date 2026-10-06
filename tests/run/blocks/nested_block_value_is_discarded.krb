@@ -1,0 +1,13 @@
+fun f(): f64 {
+  { 5 }
+  10
+}
+
+fun g(condition: bool): f64 {
+  if (condition) { 1 } else { 2 }
+  3
+}
+
+@println(f());
+@println(g(true));
+@println(g(false));

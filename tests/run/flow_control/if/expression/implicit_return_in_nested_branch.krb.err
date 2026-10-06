@@ -1,0 +1,46 @@
+== <script> ==
+0000    1 OP_NIL
+0001    | OP_RETURN
+== <script> ==
+0000    5 OP_CLOSURE          1 <fn classify>
+0002    | OP_DEFINE_GLOBAL    0 'classify'
+0004    7 OP_GET_GLOBAL       2 '@println'
+0006    | OP_GET_GLOBAL       0 'classify'
+0008    | OP_CONSTANT         3 '1'
+0010    | OP_CALL             1
+0012    | OP_CALL             1
+0014    | OP_POP
+0015    8 OP_GET_GLOBAL       2 '@println'
+0017    | OP_GET_GLOBAL       0 'classify'
+0019    | OP_CONSTANT         4 '7'
+0021    | OP_CALL             1
+0023    | OP_CALL             1
+0025    | OP_POP
+0026    9 OP_GET_GLOBAL       2 '@println'
+0028    | OP_GET_GLOBAL       0 'classify'
+0030    | OP_CONSTANT         5 '20'
+0032    | OP_CALL             1
+0034    | OP_CALL             1
+0036    | OP_POP
+0037   10 OP_NIL
+0038    | OP_RETURN
+== classify ==
+0000    2 OP_GET_LOCAL        1
+0002    | OP_CONSTANT         0 '10'
+0004    | OP_LESS
+0005    | OP_JUMP_IF_FALSE    5 -> 31
+0008    | OP_POP
+0009    3 OP_GET_LOCAL        1
+0011    | OP_CONSTANT         1 '5'
+0013    | OP_LESS
+0014    | OP_JUMP_IF_FALSE   14 -> 23
+0017    | OP_POP
+0018    | OP_CONSTANT         2 'small'
+0020    | OP_JUMP            20 -> 26
+0023    | OP_POP
+0024    | OP_CONSTANT         3 'medium'
+0026    4 OP_CLOSE_BLOCK_EXPR    0
+0028    | OP_JUMP            28 -> 34
+0031    | OP_POP
+0032    | OP_CONSTANT         4 'large'
+0034    | OP_RETURN

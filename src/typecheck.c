@@ -383,6 +383,7 @@ static Type *typchkInferStructInit(TypeEnv *env, AstNode *node);
 static Type *typchkInferArray(TypeEnv *env, AstNode *node);
 static Type *typchkInferInterpString(TypeEnv *env, AstNode *node);
 static Type *typchkInferIf(TypeEnv *env, AstNode *node);
+static bool typchkAlwaysYields(AstNode *node);
 static Type *typchkInferBlock(TypeEnv *env, AstNode *node);
 static Type *typchkCheckBlockContents(TypeEnv *env, BlockNode *block,
                                       Type *expectedValueType);
@@ -1172,18 +1173,72 @@ static Type *typchkInferArray(TypeEnv *env, AstNode *node) {
   return typeArray(elementType);
 }
 
-// Infer the type of an if expression
+// Whether a node always jumps e.g. return, break, continue
+//
+// This means any statement in a block or it's optional implicit value, both
+// branches of if
+static bool typchkAlwaysJumps(AstNode *node) {
+  if (node == NULL)
+    return false;
+
+  switch (node->kind) {
+  case NODE_RETURN:
+  case NODE_BREAK:
+  case NODE_CONTINUE:
+    return true;
+
+  case NODE_BLOCK: {
+    BlockNode *block = &node->as.block;
+    for (int i = 0; i < block->count; i++) {
+      if (typchkAlwaysJumps(block->stmts[i]))
+        return true;
+    }
+    return typchkAlwaysJumps(block->value);
+  }
+
+  case NODE_IF: {
+    IfNode *if_ = &node->as.if_;
+    return typchkAlwaysJumps(if_->thenBranch) &&
+           typchkAlwaysJumps(if_->elseBranch);
+  }
+
+  default:
+    return false;
+  }
+}
+
+// Infer the type of an if expression. A diverging branch doesn't affect it.
 static Type *typchkInferIf(TypeEnv *env, AstNode *node) {
   IfNode *i = &node->as.if_;
   typchkCheck(env, i->condition,
               typeBool()); // reported if wrong; still proceed
 
-  Type *thenType = typchkInfer(env, i->thenBranch);
-  Type *elseType =
-      i->elseBranch != NULL ? typchkInfer(env, i->elseBranch) : typeUnit();
+  bool thenIsNeverType = typchkAlwaysJumps(i->thenBranch);
+  bool elseIsNeverType = typchkAlwaysJumps(i->elseBranch);
 
-  if (thenType == NULL || elseType == NULL)
+  Type *thenType = NULL;
+  Type *elseType = i->elseBranch != NULL ? NULL : typeUnit();
+
+  if (thenIsNeverType)
+    typchkCheckStmt(env, i->thenBranch);
+  else
+    thenType = typchkInfer(env, i->thenBranch);
+
+  if (elseIsNeverType)
+    typchkCheckStmt(env, i->elseBranch);
+  else if (i->elseBranch != NULL)
+    elseType = typchkInfer(env, i->elseBranch);
+
+  if ((!thenIsNeverType && thenType == NULL) ||
+      (!elseIsNeverType && elseType == NULL))
     return NULL;
+
+  if (thenIsNeverType && elseIsNeverType)
+    return typeUnit();
+  if (thenIsNeverType)
+    return elseType;
+  if (elseIsNeverType)
+    return thenType;
 
   if (!typesEqual(thenType, elseType)) {
     typchkErrorAtNodeFmt(node,
@@ -1205,7 +1260,17 @@ static Type *typchkCheckBlockContents(TypeEnv *env, BlockNode *block,
   }
 
   Type *result;
-  if (block->value != NULL) {
+  if (block->value != NULL && typchkAlwaysJumps(block->value)) {
+    typchkCheckStmt(env, block->value);
+    result = expectedValueType != NULL ? expectedValueType : typeUnit();
+  } else if (block->value != NULL && expectedValueType != NULL &&
+             (block->value->kind == NODE_IF ||
+              block->value->kind == NODE_BLOCK) &&
+             !typchkAlwaysYields(block->value)) {
+    // Missing paths are reported by the function's return path check.
+    typchkCheckStmt(env, block->value);
+    result = expectedValueType;
+  } else if (block->value != NULL) {
     if (expectedValueType != NULL) {
       result = typchkCheck(env, block->value, expectedValueType)
                    ? expectedValueType
@@ -1231,6 +1296,33 @@ static Type *typchkInferBlock(TypeEnv *env, AstNode *node) {
 }
 
 static bool typchkCheckIfBlockAlwaysReturns(BlockNode *block);
+
+// Whether a block's final value is produced on every path, or the path
+// returns.
+static bool typchkAlwaysYields(AstNode *node) {
+  switch (node->kind) {
+  case NODE_RETURN:
+    return true;
+
+  case NODE_BLOCK:
+    return typchkCheckIfBlockAlwaysReturns(&node->as.block);
+
+  case NODE_IF: {
+    IfNode *if_ = &node->as.if_;
+    return if_->elseBranch != NULL && typchkAlwaysYields(if_->thenBranch) &&
+           typchkAlwaysYields(if_->elseBranch);
+  }
+
+  case NODE_WHILE:
+  case NODE_FOR:
+  case NODE_BREAK:
+  case NODE_CONTINUE:
+    return false;
+
+  default:
+    return true;
+  }
+}
 
 // Check if the statement (AstNode) exits it's enclosing function
 static bool typchkCheckIfAlwaysReturns(AstNode *node) {
@@ -1259,7 +1351,7 @@ static bool typchkCheckIfAlwaysReturns(AstNode *node) {
 static bool typchkCheckIfBlockAlwaysReturns(BlockNode *block) {
   // Implicit return
   if (block->value != NULL)
-    return true;
+    return typchkAlwaysYields(block->value);
 
   for (int i = 0; i < block->count; i++) {
     if (typchkCheckIfAlwaysReturns(block->stmts[i]))

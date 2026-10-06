@@ -1,0 +1,48 @@
+== <script> ==
+0000    1 OP_NIL
+0001    | OP_RETURN
+== <script> ==
+0000    3 OP_CLOSURE          1 <fn describe>
+0002    | OP_DEFINE_GLOBAL    0 'describe'
+0004    5 OP_GET_GLOBAL       2 '@println'
+0006    | OP_GET_GLOBAL       0 'describe'
+0008    | OP_CONSTANT         3 '1'
+0010    | OP_NEGATE
+0011    | OP_CALL             1
+0013    | OP_CALL             1
+0015    | OP_POP
+0016    6 OP_GET_GLOBAL       2 '@println'
+0018    | OP_GET_GLOBAL       0 'describe'
+0020    | OP_CONSTANT         4 '0'
+0022    | OP_CALL             1
+0024    | OP_CALL             1
+0026    | OP_POP
+0027    7 OP_GET_GLOBAL       2 '@println'
+0029    | OP_GET_GLOBAL       0 'describe'
+0031    | OP_CONSTANT         3 '1'
+0033    | OP_CALL             1
+0035    | OP_CALL             1
+0037    | OP_POP
+0038    8 OP_NIL
+0039    | OP_RETURN
+== describe ==
+0000    2 OP_GET_LOCAL        1
+0002    | OP_CONSTANT         0 '0'
+0004    | OP_LESS
+0005    | OP_JUMP_IF_FALSE    5 -> 16
+0008    | OP_POP
+0009    | OP_CONSTANT         1 'negative'
+0011    | OP_RETURN
+0012    | OP_NIL
+0013    | OP_JUMP            13 -> 34
+0016    | OP_POP
+0017    | OP_GET_LOCAL        1
+0019    | OP_CONSTANT         0 '0'
+0021    | OP_EQUAL
+0022    | OP_JUMP_IF_FALSE   22 -> 31
+0025    | OP_POP
+0026    | OP_CONSTANT         2 'zero'
+0028    | OP_JUMP            28 -> 34
+0031    | OP_POP
+0032    | OP_CONSTANT         3 'positive'
+0034    | OP_RETURN
