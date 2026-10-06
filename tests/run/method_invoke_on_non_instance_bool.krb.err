@@ -1,4 +1,205 @@
 == <script> ==
-0000    1 OP_NIL
-0001    | OP_RETURN
+0000    1 OP_STRUCT           0 'Date'
+0002    | OP_DEFINE_GLOBAL    0 'Date'
+0004    | OP_GET_GLOBAL       0 'Date'
+0006    2 OP_NIL
+0007    | OP_FIELD            1 'timestamp' public immutable
+0011    4 OP_NIL
+0012    | OP_FIELD            2 'year' public immutable
+0016    5 OP_NIL
+0017    | OP_FIELD            3 'month' public immutable
+0021    6 OP_NIL
+0022    | OP_FIELD            4 'day' public immutable
+0026    7 OP_NIL
+0027    | OP_FIELD            5 'hour' public immutable
+0031    8 OP_NIL
+0032    | OP_FIELD            6 'minute' public immutable
+0036    9 OP_NIL
+0037    | OP_FIELD            7 'second' public immutable
+0041   10 OP_POP
+0042   12 OP_GET_GLOBAL       0 'Date'
+0044   13 OP_CLOSURE          9 <fn new>
+0046    | OP_METHOD           8 'new'
+0048   14 OP_CLOSURE         11 <fn now>
+0050    | OP_METHOD          10 'now'
+0052   18 OP_CLOSURE         13 <fn is_leap>
+0054    | OP_METHOD          12 'is_leap'
+0056   28 OP_CLOSURE         15 <fn days_in_month>
+0058    | OP_METHOD          14 'days_in_month'
+0060   75 OP_CLOSURE         17 <fn timestamp_to_date>
+0062    | OP_METHOD          16 'timestamp_to_date'
+0064   76 OP_POP
+0065   78 OP_NIL
+0066    | OP_RETURN
+== new ==
+0000   13 OP_GET_GLOBAL       0 'Date'
+0002    | OP_GET_LOCAL        1
+0004    | OP_INVOKE        (1 args)    1 'timestamp_to_date'
+0007    | OP_RETURN
+== now ==
+0000   14 OP_GET_GLOBAL       0 'Date'
+0002    | OP_GET_GLOBAL       2 '@now'
+0004    | OP_CALL             0
+0006    | OP_INVOKE        (1 args)    1 'timestamp_to_date'
+0009    | OP_RETURN
+== is_leap ==
+0000   17 OP_GET_LOCAL        1
+0002    | OP_CONSTANT         0 '4'
+0004    | OP_MODULO
+0005    | OP_CONSTANT         1 '0'
+0007    | OP_EQUAL
+0008    | OP_JUMP_IF_FALSE    8 -> 36
+0011    | OP_POP
+0012    | OP_GET_LOCAL        1
+0014    | OP_CONSTANT         2 '100'
+0016    | OP_MODULO
+0017    | OP_CONSTANT         1 '0'
+0019    | OP_EQUAL
+0020    | OP_NOT
+0021    | OP_JUMP_IF_FALSE   21 -> 27
+0024    | OP_JUMP            24 -> 36
+0027    | OP_POP
+0028    | OP_GET_LOCAL        1
+0030    | OP_CONSTANT         3 '400'
+0032    | OP_MODULO
+0033    | OP_CONSTANT         1 '0'
+0035    | OP_EQUAL
+0036    | OP_RETURN
+== days_in_month ==
+0000   21 OP_CONSTANT         0 '31'
+0002    | OP_CONSTANT         1 '28'
+0004    | OP_CONSTANT         0 '31'
+0006    | OP_CONSTANT         2 '30'
+0008    | OP_CONSTANT         0 '31'
+0010    | OP_CONSTANT         2 '30'
+0012    | OP_CONSTANT         0 '31'
+0014    | OP_CONSTANT         0 '31'
+0016    | OP_CONSTANT         2 '30'
+0018    | OP_CONSTANT         0 '31'
+0020    | OP_CONSTANT         2 '30'
+0022    | OP_CONSTANT         0 '31'
+0024    | OP_ARRAY           12
+0026   23 OP_GET_LOCAL        2
+0028    | OP_CONSTANT         3 '2'
+0030    | OP_EQUAL
+0031    | OP_JUMP_IF_FALSE   31 -> 42
+0034    | OP_POP
+0035    | OP_GET_GLOBAL       4 'Date'
+0037    | OP_GET_LOCAL        1
+0039    | OP_INVOKE        (1 args)    5 'is_leap'
+0042    | OP_JUMP_IF_FALSE   42 -> 52
+0045    | OP_POP
+0046   24 OP_CONSTANT         6 '29'
+0048    | OP_RETURN
+0049   25 OP_JUMP            49 -> 53
+0052    | OP_POP
+0053   27 OP_GET_LOCAL        3
+0055    | OP_GET_LOCAL        2
+0057    | OP_CONSTANT         7 '1'
+0059    | OP_SUBTRACT
+0060    | OP_GET_INDEX
+0061    | OP_RETURN
+== timestamp_to_date ==
+0000   31 OP_GET_LOCAL        1
+0002    | OP_CONSTANT         0 '86400'
+0004    | OP_DIVIDE
+0005   32 OP_GET_LOCAL        1
+0007    | OP_CONSTANT         0 '86400'
+0009    | OP_MODULO
+0010   34 OP_GET_LOCAL        3
+0012    | OP_CONSTANT         1 '3600'
+0014    | OP_DIVIDE
+0015   35 OP_GET_LOCAL        3
+0017    | OP_CONSTANT         1 '3600'
+0019    | OP_MODULO
+0020    | OP_CONSTANT         2 '60'
+0022    | OP_DIVIDE
+0023   36 OP_GET_LOCAL        3
+0025    | OP_CONSTANT         2 '60'
+0027    | OP_MODULO
+0028   38 OP_CONSTANT         3 '1970'
+0030   40 OP_TRUE
+0031    | OP_JUMP_IF_FALSE   31 -> 91
+0034    | OP_POP
+0035   41 OP_GET_GLOBAL       4 'Date'
+0037    | OP_GET_LOCAL        7
+0039    | OP_INVOKE        (1 args)    5 'is_leap'
+0042    | OP_JUMP_IF_FALSE   42 -> 51
+0045    | OP_POP
+0046    | OP_CONSTANT         6 '366'
+0048    | OP_JUMP            48 -> 54
+0051    | OP_POP
+0052    | OP_CONSTANT         7 '365'
+0054   43 OP_GET_LOCAL        2
+0056    | OP_GET_LOCAL        8
+0058    | OP_LESS
+0059    | OP_JUMP_IF_FALSE   59 -> 70
+0062    | OP_POP
+0063   44 OP_POP
+0064    | OP_JUMP            64 -> 92
+0067   45 OP_JUMP            67 -> 71
+0070    | OP_POP
+0071   47 OP_GET_LOCAL        2
+0073    | OP_GET_LOCAL        8
+0075    | OP_SUBTRACT
+0076    | OP_SET_LOCAL        2
+0078    | OP_POP
+0079   48 OP_GET_LOCAL        7
+0081    | OP_CONSTANT         8 '1'
+0083    | OP_ADD
+0084    | OP_SET_LOCAL        7
+0086    | OP_POP
+0087   49 OP_POP
+0088    | OP_LOOP            88 -> 30
+0091    | OP_POP
+0092   51 OP_CONSTANT         8 '1'
+0094   53 OP_TRUE
+0095    | OP_JUMP_IF_FALSE   95 -> 145
+0098    | OP_POP
+0099   54 OP_GET_GLOBAL       4 'Date'
+0101    | OP_GET_LOCAL        7
+0103    | OP_GET_LOCAL        8
+0105    | OP_INVOKE        (2 args)    9 'days_in_month'
+0108   56 OP_GET_LOCAL        2
+0110    | OP_GET_LOCAL        9
+0112    | OP_LESS
+0113    | OP_JUMP_IF_FALSE  113 -> 124
+0116    | OP_POP
+0117   57 OP_POP
+0118    | OP_JUMP           118 -> 146
+0121   58 OP_JUMP           121 -> 125
+0124    | OP_POP
+0125   60 OP_GET_LOCAL        2
+0127    | OP_GET_LOCAL        9
+0129    | OP_SUBTRACT
+0130    | OP_SET_LOCAL        2
+0132    | OP_POP
+0133   61 OP_GET_LOCAL        8
+0135    | OP_CONSTANT         8 '1'
+0137    | OP_ADD
+0138    | OP_SET_LOCAL        8
+0140    | OP_POP
+0141   62 OP_POP
+0142    | OP_LOOP           142 -> 94
+0145    | OP_POP
+0146   64 OP_GET_LOCAL        2
+0148    | OP_CONSTANT         8 '1'
+0150    | OP_ADD
+0151   66 OP_GET_GLOBAL       4 'Date'
+0153   67 OP_CONSTANT        10 'timestamp'
+0155    | OP_GET_LOCAL        1
+0157   68 OP_CONSTANT        11 'year'
+0159    | OP_GET_LOCAL        7
+0161   69 OP_CONSTANT        12 'month'
+0163    | OP_GET_LOCAL        8
+0165   70 OP_CONSTANT        13 'day'
+0167    | OP_GET_LOCAL        9
+0169   71 OP_CONSTANT        14 'hour'
+0171    | OP_GET_LOCAL        4
+0173   72 OP_CONSTANT        15 'minute'
+0175    | OP_GET_LOCAL        5
+0177   73 OP_CONSTANT        16 'second'
+0179    | OP_GET_LOCAL        6
+0181   74 OP_STRUCT_INIT      7
+0183    | OP_RETURN
 [line 1] Error at 'fn': Can't access '.fn' on a bool.

@@ -1,0 +1,8 @@
+let date = Date.new(1791273061);
+
+@println(date.year);
+@println(date.month);
+@println(date.day);
+@println(date.hour);
+@println(date.minute);
+@println(date.second);

@@ -39,6 +39,7 @@ const NativeSignature nativeSignatures[] = {
     {"@strToLower", {NATIVE_STRING}, 1, NATIVE_STRING},
     {"@strRepeat", {NATIVE_STRING, NATIVE_F64}, 2, NATIVE_STRING},
     {"@strSplit", {NATIVE_STRING, NATIVE_STRING}, 2, NATIVE_LIST},
+    {"@now", {0}, 0, NATIVE_F64},
 };
 
 const int nativeSignatureCount =

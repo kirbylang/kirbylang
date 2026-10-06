@@ -1,0 +1,77 @@
+struct Date {
+    pub let timestamp: f64;
+
+    pub let year: f64;
+    pub let month: f64;
+    pub let day: f64;
+    pub let hour: f64;
+    pub let minute: f64;
+    pub let second: f64;
+}
+
+impl Date {
+    pub fun new(timestamp: f64): Self = Self.timestamp_to_date(timestamp);
+    pub fun now(): Self = Self.timestamp_to_date(@now());
+
+    fun is_leap(year: f64): bool {
+        year % 4 == 0 and (year % 100 != 0 or year % 400 == 0)
+    }
+
+    fun days_in_month(year: f64, month: f64): f64 {
+        let lengths = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+        
+        if (month == 2 and Self.is_leap(year)) {
+            return 29;
+        }
+
+        return lengths[month - 1];
+    }
+
+    fun timestamp_to_date(ts: f64): Self {
+        var days = ts / 86400;
+        let sod  = ts % 86400;
+
+        let hour   = sod / 3600;
+        let minute = (sod % 3600) / 60;
+        let second = sod % 60;
+
+        var year = 1970;
+
+        while (true) {
+            let ydays = if (Self.is_leap(year)) 366 else 365;
+
+            if (days < ydays) {
+                break;
+            }
+
+            days = days - ydays;
+            year = year + 1;
+        }
+
+        var month = 1;
+
+        while (true) {
+            let mdays = Self.days_in_month(year, month);
+
+            if (days < mdays) {
+                break;
+            }
+
+            days = days - mdays;
+            month = month + 1;
+        }
+
+        let day = days + 1;
+
+        return Self {
+            timestamp: ts,
+            year: year,
+            month: month,
+            day: day,
+            hour: hour,
+            minute: minute,
+            second: second,
+        };
+    }
+}
+
