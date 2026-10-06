@@ -1,0 +1,7 @@
+fun describe(n: f64): string {
+  if (n < 0) return "negative"; else if (n == 0) "zero" else "positive"
+}
+
+@println(describe(-1));
+@println(describe(0));
+@println(describe(1));

@@ -51,8 +51,13 @@ typedef struct {
 } ParseRule;
 
 static AstNode *expression(Parser *p);
-static AstNode *statement(Parser *p, bool *isTail);
-static AstNode *declaration(Parser *p, bool *isTail);
+static AstNode *statement(Parser *p);
+static AstNode *whileStatement(Parser *p);
+static AstNode *forStatement(Parser *p);
+static AstNode *returnStatement(Parser *p);
+static AstNode *breakStatement(Parser *p);
+static AstNode *continueStatement(Parser *p);
+static AstNode *declaration(Parser *p);
 static AstNode *parse_precedence(Parser *p, Precedence prec);
 static ParseRule *get_rule(TokenType type);
 static void parse_error_at(Parser *p, Token *token, const char *message);
@@ -451,6 +456,28 @@ static AstNode *self_(Parser *p, bool canAssign) {
   return node;
 }
 
+// A branch is an expression or a statement that leaves the branch. The ';' of
+// `if (a) x; else y` belongs to the branch.
+static AstNode *ifBranch(Parser *p) {
+  if (match(p, TOKEN_RETURN))
+    return returnStatement(p);
+  if (match(p, TOKEN_BREAK))
+    return breakStatement(p);
+  if (match(p, TOKEN_CONTINUE))
+    return continueStatement(p);
+  if (match(p, TOKEN_WHILE))
+    return whileStatement(p);
+  if (match(p, TOKEN_FOR))
+    return forStatement(p);
+
+  AstNode *branch = expression(p);
+
+  if (check(p, TOKEN_SEMICOLON) && tsPeek(p->tokens).type == TOKEN_ELSE)
+    advance(p);
+
+  return branch;
+}
+
 static AstNode *ifExpr(Parser *p, bool canAssign) {
   (void)canAssign;
 
@@ -462,11 +489,11 @@ static AstNode *ifExpr(Parser *p, bool canAssign) {
 
   consume(p, TOKEN_RIGHT_PAREN, "Expect ')' after condition.");
 
-  AstNode *thenBranch = expression(p);
+  AstNode *thenBranch = ifBranch(p);
   AstNode *elseBranch = NULL;
 
   if (match(p, TOKEN_ELSE)) {
-    elseBranch = expression(p);
+    elseBranch = ifBranch(p);
   }
 
   AstNode *node = astAlloc(NODE_IF, line);
@@ -773,6 +800,29 @@ static ParseRule rules[] = {
 
 static ParseRule *get_rule(TokenType type) { return &rules[type]; }
 
+static AstNode *finishExpressionStatement(Parser *p, AstNode *expr, int line);
+
+// Whether the upcoming token starts an expression rather than a declaration or
+// statement. `fun` starts a lambda only when `(` follows; a declaration always
+// has a name there.
+static bool isExpressionStart(Parser *p) {
+  if (p->current.type == TOKEN_FUN)
+    return tsPeek(p->tokens).type == TOKEN_LEFT_PAREN;
+  return get_rule(p->current.type)->prefix != NULL;
+}
+
+// Parses an expression at the start of a statement. An `if` or block ends the
+// statement, so a following '{' or '(' starts a new one.
+static AstNode *statementExpression(Parser *p) {
+  if (match(p, TOKEN_IF))
+    return ifExpr(p, false);
+  if (match(p, TOKEN_LEFT_BRACE))
+    return blockExpr(p, false);
+  return expression(p);
+}
+
+// Parses the items of a block after its '{'. An expression directly before the
+// '}' is the block's value.
 static BlockNode parseBlock(Parser *p) {
   p->blockDepth++;
   int capacity = 8, count = 0;
@@ -780,12 +830,20 @@ static BlockNode parseBlock(Parser *p) {
   AstNode *tailNode = NULL;
 
   while (!check(p, TOKEN_RIGHT_BRACE) && !is_at_end(p)) {
-    bool isTail = false;
-    AstNode *node = declaration(p, &isTail);
+    AstNode *node;
 
-    if (isTail) {
-      tailNode = node;
-      break;
+    if (isExpressionStart(p)) {
+      int line = p->current.line;
+      AstNode *expr = statementExpression(p);
+
+      if (check(p, TOKEN_RIGHT_BRACE)) {
+        tailNode = expr;
+        break;
+      }
+
+      node = finishExpressionStatement(p, expr, line);
+    } else {
+      node = declaration(p);
     }
 
     if (count >= capacity) {
@@ -794,6 +852,9 @@ static BlockNode parseBlock(Parser *p) {
     }
 
     buf[count++] = node;
+
+    if (p->panicMode)
+      synchronize(p);
   }
 
   consume(p, TOKEN_RIGHT_BRACE, "Expect '}' after block.");
@@ -816,17 +877,6 @@ static BlockNode parseBlock(Parser *p) {
   p->blockDepth--;
 
   return block;
-}
-
-static AstNode *blockStatement(Parser *p) {
-  int line = p->previous.line;
-
-  BlockNode block = parseBlock(p);
-
-  AstNode *node = astAlloc(NODE_BLOCK, line);
-  node->as.block = block;
-
-  return node;
 }
 
 static AstNode *breakStatement(Parser *p) {
@@ -853,49 +903,40 @@ static AstNode *continueStatement(Parser *p) {
   return node;
 }
 
-static AstNode *expressionStatement(Parser *p, bool *isTail) {
-  int line = p->current.line;
-  AstNode *expr = expression(p);
+// Ends an expression used as a statement. A block-like expression, or one whose
+// last token is the ';' of a branch statement, is already terminated. An `if`
+// or block keeps its own node so its value is discarded.
+static AstNode *finishExpressionStatement(Parser *p, AstNode *expr, int line) {
+  TokenType last = p->previous.type;
 
-  if (check(p, TOKEN_RIGHT_BRACE)) {
-    *isTail = true;
-    return expr;
-  }
-
-  if (!match(p, TOKEN_SEMICOLON)) {
+  if (last == TOKEN_RIGHT_BRACE || last == TOKEN_SEMICOLON) {
+    match(p, TOKEN_SEMICOLON);
+  } else if (!match(p, TOKEN_SEMICOLON)) {
     parse_error(p, "Expect ';' after expression.");
   }
 
-  *isTail = false;
+  if (expr != NULL && (expr->kind == NODE_IF || expr->kind == NODE_BLOCK))
+    return expr;
+
   AstNode *node = astAlloc(NODE_EXPR_STMT, line);
   node->as.exprStmt.expr = expr;
 
   return node;
 }
 
-static AstNode *ifStatement(Parser *p, bool *isTail) {
-  int line = p->previous.line;
-  consume(p, TOKEN_LEFT_PAREN, "Expect '(' after 'if'.");
-  AstNode *cond = expression(p);
-  consume(p, TOKEN_RIGHT_PAREN, "Expect ')' after condition.");
-  AstNode *thenBranch = statement(p, isTail);
-  AstNode *elseBranch = NULL;
-  if (match(p, TOKEN_ELSE))
-    elseBranch = statement(p, isTail);
+static AstNode *expressionStatement(Parser *p) {
+  int line = p->current.line;
+  AstNode *expr = statementExpression(p);
 
-  AstNode *node = astAlloc(NODE_IF, line);
-  node->as.if_.condition = cond;
-  node->as.if_.thenBranch = thenBranch;
-  node->as.if_.elseBranch = elseBranch;
-  return node;
+  return finishExpressionStatement(p, expr, line);
 }
 
-static AstNode *whileStatement(Parser *p, bool *isTail) {
+static AstNode *whileStatement(Parser *p) {
   int line = p->previous.line;
   consume(p, TOKEN_LEFT_PAREN, "Expect '(' after 'while'.");
   AstNode *cond = expression(p);
   consume(p, TOKEN_RIGHT_PAREN, "Expect ')' after condition.");
-  AstNode *body = statement(p, isTail);
+  AstNode *body = statement(p);
 
   AstNode *node = astAlloc(NODE_WHILE, line);
   node->as.while_.condition = cond;
@@ -903,7 +944,7 @@ static AstNode *whileStatement(Parser *p, bool *isTail) {
   return node;
 }
 
-static AstNode *forStatement(Parser *p, bool *isTail) {
+static AstNode *forStatement(Parser *p) {
   int line = p->previous.line;
   consume(p, TOKEN_LEFT_PAREN, "Expect '(' after 'for'.");
 
@@ -915,7 +956,7 @@ static AstNode *forStatement(Parser *p, bool *isTail) {
   } else if (match(p, TOKEN_LET)) {
     init = varDeclaration(p, /*isMutable=*/false);
   } else {
-    init = expressionStatement(p, isTail);
+    init = expressionStatement(p);
   }
 
   AstNode *cond = NULL;
@@ -928,7 +969,7 @@ static AstNode *forStatement(Parser *p, bool *isTail) {
     incr = expression(p);
   consume(p, TOKEN_RIGHT_PAREN, "Expect ')' after for clauses.");
 
-  AstNode *body = statement(p, isTail);
+  AstNode *body = statement(p);
 
   if (cond == NULL) {
     cond = astAlloc(NODE_LITERAL, line);
@@ -944,96 +985,10 @@ static AstNode *forStatement(Parser *p, bool *isTail) {
   return loop;
 }
 
-// Determines whether the upcoming token can start an EXPRESSION, for the
-// dynamic per-item dispatch a block used as an expression needs (see
-// parseBlockExprContents below).
-//
-// `fun` is special-cased to always mean a (named) function declaration even
-// inside a block-expression, matching the original: `fun` has a prefix rule
-// (lambda) too, but block-expressions never want a bare `fun name() {...}` line
-// to be parsed as a lambda expression-statement.
-static bool isExpressionStart(TokenType type) {
-  if (type == TOKEN_FUN)
-    return false;
-  return get_rule(type)->prefix != NULL;
-}
-
-// Parses the contents of a block used in EXPRESSION position: `{ ... }`.
-// Unlike a regular (statement) block, each item is independently
-// classified: if the next token can start an expression, it's parsed as an
-// expression -- POP'd once compiled, unless it's the last item before `}`,
-// in which case it becomes the block's value (BlockNode.value); otherwise
-// it's parsed as a full declaration
-// (var/struct/impl/for/while/print/return/fun).
-static BlockNode parseBlockExprContents(Parser *p) {
-  p->blockDepth++;
-  int capacity = 8, count = 0;
-  AstNode **buf = (AstNode **)malloc(capacity * sizeof(AstNode *));
-  AstNode *tailNode = NULL;
-
-  while (!check(p, TOKEN_RIGHT_BRACE) && !is_at_end(p)) {
-    AstNode *node;
-
-    if (isExpressionStart(p->current.type)) {
-      int line = p->current.line;
-      AstNode *expr = expression(p);
-
-      if (check(p, TOKEN_RIGHT_BRACE)) {
-        tailNode = expr;
-        break;
-      }
-
-      if (p->previous.type == TOKEN_RIGHT_BRACE) {
-        // Special handling of if/block expressions and statements
-        // The semicolon becomes optional since they can be either statements
-        // or expressions
-        match(p, TOKEN_SEMICOLON);
-      } else {
-        consume(p, TOKEN_SEMICOLON, "Expect ';' after expression.");
-      }
-
-      node = astAlloc(NODE_EXPR_STMT, line);
-      node->as.exprStmt.expr = expr;
-    } else {
-      bool isTail = false;
-      node = declaration(p, &isTail);
-    }
-
-    if (count >= capacity) {
-      capacity *= 2;
-      buf = (AstNode **)realloc(buf, capacity * sizeof(AstNode *));
-    }
-    buf[count++] = node;
-
-    if (p->panicMode) {
-      synchronize(p);
-    }
-  }
-
-  consume(p, TOKEN_RIGHT_BRACE, "Expect '}' after block expression.");
-
-  AstNode **stmts = NULL;
-  if (count > 0) {
-    stmts = (AstNode **)astAllocRaw(count * sizeof(AstNode *));
-    memcpy(stmts, buf, count * sizeof(AstNode *));
-  }
-  free(buf);
-
-  BlockNode block;
-  block.stmts = stmts;
-  block.count = count;
-  block.value = tailNode;
-  block.endLine = p->previous.line; // the '}' just consumed above
-
-  p->blockDepth--;
-
-  return block;
-}
-
 static AstNode *blockExpr(Parser *p, bool canAssign) {
   (void)canAssign;
   int line = p->previous.line;
-  BlockNode block = parseBlockExprContents(p);
+  BlockNode block = parseBlock(p);
   AstNode *node = astAlloc(NODE_BLOCK, line);
   node->as.block = block;
   return node;
@@ -1050,24 +1005,18 @@ static AstNode *returnStatement(Parser *p) {
   return node;
 }
 
-static AstNode *statement(Parser *p, bool *isTail) {
-  *isTail = false;
-
-  if (match(p, TOKEN_IF))
-    return ifStatement(p, isTail);
+static AstNode *statement(Parser *p) {
   if (match(p, TOKEN_WHILE))
-    return whileStatement(p, isTail);
+    return whileStatement(p);
   if (match(p, TOKEN_FOR))
-    return forStatement(p, isTail);
+    return forStatement(p);
   if (match(p, TOKEN_RETURN))
     return returnStatement(p);
-  if (match(p, TOKEN_LEFT_BRACE))
-    return blockStatement(p);
   if (match(p, TOKEN_BREAK))
     return breakStatement(p);
   if (match(p, TOKEN_CONTINUE))
     return continueStatement(p);
-  return expressionStatement(p, isTail);
+  return expressionStatement(p);
 }
 
 static AstNode *parseType(Parser *p) {
@@ -1596,9 +1545,8 @@ static AstNode *typeAliasDeclaration(Parser *p) {
   return node;
 }
 
-static AstNode *declaration(Parser *p, bool *isTail) {
+static AstNode *declaration(Parser *p) {
   AstNode *node = NULL;
-  *isTail = false;
 
   if (check(p, TOKEN_PUB)) {
     error_at_current(p, "'pub' is only valid on struct fields and 'impl' "
@@ -1620,14 +1568,15 @@ static AstNode *declaration(Parser *p, bool *isTail) {
     node = traitDeclaration(p);
   } else if (match(p, TOKEN_TYPE)) {
     node = typeAliasDeclaration(p);
-  } else if (match(p, TOKEN_FUN)) {
+  } else if (check(p, TOKEN_FUN) &&
+             tsPeek(p->tokens).type != TOKEN_LEFT_PAREN && match(p, TOKEN_FUN)) {
     node = functionDeclaration(p, /*isMethod=*/false);
   } else if (match(p, TOKEN_VAR)) {
     node = varDeclaration(p, /*isMutable=*/true);
   } else if (match(p, TOKEN_LET)) {
     node = varDeclaration(p, /*isMutable=*/false);
   } else {
-    node = statement(p, isTail);
+    node = statement(p);
   }
 
   if (p->panicMode)
@@ -1660,8 +1609,7 @@ AstNode **parse(const char *source, int *outCount, bool *hadError,
       capacity *= 2;
       ast = (AstNode **)realloc(ast, capacity * sizeof(AstNode *));
     }
-    bool isTail = false;
-    ast[count++] = declaration(&parser, &isTail);
+    ast[count++] = declaration(&parser);
   }
 
   *outEndLine = parser.current.line; // the EOF token itself

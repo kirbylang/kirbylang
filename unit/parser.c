@@ -122,7 +122,7 @@ int main(void) {
       "(call closure)\n");
 
   assert_ast("../tests/run/assignments/block_assignment_edge_case.krb",
-             "(block (var a \"outer\") (block (var a a)))\n");
+             "(block (var a \"outer\") (value (block (var a a))))\n");
 
   assert_ast("../tests/run/arrays/array_index_get.krb",
              "(var array (array 1 2 3))\n"

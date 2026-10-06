@@ -47,6 +47,9 @@
   - Before, a script also saw `krb`, the command and the path, so its first
     argument was `@argv(3)`. The `cat`, `env` and `fib` examples are updated
   - `krb exec <source>` now passes the arguments after the source to the script
+- Fix `if`/`else` and lambdas failing as an implicit return, and a nested
+  block's last expression wrongly returning from the whole function. Blocks
+  and `if` now have one parser each, and only a function body returns its value
 
 ## 0.4.0
 

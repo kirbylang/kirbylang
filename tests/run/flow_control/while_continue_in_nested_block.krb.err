@@ -7,7 +7,7 @@
 0004    2 OP_GET_GLOBAL       0 'i'
 0006    | OP_CONSTANT         2 '4'
 0008    | OP_LESS
-0009    | OP_JUMP_IF_FALSE    9 -> 54
+0009    | OP_JUMP_IF_FALSE    9 -> 57
 0012    | OP_POP
 0013    3 OP_GET_GLOBAL       0 'i'
 0015    | OP_CONSTANT         3 '1'
@@ -30,12 +30,14 @@
 0045    | OP_GET_LOCAL        1
 0047    | OP_CALL             1
 0049    | OP_POP
-0050    9 OP_POP
-0051   10 OP_LOOP            51 -> 4
-0054    | OP_POP
-0055   11 OP_GET_GLOBAL       6 '@println'
-0057    | OP_CONSTANT         7 'done'
-0059    | OP_CALL             1
-0061    | OP_POP
-0062   12 OP_NIL
-0063    | OP_RETURN
+0050    9 OP_NIL
+0051    | OP_CLOSE_BLOCK_EXPR    1
+0053    | OP_POP
+0054   10 OP_LOOP            54 -> 4
+0057    | OP_POP
+0058   11 OP_GET_GLOBAL       6 '@println'
+0060    | OP_CONSTANT         7 'done'
+0062    | OP_CALL             1
+0064    | OP_POP
+0065   12 OP_NIL
+0066    | OP_RETURN

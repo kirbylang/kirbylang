@@ -1,0 +1,9 @@
+fun classify(n: f64): string {
+  if (n < 10) {
+    if (n < 5) "small" else "medium"
+  } else "large"
+}
+
+@println(classify(1));
+@println(classify(7));
+@println(classify(20));
