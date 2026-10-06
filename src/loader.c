@@ -28,7 +28,8 @@ static void cleanupFromAllocatingFunctions(int n);
 /**
  * Load a CompiledUnit as a ObjFunction
  */
-ObjFunction *loadUnit(VM *vm, const CompiledUnit *compiledUnit) {
+ObjFunction *loadUnit(VM *vm, const CompiledUnit *compiledUnit,
+                      bool disassembleCode) {
   int functionCount = compiledUnit->functionCount;
 
   // Track the ObjFunctions by index so CONST_FUNCTION references resolve, and
@@ -47,10 +48,12 @@ ObjFunction *loadUnit(VM *vm, const CompiledUnit *compiledUnit) {
                                    functionCount);
 
 #ifdef DEBUG_PRINT_CODE
-  for (int i = 0; i < functionCount; i++) {
-    ObjFunction *fn = byIndex[i];
-    disassembleChunk(&fn->chunk,
-                     fn->name != NULL ? fn->name->chars : "<script>");
+  if (disassembleCode) {
+    for (int i = 0; i < functionCount; i++) {
+      ObjFunction *fn = byIndex[i];
+      disassembleChunk(&fn->chunk,
+                       fn->name != NULL ? fn->name->chars : "<script>");
+    }
   }
 #endif
 
