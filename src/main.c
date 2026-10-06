@@ -27,7 +27,7 @@ static char *readFile(const char *path);
 static CompiledUnit *compileSource(const char *source, bool typecheck);
 static void runFile(const char *path);
 static char *readFileNoExit(const char *path);
-static void runCode(const char *source);
+static void runCode(const char *source, bool disassembleCode);
 static void compileFile(const char *path);
 static void compileCode(const char *source);
 
@@ -156,7 +156,7 @@ static char **scriptArgv(char *program, int argc, char *argv[], int first,
 static void sessionBegin(int argc, char *argv[]) {
   initVM(argc, argv);
   typchkSessionBegin();
-  runCode(KIRBY_STDLIB);
+  runCode(KIRBY_STDLIB, /*disassembleCode=*/false);
 }
 
 static void sessionEnd(void) {
@@ -263,7 +263,7 @@ static int cmdExec(int argc, char *argv[]) {
   char **args = scriptArgv("exec", argc, argv, 3, &scriptArgc);
 
   sessionBegin(scriptArgc, args);
-  runCode(argv[2]);
+  runCode(argv[2], /*disassembleCode=*/true);
   sessionEnd();
   free(args);
   return 0;
@@ -564,7 +564,7 @@ static void repl(void) {
       continue;
     }
 
-    InterpretResult result = interpret(unit);
+    InterpretResult result = interpret(unit, true);
 
     if (result == INTERPRET_RUNTIME_ERROR) {
       fprintf(stderr, "Runtime Error!\n");
@@ -681,20 +681,20 @@ static void runFile(const char *path) {
     exit(EXIT_CODE_COMPILER_ERR);
   }
 
-  InterpretResult result = interpret(unit);
+  InterpretResult result = interpret(unit, true);
 
   if (result == INTERPRET_RUNTIME_ERROR)
     exit(EXIT_CODE_RUNTIME_ERR);
 }
 
-static void runCode(const char *source) {
+static void runCode(const char *source, bool disassembleCode) {
   CompiledUnit *unit = compileSource(source, /*typecheck=*/true);
 
   if (unit == NULL) {
     exit(EXIT_CODE_COMPILER_ERR);
   }
 
-  InterpretResult result = interpret(unit);
+  InterpretResult result = interpret(unit, disassembleCode);
 
   if (result == INTERPRET_RUNTIME_ERROR)
     exit(EXIT_CODE_RUNTIME_ERR);

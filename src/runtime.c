@@ -63,7 +63,8 @@ static CompiledUnit **decodeUnits(const StrBuf *payload, int *count) {
   for (;;) {
     const uint8_t *bytes;
     size_t length;
-    PackagedUnitStatus found = packagedNextUnit(payload, &cursor, &bytes, &length);
+    PackagedUnitStatus found =
+        packagedNextUnit(payload, &cursor, &bytes, &length);
 
     if (found == PACKAGED_UNIT_END) {
       break;
@@ -112,7 +113,9 @@ int main(int argc, char *argv[]) {
   initVM(argc, argv);
 
   for (int i = 0; i < count; i++) {
-    if (interpret(units[i]) == INTERPRET_RUNTIME_ERROR) {
+    bool disassembleCode = i > 0;
+
+    if (interpret(units[i], disassembleCode) == INTERPRET_RUNTIME_ERROR) {
       exit(EXIT_CODE_RUNTIME_ERR);
     }
   }

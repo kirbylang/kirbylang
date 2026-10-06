@@ -65,10 +65,10 @@ InterpretResult interpretFunction(ObjFunction *function) {
   return run();
 }
 
-InterpretResult interpret(CompiledUnit *unit) {
+InterpretResult interpret(CompiledUnit *unit, bool disassembleCode) {
   TRACELN("vm.interpret()");
 
-  ObjFunction *function = loadUnit(&vm, unit);
+  ObjFunction *function = loadUnit(&vm, unit, disassembleCode);
 
   freeCompiledUnit(unit);
   free(unit);
