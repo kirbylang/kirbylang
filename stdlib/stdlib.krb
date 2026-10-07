@@ -16,7 +16,17 @@ impl Date {
         Self.timestamp_to_date(@now());
 
     pub fun from_parts(year: f64, month: f64, day: f64, hour: f64, minute: f64, second: f64): Self {
-        Self.new(Self.date_to_timestamp(year, month, day, hour, minute, second))
+        @assert(month >= 1 and month <= 12, $"Month must be between 1-12: {@numberToString(month)}");
+        @assert(day >= 1 and day <= 30, $"Day must be between 1-31: {@numberToString(day)}");
+        @assert(hour >= 0 and hour <= 23, $"Hour must be between 0-23: {@numberToString(hour)}");
+        @assert(minute >= 0 and minute <= 59, $"Minute must be between 0-59: {@numberToString(minute)}");
+        @assert(second >= 0 and second <= 59, $"Second must be between 0-59: {@numberToString(second)}");
+
+        year = @floor(year);
+
+        let days = Self.days_from_civil(year, month, day);
+        let timestamp =  days * 86400 + hour * 3600 + minute * 60 + second;
+        Self.new(timestamp)
     }
     
     pub fun from(value: string): Self {
@@ -58,15 +68,7 @@ impl Date {
         let second_str: string = time_parts[2];
         let second: f64 = @parseNumber(second_str);
         
-        Self {
-            timestamp: Self.date_to_timestamp(year, month, day, hour, minute, second),
-            year: year,
-            month: month,
-            day: day,
-            hour: hour,
-            minute: minute,
-            second: second,
-        }
+        Self.from_parts(year, month, day, hour, minute, second)
     }
 
     pub fun get_year(self): f64 = self.year;
@@ -137,13 +139,13 @@ impl Date {
         };
     }
 
-    fun date_to_timestamp(year: f64, month: f64, day: f64, hour: f64, minute: f64, second: f64): f64 {
-        let days = Self.date_from_civil(year, month, day);
+    fun parts_to_timestamp(year: f64, month: f64, day: f64, hour: f64, minute: f64, second: f64): f64 {
+        let days = Self.days_from_civil(year, month, day);
 
         days * 86400 + hour * 3600 + minute * 60 + second
     }
 
-    fun date_from_civil(year: f64, month: f64, day: f64): f64 {
+    fun days_from_civil(year: f64, month: f64, day: f64): f64 {
         year = year - if (month <= 2) 1 else 0;
         
         let era = @floor(
