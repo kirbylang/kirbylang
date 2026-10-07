@@ -93,7 +93,7 @@
     },
     "numbers": {
       "name": "constant.numeric.krb",
-      "match": "\\b\\d+(\\.\\d+)?\\b"
+      "match": "\\b\\d+(\\.\\d+)?([fF]64)?\\b"
     },
     "struct-declaration": {
       "match": "\\b(struct)\\s+([A-Za-z_][A-Za-z0-9_]*)",

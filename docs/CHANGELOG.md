@@ -54,6 +54,7 @@
 - Add new native function `@now()` that returns the current unix timestamp
 - Add `Date` struct to `stdlib.krb`
   - Has `new(timestamp)` and `now()` static methods
+- Allow number literals to have `f64` or `F64` suffix e.g. `123f64`, `456F64`
 
 ## 0.4.0
 

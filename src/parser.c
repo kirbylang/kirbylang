@@ -769,6 +769,7 @@ static ParseRule rules[] = {
     [TOKEN_IDENTIFIER] = {variable, NULL, PREC_NONE},
     [TOKEN_STRING] = {string_, NULL, PREC_NONE},
     [TOKEN_NUMBER] = {number, NULL, PREC_NONE},
+    [TOKEN_F64] = {number, NULL, PREC_NONE},
     [TOKEN_INTERP_STRING] = {interpString, NULL, PREC_NONE},
     [TOKEN_INTERP_START] = {interpolation, NULL, PREC_NONE},
     [TOKEN_INTERP_MIDDLE] = {NULL, NULL, PREC_NONE},

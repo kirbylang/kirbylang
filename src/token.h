@@ -34,7 +34,9 @@ typedef enum {
   // Literals.
   TOKEN_IDENTIFIER,
   TOKEN_STRING,
+  // Numbers
   TOKEN_NUMBER,
+  TOKEN_F64,
   // Interpolated strings.
   TOKEN_INTERP_STRING, // $"text" -- no placeholders
   TOKEN_INTERP_START,  // $"text{

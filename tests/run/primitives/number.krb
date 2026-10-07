@@ -1,1 +1,4 @@
 @println(1234567890);
+@println(1234567890f64);
+@println(1234567890F64);
+@println(1.5f64);
