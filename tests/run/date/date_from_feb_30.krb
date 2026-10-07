@@ -1,0 +1,5 @@
+// This tests that fractional timestamps have floor ran on them
+
+let feb_30 = Date.from("2026-02-30 00:00:00");
+
+@println(feb_30);

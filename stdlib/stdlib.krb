@@ -20,7 +20,10 @@ impl Date {
 
     pub fun from_parts(year: f64, month: f64, day: f64, hour: f64, minute: f64, second: f64): Self {
         @assert(month >= 1 and month <= 12, $"Month must be between 1-12: {@numberToString(month)}");
-        @assert(day >= 1 and day <= 30, $"Day must be between 1-31: {@numberToString(day)}");
+
+        let days_in_month = Self.days_in_month(year, month);
+
+        @assert(day >= 1 and day <= days_in_month, $"Day must be between 1-{days_in_month}: {@numberToString(day)}");
         @assert(hour >= 0 and hour <= 23, $"Hour must be between 0-23: {@numberToString(hour)}");
         @assert(minute >= 0 and minute <= 59, $"Minute must be between 0-59: {@numberToString(minute)}");
         @assert(second >= 0 and second <= 59, $"Second must be between 0-59: {@numberToString(second)}");
