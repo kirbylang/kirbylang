@@ -1,0 +1,7 @@
+// This tests that fractional timestamps have floor ran on them
+
+let fractional = Date.new(86399.9);
+let whole = Date.new(86399);
+
+@println($"Fractional: {fractional.get_timestamp()}");
+@println($"Whole: {whole.get_timestamp()}");

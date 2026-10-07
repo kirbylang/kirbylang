@@ -12,7 +12,7 @@ impl Date {
     pub fun new(timestamp: f64): Self {
         @assert(timestamp >= 0, $"Negative timestamps are not supported yet");
 
-        Self.timestamp_to_date(@floor(timestamp))
+        Self.timestamp_to_date(timestamp)
     }
     
     pub fun now(): Self =
@@ -74,6 +74,7 @@ impl Date {
         Self.from_parts(year, month, day, hour, minute, second)
     }
 
+    pub fun get_timestamp(self): f64 = self.timestamp;
     pub fun get_year(self): f64 = self.year;
     pub fun get_month(self): f64 = self.month;
     pub fun get_day(self): f64 = self.day;
@@ -95,7 +96,10 @@ impl Date {
         return lengths[month - 1];
     }
 
-    fun timestamp_to_date(ts: f64): Self {
+    fun timestamp_to_date(timestamp: f64): Self {
+        // Only store whole seconds
+        let ts = @floor(timestamp);
+
         var days = ts / 86400;
         let sod  = ts % 86400;
 
