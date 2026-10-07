@@ -76,6 +76,42 @@ int main(void) {
       "@len();", nativeRefExpected,
       (int)(sizeof(nativeRefExpected) / sizeof(nativeRefExpected[0])));
 
+  TokenType numberExpected[] = {
+      TOKEN_NUMBER,
+      TOKEN_EOF,
+  };
+
+  assert_token_types("123", numberExpected,
+                     (int)(sizeof(numberExpected) / sizeof(numberExpected[0])));
+
+  // A complete f64/F64 suffix is part of the number literal.
+  TokenType numberF64Expected[] = {
+      TOKEN_F64,
+      TOKEN_EOF,
+  };
+
+  assert_token_types("123f64", numberF64Expected,
+                     (int)(sizeof(numberF64Expected) / sizeof(numberF64Expected[0])));
+  assert_token_types("456F64", numberF64Expected,
+                     (int)(sizeof(numberF64Expected) / sizeof(numberF64Expected[0])));
+  assert_token_types("1.5f64", numberF64Expected,
+                     (int)(sizeof(numberF64Expected) / sizeof(numberF64Expected[0])));
+
+  // A partial suffix is not consumed, so it scans as a number followed
+  // by an identifier, which the parser rejects.
+  TokenType numberPartialSuffixExpected[] = {
+      TOKEN_NUMBER,
+      TOKEN_IDENTIFIER,
+      TOKEN_EOF,
+  };
+
+  assert_token_types("123f", numberPartialSuffixExpected,
+                     (int)(sizeof(numberPartialSuffixExpected) /
+                           sizeof(numberPartialSuffixExpected[0])));
+  assert_token_types("123f6", numberPartialSuffixExpected,
+                     (int)(sizeof(numberPartialSuffixExpected) /
+                           sizeof(numberPartialSuffixExpected[0])));
+
   TokenType bareAtExpected[] = {
       TOKEN_ERROR,
       TOKEN_EOF,

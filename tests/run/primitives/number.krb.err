@@ -3,5 +3,17 @@
 0002    | OP_CONSTANT         1 '1234567890'
 0004    | OP_CALL             1
 0006    | OP_POP
-0007    | OP_NIL
-0008    | OP_RETURN
+0007    2 OP_GET_GLOBAL       0 '@println'
+0009    | OP_CONSTANT         1 '1234567890'
+0011    | OP_CALL             1
+0013    | OP_POP
+0014    3 OP_GET_GLOBAL       0 '@println'
+0016    | OP_CONSTANT         1 '1234567890'
+0018    | OP_CALL             1
+0020    | OP_POP
+0021    4 OP_GET_GLOBAL       0 '@println'
+0023    | OP_CONSTANT         2 '1.5'
+0025    | OP_CALL             1
+0027    | OP_POP
+0028    5 OP_NIL
+0029    | OP_RETURN

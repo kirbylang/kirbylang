@@ -342,6 +342,16 @@ static Token number(Scanner *scanner) {
       advance(scanner);
   }
 
+  // Look for an optional f64/F64 suffix
+  if ((peek(scanner) == 'f' || peek(scanner) == 'F') &&
+      peekNext(scanner) == '6' && scanner->current[2] == '4') {
+    advance(scanner);
+    advance(scanner);
+    advance(scanner);
+
+    return makeToken(scanner, TOKEN_F64);
+  }
+
   return makeToken(scanner, TOKEN_NUMBER);
 }
 
