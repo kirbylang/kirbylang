@@ -11,6 +11,6 @@
 0018    | OP_POP
 0019    2 OP_NIL
 0020    | OP_RETURN
-assertion failed: Year must be greater than or equal to 1: -1
+assertion failed: Year must be between 1-9999: -1
 [line 22] in from_parts()
 [line 1] in script

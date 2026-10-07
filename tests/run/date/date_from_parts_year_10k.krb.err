@@ -1,15 +1,15 @@
 == <script> ==
 0000    1 OP_GET_GLOBAL       0 'Date'
-0002    | OP_CONSTANT         2 '0'
+0002    | OP_CONSTANT         2 '10000'
 0004    | OP_CONSTANT         3 '1'
 0006    | OP_CONSTANT         3 '1'
-0008    | OP_CONSTANT         2 '0'
-0010    | OP_CONSTANT         2 '0'
-0012    | OP_CONSTANT         2 '0'
+0008    | OP_CONSTANT         4 '0'
+0010    | OP_CONSTANT         4 '0'
+0012    | OP_CONSTANT         4 '0'
 0014    | OP_INVOKE        (6 args)    1 'from_parts'
 0017    | OP_POP
 0018    2 OP_NIL
 0019    | OP_RETURN
-assertion failed: Year must be between 1-9999: 0
+assertion failed: Year must be between 1-9999: 10000
 [line 22] in from_parts()
 [line 1] in script
