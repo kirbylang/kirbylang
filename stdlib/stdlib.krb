@@ -9,11 +9,14 @@ struct Date {
 }
 
 impl Date {
-    pub fun new(timestamp: f64): Self =
-        Self.timestamp_to_date(@floor(timestamp));
+    pub fun new(timestamp: f64): Self {
+        @assert(timestamp >= 0, $"Negative timestamps are not supported yet");
+
+        Self.timestamp_to_date(@floor(timestamp))
+    }
     
     pub fun now(): Self =
-        Self.timestamp_to_date(@now());
+        Self.new(@now());
 
     pub fun from_parts(year: f64, month: f64, day: f64, hour: f64, minute: f64, second: f64): Self {
         @assert(month >= 1 and month <= 12, $"Month must be between 1-12: {@numberToString(month)}");
