@@ -12,5 +12,5 @@
 0019    2 OP_NIL
 0020    | OP_RETURN
 assertion failed: Second must be between 0-59: -1
-[line 29] in from_parts()
+[line 84] in from_parts()
 [line 1] in script

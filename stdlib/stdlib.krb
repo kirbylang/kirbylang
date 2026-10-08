@@ -1,5 +1,11 @@
+// UTC Date Time
+// 
+// Units are stored as f64 but are floored in the absence of integers in the language.
 struct Date {
+    // Unix timestamp
     let timestamp: f64;
+
+
     let year: f64;
     let month: f64;
     let day: f64;
@@ -9,10 +15,59 @@ struct Date {
 }
 
 impl Date {
+    // Create date from a unix timestamp
+    // 
+    // Floor is ran on the timestamp before storing.
     pub fun new(timestamp: f64): Self {
-        @assert(timestamp >= 0, $"Negative timestamps are not supported yet");
+        @assert(timestamp >= 0, $"Negative timestamps are not supported yet: {timestamp}");
 
-        Self.timestamp_to_date(timestamp)
+        // Only store whole seconds
+        let ts = @floor(timestamp);
+
+        var days = @floor(ts / 86400);
+        let sod  = ts % 86400;
+
+        let hour   = @floor(sod / 3600);
+        let minute = @floor((sod % 3600) / 60);
+        let second = sod % 60;
+
+        var year = 1970;
+
+        while (true) {
+            let ydays = if (Self.is_leap(year)) 366 else 365;
+
+            if (days < ydays) {
+                break;
+            }
+
+            days = days - ydays;
+            year = year + 1;
+        }
+
+        var month = 1;
+
+        while (true) {
+            let mdays = Self.days_in_month(year, month);
+
+            if (days < mdays) {
+                break;
+            }
+
+            days = days - mdays;
+            month = month + 1;
+        }
+
+        let day = days + 1;
+
+        Self {
+            timestamp: ts,
+            year: year,
+            month: @floor(month),
+            day: @floor(day),
+            hour: @floor(hour),
+            minute: minute,
+            second: @floor(second),
+        }
     }
     
     pub fun now(): Self =
@@ -101,56 +156,6 @@ impl Date {
         }
 
         lengths[month - 1]
-    }
-
-    fun timestamp_to_date(timestamp: f64): Self {
-        // Only store whole seconds
-        let ts = @floor(timestamp);
-
-        var days = ts / 86400;
-        let sod  = ts % 86400;
-
-        let hour   = sod / 3600;
-        let minute = (sod % 3600) / 60;
-        let second = sod % 60;
-
-        var year = 1970;
-
-        while (true) {
-            let ydays = if (Self.is_leap(year)) 366 else 365;
-
-            if (days < ydays) {
-                break;
-            }
-
-            days = days - ydays;
-            year = year + 1;
-        }
-
-        var month = 1;
-
-        while (true) {
-            let mdays = Self.days_in_month(year, month);
-
-            if (days < mdays) {
-                break;
-            }
-
-            days = days - mdays;
-            month = month + 1;
-        }
-
-        let day = days + 1;
-
-        return Self {
-            timestamp: ts,
-            year: year,
-            month: @floor(month),
-            day: @floor(day),
-            hour: @floor(hour),
-            minute: @floor(minute),
-            second: @floor(second),
-        };
     }
 
     fun parts_to_timestamp(year: f64, month: f64, day: f64, hour: f64, minute: f64, second: f64): f64 {

@@ -6,6 +6,6 @@
 0008    2 OP_NIL
 0009    | OP_RETURN
 assertion failed: Year must be between 1-9999: 0
-[line 22] in from_parts()
-[line 77] in from()
+[line 77] in from_parts()
+[line 132] in from()
 [line 1] in script
