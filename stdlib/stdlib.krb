@@ -1,5 +1,11 @@
+// UTC Date Time
+// 
+// Units are stored as f64 but are floored in the absence of integers in the language.
 struct Date {
+    // Unix timestamp
     let timestamp: f64;
+
+
     let year: f64;
     let month: f64;
     let day: f64;
@@ -9,14 +15,77 @@ struct Date {
 }
 
 impl Date {
-    pub fun new(timestamp: f64): Self =
-        Self.timestamp_to_date(@floor(timestamp));
+    // Create date from a unix timestamp
+    // 
+    // Floor is ran on the timestamp before storing.
+    pub fun new(timestamp: f64): Self {
+        // Only store whole seconds
+        let ts = @floor(timestamp);
+
+        var days = @floor(ts / 86400);
+        let sod  =  @floor(ts - days * 86400);
+
+        let hour   = @floor(sod / 3600);
+        let minute = @floor((sod % 3600) / 60);
+        let second = sod % 60;
+
+        var year = 1970;
+
+        while (true) {
+            let ydays = if (Self.is_leap(year)) 366 else 365;
+
+            if (days < ydays) {
+                break;
+            }
+
+            days = days - ydays;
+            year = year + 1;
+        }
+
+        var month = 1;
+
+        while (true) {
+            let mdays = Self.days_in_month(year, month);
+
+            if (days < mdays) {
+                break;
+            }
+
+            days = days - mdays;
+            month = month + 1;
+        }
+
+        let day = days + 1;
+
+        Self {
+            timestamp: ts,
+            year: year,
+            month: @floor(month),
+            day: @floor(day),
+            hour: @floor(hour),
+            minute: minute,
+            second: @floor(second),
+        }
+    }
     
     pub fun now(): Self =
-        Self.timestamp_to_date(@now());
+        Self.new(@now());
 
     pub fun from_parts(year: f64, month: f64, day: f64, hour: f64, minute: f64, second: f64): Self {
-        Self.new(Self.date_to_timestamp(year, month, day, hour, minute, second))
+        @assert(year >= 1 and year <= 9999, $"Year must be between 1-9999: {@numberToString(year)}");
+        
+        let days_in_month = Self.days_in_month(year, month);
+
+        @assert(day >= 1 and day <= days_in_month, $"Day must be between 1-{days_in_month}: {@numberToString(day)}");
+        @assert(hour >= 0 and hour <= 23, $"Hour must be between 0-23: {@numberToString(hour)}");
+        @assert(minute >= 0 and minute <= 59, $"Minute must be between 0-59: {@numberToString(minute)}");
+        @assert(second >= 0 and second <= 59, $"Second must be between 0-59: {@numberToString(second)}");
+
+        year = @floor(year);
+
+        let days = Self.days_from_civil(year, month, day);
+        let timestamp =  days * 86400 + hour * 3600 + minute * 60 + second;
+        Self.new(timestamp)
     }
     
     pub fun from(value: string): Self {
@@ -58,17 +127,10 @@ impl Date {
         let second_str: string = time_parts[2];
         let second: f64 = @parseNumber(second_str);
         
-        Self {
-            timestamp: Self.date_to_timestamp(year, month, day, hour, minute, second),
-            year: year,
-            month: month,
-            day: day,
-            hour: hour,
-            minute: minute,
-            second: second,
-        }
+        Self.from_parts(year, month, day, hour, minute, second)
     }
 
+    pub fun get_timestamp(self): f64 = self.timestamp;
     pub fun get_year(self): f64 = self.year;
     pub fun get_month(self): f64 = self.month;
     pub fun get_day(self): f64 = self.day;
@@ -80,76 +142,30 @@ impl Date {
         year % 4 == 0 and (year % 100 != 0 or year % 400 == 0)
     }
 
+    fun is_valid_month(month: f64): bool = month >= 1 and month <= 12;
+
     fun days_in_month(year: f64, month: f64): f64 {
+        @assert(Self.is_valid_month(month), $"Month must be between 1-12: {@numberToString(month)}");
+
         let lengths = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
         
         if (month == 2 and Self.is_leap(year)) {
             return 29;
         }
 
-        return lengths[month - 1];
+        lengths[month - 1]
     }
 
-    fun timestamp_to_date(ts: f64): Self {
-        var days = ts / 86400;
-        let sod  = ts % 86400;
-
-        let hour   = sod / 3600;
-        let minute = (sod % 3600) / 60;
-        let second = sod % 60;
-
-        var year = 1970;
-
-        while (true) {
-            let ydays = if (Self.is_leap(year)) 366 else 365;
-
-            if (days < ydays) {
-                break;
-            }
-
-            days = days - ydays;
-            year = year + 1;
-        }
-
-        var month = 1;
-
-        while (true) {
-            let mdays = Self.days_in_month(year, month);
-
-            if (days < mdays) {
-                break;
-            }
-
-            days = days - mdays;
-            month = month + 1;
-        }
-
-        let day = days + 1;
-
-        return Self {
-            timestamp: ts,
-            year: year,
-            month: @floor(month),
-            day: @floor(day),
-            hour: @floor(hour),
-            minute: @floor(minute),
-            second: @floor(second),
-        };
-    }
-
-    fun date_to_timestamp(year: f64, month: f64, day: f64, hour: f64, minute: f64, second: f64): f64 {
-        let days = Self.date_from_civil(year, month, day);
+    fun parts_to_timestamp(year: f64, month: f64, day: f64, hour: f64, minute: f64, second: f64): f64 {
+        let days = Self.days_from_civil(year, month, day);
 
         days * 86400 + hour * 3600 + minute * 60 + second
     }
 
-    fun date_from_civil(year: f64, month: f64, day: f64): f64 {
+    fun days_from_civil(year: f64, month: f64, day: f64): f64 {
         year = year - if (month <= 2) 1 else 0;
         
-        let era = @floor(
-            if (year >= 0) year / 400
-            else (year - 399) / 400
-        );
+        let era = @floor(year / 400);
 
         // Year Of Era [0, 399]
         let yoe = year - era * 400; 

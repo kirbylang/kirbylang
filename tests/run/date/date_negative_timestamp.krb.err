@@ -1,38 +1,19 @@
 == <script> ==
-0000    1 OP_GET_GLOBAL       1 'Date'
-0002    | OP_CONSTANT         3 '1'
-0004    | OP_NEGATE
-0005    | OP_INVOKE        (1 args)    2 'new'
-0008    | OP_DEFINE_GLOBAL    0 'date'
-0010    3 OP_GET_GLOBAL       4 '@println'
-0012    | OP_GET_GLOBAL       0 'date'
-0014    | OP_INVOKE        (0 args)    5 'get_year'
-0017    | OP_CALL             1
-0019    | OP_POP
-0020    4 OP_GET_GLOBAL       4 '@println'
-0022    | OP_GET_GLOBAL       0 'date'
-0024    | OP_INVOKE        (0 args)    6 'get_month'
-0027    | OP_CALL             1
-0029    | OP_POP
-0030    5 OP_GET_GLOBAL       4 '@println'
-0032    | OP_GET_GLOBAL       0 'date'
-0034    | OP_INVOKE        (0 args)    7 'get_day'
-0037    | OP_CALL             1
-0039    | OP_POP
-0040    6 OP_GET_GLOBAL       4 '@println'
-0042    | OP_GET_GLOBAL       0 'date'
-0044    | OP_INVOKE        (0 args)    8 'get_hour'
-0047    | OP_CALL             1
-0049    | OP_POP
-0050    7 OP_GET_GLOBAL       4 '@println'
-0052    | OP_GET_GLOBAL       0 'date'
-0054    | OP_INVOKE        (0 args)    9 'get_minute'
-0057    | OP_CALL             1
-0059    | OP_POP
-0060    8 OP_GET_GLOBAL       4 '@println'
-0062    | OP_GET_GLOBAL       0 'date'
-0064    | OP_INVOKE        (0 args)   10 'get_second'
-0067    | OP_CALL             1
-0069    | OP_POP
-0070    9 OP_NIL
-0071    | OP_RETURN
+0000    1 OP_GET_GLOBAL       0 '@println'
+0002    | OP_GET_GLOBAL       1 'Date'
+0004    | OP_CONSTANT         3 '1'
+0006    | OP_NEGATE
+0007    | OP_INVOKE        (1 args)    2 'new'
+0010    | OP_INVOKE        (0 args)    4 'toString'
+0013    | OP_CALL             1
+0015    | OP_POP
+0016    2 OP_GET_GLOBAL       0 '@println'
+0018    | OP_GET_GLOBAL       1 'Date'
+0020    | OP_CONSTANT         5 '10000'
+0022    | OP_NEGATE
+0023    | OP_INVOKE        (1 args)    2 'new'
+0026    | OP_INVOKE        (0 args)    4 'toString'
+0029    | OP_CALL             1
+0031    | OP_POP
+0032    3 OP_NIL
+0033    | OP_RETURN

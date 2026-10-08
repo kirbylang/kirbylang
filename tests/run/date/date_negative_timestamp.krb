@@ -1,8 +1,2 @@
-let date = Date.new(-1);
-
-@println(date.get_year());
-@println(date.get_month());
-@println(date.get_day());
-@println(date.get_hour());
-@println(date.get_minute());
-@println(date.get_second());
+@println(Date.new(-1));
+@println(Date.new(-10000));
