@@ -1,16 +1,16 @@
----
-aliases:
-  - Lexer
----
-## Lexer
+# Tokens
+
+## Generate Tokens
 
 ```c
+// src/lexer.h
+
 TokenStream lex(const char *source);
 ```
 
-## TokenStream
-
 ```c
+// src/token_stream.h
+
 typedef struct {
 	Token *tokens;
 	int count;
@@ -26,9 +26,10 @@ Token tsPeekNext(TokenStream *ts);
 Token tsAdvance(TokenStream *ts);
 bool tsIsAtEnd(TokenStream *ts);
 ```
-## Tokens
 
 ```c
+// src/token.h
+
 typedef struct {
 	TokenType type;
 	const char *start;
@@ -37,7 +38,7 @@ typedef struct {
 } Token;
 ```
 
-### TokenType
+## TokenType
 
 | Idx | Token                     |         Example |
 | --: | :------------------------ | --------------: |
@@ -69,31 +70,32 @@ typedef struct {
 |  25 | `TOKEN_IDENTIFIER`        | `StringBuilder` |
 |  26 | `TOKEN_STRING`            | `"Hello World"` |
 |  27 | `TOKEN_NUMBER`            |       `1234.56` |
-|  28 | `TOKEN_INTERP_STRING`     |      `$"Hello"` |
-|  29 | `TOKEN_INTERP_START`      |     `$"Hello {` |
-|  30 | `TOKEN_INTERP_MIDDLE`     |          `}, {` |
-|  31 | `TOKEN_INTERP_END`        |           `}!"` |
-|  32 | `TOKEN_AND`               |           `and` |
-|  33 | `TOKEN_STRUCT`            |        `struct` |
-|  34 | `TOKEN_IMPL`              |          `impl` |
-|  35 | `TOKEN_TRAIT`             |         `trait` |
-|  36 | `TOKEN_ELSE`              |          `else` |
-|  37 | `TOKEN_FALSE`             |         `false` |
-|  38 | `TOKEN_FOR`               |           `for` |
-|  39 | `TOKEN_FUN`               |           `fun` |
-|  40 | `TOKEN_IF`                |            `if` |
-|  41 | `TOKEN_NIL`               |           `nil` |
-|  42 | `TOKEN_OR`                |            `or` |
-|  43 | `TOKEN_PRINT`             |         `print` |
-|  44 | `TOKEN_PUB`               |           `pub` |
-|  45 | `TOKEN_RETURN`            |        `return` |
-|  46 | `TOKEN_SELF`              |          `self` |
-|  47 | `TOKEN_TRUE`              |          `true` |
-|  48 | `TOKEN_TYPE`              |          `type` |
-|  49 | `TOKEN_VAR`               |           `var` |
-|  50 | `TOKEN_LET`               |           `let` |
-|  51 | `TOKEN_WHILE`             |         `while` |
-|  52 | `TOKEN_BREAK`             |         `break` |
-|  53 | `TOKEN_CONTINUE`          |      `continue` |
-|  54 | `TOKEN_ERROR`             |             n/a |
-|  55 | `TOKEN_EOF`               |             n/a |
+|  28 | `TOKEN_F64`               |           `f64` |
+|  29 | `TOKEN_INTERP_STRING`     |      `$"Hello"` |
+|  30 | `TOKEN_INTERP_START`      |     `$"Hello {` |
+|  31 | `TOKEN_INTERP_MIDDLE`     |          `}, {` |
+|  32 | `TOKEN_INTERP_END`        |           `}!"` |
+|  33 | `TOKEN_AND`               |           `and` |
+|  34 | `TOKEN_STRUCT`            |        `struct` |
+|  35 | `TOKEN_IMPL`              |          `impl` |
+|  36 | `TOKEN_TRAIT`             |         `trait` |
+|  37 | `TOKEN_ELSE`              |          `else` |
+|  38 | `TOKEN_FALSE`             |         `false` |
+|  39 | `TOKEN_FOR`               |           `for` |
+|  40 | `TOKEN_FUN`               |           `fun` |
+|  41 | `TOKEN_IF`                |            `if` |
+|  42 | `TOKEN_NIL`               |           `nil` |
+|  43 | `TOKEN_OR`                |            `or` |
+|  44 | `TOKEN_PRINT`             |         `print` |
+|  45 | `TOKEN_PUB`               |           `pub` |
+|  46 | `TOKEN_RETURN`            |        `return` |
+|  47 | `TOKEN_SELF`              |          `self` |
+|  48 | `TOKEN_TRUE`              |          `true` |
+|  49 | `TOKEN_TYPE`              |          `type` |
+|  50 | `TOKEN_VAR`               |           `var` |
+|  51 | `TOKEN_LET`               |           `let` |
+|  52 | `TOKEN_WHILE`             |         `while` |
+|  53 | `TOKEN_BREAK`             |         `break` |
+|  54 | `TOKEN_CONTINUE`          |      `continue` |
+|  55 | `TOKEN_ERROR`             |             n/a |
+|  56 | `TOKEN_EOF`               |             n/a |

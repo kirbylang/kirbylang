@@ -1,11 +1,6 @@
----
-aliases:
-  - Parser
----
+# AST
 
-## Parser
-
-Files: `src/parser.h`, `src/parser.c`
+## Generate an AST
 
 ```c
 // src/parser.h
@@ -25,11 +20,12 @@ AstNode **parse(const char *source, int *outCount, bool *hadError,
 
 ```
 
-## AST
-
-Files: `src/ast.h`, `src/ast.c`
-
 ```c
+// src/ast.h
+
+/**
+ * The `parse` caller calls this to free the AST.
+ */
 void astFreeAll(void);
 ```
 
