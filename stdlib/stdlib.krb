@@ -19,13 +19,11 @@ impl Date {
     // 
     // Floor is ran on the timestamp before storing.
     pub fun new(timestamp: f64): Self {
-        @assert(timestamp >= 0, $"Negative timestamps are not supported yet: {timestamp}");
-
         // Only store whole seconds
         let ts = @floor(timestamp);
 
         var days = @floor(ts / 86400);
-        let sod  = ts % 86400;
+        let sod  =  @floor(ts - days * 86400);
 
         let hour   = @floor(sod / 3600);
         let minute = @floor((sod % 3600) / 60);
