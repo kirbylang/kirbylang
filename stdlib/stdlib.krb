@@ -20,8 +20,7 @@ impl Date {
 
     pub fun from_parts(year: f64, month: f64, day: f64, hour: f64, minute: f64, second: f64): Self {
         @assert(year >= 1 and year <= 9999, $"Year must be between 1-9999: {@numberToString(year)}");
-        @assert(month >= 1 and month <= 12, $"Month must be between 1-12: {@numberToString(month)}");
-
+        
         let days_in_month = Self.days_in_month(year, month);
 
         @assert(day >= 1 and day <= days_in_month, $"Day must be between 1-{days_in_month}: {@numberToString(day)}");
@@ -90,14 +89,18 @@ impl Date {
         year % 4 == 0 and (year % 100 != 0 or year % 400 == 0)
     }
 
+    fun is_valid_month(month: f64): bool = month >= 1 and month <= 12;
+
     fun days_in_month(year: f64, month: f64): f64 {
+        @assert(Self.is_valid_month(month), $"Month must be between 1-12: {@numberToString(month)}");
+
         let lengths = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
         
         if (month == 2 and Self.is_leap(year)) {
             return 29;
         }
 
-        return lengths[month - 1];
+        lengths[month - 1]
     }
 
     fun timestamp_to_date(timestamp: f64): Self {
@@ -159,10 +162,7 @@ impl Date {
     fun days_from_civil(year: f64, month: f64, day: f64): f64 {
         year = year - if (month <= 2) 1 else 0;
         
-        let era = @floor(
-            if (year >= 0) year / 400
-            else (year - 399) / 400
-        );
+        let era = @floor(year / 400);
 
         // Year Of Era [0, 399]
         let yoe = year - era * 400; 
