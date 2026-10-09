@@ -1,7 +1,8 @@
-name: Deploy
+name: Publish Docs
 
 on:
   push:
+    branches: ["main"]
     paths:
       - "book/**"
 
