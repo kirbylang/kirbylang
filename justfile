@@ -64,6 +64,7 @@ test-build: build
     ./scripts/test-build.sh
 
 # Run the tests of the arguments a script sees
+
 # Run the tests with memory checking enabled
 test-with-memcheck *args: build-memcheck
     ./scripts/tests.sh {{ args }}
@@ -116,3 +117,6 @@ _release bump *flags:
 
 project *args:
     cd example_project && just {{ args }}
+
+book-serve:
+    ./scripts/book-serve.sh

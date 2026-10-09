@@ -1,117 +1,10 @@
----
-aliases:
-  - Native Functions
----
+# Builtin Functions
 
 Kirby has several builtin functions (native functions) available.
 
 Builtin functions are prefixed, making them easy to identifier vs user code functions. e.g. `@len`, `@getenv`
 
 This also makes `@` a reserved character in identifiers.
-
-## General
-
-### `@len`
-
-Get the length of a string or array.
-
-```kirby
-@println(@len("Hello, World!"));
-
-@println(@len([1, 2 ,3]));
-```
-
-## Math
-
-### `@abs`
-
-Get a number without its sign.
-
-```kirby
-@println(@abs(-3.5)); // 3.5
-
-@println(@abs(3.5)); // 3.5
-```
-
-### `@ceil`
-
-Round a number up.
-
-```
-@println(@ceil(1.6)); // 2
-```
-
-### `@floor`
-
-Round a number down to the nearest whole number.
-
-```kirby
-@println(@floor(2.7)); // 2
-
-@println(@floor(-2.5)); // -3
-```
-
-### `@max`
-
-Get the larger of two numbers.
-
-```kirby
-@println(@max(3, 7)); // 7
-
-@println(@max(-1, -5)); // -1
-```
-
-### `@min`
-
-Get the smaller of two numbers.
-
-```kirby
-@println(@min(3, 7)); // 3
-
-@println(@min(-1, -5)); // -5
-```
-
-### `@pow`
-
-Raise a number to a power. It is an error to raise `0` to a negative power, or a negative number to a fractional power.
-
-```kirby
-@println(@pow(2, 10)); // 1024
-
-@println(@pow(9, 0.5)); // 3
-```
-
-### `@round`
-
-Round a number to the nearest whole number. Halves round away from zero.
-
-```kirby
-@println(@round(2.4)); // 2
-
-@println(@round(2.5)); // 3
-
-@println(@round(-2.5)); // -3
-```
-
-### `@sqrt`
-
-Get the square root of a number. A negative number is an error. When the argument is a constant, such as `@sqrt(-1)`, the error is reported before the program runs.
-
-```kirby
-@println(@sqrt(16)); // 4
-
-@println(@sqrt(2.25)); // 1.5
-```
-
-### `@trunc`
-
-Remove a number's fractional part, moving toward zero.
-
-```kirby
-@println(@trunc(2.7)); // 2
-
-@println(@trunc(-2.7)); // -2
-```
 
 ## Arrays
 
@@ -276,35 +169,7 @@ var slice = @arrSlice(array, 1, 4);
 @println(@arrEqual([20, 30, 40], slice));
 ```
 
-## Errors
-
-### `@assert`
-
-Exit (code 70) with an error message if the asserted condition is `false`.
-
-```kirby
-@assert(1 + 1 == 2, "math is broken"); // passes
-
-@assert(false, "expected a positive number"); // assertion failed: expected a positive number
-```
-
-## `@panic`
-
-Exit (code 70) with an error message.
-
-```kirby
-@panic("unreachable state"); // panic: unreachable state
-```
-
-## System
-
-### `@version`
-
-Get the current version of the kirby language.
-
-```kirby
-@println(@version()); // 0.0.0
-```
+## Date/Time
 
 ### `@clock`
 
@@ -324,27 +189,7 @@ let now: f64 = @now();
 @println(now);
 ```
 
-### `@exit`
-
-Exit with an exit code.
-
-```kirby
-var exitCode = 1;
-
-@exit(exitCode);
-```
-
-#### Valid Exit Codes
-
-Exit codes must be `>= 0`.
-
-```kirby
-@exit(-1); // Compile time error
-
-let exit_code = -1;
-
-@exit(exit_code); // Runtime error
-```
+## Environment
 
 ### `@getenv`
 
@@ -364,7 +209,98 @@ Set an environment variable to a string value.
 @println("Hello " + @getenv("NAME"));
 ```
 
-### `@prompt`
+### `@argc`
+
+The number of arguments passed to the program, counting the program itself.
+
+```kirby
+@println(@argc()); // 2, for: krb run file.krb one
+```
+
+### `@argv`
+
+Access the arguments passed to the program by index. `@argv(0)` is the program
+and `@argv(1)` is the first argument. It is `nil` past the last one.
+
+```kirby
+@println(@argv(1));
+```
+
+## Errors
+
+### `@assert`
+
+Exit (code 70) with an error message if the asserted condition is `false`.
+
+```kirby
+@assert(1 + 1 == 2, "math is broken"); // passes
+
+@assert(false, "expected a positive number"); // assertion failed: expected a positive number
+```
+
+### `@panic`
+
+Exit (code 70) with an error message.
+
+```kirby
+@panic("unreachable state"); // panic: unreachable state
+```
+
+## General
+
+### `@len`
+
+Get the length of a string or array.
+
+```kirby
+@println(@len("Hello, World!"));
+
+@println(@len([1, 2 ,3]));
+```
+
+## IO
+
+### stdout
+
+#### `@print`
+
+Write a value to stdout, the way `print` does, without a newline. A struct that implements `Display` is written with its `toString()`.
+
+```kirby
+@print("Loading");
+@print("...");
+```
+
+#### `@println`
+
+Write a value to stdout, the way `print` does, followed by a newline. A struct that implements `Display` is written with its `toString()`.
+
+```kirby
+@println("Hello, World");
+@println(0.1 + 0.2); // 0.30000000000000004
+```
+
+### stderr
+
+#### `@eprint`
+
+Write a value to stderr without a newline. A struct that implements `Display` is written with its `toString()`.
+
+```kirby
+@eprint("error: ");
+```
+
+#### `@eprintln`
+
+Write a value to stderr, followed by a newline. A struct that implements `Display` is written with its `toString()`.
+
+```kirby
+@eprintln("something failed");
+```
+
+### stdin
+
+#### `@prompt`
 
 Read in text from `stdin` until newline (NL) is encountered. An optional message can be passed as well.
 
@@ -374,7 +310,7 @@ var name = @prompt("Name: ");
 @println("Hello " + name);
 ```
 
-### `@stdin`
+#### `@stdin`
 
 Read in text from \`stdin\` until end of file (EOF) is encountered.
 
@@ -382,60 +318,9 @@ Read in text from \`stdin\` until end of file (EOF) is encountered.
 var text = @stdin();
 ```
 
-### @argc
+### Files
 
-The number of arguments passed to the program, counting the program itself.
-
-```kirby
-@println(@argc()); // 2, for: krb run file.krb one
-```
-
-### @argv
-
-Access the arguments passed to the program by index. `@argv(0)` is the program
-and `@argv(1)` is the first argument. It is `nil` past the last one.
-
-```kirby
-@println(@argv(1));
-```
-
-## IO
-
-### `@print`
-
-Write a value to stdout, the way `print` does, without a newline. A struct that implements `Display` is written with its `toString()`.
-
-```kirby
-@print("Loading");
-@print("...");
-```
-
-### `@println`
-
-Write a value to stdout, the way `print` does, followed by a newline. A struct that implements `Display` is written with its `toString()`.
-
-```kirby
-@println("Hello, World");
-@println(0.1 + 0.2); // 0.30000000000000004
-```
-
-### `@eprint`
-
-Write a value to stderr without a newline. A struct that implements `Display` is written with its `toString()`.
-
-```kirby
-@eprint("error: ");
-```
-
-### `@eprintln`
-
-Write a value to stderr, followed by a newline. A struct that implements `Display` is written with its `toString()`.
-
-```kirby
-@eprintln("something failed");
-```
-
-### `@fileExists`
+#### `@fileExists`
 
 Return if a file or path exists at a given path.
 
@@ -451,7 +336,7 @@ if (!@fileExists(path)) {
 @println(path);
 ```
 
-### `@readFileToString`
+#### `@readFileToString`
 
 Read a file at path to string.
 
@@ -461,7 +346,7 @@ let text = @readFileToString("./path/to/file.txt");
 @println(text);
 ```
 
-### `@writeStringToFile`
+#### `@writeStringToFile`
 
 Write a string to a file at a given path.
 
@@ -472,108 +357,96 @@ var text = @prompt("Text: ");
 @writeStringToFile(path, text);
 ```
 
-## Types/Values
+## Math
 
-### `@instanceOf`
+### `@abs`
 
-Returns if a value is an instance of a struct.
+Get a number without its sign.
 
 ```kirby
-struct Food {}
+@println(@abs(-3.5)); // 3.5
 
-let food = Food();
-
-@println(@instanceOf(food, Food)); // true
+@println(@abs(3.5)); // 3.5
 ```
 
-### `@typeof`
+### `@ceil`
 
-Get a value's type.
+Round a number up.
 
-```kirby
-@println(@typeof(true)); // "bool"
-@println(@typeof(123)); // "number"
-@println(@typeof("Hello World")); // "string"
-@println(@typeof([])); // "array"
-
-struct Food {}
-
-@println(@typeof(Food)); // struct
-
-let food = Food {};
-
-@println(@typeof(food)); // instance
+```
+@println(@ceil(1.6)); // 2
 ```
 
-### `@is`
+### `@floor`
 
-Returns whether a value is of the named type.
-
-The second argument is one of `"bool"`, `"string"`, `"number"`, `"function"` or `"nil"`.
+Round a number down to the nearest whole number.
 
 ```kirby
-@println(@is(true, "bool")); // true
+@println(@floor(2.7)); // 2
 
-@println(@is(12345, "string")); // false
+@println(@floor(-2.5)); // -3
 ```
 
-### `@isBool`
+### `@max`
 
-Returns if value is a bool or not.
+Get the larger of two numbers.
 
 ```kirby
-@println(@isBool(false)); // true
+@println(@max(3, 7)); // 7
 
-@println(@isBool(123)); // false
+@println(@max(-1, -5)); // -1
 ```
 
-### `@isFunction`
+### `@min`
 
-Returns if value is a function or not.
+Get the smaller of two numbers.
 
 ```kirby
-fun sum(a, b) = a + b;
+@println(@min(3, 7)); // 3
 
-@println(@isFunction(@ceil)); // true
-@println(@isFunction(sum)); // true
-@println(@isFunction(123)); // false
+@println(@min(-1, -5)); // -5
 ```
 
-### `@isNil`
+### `@pow`
 
-Returns if value is a nil or not.
+Raise a number to a power. It is an error to raise `0` to a negative power, or a negative number to a fractional power.
 
 ```kirby
-@println(@isNil(nil)); // true
-@println(@isNil(123)); // false
+@println(@pow(2, 10)); // 1024
+
+@println(@pow(9, 0.5)); // 3
 ```
 
-### `@isNumber`
+### `@round`
 
-Returns if value is a number or not.
+Round a number to the nearest whole number. Halves round away from zero.
 
 ```kirby
-@println(@isNumber(123)); // true
-@println(@isNumber("Hello World")); // false
+@println(@round(2.4)); // 2
+
+@println(@round(2.5)); // 3
+
+@println(@round(-2.5)); // -3
 ```
 
-### `@isString`
+### `@sqrt`
 
-Returns if value is a string or not.
+Get the square root of a number. A negative number is an error. When the argument is a constant, such as `@sqrt(-1)`, the error is reported before the program runs.
 
 ```kirby
-@println(@isString("Hello World")); // true
-@println(@isString(123)); // false
+@println(@sqrt(16)); // 4
+
+@println(@sqrt(2.25)); // 1.5
 ```
 
-## Booleans
+### `@trunc`
 
-### `@boolToString`
-
-Convert a boolean to a string.
+Remove a number's fractional part, moving toward zero.
 
 ```kirby
-@println(@boolToString(true)); // "true"
+@println(@trunc(2.7)); // 2
+
+@println(@trunc(-2.7)); // -2
 ```
 
 ## Numbers
@@ -621,6 +494,14 @@ Get a random number between min and max.
 ```
 
 ## Strings
+
+### `@boolToString`
+
+Convert a boolean to a string.
+
+```kirby
+@println(@boolToString(true)); // "true"
+```
 
 ### `@strContains`
 
@@ -741,4 +622,130 @@ Remove spaces, tabs, and newlines from both ends of a string.
 
 ```kirby
 @println("[" + @strTrim("  hello  ") + "]"); // [hello]
+```
+
+## System
+
+### `@exit`
+
+Exit with an exit code.
+
+```kirby
+var exitCode = 1;
+
+@exit(exitCode);
+```
+
+#### Valid Exit Codes
+
+Exit codes must be `>= 0`.
+
+```kirby
+@exit(-1); // Compile time error
+
+let exit_code = -1;
+
+@exit(exit_code); // Runtime error
+```
+
+### `@version`
+
+Get the current version of the kirby language.
+
+```kirby
+@println(@version()); // 0.0.0
+```
+
+## Types/Values
+
+### `@instanceOf`
+
+Returns if a value is an instance of a struct.
+
+```kirby
+struct Food {}
+
+let food = Food();
+
+@println(@instanceOf(food, Food)); // true
+```
+
+### `@typeof`
+
+Get a value's type.
+
+```kirby
+@println(@typeof(true)); // "bool"
+@println(@typeof(123)); // "number"
+@println(@typeof("Hello World")); // "string"
+@println(@typeof([])); // "array"
+
+struct Food {}
+
+@println(@typeof(Food)); // struct
+
+let food = Food {};
+
+@println(@typeof(food)); // instance
+```
+
+### `@is`
+
+Returns whether a value is of the named type.
+
+The second argument is one of `"bool"`, `"string"`, `"number"`, `"function"` or `"nil"`.
+
+```kirby
+@println(@is(true, "bool")); // true
+
+@println(@is(12345, "string")); // false
+```
+
+### `@isBool`
+
+Returns if value is a bool or not.
+
+```kirby
+@println(@isBool(false)); // true
+
+@println(@isBool(123)); // false
+```
+
+### `@isFunction`
+
+Returns if value is a function or not.
+
+```kirby
+fun sum(a, b) = a + b;
+
+@println(@isFunction(@ceil)); // true
+@println(@isFunction(sum)); // true
+@println(@isFunction(123)); // false
+```
+
+### `@isNil`
+
+Returns if value is a nil or not.
+
+```kirby
+@println(@isNil(nil)); // true
+@println(@isNil(123)); // false
+```
+
+### `@isNumber`
+
+Returns if value is a number or not.
+
+```kirby
+@println(@isNumber(123)); // true
+@println(@isNumber("Hello World")); // false
+```
+
+### `@isString`
+
+Returns if value is a string or not.
+
+```kirby
+@println(@isString("Hello World")); // true
+@println(@isString(123)); // false
 ```

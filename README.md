@@ -44,7 +44,7 @@ This is an interpreted language (bytecode VM) heavily inspired from my favorite 
 
 ## Documentation
 
-- [Documentation](./wiki/README.md)
+- [Documentation](./book/src/SUMMARY.md)
   - [Development](./docs/DEVELOPMENT.md)
   - [Change Log](./docs/CHANGELOG.md)
   - [Proposals](./docs/PROPOSALS.md)
