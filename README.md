@@ -1,6 +1,7 @@
 <div>
 <img src="https://github.com/kirbylang/kirbylang/actions/workflows/ci.yml/badge.svg" />
 <img src="https://github.com/kirbylang/kirbylang/actions/workflows/release.yml/badge.svg" />
+<img src="https://github.com/kirbylang/kirbylang/actions/workflows/docs.yml/badge.svg" />
 </div>
 
 ![kirby programming language](./docs/kirby-logo.png)
