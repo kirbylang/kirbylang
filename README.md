@@ -45,7 +45,7 @@ This is an interpreted language (bytecode VM) heavily inspired from my favorite 
 
 ## Documentation
 
-- [Documentation](./book/src/SUMMARY.md)
+- [Documentation](https://kirbylang.github.io/kirbylang/)
   - [Development](./docs/DEVELOPMENT.md)
   - [Change Log](./docs/CHANGELOG.md)
   - [Proposals](./docs/PROPOSALS.md)
