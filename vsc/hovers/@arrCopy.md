@@ -11,3 +11,5 @@ a[0] = 100;
 @println(b); // [100, 2, 3]
 @println(c); // [1, 2, 3]
 ```
+
+https://kirbylang.github.io/kirbylang/reference/builtin-functions.html#arrcopy

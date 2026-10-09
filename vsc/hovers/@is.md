@@ -7,3 +7,5 @@ or `"nil"`.
 @println(@is(true, "bool")); // true
 @println(@is(12345, "string")); // false
 ```
+
+https://kirbylang.github.io/kirbylang/reference/builtin-functions.html#is

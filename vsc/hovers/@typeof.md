@@ -14,3 +14,5 @@ let food = Food {};
 
 @println(@typeof(food)); // instance
 ```
+
+https://kirbylang.github.io/kirbylang/reference/builtin-functions.html#typeof

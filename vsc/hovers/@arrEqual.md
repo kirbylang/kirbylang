@@ -9,3 +9,5 @@ var c = @arrCopy(a);
 @println(@arrEqual(b, c)); // false
 @println(@arrEqual(a, c)); // false
 ```
+
+https://kirbylang.github.io/kirbylang/reference/builtin-functions.html#arrequal

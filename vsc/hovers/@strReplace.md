@@ -3,3 +3,5 @@ Replace the first place a string appears in another string. Returns the string u
 ```kirby
 @println(@strReplace("a-b-c", "-", "+")); // a+b-c
 ```
+
+https://kirbylang.github.io/kirbylang/reference/builtin-functions.html#strreplace

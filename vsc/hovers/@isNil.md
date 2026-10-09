@@ -4,3 +4,5 @@ Returns if value is a nil or not.
 @println(@isNil(nil)); // true
 @println(@isNil(123)); // false
 ```
+
+https://kirbylang.github.io/kirbylang/reference/builtin-functions.html#isnil

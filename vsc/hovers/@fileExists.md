@@ -10,3 +10,5 @@ if (!@fileExists(path)) {
 
 @println(path);
 ```
+
+https://kirbylang.github.io/kirbylang/reference/builtin-functions.html#fileexists

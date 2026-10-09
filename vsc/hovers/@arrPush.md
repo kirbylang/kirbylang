@@ -8,3 +8,5 @@ var array = [];
 
 @println(array); // [Hello, World]
 ```
+
+https://kirbylang.github.io/kirbylang/reference/builtin-functions.html#arrpush

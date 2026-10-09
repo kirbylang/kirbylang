@@ -4,3 +4,5 @@ Get the position where a string first appears in another string, counting from 0
 @println(@strIndexOf("hello world", "world")); // 6
 @println(@strIndexOf("hello", "xyz")); // nil
 ```
+
+https://kirbylang.github.io/kirbylang/reference/builtin-functions.html#strindexof

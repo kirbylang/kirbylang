@@ -5,3 +5,5 @@ let now: f64 = @now();
 
 @println(now);
 ```
+
+https://kirbylang.github.io/kirbylang/reference/builtin-functions.html#now

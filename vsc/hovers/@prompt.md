@@ -5,3 +5,5 @@ var name = @prompt("Name: ");
 
 @println("Hello " + name);
 ```
+
+https://kirbylang.github.io/kirbylang/reference/builtin-functions.html#prompt

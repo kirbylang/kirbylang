@@ -8,3 +8,5 @@ var poppedValue = @arrPop(array);
 @println(array); // [Hello]
 @println(poppedValue); // World
 ```
+
+https://kirbylang.github.io/kirbylang/reference/builtin-functions.html#arrpop

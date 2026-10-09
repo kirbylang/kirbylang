@@ -7,3 +7,5 @@ var parts = ["kirby", "is", "a", "language"];
 @println(@arrJoin(parts, ", ")); // kirby, is, a, language
 @println(@arrJoin(parts, "")); // kirbyisalanguage
 ```
+
+https://kirbylang.github.io/kirbylang/reference/builtin-functions.html#arrjoin

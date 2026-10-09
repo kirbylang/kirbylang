@@ -4,3 +4,5 @@ Write a value to stdout, the way `print` does, without a newline. A struct that 
 @print("Loading");
 @print("...");
 ```
+
+https://kirbylang.github.io/kirbylang/reference/builtin-functions.html#print
