@@ -21,6 +21,8 @@ Download the latest release: [https://github.com/kirbylang/kirbylang/releases](h
 
 ## REPL
 
+Start an interactive prompt to run Kirby code.
+
 ```shell
 krb repl
 ```
