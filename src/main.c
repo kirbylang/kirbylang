@@ -71,6 +71,9 @@ const char *help_message =
     "krb run                           # runs the project's \"bin\" file\n"
     "krb run -- arg1 arg2              # passes args to the project's \"bin\"\n"
     "krb example hello                 # runs examples/hello.krb\n"
+    "krb docs                          # Open the Kirby docs\n"
+    "krb docs 'search terms'           # Open the Kirby docs with a search "
+    "term\n"
     "krb config                        # print kirby.project.toml\n"
     "krb config bin                    # print 'bin' kirby.project.toml\n"
     "krb config examples               # print 'examples' kirby.project.toml\n"
@@ -212,6 +215,29 @@ static int cmdRun(int argc, char *argv[]) {
   }
 
   runProgram(argc, argv, file);
+  return 0;
+}
+
+/* krb run [path] [args...]
+ * With no path, or "--" in place of the path, the project's "bin" file runs. */
+static int cmdDocs(int argc, char *argv[]) {
+  char *url = "https://kirbylang.github.io/kirbylang/";
+
+  char cmd[512];
+
+#if defined(_WIN32) || defined(_WIN64)
+  // Windows: use start command
+  snprintf(cmd, sizeof(cmd), "start \"\" \"%s\"", url);
+#elif defined(__APPLE__)
+  // macOS
+  snprintf(cmd, sizeof(cmd), "open \"%s\"", url);
+#else
+  // Linux
+  snprintf(cmd, sizeof(cmd), "xdg-open \"%s\" >/dev/null 2>&1 &", url);
+#endif
+
+  system(cmd);
+
   return 0;
 }
 
@@ -479,10 +505,10 @@ static int cmdConfig(int argc, char *argv[]) {
 }
 
 static const Command commands[] = {
-    {"init", cmdInit},    {"run", cmdRun},   {"example", cmdExample},
-    {"repl", cmdRepl},    {"exec", cmdExec}, {"compile", cmdCompile},
-    {"build", cmdBuild},  {"lex", cmdLex},   {"parse", cmdParse},
-    {"config", cmdConfig}};
+    {"init", cmdInit},     {"run", cmdRun},   {"example", cmdExample},
+    {"repl", cmdRepl},     {"exec", cmdExec}, {"compile", cmdCompile},
+    {"build", cmdBuild},   {"lex", cmdLex},   {"parse", cmdParse},
+    {"config", cmdConfig}, {"docs", cmdDocs}};
 
 static const Command *findCommand(const char *name) {
   size_t count = sizeof(commands) / sizeof(commands[0]);
@@ -552,7 +578,7 @@ static void repl(void) {
       exit(0);
 
     if (strcmp(line, "help") == 0) {
-      printf("\nhttps://github.com/kirbylang/kirbylang#documentation\n\n");
+      printf("\nhttps://kirbylang.github.io/kirbylang/\n\n");
       continue;
     }
 
