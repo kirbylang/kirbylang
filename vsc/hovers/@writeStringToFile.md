@@ -6,3 +6,5 @@ var text = @prompt("Text: ");
 
 @writeStringToFile(path, text);
 ```
+
+https://kirbylang.github.io/kirbylang/reference/builtin-functions.html#writestringtofile

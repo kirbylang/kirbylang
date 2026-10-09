@@ -4,3 +4,5 @@ Split a string into an array of strings at each place the separator appears. An 
 @println(@strSplit("a,b,c", ",")); // [a, b, c]
 @println(@strSplit("abc", "")); // [a, b, c]
 ```
+
+https://kirbylang.github.io/kirbylang/reference/builtin-functions.html#strsplit

@@ -7,3 +7,5 @@ fun sum(a, b) = a + b;
 @println(@isFunction(sum)); // true
 @println(@isFunction(123)); // false
 ```
+
+https://kirbylang.github.io/kirbylang/reference/builtin-functions.html#isfunction

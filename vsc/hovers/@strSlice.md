@@ -4,3 +4,5 @@ Get the part of a string from `start` up to, but not including, `end`. Both are 
 @println(@strSlice("hello world", 0, 5)); // hello
 @println(@strSlice("hello world", 6, 11)); // world
 ```
+
+https://kirbylang.github.io/kirbylang/reference/builtin-functions.html#strslice

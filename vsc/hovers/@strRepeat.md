@@ -4,3 +4,5 @@ Repeat a string a number of times. The count must be a whole number, zero or mor
 @println(@strRepeat("ab", 3)); // ababab
 @println(@strRepeat("ab", 0)); // (empty string)
 ```
+
+https://kirbylang.github.io/kirbylang/reference/builtin-functions.html#strrepeat

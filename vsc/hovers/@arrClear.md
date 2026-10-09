@@ -7,3 +7,5 @@ var array = [1, 2, 3];
 
 @println(array); // []
 ```
+
+https://kirbylang.github.io/kirbylang/reference/builtin-functions.html#arrclear

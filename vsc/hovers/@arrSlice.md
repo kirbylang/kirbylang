@@ -7,3 +7,5 @@ var slice = @arrSlice(array, 1, 4);
 
 @println(@arrEqual([20, 30, 40], slice));
 ```
+
+https://kirbylang.github.io/kirbylang/reference/builtin-functions.html#arrslice

@@ -3,3 +3,5 @@ Replace every place a string appears in another string. Returns the string uncha
 ```kirby
 @println(@strReplaceAll("a-b-c", "-", "+")); // a+b+c
 ```
+
+https://kirbylang.github.io/kirbylang/reference/builtin-functions.html#strreplaceall

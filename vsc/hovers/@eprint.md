@@ -3,3 +3,5 @@ Write a value to stderr without a newline. A struct that implements `Display` is
 ```kirby
 @eprint("error: ");
 ```
+
+https://kirbylang.github.io/kirbylang/reference/builtin-functions.html#eprint

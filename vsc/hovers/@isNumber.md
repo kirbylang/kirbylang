@@ -4,3 +4,5 @@ Returns if value is a number or not.
 @println(@isNumber(123)); // true
 @println(@isNumber("Hello World")); // false
 ```
+
+https://kirbylang.github.io/kirbylang/reference/builtin-functions.html#isnumber
