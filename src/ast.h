@@ -57,11 +57,19 @@ typedef enum {
   LITERAL_STRING
 } LiteralKind;
 
+typedef enum { NUMBER_F64 } NumberKind;
+
 typedef struct {
   LiteralKind kind;
   union {
     bool boolean;
-    double number;
+    struct {
+      NumberKind kind;
+      union {
+        double f64;
+        char u8;
+      } as;
+    } number;
     struct {
       const char *chars;
       int length;

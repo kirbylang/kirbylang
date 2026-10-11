@@ -907,7 +907,12 @@ static void compileExpr(AstNode *node) {
       emitByte(literal->as.boolean ? OP_TRUE : OP_FALSE);
       break;
     case LITERAL_NUMBER:
-      emitNumberConstant(literal->as.number);
+      switch (literal->as.number.kind) {
+      case NUMBER_F64:
+        emitNumberConstant(literal->as.number.as.f64);
+        break;
+      }
+
       break;
     case LITERAL_STRING:
       emitStringConstant(literal->as.string.chars, literal->as.string.length);

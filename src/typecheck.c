@@ -742,7 +742,13 @@ static bool typchkConstantNumber(AstNode *node, double *value) {
   case NODE_LITERAL:
     if (node->as.literal.kind != LITERAL_NUMBER)
       return false;
-    *value = node->as.literal.as.number;
+
+    switch (node->as.literal.as.number.kind) {
+    case NUMBER_F64:
+      *value = node->as.literal.as.number.as.f64;
+      break;
+    }
+
     return true;
   case NODE_GROUPING:
     return typchkConstantNumber(node->as.grouping.inner, value);

@@ -110,7 +110,12 @@ static void printAstLiteral(StrBuf *sb, LiteralNode *lit) {
     sb_append(sb, lit->as.boolean ? "true" : "false");
     break;
   case LITERAL_NUMBER:
-    sb_appendf(sb, "%g", lit->as.number);
+    switch (lit->as.number.kind) {
+    case NUMBER_F64:
+      sb_appendf(sb, "%g", lit->as.number.as.f64);
+      break;
+    }
+
     break;
   case LITERAL_STRING:
     sb_appendf(sb, "\"%s\"", lit->as.string.chars);

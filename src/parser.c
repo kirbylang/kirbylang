@@ -220,7 +220,9 @@ static AstNode *number(Parser *parser, bool canAssign) {
 
   AstNode *node = astAlloc(NODE_LITERAL, parser->previous.line);
   node->as.literal.kind = LITERAL_NUMBER;
-  node->as.literal.as.number = v;
+
+  node->as.literal.as.number.kind = NUMBER_F64;
+  node->as.literal.as.number.as.f64 = v;
 
   return node;
 }
