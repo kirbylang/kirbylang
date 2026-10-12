@@ -23,7 +23,7 @@ static void assertReceiverReplaced(int argCount) {
   pushOnStack(OBJ_VAL(struct_));
 
   // tableSet can grow the table and collect, so fieldName must stay rooted.
-  tableSet(vm.gc, &struct_->fields, fieldName, NUMBER_VAL(0));
+  tableSet(vm.gc, &struct_->fields, fieldName, NUMBER_F64_VAL(0));
   struct_->fieldCount = 1;
   struct_->fieldPublic[0] = true;
 
@@ -49,7 +49,7 @@ static void assertReceiverReplaced(int argCount) {
   // Stack shape at OP_INVOKE: receiver, then argCount arguments.
   pushOnStack(OBJ_VAL(instance));
   for (int i = 0; i < argCount; i++) {
-    pushOnStack(NUMBER_VAL(i));
+    pushOnStack(NUMBER_F64_VAL(i));
   }
 
   bool ok = invoke(fieldName, argCount);

@@ -12,10 +12,22 @@ typedef enum {
   CONST_FUNCTION, // an index into CompiledUnit.functions
 } CompiledConstKind;
 
+typedef enum {
+  CONST_NUMBER_F64,
+  CONST_NUMBER_U8,
+} CompiledConstNumberKind;
+
 typedef struct {
   CompiledConstKind kind;
   union {
-    double number;
+    struct {
+      CompiledConstNumberKind kind;
+      union {
+        double f64;
+        uint8_t u8;
+      } as;
+    } number;
+
     bool boolean;
     struct {
       int offset;

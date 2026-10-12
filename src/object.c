@@ -51,7 +51,7 @@ bool structFieldSlot(ObjStruct *struct_, ObjString *name, int *slot) {
   Value value;
   if (!tableGet(&struct_->fields, name, &value))
     return false;
-  *slot = (int)AS_NUMBER(value);
+  *slot = (int)AS_NUMBER_F64(value);
   return true;
 }
 
@@ -59,7 +59,7 @@ ObjString *structFieldName(ObjStruct *struct_, int slot) {
   for (int i = 0; i < struct_->fields.capacity; i++) {
     Entry *entry = &struct_->fields.entries[i];
 
-    if (entry->key != NULL && (int)AS_NUMBER(entry->value) == slot)
+    if (entry->key != NULL && (int)AS_NUMBER_F64(entry->value) == slot)
       return entry->key;
   }
 

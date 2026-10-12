@@ -1,0 +1,5 @@
+fun sum(x: u8, y: u8): u8 {
+    return x + y;
+}
+
+@println(sum(123, 45));

@@ -1,6 +1,7 @@
 #ifndef kirby_ast_h
 #define kirby_ast_h
 #include <stdbool.h>
+#include <stdint.h>
 #include <stdlib.h>
 
 #include "strbuf.h"
@@ -57,7 +58,7 @@ typedef enum {
   LITERAL_STRING
 } LiteralKind;
 
-typedef enum { NUMBER_F64 } NumberKind;
+typedef enum { NUMBER_F64, NUMBER_U8 } NumberKind;
 
 typedef struct {
   LiteralKind kind;
@@ -67,8 +68,14 @@ typedef struct {
       NumberKind kind;
       union {
         double f64;
-        char u8;
+        uint8_t u8;
       } as;
+      /**
+       * A plain, unsuffixed integer literal, e.g. `42` -- as opposed to a
+       * suffixed (`42f64`, `42u8`) or decimal (`1.5`) literal. Only plain
+       * integers may be coerced to u8 in a u8-expected context.
+       */
+      bool isPlainInteger;
     } number;
     struct {
       const char *chars;
@@ -391,6 +398,7 @@ typedef enum {
   STRING_CONVERSION_UNDEFINED, // not yet chosen by the type checker
   STRING_CONVERSION_STRING,    // already a string
   STRING_CONVERSION_NUMBER,    // @numberToString
+  STRING_CONVERSION_U8,        // @u8ToString
   STRING_CONVERSION_BOOL,      // @boolToString
   STRING_CONVERSION_DISPLAY,   // toString(), from the type's Display impl
 } StringConversion;

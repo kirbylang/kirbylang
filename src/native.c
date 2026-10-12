@@ -85,7 +85,7 @@ static Value clockNative(VM *vm, int argCount, Value *args) {
 
   assertArgCount(vm, "@clock", 0, argCount);
 
-  return NUMBER_VAL((double)clock() / CLOCKS_PER_SEC);
+  return NUMBER_F64_VAL((double)clock() / CLOCKS_PER_SEC);
 }
 
 static Value versionNative(VM *vm, int argCount, Value *args) {
@@ -100,7 +100,7 @@ static Value exitNative(VM *vm, int argCount, Value *args) {
   assertArgCount(vm, "@exit", 1, argCount);
   assertArgIsNumber(vm, "@exit", args, 0);
 
-  double exitCode = args[0].as.number;
+  double exitCode = args[0].as.number.as.f64;
 
   assertGtEq(vm, "@exit", exitCode, /**>=*/0, /**arg=*/0);
   assertLtEq(vm, "@exit", exitCode, /**<=*/255, /**arg=*/0);
@@ -115,7 +115,7 @@ static Value randNative(VM *vm, int argCount, Value *args) {
 
   assertArgCount(vm, "@rand", 0, argCount);
 
-  return NUMBER_VAL((double)rand());
+  return NUMBER_F64_VAL((double)rand());
 }
 
 static Value rand01Native(VM *vm, int argCount, Value *args) {
@@ -123,7 +123,7 @@ static Value rand01Native(VM *vm, int argCount, Value *args) {
 
   assertArgCount(vm, "@rand01", 0, argCount);
 
-  return NUMBER_VAL((double)rand() / (double)RAND_MAX);
+  return NUMBER_F64_VAL((double)rand() / (double)RAND_MAX);
 }
 
 static Value randBetweenNative(VM *vm, int argCount, Value *args) {
@@ -131,8 +131,8 @@ static Value randBetweenNative(VM *vm, int argCount, Value *args) {
   assertArgIsNumber(vm, "@randBetween", args, 0);
   assertArgIsNumber(vm, "@randBetween", args, 1);
 
-  double min = AS_NUMBER(args[0]);
-  double max = AS_NUMBER(args[1]);
+  double min = AS_NUMBER_F64(args[0]);
+  double max = AS_NUMBER_F64(args[1]);
 
   if (min > max) {
     raiseError(vm, "randomRange(min, max) requires min <= max");
@@ -141,7 +141,7 @@ static Value randBetweenNative(VM *vm, int argCount, Value *args) {
   double r = (double)rand() / (double)RAND_MAX; // [0, 1]
   double result = min + r * (max - min);        // [min, max)
 
-  return NUMBER_VAL(ceil(result));
+  return NUMBER_F64_VAL(ceil(result));
 }
 
 static Value ceilNative(VM *vm, int argCount, Value *args) {
@@ -150,7 +150,7 @@ static Value ceilNative(VM *vm, int argCount, Value *args) {
 
   Value value = args[0];
 
-  return NUMBER_VAL(ceil(AS_NUMBER(value)));
+  return NUMBER_F64_VAL(ceil(AS_NUMBER_F64(value)));
 }
 
 Value fileExists(char *filename) {
@@ -202,7 +202,7 @@ static Value nowNative(VM *vm, int argCount, Value *args) {
 
   time_t t = time(NULL);
 
-  return NUMBER_VAL(t);
+  return NUMBER_F64_VAL(t);
 }
 
 static Value getEnvNative(VM *vm, int argCount, Value *args) {
@@ -251,11 +251,11 @@ static Value lenNative(VM *vm, int argCount, Value *args) {
   if (IS_STRING(name)) {
     int length = AS_STRING(name)->length;
 
-    return NUMBER_VAL(length);
+    return NUMBER_F64_VAL(length);
   } else if (IS_ARRAY(name)) {
     ObjArray *array = AS_ARRAY(name);
     int length = array->count;
-    return NUMBER_VAL(length);
+    return NUMBER_F64_VAL(length);
   } else {
     runtimeError(vm,
                  "function len expects argument 1 to be a string or array.");
@@ -343,7 +343,7 @@ static Value isNumberNative(VM *vm, int argCount, Value *args) {
 
   Value value = args[0];
 
-  bool equals = isHelper(value, "number");
+  bool equals = isHelper(value, "f64");
 
   return BOOL_VAL(equals);
 }
@@ -442,7 +442,7 @@ static Value arrInsertNative(VM *vm, int argCount, Value *args) {
   assertArgIsNumber(vm, "@arrInsert", args, 1);
 
   ObjArray *array = AS_ARRAY(args[0]);
-  int index = (int)AS_NUMBER(args[1]);
+  int index = (int)AS_NUMBER_F64(args[1]);
   Value value = args[2];
 
   assertIsInArrayBounds(vm, array, index);
@@ -464,7 +464,7 @@ static Value arrRemoveNative(VM *vm, int argCount, Value *args) {
   assertArgIsNumber(vm, "@arrRemove", args, 1);
 
   ObjArray *array = AS_ARRAY(args[0]);
-  int index = (int)AS_NUMBER(args[1]);
+  int index = (int)AS_NUMBER_F64(args[1]);
 
   assertIsInArrayBounds(vm, array, index);
 
@@ -580,11 +580,11 @@ static Value arrSliceNative(VM *vm, int argCount, Value *args) {
 
   ObjArray *array = AS_ARRAY(args[0]);
 
-  double start = AS_NUMBER(args[1]);
+  double start = AS_NUMBER_F64(args[1]);
   assertPositiveNumber(vm, "@arrSlice", start, 1);
   assertIsInArrayBounds(vm, array, start);
 
-  double end = AS_NUMBER(args[2]);
+  double end = AS_NUMBER_F64(args[2]);
   assertPositiveNumber(vm, "@arrSlice", end, 2);
   assertIsInArrayBounds(vm, array, end);
 
@@ -852,7 +852,7 @@ static Value argvNative(VM *vm, int argCount, Value *args) {
 
   Value index = args[0];
 
-  int idx = (int)AS_NUMBER(index);
+  int idx = (int)AS_NUMBER_F64(index);
   if (idx < 0 || idx >= vm->argc) {
     return NIL_VAL;
   }
@@ -870,7 +870,7 @@ static Value argcNative(VM *vm, int argCount, Value *args) {
 
   int argc = vm->argc;
 
-  return NUMBER_VAL(argc);
+  return NUMBER_F64_VAL(argc);
 }
 
 static Value parseNumberNative(VM *vm, int argCount, Value *args) {
@@ -882,7 +882,7 @@ static Value parseNumberNative(VM *vm, int argCount, Value *args) {
   char *valueString = AS_CSTRING(value);
   int valueInt = strtol(valueString, NULL, 10);
 
-  return NUMBER_VAL(valueInt);
+  return NUMBER_F64_VAL(valueInt);
 }
 
 static Value numberToStringNative(VM *vm, int argCount, Value *args) {
@@ -893,7 +893,20 @@ static Value numberToStringNative(VM *vm, int argCount, Value *args) {
 
   char buffer[NUMBER_STRING_MAX];
 
-  formatNumber(value.as.number, buffer, sizeof(buffer));
+  formatNumberF64(value.as.number.as.f64, buffer, sizeof(buffer));
+
+  return OBJ_VAL(copyString(vm->gc, buffer, (int)strlen(buffer)));
+}
+
+static Value u8ToStringNative(VM *vm, int argCount, Value *args) {
+  assertArgCount(vm, "@u8ToString", 1, argCount);
+  assertArgIsU8(vm, "@u8ToString", args, 0);
+
+  Value value = args[0];
+
+  char buffer[NUMBER_STRING_MAX];
+
+  formatNumberU8(value.as.number.as.u8, buffer, sizeof(buffer));
 
   return OBJ_VAL(copyString(vm->gc, buffer, (int)strlen(buffer)));
 }
@@ -911,7 +924,7 @@ static Value floorNative(VM *vm, int argCount, Value *args) {
   assertArgCount(vm, "@floor", 1, argCount);
   assertArgIsNumber(vm, "@floor", args, 0);
 
-  return NUMBER_VAL(floor(AS_NUMBER(args[0])));
+  return NUMBER_F64_VAL(floor(AS_NUMBER_F64(args[0])));
 }
 
 // Rounds halves away from zero: round(2.5) is 3, round(-2.5) is -3.
@@ -919,7 +932,7 @@ static Value roundNative(VM *vm, int argCount, Value *args) {
   assertArgCount(vm, "@round", 1, argCount);
   assertArgIsNumber(vm, "@round", args, 0);
 
-  return NUMBER_VAL(round(AS_NUMBER(args[0])));
+  return NUMBER_F64_VAL(round(AS_NUMBER_F64(args[0])));
 }
 
 // Drops the fractional part, moving toward zero: trunc(-2.7) is -2.
@@ -927,25 +940,25 @@ static Value truncNative(VM *vm, int argCount, Value *args) {
   assertArgCount(vm, "@trunc", 1, argCount);
   assertArgIsNumber(vm, "@trunc", args, 0);
 
-  return NUMBER_VAL(trunc(AS_NUMBER(args[0])));
+  return NUMBER_F64_VAL(trunc(AS_NUMBER_F64(args[0])));
 }
 
 static Value absNative(VM *vm, int argCount, Value *args) {
   assertArgCount(vm, "@abs", 1, argCount);
   assertArgIsNumber(vm, "@abs", args, 0);
 
-  return NUMBER_VAL(fabs(AS_NUMBER(args[0])));
+  return NUMBER_F64_VAL(fabs(AS_NUMBER_F64(args[0])));
 }
 
 static Value sqrtNative(VM *vm, int argCount, Value *args) {
   assertArgCount(vm, "@sqrt", 1, argCount);
   assertArgIsNumber(vm, "@sqrt", args, 0);
 
-  double number = AS_NUMBER(args[0]);
+  double number = AS_NUMBER_F64(args[0]);
 
   assertNonNegativeNumber(vm, "@sqrt", number, 0);
 
-  return NUMBER_VAL(sqrt(number));
+  return NUMBER_F64_VAL(sqrt(number));
 }
 
 // Raising 0 to a negative power divides by zero, and a negative number to a
@@ -956,8 +969,8 @@ static Value powNative(VM *vm, int argCount, Value *args) {
   assertArgIsNumber(vm, "@pow", args, 0);
   assertArgIsNumber(vm, "@pow", args, 1);
 
-  double base = AS_NUMBER(args[0]);
-  double exponent = AS_NUMBER(args[1]);
+  double base = AS_NUMBER_F64(args[0]);
+  double exponent = AS_NUMBER_F64(args[1]);
 
   if (base == 0 && exponent < 0) {
     runtimeError(vm, "function @pow can't raise 0 to a negative power (%g).",
@@ -973,7 +986,7 @@ static Value powNative(VM *vm, int argCount, Value *args) {
     exit(EXIT_CODE_RUNTIME_ERR);
   }
 
-  return NUMBER_VAL(pow(base, exponent));
+  return NUMBER_F64_VAL(pow(base, exponent));
 }
 
 static Value minNative(VM *vm, int argCount, Value *args) {
@@ -981,7 +994,7 @@ static Value minNative(VM *vm, int argCount, Value *args) {
   assertArgIsNumber(vm, "@min", args, 0);
   assertArgIsNumber(vm, "@min", args, 1);
 
-  return NUMBER_VAL(fmin(AS_NUMBER(args[0]), AS_NUMBER(args[1])));
+  return NUMBER_F64_VAL(fmin(AS_NUMBER_F64(args[0]), AS_NUMBER_F64(args[1])));
 }
 
 static Value maxNative(VM *vm, int argCount, Value *args) {
@@ -989,7 +1002,7 @@ static Value maxNative(VM *vm, int argCount, Value *args) {
   assertArgIsNumber(vm, "@max", args, 0);
   assertArgIsNumber(vm, "@max", args, 1);
 
-  return NUMBER_VAL(fmax(AS_NUMBER(args[0]), AS_NUMBER(args[1])));
+  return NUMBER_F64_VAL(fmax(AS_NUMBER_F64(args[0]), AS_NUMBER_F64(args[1])));
 }
 
 // Stops the program with a message written by the script, after a fixed
@@ -1146,7 +1159,7 @@ static Value strRepeatNative(VM *vm, int argCount, Value *args) {
   assertArgIsNumber(vm, "@strRepeat", args, 1);
 
   ObjString *string = AS_STRING(args[0]);
-  double number = AS_NUMBER(args[1]);
+  double number = AS_NUMBER_F64(args[1]);
 
   assertNonNegativeNumber(vm, "@strRepeat", number, 1);
   assertWholeNumber(vm, "@strRepeat", number, 1);
@@ -1239,7 +1252,7 @@ static Value strIndexOfNative(VM *vm, int argCount, Value *args) {
     return NIL_VAL;
   }
 
-  return NUMBER_VAL(index);
+  return NUMBER_F64_VAL(index);
 }
 
 // Asserts a number is a whole position in the string: 0 up to and including
@@ -1269,9 +1282,9 @@ static Value strSliceNative(VM *vm, int argCount, Value *args) {
   ObjString *string = AS_STRING(args[0]);
 
   int start =
-      assertStringPosition(vm, "@strSlice", string, AS_NUMBER(args[1]), 1);
+      assertStringPosition(vm, "@strSlice", string, AS_NUMBER_F64(args[1]), 1);
   int end =
-      assertStringPosition(vm, "@strSlice", string, AS_NUMBER(args[2]), 2);
+      assertStringPosition(vm, "@strSlice", string, AS_NUMBER_F64(args[2]), 2);
 
   if (start > end) {
     runtimeError(vm, "function @strSlice expects argument 2 to be less than or "
@@ -1372,6 +1385,7 @@ const NativeDefinition nativeDefinitions[] = {
     {"@readFileToString", readFileToStringNative},
     {"@writeStringToFile", writeStringToFileNative},
     {"@numberToString", numberToStringNative},
+    {"@u8ToString", u8ToStringNative},
     {"@boolToString", boolToStringNative},
     {"@fileExists", fileExistsNative},
     {"@getenv", getEnvNative},

@@ -114,6 +114,9 @@ static void printAstLiteral(StrBuf *sb, LiteralNode *lit) {
     case NUMBER_F64:
       sb_appendf(sb, "%g", lit->as.number.as.f64);
       break;
+    case NUMBER_U8:
+      sb_appendf(sb, "%u", lit->as.number.as.u8);
+      break;
     }
 
     break;

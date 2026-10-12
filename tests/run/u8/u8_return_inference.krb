@@ -1,0 +1,5 @@
+fun answer(): u8 {
+    return 42;
+}
+
+@println(answer());

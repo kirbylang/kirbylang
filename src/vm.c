@@ -430,12 +430,12 @@ static InterpretResult run(void) {
 #define READ_STRING() AS_STRING(READ_CONSTANT())
 #define BINARY_OP(valueType, op)                                               \
   do {                                                                         \
-    if (!IS_NUMBER(peekStack(0)) || !IS_NUMBER(peekStack(1))) {                \
+    if (!IS_NUMBER_F64(peekStack(0)) || !IS_NUMBER_F64(peekStack(1))) {        \
       runtimeError(&vm, "Operands must be numbers.");                          \
       return INTERPRET_RUNTIME_ERROR;                                          \
     }                                                                          \
-    double b = AS_NUMBER(popFromStack());                                      \
-    double a = AS_NUMBER(popFromStack());                                      \
+    double b = AS_NUMBER_F64(popFromStack());                                  \
+    double a = AS_NUMBER_F64(popFromStack());                                  \
     pushOnStack(valueType(a op b));                                            \
   } while (false)
 
@@ -481,11 +481,20 @@ static InterpretResult run(void) {
 
       if (IS_STRING(operand_b) && IS_STRING(operand_a)) {
         concatenate();
-      } else if (IS_NUMBER(operand_b) && IS_NUMBER(operand_a)) {
-        double b = AS_NUMBER(popFromStack());
-        double a = AS_NUMBER(popFromStack());
+      } else if (IS_NUMBER_F64(operand_b) && IS_NUMBER_F64(operand_a)) {
+        double b = AS_NUMBER_F64(popFromStack());
+        double a = AS_NUMBER_F64(popFromStack());
 
-        Value result = NUMBER_VAL(a + b);
+        Value result = NUMBER_F64_VAL(a + b);
+
+        pushOnStack(result);
+      } else if (IS_NUMBER_U8(operand_b) && IS_NUMBER_U8(operand_a)) {
+        // Integer promotion makes a + b an int; NUMBER_U8_VAL truncates it
+        // to eight bits, so u8 addition wraps mod 256.
+        uint8_t b = AS_NUMBER_U8(popFromStack());
+        uint8_t a = AS_NUMBER_U8(popFromStack());
+
+        Value result = NUMBER_U8_VAL(a + b);
 
         pushOnStack(result);
       } else {
@@ -495,26 +504,26 @@ static InterpretResult run(void) {
       break;
     }
     case OP_SUBTRACT:
-      BINARY_OP(NUMBER_VAL, -);
+      BINARY_OP(NUMBER_F64_VAL, -);
       break;
     case OP_MULTIPLY:
-      BINARY_OP(NUMBER_VAL, *);
+      BINARY_OP(NUMBER_F64_VAL, *);
       break;
     case OP_DIVIDE: {
-      assertNonZero(&vm, "/", peekStack(0).as.number, 1);
-      BINARY_OP(NUMBER_VAL, /);
+      assertNonZero(&vm, "/", peekStack(0).as.number.as.f64, 1);
+      BINARY_OP(NUMBER_F64_VAL, /);
       break;
     }
     case OP_MODULO: {
-      if (!IS_NUMBER(peekStack(0)) || !IS_NUMBER(peekStack(1))) {
+      if (!IS_NUMBER_F64(peekStack(0)) || !IS_NUMBER_F64(peekStack(1))) {
         runtimeError(&vm, "Operands must be numbers.");
         return INTERPRET_RUNTIME_ERROR;
       }
 
-      double b = AS_NUMBER(popFromStack());
-      double a = AS_NUMBER(popFromStack());
+      double b = AS_NUMBER_F64(popFromStack());
+      double a = AS_NUMBER_F64(popFromStack());
 
-      Value result = NUMBER_VAL(fmod(a, b));
+      Value result = NUMBER_F64_VAL(fmod(a, b));
 
       pushOnStack(result);
       break;
@@ -527,12 +536,12 @@ static InterpretResult run(void) {
     case OP_NEGATE: {
       Value value = peekStack(0);
 
-      if (!IS_NUMBER(value)) {
+      if (!IS_NUMBER_F64(value)) {
         runtimeError(&vm, "Operand must be a number.");
         return INTERPRET_RUNTIME_ERROR;
       }
 
-      Value negated_value = NUMBER_VAL(-AS_NUMBER(popFromStack()));
+      Value negated_value = NUMBER_F64_VAL(-AS_NUMBER_F64(popFromStack()));
 
       pushOnStack(negated_value);
 
@@ -898,7 +907,7 @@ static InterpretResult run(void) {
       }
 
       tableSet(vm.gc, &struct_->fields, field_name,
-               NUMBER_VAL(struct_->fieldCount));
+               NUMBER_F64_VAL(struct_->fieldCount));
 
       struct_->fieldPublic[struct_->fieldCount] = isPublic;
       struct_->fieldMutable[struct_->fieldCount] = isMutable;
@@ -959,14 +968,14 @@ static InterpretResult run(void) {
         return INTERPRET_RUNTIME_ERROR;
       }
 
-      if (!IS_NUMBER(index)) {
+      if (!IS_NUMBER_F64(index)) {
         runtimeError(&vm, "Array index must be number.");
         return INTERPRET_RUNTIME_ERROR;
       }
 
       ObjArray *array = AS_ARRAY(arrayVal);
 
-      int i = AS_NUMBER(index);
+      int i = AS_NUMBER_F64(index);
 
       if (i < 0 || i >= array->count) {
         runtimeError(&vm, "Array index out of bounds.");
@@ -987,14 +996,14 @@ static InterpretResult run(void) {
         return INTERPRET_RUNTIME_ERROR;
       }
 
-      if (!IS_NUMBER(index)) {
+      if (!IS_NUMBER_F64(index)) {
         runtimeError(&vm, "Array index must be number.");
         return INTERPRET_RUNTIME_ERROR;
       }
 
       ObjArray *array = AS_ARRAY(arrayValue);
 
-      int i = AS_NUMBER(index);
+      int i = AS_NUMBER_F64(index);
 
       if (i < 0 || i >= array->count) {
         runtimeError(&vm, "Array index out of bounds.");

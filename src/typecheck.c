@@ -345,6 +345,8 @@ Type *typchkResolveType(TypeEnv *env, AstNode *typeAnnotation) {
     return typeString();
   if (tokenTextEquals(&t->name, "f64"))
     return typeF64();
+  if (tokenTextEquals(&t->name, "u8"))
+    return typeU8();
   if (tokenTextEquals(&t->name, "Array"))
     return typeArray(NULL);
   if (tokenTextEquals(&t->name, "Self")) {
@@ -391,6 +393,33 @@ static Type *typchkCheckOrInferLambda(TypeEnv *env, AstNode *node,
                                       Type *expected);
 static void typchkCheckVarDecl(TypeEnv *env, AstNode *node);
 static void typchkCheckFunctionDecl(TypeEnv *env, AstNode *node);
+
+// In a u8-expected context, a plain integer literal -- no suffix, no decimal
+// point, in the range 0..255 -- is treated as a u8 literal, so
+// `let byte: u8 = 65;` and `sum(1, 2)` don't need a suffix. Suffixed and
+// decimal literals are an explicit choice of f64 and never coerce. The
+// compiler reads the literal's kind, so the AST is rewritten here, before
+// compilation.
+static void typchkCoerceIntegerLiteralToU8(AstNode *node, Type *expected) {
+  if (expected == NULL || expected->kind != TYPE_U8)
+    return;
+
+  if (node->kind != NODE_LITERAL || node->as.literal.kind != LITERAL_NUMBER)
+    return;
+
+  LiteralNode *lit = &node->as.literal;
+
+  if (lit->as.number.kind != NUMBER_F64 || !lit->as.number.isPlainInteger)
+    return;
+
+  double value = lit->as.number.as.f64;
+
+  if (value < 0.0 || value > 255.0)
+    return;
+
+  lit->as.number.kind = NUMBER_U8;
+  lit->as.number.as.u8 = (uint8_t)value;
+}
 
 // Infer the type of an expression
 Type *typchkInfer(TypeEnv *env, AstNode *node) {
@@ -447,6 +476,8 @@ Type *typchkInfer(TypeEnv *env, AstNode *node) {
 }
 
 bool typchkCheck(TypeEnv *env, AstNode *node, Type *expected) {
+  typchkCoerceIntegerLiteralToU8(node, expected);
+
   if (node->kind == NODE_FUNCTION && node->as.function.isLambda)
     return typchkCheckOrInferLambda(env, node, expected) != NULL;
 
@@ -504,7 +535,12 @@ static Type *typchkInferLiteral(AstNode *node) {
   case LITERAL_BOOL:
     return typeBool();
   case LITERAL_NUMBER:
-    return typeF64();
+    switch (lit->as.number.kind) {
+    case NUMBER_F64:
+      return typeF64();
+    case NUMBER_U8:
+      return typeU8();
+    }
   case LITERAL_STRING:
     return typeString();
   }
@@ -550,15 +586,18 @@ static Type *typchkInferBinary(TypeEnv *env, AstNode *node) {
     if (typesEqual(leftType, typeF64()) && typesEqual(rightType, typeF64()))
       return typeF64();
 
+    if (typesEqual(leftType, typeU8()) && typesEqual(rightType, typeU8()))
+      return typeU8();
+
     if (typesEqual(leftType, typeString()) &&
         typesEqual(rightType, typeString())) {
       b->isStringConcat = true;
       return typeString();
     }
 
-    typchkErrorAtTokenFmt(&b->op,
-                          "'+' needs two f64s or two strings, got %s and %s.",
-                          typeToString(leftType), typeToString(rightType));
+    typchkErrorAtTokenFmt(
+        &b->op, "'+' needs addable types: f64, u8, string; got %s and %s.",
+        typeToString(leftType), typeToString(rightType));
     return NULL;
 
   case TOKEN_MINUS:
@@ -622,13 +661,15 @@ static Type *typchkInferBinary(TypeEnv *env, AstNode *node) {
 
 /**
  * Chooses how a value of this type becomes a string. Returns false when it
- * can't: only strings, f64, bool, and types that implement Display can.
+ * can't: only strings, f64, u8, bool, and types that implement Display can.
  */
 static bool chooseStringConversion(Type *type, StringConversion *conversion) {
   if (typesEqual(type, typeString())) {
     *conversion = STRING_CONVERSION_STRING;
   } else if (typesEqual(type, typeF64())) {
     *conversion = STRING_CONVERSION_NUMBER;
+  } else if (typesEqual(type, typeU8())) {
+    *conversion = STRING_CONVERSION_U8;
   } else if (typesEqual(type, typeBool())) {
     *conversion = STRING_CONVERSION_BOOL;
   } else if (typeImplementsDisplay(type)) {
@@ -670,8 +711,9 @@ static Type *typchkInferInterpString(TypeEnv *env, AstNode *node) {
 
     if (!chooseStringConversion(type, &part->conversion)) {
       typchkErrorAtNodeFmt(part->expr,
-                           "Can't interpolate %s. Only string, f64, bool, and "
-                           "types that implement Display can be interpolated.",
+                           "Can't interpolate %s. Only string, f64, u8, bool, "
+                           "and types that implement Display can be "
+                           "interpolated.",
                            typeToString(type));
     }
   }
@@ -746,6 +788,9 @@ static bool typchkConstantNumber(AstNode *node, double *value) {
     switch (node->as.literal.as.number.kind) {
     case NUMBER_F64:
       *value = node->as.literal.as.number.as.f64;
+      break;
+    case NUMBER_U8:
+      *value = node->as.literal.as.number.as.u8;
       break;
     }
 

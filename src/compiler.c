@@ -50,7 +50,8 @@ static void compileBlockContents(BlockNode *block, bool returnsValue);
 static void compileFunction(FunctionNode *fn, FunctionType type);
 static uint8_t makeConstant(CompiledConst value, Token *tok);
 static uint8_t stringConstant(const char *chars, int length, Token *tok);
-static void emitNumberConstant(double number);
+static void emitF64Constant(double number);
+static void emitU8Constant(uint8_t number);
 static void emitStringConstant(const char *chars, int length);
 static void emitByte(uint8_t byte);
 static void emitBytes(uint8_t byte1, uint8_t byte2);
@@ -547,11 +548,22 @@ static uint8_t stringConstant(const char *chars, int length, Token *tok) {
   return makeConstant(k, tok);
 }
 
-static void emitNumberConstant(double number) {
-  CompiledConst k;
-  k.kind = CONST_NUMBER;
-  k.as.number = number;
-  emitBytes(OP_CONSTANT, makeConstant(k, NULL));
+static void emitF64Constant(double number) {
+  CompiledConst const_;
+  const_.kind = CONST_NUMBER;
+  const_.as.number.kind = CONST_NUMBER_F64;
+  const_.as.number.as.f64 = number;
+
+  emitBytes(OP_CONSTANT, makeConstant(const_, NULL));
+}
+
+static void emitU8Constant(uint8_t number) {
+  CompiledConst const_;
+  const_.kind = CONST_NUMBER;
+  const_.as.number.kind = CONST_NUMBER_U8;
+  const_.as.number.as.u8 = number;
+
+  emitBytes(OP_CONSTANT, makeConstant(const_, NULL));
 }
 
 static void emitStringConstant(const char *chars, int length) {
@@ -749,6 +761,9 @@ static void compileToString(AstNode *expr, StringConversion conversion) {
   case STRING_CONVERSION_NUMBER:
     compileNativeCall("@numberToString", expr);
     break;
+  case STRING_CONVERSION_U8:
+    compileNativeCall("@u8ToString", expr);
+    break;
   case STRING_CONVERSION_BOOL:
     compileNativeCall("@boolToString", expr);
     break;
@@ -909,7 +924,10 @@ static void compileExpr(AstNode *node) {
     case LITERAL_NUMBER:
       switch (literal->as.number.kind) {
       case NUMBER_F64:
-        emitNumberConstant(literal->as.number.as.f64);
+        emitF64Constant(literal->as.number.as.f64);
+        break;
+      case NUMBER_U8:
+        emitU8Constant(literal->as.number.as.u8);
         break;
       }
 

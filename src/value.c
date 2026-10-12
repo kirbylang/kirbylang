@@ -37,7 +37,7 @@ static void appendChar(char *buffer, size_t size, size_t *length, char c) {
     buffer[(*length)++] = c;
 }
 
-void formatNumber(double value, char *buffer, size_t size) {
+void formatNumberF64(double value, char *buffer, size_t size) {
   if (isnan(value)) {
     snprintf(buffer, size, "nan");
     return;
@@ -129,6 +129,12 @@ void formatNumber(double value, char *buffer, size_t size) {
     buffer[length] = '\0';
 }
 
+void formatNumberU8(uint8_t value, char *buffer, size_t size) {
+  if (size == 0)
+    return;
+  snprintf(buffer, size, "%u", (unsigned)value);
+}
+
 void valueToString(Value value, char *buffer, size_t size) {
   switch (value.type) {
   case VAL_BOOL:
@@ -138,7 +144,14 @@ void valueToString(Value value, char *buffer, size_t size) {
     snprintf(buffer, size, "nil");
     break;
   case VAL_NUMBER:
-    formatNumber(AS_NUMBER(value), buffer, size);
+    switch (value.as.number.type) {
+    case VAL_NUMBER_F64:
+      formatNumberF64(AS_NUMBER_F64(value), buffer, size);
+      break;
+    case VAL_NUMBER_U8:
+      formatNumberU8(AS_NUMBER_U8(value), buffer, size);
+      break;
+    }
     break;
   case VAL_OBJ:
     objectToString(value, buffer, size); // signal: handled elsewhere
@@ -155,7 +168,14 @@ void valueTypeToString(Value value, char *buffer, size_t size) {
     snprintf(buffer, size, "nil");
     break;
   case VAL_NUMBER:
-    snprintf(buffer, size, "number");
+    switch (value.as.number.type) {
+    case VAL_NUMBER_F64:
+      snprintf(buffer, size, "f64");
+      break;
+    case VAL_NUMBER_U8:
+      snprintf(buffer, size, "u8");
+      break;
+    }
     break;
   case VAL_OBJ:
     objectTypeToString(value.as.obj->type, buffer, size);
@@ -196,7 +216,20 @@ bool valuesEqual(Value a, Value b) {
   case VAL_NIL:
     return true;
   case VAL_NUMBER:
-    return AS_NUMBER(a) == AS_NUMBER(b);
+    // Different number subtypes (f64 vs u8) never compare equal; the type
+    // checker keeps them apart, so this is only a guard against reinterpreting
+    // the wrong union member.
+    if (a.as.number.type != b.as.number.type)
+      return false;
+
+    switch (a.as.number.type) {
+    case VAL_NUMBER_F64:
+      return AS_NUMBER_F64(a) == AS_NUMBER_F64(b);
+
+    case VAL_NUMBER_U8:
+      return AS_NUMBER_U8(a) == AS_NUMBER_U8(b);
+    }
+    return false;
   case VAL_OBJ:
     return AS_OBJ(a) == AS_OBJ(b);
   default:

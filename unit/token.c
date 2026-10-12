@@ -83,6 +83,7 @@ static void test_token_to_cstring(void) {
   assert(strcmp("TOKEN_STRING", tokenTypeToString(TOKEN_STRING)) == 0);
   assert(strcmp("TOKEN_NUMBER", tokenTypeToString(TOKEN_NUMBER)) == 0);
   assert(strcmp("TOKEN_F64", tokenTypeToString(TOKEN_F64)) == 0);
+  assert(strcmp("TOKEN_U8", tokenTypeToString(TOKEN_U8)) == 0);
   assert(strcmp("TOKEN_INTERP_STRING",
                 tokenTypeToString(TOKEN_INTERP_STRING)) == 0);
   assert(strcmp("TOKEN_INTERP_START", tokenTypeToString(TOKEN_INTERP_START)) ==
@@ -118,7 +119,7 @@ static void test_token_to_cstring(void) {
 }
 
 int main(void) {
-  assert(NumberOfDefinedTokens == 56);
+  assert(NumberOfDefinedTokens == 57);
   test_token_to_cstring();
   test_tokens_equal();
   test_token_text_equals();

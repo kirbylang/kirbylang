@@ -352,6 +352,15 @@ static Token number(Scanner *scanner) {
     return makeToken(scanner, TOKEN_F64);
   }
 
+  // Look for an optional u8/U8 suffix
+  if ((peek(scanner) == 'u' || peek(scanner) == 'U') &&
+      peekNext(scanner) == '8') {
+    advance(scanner);
+    advance(scanner);
+
+    return makeToken(scanner, TOKEN_U8);
+  }
+
   return makeToken(scanner, TOKEN_NUMBER);
 }
 

@@ -13,7 +13,7 @@
   }
 
 TEST(test_nil, NIL_VAL, "nil")
-TEST(test_number, NUMBER_VAL(123), "123")
+TEST(test_number, NUMBER_F64_VAL(123), "123")
 TEST(test_bool_true, BOOL_VAL(true), "true")
 TEST(test_bool_false, BOOL_VAL(false), "false")
 
@@ -48,10 +48,10 @@ static void test_format_number(void) {
 
   for (size_t i = 0; i < sizeof(cases) / sizeof(cases[0]); i++) {
     char buffer[NUMBER_STRING_MAX];
-    formatNumber(cases[i].value, buffer, sizeof(buffer));
+    formatNumberF64(cases[i].value, buffer, sizeof(buffer));
 
     if (strcmp(cases[i].expected, buffer) != 0) {
-      fprintf(stderr, "formatNumber: expected %s, got %s\n",
+      fprintf(stderr, "formatNumberF64: expected %s, got %s\n",
               cases[i].expected, buffer);
     }
     assert(strcmp(cases[i].expected, buffer) == 0);
