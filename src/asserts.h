@@ -16,6 +16,7 @@ void assertArgIsNumber(VM *vm, const char *function, Value *args, int index);
 void assertArgIsU8(VM *vm, const char *function, Value *args, int index);
 void assertArgIsString(VM *vm, const char *function, Value *args, int index);
 void assertNonZero(VM *vm, const char *function, double number, int index);
+void assertNonZeroU8(VM *vm, const char *function, uint8_t number, int index);
 void assertPositiveNumber(VM *vm, const char *function, double number,
                           int index);
 void assertNonNegativeNumber(VM *vm, const char *function, double number,

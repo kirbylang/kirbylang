@@ -1,0 +1,2 @@
+@println(7u8 / 2u8);
+@println(255u8 / 2u8);

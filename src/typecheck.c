@@ -573,6 +573,36 @@ static bool typeImplementsDisplay(Type *type) {
       type, internTokenName(tokenFromCString("Display")));
 }
 
+// The user-facing symbol for a binary operator token, used in error messages.
+static const char *binaryOperatorSymbol(TokenType type) {
+  switch (type) {
+  case TOKEN_PLUS:
+    return "+";
+  case TOKEN_MINUS:
+    return "-";
+  case TOKEN_STAR:
+    return "*";
+  case TOKEN_SLASH:
+    return "/";
+  case TOKEN_MODULO:
+    return "%";
+  case TOKEN_EQUAL_EQUAL:
+    return "==";
+  case TOKEN_BANG_EQUAL:
+    return "!=";
+  case TOKEN_LESS:
+    return "<";
+  case TOKEN_GREATER:
+    return ">";
+  case TOKEN_LESS_EQUAL:
+    return "<=";
+  case TOKEN_GREATER_EQUAL:
+    return ">=";
+  default:
+    return "?";
+  }
+}
+
 static Type *typchkInferBinary(TypeEnv *env, AstNode *node) {
   BinaryNode *b = &node->as.binary;
   Type *leftType = typchkInfer(env, b->left);
@@ -604,17 +634,17 @@ static Type *typchkInferBinary(TypeEnv *env, AstNode *node) {
   case TOKEN_STAR:
   case TOKEN_SLASH:
   case TOKEN_MODULO:
-    if (!typesEqual(leftType, typeF64())) {
-      typchkErrorAtNodeFmt(b->left, "Expected f64, got %s.",
-                           typeToString(leftType));
-      return NULL;
-    }
-    if (!typesEqual(rightType, typeF64())) {
-      typchkErrorAtNodeFmt(b->right, "Expected f64, got %s.",
-                           typeToString(rightType));
-      return NULL;
-    }
-    return typeF64();
+    if (typesEqual(leftType, typeF64()) && typesEqual(rightType, typeF64()))
+      return typeF64();
+
+    if (typesEqual(leftType, typeU8()) && typesEqual(rightType, typeU8()))
+      return typeU8();
+
+    typchkErrorAtTokenFmt(&b->op,
+                          "'%s' needs two f64s or two u8s, got %s and %s.",
+                          binaryOperatorSymbol(b->op.type),
+                          typeToString(leftType), typeToString(rightType));
+    return NULL;
 
   case TOKEN_EQUAL_EQUAL:
   case TOKEN_BANG_EQUAL:
@@ -641,17 +671,17 @@ static Type *typchkInferBinary(TypeEnv *env, AstNode *node) {
   case TOKEN_GREATER:
   case TOKEN_LESS_EQUAL:
   case TOKEN_GREATER_EQUAL:
-    if (!typesEqual(leftType, typeF64())) {
-      typchkErrorAtNodeFmt(b->left, "Expected f64, got %s.",
-                           typeToString(leftType));
-      return NULL;
-    }
-    if (!typesEqual(rightType, typeF64())) {
-      typchkErrorAtNodeFmt(b->right, "Expected f64, got %s.",
-                           typeToString(rightType));
-      return NULL;
-    }
-    return typeBool();
+    if (typesEqual(leftType, typeF64()) && typesEqual(rightType, typeF64()))
+      return typeBool();
+
+    if (typesEqual(leftType, typeU8()) && typesEqual(rightType, typeU8()))
+      return typeBool();
+
+    typchkErrorAtTokenFmt(&b->op,
+                          "'%s' needs two f64s or two u8s, got %s and %s.",
+                          binaryOperatorSymbol(b->op.type),
+                          typeToString(leftType), typeToString(rightType));
+    return NULL;
 
   default:
     typchkErrorAtToken(&b->op, "Internal: unhandled binary operator.");

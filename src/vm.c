@@ -428,15 +428,23 @@ static InterpretResult run(void) {
 #define READ_SHORT()                                                           \
   (frame->ip += 2, (uint16_t)((frame->ip[-2] << 8) | frame->ip[-1]))
 #define READ_STRING() AS_STRING(READ_CONSTANT())
-#define BINARY_OP(valueType, op)                                               \
+#define BINARY_OP(f64ValueType, u8ValueType, op)                               \
   do {                                                                         \
-    if (!IS_NUMBER_F64(peekStack(0)) || !IS_NUMBER_F64(peekStack(1))) {        \
-      runtimeError(&vm, "Operands must be numbers.");                          \
+    if (IS_NUMBER_F64(peekStack(0)) && IS_NUMBER_F64(peekStack(1))) {          \
+      double b = AS_NUMBER_F64(popFromStack());                                \
+      double a = AS_NUMBER_F64(popFromStack());                                \
+      pushOnStack(f64ValueType(a op b));                                       \
+    } else if (IS_NUMBER_U8(peekStack(0)) && IS_NUMBER_U8(peekStack(1))) {     \
+      /* Integer promotion keeps a op b in int range; NUMBER_U8_VAL truncates  \
+         it to eight bits, so u8 arithmetic wraps mod 256. Comparisons keep    \
+         their unsigned semantics under promotion. */                          \
+      uint8_t b = AS_NUMBER_U8(popFromStack());                                \
+      uint8_t a = AS_NUMBER_U8(popFromStack());                                \
+      pushOnStack(u8ValueType(a op b));                                        \
+    } else {                                                                   \
+      runtimeError(&vm, "Operands must be two numbers of the same type.");     \
       return INTERPRET_RUNTIME_ERROR;                                          \
     }                                                                          \
-    double b = AS_NUMBER_F64(popFromStack());                                  \
-    double a = AS_NUMBER_F64(popFromStack());                                  \
-    pushOnStack(valueType(a op b));                                            \
   } while (false)
 
   TRACELN("vm.run()");
@@ -504,28 +512,45 @@ static InterpretResult run(void) {
       break;
     }
     case OP_SUBTRACT:
-      BINARY_OP(NUMBER_F64_VAL, -);
+      BINARY_OP(NUMBER_F64_VAL, NUMBER_U8_VAL, -);
       break;
     case OP_MULTIPLY:
-      BINARY_OP(NUMBER_F64_VAL, *);
+      BINARY_OP(NUMBER_F64_VAL, NUMBER_U8_VAL, *);
       break;
     case OP_DIVIDE: {
-      assertNonZero(&vm, "/", peekStack(0).as.number.as.f64, 1);
-      BINARY_OP(NUMBER_F64_VAL, /);
+      if (IS_NUMBER_U8(peekStack(0))) {
+        assertNonZeroU8(&vm, "/", peekStack(0).as.number.as.u8, 1);
+      } else {
+        assertNonZero(&vm, "/", peekStack(0).as.number.as.f64, 1);
+      }
+      BINARY_OP(NUMBER_F64_VAL, NUMBER_U8_VAL, /);
       break;
     }
     case OP_MODULO: {
-      if (!IS_NUMBER_F64(peekStack(0)) || !IS_NUMBER_F64(peekStack(1))) {
-        runtimeError(&vm, "Operands must be numbers.");
-        return INTERPRET_RUNTIME_ERROR;
+      if (IS_NUMBER_U8(peekStack(0))) {
+        // A zero divisor is undefined behavior for C integer modulo, so
+        // reject it before the op runs. f64 fmod(, 0) returns NaN instead.
+        assertNonZeroU8(&vm, "%", peekStack(0).as.number.as.u8, 1);
       }
 
-      double b = AS_NUMBER_F64(popFromStack());
-      double a = AS_NUMBER_F64(popFromStack());
+      if (IS_NUMBER_F64(peekStack(0)) && IS_NUMBER_F64(peekStack(1))) {
+        double b = AS_NUMBER_F64(popFromStack());
+        double a = AS_NUMBER_F64(popFromStack());
 
-      Value result = NUMBER_F64_VAL(fmod(a, b));
+        Value result = NUMBER_F64_VAL(fmod(a, b));
 
-      pushOnStack(result);
+        pushOnStack(result);
+      } else if (IS_NUMBER_U8(peekStack(0)) && IS_NUMBER_U8(peekStack(1))) {
+        uint8_t b = AS_NUMBER_U8(popFromStack());
+        uint8_t a = AS_NUMBER_U8(popFromStack());
+
+        Value result = NUMBER_U8_VAL(a % b);
+
+        pushOnStack(result);
+      } else {
+        runtimeError(&vm, "Operands must be two numbers of the same type.");
+        return INTERPRET_RUNTIME_ERROR;
+      }
       break;
     }
     case OP_NOT: {
@@ -576,10 +601,10 @@ static InterpretResult run(void) {
       break;
     }
     case OP_GREATER:
-      BINARY_OP(BOOL_VAL, >);
+      BINARY_OP(BOOL_VAL, BOOL_VAL, >);
       break;
     case OP_LESS:
-      BINARY_OP(BOOL_VAL, <);
+      BINARY_OP(BOOL_VAL, BOOL_VAL, <);
       break;
     case OP_POP: {
       popFromStack();

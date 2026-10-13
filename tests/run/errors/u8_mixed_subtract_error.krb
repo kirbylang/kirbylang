@@ -1,0 +1,2 @@
+let a: u8 = 1;
+@println(a - 2);
