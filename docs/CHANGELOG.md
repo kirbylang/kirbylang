@@ -56,6 +56,7 @@
   - Has `new(timestamp)` and `now()` static methods
 - Allow number literals to have `f64` or `F64` suffix e.g. `123f64`, `456F64`
 - New CLI subcommand `krb docs` which opens `https://kirbylang.github.io/kirbylang/` in the default browser
+- Add `u8` number type
 
 ## 0.4.0
 

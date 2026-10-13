@@ -31,6 +31,7 @@ let greeting: string = "Hello World";
 | :------- | --------------------------------: | -------------------------------------------------- |
 | `string` |                   `"Hello World"` |                                                    |
 | `f64`    |               `123f64`, `123.456` | The `f64` suffix is optional                       |
+| `u8`     |                  `123u8`, `255U8` |                                                    |
 | `unit`   |                              `()` |                                                    |
 | `bool`   |                   `true`, `false` |                                                    |
 | `Array`  | `[1, 2, 3]`, `["Hello", "World"]` | A dynamically sized collection of homonogous types |
