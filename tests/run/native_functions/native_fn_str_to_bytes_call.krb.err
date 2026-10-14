@@ -1,0 +1,33 @@
+== <script> ==
+0000    1 OP_GET_GLOBAL       1 '@strToBytes'
+0002    | OP_CONSTANT         2 'AB'
+0004    | OP_CALL             1
+0006    | OP_DEFINE_GLOBAL    0 'bytes'
+0008    2 OP_GET_GLOBAL       3 '@println'
+0010    | OP_GET_GLOBAL       4 '@len'
+0012    | OP_GET_GLOBAL       0 'bytes'
+0014    | OP_CALL             1
+0016    | OP_CALL             1
+0018    | OP_POP
+0019    3 OP_GET_GLOBAL       3 '@println'
+0021    | OP_GET_GLOBAL       0 'bytes'
+0023    | OP_CONSTANT         5 '0'
+0025    | OP_GET_INDEX
+0026    | OP_CALL             1
+0028    | OP_POP
+0029    4 OP_GET_GLOBAL       3 '@println'
+0031    | OP_GET_GLOBAL       0 'bytes'
+0033    | OP_CONSTANT         6 '1'
+0035    | OP_GET_INDEX
+0036    | OP_CALL             1
+0038    | OP_POP
+0039    5 OP_GET_GLOBAL       3 '@println'
+0041    | OP_GET_GLOBAL       7 '@typeof'
+0043    | OP_GET_GLOBAL       0 'bytes'
+0045    | OP_CONSTANT         5 '0'
+0047    | OP_GET_INDEX
+0048    | OP_CALL             1
+0050    | OP_CALL             1
+0052    | OP_POP
+0053    6 OP_NIL
+0054    | OP_RETURN
