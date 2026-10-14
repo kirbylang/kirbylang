@@ -1295,6 +1295,28 @@ static Value strSliceNative(VM *vm, int argCount, Value *args) {
   return OBJ_VAL(copyString(vm->gc, string->chars + start, end - start));
 }
 
+// Every byte of the string, in order, becomes one u8 element. The read is
+// cast to uint8_t so bytes 128..255 are preserved even where `char` is signed.
+static Value strToBytesNative(VM *vm, int argCount, Value *args) {
+  assertArgCount(vm, "@strToBytes", 1, argCount);
+  assertArgIsString(vm, "@strToBytes", args, 0);
+
+  ObjString *string = AS_STRING(args[0]);
+
+  ObjArray *result = newArray(vm->gc);
+
+  pushOnStack(OBJ_VAL(result)); // Protect from GC
+
+  for (int i = 0; i < string->length; i++) {
+    writeValueToArrayObj(vm->gc, result,
+                         NUMBER_U8_VAL((uint8_t)string->chars[i]));
+  }
+
+  popFromStack(); // Clean up after GC protection
+
+  return OBJ_VAL(result);
+}
+
 // Replaces the first match of `old` in a string, or every match when `all` is
 // true. Matches are found left to right and never overlap. A string with no
 // matches is returned as is. An empty `old` never matches.
@@ -1445,6 +1467,7 @@ const NativeDefinition nativeDefinitions[] = {
     {"@strSlice", strSliceNative},
     {"@strReplace", strReplaceNative},
     {"@strReplaceAll", strReplaceAllNative},
+    {"@strToBytes", strToBytesNative},
     {"@now", nowNative}};
 
 const int nativeDefinitionCount =
