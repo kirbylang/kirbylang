@@ -1,5 +1,6 @@
 @println(@is(true, "bool"));
 @println(@is("Hello", "string"));
-@println(@is(12345, "number"));
+@println(@is(12345, "f64"));
+@println(@is(123u8, "u8"));
 @println(@is(@ceil, "function"));
 @println(@is(nil, "nil"));
