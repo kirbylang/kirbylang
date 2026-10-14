@@ -104,8 +104,7 @@ typedef struct {
 typedef struct {
   AstNode *expr;
   /**
-   * The cast's target type, e.g. the `u8` in `value as u8`. A NODE_TYPE or
-   * NODE_TYPE_FUNCTION node.
+   * The cast's target type, e.g. the `T` in `value as T`
    */
   AstNode *type;
   /**
