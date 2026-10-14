@@ -555,6 +555,14 @@ static void printNode(StrBuf *sb, AstNode *node) {
     sb_append(sb, ")");
     break;
 
+  case NODE_CAST:
+    sb_append(sb, "(cast ");
+    printNode(sb, node->as.cast.expr);
+    sb_append(sb, " as ");
+    printNode(sb, node->as.cast.type);
+    sb_append(sb, ")");
+    break;
+
   case NODE_COUNT:
     sb_append(sb, "<invalid>");
     break;

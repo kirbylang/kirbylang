@@ -50,6 +50,7 @@ typedef enum {
   OP_GET_INDEX,        // 39
   OP_SET_INDEX,        // 40
   OP_CLOSE_BLOCK_EXPR, // 41
+  OP_CAST,             // 42; operand: target number kind (0 = f64, 1 = u8)
   // Sentinel
   OP_COUNT,
 } OpCode;

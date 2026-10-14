@@ -5,6 +5,7 @@
 #include <stdlib.h>
 #include <time.h>
 
+#include "ast.h"
 #include "asserts.h"
 #include "common.h"
 #include "debug.h"
@@ -570,6 +571,48 @@ static InterpretResult run(void) {
 
       pushOnStack(negated_value);
 
+      break;
+    }
+    case OP_CAST: {
+      uint8_t target = READ_BYTE();
+      Value value = popFromStack();
+
+      if (target == NUMBER_U8) {
+        // Narrowing conversion. A u8 holds only the integers 0 through 255,
+        // so an f64 is range-checked here and rejected if it can't be
+        // represented exactly.
+        if (IS_NUMBER_U8(value)) {
+          pushOnStack(value);
+        } else if (IS_NUMBER_F64(value)) {
+          double d = value.as.number.as.f64;
+          if (d != floor(d) || d < 0.0 || d > 255.0) {
+            runtimeError(
+                &vm,
+                "can't convert f64 %g to u8, expected an integer from 0 to "
+                "255.",
+                d);
+            return INTERPRET_RUNTIME_ERROR;
+          }
+          pushOnStack(NUMBER_U8_VAL((uint8_t)d));
+        } else {
+          runtimeError(&vm, "can't cast to u8.");
+          return INTERPRET_RUNTIME_ERROR;
+        }
+      } else if (target == NUMBER_F64) {
+        // Widening conversion. Every u8 fits exactly in an f64, so no check
+        // is needed.
+        if (IS_NUMBER_F64(value)) {
+          pushOnStack(value);
+        } else if (IS_NUMBER_U8(value)) {
+          pushOnStack(NUMBER_F64_VAL(value.as.number.as.u8));
+        } else {
+          runtimeError(&vm, "can't cast to f64.");
+          return INTERPRET_RUNTIME_ERROR;
+        }
+      } else {
+        runtimeError(&vm, "Internal: unknown cast target %d.", target);
+        return INTERPRET_RUNTIME_ERROR;
+      }
       break;
     }
     case OP_PRINT: {

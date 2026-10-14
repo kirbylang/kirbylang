@@ -69,6 +69,7 @@ static BlockNode parseBlock(Parser *p);
 static AstNode *lambda(Parser *p, bool canAssign);
 static AstNode *ifExpr(Parser *p, bool canAssign);
 static AstNode *nullish_(Parser *p, AstNode *left, bool canAssign);
+static AstNode *cast_(Parser *p, AstNode *left, bool canAssign);
 static AstNode *struct_(Parser *p, AstNode *left, bool canAssign);
 static AstNode *varDeclaration(Parser *p, bool isMutable);
 static AstNode *parseType(Parser *p);
@@ -645,6 +646,28 @@ static AstNode *nullish_(Parser *p, AstNode *left, bool canAssign) {
   return node;
 }
 
+/**
+ * `expr as Type` -- an explicit conversion between number types, e.g.
+ * `value as u8`. The right side is a type, not an expression, so this rule
+ * parses it with parseType(). Cast binds looser than arithmetic, comparison,
+ * and unary, so `-1 as u8` is `(-1) as u8` and `2 * 3 as u8` is
+ * `(2 * 3) as u8`. Wrap the operand in parentheses to cast just a part of
+ * an expression, e.g. `a + (b as u8)`.
+ */
+static AstNode *cast_(Parser *p, AstNode *left, bool canAssign) {
+  (void)canAssign;
+
+  Token as = p->previous;
+  AstNode *type = parseType(p);
+
+  AstNode *node = astAlloc(NODE_CAST, as.line);
+  node->as.cast.expr = left;
+  node->as.cast.type = type;
+  node->as.cast.as = as;
+  node->as.cast.target = NUMBER_F64; // set by the type checker
+  return node;
+}
+
 static AstNode *call(Parser *p, AstNode *left, bool canAssign) {
   (void)canAssign;
   int line = p->previous.line;
@@ -843,6 +866,7 @@ static ParseRule rules[] = {
     [TOKEN_PUB] = {NULL, NULL, PREC_NONE},
     [TOKEN_WHILE] = {NULL, NULL, PREC_NONE},
     [TOKEN_MODULO] = {NULL, binary, PREC_FACTOR},
+    [TOKEN_AS] = {NULL, cast_, PREC_TERM},
     [TOKEN_BREAK] = {NULL, NULL, PREC_NONE},
     [TOKEN_CONTINUE] = {NULL, NULL, PREC_NONE},
     [TOKEN_ERROR] = {NULL, NULL, PREC_NONE},

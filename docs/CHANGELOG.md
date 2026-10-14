@@ -57,6 +57,10 @@
 - Allow number literals to have `f64` or `F64` suffix e.g. `123f64`, `456F64`
 - New CLI subcommand `krb docs` which opens `https://kirbylang.github.io/kirbylang/` in the default browser
 - Add `u8` number type
+- Add `as` to explicitly cast between number types, e.g. `value as u8`. Only
+  `f64` and `u8` can be cast for now. Casting to `f64` is always exact; casting
+  to `u8` checks at runtime that the value is an integer from 0 to 255 and
+  raises an error otherwise
 
 ## 0.4.0
 

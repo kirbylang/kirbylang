@@ -151,6 +151,10 @@
           "match": "\\b(and|or)\\b"
         },
         {
+          "name": "keyword.other.cast.krb",
+          "match": "\\bas\\b"
+        },
+        {
           "name": "keyword.other.print.krb",
           "match": "\\bprint\\b"
         },

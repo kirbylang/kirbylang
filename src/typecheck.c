@@ -369,6 +369,7 @@ Type *typchkResolveType(TypeEnv *env, AstNode *typeAnnotation) {
 static Type *typchkInferLiteral(AstNode *node);
 static Type *typchkInferUnary(TypeEnv *env, AstNode *node);
 static Type *typchkInferBinary(TypeEnv *env, AstNode *node);
+static Type *typchkInferCast(TypeEnv *env, AstNode *node);
 static Type *typchkInferVariable(TypeEnv *env, AstNode *node);
 static Type *typchkInferAssign(TypeEnv *env, AstNode *node);
 static Type *typchkInferLogical(TypeEnv *env, AstNode *node);
@@ -430,6 +431,8 @@ Type *typchkInfer(TypeEnv *env, AstNode *node) {
     return typchkInferUnary(env, node);
   case NODE_BINARY:
     return typchkInferBinary(env, node);
+  case NODE_CAST:
+    return typchkInferCast(env, node);
   case NODE_GROUPING:
     return typchkInfer(env, node->as.grouping.inner);
   case NODE_VARIABLE:
@@ -687,6 +690,42 @@ static Type *typchkInferBinary(TypeEnv *env, AstNode *node) {
     typchkErrorAtToken(&b->op, "Internal: unhandled binary operator.");
     return NULL;
   }
+}
+
+/**
+ * `expr as Type` -- an explicit conversion between number types, e.g.
+ * `value as u8`. Only f64 and u8 may appear on either side, so the legal
+ * casts are f64->f64, f64->u8, u8->f64, and u8->u8. The u8->f64 widening is
+ * always exact. The f64->u8 narrowing is checked at runtime: the value must
+ * be an integer from 0 to 255, else the VM raises an error.
+ */
+static Type *typchkInferCast(TypeEnv *env, AstNode *node) {
+  CastNode *c = &node->as.cast;
+
+  Type *sourceType = typchkInfer(env, c->expr);
+  if (sourceType == NULL)
+    return NULL;
+
+  Type *targetType = typchkResolveType(env, c->type);
+  if (targetType == NULL)
+    return NULL;
+
+  bool sourceIsNumber = typesEqual(sourceType, typeF64()) ||
+                        typesEqual(sourceType, typeU8());
+  bool targetIsNumber = typesEqual(targetType, typeF64()) ||
+                        typesEqual(targetType, typeU8());
+
+  if (!sourceIsNumber || !targetIsNumber) {
+    typchkErrorAtTokenFmt(&c->as,
+                          "Can't cast %s to %s. Only f64 and u8 can be cast.",
+                          typeToString(sourceType), typeToString(targetType));
+    return NULL;
+  }
+
+  // The compiler has no types, so it reads the target's number kind from
+  // the node. Set it here, where the target is known to be f64 or u8.
+  c->target = typesEqual(targetType, typeU8()) ? NUMBER_U8 : NUMBER_F64;
+  return targetType;
 }
 
 /**

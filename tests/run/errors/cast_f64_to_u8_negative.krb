@@ -1,0 +1,3 @@
+// Casting a negative f64 to u8 is a runtime error.
+let v: f64 = -1.0;
+let byte: u8 = v as u8;

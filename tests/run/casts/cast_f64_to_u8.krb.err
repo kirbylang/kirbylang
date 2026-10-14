@@ -1,0 +1,33 @@
+== <script> ==
+0000    2 OP_CONSTANT         1 '255'
+0002    | OP_DEFINE_GLOBAL    0 'v'
+0004    3 OP_GET_GLOBAL       0 'v'
+0006    | OP_CAST          u8
+0008    | OP_DEFINE_GLOBAL    2 'byte'
+0010    4 OP_GET_GLOBAL       3 '@println'
+0012    | OP_GET_GLOBAL       2 'byte'
+0014    | OP_CALL             1
+0016    | OP_POP
+0017    6 OP_CONSTANT         5 '3.14159'
+0019    | OP_DEFINE_GLOBAL    4 'pi'
+0021    7 OP_GET_GLOBAL       3 '@println'
+0023    | OP_GET_GLOBAL       6 '@floor'
+0025    | OP_GET_GLOBAL       4 'pi'
+0027    | OP_CALL             1
+0029    | OP_CAST          u8
+0031    | OP_CALL             1
+0033    | OP_POP
+0034   11 OP_GET_GLOBAL       3 '@println'
+0036    | OP_CONSTANT         7 '2'
+0038    | OP_CONSTANT         8 '3'
+0040    | OP_MULTIPLY
+0041    | OP_CAST          u8
+0043    | OP_CALL             1
+0045    | OP_POP
+0046   14 OP_GET_GLOBAL       3 '@println'
+0048    | OP_CONSTANT         9 '7'
+0050    | OP_CAST          u8
+0052    | OP_CALL             1
+0054    | OP_POP
+0055   15 OP_NIL
+0056    | OP_RETURN

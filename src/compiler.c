@@ -1008,6 +1008,16 @@ static void compileExpr(AstNode *node) {
     compileExpr(node->as.grouping.inner);
     break;
 
+  case NODE_CAST: {
+    CastNode *c = &node->as.cast;
+
+    // The operand stays under the result, so the net stack effect is zero.
+    compileExpr(c->expr);
+    emitByte(OP_CAST);
+    emitByte(c->target);
+    break;
+  }
+
   case NODE_VARIABLE: {
     VarRef ref = resolveVariable(&node->as.variable.name);
     emitBytes(ref.getOp, ref.arg);

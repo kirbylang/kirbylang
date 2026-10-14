@@ -42,6 +42,7 @@ typedef enum {
   NODE_TYPE_ALIAS,
   NODE_TYPE_FUNCTION,
   NODE_INTERP_STRING,
+  NODE_CAST,
   // Sentinel
   NODE_COUNT
 } NodeKind;
@@ -99,6 +100,25 @@ typedef struct {
    */
   bool isStringConcat;
 } BinaryNode;
+
+typedef struct {
+  AstNode *expr;
+  /**
+   * The cast's target type, e.g. the `u8` in `value as u8`. A NODE_TYPE or
+   * NODE_TYPE_FUNCTION node.
+   */
+  AstNode *type;
+  /**
+   * The `as` keyword — used for error location.
+   */
+  Token as;
+  /**
+   * The target's number kind, set by the type checker because the compiler
+   * has no types. Valid for casts the type checker accepted, which are
+   * always to f64 or u8.
+   */
+  NumberKind target;
+} CastNode;
 
 typedef struct {
   AstNode *inner;
@@ -465,6 +485,7 @@ struct AstNode {
     TypeAliasNode typeAlias;
     TypeFunctionNode typeFunction;
     InterpStringNode interpString;
+    CastNode cast;
   } as;
 };
 
