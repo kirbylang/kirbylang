@@ -345,6 +345,8 @@ Type *typchkResolveType(TypeEnv *env, AstNode *typeAnnotation) {
     return typeString();
   if (tokenTextEquals(&t->name, "f64"))
     return typeF64();
+  if (tokenTextEquals(&t->name, "u8"))
+    return typeU8();
   if (tokenTextEquals(&t->name, "Array"))
     return typeArray(NULL);
   if (tokenTextEquals(&t->name, "Self")) {
@@ -367,6 +369,7 @@ Type *typchkResolveType(TypeEnv *env, AstNode *typeAnnotation) {
 static Type *typchkInferLiteral(AstNode *node);
 static Type *typchkInferUnary(TypeEnv *env, AstNode *node);
 static Type *typchkInferBinary(TypeEnv *env, AstNode *node);
+static Type *typchkInferCast(TypeEnv *env, AstNode *node);
 static Type *typchkInferVariable(TypeEnv *env, AstNode *node);
 static Type *typchkInferAssign(TypeEnv *env, AstNode *node);
 static Type *typchkInferLogical(TypeEnv *env, AstNode *node);
@@ -392,6 +395,33 @@ static Type *typchkCheckOrInferLambda(TypeEnv *env, AstNode *node,
 static void typchkCheckVarDecl(TypeEnv *env, AstNode *node);
 static void typchkCheckFunctionDecl(TypeEnv *env, AstNode *node);
 
+// In a u8-expected context, a plain integer literal -- no suffix, no decimal
+// point, in the range 0..255 -- is treated as a u8 literal, so
+// `let byte: u8 = 65;` and `sum(1, 2)` don't need a suffix. Suffixed and
+// decimal literals are an explicit choice of f64 and never coerce. The
+// compiler reads the literal's kind, so the AST is rewritten here, before
+// compilation.
+static void typchkCoerceIntegerLiteralToU8(AstNode *node, Type *expected) {
+  if (expected == NULL || expected->kind != TYPE_U8)
+    return;
+
+  if (node->kind != NODE_LITERAL || node->as.literal.kind != LITERAL_NUMBER)
+    return;
+
+  LiteralNode *lit = &node->as.literal;
+
+  if (lit->as.number.kind != NUMBER_F64 || !lit->as.number.isPlainInteger)
+    return;
+
+  double value = lit->as.number.as.f64;
+
+  if (value < 0.0 || value > 255.0)
+    return;
+
+  lit->as.number.kind = NUMBER_U8;
+  lit->as.number.as.u8 = (uint8_t)value;
+}
+
 // Infer the type of an expression
 Type *typchkInfer(TypeEnv *env, AstNode *node) {
   switch (node->kind) {
@@ -401,6 +431,8 @@ Type *typchkInfer(TypeEnv *env, AstNode *node) {
     return typchkInferUnary(env, node);
   case NODE_BINARY:
     return typchkInferBinary(env, node);
+  case NODE_CAST:
+    return typchkInferCast(env, node);
   case NODE_GROUPING:
     return typchkInfer(env, node->as.grouping.inner);
   case NODE_VARIABLE:
@@ -447,6 +479,8 @@ Type *typchkInfer(TypeEnv *env, AstNode *node) {
 }
 
 bool typchkCheck(TypeEnv *env, AstNode *node, Type *expected) {
+  typchkCoerceIntegerLiteralToU8(node, expected);
+
   if (node->kind == NODE_FUNCTION && node->as.function.isLambda)
     return typchkCheckOrInferLambda(env, node, expected) != NULL;
 
@@ -504,7 +538,12 @@ static Type *typchkInferLiteral(AstNode *node) {
   case LITERAL_BOOL:
     return typeBool();
   case LITERAL_NUMBER:
-    return typeF64();
+    switch (lit->as.number.kind) {
+    case NUMBER_F64:
+      return typeF64();
+    case NUMBER_U8:
+      return typeU8();
+    }
   case LITERAL_STRING:
     return typeString();
   }
@@ -537,6 +576,36 @@ static bool typeImplementsDisplay(Type *type) {
       type, internTokenName(tokenFromCString("Display")));
 }
 
+// The user-facing symbol for a binary operator token, used in error messages.
+static const char *binaryOperatorSymbol(TokenType type) {
+  switch (type) {
+  case TOKEN_PLUS:
+    return "+";
+  case TOKEN_MINUS:
+    return "-";
+  case TOKEN_STAR:
+    return "*";
+  case TOKEN_SLASH:
+    return "/";
+  case TOKEN_MODULO:
+    return "%";
+  case TOKEN_EQUAL_EQUAL:
+    return "==";
+  case TOKEN_BANG_EQUAL:
+    return "!=";
+  case TOKEN_LESS:
+    return "<";
+  case TOKEN_GREATER:
+    return ">";
+  case TOKEN_LESS_EQUAL:
+    return "<=";
+  case TOKEN_GREATER_EQUAL:
+    return ">=";
+  default:
+    return "?";
+  }
+}
+
 static Type *typchkInferBinary(TypeEnv *env, AstNode *node) {
   BinaryNode *b = &node->as.binary;
   Type *leftType = typchkInfer(env, b->left);
@@ -550,32 +619,35 @@ static Type *typchkInferBinary(TypeEnv *env, AstNode *node) {
     if (typesEqual(leftType, typeF64()) && typesEqual(rightType, typeF64()))
       return typeF64();
 
+    if (typesEqual(leftType, typeU8()) && typesEqual(rightType, typeU8()))
+      return typeU8();
+
     if (typesEqual(leftType, typeString()) &&
         typesEqual(rightType, typeString())) {
       b->isStringConcat = true;
       return typeString();
     }
 
-    typchkErrorAtTokenFmt(&b->op,
-                          "'+' needs two f64s or two strings, got %s and %s.",
-                          typeToString(leftType), typeToString(rightType));
+    typchkErrorAtTokenFmt(
+        &b->op, "'+' needs addable types: f64, u8, string; got %s and %s.",
+        typeToString(leftType), typeToString(rightType));
     return NULL;
 
   case TOKEN_MINUS:
   case TOKEN_STAR:
   case TOKEN_SLASH:
   case TOKEN_MODULO:
-    if (!typesEqual(leftType, typeF64())) {
-      typchkErrorAtNodeFmt(b->left, "Expected f64, got %s.",
-                           typeToString(leftType));
-      return NULL;
-    }
-    if (!typesEqual(rightType, typeF64())) {
-      typchkErrorAtNodeFmt(b->right, "Expected f64, got %s.",
-                           typeToString(rightType));
-      return NULL;
-    }
-    return typeF64();
+    if (typesEqual(leftType, typeF64()) && typesEqual(rightType, typeF64()))
+      return typeF64();
+
+    if (typesEqual(leftType, typeU8()) && typesEqual(rightType, typeU8()))
+      return typeU8();
+
+    typchkErrorAtTokenFmt(&b->op,
+                          "'%s' needs two f64s or two u8s, got %s and %s.",
+                          binaryOperatorSymbol(b->op.type),
+                          typeToString(leftType), typeToString(rightType));
+    return NULL;
 
   case TOKEN_EQUAL_EQUAL:
   case TOKEN_BANG_EQUAL:
@@ -602,17 +674,17 @@ static Type *typchkInferBinary(TypeEnv *env, AstNode *node) {
   case TOKEN_GREATER:
   case TOKEN_LESS_EQUAL:
   case TOKEN_GREATER_EQUAL:
-    if (!typesEqual(leftType, typeF64())) {
-      typchkErrorAtNodeFmt(b->left, "Expected f64, got %s.",
-                           typeToString(leftType));
-      return NULL;
-    }
-    if (!typesEqual(rightType, typeF64())) {
-      typchkErrorAtNodeFmt(b->right, "Expected f64, got %s.",
-                           typeToString(rightType));
-      return NULL;
-    }
-    return typeBool();
+    if (typesEqual(leftType, typeF64()) && typesEqual(rightType, typeF64()))
+      return typeBool();
+
+    if (typesEqual(leftType, typeU8()) && typesEqual(rightType, typeU8()))
+      return typeBool();
+
+    typchkErrorAtTokenFmt(&b->op,
+                          "'%s' needs two f64s or two u8s, got %s and %s.",
+                          binaryOperatorSymbol(b->op.type),
+                          typeToString(leftType), typeToString(rightType));
+    return NULL;
 
   default:
     typchkErrorAtToken(&b->op, "Internal: unhandled binary operator.");
@@ -621,14 +693,52 @@ static Type *typchkInferBinary(TypeEnv *env, AstNode *node) {
 }
 
 /**
+ * `expr as Type` -- an explicit conversion between number types, e.g.
+ * `value as u8`. Only f64 and u8 may appear on either side, so the legal
+ * casts are f64->f64, f64->u8, u8->f64, and u8->u8. The u8->f64 widening is
+ * always exact. The f64->u8 narrowing is checked at runtime: the value must
+ * be an integer from 0 to 255, else the VM raises an error.
+ */
+static Type *typchkInferCast(TypeEnv *env, AstNode *node) {
+  CastNode *c = &node->as.cast;
+
+  Type *sourceType = typchkInfer(env, c->expr);
+  if (sourceType == NULL)
+    return NULL;
+
+  Type *targetType = typchkResolveType(env, c->type);
+  if (targetType == NULL)
+    return NULL;
+
+  bool sourceIsNumber = typesEqual(sourceType, typeF64()) ||
+                        typesEqual(sourceType, typeU8());
+  bool targetIsNumber = typesEqual(targetType, typeF64()) ||
+                        typesEqual(targetType, typeU8());
+
+  if (!sourceIsNumber || !targetIsNumber) {
+    typchkErrorAtTokenFmt(&c->as,
+                          "Can't cast %s to %s. Only f64 and u8 can be cast.",
+                          typeToString(sourceType), typeToString(targetType));
+    return NULL;
+  }
+
+  // The compiler has no types, so it reads the target's number kind from
+  // the node. Set it here, where the target is known to be f64 or u8.
+  c->target = typesEqual(targetType, typeU8()) ? NUMBER_U8 : NUMBER_F64;
+  return targetType;
+}
+
+/**
  * Chooses how a value of this type becomes a string. Returns false when it
- * can't: only strings, f64, bool, and types that implement Display can.
+ * can't: only strings, f64, u8, bool, and types that implement Display can.
  */
 static bool chooseStringConversion(Type *type, StringConversion *conversion) {
   if (typesEqual(type, typeString())) {
     *conversion = STRING_CONVERSION_STRING;
   } else if (typesEqual(type, typeF64())) {
     *conversion = STRING_CONVERSION_NUMBER;
+  } else if (typesEqual(type, typeU8())) {
+    *conversion = STRING_CONVERSION_U8;
   } else if (typesEqual(type, typeBool())) {
     *conversion = STRING_CONVERSION_BOOL;
   } else if (typeImplementsDisplay(type)) {
@@ -670,8 +780,9 @@ static Type *typchkInferInterpString(TypeEnv *env, AstNode *node) {
 
     if (!chooseStringConversion(type, &part->conversion)) {
       typchkErrorAtNodeFmt(part->expr,
-                           "Can't interpolate %s. Only string, f64, bool, and "
-                           "types that implement Display can be interpolated.",
+                           "Can't interpolate %s. Only string, f64, u8, bool, "
+                           "and types that implement Display can be "
+                           "interpolated.",
                            typeToString(type));
     }
   }
@@ -742,7 +853,16 @@ static bool typchkConstantNumber(AstNode *node, double *value) {
   case NODE_LITERAL:
     if (node->as.literal.kind != LITERAL_NUMBER)
       return false;
-    *value = node->as.literal.as.number;
+
+    switch (node->as.literal.as.number.kind) {
+    case NUMBER_F64:
+      *value = node->as.literal.as.number.as.f64;
+      break;
+    case NUMBER_U8:
+      *value = node->as.literal.as.number.as.u8;
+      break;
+    }
+
     return true;
   case NODE_GROUPING:
     return typchkConstantNumber(node->as.grouping.inner, value);

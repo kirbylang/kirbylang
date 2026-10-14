@@ -1,1 +1,1 @@
-[line 1] Error: Expected f64, got string.
+[line 1] Error at '%': '%' needs two f64s or two u8s, got string and f64.

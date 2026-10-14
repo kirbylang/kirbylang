@@ -11,7 +11,9 @@
  * bytes read the same on every machine. A unit made by one Kirby version is
  * refused by any other.
  */
-#define UNIT_BYTES_FORMAT_VERSION 1
+// 2: number constants carry a kind byte and a kind-specific payload
+// (f64 is an eight-byte double, u8 is one byte), where 1 wrote a bare double.
+#define UNIT_BYTES_FORMAT_VERSION 2
 
 typedef enum {
   UNIT_DECODE_OK,

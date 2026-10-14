@@ -83,6 +83,7 @@ static void test_token_to_cstring(void) {
   assert(strcmp("TOKEN_STRING", tokenTypeToString(TOKEN_STRING)) == 0);
   assert(strcmp("TOKEN_NUMBER", tokenTypeToString(TOKEN_NUMBER)) == 0);
   assert(strcmp("TOKEN_F64", tokenTypeToString(TOKEN_F64)) == 0);
+  assert(strcmp("TOKEN_U8", tokenTypeToString(TOKEN_U8)) == 0);
   assert(strcmp("TOKEN_INTERP_STRING",
                 tokenTypeToString(TOKEN_INTERP_STRING)) == 0);
   assert(strcmp("TOKEN_INTERP_START", tokenTypeToString(TOKEN_INTERP_START)) ==
@@ -111,6 +112,7 @@ static void test_token_to_cstring(void) {
   assert(strcmp("TOKEN_WHILE", tokenTypeToString(TOKEN_WHILE)) == 0);
   assert(strcmp("TOKEN_BREAK", tokenTypeToString(TOKEN_BREAK)) == 0);
   assert(strcmp("TOKEN_CONTINUE", tokenTypeToString(TOKEN_CONTINUE)) == 0);
+  assert(strcmp("TOKEN_AS", tokenTypeToString(TOKEN_AS)) == 0);
   assert(strcmp("TOKEN_EOF", tokenTypeToString(TOKEN_EOF)) == 0);
   assert(strcmp("TOKEN_ERROR", tokenTypeToString(TOKEN_ERROR)) == 0);
   assert(strcmp("UNKNOWN TOKEN",
@@ -118,7 +120,7 @@ static void test_token_to_cstring(void) {
 }
 
 int main(void) {
-  assert(NumberOfDefinedTokens == 56);
+  assert(NumberOfDefinedTokens == 58);
   test_token_to_cstring();
   test_tokens_equal();
   test_token_text_equals();

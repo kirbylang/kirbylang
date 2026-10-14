@@ -54,20 +54,37 @@ static CompiledUnit *newSampleUnit(void) {
     cuWriteByte(script, code[i], 1 + i * 100);
   }
 
-  cuAddConstant(script, (CompiledConst){.kind = CONST_NUMBER, .as.number = 3.14});
-  cuAddConstant(script, (CompiledConst){.kind = CONST_NUMBER, .as.number = -0.0});
-  cuAddConstant(script, (CompiledConst){.kind = CONST_NUMBER, .as.number = NAN});
+  cuAddConstant(script, (CompiledConst){.kind = CONST_NUMBER,
+                                        .as.number = {.kind = CONST_NUMBER_F64,
+                                                      .as.f64 = 3.14}});
+  cuAddConstant(script, (CompiledConst){.kind = CONST_NUMBER,
+                                        .as.number = {.kind = CONST_NUMBER_F64,
+                                                      .as.f64 = -0.0}});
+  cuAddConstant(script, (CompiledConst){.kind = CONST_NUMBER,
+                                        .as.number = {.kind = CONST_NUMBER_F64,
+                                                      .as.f64 = NAN}});
+  cuAddConstant(script, (CompiledConst){.kind = CONST_NUMBER,
+                                        .as.number = {.kind = CONST_NUMBER_F64,
+                                                      .as.f64 = INFINITY}});
+  cuAddConstant(script, (CompiledConst){.kind = CONST_NUMBER,
+                                        .as.number = {.kind = CONST_NUMBER_U8,
+                                                      .as.u8 = 255}});
+  cuAddConstant(script, (CompiledConst){.kind = CONST_NUMBER,
+                                        .as.number = {.kind = CONST_NUMBER_U8,
+                                                      .as.u8 = 0}});
   cuAddConstant(script,
-                (CompiledConst){.kind = CONST_NUMBER, .as.number = INFINITY});
-  cuAddConstant(script, (CompiledConst){.kind = CONST_BOOL, .as.boolean = true});
-  cuAddConstant(script, (CompiledConst){.kind = CONST_BOOL, .as.boolean = false});
+                (CompiledConst){.kind = CONST_BOOL, .as.boolean = true});
+  cuAddConstant(script,
+                (CompiledConst){.kind = CONST_BOOL, .as.boolean = false});
   cuAddConstant(script, (CompiledConst){.kind = CONST_NIL});
-  cuAddConstant(script, (CompiledConst){.kind = CONST_STRING,
-                                        .as.string = {.offset = hello, .length = 5}});
-  cuAddConstant(script, (CompiledConst){.kind = CONST_STRING,
-                                        .as.string = {.offset = odd, .length = 4}});
   cuAddConstant(script,
-                (CompiledConst){.kind = CONST_FUNCTION, .as.functionIndex = addIndex});
+                (CompiledConst){.kind = CONST_STRING,
+                                .as.string = {.offset = hello, .length = 5}});
+  cuAddConstant(script,
+                (CompiledConst){.kind = CONST_STRING,
+                                .as.string = {.offset = odd, .length = 4}});
+  cuAddConstant(script, (CompiledConst){.kind = CONST_FUNCTION,
+                                        .as.functionIndex = addIndex});
 
   CompiledFn *addFn = cuGetFnByIndex(unit, addIndex);
   addFn->arity = 2;
@@ -79,7 +96,9 @@ static CompiledUnit *newSampleUnit(void) {
   cuAddUpvalue(addFn, true, 0);
   cuAddUpvalue(addFn, false, 255);
   cuWriteByte(addFn, 7, 5);
-  cuAddConstant(addFn, (CompiledConst){.kind = CONST_NUMBER, .as.number = 1.0});
+  cuAddConstant(addFn, (CompiledConst){.kind = CONST_NUMBER,
+                                       .as.number = {.kind = CONST_NUMBER_F64,
+                                                     .as.f64 = 1.0}});
 
   return unit;
 }
@@ -129,7 +148,13 @@ static void assertUnitsEqual(const CompiledUnit *a, const CompiledUnit *b) {
 
       switch (p->kind) {
       case CONST_NUMBER:
-        assertSameBits(p->as.number, q->as.number);
+        assert(p->as.number.kind == q->as.number.kind);
+
+        if (p->as.number.kind == CONST_NUMBER_F64) {
+          assertSameBits(p->as.number.as.f64, q->as.number.as.f64);
+        } else {
+          assert(p->as.number.as.u8 == q->as.number.as.u8);
+        }
         break;
       case CONST_BOOL:
         assert(p->as.boolean == q->as.boolean);
@@ -310,8 +335,8 @@ static void testRejectsHugeCountsWithoutAllocatingThem(void) {
 static void testRejectsStringConstantOutsideTheBlob(void) {
   CompiledUnit *original = newSampleUnit();
   CompiledFn *script = cuGetFnByIndex(original, 0);
-  script->constants[7].as.string.offset = original->strings.arenaLen;
-  script->constants[7].as.string.length = 1;
+  script->constants[9].as.string.offset = original->strings.arenaLen;
+  script->constants[9].as.string.length = 1;
 
   StrBuf bytes = encode(original);
   assertRejected(&bytes, UNIT_DECODE_INVALID);
@@ -323,7 +348,7 @@ static void testRejectsStringConstantOutsideTheBlob(void) {
 static void testRejectsNegativeStringLength(void) {
   CompiledUnit *original = newSampleUnit();
   CompiledFn *script = cuGetFnByIndex(original, 0);
-  script->constants[7].as.string.length = -1;
+  script->constants[9].as.string.length = -1;
 
   StrBuf bytes = encode(original);
   assertRejected(&bytes, UNIT_DECODE_INVALID);
@@ -335,7 +360,7 @@ static void testRejectsNegativeStringLength(void) {
 static void testRejectsFunctionConstantOutOfRange(void) {
   CompiledUnit *original = newSampleUnit();
   CompiledFn *script = cuGetFnByIndex(original, 0);
-  script->constants[9].as.functionIndex = original->functionCount;
+  script->constants[11].as.functionIndex = original->functionCount;
 
   StrBuf bytes = encode(original);
   assertRejected(&bytes, UNIT_DECODE_INVALID);
@@ -379,6 +404,18 @@ static void testRejectsUnknownConstantKind(void) {
   freeUnit(original);
 }
 
+static void testRejectsUnknownNumberKind(void) {
+  CompiledUnit *original = newSampleUnit();
+  cuGetFnByIndex(original, 0)->constants[0].as.number.kind =
+      (CompiledConstNumberKind)99;
+
+  StrBuf bytes = encode(original);
+  assertRejected(&bytes, UNIT_DECODE_INVALID);
+
+  sb_free(&bytes);
+  freeUnit(original);
+}
+
 static void testEveryStatusHasAMessage(void) {
   for (int status = UNIT_DECODE_OK; status <= UNIT_DECODE_INVALID; status++) {
     const char *message = unitDecodeStatusMessage((UnitDecodeStatus)status);
@@ -403,6 +440,7 @@ int main(void) {
   testRejectsFunctionNameOutsideTheBlob();
   testRejectsNegativeArity();
   testRejectsUnknownConstantKind();
+  testRejectsUnknownNumberKind();
   testEveryStatusHasAMessage();
   return 0;
 }

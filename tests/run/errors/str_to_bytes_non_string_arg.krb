@@ -1,0 +1,2 @@
+// @strToBytes takes a string; a u8 argument is a compile-time type error.
+let bytes: Array = @strToBytes(5u8);

@@ -14,6 +14,7 @@ const NativeSignature nativeSignatures[] = {
     {"@readFileToString", {NATIVE_STRING}, 1, NATIVE_STRING},
     {"@writeStringToFile", {NATIVE_STRING, NATIVE_STRING}, 2, NATIVE_UNIT},
     {"@numberToString", {NATIVE_F64}, 1, NATIVE_STRING},
+    {"@u8ToString", {NATIVE_U8}, 1, NATIVE_STRING},
     {"@boolToString", {NATIVE_BOOL}, 1, NATIVE_STRING},
     {"@fileExists", {NATIVE_STRING}, 1, NATIVE_BOOL},
     {"@getenv", {NATIVE_STRING}, 1, NATIVE_STRING},
@@ -39,6 +40,7 @@ const NativeSignature nativeSignatures[] = {
     {"@strToLower", {NATIVE_STRING}, 1, NATIVE_STRING},
     {"@strRepeat", {NATIVE_STRING, NATIVE_F64}, 2, NATIVE_STRING},
     {"@strSplit", {NATIVE_STRING, NATIVE_STRING}, 2, NATIVE_LIST},
+    {"@strToBytes", {NATIVE_STRING}, 1, NATIVE_LIST},
     {"@now", {0}, 0, NATIVE_F64},
 };
 
@@ -67,6 +69,8 @@ static Type *primitiveType(NativePrimitive primitive) {
     return typeString();
   case NATIVE_F64:
     return typeF64();
+  case NATIVE_U8:
+    return typeU8();
   case NATIVE_LIST:
     return typeArray(NULL);
   }

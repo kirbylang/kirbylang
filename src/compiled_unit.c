@@ -113,8 +113,18 @@ static bool compiledConstantsAreEqual(CompiledConst a, CompiledConst b) {
 
   switch (a.kind) {
   case CONST_NUMBER:
-    // Compare the bits, so 0 and -0 stay separate and NaN matches itself.
-    return memcmp(&a.as.number, &b.as.number, sizeof(double)) == 0;
+    if (a.as.number.kind != b.as.number.kind)
+      return false;
+
+    switch (a.as.number.kind) {
+    case CONST_NUMBER_F64:
+      return a.as.number.as.f64 == b.as.number.as.f64;
+    case CONST_NUMBER_U8:
+      return a.as.number.as.u8 == b.as.number.as.u8;
+    }
+
+    return false;
+
   case CONST_BOOL:
     return a.as.boolean == b.as.boolean;
   case CONST_NIL:

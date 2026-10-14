@@ -1,0 +1,31 @@
+== <script> ==
+0000    2 OP_CONSTANT         1 '7'
+0002    | OP_DEFINE_GLOBAL    0 'byte'
+0004    3 OP_GET_GLOBAL       0 'byte'
+0006    | OP_CAST          f64
+0008    | OP_DEFINE_GLOBAL    2 'value'
+0010    4 OP_GET_GLOBAL       3 '@println'
+0012    | OP_GET_GLOBAL       2 'value'
+0014    | OP_CONSTANT         4 '0.5'
+0016    | OP_ADD
+0017    | OP_CALL             1
+0019    | OP_POP
+0020    5 OP_GET_GLOBAL       3 '@println'
+0022    | OP_GET_GLOBAL       0 'byte'
+0024    | OP_CAST          f64
+0026    | OP_CONSTANT         5 '2'
+0028    | OP_DIVIDE
+0029    | OP_CALL             1
+0031    | OP_POP
+0032    8 OP_GET_GLOBAL       3 '@println'
+0034    | OP_CONSTANT         1 '7'
+0036    | OP_CAST          u8
+0038    | OP_CALL             1
+0040    | OP_POP
+0041    9 OP_GET_GLOBAL       3 '@println'
+0043    | OP_CONSTANT         6 '1.5'
+0045    | OP_CAST          f64
+0047    | OP_CALL             1
+0049    | OP_POP
+0050   10 OP_NIL
+0051    | OP_RETURN

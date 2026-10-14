@@ -31,10 +31,39 @@ let greeting: string = "Hello World";
 | :------- | --------------------------------: | -------------------------------------------------- |
 | `string` |                   `"Hello World"` |                                                    |
 | `f64`    |               `123f64`, `123.456` | The `f64` suffix is optional                       |
+| `u8`     |                  `123u8`, `255U8` |                                                    |
 | `unit`   |                              `()` |                                                    |
 | `bool`   |                   `true`, `false` |                                                    |
 | `Array`  | `[1, 2, 3]`, `["Hello", "World"]` | A dynamically sized collection of homonogous types |
 | `nil`    |                             `nil` | This will be deprecated in the future.             |
+
+### Casting Number Types
+
+Number types can be explicitly converted to another number type with the `as` keyword.
+
+```krb
+let value: f64 = 42.0;
+let byte: u8 = value as u8;
+
+let widened: f64 = byte as f64;
+```
+
+| From  | To    | ...                |
+| ----- | ----- | ------------------ |
+| `u8`  | `f64` | Always exact       |
+| `f64` | `u8`  | Checked at runtime |
+
+```krb
+let too_big: f64 = 300.0;
+let byte: u8 = too_big as u8; // Error: can't convert f64 300 to u8
+```
+
+Use parentheses to cast just a part of an expression.
+
+```krb
+let sum: u8 = 2 * 3 as u8;      // (2 * 3) as u8
+let total: u8 = a + (b as u8);  // cast only `b`
+```
 
 ## Flow Control
 

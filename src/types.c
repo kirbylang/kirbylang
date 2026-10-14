@@ -53,6 +53,7 @@ static Type *unitSingleton = NULL;
 static Type *boolSingleton = NULL;
 static Type *stringSingleton = NULL;
 static Type *f64Singleton = NULL;
+static Type *u8Singleton = NULL;
 static Type *selfPlaceholderSingleton = NULL;
 
 void typesFreeAll(void) {
@@ -69,6 +70,7 @@ void typesFreeAll(void) {
   boolSingleton = NULL;
   stringSingleton = NULL;
   f64Singleton = NULL;
+  u8Singleton = NULL;
   selfPlaceholderSingleton = NULL;
 
   stringSetFree(&typeNames);
@@ -135,6 +137,12 @@ Type *typeF64(void) {
   if (f64Singleton == NULL)
     f64Singleton = allocType(TYPE_F64);
   return f64Singleton;
+}
+
+Type *typeU8(void) {
+  if (u8Singleton == NULL)
+    u8Singleton = allocType(TYPE_U8);
+  return u8Singleton;
 }
 
 Type *typeSelfPlaceholder(void) {
@@ -392,6 +400,7 @@ bool typesEqual(Type *a, Type *b) {
   case TYPE_BOOL:
   case TYPE_STRING:
   case TYPE_F64:
+  case TYPE_U8:
   case TYPE_SELF:
     return true;
 
@@ -547,6 +556,9 @@ static void appendTypeName(StrBuf *sb, Type *type) {
     break;
   case TYPE_F64:
     sb_append(sb, "f64");
+    break;
+  case TYPE_U8:
+    sb_append(sb, "u8");
     break;
   case TYPE_STRUCT:
     sb_appendf(sb, "%.*s", type->as.struct_.name.length,

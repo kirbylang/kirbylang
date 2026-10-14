@@ -1,49 +1,50 @@
 # Opcodes
 
-| Index | Opcode                | Operand(s)                         |      Stack | Notes                                                                                           |
-| ----: | --------------------- | ---------------------------------- | ---------: | ----------------------------------------------------------------------------------------------- |
-|   `0` | `OP_CONSTANT`         | `index`                            |         +1 |                                                                                                 |
-|   `1` | `OP_NIL`              |                                    |         +1 |                                                                                                 |
-|   `2` | `OP_TRUE`             |                                    |         +1 |                                                                                                 |
-|   `3` | `OP_FALSE`            |                                    |         +1 |                                                                                                 |
-|   `4` | `OP_ADD`              |                                    |      -2 +1 |                                                                                                 |
-|   `5` | `OP_SUBTRACT`         |                                    |      -2 +1 |                                                                                                 |
-|   `6` | `OP_MULTIPLY`         |                                    |      -2 +1 |                                                                                                 |
-|   `7` | `OP_DIVIDE`           |                                    |      -2 +1 |                                                                                                 |
-|   `8` | `OP_MODULO`           |                                    |      -2 +1 |                                                                                                 |
-|   `9` | `OP_NEGATE`           |                                    |      -1 +1 |                                                                                                 |
-|  `10` | `OP_PRINT`            |                                    |         -1 |                                                                                                 |
-|  `11` | `OP_RETURN`           |                                    |         -1 | Discards the call's frame, then pushes the value for the caller.                                |
-|  `12` | `OP_EQUAL`            |                                    |      -2 +1 |                                                                                                 |
-|  `13` | `OP_NOT`              |                                    |      -1 +1 |                                                                                                 |
-|  `14` | `OP_POP`              |                                    |         -1 |                                                                                                 |
-|  `15` | `OP_CLOSE_UPVALUE`    |                                    |         -1 | Moves the captured value off the stack first.                                                   |
-|  `16` | `OP_DEFINE_GLOBAL`    | `index`                            |         -1 |                                                                                                 |
-|  `17` | `OP_GET_GLOBAL`       | `index`                            |         +1 |                                                                                                 |
-|  `18` | `OP_SET_GLOBAL`       | `index`                            |          0 | Leaves the assigned value on the stack.                                                         |
-|  `19` | `OP_GET_UPVALUE`      | `slot`                             |         +1 |                                                                                                 |
-|  `20` | `OP_SET_UPVALUE`      | `slot`                             |          0 | Leaves the assigned value on the stack.                                                         |
-|  `21` | `OP_GET_LOCAL`        | `slot`                             |         +1 |                                                                                                 |
-|  `22` | `OP_SET_LOCAL`        | `slot`                             |          0 | Leaves the assigned value on the stack.                                                         |
-|  `23` | `OP_JUMP_IF_FALSE`    | `jumpOffset`                       |          0 | Reads the condition without popping it.                                                         |
-|  `24` | `OP_JUMP_IF_NOT_NIL`  | `jumpOffset`                       |          0 | Reads the value without popping it.                                                             |
-|  `25` | `OP_JUMP`             | `jumpOffset`                       |          0 |                                                                                                 |
-|  `26` | `OP_LOOP`             | `jumpOffset`                       |          0 |                                                                                                 |
-|  `27` | `OP_GREATER`          |                                    |      -2 +1 |                                                                                                 |
-|  `28` | `OP_LESS`             |                                    |      -2 +1 |                                                                                                 |
-|  `29` | `OP_CALL`             | `argCount`                         |  -(n+1) +1 | Pops the callee and its n arguments.                                                            |
-|  `30` | `OP_CLOSURE`          | `index`, `isLocal`, `upvalueIndex` |         +1 | See [below](#op_closure).                                                                       |
-|  `31` | `OP_STRUCT`           | `index`                            |         +1 |                                                                                                 |
-|  `32` | `OP_STRUCT_INIT`      | `initFieldCount`                   | -(2n+1) +1 | Pops the struct and a name and value per field.                                                 |
-|  `33` | `OP_FIELD`            | `index`, `isPublic`, `isMutable`   |         -1 |                                                                                                 |
-|  `34` | `OP_GET_PROPERTY`     | `index`                            |      -1 +1 |                                                                                                 |
-|  `35` | `OP_SET_PROPERTY`     | `index`                            |      -2 +1 | Pops the object and value, then pushes the value.                                               |
-|  `36` | `OP_METHOD`           | `index`                            |         -1 | Pops the method; the struct stays.                                                              |
-|  `37` | `OP_INVOKE`           | `index`, `argCount`                |  -(n+1) +1 | Pops the receiver and its n arguments.                                                          |
-|  `38` | `OP_ARRAY`            | `itemCount`                        |      -n +1 |                                                                                                 |
-|  `39` | `OP_GET_INDEX`        |                                    |      -2 +1 |                                                                                                 |
-|  `40` | `OP_SET_INDEX`        |                                    |      -3 +1 |                                                                                                 |
-|  `41` | `OP_CLOSE_BLOCK_EXPR` | `localCount`                       |  -(n+1) +1 | Pops the block's value and its n locals, closing any captured ones, then pushes the value back. |
+| Index | Opcode                | Operand(s)                         |      Stack | Notes                                                                                                  |
+| ----: | --------------------- | ---------------------------------- | ---------: | ------------------------------------------------------------------------------------------------------ |
+|   `0` | `OP_CONSTANT`         | `index`                            |         +1 |                                                                                                        |
+|   `1` | `OP_NIL`              |                                    |         +1 |                                                                                                        |
+|   `2` | `OP_TRUE`             |                                    |         +1 |                                                                                                        |
+|   `3` | `OP_FALSE`            |                                    |         +1 |                                                                                                        |
+|   `4` | `OP_ADD`              |                                    |      -2 +1 |                                                                                                        |
+|   `5` | `OP_SUBTRACT`         |                                    |      -2 +1 |                                                                                                        |
+|   `6` | `OP_MULTIPLY`         |                                    |      -2 +1 |                                                                                                        |
+|   `7` | `OP_DIVIDE`           |                                    |      -2 +1 |                                                                                                        |
+|   `8` | `OP_MODULO`           |                                    |      -2 +1 |                                                                                                        |
+|   `9` | `OP_NEGATE`           |                                    |      -1 +1 |                                                                                                        |
+|  `10` | `OP_PRINT`            |                                    |         -1 |                                                                                                        |
+|  `11` | `OP_RETURN`           |                                    |         -1 | Discards the call's frame, then pushes the value for the caller.                                       |
+|  `12` | `OP_EQUAL`            |                                    |      -2 +1 |                                                                                                        |
+|  `13` | `OP_NOT`              |                                    |      -1 +1 |                                                                                                        |
+|  `14` | `OP_POP`              |                                    |         -1 |                                                                                                        |
+|  `15` | `OP_CLOSE_UPVALUE`    |                                    |         -1 | Moves the captured value off the stack first.                                                          |
+|  `16` | `OP_DEFINE_GLOBAL`    | `index`                            |         -1 |                                                                                                        |
+|  `17` | `OP_GET_GLOBAL`       | `index`                            |         +1 |                                                                                                        |
+|  `18` | `OP_SET_GLOBAL`       | `index`                            |          0 | Leaves the assigned value on the stack.                                                                |
+|  `19` | `OP_GET_UPVALUE`      | `slot`                             |         +1 |                                                                                                        |
+|  `20` | `OP_SET_UPVALUE`      | `slot`                             |          0 | Leaves the assigned value on the stack.                                                                |
+|  `21` | `OP_GET_LOCAL`        | `slot`                             |         +1 |                                                                                                        |
+|  `22` | `OP_SET_LOCAL`        | `slot`                             |          0 | Leaves the assigned value on the stack.                                                                |
+|  `23` | `OP_JUMP_IF_FALSE`    | `jumpOffset`                       |          0 | Reads the condition without popping it.                                                                |
+|  `24` | `OP_JUMP_IF_NOT_NIL`  | `jumpOffset`                       |          0 | Reads the value without popping it.                                                                    |
+|  `25` | `OP_JUMP`             | `jumpOffset`                       |          0 |                                                                                                        |
+|  `26` | `OP_LOOP`             | `jumpOffset`                       |          0 |                                                                                                        |
+|  `27` | `OP_GREATER`          |                                    |      -2 +1 |                                                                                                        |
+|  `28` | `OP_LESS`             |                                    |      -2 +1 |                                                                                                        |
+|  `29` | `OP_CALL`             | `argCount`                         |  -(n+1) +1 | Pops the callee and its n arguments.                                                                   |
+|  `30` | `OP_CLOSURE`          | `index`, `isLocal`, `upvalueIndex` |         +1 | See [below](#op_closure).                                                                              |
+|  `31` | `OP_STRUCT`           | `index`                            |         +1 |                                                                                                        |
+|  `32` | `OP_STRUCT_INIT`      | `initFieldCount`                   | -(2n+1) +1 | Pops the struct and a name and value per field.                                                        |
+|  `33` | `OP_FIELD`            | `index`, `isPublic`, `isMutable`   |         -1 |                                                                                                        |
+|  `34` | `OP_GET_PROPERTY`     | `index`                            |      -1 +1 |                                                                                                        |
+|  `35` | `OP_SET_PROPERTY`     | `index`                            |      -2 +1 | Pops the object and value, then pushes the value.                                                      |
+|  `36` | `OP_METHOD`           | `index`                            |         -1 | Pops the method; the struct stays.                                                                     |
+|  `37` | `OP_INVOKE`           | `index`, `argCount`                |  -(n+1) +1 | Pops the receiver and its n arguments.                                                                 |
+|  `38` | `OP_ARRAY`            | `itemCount`                        |      -n +1 |                                                                                                        |
+|  `39` | `OP_GET_INDEX`        |                                    |      -2 +1 |                                                                                                        |
+|  `40` | `OP_SET_INDEX`        |                                    |      -3 +1 |                                                                                                        |
+|  `41` | `OP_CLOSE_BLOCK_EXPR` | `localCount`                       |  -(n+1) +1 | Pops the block's value and its n locals, closing any captured ones, then pushes the value back.        |
+|  `42` | `OP_CAST`             | `targetType`                       |          0 | Converts the value to the target number kind (`f64` or `u8`); the result takes its place on the stack. |
 
 **Stack** shows what an instruction pops and then pushes: `-2 +1` pops two values and pushes one, and `0` leaves the stack as it was. `n` is the instruction's count operand. The compiler tracks the stack height from the same information in `opInfos` in `src/opcode.c`, so the two must match.
 
@@ -82,6 +83,7 @@ Stack: +1 (the closure). The function itself comes from the constant table, not 
 | **jumpOffset**     | `uint16_t` | Unsigned relative jump distance, big-endian (high byte first). Measured from the start of the instruction following the operand — i.e. from `offset + 3`. `OP_JUMP`, `OP_JUMP_IF_FALSE`, and `OP_JUMP_IF_NOT_NIL` add it (forward); `OP_LOOP` subtracts it (backward). Because the value is unsigned, direction is determined by the opcode, not the operand. |
 | **isPublic**       | `uint8_t`  | A flag operand. 0 = false, 1 = true                                                                                                                                                                                                                                                                                                                           |
 | **initFieldCount** | `uint8_t`  | The number of fields passed to `OP_STRUCT_INIT`                                                                                                                                                                                                                                                                                                               |
+| **targetType**     | `uint8_t`  | For `OP_CAST` only: the number kind to cast to:<br><br>`0` = `f64`<br>`1` = `u8`                                                                                                                                                                                                                                                                              |
 
 ---
 

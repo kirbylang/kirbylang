@@ -93,7 +93,7 @@
     },
     "numbers": {
       "name": "constant.numeric.krb",
-      "match": "\\b\\d+(\\.\\d+)?([fF]64)?\\b"
+      "match": "\\b\\d+(\\.\\d+)?([fF]64|[uU]8)?\\b"
     },
     "struct-declaration": {
       "match": "\\b(struct)\\s+([A-Za-z_][A-Za-z0-9_]*)",
@@ -149,6 +149,10 @@
         {
           "name": "keyword.operator.logical.krb",
           "match": "\\b(and|or)\\b"
+        },
+        {
+          "name": "keyword.other.cast.krb",
+          "match": "\\bas\\b"
         },
         {
           "name": "keyword.other.print.krb",

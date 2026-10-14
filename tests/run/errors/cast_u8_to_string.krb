@@ -1,0 +1,3 @@
+// Casting a number type to a string is a compile-time type error.
+let byte: u8 = 7;
+let s: string = byte as string;

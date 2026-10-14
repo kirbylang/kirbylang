@@ -68,6 +68,7 @@ struct AstNode {
 		TypeAliasNode typeAlias;
 		TypeFunctionNode typeFunction;
 		InterpStringNode interpString;
+		CastNode cast;
 	} as;
 };
 ```
@@ -480,6 +481,30 @@ typedef struct {
 } ArrayNode;
 ```
 
+### Casting
+
+`expr as Type` -- an explicit conversion between number types, e.g.
+`value as u8`.
+
+```c
+typedef struct {
+  AstNode *expr;
+  /**
+   * The cast's target type, e.g. the `T` in `value as T`
+   */
+  AstNode *type;
+  /**
+   * The `as` keyword, for error reporting.
+   */
+  Token as;
+  /**
+   * The target number kind (f64 or u8), set by the type checker. The compiler
+   * emits it as the operand of OP_CAST.
+   */
+  NumberKind target;
+} CastNode;
+```
+
 ### Interpolated Strings
 
 `$"Hello {name}!"`. The type checker sets each part's `conversion`, and the
@@ -529,22 +554,22 @@ void arrayNodeDataFree(ArrayNodeData *and);
 |  13 | `NODE_INDEX_GET`     |
 |  14 | `NODE_INDEX_SET`     |
 |  15 | `NODE_EXPR_STMT`     |
-|  16 | `NODE_PRINT`         |
-|  17 | `NODE_VAR_DECL`      |
-|  18 | `NODE_BLOCK`         |
-|  19 | `NODE_IF`            |
-|  20 | `NODE_WHILE`         |
-|  21 | `NODE_FOR`           |
-|  22 | `NODE_RETURN`        |
-|  23 | `NODE_FUNCTION`      |
-|  24 | `NODE_STRUCT`        |
-|  25 | `NODE_STRUCT_INIT`   |
-|  26 | `NODE_IMPL`          |
-|  27 | `NODE_TRAIT`         |
-|  28 | `NODE_ARRAY`         |
-|  29 | `NODE_BREAK`         |
-|  30 | `NODE_CONTINUE`      |
-|  31 | `NODE_TYPE`          |
-|  32 | `NODE_TYPE_ALIAS`    |
-|  33 | `NODE_TYPE_FUNCTION` |
-|  34 | `NODE_INTERP_STRING` |
+|  16 | `NODE_VAR_DECL`      |
+|  17 | `NODE_BLOCK`         |
+|  18 | `NODE_IF`            |
+|  19 | `NODE_WHILE`         |
+|  20 | `NODE_FOR`           |
+|  21 | `NODE_RETURN`        |
+|  22 | `NODE_FUNCTION`      |
+|  23 | `NODE_STRUCT`        |
+|  24 | `NODE_STRUCT_INIT`   |
+|  25 | `NODE_IMPL`          |
+|  26 | `NODE_TRAIT`         |
+|  27 | `NODE_ARRAY`         |
+|  28 | `NODE_BREAK`         |
+|  29 | `NODE_CONTINUE`      |
+|  30 | `NODE_TYPE`          |
+|  31 | `NODE_TYPE_ALIAS`    |
+|  32 | `NODE_TYPE_FUNCTION` |
+|  33 | `NODE_INTERP_STRING` |
+|  34 | `NODE_CAST`          |

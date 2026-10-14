@@ -1,5 +1,6 @@
 #include <stdio.h>
 
+#include "ast.h"
 #include "debug.h"
 #include "object.h"
 #include "value.h"
@@ -173,6 +174,13 @@ int disassembleInstruction(Chunk *chunk, int offset) {
     return simpleInstruction("OP_SET_INDEX", offset);
   case OP_CLOSE_BLOCK_EXPR:
     return byteInstruction("OP_CLOSE_BLOCK_EXPR", chunk, offset);
+  case OP_CAST: {
+    offset++;
+    uint8_t target = chunk->code[offset++];
+    fprintf(stderr, "%-16s %s\n", "OP_CAST",
+            target == NUMBER_U8 ? "u8" : "f64");
+    return offset;
+  }
   default:
     fprintf(stderr, "Unknown opcode %d\n", instruction);
     return offset + 1;

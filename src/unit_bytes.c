@@ -61,7 +61,17 @@ static void encodeConstant(StrBuf *out, const CompiledConst *constant) {
 
   switch (constant->kind) {
   case CONST_NUMBER:
-    putDouble(out, constant->as.number);
+    // The number kind chooses the payload: f64 is eight bytes, u8 is one.
+    putU8(out, (uint8_t)constant->as.number.kind);
+
+    switch (constant->as.number.kind) {
+    case CONST_NUMBER_F64:
+      putDouble(out, constant->as.number.as.f64);
+      break;
+    case CONST_NUMBER_U8:
+      putU8(out, constant->as.number.as.u8);
+      break;
+    }
     break;
   case CONST_BOOL:
     putU8(out, constant->as.boolean ? 1 : 0);
@@ -246,10 +256,27 @@ static void readConstant(Reader *reader, const CompiledUnit *unit,
   uint8_t kind = readU8(reader);
 
   switch (kind) {
-  case CONST_NUMBER:
-    constant->kind = CONST_NUMBER;
-    constant->as.number = readDouble(reader);
+  case CONST_NUMBER: {
+    uint8_t number_kind = readU8(reader);
+
+    switch (number_kind) {
+    case CONST_NUMBER_F64:
+      constant->kind = CONST_NUMBER;
+      constant->as.number.kind = CONST_NUMBER_F64;
+      constant->as.number.as.f64 = readDouble(reader);
+      break;
+    case CONST_NUMBER_U8:
+      constant->kind = CONST_NUMBER;
+      constant->as.number.kind = CONST_NUMBER_U8;
+      constant->as.number.as.u8 = readU8(reader);
+      break;
+    default:
+      fail(reader, UNIT_DECODE_INVALID);
+      break;
+    }
+
     break;
+  }
   case CONST_BOOL: {
     uint8_t value = readU8(reader);
 

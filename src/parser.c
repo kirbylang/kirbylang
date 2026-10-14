@@ -1,3 +1,4 @@
+#include <errno.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -68,6 +69,7 @@ static BlockNode parseBlock(Parser *p);
 static AstNode *lambda(Parser *p, bool canAssign);
 static AstNode *ifExpr(Parser *p, bool canAssign);
 static AstNode *nullish_(Parser *p, AstNode *left, bool canAssign);
+static AstNode *cast_(Parser *p, AstNode *left, bool canAssign);
 static AstNode *struct_(Parser *p, AstNode *left, bool canAssign);
 static AstNode *varDeclaration(Parser *p, bool isMutable);
 static AstNode *parseType(Parser *p);
@@ -213,14 +215,62 @@ static AstNode *expression(Parser *parser) {
   return parse_precedence(parser, PREC_ASSIGNMENT);
 }
 
-static AstNode *number(Parser *parser, bool canAssign) {
+static AstNode *number_f64(Parser *parser, bool canAssign) {
   (void)canAssign;
 
   double v = strtod(parser->previous.start, NULL);
 
   AstNode *node = astAlloc(NODE_LITERAL, parser->previous.line);
   node->as.literal.kind = LITERAL_NUMBER;
-  node->as.literal.as.number = v;
+
+  node->as.literal.as.number.kind = NUMBER_F64;
+  node->as.literal.as.number.as.f64 = v;
+
+  // A plain number -- no suffix, no decimal point -- is an integer that may
+  // be coerced to u8 where a u8 is expected. A f64 suffix or a decimal point
+  // is an explicit choice of f64, so it never coerces. The token text is a
+  // slice of the source, so scan only its own length.
+  bool plain = parser->previous.type == TOKEN_NUMBER;
+  for (int i = 0; plain && i < parser->previous.length; i++) {
+    if (parser->previous.start[i] == '.')
+      plain = false;
+  }
+  node->as.literal.as.number.isPlainInteger = plain;
+
+  return node;
+}
+
+static AstNode *number_u8(Parser *parser, bool canAssign) {
+  (void)canAssign;
+
+  const char *text = parser->previous.start;
+  size_t tokenLength = (size_t)parser->previous.length;
+  char *end;
+
+  errno = 0;
+  unsigned long val = strtoul(text, &end, 10);
+
+  // The token is a slice of the source: digits, optionally a decimal part,
+  // then the two-character u8 suffix. A valid u8 literal has no decimal
+  // point, so `end` must sit exactly where the suffix begins.
+  size_t digitLength = (size_t)(end - text);
+  const char *suffix = text + digitLength;
+
+  bool valid = errno == 0 &&
+               digitLength > 0 &&
+               digitLength + 2 == tokenLength &&
+               val <= 255 &&
+               (suffix[0] == 'u' || suffix[0] == 'U') && suffix[1] == '8';
+
+  if (!valid)
+    parse_error(parser,
+                "invalid u8 literal, expected an integer from 0 to 255.");
+
+  AstNode *node = astAlloc(NODE_LITERAL, parser->previous.line);
+  node->as.literal.kind = LITERAL_NUMBER;
+
+  node->as.literal.as.number.kind = NUMBER_U8;
+  node->as.literal.as.number.as.u8 = (uint8_t)(valid ? val : 0);
 
   return node;
 }
@@ -596,6 +646,28 @@ static AstNode *nullish_(Parser *p, AstNode *left, bool canAssign) {
   return node;
 }
 
+/**
+ * `expr as Type` -- an explicit conversion between number types, e.g.
+ * `value as u8`. The right side is a type, not an expression, so this rule
+ * parses it with parseType(). Cast binds looser than arithmetic, comparison,
+ * and unary, so `-1 as u8` is `(-1) as u8` and `2 * 3 as u8` is
+ * `(2 * 3) as u8`. Wrap the operand in parentheses to cast just a part of
+ * an expression, e.g. `a + (b as u8)`.
+ */
+static AstNode *cast_(Parser *p, AstNode *left, bool canAssign) {
+  (void)canAssign;
+
+  Token as = p->previous;
+  AstNode *type = parseType(p);
+
+  AstNode *node = astAlloc(NODE_CAST, as.line);
+  node->as.cast.expr = left;
+  node->as.cast.type = type;
+  node->as.cast.as = as;
+  node->as.cast.target = NUMBER_F64; // set by the type checker
+  return node;
+}
+
 static AstNode *call(Parser *p, AstNode *left, bool canAssign) {
   (void)canAssign;
   int line = p->previous.line;
@@ -768,8 +840,9 @@ static ParseRule rules[] = {
     [TOKEN_LESS_EQUAL] = {NULL, binary, PREC_COMPARISON},
     [TOKEN_IDENTIFIER] = {variable, NULL, PREC_NONE},
     [TOKEN_STRING] = {string_, NULL, PREC_NONE},
-    [TOKEN_NUMBER] = {number, NULL, PREC_NONE},
-    [TOKEN_F64] = {number, NULL, PREC_NONE},
+    [TOKEN_NUMBER] = {number_f64, NULL, PREC_NONE},
+    [TOKEN_F64] = {number_f64, NULL, PREC_NONE},
+    [TOKEN_U8] = {number_u8, NULL, PREC_NONE},
     [TOKEN_INTERP_STRING] = {interpString, NULL, PREC_NONE},
     [TOKEN_INTERP_START] = {interpolation, NULL, PREC_NONE},
     [TOKEN_INTERP_MIDDLE] = {NULL, NULL, PREC_NONE},
@@ -793,6 +866,7 @@ static ParseRule rules[] = {
     [TOKEN_PUB] = {NULL, NULL, PREC_NONE},
     [TOKEN_WHILE] = {NULL, NULL, PREC_NONE},
     [TOKEN_MODULO] = {NULL, binary, PREC_FACTOR},
+    [TOKEN_AS] = {NULL, cast_, PREC_TERM},
     [TOKEN_BREAK] = {NULL, NULL, PREC_NONE},
     [TOKEN_CONTINUE] = {NULL, NULL, PREC_NONE},
     [TOKEN_ERROR] = {NULL, NULL, PREC_NONE},

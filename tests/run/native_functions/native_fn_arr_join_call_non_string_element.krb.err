@@ -15,5 +15,5 @@
 0025    | OP_POP
 0026    7 OP_NIL
 0027    | OP_RETURN
-function arrJoin expects every element of argument 1 to be a string but element 2 is a number.
+function arrJoin expects every element of argument 1 to be a string but element 2 is a f64.
 [line 6] in script

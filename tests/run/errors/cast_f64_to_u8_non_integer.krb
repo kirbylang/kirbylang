@@ -1,0 +1,3 @@
+// Casting an f64 with a fractional part to u8 is a runtime error.
+let v: f64 = 42.7;
+let byte: u8 = v as u8;

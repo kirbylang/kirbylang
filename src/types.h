@@ -12,6 +12,7 @@ typedef enum {
   TYPE_BOOL,
   TYPE_STRING,
   TYPE_F64,
+  TYPE_U8,
   TYPE_STRUCT,
   TYPE_FN,
   TYPE_ARRAY,
@@ -110,6 +111,9 @@ Type *typeString(void);
 
 // Returns pointer to the `f64` type
 Type *typeF64(void);
+
+// Returns pointer to the `u8` type
+Type *typeU8(void);
 
 // Returns pointer to the `Self` placeholder type
 Type *typeSelfPlaceholder(void);

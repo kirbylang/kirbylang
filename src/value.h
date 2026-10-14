@@ -17,11 +17,22 @@ typedef struct ObjString ObjString;
 
 typedef enum { VAL_BOOL, VAL_NIL, VAL_NUMBER, VAL_OBJ } ValueType;
 
+typedef enum {
+  VAL_NUMBER_F64,
+  VAL_NUMBER_U8,
+} ValueNumberType;
+
 typedef struct {
   ValueType type;
   union {
     bool boolean;
-    double number;
+    struct {
+      ValueNumberType type;
+      union {
+        double f64;
+        uint8_t u8;
+      } as;
+    } number;
     Obj *obj;
   } as;
 } Value;
@@ -29,15 +40,25 @@ typedef struct {
 #define IS_BOOL(value) ((value).type == VAL_BOOL)
 #define IS_NIL(value) ((value).type == VAL_NIL)
 #define IS_NUMBER(value) ((value).type == VAL_NUMBER)
+#define IS_NUMBER_F64(value)                                                   \
+  (IS_NUMBER(value) && (value).as.number.type == VAL_NUMBER_F64)
+#define IS_NUMBER_U8(value)                                                    \
+  (IS_NUMBER(value) && (value).as.number.type == VAL_NUMBER_U8)
 #define IS_OBJ(value) ((value).type == VAL_OBJ)
 
 #define AS_BOOL(value) ((value).as.boolean)
-#define AS_NUMBER(value) ((value).as.number)
+#define AS_NUMBER_F64(value) ((value).as.number.as.f64)
+#define AS_NUMBER_U8(value) ((value).as.number.as.u8)
 #define AS_OBJ(value) ((value).as.obj)
 
 #define BOOL_VAL(value) ((Value){VAL_BOOL, {.boolean = value}})
 #define NIL_VAL ((Value){VAL_NIL, {.number = 0}})
-#define NUMBER_VAL(value) ((Value){VAL_NUMBER, {.number = value}})
+#define NUMBER_F64_VAL(value)                                                  \
+  ((Value){.type = VAL_NUMBER,                                                 \
+           .as.number = {.type = VAL_NUMBER_F64, .as.f64 = value}})
+#define NUMBER_U8_VAL(value)                                                   \
+  ((Value){.type = VAL_NUMBER,                                                 \
+           .as.number = {.type = VAL_NUMBER_U8, .as.u8 = value}})
 #define OBJ_VAL(object) ((Value){VAL_OBJ, {.obj = (Obj *)object}})
 
 typedef struct {
@@ -52,7 +73,7 @@ void writeValueArray(struct GC *gc, ValueArray *array, Value value);
 void freeValueArray(struct GC *gc, ValueArray *array);
 
 /**
- * Room for any number formatted by formatNumber, including the '\0'.
+ * Room for any number formatted by formatNumberF64, including the '\0'.
  */
 #define NUMBER_STRING_MAX 32
 
@@ -62,7 +83,8 @@ void freeValueArray(struct GC *gc, ValueArray *array);
  * 1e21 are written in plain decimal form, others in exponent form, e.g. `10`,
  * `123.456`, `0.000025`, `1e-7`, `1e+21`.
  */
-void formatNumber(double value, char *buffer, size_t size);
+void formatNumberF64(double value, char *buffer, size_t size);
+void formatNumberU8(uint8_t value, char *buffer, size_t size);
 
 void valueToString(Value value, char *buffer, size_t size);
 void valueTypeToString(Value value, char *buffer, size_t size);

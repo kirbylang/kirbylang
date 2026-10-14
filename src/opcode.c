@@ -52,6 +52,9 @@ static const OpInfo opInfos[OP_COUNT] = {
     [OP_SET_INDEX] = {true, 0, -2, -1, 0},
     // The block's locals are removed from under its result.
     [OP_CLOSE_BLOCK_EXPR] = {true, 1, 0, 0, -1},
+    // A number is converted to the operand's target kind; the result takes
+    // the operand's place on the stack.
+    [OP_CAST] = {true, 1, 0, -1, 0},
 };
 
 const OpInfo *opInfo(OpCode op) {

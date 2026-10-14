@@ -110,7 +110,15 @@ static void printAstLiteral(StrBuf *sb, LiteralNode *lit) {
     sb_append(sb, lit->as.boolean ? "true" : "false");
     break;
   case LITERAL_NUMBER:
-    sb_appendf(sb, "%g", lit->as.number);
+    switch (lit->as.number.kind) {
+    case NUMBER_F64:
+      sb_appendf(sb, "%g", lit->as.number.as.f64);
+      break;
+    case NUMBER_U8:
+      sb_appendf(sb, "%u", lit->as.number.as.u8);
+      break;
+    }
+
     break;
   case LITERAL_STRING:
     sb_appendf(sb, "\"%s\"", lit->as.string.chars);
@@ -544,6 +552,14 @@ static void printNode(StrBuf *sb, AstNode *node) {
       printNode(sb, node->as.interpString.parts[i].expr);
     }
 
+    sb_append(sb, ")");
+    break;
+
+  case NODE_CAST:
+    sb_append(sb, "(cast ");
+    printNode(sb, node->as.cast.expr);
+    sb_append(sb, " as ");
+    printNode(sb, node->as.cast.type);
     sb_append(sb, ")");
     break;
 

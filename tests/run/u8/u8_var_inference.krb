@@ -1,0 +1,4 @@
+let byte: u8 = 123;
+let top: u8 = 255;
+@println(byte);
+@println(top);

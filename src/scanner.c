@@ -236,7 +236,15 @@ static TokenType checkKeyword(Scanner *scanner, int start, int length,
 static TokenType identifierType(Scanner *scanner) {
   switch (scanner->start[0]) {
   case 'a':
-    return checkKeyword(scanner, 1, 2, "nd", TOKEN_AND);
+    if (scanner->current - scanner->start > 1) {
+      switch (scanner->start[1]) {
+      case 'n':
+        return checkKeyword(scanner, 2, 1, "d", TOKEN_AND);
+      case 's':
+        return checkKeyword(scanner, 2, 0, "", TOKEN_AS);
+      }
+    }
+    break;
   case 'b':
     return checkKeyword(scanner, 1, 4, "reak", TOKEN_BREAK);
   case 'c':
@@ -350,6 +358,15 @@ static Token number(Scanner *scanner) {
     advance(scanner);
 
     return makeToken(scanner, TOKEN_F64);
+  }
+
+  // Look for an optional u8/U8 suffix
+  if ((peek(scanner) == 'u' || peek(scanner) == 'U') &&
+      peekNext(scanner) == '8') {
+    advance(scanner);
+    advance(scanner);
+
+    return makeToken(scanner, TOKEN_U8);
   }
 
   return makeToken(scanner, TOKEN_NUMBER);
