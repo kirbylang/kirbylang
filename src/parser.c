@@ -266,17 +266,25 @@ static AstNode *number(Parser *parser, bool canAssign) {
   AstNode *node = astAlloc(NODE_LITERAL, parser->previous.line);
   node->as.literal.kind = LITERAL_NUMBER;
   node->as.literal.as.number.kind = kind;
-  node->as.literal.as.number.isPlainInteger = plain && !hasPoint;
+  node->as.literal.as.number.literalIsPlainInteger = plain && !hasPoint;
 
   if (numberKindInfo(kind)->isFloat) {
     node->as.literal.as.number.as.f64 = strtod(text, NULL);
+
+    if (node->as.literal.as.number.literalIsPlainInteger) {
+      errno = 0;
+      node->as.literal.as.number.literalValue = strtoull(text, NULL, 10);
+      node->as.literal.as.number.literalValueFits = errno == 0;
+    }
+
     return node;
   }
 
   char digits[32];
   errno = 0;
   unsigned long long value = 0;
-  bool valid = digitLength > 0 && digitLength < (int)sizeof(digits) && !hasPoint;
+  bool valid =
+      digitLength > 0 && digitLength < (int)sizeof(digits) && !hasPoint;
 
   if (valid) {
     memcpy(digits, text, (size_t)digitLength);

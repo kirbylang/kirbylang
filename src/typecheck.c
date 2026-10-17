@@ -413,17 +413,16 @@ static void typchkCoerceIntegerLiteral(AstNode *node, Type *expected) {
 
   LiteralNode *lit = &node->as.literal;
 
-  if (lit->as.number.kind != NUMBER_KIND_F64 || !lit->as.number.isPlainInteger)
+  if (lit->as.number.kind != NUMBER_KIND_F64 ||
+      !lit->as.number.literalIsPlainInteger)
     return;
 
-  double value = lit->as.number.as.f64;
-
-  if (value < (double)numberKindMin(kind) ||
-      value > (double)numberKindMax(kind))
+  if (!lit->as.number.literalValueFits ||
+      lit->as.number.literalValue > numberKindMax(kind))
     return;
 
   lit->as.number.kind = kind;
-  lit->as.number.as.i64 = (int64_t)value;
+  lit->as.number.as.u64 = lit->as.number.literalValue;
 }
 
 // Where a signed integer kind is expected, `-5` is a literal of that kind, so
@@ -448,12 +447,12 @@ static void typchkMaybeFoldNegativeNumberLiteral(AstNode *node,
     return;
 
   if (operand->as.literal.as.number.kind != NUMBER_KIND_F64 ||
-      !operand->as.literal.as.number.isPlainInteger)
+      !operand->as.literal.as.number.literalIsPlainInteger)
     return;
 
-  double value = -operand->as.literal.as.number.as.f64;
-
-  if (value < (double)numberKindMin(kind))
+  if (!operand->as.literal.as.number.literalValueFits ||
+      operand->as.literal.as.number.literalValue >
+          0 - (uint64_t)numberKindMin(kind))
     return;
 
   int line = node->line;
@@ -461,8 +460,9 @@ static void typchkMaybeFoldNegativeNumberLiteral(AstNode *node,
   node->line = line;
   node->as.literal.kind = LITERAL_NUMBER;
   node->as.literal.as.number.kind = kind;
-  node->as.literal.as.number.isPlainInteger = false;
-  node->as.literal.as.number.as.i64 = (int64_t)value;
+  node->as.literal.as.number.literalIsPlainInteger = false;
+  node->as.literal.as.number.as.i64 =
+      (int64_t)(0 - operand->as.literal.as.number.literalValue);
 }
 
 // Infer the type of an expression
