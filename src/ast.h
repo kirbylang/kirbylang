@@ -72,7 +72,13 @@ typedef struct {
        * suffixed (`42f64`, `42u8`) or decimal (`1.5`) literal. Only plain
        * integers may become another integer kind where that kind is expected.
        */
-      bool isPlainInteger;
+      bool literalIsPlainInteger;
+      /**
+       * For a plain integer literal, its exact value, unless it does not fit
+       * in 64 bits (`integerFits` is false).
+       */
+      uint64_t literalValue;
+      bool literalValueFits;
     } number;
     struct {
       const char *chars;
