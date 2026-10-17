@@ -394,14 +394,18 @@ static Type *typchkCheckOrInferLambda(TypeEnv *env, AstNode *node,
 static void typchkCheckVarDecl(TypeEnv *env, AstNode *node);
 static void typchkCheckFunctionDecl(TypeEnv *env, AstNode *node);
 
-// In a u8-expected context, a plain integer literal -- no suffix, no decimal
-// point, in the range 0..255 -- is treated as a u8 literal, so
-// `let byte: u8 = 65;` and `sum(1, 2)` don't need a suffix. Suffixed and
-// decimal literals are an explicit choice of f64 and never coerce. The
-// compiler reads the literal's kind, so the AST is rewritten here, before
-// compilation.
-static void typchkCoerceIntegerLiteralToU8(AstNode *node, Type *expected) {
-  if (expected == NULL || !typesEqual(expected, typeU8()))
+// Where an integer kind is expected, a plain integer literal that fits the
+// kind is treated as a literal of that kind, so `let byte: u8 = 65;` and
+// `sum(1, 2)` don't need a suffix. Suffixed and decimal literals are an
+// explicit choice and never coerce. The compiler reads the literal's kind, so
+// the AST is rewritten here, before compilation.
+static void typchkCoerceIntegerLiteral(AstNode *node, Type *expected) {
+  if (expected == NULL || !typeIsNumber(expected))
+    return;
+
+  NumberKind kind = expected->as.number.kind;
+
+  if (kind == NUMBER_KIND_COUNT || numberKindInfo(kind)->isFloat)
     return;
 
   if (node->kind != NODE_LITERAL || node->as.literal.kind != LITERAL_NUMBER)
@@ -414,11 +418,11 @@ static void typchkCoerceIntegerLiteralToU8(AstNode *node, Type *expected) {
 
   double value = lit->as.number.as.f64;
 
-  if (value < 0.0 || value > 255.0)
+  if (value < (double)numberKindMin(kind) || value > (double)numberKindMax(kind))
     return;
 
-  lit->as.number.kind = NUMBER_KIND_U8;
-  lit->as.number.as.u64 = (uint8_t)value;
+  lit->as.number.kind = kind;
+  lit->as.number.as.i64 = (int64_t)value;
 }
 
 // Infer the type of an expression
@@ -478,7 +482,7 @@ Type *typchkInfer(TypeEnv *env, AstNode *node) {
 }
 
 bool typchkCheck(TypeEnv *env, AstNode *node, Type *expected) {
-  typchkCoerceIntegerLiteralToU8(node, expected);
+  typchkCoerceIntegerLiteral(node, expected);
 
   if (node->kind == NODE_FUNCTION && node->as.function.isLambda)
     return typchkCheckOrInferLambda(env, node, expected) != NULL;

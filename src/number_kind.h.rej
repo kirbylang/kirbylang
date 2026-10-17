@@ -1,0 +1,12 @@
+diff a/src/number_kind.h b/src/number_kind.h	(rejected hunks)
+@@ -41,6 +41,10 @@ const NumberKindInfo *numberKindInfo(NumberKind kind);
+ 
+ double numberToDouble(NumberKind kind, NumberPayload payload);
+ 
++// Smallest and largest value of an integer kind.
++int64_t numberKindMin(NumberKind kind);
++uint64_t numberKindMax(NumberKind kind);
++
+ // Finds a supported kind by its name, e.g. "u8".
+ bool numberKindFromName(const char *name, int length, NumberKind *kind);
+ 

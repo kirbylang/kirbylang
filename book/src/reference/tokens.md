@@ -70,7 +70,7 @@ typedef struct {
 |  25 | `TOKEN_IDENTIFIER`        | `StringBuilder` |
 |  26 | `TOKEN_STRING`            | `"Hello World"` |
 |  27 | `TOKEN_NUMBER`            |       `1234.56` |
-|  28 | `TOKEN_F64`               |           `f64` |
+|  28 | `TOKEN_NUMBER_SUFFIXED`   |          `12u8` |
 |  29 | `TOKEN_INTERP_STRING`     |      `$"Hello"` |
 |  30 | `TOKEN_INTERP_START`      |     `$"Hello {` |
 |  31 | `TOKEN_INTERP_MIDDLE`     |          `}, {` |
@@ -96,7 +96,6 @@ typedef struct {
 |  51 | `TOKEN_WHILE`             |         `while` |
 |  52 | `TOKEN_BREAK`             |         `break` |
 |  53 | `TOKEN_CONTINUE`          |      `continue` |
-|  54 | `TOKEN_U8`                |            `u8` |
-|  55 | `TOKEN_AS`                |            `as` |
-|  56 | `TOKEN_ERROR`             |             n/a |
-|  57 | `TOKEN_EOF`               |             n/a |
+|  54 | `TOKEN_AS`                |            `as` |
+|  55 | `TOKEN_ERROR`             |             n/a |
+|  56 | `TOKEN_EOF`               |             n/a |

@@ -36,7 +36,7 @@ typedef enum {
   TOKEN_STRING,
   // Numbers
   TOKEN_NUMBER,
-  TOKEN_F64,
+  TOKEN_NUMBER_SUFFIXED, // e.g. 12u8
   // Interpolated strings.
   TOKEN_INTERP_STRING, // $"text" -- no placeholders
   TOKEN_INTERP_START,  // $"text{
@@ -64,7 +64,6 @@ typedef enum {
   TOKEN_WHILE,
   TOKEN_BREAK,
   TOKEN_CONTINUE,
-  TOKEN_U8,
   TOKEN_AS,
 
   TOKEN_ERROR,

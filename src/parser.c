@@ -215,63 +215,80 @@ static AstNode *expression(Parser *parser) {
   return parse_precedence(parser, PREC_ASSIGNMENT);
 }
 
-static AstNode *number_f64(Parser *parser, bool canAssign) {
-  (void)canAssign;
+static void numberLiteralError(Parser *parser, NumberKind kind) {
+  char min[NUMBER_STRING_MAX];
+  char max[NUMBER_STRING_MAX];
+  char message[128];
 
-  double v = strtod(parser->previous.start, NULL);
-
-  AstNode *node = astAlloc(NODE_LITERAL, parser->previous.line);
-  node->as.literal.kind = LITERAL_NUMBER;
-
-  node->as.literal.as.number.kind = NUMBER_KIND_F64;
-  node->as.literal.as.number.as.f64 = v;
-
-  // A plain number -- no suffix, no decimal point -- is an integer that may
-  // be coerced to u8 where a u8 is expected. A f64 suffix or a decimal point
-  // is an explicit choice of f64, so it never coerces. The token text is a
-  // slice of the source, so scan only its own length.
-  bool plain = parser->previous.type == TOKEN_NUMBER;
-  for (int i = 0; plain && i < parser->previous.length; i++) {
-    if (parser->previous.start[i] == '.')
-      plain = false;
-  }
-  node->as.literal.as.number.isPlainInteger = plain;
-
-  return node;
+  formatNumber(kind, (NumberPayload){.i64 = numberKindMin(kind)}, min,
+               sizeof(min));
+  formatNumber(kind, (NumberPayload){.u64 = numberKindMax(kind)}, max,
+               sizeof(max));
+  snprintf(message, sizeof(message),
+           "invalid %s literal, expected an integer from %s to %s.",
+           numberKindInfo(kind)->name, min, max);
+  parse_error(parser, message);
 }
 
-static AstNode *number_u8(Parser *parser, bool canAssign) {
+// A plain number is an integer that may be coerced to a kind that expects
+// one. A decimal point or a suffix is an explicit choice, so it never
+// coerces.
+static AstNode *number(Parser *parser, bool canAssign) {
   (void)canAssign;
 
   const char *text = parser->previous.start;
-  size_t tokenLength = (size_t)parser->previous.length;
-  char *end;
+  int length = parser->previous.length;
+  NumberKind kind = NUMBER_KIND_F64;
+  bool plain = parser->previous.type == TOKEN_NUMBER;
+  bool hasPoint = false;
+  int digitLength = 0;
 
-  errno = 0;
-  unsigned long val = strtoul(text, &end, 10);
+  while (digitLength < length &&
+         ((text[digitLength] >= '0' && text[digitLength] <= '9') ||
+          text[digitLength] == '.')) {
+    hasPoint = hasPoint || text[digitLength] == '.';
+    digitLength++;
+  }
 
-  // The token is a slice of the source: digits, optionally a decimal part,
-  // then the two-character u8 suffix. A valid u8 literal has no decimal
-  // point, so `end` must sit exactly where the suffix begins.
-  size_t digitLength = (size_t)(end - text);
-  const char *suffix = text + digitLength;
+  if (!plain) {
+    char name[8] = {0};
+    int nameLength = length - digitLength;
 
-  bool valid = errno == 0 &&
-               digitLength > 0 &&
-               digitLength + 2 == tokenLength &&
-               val <= 255 &&
-               (suffix[0] == 'u' || suffix[0] == 'U') && suffix[1] == '8';
+    if (nameLength > 0 && nameLength < (int)sizeof(name)) {
+      memcpy(name, text + digitLength, (size_t)nameLength);
+      if (name[0] >= 'A' && name[0] <= 'Z')
+        name[0] = (char)(name[0] - 'A' + 'a');
+    }
 
-  if (!valid)
-    parse_error(parser,
-                "invalid u8 literal, expected an integer from 0 to 255.");
+    numberKindFromName(name, nameLength, &kind);
+  }
 
   AstNode *node = astAlloc(NODE_LITERAL, parser->previous.line);
   node->as.literal.kind = LITERAL_NUMBER;
+  node->as.literal.as.number.kind = kind;
+  node->as.literal.as.number.isPlainInteger = plain && !hasPoint;
 
-  node->as.literal.as.number.kind = NUMBER_KIND_U8;
-  node->as.literal.as.number.as.u64 = valid ? val : 0;
+  if (numberKindInfo(kind)->isFloat) {
+    node->as.literal.as.number.as.f64 = strtod(text, NULL);
+    return node;
+  }
 
+  char digits[32];
+  errno = 0;
+  unsigned long long value = 0;
+  bool valid = digitLength > 0 && digitLength < (int)sizeof(digits) && !hasPoint;
+
+  if (valid) {
+    memcpy(digits, text, (size_t)digitLength);
+    digits[digitLength] = '\0';
+    value = strtoull(digits, NULL, 10);
+    valid = errno == 0 && value <= numberKindMax(kind);
+  }
+
+  if (!valid)
+    numberLiteralError(parser, kind);
+
+  node->as.literal.as.number.as.u64 = valid ? value : 0;
   return node;
 }
 
@@ -840,9 +857,8 @@ static ParseRule rules[] = {
     [TOKEN_LESS_EQUAL] = {NULL, binary, PREC_COMPARISON},
     [TOKEN_IDENTIFIER] = {variable, NULL, PREC_NONE},
     [TOKEN_STRING] = {string_, NULL, PREC_NONE},
-    [TOKEN_NUMBER] = {number_f64, NULL, PREC_NONE},
-    [TOKEN_F64] = {number_f64, NULL, PREC_NONE},
-    [TOKEN_U8] = {number_u8, NULL, PREC_NONE},
+    [TOKEN_NUMBER] = {number, NULL, PREC_NONE},
+    [TOKEN_NUMBER_SUFFIXED] = {number, NULL, PREC_NONE},
     [TOKEN_INTERP_STRING] = {interpString, NULL, PREC_NONE},
     [TOKEN_INTERP_START] = {interpolation, NULL, PREC_NONE},
     [TOKEN_INTERP_MIDDLE] = {NULL, NULL, PREC_NONE},

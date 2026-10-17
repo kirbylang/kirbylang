@@ -6,6 +6,7 @@
 
 #include "assert.h"
 #include "common.h"
+#include "number_kind.h"
 
 static bool isDigit(char c);
 static bool isAlpha(char c);
@@ -335,6 +336,35 @@ static Token identifier(Scanner *scanner) {
   return makeToken(scanner, identifierType(scanner));
 }
 
+// Length of the type name at the cursor if it is a number suffix, otherwise 0.
+// The letter may be upper case: `12U8`.
+static int numberSuffixLength(Scanner *scanner) {
+  for (int kind = 0; kind < NUMBER_KIND_COUNT; kind++) {
+    const NumberKindInfo *info = numberKindInfo((NumberKind)kind);
+
+    if (!info->supported)
+      continue;
+
+    int length = (int)strlen(info->name);
+    bool matches = true;
+
+    for (int i = 0; i < length && matches; i++) {
+      char expected = info->name[i];
+      char actual = scanner->current[i];
+
+      if (i == 0 && actual >= 'A' && actual <= 'Z')
+        actual = (char)(actual - 'A' + 'a');
+
+      matches = actual == expected;
+    }
+
+    if (matches)
+      return length;
+  }
+
+  return 0;
+}
+
 static Token number(Scanner *scanner) {
   TRACELN("scanner.number()");
 
@@ -350,23 +380,12 @@ static Token number(Scanner *scanner) {
       advance(scanner);
   }
 
-  // Look for an optional f64/F64 suffix
-  if ((peek(scanner) == 'f' || peek(scanner) == 'F') &&
-      peekNext(scanner) == '6' && scanner->current[2] == '4') {
-    advance(scanner);
-    advance(scanner);
-    advance(scanner);
+  int suffixLength = numberSuffixLength(scanner);
+  if (suffixLength > 0) {
+    for (int i = 0; i < suffixLength; i++)
+      advance(scanner);
 
-    return makeToken(scanner, TOKEN_F64);
-  }
-
-  // Look for an optional u8/U8 suffix
-  if ((peek(scanner) == 'u' || peek(scanner) == 'U') &&
-      peekNext(scanner) == '8') {
-    advance(scanner);
-    advance(scanner);
-
-    return makeToken(scanner, TOKEN_U8);
+    return makeToken(scanner, TOKEN_NUMBER_SUFFIXED);
   }
 
   return makeToken(scanner, TOKEN_NUMBER);
