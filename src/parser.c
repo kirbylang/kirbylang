@@ -223,7 +223,7 @@ static AstNode *number_f64(Parser *parser, bool canAssign) {
   AstNode *node = astAlloc(NODE_LITERAL, parser->previous.line);
   node->as.literal.kind = LITERAL_NUMBER;
 
-  node->as.literal.as.number.kind = NUMBER_F64;
+  node->as.literal.as.number.kind = NUMBER_KIND_F64;
   node->as.literal.as.number.as.f64 = v;
 
   // A plain number -- no suffix, no decimal point -- is an integer that may
@@ -269,7 +269,7 @@ static AstNode *number_u8(Parser *parser, bool canAssign) {
   AstNode *node = astAlloc(NODE_LITERAL, parser->previous.line);
   node->as.literal.kind = LITERAL_NUMBER;
 
-  node->as.literal.as.number.kind = NUMBER_U8;
+  node->as.literal.as.number.kind = NUMBER_KIND_U8;
   node->as.literal.as.number.as.u8 = (uint8_t)(valid ? val : 0);
 
   return node;
@@ -664,7 +664,7 @@ static AstNode *cast_(Parser *p, AstNode *left, bool canAssign) {
   node->as.cast.expr = left;
   node->as.cast.type = type;
   node->as.cast.as = as;
-  node->as.cast.target = NUMBER_F64; // set by the type checker
+  node->as.cast.target = NUMBER_KIND_F64; // set by the type checker
   return node;
 }
 

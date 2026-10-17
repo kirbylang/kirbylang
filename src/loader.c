@@ -152,9 +152,9 @@ static Value resolveConstToValue(GC *gc, const CompiledUnit *compiledUnit,
   switch (compiledConst->kind) {
   case CONST_NUMBER:
     switch (compiledConst->as.number.kind) {
-    case CONST_NUMBER_F64:
+    case NUMBER_KIND_F64:
       return NUMBER_F64_VAL(compiledConst->as.number.as.f64);
-    case CONST_NUMBER_U8:
+    case NUMBER_KIND_U8:
       return NUMBER_U8_VAL(compiledConst->as.number.as.u8);
     }
 

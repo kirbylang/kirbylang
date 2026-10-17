@@ -13,7 +13,7 @@
  */
 // 2: number constants carry a kind byte and a kind-specific payload
 // (f64 is an eight-byte double, u8 is one byte), where 1 wrote a bare double.
-#define UNIT_BYTES_FORMAT_VERSION 2
+#define UNIT_BYTES_FORMAT_VERSION 3
 
 typedef enum {
   UNIT_DECODE_OK,

@@ -4,6 +4,7 @@
 #include <stdint.h>
 #include <stdlib.h>
 
+#include "number_kind.h"
 #include "strbuf.h"
 #include "token.h"
 
@@ -59,8 +60,6 @@ typedef enum {
   LITERAL_STRING
 } LiteralKind;
 
-typedef enum { NUMBER_F64, NUMBER_U8 } NumberKind;
-
 typedef struct {
   LiteralKind kind;
   union {
@@ -114,7 +113,7 @@ typedef struct {
   /**
    * The target's number kind, set by the type checker because the compiler
    * has no types. Valid for casts the type checker accepted, which are
-   * always to f64 or u8.
+   * always to a supported number kind.
    */
   NumberKind target;
 } CastNode;

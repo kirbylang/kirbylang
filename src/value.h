@@ -2,6 +2,7 @@
 #define kirby_value_h
 
 #include "common.h"
+#include "number_kind.h"
 
 #define VALUE_STRING_MAX 128
 
@@ -17,17 +18,12 @@ typedef struct ObjString ObjString;
 
 typedef enum { VAL_BOOL, VAL_NIL, VAL_NUMBER, VAL_OBJ } ValueType;
 
-typedef enum {
-  VAL_NUMBER_F64,
-  VAL_NUMBER_U8,
-} ValueNumberType;
-
 typedef struct {
   ValueType type;
   union {
     bool boolean;
     struct {
-      ValueNumberType type;
+      NumberKind kind;
       union {
         double f64;
         uint8_t u8;
@@ -41,9 +37,9 @@ typedef struct {
 #define IS_NIL(value) ((value).type == VAL_NIL)
 #define IS_NUMBER(value) ((value).type == VAL_NUMBER)
 #define IS_NUMBER_F64(value)                                                   \
-  (IS_NUMBER(value) && (value).as.number.type == VAL_NUMBER_F64)
+  (IS_NUMBER(value) && (value).as.number.kind == NUMBER_KIND_F64)
 #define IS_NUMBER_U8(value)                                                    \
-  (IS_NUMBER(value) && (value).as.number.type == VAL_NUMBER_U8)
+  (IS_NUMBER(value) && (value).as.number.kind == NUMBER_KIND_U8)
 #define IS_OBJ(value) ((value).type == VAL_OBJ)
 
 #define AS_BOOL(value) ((value).as.boolean)
@@ -55,10 +51,10 @@ typedef struct {
 #define NIL_VAL ((Value){VAL_NIL, {.number = 0}})
 #define NUMBER_F64_VAL(value)                                                  \
   ((Value){.type = VAL_NUMBER,                                                 \
-           .as.number = {.type = VAL_NUMBER_F64, .as.f64 = value}})
+           .as.number = {.kind = NUMBER_KIND_F64, .as.f64 = value}})
 #define NUMBER_U8_VAL(value)                                                   \
   ((Value){.type = VAL_NUMBER,                                                 \
-           .as.number = {.type = VAL_NUMBER_U8, .as.u8 = value}})
+           .as.number = {.kind = NUMBER_KIND_U8, .as.u8 = value}})
 #define OBJ_VAL(object) ((Value){VAL_OBJ, {.obj = (Obj *)object}})
 
 typedef struct {

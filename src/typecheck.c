@@ -410,7 +410,7 @@ static void typchkCoerceIntegerLiteralToU8(AstNode *node, Type *expected) {
 
   LiteralNode *lit = &node->as.literal;
 
-  if (lit->as.number.kind != NUMBER_F64 || !lit->as.number.isPlainInteger)
+  if (lit->as.number.kind != NUMBER_KIND_F64 || !lit->as.number.isPlainInteger)
     return;
 
   double value = lit->as.number.as.f64;
@@ -418,7 +418,7 @@ static void typchkCoerceIntegerLiteralToU8(AstNode *node, Type *expected) {
   if (value < 0.0 || value > 255.0)
     return;
 
-  lit->as.number.kind = NUMBER_U8;
+  lit->as.number.kind = NUMBER_KIND_U8;
   lit->as.number.as.u8 = (uint8_t)value;
 }
 
@@ -539,9 +539,9 @@ static Type *typchkInferLiteral(AstNode *node) {
     return typeBool();
   case LITERAL_NUMBER:
     switch (lit->as.number.kind) {
-    case NUMBER_F64:
+    case NUMBER_KIND_F64:
       return typeF64();
-    case NUMBER_U8:
+    case NUMBER_KIND_U8:
       return typeU8();
     }
   case LITERAL_STRING:
@@ -724,7 +724,7 @@ static Type *typchkInferCast(TypeEnv *env, AstNode *node) {
 
   // The compiler has no types, so it reads the target's number kind from
   // the node. Set it here, where the target is known to be f64 or u8.
-  c->target = typesEqual(targetType, typeU8()) ? NUMBER_U8 : NUMBER_F64;
+  c->target = typesEqual(targetType, typeU8()) ? NUMBER_KIND_U8 : NUMBER_KIND_F64;
   return targetType;
 }
 
@@ -855,10 +855,10 @@ static bool typchkConstantNumber(AstNode *node, double *value) {
       return false;
 
     switch (node->as.literal.as.number.kind) {
-    case NUMBER_F64:
+    case NUMBER_KIND_F64:
       *value = node->as.literal.as.number.as.f64;
       break;
-    case NUMBER_U8:
+    case NUMBER_KIND_U8:
       *value = node->as.literal.as.number.as.u8;
       break;
     }
