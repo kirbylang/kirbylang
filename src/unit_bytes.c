@@ -65,10 +65,10 @@ static void encodeConstant(StrBuf *out, const CompiledConst *constant) {
     putU8(out, (uint8_t)constant->as.number.kind);
 
     switch (constant->as.number.kind) {
-    case CONST_NUMBER_F64:
+    case NUMBER_KIND_F64:
       putDouble(out, constant->as.number.as.f64);
       break;
-    case CONST_NUMBER_U8:
+    case NUMBER_KIND_U8:
       putU8(out, constant->as.number.as.u8);
       break;
     }
@@ -260,14 +260,14 @@ static void readConstant(Reader *reader, const CompiledUnit *unit,
     uint8_t number_kind = readU8(reader);
 
     switch (number_kind) {
-    case CONST_NUMBER_F64:
+    case NUMBER_KIND_F64:
       constant->kind = CONST_NUMBER;
-      constant->as.number.kind = CONST_NUMBER_F64;
+      constant->as.number.kind = NUMBER_KIND_F64;
       constant->as.number.as.f64 = readDouble(reader);
       break;
-    case CONST_NUMBER_U8:
+    case NUMBER_KIND_U8:
       constant->kind = CONST_NUMBER;
-      constant->as.number.kind = CONST_NUMBER_U8;
+      constant->as.number.kind = NUMBER_KIND_U8;
       constant->as.number.as.u8 = readU8(reader);
       break;
     default:

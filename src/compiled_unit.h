@@ -2,6 +2,7 @@
 #define kirby_compiled_unit_h
 
 #include "common.h"
+#include "number_kind.h"
 #include "stringset.h"
 
 typedef enum {
@@ -12,16 +13,11 @@ typedef enum {
   CONST_FUNCTION, // an index into CompiledUnit.functions
 } CompiledConstKind;
 
-typedef enum {
-  CONST_NUMBER_F64,
-  CONST_NUMBER_U8,
-} CompiledConstNumberKind;
-
 typedef struct {
   CompiledConstKind kind;
   union {
     struct {
-      CompiledConstNumberKind kind;
+      NumberKind kind;
       union {
         double f64;
         uint8_t u8;

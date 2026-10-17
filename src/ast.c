@@ -111,10 +111,10 @@ static void printAstLiteral(StrBuf *sb, LiteralNode *lit) {
     break;
   case LITERAL_NUMBER:
     switch (lit->as.number.kind) {
-    case NUMBER_F64:
+    case NUMBER_KIND_F64:
       sb_appendf(sb, "%g", lit->as.number.as.f64);
       break;
-    case NUMBER_U8:
+    case NUMBER_KIND_U8:
       sb_appendf(sb, "%u", lit->as.number.as.u8);
       break;
     }

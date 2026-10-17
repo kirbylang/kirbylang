@@ -117,9 +117,9 @@ static bool compiledConstantsAreEqual(CompiledConst a, CompiledConst b) {
       return false;
 
     switch (a.as.number.kind) {
-    case CONST_NUMBER_F64:
+    case NUMBER_KIND_F64:
       return a.as.number.as.f64 == b.as.number.as.f64;
-    case CONST_NUMBER_U8:
+    case NUMBER_KIND_U8:
       return a.as.number.as.u8 == b.as.number.as.u8;
     }
 

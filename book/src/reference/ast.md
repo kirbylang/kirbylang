@@ -498,7 +498,7 @@ typedef struct {
    */
   Token as;
   /**
-   * The target number kind (f64 or u8), set by the type checker. The compiler
+   * The target number kind, set by the type checker. The compiler
    * emits it as the operand of OP_CAST.
    */
   NumberKind target;

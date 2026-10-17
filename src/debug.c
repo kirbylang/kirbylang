@@ -178,7 +178,7 @@ int disassembleInstruction(Chunk *chunk, int offset) {
     offset++;
     uint8_t target = chunk->code[offset++];
     fprintf(stderr, "%-16s %s\n", "OP_CAST",
-            target == NUMBER_U8 ? "u8" : "f64");
+            target < NUMBER_KIND_COUNT ? numberKindInfo(target)->name : "?");
     return offset;
   }
   default:

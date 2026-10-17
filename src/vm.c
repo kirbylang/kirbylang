@@ -585,7 +585,7 @@ static InterpretResult run(void) {
       uint8_t target = READ_BYTE();
       Value value = popFromStack();
 
-      if (target == NUMBER_U8) {
+      if (target == NUMBER_KIND_U8) {
         // Narrowing conversion. A u8 holds only the integers 0 through 255,
         // so an f64 is range-checked here and rejected if it can't be
         // represented exactly.
@@ -606,7 +606,7 @@ static InterpretResult run(void) {
           runtimeError(&vm, "can't cast to u8.");
           return INTERPRET_RUNTIME_ERROR;
         }
-      } else if (target == NUMBER_F64) {
+      } else if (target == NUMBER_KIND_F64) {
         // Widening conversion. Every u8 fits exactly in an f64, so no check
         // is needed.
         if (IS_NUMBER_F64(value)) {

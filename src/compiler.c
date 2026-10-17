@@ -551,7 +551,7 @@ static uint8_t stringConstant(const char *chars, int length, Token *tok) {
 static void emitF64Constant(double number) {
   CompiledConst const_;
   const_.kind = CONST_NUMBER;
-  const_.as.number.kind = CONST_NUMBER_F64;
+  const_.as.number.kind = NUMBER_KIND_F64;
   const_.as.number.as.f64 = number;
 
   emitBytes(OP_CONSTANT, makeConstant(const_, NULL));
@@ -560,7 +560,7 @@ static void emitF64Constant(double number) {
 static void emitU8Constant(uint8_t number) {
   CompiledConst const_;
   const_.kind = CONST_NUMBER;
-  const_.as.number.kind = CONST_NUMBER_U8;
+  const_.as.number.kind = NUMBER_KIND_U8;
   const_.as.number.as.u8 = number;
 
   emitBytes(OP_CONSTANT, makeConstant(const_, NULL));
@@ -923,10 +923,10 @@ static void compileExpr(AstNode *node) {
       break;
     case LITERAL_NUMBER:
       switch (literal->as.number.kind) {
-      case NUMBER_F64:
+      case NUMBER_KIND_F64:
         emitF64Constant(literal->as.number.as.f64);
         break;
-      case NUMBER_U8:
+      case NUMBER_KIND_U8:
         emitU8Constant(literal->as.number.as.u8);
         break;
       }

@@ -144,11 +144,11 @@ void valueToString(Value value, char *buffer, size_t size) {
     snprintf(buffer, size, "nil");
     break;
   case VAL_NUMBER:
-    switch (value.as.number.type) {
-    case VAL_NUMBER_F64:
+    switch (value.as.number.kind) {
+    case NUMBER_KIND_F64:
       formatNumberF64(AS_NUMBER_F64(value), buffer, size);
       break;
-    case VAL_NUMBER_U8:
+    case NUMBER_KIND_U8:
       formatNumberU8(AS_NUMBER_U8(value), buffer, size);
       break;
     }
@@ -160,6 +160,7 @@ void valueToString(Value value, char *buffer, size_t size) {
 }
 
 void valueTypeToString(Value value, char *buffer, size_t size) {
+
   switch (value.type) {
   case VAL_BOOL:
     snprintf(buffer, size, "bool");
@@ -168,14 +169,7 @@ void valueTypeToString(Value value, char *buffer, size_t size) {
     snprintf(buffer, size, "nil");
     break;
   case VAL_NUMBER:
-    switch (value.as.number.type) {
-    case VAL_NUMBER_F64:
-      snprintf(buffer, size, "f64");
-      break;
-    case VAL_NUMBER_U8:
-      snprintf(buffer, size, "u8");
-      break;
-    }
+    snprintf(buffer, size, numberKindInfo(value.as.number.kind)->name);
     break;
   case VAL_OBJ:
     objectTypeToString(value.as.obj->type, buffer, size);
@@ -219,14 +213,14 @@ bool valuesEqual(Value a, Value b) {
     // Different number subtypes (f64 vs u8) never compare equal; the type
     // checker keeps them apart, so this is only a guard against reinterpreting
     // the wrong union member.
-    if (a.as.number.type != b.as.number.type)
+    if (a.as.number.kind != b.as.number.kind)
       return false;
 
-    switch (a.as.number.type) {
-    case VAL_NUMBER_F64:
+    switch (a.as.number.kind) {
+    case NUMBER_KIND_F64:
       return AS_NUMBER_F64(a) == AS_NUMBER_F64(b);
 
-    case VAL_NUMBER_U8:
+    case NUMBER_KIND_U8:
       return AS_NUMBER_U8(a) == AS_NUMBER_U8(b);
     }
     return false;

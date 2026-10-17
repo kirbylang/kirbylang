@@ -55,22 +55,22 @@ static CompiledUnit *newSampleUnit(void) {
   }
 
   cuAddConstant(script, (CompiledConst){.kind = CONST_NUMBER,
-                                        .as.number = {.kind = CONST_NUMBER_F64,
+                                        .as.number = {.kind = NUMBER_KIND_F64,
                                                       .as.f64 = 3.14}});
   cuAddConstant(script, (CompiledConst){.kind = CONST_NUMBER,
-                                        .as.number = {.kind = CONST_NUMBER_F64,
+                                        .as.number = {.kind = NUMBER_KIND_F64,
                                                       .as.f64 = -0.0}});
   cuAddConstant(script, (CompiledConst){.kind = CONST_NUMBER,
-                                        .as.number = {.kind = CONST_NUMBER_F64,
+                                        .as.number = {.kind = NUMBER_KIND_F64,
                                                       .as.f64 = NAN}});
   cuAddConstant(script, (CompiledConst){.kind = CONST_NUMBER,
-                                        .as.number = {.kind = CONST_NUMBER_F64,
+                                        .as.number = {.kind = NUMBER_KIND_F64,
                                                       .as.f64 = INFINITY}});
   cuAddConstant(script, (CompiledConst){.kind = CONST_NUMBER,
-                                        .as.number = {.kind = CONST_NUMBER_U8,
+                                        .as.number = {.kind = NUMBER_KIND_U8,
                                                       .as.u8 = 255}});
   cuAddConstant(script, (CompiledConst){.kind = CONST_NUMBER,
-                                        .as.number = {.kind = CONST_NUMBER_U8,
+                                        .as.number = {.kind = NUMBER_KIND_U8,
                                                       .as.u8 = 0}});
   cuAddConstant(script,
                 (CompiledConst){.kind = CONST_BOOL, .as.boolean = true});
@@ -97,7 +97,7 @@ static CompiledUnit *newSampleUnit(void) {
   cuAddUpvalue(addFn, false, 255);
   cuWriteByte(addFn, 7, 5);
   cuAddConstant(addFn, (CompiledConst){.kind = CONST_NUMBER,
-                                       .as.number = {.kind = CONST_NUMBER_F64,
+                                       .as.number = {.kind = NUMBER_KIND_F64,
                                                      .as.f64 = 1.0}});
 
   return unit;
@@ -150,7 +150,7 @@ static void assertUnitsEqual(const CompiledUnit *a, const CompiledUnit *b) {
       case CONST_NUMBER:
         assert(p->as.number.kind == q->as.number.kind);
 
-        if (p->as.number.kind == CONST_NUMBER_F64) {
+        if (p->as.number.kind == NUMBER_KIND_F64) {
           assertSameBits(p->as.number.as.f64, q->as.number.as.f64);
         } else {
           assert(p->as.number.as.u8 == q->as.number.as.u8);
@@ -407,7 +407,7 @@ static void testRejectsUnknownConstantKind(void) {
 static void testRejectsUnknownNumberKind(void) {
   CompiledUnit *original = newSampleUnit();
   cuGetFnByIndex(original, 0)->constants[0].as.number.kind =
-      (CompiledConstNumberKind)99;
+      (NumberKind)99;
 
   StrBuf bytes = encode(original);
   assertRejected(&bytes, UNIT_DECODE_INVALID);
