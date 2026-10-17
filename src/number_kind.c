@@ -1,5 +1,7 @@
 #include "number_kind.h"
 
+#include <string.h>
+
 static const NumberKindInfo infos[] = {
     [NUMBER_KIND_I64] = {.name = "i64", .size = 8, .isSigned = true},
     [NUMBER_KIND_I32] = {.name = "i32", .size = 4, .isSigned = true},
@@ -24,6 +26,22 @@ _Static_assert(sizeof(infos) / sizeof(infos[0]) == NUMBER_KIND_COUNT,
                "every NumberKind needs a row");
 
 const NumberKindInfo *numberKindInfo(NumberKind kind) { return &infos[kind]; }
+
+bool numberKindFromName(const char *name, int length, NumberKind *kind) {
+  for (int i = 0; i < NUMBER_KIND_COUNT; i++) {
+    if (!infos[i].supported)
+      continue;
+
+    if ((int)strlen(infos[i].name) == length &&
+        memcmp(infos[i].name, name, (size_t)length) == 0) {
+      *kind = (NumberKind)i;
+
+      return true;
+    }
+  }
+
+  return false;
+}
 
 double numberToDouble(NumberKind kind, NumberPayload payload) {
   const NumberKindInfo *info = numberKindInfo(kind);

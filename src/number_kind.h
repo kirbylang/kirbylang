@@ -42,4 +42,7 @@ const NumberKindInfo *numberKindInfo(NumberKind kind);
 
 double numberToDouble(NumberKind kind, NumberPayload payload);
 
+// Get NumberKind by string, e.g. "u8".
+bool numberKindFromName(const char *name, int length, NumberKind *kind);
+
 #endif

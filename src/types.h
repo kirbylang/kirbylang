@@ -4,6 +4,7 @@
 #include <stdbool.h>
 #include <stddef.h>
 
+#include "number_kind.h"
 #include "stringset.h"
 #include "token.h"
 
@@ -11,8 +12,7 @@ typedef enum {
   TYPE_UNIT,
   TYPE_BOOL,
   TYPE_STRING,
-  TYPE_F64,
-  TYPE_U8,
+  TYPE_NUMBER,
   TYPE_STRUCT,
   TYPE_FN,
   TYPE_ARRAY,
@@ -69,6 +69,9 @@ struct Type {
       Type *returnType;
     } function;
     struct {
+      NumberKind kind;
+    } number;
+    struct {
       Type *elementType;
     } array;
     struct {
@@ -109,11 +112,13 @@ Type *typeBool(void);
 // Returns pointer to the `string` type
 Type *typeString(void);
 
-// Returns pointer to the `f64` type
-Type *typeF64(void);
+// Returns pointer to the type of numbers of this kind
+Type *typeNumber(NumberKind kind);
 
-// Returns pointer to the `u8` type
+Type *typeF64(void);
 Type *typeU8(void);
+
+bool typeIsNumber(const Type *type);
 
 // Returns pointer to the `Self` placeholder type
 Type *typeSelfPlaceholder(void);
