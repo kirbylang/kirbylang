@@ -29,7 +29,7 @@ NumberPayload numberNegateValue(NumberKind kind, NumberPayload value);
 
 bool numberOpLessThan(NumberKind kind, NumberPayload a, NumberPayload b);
 
-// Cast from one number kind to another
+// Cast from one number kind to another at runtime
 NumberCastResult numberCast(NumberKind from, NumberPayload value, NumberKind to,
                             NumberPayload *result);
 
