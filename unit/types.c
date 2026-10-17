@@ -15,6 +15,24 @@ static void test_primitives_are_singletons(void) {
   assert(typeString() != typeF64());
 }
 
+static void test_number_types_are_per_kind_singletons(void) {
+  assert(typeNumber(NUMBER_KIND_U8) == typeU8());
+  assert(typeNumber(NUMBER_KIND_F64) == typeF64());
+  assert(typeNumber(NUMBER_KIND_U8) != typeNumber(NUMBER_KIND_F64));
+  assert(!typesEqual(typeU8(), typeF64()));
+}
+
+static void test_type_is_number(void) {
+  assert(typeIsNumber(typeU8()));
+  assert(typeIsNumber(typeF64()));
+  assert(!typeIsNumber(typeBool()));
+}
+
+static void test_numbers_type_to_string(void) {
+  assert(strcmp(typeToString(typeU8()), "u8") == 0);
+  assert(strcmp(typeToString(typeF64()), "f64") == 0);
+}
+
 static void test_primitive_equality(void) {
   assert(typesEqual(typeUnit(), typeUnit()));
   assert(typesEqual(typeBool(), typeBool()));
@@ -44,8 +62,7 @@ static void test_struct_equality_is_nominal(void) {
   };
 
   Type *point = typeStruct(pointName, pointFields, 2);
-  Type *pointAgain =
-      typeStruct(otherPointName, vectorLikeFields, 1);
+  Type *pointAgain = typeStruct(otherPointName, vectorLikeFields, 1);
   Type *vector = typeStruct(vectorName, pointFields, 2);
 
   assert(typesEqual(point, pointAgain)); // same name -> equal, fields ignored
@@ -79,8 +96,7 @@ static void test_struct_field_lookup(void) {
       {tokenFromCString("x"), typeF64()},
       {tokenFromCString("label"), typeString()},
   };
-  Type *point =
-      typeStruct(tokenFromCString("Point"), fields, 2);
+  Type *point = typeStruct(tokenFromCString("Point"), fields, 2);
 
   assert(typeStructFieldLookup(point, tokenFromCString("x")) == typeF64());
   assert(typeStructFieldLookup(point, tokenFromCString("label")) ==
@@ -97,8 +113,7 @@ static void test_type_to_string(void) {
   assert(strcmp(typeToString(typeString()), "string") == 0);
   assert(strcmp(typeToString(typeF64()), "f64") == 0);
 
-  Type *point =
-      typeStruct(tokenFromCString("Point"), NULL, 0);
+  Type *point = typeStruct(tokenFromCString("Point"), NULL, 0);
   assert(strcmp(typeToString(point), "Point") == 0);
 
   Type *addParams[] = {typeF64(), typeF64()};
@@ -149,8 +164,7 @@ static void test_struct_method_lookup(void) {
 
   Type *accountParams[] = {typeF64()};
   Type *newAccount = typeFunction(
-      accountParams, 1,
-      typeStruct(tokenFromCString("Account"), NULL, 0));
+      accountParams, 1, typeStruct(tokenFromCString("Account"), NULL, 0));
 
   UninternedTypeMember fields[] = {{tokenFromCString("balance"), typeF64()}};
 
@@ -199,8 +213,7 @@ static void test_incremental_struct_construction(void) {
 static void test_incremental_struct_methods_across_multiple_calls(void) {
   // Simulates multiple impl blocks contributing methods to the same
   // struct one at a time, in any order.
-  Type *counter =
-      typeStruct(tokenFromCString("Counter"), NULL, 0);
+  Type *counter = typeStruct(tokenFromCString("Counter"), NULL, 0);
 
   Type *newType = typeFunction(NULL, 0, counter);
   typeStructAddStaticMethod(counter, tokenFromCString("new"), newType,
@@ -241,8 +254,7 @@ static void test_struct_trait_method_lookup_is_separate_from_instance(void) {
   // Also split by hasSelf, same as the struct's own static/instance
   // methods, so a static trait method (e.g. Default.default()) can't be
   // called as if it were an instance method or vice versa.
-  Type *accountStruct =
-      typeStruct(tokenFromCString("Account"), NULL, 0);
+  Type *accountStruct = typeStruct(tokenFromCString("Account"), NULL, 0);
 
   Type *toStringType = typeFunction(NULL, 0, typeString());
   typeStructAddTraitMethod(accountStruct, tokenFromCString("toString"),
@@ -281,8 +293,7 @@ static void test_struct_trait_coherence_bookkeeping(void) {
   InternedName display = internTokenName(displayName);
   InternedName eq = internTokenName(eqName);
 
-  Type *point =
-      typeStruct(tokenFromCString("Point"), NULL, 0);
+  Type *point = typeStruct(tokenFromCString("Point"), NULL, 0);
 
   assert(!typeStructImplementsTrait(point, display));
   assert(!typeStructImplementsTrait(point, eq));
@@ -380,8 +391,7 @@ static void test_self_placeholder_is_singleton_and_always_equal(void) {
 }
 
 static void test_substitute_self_replaces_placeholder(void) {
-  Type *point =
-      typeStruct(tokenFromCString("Point"), NULL, 0);
+  Type *point = typeStruct(tokenFromCString("Point"), NULL, 0);
 
   // Bare Self.
   assert(typeSubstituteSelf(typeSelfPlaceholder(), point) == point);
@@ -427,6 +437,9 @@ static void test_interned_name_round_trips_through_a_token(void) {
 
 int main(void) {
   test_primitives_are_singletons();
+  test_number_types_are_per_kind_singletons();
+  test_type_is_number();
+  test_numbers_type_to_string();
   test_primitive_equality();
   test_struct_equality_is_nominal();
   test_function_equality_is_structural();

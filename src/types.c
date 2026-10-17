@@ -52,8 +52,7 @@ void *typesAllocRaw(size_t size) {
 static Type *unitSingleton = NULL;
 static Type *boolSingleton = NULL;
 static Type *stringSingleton = NULL;
-static Type *f64Singleton = NULL;
-static Type *u8Singleton = NULL;
+static Type *numberSingletons[NUMBER_KIND_COUNT];
 static Type *selfPlaceholderSingleton = NULL;
 
 void typesFreeAll(void) {
@@ -69,8 +68,7 @@ void typesFreeAll(void) {
   unitSingleton = NULL;
   boolSingleton = NULL;
   stringSingleton = NULL;
-  f64Singleton = NULL;
-  u8Singleton = NULL;
+  memset(numberSingletons, 0, sizeof(numberSingletons));
   selfPlaceholderSingleton = NULL;
 
   stringSetFree(&typeNames);
@@ -133,17 +131,19 @@ Type *typeString(void) {
   return stringSingleton;
 }
 
-Type *typeF64(void) {
-  if (f64Singleton == NULL)
-    f64Singleton = allocType(TYPE_F64);
-  return f64Singleton;
+Type *typeNumber(NumberKind kind) {
+  if (numberSingletons[kind] == NULL) {
+    numberSingletons[kind] = allocType(TYPE_NUMBER);
+    numberSingletons[kind]->as.number.kind = kind;
+  }
+  return numberSingletons[kind];
 }
 
-Type *typeU8(void) {
-  if (u8Singleton == NULL)
-    u8Singleton = allocType(TYPE_U8);
-  return u8Singleton;
-}
+Type *typeF64(void) { return typeNumber(NUMBER_KIND_F64); }
+
+Type *typeU8(void) { return typeNumber(NUMBER_KIND_U8); }
+
+bool typeIsNumber(const Type *type) { return type->kind == TYPE_NUMBER; }
 
 Type *typeSelfPlaceholder(void) {
   if (selfPlaceholderSingleton == NULL)
@@ -399,10 +399,11 @@ bool typesEqual(Type *a, Type *b) {
   case TYPE_UNIT:
   case TYPE_BOOL:
   case TYPE_STRING:
-  case TYPE_F64:
-  case TYPE_U8:
   case TYPE_SELF:
     return true;
+
+  case TYPE_NUMBER:
+    return a->as.number.kind == b->as.number.kind;
 
   case TYPE_STRUCT:
     // Nominal Equality
@@ -554,11 +555,8 @@ static void appendTypeName(StrBuf *sb, Type *type) {
   case TYPE_STRING:
     sb_append(sb, "string");
     break;
-  case TYPE_F64:
-    sb_append(sb, "f64");
-    break;
-  case TYPE_U8:
-    sb_append(sb, "u8");
+  case TYPE_NUMBER:
+    sb_append(sb, numberKindInfo(type->as.number.kind)->name);
     break;
   case TYPE_STRUCT:
     sb_appendf(sb, "%.*s", type->as.struct_.name.length,

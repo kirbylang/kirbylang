@@ -343,10 +343,9 @@ Type *typchkResolveType(TypeEnv *env, AstNode *typeAnnotation) {
     return typeBool();
   if (tokenTextEquals(&t->name, "string"))
     return typeString();
-  if (tokenTextEquals(&t->name, "f64"))
-    return typeF64();
-  if (tokenTextEquals(&t->name, "u8"))
-    return typeU8();
+  NumberKind numberKind;
+  if (numberKindFromName(t->name.start, t->name.length, &numberKind))
+    return typeNumber(numberKind);
   if (tokenTextEquals(&t->name, "Array"))
     return typeArray(NULL);
   if (tokenTextEquals(&t->name, "Self")) {
@@ -402,7 +401,7 @@ static void typchkCheckFunctionDecl(TypeEnv *env, AstNode *node);
 // compiler reads the literal's kind, so the AST is rewritten here, before
 // compilation.
 static void typchkCoerceIntegerLiteralToU8(AstNode *node, Type *expected) {
-  if (expected == NULL || expected->kind != TYPE_U8)
+  if (expected == NULL || !typesEqual(expected, typeU8()))
     return;
 
   if (node->kind != NODE_LITERAL || node->as.literal.kind != LITERAL_NUMBER)
@@ -538,12 +537,7 @@ static Type *typchkInferLiteral(AstNode *node) {
   case LITERAL_BOOL:
     return typeBool();
   case LITERAL_NUMBER:
-    switch (lit->as.number.kind) {
-    case NUMBER_KIND_F64:
-      return typeF64();
-    case NUMBER_KIND_U8:
-      return typeU8();
-    }
+    return typeNumber(lit->as.number.kind);
   case LITERAL_STRING:
     return typeString();
   }
