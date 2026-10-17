@@ -1,0 +1,11 @@
+// Casting an f64 to i32 is checked at runtime: the value must be an
+// integer from -2147483648 to 2147483647.
+let v: f64 = 42.0;
+let a: i32 = v as i32;
+@println(a);
+
+let max: f64 = 2147483647.0;
+@println(max as i32);
+
+let min: f64 = -2147483648.0;
+@println(min as i32);

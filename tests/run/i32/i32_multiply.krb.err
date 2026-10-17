@@ -1,0 +1,17 @@
+== <script> ==
+0000    1 OP_GET_GLOBAL       0 '@println'
+0002    | OP_CONSTANT         1 '6'
+0004    | OP_CONSTANT         2 '7'
+0006    | OP_MULTIPLY
+0007    | OP_CALL             1
+0009    | OP_POP
+0010    2 OP_CONSTANT         4 '65536'
+0012    | OP_DEFINE_GLOBAL    3 'big'
+0014    3 OP_GET_GLOBAL       0 '@println'
+0016    | OP_GET_GLOBAL       3 'big'
+0018    | OP_GET_GLOBAL       3 'big'
+0020    | OP_MULTIPLY
+0021    | OP_CALL             1
+0023    | OP_POP
+0024    4 OP_NIL
+0025    | OP_RETURN

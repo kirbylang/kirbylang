@@ -1,0 +1,8 @@
+let x: i32 = -5;
+@println(x);
+
+let min: i32 = -2147483648;
+@println(min);
+
+let y: i32 = 3;
+@println(@typeof(-y));

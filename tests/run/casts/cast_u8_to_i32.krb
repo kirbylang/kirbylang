@@ -1,0 +1,4 @@
+// Every u8 fits exactly in an i32, so the cast needs no check.
+let byte: u8 = 255;
+let a: i32 = byte as i32;
+@println(a + 1i32);

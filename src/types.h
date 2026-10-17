@@ -192,7 +192,7 @@ void typeStructMarkUnresolvedMembers(Type *type);
 bool typeStructHasUnresolvedMembers(Type *type);
 
 // Returns bool if two types are equal
-bool typesEqual(Type *a, Type *b);
+bool typesEqual(const Type *a, const Type *b);
 
 // Returns NULL if `type` isn't TYPE_STRUCT or has no field with this name.
 Type *typeStructFieldLookup(Type *type, Token fieldName);

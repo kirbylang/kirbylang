@@ -418,11 +418,51 @@ static void typchkCoerceIntegerLiteral(AstNode *node, Type *expected) {
 
   double value = lit->as.number.as.f64;
 
-  if (value < (double)numberKindMin(kind) || value > (double)numberKindMax(kind))
+  if (value < (double)numberKindMin(kind) ||
+      value > (double)numberKindMax(kind))
     return;
 
   lit->as.number.kind = kind;
   lit->as.number.as.i64 = (int64_t)value;
+}
+
+// Where a signed integer kind is expected, `-5` is a literal of that kind, so
+// the smallest value of the kind can be written. The node is rewritten in
+// place before compilation.
+static void typchkMaybeFoldNegativeNumberLiteral(AstNode *node,
+                                                 Type *expected) {
+  if (expected == NULL || !typeIsNumber(expected) || node->kind != NODE_UNARY ||
+      node->as.unary.op.type != TOKEN_MINUS)
+    return;
+
+  NumberKind kind = expected->as.number.kind;
+
+  if (kind == NUMBER_KIND_COUNT || numberKindInfo(kind)->isFloat ||
+      !numberKindInfo(kind)->isSigned)
+    return;
+
+  AstNode *operand = node->as.unary.operand;
+
+  if (operand->kind != NODE_LITERAL ||
+      operand->as.literal.kind != LITERAL_NUMBER)
+    return;
+
+  if (operand->as.literal.as.number.kind != NUMBER_KIND_F64 ||
+      !operand->as.literal.as.number.isPlainInteger)
+    return;
+
+  double value = -operand->as.literal.as.number.as.f64;
+
+  if (value < (double)numberKindMin(kind))
+    return;
+
+  int line = node->line;
+  node->kind = NODE_LITERAL;
+  node->line = line;
+  node->as.literal.kind = LITERAL_NUMBER;
+  node->as.literal.as.number.kind = kind;
+  node->as.literal.as.number.isPlainInteger = false;
+  node->as.literal.as.number.as.i64 = (int64_t)value;
 }
 
 // Infer the type of an expression
@@ -483,6 +523,7 @@ Type *typchkInfer(TypeEnv *env, AstNode *node) {
 
 bool typchkCheck(TypeEnv *env, AstNode *node, Type *expected) {
   typchkCoerceIntegerLiteral(node, expected);
+  typchkMaybeFoldNegativeNumberLiteral(node, expected);
 
   if (node->kind == NODE_FUNCTION && node->as.function.isLambda)
     return typchkCheckOrInferLambda(env, node, expected) != NULL;
@@ -561,10 +602,23 @@ static Type *typchkInferUnary(TypeEnv *env, AstNode *node) {
     return typeBool();
   }
 
-  if (!typchkCheck(env, u->operand, typeF64()))
+  Type *operandType = typchkInfer(env, u->operand);
+
+  if (operandType == NULL)
     return NULL;
 
-  return typeF64();
+  if (!typeIsNumber(operandType)) {
+    typchkCheck(env, u->operand, typeF64());
+    return NULL;
+  }
+
+  if (!numberKindInfo(operandType->as.number.kind)->isSigned) {
+    typchkErrorAtTokenFmt(&u->op, "Can't negate %s.",
+                          typeToString(operandType));
+    return NULL;
+  }
+
+  return operandType;
 }
 
 // Infer the type of a binary expression
@@ -715,7 +769,7 @@ static Type *typchkInferCast(TypeEnv *env, AstNode *node) {
 
 /**
  * Chooses how a value of this type becomes a string. Returns false when it
- * can't: only strings, f64, u8, bool, and types that implement Display can.
+ * can't: only strings, numbers, bool, and types that implement Display can.
  */
 static bool chooseStringConversion(Type *type, StringConversion *conversion) {
   if (typesEqual(type, typeString())) {
@@ -763,7 +817,7 @@ static Type *typchkInferInterpString(TypeEnv *env, AstNode *node) {
 
     if (!chooseStringConversion(type, &part->conversion)) {
       typchkErrorAtNodeFmt(part->expr,
-                           "Can't interpolate %s. Only string, f64, u8, bool, "
+                           "Can't interpolate %s. Only string, numbers, bool, "
                            "and types that implement Display can be "
                            "interpolated.",
                            typeToString(type));

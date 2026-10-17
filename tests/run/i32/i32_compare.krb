@@ -1,0 +1,6 @@
+@println(5i32 < 10i32);
+@println(10i32 < 5i32);
+@println(200i32 > 100i32);
+@println(5i32 <= 5i32);
+@println(6i32 >= 7i32);
+@println(6i32 >= 6i32);

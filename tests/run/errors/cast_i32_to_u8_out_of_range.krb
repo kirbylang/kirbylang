@@ -1,0 +1,3 @@
+// Casting an i32 above the u8 range is a runtime error.
+let a: i32 = 300;
+let b: u8 = a as u8;

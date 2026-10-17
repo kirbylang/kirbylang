@@ -4,7 +4,10 @@
 
 static const NumberKindInfo infos[] = {
     [NUMBER_KIND_I64] = {.name = "i64", .size = 8, .isSigned = true},
-    [NUMBER_KIND_I32] = {.name = "i32", .size = 4, .isSigned = true},
+    [NUMBER_KIND_I32] = {.name = "i32",
+                         .size = 4,
+                         .isSigned = true,
+                         .supported = true},
     [NUMBER_KIND_I16] = {.name = "i16", .size = 2, .isSigned = true},
     [NUMBER_KIND_I8] = {.name = "i8", .size = 1, .isSigned = true},
     [NUMBER_KIND_U64] = {.name = "u64", .size = 8},

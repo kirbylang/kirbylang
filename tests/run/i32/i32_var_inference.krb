@@ -1,0 +1,4 @@
+let a: i32 = 123;
+let max: i32 = 2147483647;
+@println(a);
+@println(max);

@@ -1,0 +1,5 @@
+@println(7i32 % 3i32);
+let neg: i32 = (-10) as i32;
+@println(neg % 3i32);
+let min: i32 = (-2147483648) as i32;
+@println(min % 7i32);

@@ -70,7 +70,7 @@ typedef struct {
       /**
        * A plain, unsuffixed integer literal, e.g. `42` -- as opposed to a
        * suffixed (`42f64`, `42u8`) or decimal (`1.5`) literal. Only plain
-       * integers may be coerced to u8 in a u8-expected context.
+       * integers may become another integer kind where that kind is expected.
        */
       bool isPlainInteger;
     } number;
