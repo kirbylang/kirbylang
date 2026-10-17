@@ -176,7 +176,7 @@ void valueTypeToString(Value value, char *buffer, size_t size) {
     snprintf(buffer, size, "nil");
     break;
   case VAL_NUMBER:
-    snprintf(buffer, size, numberKindInfo(value.as.number.kind)->name);
+    snprintf(buffer, size, "%s", numberKindInfo(value.as.number.kind)->name);
     break;
   case VAL_OBJ:
     objectTypeToString(value.as.obj->type, buffer, size);

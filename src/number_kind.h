@@ -45,4 +45,7 @@ double numberToDouble(NumberKind kind, NumberPayload payload);
 // Get NumberKind by string, e.g. "u8".
 bool numberKindFromName(const char *name, int length, NumberKind *kind);
 
+int64_t numberKindMin(NumberKind kind);
+uint64_t numberKindMax(NumberKind kind);
+
 #endif
