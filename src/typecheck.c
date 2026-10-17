@@ -610,11 +610,8 @@ static Type *typchkInferBinary(TypeEnv *env, AstNode *node) {
 
   switch (b->op.type) {
   case TOKEN_PLUS:
-    if (typesEqual(leftType, typeF64()) && typesEqual(rightType, typeF64()))
-      return typeF64();
-
-    if (typesEqual(leftType, typeU8()) && typesEqual(rightType, typeU8()))
-      return typeU8();
+    if (typeIsNumber(leftType) && typesEqual(leftType, rightType))
+      return leftType;
 
     if (typesEqual(leftType, typeString()) &&
         typesEqual(rightType, typeString())) {
@@ -623,7 +620,8 @@ static Type *typchkInferBinary(TypeEnv *env, AstNode *node) {
     }
 
     typchkErrorAtTokenFmt(
-        &b->op, "'+' needs addable types: f64, u8, string; got %s and %s.",
+        &b->op,
+        "'+' needs two numbers of the same type or two strings, got %s and %s.",
         typeToString(leftType), typeToString(rightType));
     return NULL;
 
@@ -631,16 +629,13 @@ static Type *typchkInferBinary(TypeEnv *env, AstNode *node) {
   case TOKEN_STAR:
   case TOKEN_SLASH:
   case TOKEN_MODULO:
-    if (typesEqual(leftType, typeF64()) && typesEqual(rightType, typeF64()))
-      return typeF64();
+    if (typeIsNumber(leftType) && typesEqual(leftType, rightType))
+      return leftType;
 
-    if (typesEqual(leftType, typeU8()) && typesEqual(rightType, typeU8()))
-      return typeU8();
-
-    typchkErrorAtTokenFmt(&b->op,
-                          "'%s' needs two f64s or two u8s, got %s and %s.",
-                          binaryOperatorSymbol(b->op.type),
-                          typeToString(leftType), typeToString(rightType));
+    typchkErrorAtTokenFmt(
+        &b->op, "'%s' needs two numbers of the same type, got %s and %s.",
+        binaryOperatorSymbol(b->op.type), typeToString(leftType),
+        typeToString(rightType));
     return NULL;
 
   case TOKEN_EQUAL_EQUAL:
@@ -668,16 +663,13 @@ static Type *typchkInferBinary(TypeEnv *env, AstNode *node) {
   case TOKEN_GREATER:
   case TOKEN_LESS_EQUAL:
   case TOKEN_GREATER_EQUAL:
-    if (typesEqual(leftType, typeF64()) && typesEqual(rightType, typeF64()))
+    if (typeIsNumber(leftType) && typesEqual(leftType, rightType))
       return typeBool();
 
-    if (typesEqual(leftType, typeU8()) && typesEqual(rightType, typeU8()))
-      return typeBool();
-
-    typchkErrorAtTokenFmt(&b->op,
-                          "'%s' needs two f64s or two u8s, got %s and %s.",
-                          binaryOperatorSymbol(b->op.type),
-                          typeToString(leftType), typeToString(rightType));
+    typchkErrorAtTokenFmt(
+        &b->op, "'%s' needs two numbers of the same type, got %s and %s.",
+        binaryOperatorSymbol(b->op.type), typeToString(leftType),
+        typeToString(rightType));
     return NULL;
 
   default:
@@ -704,21 +696,16 @@ static Type *typchkInferCast(TypeEnv *env, AstNode *node) {
   if (targetType == NULL)
     return NULL;
 
-  bool sourceIsNumber = typesEqual(sourceType, typeF64()) ||
-                        typesEqual(sourceType, typeU8());
-  bool targetIsNumber = typesEqual(targetType, typeF64()) ||
-                        typesEqual(targetType, typeU8());
-
-  if (!sourceIsNumber || !targetIsNumber) {
+  if (!typeIsNumber(sourceType) || !typeIsNumber(targetType)) {
     typchkErrorAtTokenFmt(&c->as,
-                          "Can't cast %s to %s. Only f64 and u8 can be cast.",
+                          "Can't cast %s to %s. Only numbers can be cast.",
                           typeToString(sourceType), typeToString(targetType));
     return NULL;
   }
 
   // The compiler has no types, so it reads the target's number kind from
-  // the node. Set it here, where the target is known to be f64 or u8.
-  c->target = typesEqual(targetType, typeU8()) ? NUMBER_KIND_U8 : NUMBER_KIND_F64;
+  // the node.
+  c->target = targetType->as.number.kind;
   return targetType;
 }
 

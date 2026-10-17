@@ -1,1 +1,1 @@
-[line 3] Error at 'as': Can't cast string to u8. Only f64 and u8 can be cast.
+[line 3] Error at 'as': Can't cast string to u8. Only numbers can be cast.
