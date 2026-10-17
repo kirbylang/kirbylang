@@ -1,4 +1,5 @@
 #include <assert.h>
+#include <stdbool.h>
 #include <string.h>
 
 #include "../src/number_kind.h"
@@ -36,8 +37,51 @@ static void test_every_kind_has_a_name(void) {
   }
 }
 
+static void test_sizes_and_signs(void) {
+  struct {
+    NumberKind kind;
+    int size;
+    bool isSigned;
+    bool isFloat;
+  } cases[] = {
+      {NUMBER_KIND_I64, 8, true, false}, {NUMBER_KIND_I32, 4, true, false},
+      {NUMBER_KIND_I16, 2, true, false}, {NUMBER_KIND_I8, 1, true, false},
+      {NUMBER_KIND_U64, 8, false, false}, {NUMBER_KIND_U32, 4, false, false},
+      {NUMBER_KIND_U16, 2, false, false}, {NUMBER_KIND_U8, 1, false, false},
+      {NUMBER_KIND_F64, 8, true, true}, {NUMBER_KIND_F32, 4, true, true},
+  };
+
+  assert(sizeof(cases) / sizeof(cases[0]) == NUMBER_KIND_COUNT);
+
+  for (size_t i = 0; i < sizeof(cases) / sizeof(cases[0]); i++) {
+    const NumberKindInfo *info = numberKindInfo(cases[i].kind);
+    assert(info->size == cases[i].size);
+    assert(info->isSigned == cases[i].isSigned);
+    assert(info->isFloat == cases[i].isFloat);
+  }
+}
+
+static void test_supported_kinds(void) {
+  for (int kind = 0; kind < NUMBER_KIND_COUNT; kind++) {
+    bool expected = kind == NUMBER_KIND_F64 || kind == NUMBER_KIND_U8;
+    assert(numberKindInfo((NumberKind)kind)->supported == expected);
+  }
+}
+
+static void test_number_to_double(void) {
+  assert(numberToDouble(NUMBER_KIND_U8, (NumberPayload){.u64 = 200}) == 200.0);
+  assert(numberToDouble(NUMBER_KIND_I32, (NumberPayload){.i64 = -5}) == -5.0);
+  assert(numberToDouble(NUMBER_KIND_U64,
+                        (NumberPayload){.u64 = 4294967296ull}) ==
+         4294967296.0);
+  assert(numberToDouble(NUMBER_KIND_F64, (NumberPayload){.f64 = 1.5}) == 1.5);
+}
+
 int main(void) {
   test_numbers_are_fixed();
   test_every_kind_has_a_name();
+  test_sizes_and_signs();
+  test_supported_kinds();
+  test_number_to_double();
   return 0;
 }

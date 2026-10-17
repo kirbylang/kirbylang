@@ -151,14 +151,8 @@ static Value resolveConstToValue(GC *gc, const CompiledUnit *compiledUnit,
                                  ObjFunction **byIndex) {
   switch (compiledConst->kind) {
   case CONST_NUMBER:
-    switch (compiledConst->as.number.kind) {
-    case NUMBER_KIND_F64:
-      return NUMBER_F64_VAL(compiledConst->as.number.as.f64);
-    case NUMBER_KIND_U8:
-      return NUMBER_U8_VAL(compiledConst->as.number.as.u8);
-    }
-
-    return NIL_VAL; // unreachable
+    return numberValue(compiledConst->as.number.kind,
+                       compiledConst->as.number.as);
   case CONST_BOOL:
     return BOOL_VAL(compiledConst->as.boolean);
   case CONST_NIL:

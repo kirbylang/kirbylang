@@ -270,7 +270,7 @@ static AstNode *number_u8(Parser *parser, bool canAssign) {
   node->as.literal.kind = LITERAL_NUMBER;
 
   node->as.literal.as.number.kind = NUMBER_KIND_U8;
-  node->as.literal.as.number.as.u8 = (uint8_t)(valid ? val : 0);
+  node->as.literal.as.number.as.u64 = valid ? val : 0;
 
   return node;
 }

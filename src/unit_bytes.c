@@ -56,22 +56,29 @@ static void putDouble(StrBuf *out, double value) {
   sb_append_bytes(out, bytes, sizeof bytes);
 }
 
+static void putSized(StrBuf *out, uint64_t value, int size) {
+  uint8_t bytes[8];
+
+  for (int i = 0; i < size; i++) {
+    bytes[i] = (uint8_t)((value >> (8 * i)) & 0xff);
+  }
+
+  sb_append_bytes(out, bytes, (size_t)size);
+}
+
 static void encodeConstant(StrBuf *out, const CompiledConst *constant) {
   putU8(out, (uint8_t)constant->kind);
 
   switch (constant->kind) {
   case CONST_NUMBER:
-    // The number kind chooses the payload: f64 is eight bytes, u8 is one.
+    // Floats are stored as a double; integers use their own size.
     putU8(out, (uint8_t)constant->as.number.kind);
 
-    switch (constant->as.number.kind) {
-    case NUMBER_KIND_F64:
+    const NumberKindInfo *info = numberKindInfo(constant->as.number.kind);
+    if (info->isFloat)
       putDouble(out, constant->as.number.as.f64);
-      break;
-    case NUMBER_KIND_U8:
-      putU8(out, constant->as.number.as.u8);
-      break;
-    }
+    else
+      putSized(out, constant->as.number.as.u64, info->size);
     break;
   case CONST_BOOL:
     putU8(out, constant->as.boolean ? 1 : 0);
@@ -193,6 +200,20 @@ static uint32_t readU32(Reader *reader) {
 
 static int32_t readI32(Reader *reader) { return (int32_t)readU32(reader); }
 
+static uint64_t readSized(Reader *reader, int size) {
+  const uint8_t *bytes = take(reader, (size_t)size);
+
+  if (bytes == NULL) {
+    return 0;
+  }
+
+  uint64_t value = 0;
+  for (int i = 0; i < size; i++) {
+    value |= (uint64_t)bytes[i] << (8 * i);
+  }
+  return value;
+}
+
 static double readDouble(Reader *reader) {
   const uint8_t *bytes = take(reader, 8);
 
@@ -257,22 +278,28 @@ static void readConstant(Reader *reader, const CompiledUnit *unit,
 
   switch (kind) {
   case CONST_NUMBER: {
-    uint8_t number_kind = readU8(reader);
+    uint8_t numberKind = readU8(reader);
 
-    switch (number_kind) {
-    case NUMBER_KIND_F64:
-      constant->kind = CONST_NUMBER;
-      constant->as.number.kind = NUMBER_KIND_F64;
-      constant->as.number.as.f64 = readDouble(reader);
-      break;
-    case NUMBER_KIND_U8:
-      constant->kind = CONST_NUMBER;
-      constant->as.number.kind = NUMBER_KIND_U8;
-      constant->as.number.as.u8 = readU8(reader);
-      break;
-    default:
+    if (numberKind >= NUMBER_KIND_COUNT ||
+        !numberKindInfo((NumberKind)numberKind)->supported) {
       fail(reader, UNIT_DECODE_INVALID);
       break;
+    }
+
+    const NumberKindInfo *info = numberKindInfo((NumberKind)numberKind);
+    constant->kind = CONST_NUMBER;
+    constant->as.number.kind = (NumberKind)numberKind;
+
+    if (info->isFloat) {
+      constant->as.number.as.f64 = readDouble(reader);
+    } else {
+      uint64_t raw = readSized(reader, info->size);
+
+      if (info->isSigned && info->size < 8) {
+        uint64_t signBit = (uint64_t)1 << (info->size * 8 - 1);
+        raw = (raw ^ signBit) - signBit;
+      }
+      constant->as.number.as.u64 = raw;
     }
 
     break;

@@ -24,10 +24,7 @@ typedef struct {
     bool boolean;
     struct {
       NumberKind kind;
-      union {
-        double f64;
-        uint8_t u8;
-      } as;
+      NumberPayload as;
     } number;
     Obj *obj;
   } as;
@@ -44,17 +41,18 @@ typedef struct {
 
 #define AS_BOOL(value) ((value).as.boolean)
 #define AS_NUMBER_F64(value) ((value).as.number.as.f64)
-#define AS_NUMBER_U8(value) ((value).as.number.as.u8)
+#define AS_NUMBER_U8(value) ((uint8_t)(value).as.number.as.u64)
 #define AS_OBJ(value) ((value).as.obj)
 
 #define BOOL_VAL(value) ((Value){VAL_BOOL, {.boolean = value}})
-#define NIL_VAL ((Value){VAL_NIL, {.number = 0}})
+#define NIL_VAL ((Value){VAL_NIL, {.boolean = false}})
 #define NUMBER_F64_VAL(value)                                                  \
   ((Value){.type = VAL_NUMBER,                                                 \
-           .as.number = {.kind = NUMBER_KIND_F64, .as.f64 = value}})
+           .as.number = {.kind = NUMBER_KIND_F64, .as = {.f64 = value}}})
 #define NUMBER_U8_VAL(value)                                                   \
   ((Value){.type = VAL_NUMBER,                                                 \
-           .as.number = {.kind = NUMBER_KIND_U8, .as.u8 = value}})
+           .as.number = {.kind = NUMBER_KIND_U8,                               \
+                         .as = {.u64 = (uint8_t)(value)}}})
 #define OBJ_VAL(object) ((Value){VAL_OBJ, {.obj = (Obj *)object}})
 
 typedef struct {
@@ -63,6 +61,7 @@ typedef struct {
   Value *values;
 } ValueArray;
 
+Value numberValue(NumberKind kind, NumberPayload payload);
 bool valuesEqual(Value a, Value b);
 void initValueArray(ValueArray *array);
 void writeValueArray(struct GC *gc, ValueArray *array, Value value);
@@ -80,7 +79,8 @@ void freeValueArray(struct GC *gc, ValueArray *array);
  * `123.456`, `0.000025`, `1e-7`, `1e+21`.
  */
 void formatNumberF64(double value, char *buffer, size_t size);
-void formatNumberU8(uint8_t value, char *buffer, size_t size);
+void formatNumber(NumberKind kind, NumberPayload payload, char *buffer,
+                  size_t size);
 
 void valueToString(Value value, char *buffer, size_t size);
 void valueTypeToString(Value value, char *buffer, size_t size);

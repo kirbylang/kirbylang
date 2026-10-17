@@ -116,14 +116,10 @@ static bool compiledConstantsAreEqual(CompiledConst a, CompiledConst b) {
     if (a.as.number.kind != b.as.number.kind)
       return false;
 
-    switch (a.as.number.kind) {
-    case NUMBER_KIND_F64:
+    if (numberKindInfo(a.as.number.kind)->isFloat)
       return a.as.number.as.f64 == b.as.number.as.f64;
-    case NUMBER_KIND_U8:
-      return a.as.number.as.u8 == b.as.number.as.u8;
-    }
 
-    return false;
+    return a.as.number.as.u64 == b.as.number.as.u64;
 
   case CONST_BOOL:
     return a.as.boolean == b.as.boolean;

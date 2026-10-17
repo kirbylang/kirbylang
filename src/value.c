@@ -129,10 +129,24 @@ void formatNumberF64(double value, char *buffer, size_t size) {
     buffer[length] = '\0';
 }
 
-void formatNumberU8(uint8_t value, char *buffer, size_t size) {
-  if (size == 0)
+void formatNumber(NumberKind kind, NumberPayload payload, char *buffer,
+                  size_t size) {
+  const NumberKindInfo *info = numberKindInfo(kind);
+
+  if (info->isFloat) {
+    formatNumberF64(payload.f64, buffer, size);
+  } else if (size == 0) {
     return;
-  snprintf(buffer, size, "%u", (unsigned)value);
+  } else if (info->isSigned) {
+    snprintf(buffer, size, "%lld", (long long)payload.i64);
+  } else {
+    snprintf(buffer, size, "%llu", (unsigned long long)payload.u64);
+  }
+}
+
+Value numberValue(NumberKind kind, NumberPayload payload) {
+  return (Value){.type = VAL_NUMBER,
+                 .as.number = {.kind = kind, .as = payload}};
 }
 
 void valueToString(Value value, char *buffer, size_t size) {
@@ -144,14 +158,7 @@ void valueToString(Value value, char *buffer, size_t size) {
     snprintf(buffer, size, "nil");
     break;
   case VAL_NUMBER:
-    switch (value.as.number.kind) {
-    case NUMBER_KIND_F64:
-      formatNumberF64(AS_NUMBER_F64(value), buffer, size);
-      break;
-    case NUMBER_KIND_U8:
-      formatNumberU8(AS_NUMBER_U8(value), buffer, size);
-      break;
-    }
+    formatNumber(value.as.number.kind, value.as.number.as, buffer, size);
     break;
   case VAL_OBJ:
     objectToString(value, buffer, size); // signal: handled elsewhere
@@ -210,20 +217,15 @@ bool valuesEqual(Value a, Value b) {
   case VAL_NIL:
     return true;
   case VAL_NUMBER:
-    // Different number subtypes (f64 vs u8) never compare equal; the type
-    // checker keeps them apart, so this is only a guard against reinterpreting
-    // the wrong union member.
+    // Different number kinds never compare equal; the type checker keeps them
+    // apart, so this is only a guard against reinterpreting the payload.
     if (a.as.number.kind != b.as.number.kind)
       return false;
 
-    switch (a.as.number.kind) {
-    case NUMBER_KIND_F64:
-      return AS_NUMBER_F64(a) == AS_NUMBER_F64(b);
+    if (numberKindInfo(a.as.number.kind)->isFloat)
+      return a.as.number.as.f64 == b.as.number.as.f64;
 
-    case NUMBER_KIND_U8:
-      return AS_NUMBER_U8(a) == AS_NUMBER_U8(b);
-    }
-    return false;
+    return a.as.number.as.u64 == b.as.number.as.u64;
   case VAL_OBJ:
     return AS_OBJ(a) == AS_OBJ(b);
   default:
