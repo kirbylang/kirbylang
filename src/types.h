@@ -120,6 +120,12 @@ Type *typeU8(void);
 
 bool typeIsNumber(const Type *type);
 
+// Matches a number of any kind. Only usable as a native parameter type.
+Type *typeAnyNumber(void);
+
+// Whether a value of type `actual` can be given where `expected` is wanted
+bool typeAccepts(const Type *expected, const Type *actual);
+
 // Returns pointer to the `Self` placeholder type
 Type *typeSelfPlaceholder(void);
 

@@ -57,7 +57,6 @@
 - Allow number literals to have `f64` or `F64` suffix e.g. `123f64`, `456F64`
 - New CLI subcommand `krb docs` which opens `https://kirbylang.github.io/kirbylang/` in the default browser
 - Add `u8` number type
-  - New native function: `@u8ToString(u8): string`
 - Add `as` keyword for casting between number types (`u8` <-> `f64`)
   - New opcode: `OP_CAST`
 - An array index that is not a whole number, such as `array[1.5]` or

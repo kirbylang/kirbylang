@@ -6,7 +6,7 @@
 0008    | OP_CALL             1
 0010    | OP_POP
 0011    2 OP_GET_GLOBAL       0 '@println'
-0013    | OP_GET_GLOBAL       3 '@u8ToString'
+0013    | OP_GET_GLOBAL       3 '@numberToString'
 0015    | OP_CONSTANT         4 '255'
 0017    | OP_CALL             1
 0019    | OP_CALL             1

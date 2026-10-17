@@ -453,10 +453,11 @@ Remove a number's fractional part, moving toward zero.
 
 ### `@numberToString`
 
-Convert a number to a string.
+Convert a number of any type to a string.
 
 ```kirby
 @println(@numberToString(123)); // "123"
+@println(@numberToString(255u8)); // "255"
 ```
 
 ### `@parseNumber`

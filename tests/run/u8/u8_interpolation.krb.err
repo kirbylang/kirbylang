@@ -4,7 +4,7 @@
 0004    2 OP_GET_GLOBAL       2 '@println'
 0006    | OP_GET_GLOBAL       3 '@strConcat'
 0008    | OP_CONSTANT         4 'v='
-0010    | OP_GET_GLOBAL       5 '@u8ToString'
+0010    | OP_GET_GLOBAL       5 '@numberToString'
 0012    | OP_GET_GLOBAL       0 'x'
 0014    | OP_CALL             1
 0016    | OP_ARRAY            2

@@ -887,20 +887,7 @@ static Value parseNumberNative(VM *vm, int argCount, Value *args) {
 
 static Value numberToStringNative(VM *vm, int argCount, Value *args) {
   assertArgCount(vm, "@numberToString", 1, argCount);
-  assertArgIsNumber(vm, "@numberToString", args, 0);
-
-  Value value = args[0];
-
-  char buffer[NUMBER_STRING_MAX];
-
-  formatNumberF64(value.as.number.as.f64, buffer, sizeof(buffer));
-
-  return OBJ_VAL(copyString(vm->gc, buffer, (int)strlen(buffer)));
-}
-
-static Value u8ToStringNative(VM *vm, int argCount, Value *args) {
-  assertArgCount(vm, "@u8ToString", 1, argCount);
-  assertArgIsU8(vm, "@u8ToString", args, 0);
+  assertArgIsAnyNumber(vm, "@numberToString", args, 0);
 
   Value value = args[0];
 
@@ -1408,7 +1395,6 @@ const NativeDefinition nativeDefinitions[] = {
     {"@readFileToString", readFileToStringNative},
     {"@writeStringToFile", writeStringToFileNative},
     {"@numberToString", numberToStringNative},
-    {"@u8ToString", u8ToStringNative},
     {"@boolToString", boolToStringNative},
     {"@fileExists", fileExistsNative},
     {"@getenv", getEnvNative},
