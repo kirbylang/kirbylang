@@ -1,1 +1,1 @@
-[line 2] Error at '<': '<' needs two f64s or two u8s, got u8 and f64.
+[line 2] Error at '<': '<' needs two numbers of the same type, got u8 and f64.
