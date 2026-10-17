@@ -27,6 +27,22 @@ _Static_assert(sizeof(infos) / sizeof(infos[0]) == NUMBER_KIND_COUNT,
 
 const NumberKindInfo *numberKindInfo(NumberKind kind) { return &infos[kind]; }
 
+int64_t numberKindMin(NumberKind kind) {
+  const NumberKindInfo *info = numberKindInfo(kind);
+
+  if (!info->isSigned)
+    return 0;
+
+  return (int64_t)(UINT64_MAX << (info->size * 8 - 1));
+}
+
+uint64_t numberKindMax(NumberKind kind) {
+  const NumberKindInfo *info = numberKindInfo(kind);
+  int bits = info->size * 8 - (info->isSigned ? 1 : 0);
+
+  return bits == 64 ? UINT64_MAX : ((uint64_t)1 << bits) - 1;
+}
+
 bool numberKindFromName(const char *name, int length, NumberKind *kind) {
   for (int i = 0; i < NUMBER_KIND_COUNT; i++) {
     if (!infos[i].supported)

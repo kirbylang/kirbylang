@@ -77,7 +77,36 @@ static void test_number_to_double(void) {
   assert(numberToDouble(NUMBER_KIND_F64, (NumberPayload){.f64 = 1.5}) == 1.5);
 }
 
+static void test_integer_limits(void) {
+  assert(numberKindMin(NUMBER_KIND_I8) == -128);
+  assert(numberKindMax(NUMBER_KIND_I8) == 127);
+  assert(numberKindMin(NUMBER_KIND_I16) == -32768);
+  assert(numberKindMax(NUMBER_KIND_I16) == 32767);
+  assert(numberKindMin(NUMBER_KIND_I32) == INT32_MIN);
+  assert(numberKindMax(NUMBER_KIND_I32) == INT32_MAX);
+  assert(numberKindMin(NUMBER_KIND_I64) == INT64_MIN);
+  assert(numberKindMax(NUMBER_KIND_I64) == INT64_MAX);
+  assert(numberKindMin(NUMBER_KIND_U8) == 0);
+  assert(numberKindMax(NUMBER_KIND_U8) == 255);
+  assert(numberKindMax(NUMBER_KIND_U16) == 65535);
+  assert(numberKindMax(NUMBER_KIND_U32) == UINT32_MAX);
+  assert(numberKindMax(NUMBER_KIND_U64) == UINT64_MAX);
+}
+
+static void test_kind_from_name(void) {
+  NumberKind kind;
+
+  assert(numberKindFromName("u8", 2, &kind) && kind == NUMBER_KIND_U8);
+  assert(numberKindFromName("f64", 3, &kind) && kind == NUMBER_KIND_F64);
+  assert(numberKindFromName("u8x", 2, &kind) && kind == NUMBER_KIND_U8);
+  assert(!numberKindFromName("u8x", 3, &kind));
+  assert(!numberKindFromName("i32", 3, &kind));
+  assert(!numberKindFromName("u", 1, &kind));
+}
+
 int main(void) {
+  test_integer_limits();
+  test_kind_from_name();
   test_numbers_are_fixed();
   test_every_kind_has_a_name();
   test_sizes_and_signs();

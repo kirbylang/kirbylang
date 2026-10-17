@@ -56,10 +56,8 @@ const char *tokenTypeToString(TokenType type) {
     return "TOKEN_STRING";
   case TOKEN_NUMBER:
     return "TOKEN_NUMBER";
-  case TOKEN_F64:
-    return "TOKEN_F64";
-  case TOKEN_U8:
-    return "TOKEN_U8";
+  case TOKEN_NUMBER_SUFFIXED:
+    return "TOKEN_NUMBER_SUFFIXED";
   case TOKEN_AS:
     return "TOKEN_AS";
   case TOKEN_INTERP_STRING:

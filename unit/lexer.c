@@ -86,7 +86,7 @@ int main(void) {
 
   // A complete f64/F64 suffix is part of the number literal.
   TokenType numberF64Expected[] = {
-      TOKEN_F64,
+      TOKEN_NUMBER_SUFFIXED,
       TOKEN_EOF,
   };
 
@@ -95,6 +95,11 @@ int main(void) {
   assert_token_types("456F64", numberF64Expected,
                      (int)(sizeof(numberF64Expected) / sizeof(numberF64Expected[0])));
   assert_token_types("1.5f64", numberF64Expected,
+                     (int)(sizeof(numberF64Expected) / sizeof(numberF64Expected[0])));
+
+  assert_token_types("12u8", numberF64Expected,
+                     (int)(sizeof(numberF64Expected) / sizeof(numberF64Expected[0])));
+  assert_token_types("12U8", numberF64Expected,
                      (int)(sizeof(numberF64Expected) / sizeof(numberF64Expected[0])));
 
   // A partial suffix is not consumed, so it scans as a number followed
