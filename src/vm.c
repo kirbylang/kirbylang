@@ -528,7 +528,7 @@ static InterpretResult run(void) {
       break;
     case OP_DIVIDE: {
       if (IS_NUMBER_U8(peekStack(0))) {
-        assertNonZeroU8(&vm, "/", peekStack(0).as.number.as.u8, 1);
+        assertNonZeroU8(&vm, "/", AS_NUMBER_U8(peekStack(0)), 1);
       } else {
         assertNonZero(&vm, "/", peekStack(0).as.number.as.f64, 1);
       }
@@ -539,7 +539,7 @@ static InterpretResult run(void) {
       if (IS_NUMBER_U8(peekStack(0))) {
         // A zero divisor is undefined behavior for C integer modulo, so
         // reject it before the op runs. f64 fmod(, 0) returns NaN instead.
-        assertNonZeroU8(&vm, "%", peekStack(0).as.number.as.u8, 1);
+        assertNonZeroU8(&vm, "%", AS_NUMBER_U8(peekStack(0)), 1);
       }
 
       if (IS_NUMBER_F64(peekStack(0)) && IS_NUMBER_F64(peekStack(1))) {
@@ -612,7 +612,7 @@ static InterpretResult run(void) {
         if (IS_NUMBER_F64(value)) {
           pushOnStack(value);
         } else if (IS_NUMBER_U8(value)) {
-          pushOnStack(NUMBER_F64_VAL(value.as.number.as.u8));
+          pushOnStack(NUMBER_F64_VAL(AS_NUMBER_U8(value)));
         } else {
           runtimeError(&vm, "can't cast to f64.");
           return INTERPRET_RUNTIME_ERROR;

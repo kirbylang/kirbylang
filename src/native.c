@@ -906,7 +906,8 @@ static Value u8ToStringNative(VM *vm, int argCount, Value *args) {
 
   char buffer[NUMBER_STRING_MAX];
 
-  formatNumberU8(value.as.number.as.u8, buffer, sizeof(buffer));
+  formatNumber(value.as.number.kind, value.as.number.as, buffer,
+               sizeof(buffer));
 
   return OBJ_VAL(copyString(vm->gc, buffer, (int)strlen(buffer)));
 }

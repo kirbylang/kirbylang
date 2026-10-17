@@ -50,8 +50,7 @@ static void compileBlockContents(BlockNode *block, bool returnsValue);
 static void compileFunction(FunctionNode *fn, FunctionType type);
 static uint8_t makeConstant(CompiledConst value, Token *tok);
 static uint8_t stringConstant(const char *chars, int length, Token *tok);
-static void emitF64Constant(double number);
-static void emitU8Constant(uint8_t number);
+static void emitNumberConstant(NumberKind kind, NumberPayload payload);
 static void emitStringConstant(const char *chars, int length);
 static void emitByte(uint8_t byte);
 static void emitBytes(uint8_t byte1, uint8_t byte2);
@@ -548,20 +547,11 @@ static uint8_t stringConstant(const char *chars, int length, Token *tok) {
   return makeConstant(k, tok);
 }
 
-static void emitF64Constant(double number) {
+static void emitNumberConstant(NumberKind kind, NumberPayload payload) {
   CompiledConst const_;
   const_.kind = CONST_NUMBER;
-  const_.as.number.kind = NUMBER_KIND_F64;
-  const_.as.number.as.f64 = number;
-
-  emitBytes(OP_CONSTANT, makeConstant(const_, NULL));
-}
-
-static void emitU8Constant(uint8_t number) {
-  CompiledConst const_;
-  const_.kind = CONST_NUMBER;
-  const_.as.number.kind = NUMBER_KIND_U8;
-  const_.as.number.as.u8 = number;
+  const_.as.number.kind = kind;
+  const_.as.number.as = payload;
 
   emitBytes(OP_CONSTANT, makeConstant(const_, NULL));
 }
@@ -922,15 +912,7 @@ static void compileExpr(AstNode *node) {
       emitByte(literal->as.boolean ? OP_TRUE : OP_FALSE);
       break;
     case LITERAL_NUMBER:
-      switch (literal->as.number.kind) {
-      case NUMBER_KIND_F64:
-        emitF64Constant(literal->as.number.as.f64);
-        break;
-      case NUMBER_KIND_U8:
-        emitU8Constant(literal->as.number.as.u8);
-        break;
-      }
-
+      emitNumberConstant(literal->as.number.kind, literal->as.number.as);
       break;
     case LITERAL_STRING:
       emitStringConstant(literal->as.string.chars, literal->as.string.length);

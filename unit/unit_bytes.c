@@ -68,10 +68,10 @@ static CompiledUnit *newSampleUnit(void) {
                                                       .as.f64 = INFINITY}});
   cuAddConstant(script, (CompiledConst){.kind = CONST_NUMBER,
                                         .as.number = {.kind = NUMBER_KIND_U8,
-                                                      .as.u8 = 255}});
+                                                      .as.u64 = 255}});
   cuAddConstant(script, (CompiledConst){.kind = CONST_NUMBER,
                                         .as.number = {.kind = NUMBER_KIND_U8,
-                                                      .as.u8 = 0}});
+                                                      .as.u64 = 0}});
   cuAddConstant(script,
                 (CompiledConst){.kind = CONST_BOOL, .as.boolean = true});
   cuAddConstant(script,
@@ -153,7 +153,7 @@ static void assertUnitsEqual(const CompiledUnit *a, const CompiledUnit *b) {
         if (p->as.number.kind == NUMBER_KIND_F64) {
           assertSameBits(p->as.number.as.f64, q->as.number.as.f64);
         } else {
-          assert(p->as.number.as.u8 == q->as.number.as.u8);
+          assert(p->as.number.as.u64 == q->as.number.as.u64);
         }
         break;
       case CONST_BOOL:

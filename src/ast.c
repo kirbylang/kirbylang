@@ -109,17 +109,18 @@ static void printAstLiteral(StrBuf *sb, LiteralNode *lit) {
   case LITERAL_BOOL:
     sb_append(sb, lit->as.boolean ? "true" : "false");
     break;
-  case LITERAL_NUMBER:
-    switch (lit->as.number.kind) {
-    case NUMBER_KIND_F64:
+  case LITERAL_NUMBER: {
+    const NumberKindInfo *info = numberKindInfo(lit->as.number.kind);
+
+    if (info->isFloat)
       sb_appendf(sb, "%g", lit->as.number.as.f64);
-      break;
-    case NUMBER_KIND_U8:
-      sb_appendf(sb, "%u", lit->as.number.as.u8);
-      break;
-    }
+    else if (info->isSigned)
+      sb_appendf(sb, "%lld", (long long)lit->as.number.as.i64);
+    else
+      sb_appendf(sb, "%llu", (unsigned long long)lit->as.number.as.u64);
 
     break;
+  }
   case LITERAL_STRING:
     sb_appendf(sb, "\"%s\"", lit->as.string.chars);
     break;

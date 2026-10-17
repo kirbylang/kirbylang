@@ -419,7 +419,7 @@ static void typchkCoerceIntegerLiteralToU8(AstNode *node, Type *expected) {
     return;
 
   lit->as.number.kind = NUMBER_KIND_U8;
-  lit->as.number.as.u8 = (uint8_t)value;
+  lit->as.number.as.u64 = (uint8_t)value;
 }
 
 // Infer the type of an expression
@@ -854,15 +854,8 @@ static bool typchkConstantNumber(AstNode *node, double *value) {
     if (node->as.literal.kind != LITERAL_NUMBER)
       return false;
 
-    switch (node->as.literal.as.number.kind) {
-    case NUMBER_KIND_F64:
-      *value = node->as.literal.as.number.as.f64;
-      break;
-    case NUMBER_KIND_U8:
-      *value = node->as.literal.as.number.as.u8;
-      break;
-    }
-
+    *value = numberToDouble(node->as.literal.as.number.kind,
+                            node->as.literal.as.number.as);
     return true;
   case NODE_GROUPING:
     return typchkConstantNumber(node->as.grouping.inner, value);

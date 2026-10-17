@@ -66,10 +66,7 @@ typedef struct {
     bool boolean;
     struct {
       NumberKind kind;
-      union {
-        double f64;
-        uint8_t u8;
-      } as;
+      NumberPayload as;
       /**
        * A plain, unsuffixed integer literal, e.g. `42` -- as opposed to a
        * suffixed (`42f64`, `42u8`) or decimal (`1.5`) literal. Only plain

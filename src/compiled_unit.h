@@ -18,10 +18,7 @@ typedef struct {
   union {
     struct {
       NumberKind kind;
-      union {
-        double f64;
-        uint8_t u8;
-      } as;
+      NumberPayload as;
     } number;
 
     bool boolean;
