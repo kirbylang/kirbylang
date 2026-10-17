@@ -421,6 +421,14 @@ static void concatenate(void) {
   pushOnStack(OBJ_VAL(result));
 }
 
+static const char *checkArrayIndex(double index, int count) {
+  if (index != floor(index))
+    return "Array index must be a whole number.";
+  if (index < 0 || index >= count)
+    return "Array index out of bounds.";
+  return NULL;
+}
+
 static InterpretResult run(void) {
   CallFrame *frame = &vm.frames[vm.frameCount - 1];
 #define READ_BYTE() (*frame->ip++)
@@ -1043,12 +1051,14 @@ static InterpretResult run(void) {
 
       ObjArray *array = AS_ARRAY(arrayVal);
 
-      int i = AS_NUMBER_F64(index);
-
-      if (i < 0 || i >= array->count) {
-        runtimeError(&vm, "Array index out of bounds.");
+      const char *indexError =
+          checkArrayIndex(AS_NUMBER_F64(index), array->count);
+      if (indexError != NULL) {
+        runtimeError(&vm, "%s", indexError);
         return INTERPRET_RUNTIME_ERROR;
       }
+
+      int i = (int)AS_NUMBER_F64(index);
 
       pushOnStack(array->values[i]);
 
@@ -1071,12 +1081,14 @@ static InterpretResult run(void) {
 
       ObjArray *array = AS_ARRAY(arrayValue);
 
-      int i = AS_NUMBER_F64(index);
-
-      if (i < 0 || i >= array->count) {
-        runtimeError(&vm, "Array index out of bounds.");
+      const char *indexError =
+          checkArrayIndex(AS_NUMBER_F64(index), array->count);
+      if (indexError != NULL) {
+        runtimeError(&vm, "%s", indexError);
         return INTERPRET_RUNTIME_ERROR;
       }
+
+      int i = (int)AS_NUMBER_F64(index);
 
       array->values[i] = value;
 

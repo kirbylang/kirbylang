@@ -60,6 +60,9 @@
   - New native function: `@u8ToString(u8): string`
 - Add `as` keyword for casting between number types (`u8` <-> `f64`)
   - New opcode: `OP_CAST`
+- An array index that is not a whole number, such as `array[1.5]` or
+  `array[-0.5]`, is now a runtime error instead of being truncated to a whole
+  number
 
 ## 0.4.0
 
