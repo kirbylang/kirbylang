@@ -5,13 +5,14 @@
 #include <stdlib.h>
 #include <time.h>
 
-#include "ast.h"
 #include "asserts.h"
+#include "ast.h"
 #include "common.h"
 #include "debug.h"
 #include "gc.h"
 #include "loader.h"
 #include "native.h"
+#include "number_ops.h"
 #include "object.h"
 #include "string.h"
 #include "version.h"
@@ -429,6 +430,94 @@ static const char *checkArrayIndex(double index, int count) {
   return NULL;
 }
 
+#define NUMBERS_OF_SAME_TYPE "Operands must be two numbers of the same type."
+
+static bool sameNumberKind(Value a, Value b) {
+  return IS_NUMBER(a) && IS_NUMBER(b) && a.as.number.kind == b.as.number.kind;
+}
+
+static bool numberBinary(NumberOp op, const char *mismatchMessage) {
+  Value b = peekStack(0);
+  Value a = peekStack(1);
+
+  if (!sameNumberKind(a, b)) {
+    runtimeError(&vm, "%s", mismatchMessage);
+    return false;
+  }
+
+  NumberKind kind = a.as.number.kind;
+  bool isFloat = numberKindInfo(kind)->isFloat;
+
+  if (op == NUMBER_OP_DIVIDE || (op == NUMBER_OP_MODULO && !isFloat))
+    assertNonZeroNumber(&vm, op == NUMBER_OP_DIVIDE ? "/" : "%", b, 1);
+
+  popFromStack();
+  popFromStack();
+
+  NumberPayload result =
+      numberArithmetic(kind, op, a.as.number.as, b.as.number.as);
+  Value resultValue = numberValue(kind, result);
+  pushOnStack(resultValue);
+
+  return true;
+}
+
+static bool numberCompare(bool greater) {
+  Value b = peekStack(0);
+  Value a = peekStack(1);
+
+  if (!sameNumberKind(a, b)) {
+    runtimeError(&vm, NUMBERS_OF_SAME_TYPE);
+    return false;
+  }
+
+  NumberKind kind = a.as.number.kind;
+  bool result = greater
+                    ? numberOpLessThan(kind, b.as.number.as, a.as.number.as)
+                    : numberOpLessThan(kind, a.as.number.as, b.as.number.as);
+
+  popFromStack();
+  popFromStack();
+  pushOnStack(BOOL_VAL(result));
+  return true;
+}
+
+static bool castNumber(Value value, NumberKind target) {
+  NumberKind source = value.as.number.kind;
+  NumberPayload result;
+  NumberCastResult status =
+      numberCast(source, value.as.number.as, target, &result);
+
+  if (status != NUMBER_CAST_OK) {
+    char text[NUMBER_STRING_MAX];
+    formatNumber(source, value.as.number.as, text, sizeof(text));
+
+    if (numberKindInfo(target)->isFloat) {
+      runtimeError(&vm, "can't convert %s %s to %s, out of range.",
+                   numberKindInfo(source)->name, text,
+                   numberKindInfo(target)->name);
+    } else {
+      char min[NUMBER_STRING_MAX];
+      char max[NUMBER_STRING_MAX];
+
+      formatNumber(target, (NumberPayload){.i64 = numberKindMin(target)}, min,
+                   sizeof(min));
+      formatNumber(target, (NumberPayload){.u64 = numberKindMax(target)}, max,
+                   sizeof(max));
+
+      runtimeError(&vm,
+                   "can't convert %s %s to %s, expected an integer from %s "
+                   "to %s.",
+                   numberKindInfo(source)->name, text,
+                   numberKindInfo(target)->name, min, max);
+    }
+    return false;
+  }
+
+  pushOnStack(numberValue(target, result));
+  return true;
+}
+
 static InterpretResult run(void) {
   CallFrame *frame = &vm.frames[vm.frameCount - 1];
 #define READ_BYTE() (*frame->ip++)
@@ -437,25 +526,6 @@ static InterpretResult run(void) {
 #define READ_SHORT()                                                           \
   (frame->ip += 2, (uint16_t)((frame->ip[-2] << 8) | frame->ip[-1]))
 #define READ_STRING() AS_STRING(READ_CONSTANT())
-#define BINARY_OP(f64ValueType, u8ValueType, op)                               \
-  do {                                                                         \
-    if (IS_NUMBER_F64(peekStack(0)) && IS_NUMBER_F64(peekStack(1))) {          \
-      double b = AS_NUMBER_F64(popFromStack());                                \
-      double a = AS_NUMBER_F64(popFromStack());                                \
-      pushOnStack(f64ValueType(a op b));                                       \
-    } else if (IS_NUMBER_U8(peekStack(0)) && IS_NUMBER_U8(peekStack(1))) {     \
-      /* Integer promotion keeps a op b in int range; NUMBER_U8_VAL truncates  \
-         it to eight bits, so u8 arithmetic wraps mod 256. Comparisons keep    \
-         their unsigned semantics under promotion. */                          \
-      uint8_t b = AS_NUMBER_U8(popFromStack());                                \
-      uint8_t a = AS_NUMBER_U8(popFromStack());                                \
-      pushOnStack(u8ValueType(a op b));                                        \
-    } else {                                                                   \
-      runtimeError(&vm, "Operands must be two numbers of the same type.");     \
-      return INTERPRET_RUNTIME_ERROR;                                          \
-    }                                                                          \
-  } while (false)
-
   TRACELN("vm.run()");
 
   for (;;) {
@@ -498,70 +568,29 @@ static InterpretResult run(void) {
 
       if (IS_STRING(operand_b) && IS_STRING(operand_a)) {
         concatenate();
-      } else if (IS_NUMBER_F64(operand_b) && IS_NUMBER_F64(operand_a)) {
-        double b = AS_NUMBER_F64(popFromStack());
-        double a = AS_NUMBER_F64(popFromStack());
-
-        Value result = NUMBER_F64_VAL(a + b);
-
-        pushOnStack(result);
-      } else if (IS_NUMBER_U8(operand_b) && IS_NUMBER_U8(operand_a)) {
-        // Integer promotion makes a + b an int; NUMBER_U8_VAL truncates it
-        // to eight bits, so u8 addition wraps mod 256.
-        uint8_t b = AS_NUMBER_U8(popFromStack());
-        uint8_t a = AS_NUMBER_U8(popFromStack());
-
-        Value result = NUMBER_U8_VAL(a + b);
-
-        pushOnStack(result);
-      } else {
-        runtimeError(&vm, "Operands must be two numbers or two strings.");
+      } else if (!numberBinary(
+                     NUMBER_OP_ADD,
+                     "Operands must be two numbers or two strings.")) {
         return INTERPRET_RUNTIME_ERROR;
       }
       break;
     }
     case OP_SUBTRACT:
-      BINARY_OP(NUMBER_F64_VAL, NUMBER_U8_VAL, -);
+      if (!numberBinary(NUMBER_OP_SUBTRACT, NUMBERS_OF_SAME_TYPE))
+        return INTERPRET_RUNTIME_ERROR;
       break;
     case OP_MULTIPLY:
-      BINARY_OP(NUMBER_F64_VAL, NUMBER_U8_VAL, *);
-      break;
-    case OP_DIVIDE: {
-      if (IS_NUMBER_U8(peekStack(0))) {
-        assertNonZeroU8(&vm, "/", AS_NUMBER_U8(peekStack(0)), 1);
-      } else {
-        assertNonZero(&vm, "/", peekStack(0).as.number.as.f64, 1);
-      }
-      BINARY_OP(NUMBER_F64_VAL, NUMBER_U8_VAL, /);
-      break;
-    }
-    case OP_MODULO: {
-      if (IS_NUMBER_U8(peekStack(0))) {
-        // A zero divisor is undefined behavior for C integer modulo, so
-        // reject it before the op runs. f64 fmod(, 0) returns NaN instead.
-        assertNonZeroU8(&vm, "%", AS_NUMBER_U8(peekStack(0)), 1);
-      }
-
-      if (IS_NUMBER_F64(peekStack(0)) && IS_NUMBER_F64(peekStack(1))) {
-        double b = AS_NUMBER_F64(popFromStack());
-        double a = AS_NUMBER_F64(popFromStack());
-
-        Value result = NUMBER_F64_VAL(fmod(a, b));
-
-        pushOnStack(result);
-      } else if (IS_NUMBER_U8(peekStack(0)) && IS_NUMBER_U8(peekStack(1))) {
-        uint8_t b = AS_NUMBER_U8(popFromStack());
-        uint8_t a = AS_NUMBER_U8(popFromStack());
-
-        Value result = NUMBER_U8_VAL(a % b);
-
-        pushOnStack(result);
-      } else {
-        runtimeError(&vm, "Operands must be two numbers of the same type.");
+      if (!numberBinary(NUMBER_OP_MULTIPLY, NUMBERS_OF_SAME_TYPE))
         return INTERPRET_RUNTIME_ERROR;
-      }
       break;
-    }
+    case OP_DIVIDE:
+      if (!numberBinary(NUMBER_OP_DIVIDE, NUMBERS_OF_SAME_TYPE))
+        return INTERPRET_RUNTIME_ERROR;
+      break;
+    case OP_MODULO:
+      if (!numberBinary(NUMBER_OP_MODULO, NUMBERS_OF_SAME_TYPE))
+        return INTERPRET_RUNTIME_ERROR;
+      break;
     case OP_NOT: {
       Value result = BOOL_VAL(isFalsey(popFromStack()));
       pushOnStack(result);
@@ -570,14 +599,15 @@ static InterpretResult run(void) {
     case OP_NEGATE: {
       Value value = peekStack(0);
 
-      if (!IS_NUMBER_F64(value)) {
+      if (!IS_NUMBER(value)) {
         runtimeError(&vm, "Operand must be a number.");
         return INTERPRET_RUNTIME_ERROR;
       }
 
-      Value negated_value = NUMBER_F64_VAL(-AS_NUMBER_F64(popFromStack()));
-
-      pushOnStack(negated_value);
+      popFromStack();
+      pushOnStack(numberValue(
+          value.as.number.kind,
+          numberNegateValue(value.as.number.kind, value.as.number.as)));
 
       break;
     }
@@ -585,42 +615,18 @@ static InterpretResult run(void) {
       uint8_t target = READ_BYTE();
       Value value = popFromStack();
 
-      if (target == NUMBER_KIND_U8) {
-        // Narrowing conversion. A u8 holds only the integers 0 through 255,
-        // so an f64 is range-checked here and rejected if it can't be
-        // represented exactly.
-        if (IS_NUMBER_U8(value)) {
-          pushOnStack(value);
-        } else if (IS_NUMBER_F64(value)) {
-          double d = value.as.number.as.f64;
-          if (d != floor(d) || d < 0.0 || d > 255.0) {
-            runtimeError(
-                &vm,
-                "can't convert f64 %g to u8, expected an integer from 0 to "
-                "255.",
-                d);
-            return INTERPRET_RUNTIME_ERROR;
-          }
-          pushOnStack(NUMBER_U8_VAL((uint8_t)d));
-        } else {
-          runtimeError(&vm, "can't cast to u8.");
-          return INTERPRET_RUNTIME_ERROR;
-        }
-      } else if (target == NUMBER_KIND_F64) {
-        // Widening conversion. Every u8 fits exactly in an f64, so no check
-        // is needed.
-        if (IS_NUMBER_F64(value)) {
-          pushOnStack(value);
-        } else if (IS_NUMBER_U8(value)) {
-          pushOnStack(NUMBER_F64_VAL(AS_NUMBER_U8(value)));
-        } else {
-          runtimeError(&vm, "can't cast to f64.");
-          return INTERPRET_RUNTIME_ERROR;
-        }
-      } else {
+      if (target >= NUMBER_KIND_COUNT) {
         runtimeError(&vm, "Internal: unknown cast target %d.", target);
         return INTERPRET_RUNTIME_ERROR;
       }
+
+      if (!IS_NUMBER(value)) {
+        runtimeError(&vm, "can't cast a value that is not a number.");
+        return INTERPRET_RUNTIME_ERROR;
+      }
+
+      if (!castNumber(value, (NumberKind)target))
+        return INTERPRET_RUNTIME_ERROR;
       break;
     }
     case OP_PRINT: {
@@ -652,10 +658,12 @@ static InterpretResult run(void) {
       break;
     }
     case OP_GREATER:
-      BINARY_OP(BOOL_VAL, BOOL_VAL, >);
+      if (!numberCompare(true))
+        return INTERPRET_RUNTIME_ERROR;
       break;
     case OP_LESS:
-      BINARY_OP(BOOL_VAL, BOOL_VAL, <);
+      if (!numberCompare(false))
+        return INTERPRET_RUNTIME_ERROR;
       break;
     case OP_POP: {
       popFromStack();
@@ -1115,5 +1123,4 @@ static InterpretResult run(void) {
 #undef READ_SHORT
 #undef READ_CONSTANT
 #undef READ_STRING
-#undef BINARY_OP
 }

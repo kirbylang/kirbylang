@@ -3,6 +3,7 @@
 #include <stdlib.h>
 
 #include "asserts.h"
+#include "number_ops.h"
 #include "vm.h"
 
 void raiseError(VM *vm, const char *message) {
@@ -103,14 +104,24 @@ void assertNonZero(VM *vm, const char *function, double number, int index) {
   }
 }
 
-void assertNonZeroU8(VM *vm, const char *function, uint8_t number, int index) {
-  if (number == 0) {
-    runtimeError(
-        vm,
-        "function %s expects argument %d to be a non-zero number but got %u.",
-        function, index, (unsigned)number);
-    exit(EXIT_CODE_RUNTIME_ERR);
-  }
+void assertNonZeroNumber(VM *vm, const char *function, Value number,
+                         int index) {
+  NumberKind kind = number.as.number.kind;
+
+  if (!numberIsZero(kind, number.as.number.as))
+    return;
+
+  char text[NUMBER_STRING_MAX];
+
+  if (numberKindInfo(kind)->isFloat)
+    snprintf(text, sizeof(text), "%g", number.as.number.as.f64);
+  else
+    formatNumber(kind, number.as.number.as, text, sizeof(text));
+
+  runtimeError(
+      vm, "function %s expects argument %d to be a non-zero number but got %s.",
+      function, index, text);
+  exit(EXIT_CODE_RUNTIME_ERR);
 }
 
 void assertPositiveNumber(VM *vm, const char *function, double value,

@@ -78,6 +78,7 @@ set(KIRBY_SOURCES
     src/native.c
     src/native_signatures.c
     src/number_kind.c
+    src/number_ops.c
     src/object.c
     src/opcode.c
     src/packaged_program.c
@@ -242,6 +243,7 @@ set(KIRBY_RUNTIME_SOURCES
     src/loader.c
     src/native.c
     src/number_kind.c
+    src/number_ops.c
     src/object.c
     src/packaged_program.c
     src/stringset.c
@@ -478,6 +480,23 @@ if(BUILD_TESTS)
     add_test(
         NAME kirby-number-kind-unit-test
         COMMAND kirby-number-kind-unit-test
+    )
+
+    add_executable(kirby-number-ops-unit-test
+        unit/number_ops.c
+    )
+
+    target_link_libraries(kirby-number-ops-unit-test
+        PRIVATE
+            kirby_core_debug
+    )
+
+    configure_kirby_target(kirby-number-ops-unit-test)
+    enable_coverage(kirby-number-ops-unit-test)
+
+    add_test(
+        NAME kirby-number-ops-unit-test
+        COMMAND kirby-number-ops-unit-test
     )
 
     add_executable(kirby-token-unit-test
