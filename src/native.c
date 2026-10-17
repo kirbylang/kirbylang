@@ -468,6 +468,12 @@ static Value arrRemoveNative(VM *vm, int argCount, Value *args) {
 
   assertIsInArrayBounds(vm, array, index);
 
+  if (index == array->count) {
+    runtimeError(vm, "index %d out of bounds. array length: %d", index,
+                 array->count);
+    exit(EXIT_CODE_RUNTIME_ERR);
+  }
+
   Value removed = array->values[index];
 
   for (int i = index; i < array->count - 1; i++) {
