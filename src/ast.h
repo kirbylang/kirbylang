@@ -413,7 +413,6 @@ typedef enum {
   STRING_CONVERSION_UNDEFINED, // not yet chosen by the type checker
   STRING_CONVERSION_STRING,    // already a string
   STRING_CONVERSION_NUMBER,    // @numberToString
-  STRING_CONVERSION_U8,        // @u8ToString
   STRING_CONVERSION_BOOL,      // @boolToString
   STRING_CONVERSION_DISPLAY,   // toString(), from the type's Display impl
 } StringConversion;

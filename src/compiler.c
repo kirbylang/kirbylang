@@ -751,9 +751,6 @@ static void compileToString(AstNode *expr, StringConversion conversion) {
   case STRING_CONVERSION_NUMBER:
     compileNativeCall("@numberToString", expr);
     break;
-  case STRING_CONVERSION_U8:
-    compileNativeCall("@u8ToString", expr);
-    break;
   case STRING_CONVERSION_BOOL:
     compileNativeCall("@boolToString", expr);
     break;

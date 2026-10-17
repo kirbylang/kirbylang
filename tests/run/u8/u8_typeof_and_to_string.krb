@@ -1,2 +1,2 @@
 @println(@typeof(5u8));
-@println(@u8ToString(255u8));
+@println(@numberToString(255u8));

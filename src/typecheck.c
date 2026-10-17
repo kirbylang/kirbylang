@@ -512,7 +512,7 @@ bool typchkCheck(TypeEnv *env, AstNode *node, Type *expected) {
   if (expected == NULL)
     return true;
 
-  if (!typesEqual(actual, expected)) {
+  if (!typeAccepts(expected, actual)) {
     typchkErrorAtNodeFmt(node, "Expected %s, got %s.", typeToString(expected),
                          typeToString(actual));
     return false;
@@ -729,10 +729,8 @@ static Type *typchkInferCast(TypeEnv *env, AstNode *node) {
 static bool chooseStringConversion(Type *type, StringConversion *conversion) {
   if (typesEqual(type, typeString())) {
     *conversion = STRING_CONVERSION_STRING;
-  } else if (typesEqual(type, typeF64())) {
+  } else if (typeIsNumber(type)) {
     *conversion = STRING_CONVERSION_NUMBER;
-  } else if (typesEqual(type, typeU8())) {
-    *conversion = STRING_CONVERSION_U8;
   } else if (typesEqual(type, typeBool())) {
     *conversion = STRING_CONVERSION_BOOL;
   } else if (typeImplementsDisplay(type)) {

@@ -52,7 +52,7 @@ void *typesAllocRaw(size_t size) {
 static Type *unitSingleton = NULL;
 static Type *boolSingleton = NULL;
 static Type *stringSingleton = NULL;
-static Type *numberSingletons[NUMBER_KIND_COUNT];
+static Type *numberSingletons[NUMBER_KIND_COUNT + 1];
 static Type *selfPlaceholderSingleton = NULL;
 
 void typesFreeAll(void) {
@@ -139,11 +139,20 @@ Type *typeNumber(NumberKind kind) {
   return numberSingletons[kind];
 }
 
+Type *typeAnyNumber(void) { return typeNumber(NUMBER_KIND_COUNT); }
+
 Type *typeF64(void) { return typeNumber(NUMBER_KIND_F64); }
 
 Type *typeU8(void) { return typeNumber(NUMBER_KIND_U8); }
 
 bool typeIsNumber(const Type *type) { return type->kind == TYPE_NUMBER; }
+
+bool typeAccepts(const Type *expected, const Type *actual) {
+  if (expected == typeAnyNumber())
+    return typeIsNumber(actual);
+
+  return typesEqual(expected, actual);
+}
 
 Type *typeSelfPlaceholder(void) {
   if (selfPlaceholderSingleton == NULL)
@@ -556,7 +565,9 @@ static void appendTypeName(StrBuf *sb, Type *type) {
     sb_append(sb, "string");
     break;
   case TYPE_NUMBER:
-    sb_append(sb, numberKindInfo(type->as.number.kind)->name);
+    sb_append(sb, type->as.number.kind == NUMBER_KIND_COUNT
+                      ? "number"
+                      : numberKindInfo(type->as.number.kind)->name);
     break;
   case TYPE_STRUCT:
     sb_appendf(sb, "%.*s", type->as.struct_.name.length,

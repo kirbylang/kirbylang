@@ -62,10 +62,11 @@ void assertArgIsNumber(VM *vm, const char *function, Value *args, int index) {
   }
 }
 
-void assertArgIsU8(VM *vm, const char *function, Value *args, int index) {
-  if (!IS_NUMBER_U8(args[index])) {
-    runtimeError(vm, "function %s expects argument %d to be a u8.", function,
-                 index + 1);
+void assertArgIsAnyNumber(VM *vm, const char *function, Value *args,
+                          int index) {
+  if (!IS_NUMBER(args[index])) {
+    runtimeError(vm, "function %s expects argument %d to be a number.",
+                 function, index + 1);
     exit(EXIT_CODE_RUNTIME_ERR);
   }
 }

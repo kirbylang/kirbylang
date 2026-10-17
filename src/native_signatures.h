@@ -16,7 +16,7 @@ typedef enum {
   NATIVE_BOOL,
   NATIVE_STRING,
   NATIVE_F64,
-  NATIVE_U8,
+  NATIVE_NUMBER,
   NATIVE_LIST
 } NativePrimitive;
 
