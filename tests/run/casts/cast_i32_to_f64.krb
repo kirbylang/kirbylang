@@ -1,0 +1,7 @@
+// Casting an i32 to f64 is a widening conversion and is always exact.
+let a: i32 = 7;
+let value: f64 = a as f64;
+@println(value + 0.5);
+
+// Casting to the same type is allowed.
+@println(7i32 as i32);

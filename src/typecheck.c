@@ -715,7 +715,7 @@ static Type *typchkInferCast(TypeEnv *env, AstNode *node) {
 
 /**
  * Chooses how a value of this type becomes a string. Returns false when it
- * can't: only strings, f64, u8, bool, and types that implement Display can.
+ * can't: only strings, numbers, bool, and types that implement Display can.
  */
 static bool chooseStringConversion(Type *type, StringConversion *conversion) {
   if (typesEqual(type, typeString())) {
@@ -763,7 +763,7 @@ static Type *typchkInferInterpString(TypeEnv *env, AstNode *node) {
 
     if (!chooseStringConversion(type, &part->conversion)) {
       typchkErrorAtNodeFmt(part->expr,
-                           "Can't interpolate %s. Only string, f64, u8, bool, "
+                           "Can't interpolate %s. Only string, numbers, bool, "
                            "and types that implement Display can be "
                            "interpolated.",
                            typeToString(type));

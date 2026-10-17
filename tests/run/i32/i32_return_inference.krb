@@ -1,0 +1,5 @@
+fun answer(): i32 {
+    return 42;
+}
+
+@println(answer());

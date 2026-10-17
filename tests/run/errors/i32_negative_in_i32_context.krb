@@ -1,0 +1,3 @@
+// Unary minus only produces f64, so a negative literal cannot
+// be assigned to an i32.
+let x: i32 = -5;

@@ -44,11 +44,11 @@ static void test_sizes_and_signs(void) {
     bool isSigned;
     bool isFloat;
   } cases[] = {
-      {NUMBER_KIND_I64, 8, true, false}, {NUMBER_KIND_I32, 4, true, false},
-      {NUMBER_KIND_I16, 2, true, false}, {NUMBER_KIND_I8, 1, true, false},
+      {NUMBER_KIND_I64, 8, true, false},  {NUMBER_KIND_I32, 4, true, false},
+      {NUMBER_KIND_I16, 2, true, false},  {NUMBER_KIND_I8, 1, true, false},
       {NUMBER_KIND_U64, 8, false, false}, {NUMBER_KIND_U32, 4, false, false},
       {NUMBER_KIND_U16, 2, false, false}, {NUMBER_KIND_U8, 1, false, false},
-      {NUMBER_KIND_F64, 8, true, true}, {NUMBER_KIND_F32, 4, true, true},
+      {NUMBER_KIND_F64, 8, true, true},   {NUMBER_KIND_F32, 4, true, true},
   };
 
   assert(sizeof(cases) / sizeof(cases[0]) == NUMBER_KIND_COUNT);
@@ -63,7 +63,8 @@ static void test_sizes_and_signs(void) {
 
 static void test_supported_kinds(void) {
   for (int kind = 0; kind < NUMBER_KIND_COUNT; kind++) {
-    bool expected = kind == NUMBER_KIND_F64 || kind == NUMBER_KIND_U8;
+    bool expected = kind == NUMBER_KIND_F64 || kind == NUMBER_KIND_U8 ||
+                    kind == NUMBER_KIND_I32;
     assert(numberKindInfo((NumberKind)kind)->supported == expected);
   }
 }
@@ -72,8 +73,7 @@ static void test_number_to_double(void) {
   assert(numberToDouble(NUMBER_KIND_U8, (NumberPayload){.u64 = 200}) == 200.0);
   assert(numberToDouble(NUMBER_KIND_I32, (NumberPayload){.i64 = -5}) == -5.0);
   assert(numberToDouble(NUMBER_KIND_U64,
-                        (NumberPayload){.u64 = 4294967296ull}) ==
-         4294967296.0);
+                        (NumberPayload){.u64 = 4294967296ull}) == 4294967296.0);
   assert(numberToDouble(NUMBER_KIND_F64, (NumberPayload){.f64 = 1.5}) == 1.5);
 }
 
@@ -100,7 +100,8 @@ static void test_kind_from_name(void) {
   assert(numberKindFromName("f64", 3, &kind) && kind == NUMBER_KIND_F64);
   assert(numberKindFromName("u8x", 2, &kind) && kind == NUMBER_KIND_U8);
   assert(!numberKindFromName("u8x", 3, &kind));
-  assert(!numberKindFromName("i32", 3, &kind));
+  assert(numberKindFromName("i32", 3, &kind) && kind == NUMBER_KIND_I32);
+  assert(!numberKindFromName("i16", 3, &kind));
   assert(!numberKindFromName("u", 1, &kind));
 }
 

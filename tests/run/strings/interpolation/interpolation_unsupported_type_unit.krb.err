@@ -1,1 +1,1 @@
-[line 1] Error: Can't interpolate unit. Only string, f64, u8, bool, and types that implement Display can be interpolated.
+[line 1] Error: Can't interpolate unit. Only string, numbers, bool, and types that implement Display can be interpolated.

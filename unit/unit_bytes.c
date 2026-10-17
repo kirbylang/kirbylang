@@ -85,6 +85,15 @@ static CompiledUnit *newSampleUnit(void) {
                                 .as.string = {.offset = odd, .length = 4}});
   cuAddConstant(script, (CompiledConst){.kind = CONST_FUNCTION,
                                         .as.functionIndex = addIndex});
+  cuAddConstant(script, (CompiledConst){.kind = CONST_NUMBER,
+                                        .as.number = {.kind = NUMBER_KIND_I32,
+                                                      .as.i64 = -1}});
+  cuAddConstant(script, (CompiledConst){.kind = CONST_NUMBER,
+                                        .as.number = {.kind = NUMBER_KIND_I32,
+                                                      .as.i64 = INT32_MIN}});
+  cuAddConstant(script, (CompiledConst){.kind = CONST_NUMBER,
+                                        .as.number = {.kind = NUMBER_KIND_I32,
+                                                      .as.i64 = INT32_MAX}});
 
   CompiledFn *addFn = cuGetFnByIndex(unit, addIndex);
   addFn->arity = 2;
@@ -406,8 +415,7 @@ static void testRejectsUnknownConstantKind(void) {
 
 static void testRejectsUnknownNumberKind(void) {
   CompiledUnit *original = newSampleUnit();
-  cuGetFnByIndex(original, 0)->constants[0].as.number.kind =
-      (NumberKind)99;
+  cuGetFnByIndex(original, 0)->constants[0].as.number.kind = (NumberKind)99;
 
   StrBuf bytes = encode(original);
   assertRejected(&bytes, UNIT_DECODE_INVALID);

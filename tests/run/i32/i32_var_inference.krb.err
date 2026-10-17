@@ -1,0 +1,15 @@
+== <script> ==
+0000    1 OP_CONSTANT         1 '123'
+0002    | OP_DEFINE_GLOBAL    0 'a'
+0004    2 OP_CONSTANT         3 '2147483647'
+0006    | OP_DEFINE_GLOBAL    2 'max'
+0008    3 OP_GET_GLOBAL       4 '@println'
+0010    | OP_GET_GLOBAL       0 'a'
+0012    | OP_CALL             1
+0014    | OP_POP
+0015    4 OP_GET_GLOBAL       4 '@println'
+0017    | OP_GET_GLOBAL       2 'max'
+0019    | OP_CALL             1
+0021    | OP_POP
+0022    5 OP_NIL
+0023    | OP_RETURN

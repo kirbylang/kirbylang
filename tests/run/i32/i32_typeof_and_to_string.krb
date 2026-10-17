@@ -1,0 +1,2 @@
+@println(@typeof(5i32));
+@println(@numberToString(2147483647i32));

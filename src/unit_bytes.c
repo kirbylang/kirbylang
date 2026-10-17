@@ -74,6 +74,9 @@ static void encodeConstant(StrBuf *out, const CompiledConst *constant) {
     // Floats are stored as a double; integers use their own size.
     putU8(out, (uint8_t)constant->as.number.kind);
 
+    if (constant->as.number.kind >= NUMBER_KIND_COUNT)
+      break;
+
     const NumberKindInfo *info = numberKindInfo(constant->as.number.kind);
     if (info->isFloat)
       putDouble(out, constant->as.number.as.f64);

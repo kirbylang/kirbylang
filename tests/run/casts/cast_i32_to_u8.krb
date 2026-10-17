@@ -1,0 +1,4 @@
+// An i32 can only be cast to a u8 if it fits in 0 to 255.
+let a: i32 = 255;
+let byte: u8 = a as u8;
+@println(byte);

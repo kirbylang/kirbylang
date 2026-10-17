@@ -32,6 +32,7 @@ let greeting: string = "Hello World";
 | `string` |                   `"Hello World"` |                                                    |
 | `f64`    |               `123f64`, `123.456` | The `f64` suffix is optional                       |
 | `u8`     |                  `123u8`, `255U8` |                                                    |
+| `i32`    |                  `123i32`, `7I32` | Signed 32-bit integer                              |
 | `unit`   |                              `()` |                                                    |
 | `bool`   |                   `true`, `false` |                                                    |
 | `Array`  | `[1, 2, 3]`, `["Hello", "World"]` | A dynamically sized collection of homonogous types |
@@ -46,12 +47,17 @@ let value: f64 = 42.0;
 let byte: u8 = value as u8;
 
 let widened: f64 = byte as f64;
+let int: i32 = value as i32;
 ```
 
 | From  | To    | ...                |
 | ----- | ----- | ------------------ |
 | `u8`  | `f64` | Always exact       |
+| `u8`  | `i32` | Always exact       |
 | `f64` | `u8`  | Checked at runtime |
+| `f64` | `i32` | Checked at runtime |
+| `i32` | `f64` | Always exact       |
+| `i32` | `u8`  | Checked at runtime |
 
 ```krb
 let too_big: f64 = 300.0;
