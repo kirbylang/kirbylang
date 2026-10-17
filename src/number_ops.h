@@ -19,8 +19,9 @@ typedef enum {
 
 bool numberIsZero(NumberKind kind, NumberPayload value);
 
-// Integers wrap on overflow and divide toward zero. The caller must reject a
-// zero integer divisor first.
+// Perform arithmetic on number kinds
+//
+// The caller must reject a zero integer divisor first.
 NumberPayload numberArithmetic(NumberKind kind, NumberOp op, NumberPayload a,
                                NumberPayload b);
 
@@ -28,8 +29,7 @@ NumberPayload numberNegateValue(NumberKind kind, NumberPayload value);
 
 bool numberOpLessThan(NumberKind kind, NumberPayload a, NumberPayload b);
 
-// Floats must be whole and in range to become integers, and integers must be
-// in range. Converting to a float rounds, and fails only on overflow.
+// Cast from one number kind to another
 NumberCastResult numberCast(NumberKind from, NumberPayload value, NumberKind to,
                             NumberPayload *result);
 
