@@ -75,7 +75,7 @@ typedef struct {
       bool literalIsPlainInteger;
       /**
        * For a plain integer literal, its exact value, unless it does not fit
-       * in 64 bits (`integerFits` is false).
+       * in 64 bits (`literalValueFits` is false).
        */
       uint64_t literalValue;
       bool literalValueFits;
