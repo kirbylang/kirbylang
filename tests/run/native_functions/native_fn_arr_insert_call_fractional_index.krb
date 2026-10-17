@@ -1,0 +1,3 @@
+var array = [1, 2];
+
+@arrInsert(array, 0.5, 3);

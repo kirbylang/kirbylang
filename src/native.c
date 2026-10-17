@@ -442,6 +442,7 @@ static Value arrInsertNative(VM *vm, int argCount, Value *args) {
   assertArgIsNumber(vm, "@arrInsert", args, 1);
 
   ObjArray *array = AS_ARRAY(args[0]);
+  assertWholeNumber(vm, "@arrInsert", AS_NUMBER_F64(args[1]), 1);
   int index = (int)AS_NUMBER_F64(args[1]);
   Value value = args[2];
 
@@ -464,6 +465,7 @@ static Value arrRemoveNative(VM *vm, int argCount, Value *args) {
   assertArgIsNumber(vm, "@arrRemove", args, 1);
 
   ObjArray *array = AS_ARRAY(args[0]);
+  assertWholeNumber(vm, "@arrRemove", AS_NUMBER_F64(args[1]), 1);
   int index = (int)AS_NUMBER_F64(args[1]);
 
   assertIsInArrayBounds(vm, array, index);
@@ -588,10 +590,12 @@ static Value arrSliceNative(VM *vm, int argCount, Value *args) {
 
   double start = AS_NUMBER_F64(args[1]);
   assertPositiveNumber(vm, "@arrSlice", start, 1);
+  assertWholeNumber(vm, "@arrSlice", start, 1);
   assertIsInArrayBounds(vm, array, start);
 
   double end = AS_NUMBER_F64(args[2]);
   assertPositiveNumber(vm, "@arrSlice", end, 2);
+  assertWholeNumber(vm, "@arrSlice", end, 2);
   assertIsInArrayBounds(vm, array, end);
 
   if (start >= end) {
@@ -858,6 +862,7 @@ static Value argvNative(VM *vm, int argCount, Value *args) {
 
   Value index = args[0];
 
+  assertWholeNumber(vm, "@argv", AS_NUMBER_F64(index), 0);
   int idx = (int)AS_NUMBER_F64(index);
   if (idx < 0 || idx >= vm->argc) {
     return NIL_VAL;
