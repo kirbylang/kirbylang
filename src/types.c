@@ -396,7 +396,7 @@ bool typeStructHasUnresolvedMembers(Type *type) {
          type->as.struct_.hasUnresolvedMembers;
 }
 
-bool typesEqual(Type *a, Type *b) {
+bool typesEqual(const Type *a, const Type *b) {
   if (a == b)
     return true;
   if (a == NULL || b == NULL)
