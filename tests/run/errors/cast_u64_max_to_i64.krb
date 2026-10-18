@@ -1,0 +1,2 @@
+let max: u64 = 18446744073709551615;
+@println(max as i64);

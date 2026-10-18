@@ -33,6 +33,8 @@ let greeting: string = "Hello World";
 | `f64`    |               `123f64`, `123.456` | The `f64` suffix is optional                       |
 | `u8`     |                  `123u8`, `255U8` |                                                    |
 | `i32`    |                  `123i32`, `7I32` | Signed 32-bit integer                              |
+| `i64`    |                          `123i64` | Signed 64-bit integer                              |
+| `u64`    |                          `123u64` | Unsigned 64-bit integer                            |
 | `unit`   |                              `()` |                                                    |
 | `bool`   |                   `true`, `false` |                                                    |
 | `Array`  | `[1, 2, 3]`, `["Hello", "World"]` | A dynamically sized collection of homonogous types |
@@ -50,14 +52,12 @@ let widened: f64 = byte as f64;
 let int: i32 = value as i32;
 ```
 
-| From  | To    | ...                |
-| ----- | ----- | ------------------ |
-| `u8`  | `f64` | Always exact       |
-| `u8`  | `i32` | Always exact       |
-| `f64` | `u8`  | Checked at runtime |
-| `f64` | `i32` | Checked at runtime |
-| `i32` | `f64` | Always exact       |
-| `i32` | `u8`  | Checked at runtime |
+| From          | To         | Result                                                            |
+| ------------- | ---------- | ----------------------------------------------------------------- |
+| a float       | an integer | Must be a whole number in the integer's range. Checked at runtime |
+| an integer    | an integer | Must fit in the target. Checked at runtime                        |
+| an integer    | a float    | Rounded to the nearest float. Exact when it fits the float        |
+| the same type | itself     | Unchanged                                                         |
 
 ```krb
 let too_big: f64 = 300.0;

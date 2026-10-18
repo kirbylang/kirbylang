@@ -1,0 +1,2 @@
+let zero: u64 = 0;
+@println(1u64 % zero);

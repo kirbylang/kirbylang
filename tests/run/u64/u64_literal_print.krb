@@ -1,0 +1,6 @@
+@println(18446744073709551615u64);
+@println(0u64);
+let big: u64 = 18446744073709551615;
+@println(big);
+let mid: u64 = 9007199254740993;
+@println(mid);

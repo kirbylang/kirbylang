@@ -1,0 +1,2 @@
+let big: u64 = 256;
+@println(big as u8);

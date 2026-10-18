@@ -64,7 +64,8 @@ static void test_sizes_and_signs(void) {
 static void test_supported_kinds(void) {
   for (int kind = 0; kind < NUMBER_KIND_COUNT; kind++) {
     bool expected = kind == NUMBER_KIND_F64 || kind == NUMBER_KIND_U8 ||
-                    kind == NUMBER_KIND_I32;
+                    kind == NUMBER_KIND_I32 ||
+                    kind == NUMBER_KIND_I64 || kind == NUMBER_KIND_U64;
     assert(numberKindInfo((NumberKind)kind)->supported == expected);
   }
 }
@@ -101,6 +102,8 @@ static void test_kind_from_name(void) {
   assert(numberKindFromName("u8x", 2, &kind) && kind == NUMBER_KIND_U8);
   assert(!numberKindFromName("u8x", 3, &kind));
   assert(numberKindFromName("i32", 3, &kind) && kind == NUMBER_KIND_I32);
+  assert(numberKindFromName("i64", 3, &kind) && kind == NUMBER_KIND_I64);
+  assert(numberKindFromName("u64", 3, &kind) && kind == NUMBER_KIND_U64);
   assert(!numberKindFromName("i16", 3, &kind));
   assert(!numberKindFromName("u", 1, &kind));
 }
