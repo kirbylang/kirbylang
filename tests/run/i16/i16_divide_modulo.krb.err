@@ -1,0 +1,57 @@
+== <script> ==
+0000    1 OP_GET_GLOBAL       0 '@println'
+0002    | OP_CONSTANT         1 '32767'
+0004    | OP_CONSTANT         2 '7'
+0006    | OP_DIVIDE
+0007    | OP_CALL             1
+0009    | OP_POP
+0010    2 OP_GET_GLOBAL       0 '@println'
+0012    | OP_CONSTANT         1 '32767'
+0014    | OP_CONSTANT         2 '7'
+0016    | OP_MODULO
+0017    | OP_CALL             1
+0019    | OP_POP
+0020    3 OP_CONSTANT         4 '-32768'
+0022    | OP_DEFINE_GLOBAL    3 'min'
+0024    4 OP_CONSTANT         6 '-1'
+0026    | OP_DEFINE_GLOBAL    5 'negOne'
+0028    5 OP_CONSTANT         8 '-2'
+0030    | OP_DEFINE_GLOBAL    7 'negTwo'
+0032    6 OP_GET_GLOBAL       0 '@println'
+0034    | OP_GET_GLOBAL       3 'min'
+0036    | OP_GET_GLOBAL       5 'negOne'
+0038    | OP_DIVIDE
+0039    | OP_CALL             1
+0041    | OP_POP
+0042    7 OP_GET_GLOBAL       0 '@println'
+0044    | OP_GET_GLOBAL       3 'min'
+0046    | OP_GET_GLOBAL       5 'negOne'
+0048    | OP_MODULO
+0049    | OP_CALL             1
+0051    | OP_POP
+0052    8 OP_GET_GLOBAL       0 '@println'
+0054    | OP_CONSTANT         2 '7'
+0056    | OP_GET_GLOBAL       7 'negTwo'
+0058    | OP_DIVIDE
+0059    | OP_CALL             1
+0061    | OP_POP
+0062    9 OP_GET_GLOBAL       0 '@println'
+0064    | OP_CONSTANT         2 '7'
+0066    | OP_GET_GLOBAL       7 'negTwo'
+0068    | OP_MODULO
+0069    | OP_CALL             1
+0071    | OP_POP
+0072   10 OP_GET_GLOBAL       0 '@println'
+0074    | OP_GET_GLOBAL       7 'negTwo'
+0076    | OP_CONSTANT         9 '3'
+0078    | OP_DIVIDE
+0079    | OP_CALL             1
+0081    | OP_POP
+0082   11 OP_GET_GLOBAL       0 '@println'
+0084    | OP_GET_GLOBAL       7 'negTwo'
+0086    | OP_CONSTANT         9 '3'
+0088    | OP_MODULO
+0089    | OP_CALL             1
+0091    | OP_POP
+0092   12 OP_NIL
+0093    | OP_RETURN

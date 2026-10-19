@@ -1,0 +1,9 @@
+let max: i16 = 32767;
+@println(max > 1i16);
+@println(1i16 > max);
+@println(max < 1i16);
+@println(max >= max);
+@println(max == 32767i16);
+let min: i16 = -32768;
+@println(min < max);
+@println(min > 0i16);

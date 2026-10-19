@@ -1,0 +1,2 @@
+let big: i64 = 32768;
+@println(big as i16);
