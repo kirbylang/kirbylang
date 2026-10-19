@@ -1,0 +1,11 @@
+@println(32767i16 as f64);
+@println(32767.0 as i16);
+@println(7i16 as u8);
+@println(7u8 as i16);
+@println(7i16 as i64);
+@println(7i64 as i16);
+@println(7i16 as f64);
+@println(-32768.0 as i16);
+@println((-5) as i16);
+let n: i16 = -5;
+@println(n as i64);

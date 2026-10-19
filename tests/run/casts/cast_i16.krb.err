@@ -1,0 +1,57 @@
+== <script> ==
+0000    1 OP_GET_GLOBAL       0 '@println'
+0002    | OP_CONSTANT         1 '32767'
+0004    | OP_CAST          f64
+0006    | OP_CALL             1
+0008    | OP_POP
+0009    2 OP_GET_GLOBAL       0 '@println'
+0011    | OP_CONSTANT         2 '32767'
+0013    | OP_CAST          i16
+0015    | OP_CALL             1
+0017    | OP_POP
+0018    3 OP_GET_GLOBAL       0 '@println'
+0020    | OP_CONSTANT         3 '7'
+0022    | OP_CAST          u8
+0024    | OP_CALL             1
+0026    | OP_POP
+0027    4 OP_GET_GLOBAL       0 '@println'
+0029    | OP_CONSTANT         4 '7'
+0031    | OP_CAST          i16
+0033    | OP_CALL             1
+0035    | OP_POP
+0036    5 OP_GET_GLOBAL       0 '@println'
+0038    | OP_CONSTANT         3 '7'
+0040    | OP_CAST          i64
+0042    | OP_CALL             1
+0044    | OP_POP
+0045    6 OP_GET_GLOBAL       0 '@println'
+0047    | OP_CONSTANT         5 '7'
+0049    | OP_CAST          i16
+0051    | OP_CALL             1
+0053    | OP_POP
+0054    7 OP_GET_GLOBAL       0 '@println'
+0056    | OP_CONSTANT         3 '7'
+0058    | OP_CAST          f64
+0060    | OP_CALL             1
+0062    | OP_POP
+0063    8 OP_GET_GLOBAL       0 '@println'
+0065    | OP_CONSTANT         6 '32768'
+0067    | OP_NEGATE
+0068    | OP_CAST          i16
+0070    | OP_CALL             1
+0072    | OP_POP
+0073    9 OP_GET_GLOBAL       0 '@println'
+0075    | OP_CONSTANT         7 '5'
+0077    | OP_NEGATE
+0078    | OP_CAST          i16
+0080    | OP_CALL             1
+0082    | OP_POP
+0083   10 OP_CONSTANT         9 '-5'
+0085    | OP_DEFINE_GLOBAL    8 'n'
+0087   11 OP_GET_GLOBAL       0 '@println'
+0089    | OP_GET_GLOBAL       8 'n'
+0091    | OP_CAST          i64
+0093    | OP_CALL             1
+0095    | OP_POP
+0096   12 OP_NIL
+0097    | OP_RETURN

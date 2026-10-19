@@ -1,0 +1,7 @@
+@println(32767i16);
+@println(1i16);
+@println(0i16);
+let big: i16 = 32767;
+@println(big);
+let min: i16 = -32768;
+@println(min);

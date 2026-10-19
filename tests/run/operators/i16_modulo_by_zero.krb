@@ -1,0 +1,2 @@
+let zero: i16 = 0;
+@println(1i16 % zero);
