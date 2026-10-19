@@ -35,7 +35,6 @@ typedef struct {
   int size;      // in bytes
   bool isSigned; // can hold negative numbers, which includes floats
   bool isFloat;
-  bool supported; // usable in programs
 } NumberKindInfo;
 
 const NumberKindInfo *numberKindInfo(NumberKind kind);

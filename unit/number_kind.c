@@ -61,23 +61,6 @@ static void test_sizes_and_signs(void) {
   }
 }
 
-static void test_supported_kinds(void) {
-  bool supportedKinds[NUMBER_KIND_COUNT] = {
-      [NUMBER_KIND_F64] = true, [NUMBER_KIND_U8] = true,
-      [NUMBER_KIND_I32] = true, [NUMBER_KIND_I64] = true,
-      [NUMBER_KIND_U64] = true,
-      [NUMBER_KIND_U16] = true,
-      [NUMBER_KIND_U32] = true,
-      [NUMBER_KIND_I8] = true,
-      [NUMBER_KIND_I16] = true,
-      [NUMBER_KIND_F32] = true,
-  };
-
-  for (int kind = 0; kind < NUMBER_KIND_COUNT; kind++) {
-    assert(numberKindInfo((NumberKind)kind)->supported == supportedKinds[kind]);
-  }
-}
-
 static void test_number_to_double(void) {
   assert(numberToDouble(NUMBER_KIND_U8, (NumberPayload){.u64 = 200}) == 200.0);
   assert(numberToDouble(NUMBER_KIND_I32, (NumberPayload){.i64 = -5}) == -5.0);
@@ -109,6 +92,7 @@ static void test_kind_from_name(void) {
   assert(numberKindFromName("f64", 3, &kind) && kind == NUMBER_KIND_F64);
   assert(numberKindFromName("u8x", 2, &kind) && kind == NUMBER_KIND_U8);
   assert(!numberKindFromName("u8x", 3, &kind));
+  assert(!numberKindFromName("i128", 4, &kind));
   assert(numberKindFromName("i32", 3, &kind) && kind == NUMBER_KIND_I32);
   assert(numberKindFromName("i64", 3, &kind) && kind == NUMBER_KIND_I64);
   assert(numberKindFromName("u64", 3, &kind) && kind == NUMBER_KIND_U64);
@@ -127,7 +111,6 @@ int main(void) {
   test_numbers_are_fixed();
   test_every_kind_has_a_name();
   test_sizes_and_signs();
-  test_supported_kinds();
   test_number_to_double();
   return 0;
 }

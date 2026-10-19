@@ -342,9 +342,6 @@ static int numberSuffixLength(Scanner *scanner) {
   for (int kind = 0; kind < NUMBER_KIND_COUNT; kind++) {
     const NumberKindInfo *info = numberKindInfo((NumberKind)kind);
 
-    if (!info->supported)
-      continue;
-
     int length = (int)strlen(info->name);
     bool matches = true;
 

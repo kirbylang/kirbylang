@@ -283,8 +283,7 @@ static void readConstant(Reader *reader, const CompiledUnit *unit,
   case CONST_NUMBER: {
     uint8_t numberKind = readU8(reader);
 
-    if (numberKind >= NUMBER_KIND_COUNT ||
-        !numberKindInfo((NumberKind)numberKind)->supported) {
+    if (numberKind >= NUMBER_KIND_COUNT) {
       fail(reader, UNIT_DECODE_INVALID);
       break;
     }
