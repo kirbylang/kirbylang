@@ -116,7 +116,7 @@ typedef struct {
   /**
    * The target's number kind, set by the type checker because the compiler
    * has no types. Valid for casts the type checker accepted, which are
-   * always to a supported number kind.
+   * always to a number kind.
    */
   NumberKind target;
 } CastNode;
