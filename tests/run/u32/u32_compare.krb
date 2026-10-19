@@ -1,0 +1,6 @@
+let max: u32 = 4294967295;
+@println(max > 1u32);
+@println(1u32 > max);
+@println(max < 1u32);
+@println(max >= max);
+@println(max == 4294967295u32);

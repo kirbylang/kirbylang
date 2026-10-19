@@ -1,0 +1,2 @@
+let zero: u32 = 0;
+@println(1u32 / zero);

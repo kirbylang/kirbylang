@@ -1,0 +1,5 @@
+let max: u32 = 4294967295;
+@println(max + 1u32);
+@println(max + max);
+@println(0u32 - 1u32);
+@println(2147483648u32 * 2u32);
