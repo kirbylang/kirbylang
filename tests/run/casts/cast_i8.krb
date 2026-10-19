@@ -1,0 +1,11 @@
+@println(127i8 as f64);
+@println(127.0 as i8);
+@println(7i8 as u8);
+@println(7u8 as i8);
+@println(7i8 as i64);
+@println(7i64 as i8);
+@println(7i8 as f64);
+@println(-128.0 as i8);
+@println((-5) as i8);
+let n: i8 = -5;
+@println(n as i64);

@@ -37,6 +37,7 @@ let greeting: string = "Hello World";
 | `u64`    |                          `123u64` | Unsigned 64-bit integer                            |
 | `u16`    |                          `123u16` | Unsigned 16-bit integer                            |
 | `u32`    |                          `123u32` | Unsigned 32-bit integer                            |
+| `i8`     |                           `123i8` | Signed 8-bit integer                               |
 | `unit`   |                              `()` |                                                    |
 | `bool`   |                   `true`, `false` |                                                    |
 | `Array`  | `[1, 2, 3]`, `["Hello", "World"]` | A dynamically sized collection of homonogous types |

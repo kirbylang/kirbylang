@@ -1,0 +1,7 @@
+@println(127i8);
+@println(1i8);
+@println(0i8);
+let big: i8 = 127;
+@println(big);
+let min: i8 = -128;
+@println(min);
