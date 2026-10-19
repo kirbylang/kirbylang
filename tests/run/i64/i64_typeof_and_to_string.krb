@@ -1,0 +1,4 @@
+@println(@typeof(1i64));
+let min: i64 = -9223372036854775808;
+@println(@numberToString(min));
+@println($"{min} {9223372036854775807i64}");

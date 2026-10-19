@@ -1,0 +1,8 @@
+let min: i64 = -9223372036854775808;
+let max: i64 = 9223372036854775807;
+@println(min < max);
+@println(max < min);
+@println(max > min);
+@println(min >= min);
+@println(max == 9223372036854775807i64);
+@println(min == max);

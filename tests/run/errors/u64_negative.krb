@@ -1,0 +1,2 @@
+let x: u64 = 5;
+@println(-x);

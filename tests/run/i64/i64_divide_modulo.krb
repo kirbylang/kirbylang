@@ -1,0 +1,10 @@
+let min: i64 = -9223372036854775808;
+let negOne: i64 = -1;
+let negTwo: i64 = -2;
+@println(min / negOne);
+@println(min % negOne);
+@println(7i64 / negTwo);
+@println(7i64 % negTwo);
+@println(negTwo / 3i64);
+@println(negTwo % 3i64);
+@println(9223372036854775807i64 / 1000i64);

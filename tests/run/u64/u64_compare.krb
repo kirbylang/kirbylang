@@ -1,0 +1,6 @@
+let max: u64 = 18446744073709551615;
+@println(max > 1u64);
+@println(1u64 > max);
+@println(max < 1u64);
+@println(max >= max);
+@println(max == 18446744073709551615u64);

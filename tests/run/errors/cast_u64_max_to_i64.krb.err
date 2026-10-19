@@ -1,0 +1,12 @@
+== <script> ==
+0000    1 OP_CONSTANT         1 '18446744073709551615'
+0002    | OP_DEFINE_GLOBAL    0 'max'
+0004    2 OP_GET_GLOBAL       2 '@println'
+0006    | OP_GET_GLOBAL       0 'max'
+0008    | OP_CAST          i64
+0010    | OP_CALL             1
+0012    | OP_POP
+0013    3 OP_NIL
+0014    | OP_RETURN
+can't convert u64 18446744073709551615 to i64, expected an integer from -9223372036854775808 to 9223372036854775807.
+[line 2] in script
