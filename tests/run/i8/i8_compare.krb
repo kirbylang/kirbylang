@@ -1,0 +1,9 @@
+let max: i8 = 127;
+@println(max > 1i8);
+@println(1i8 > max);
+@println(max < 1i8);
+@println(max >= max);
+@println(max == 127i8);
+let min: i8 = -128;
+@println(min < max);
+@println(min > 0i8);

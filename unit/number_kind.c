@@ -68,6 +68,7 @@ static void test_supported_kinds(void) {
       [NUMBER_KIND_U64] = true,
       [NUMBER_KIND_U16] = true,
       [NUMBER_KIND_U32] = true,
+      [NUMBER_KIND_I8] = true,
   };
 
   for (int kind = 0; kind < NUMBER_KIND_COUNT; kind++) {
@@ -110,6 +111,7 @@ static void test_kind_from_name(void) {
   assert(numberKindFromName("i64", 3, &kind) && kind == NUMBER_KIND_I64);
   assert(numberKindFromName("u64", 3, &kind) && kind == NUMBER_KIND_U64);
   assert(numberKindFromName("u16", 3, &kind) && kind == NUMBER_KIND_U16);
+  assert(numberKindFromName("i8", 2, &kind) && kind == NUMBER_KIND_I8);
   assert(numberKindFromName("u32", 3, &kind) && kind == NUMBER_KIND_U32);
   assert(!numberKindFromName("i16", 3, &kind));
   assert(!numberKindFromName("u", 1, &kind));

@@ -1,0 +1,7 @@
+let max: i8 = 127;
+@println(max + 1i8);
+@println(max + max);
+@println(0i8 - 1i8);
+@println(64i8 * 2i8);
+let min: i8 = -128;
+@println(min - 1i8);
