@@ -1,0 +1,6 @@
+let max: u16 = 65535;
+@println(max > 1u16);
+@println(1u16 > max);
+@println(max < 1u16);
+@println(max >= max);
+@println(max == 65535u16);
