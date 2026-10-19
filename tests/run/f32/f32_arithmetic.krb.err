@@ -1,0 +1,51 @@
+== <script> ==
+0000    1 OP_GET_GLOBAL       0 '@println'
+0002    | OP_CONSTANT         1 '16777216'
+0004    | OP_CONSTANT         2 '1'
+0006    | OP_ADD
+0007    | OP_CALL             1
+0009    | OP_POP
+0010    2 OP_GET_GLOBAL       0 '@println'
+0012    | OP_CONSTANT         3 '0.1'
+0014    | OP_CONSTANT         4 '0.2'
+0016    | OP_ADD
+0017    | OP_CALL             1
+0019    | OP_POP
+0020    3 OP_GET_GLOBAL       0 '@println'
+0022    | OP_CONSTANT         3 '0.1'
+0024    | OP_CONSTANT         5 '3'
+0026    | OP_MULTIPLY
+0027    | OP_CALL             1
+0029    | OP_POP
+0030    4 OP_GET_GLOBAL       0 '@println'
+0032    | OP_CONSTANT         2 '1'
+0034    | OP_CONSTANT         5 '3'
+0036    | OP_DIVIDE
+0037    | OP_CALL             1
+0039    | OP_POP
+0040    5 OP_GET_GLOBAL       0 '@println'
+0042    | OP_CONSTANT         6 '10'
+0044    | OP_CONSTANT         3 '0.1'
+0046    | OP_SUBTRACT
+0047    | OP_CALL             1
+0049    | OP_POP
+0050    6 OP_GET_GLOBAL       0 '@println'
+0052    | OP_CONSTANT         7 '7.5'
+0054    | OP_CONSTANT         8 '2'
+0056    | OP_MODULO
+0057    | OP_CALL             1
+0059    | OP_POP
+0060    7 OP_GET_GLOBAL       0 '@println'
+0062    | OP_CONSTANT         9 '3.4028235e+38'
+0064    | OP_CONSTANT         8 '2'
+0066    | OP_MULTIPLY
+0067    | OP_CALL             1
+0069    | OP_POP
+0070    8 OP_GET_GLOBAL       0 '@println'
+0072    | OP_CONSTANT         2 '1'
+0074    | OP_CONSTANT        10 '0'
+0076    | OP_MODULO
+0077    | OP_CALL             1
+0079    | OP_POP
+0080    9 OP_NIL
+0081    | OP_RETURN

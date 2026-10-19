@@ -39,6 +39,7 @@ let greeting: string = "Hello World";
 | `u32`    |                          `123u32` | Unsigned 32-bit integer                            |
 | `i8`     |                           `123i8` | Signed 8-bit integer                               |
 | `i16`    |                          `123i16` | Signed 16-bit integer                              |
+| `f32`    |                `123f32`, `1.5f32` | 32-bit float. A decimal literal needs the suffix   |
 | `unit`   |                              `()` |                                                    |
 | `bool`   |                   `true`, `false` |                                                    |
 | `Array`  | `[1, 2, 3]`, `["Hello", "World"]` | A dynamically sized collection of homonogous types |

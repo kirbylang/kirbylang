@@ -1,4 +1,6 @@
 #include <errno.h>
+#include <float.h>
+#include <math.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -230,6 +232,17 @@ static void numberLiteralError(Parser *parser, NumberKind kind) {
   parse_error(parser, message);
 }
 
+static void floatLiteralError(Parser *parser, NumberKind kind) {
+  char max[NUMBER_STRING_MAX];
+  char message[128];
+
+  formatNumber(kind, (NumberPayload){.f64 = FLT_MAX}, max, sizeof(max));
+  snprintf(message, sizeof(message),
+           "invalid %s literal, expected a number up to %s.",
+           numberKindInfo(kind)->name, max);
+  parse_error(parser, message);
+}
+
 // A plain number is an integer that may be coerced to a kind that expects
 // one. A decimal point or a suffix is an explicit choice, so it never
 // coerces.
@@ -269,7 +282,16 @@ static AstNode *number(Parser *parser, bool canAssign) {
   node->as.literal.as.number.literalIsPlainInteger = plain && !hasPoint;
 
   if (numberKindInfo(kind)->isFloat) {
-    node->as.literal.as.number.as.f64 = strtod(text, NULL);
+    if (kind == NUMBER_KIND_F32) {
+      float single = strtof(text, NULL);
+
+      if (isinf(single))
+        floatLiteralError(parser, kind);
+
+      node->as.literal.as.number.as.f64 = single;
+    } else {
+      node->as.literal.as.number.as.f64 = strtod(text, NULL);
+    }
 
     if (node->as.literal.as.number.literalIsPlainInteger) {
       errno = 0;

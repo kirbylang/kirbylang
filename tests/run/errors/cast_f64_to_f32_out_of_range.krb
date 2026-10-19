@@ -1,0 +1,2 @@
+let big: f64 = @pow(10, 300);
+@println(big as f32);

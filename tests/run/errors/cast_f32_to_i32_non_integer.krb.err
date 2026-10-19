@@ -1,0 +1,10 @@
+== <script> ==
+0000    1 OP_GET_GLOBAL       0 '@println'
+0002    | OP_CONSTANT         1 '1.5'
+0004    | OP_CAST          i32
+0006    | OP_CALL             1
+0008    | OP_POP
+0009    2 OP_NIL
+0010    | OP_RETURN
+can't convert f32 1.5 to i32, expected an integer from -2147483648 to 2147483647.
+[line 1] in script

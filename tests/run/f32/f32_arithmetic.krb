@@ -1,0 +1,8 @@
+@println(16777216f32 + 1f32);
+@println(0.1f32 + 0.2f32);
+@println(0.1f32 * 3f32);
+@println(1f32 / 3f32);
+@println(10f32 - 0.1f32);
+@println(7.5f32 % 2f32);
+@println(340282350000000000000000000000000000000f32 * 2f32);
+@println(1f32 % 0f32);

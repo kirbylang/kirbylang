@@ -29,7 +29,8 @@ static const NumberKindInfo infos[] = {
     [NUMBER_KIND_F32] = {.name = "f32",
                          .size = 4,
                          .isSigned = true,
-                         .isFloat = true},
+                         .isFloat = true,
+                         .supported = true},
 };
 
 _Static_assert(sizeof(infos) / sizeof(infos[0]) == NUMBER_KIND_COUNT,
