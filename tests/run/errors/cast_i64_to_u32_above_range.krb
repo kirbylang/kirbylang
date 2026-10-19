@@ -1,0 +1,2 @@
+let big: i64 = 4294967296;
+@println(big as u32);
