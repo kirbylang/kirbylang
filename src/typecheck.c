@@ -394,6 +394,14 @@ static Type *typchkCheckOrInferLambda(TypeEnv *env, AstNode *node,
 static void typchkCheckVarDecl(TypeEnv *env, AstNode *node);
 static void typchkCheckFunctionDecl(TypeEnv *env, AstNode *node);
 
+// The largest integer a literal can be while still being exact in the kind.
+static uint64_t typchkLargestExactInteger(NumberKind kind) {
+  if (numberKindInfo(kind)->isFloat)
+    return (uint64_t)1 << 24;
+
+  return numberKindMax(kind);
+}
+
 // Where an integer kind is expected, a plain integer literal that fits the
 // kind is treated as a literal of that kind, so `let byte: u8 = 65;` and
 // `sum(1, 2)` don't need a suffix. Suffixed and decimal literals are an
@@ -405,7 +413,7 @@ static void typchkCoerceIntegerLiteral(AstNode *node, Type *expected) {
 
   NumberKind kind = expected->as.number.kind;
 
-  if (kind == NUMBER_KIND_COUNT || numberKindInfo(kind)->isFloat)
+  if (kind == NUMBER_KIND_COUNT || kind == NUMBER_KIND_F64)
     return;
 
   if (node->kind != NODE_LITERAL || node->as.literal.kind != LITERAL_NUMBER)
@@ -418,11 +426,15 @@ static void typchkCoerceIntegerLiteral(AstNode *node, Type *expected) {
     return;
 
   if (!lit->as.number.literalValueFits ||
-      lit->as.number.literalValue > numberKindMax(kind))
+      lit->as.number.literalValue > typchkLargestExactInteger(kind))
     return;
 
   lit->as.number.kind = kind;
-  lit->as.number.as.u64 = lit->as.number.literalValue;
+
+  if (numberKindInfo(kind)->isFloat)
+    lit->as.number.as.f64 = (double)lit->as.number.literalValue;
+  else
+    lit->as.number.as.u64 = lit->as.number.literalValue;
 }
 
 // Where a signed integer kind is expected, `-5` is a literal of that kind, so
@@ -436,7 +448,7 @@ static void typchkMaybeFoldNegativeNumberLiteral(AstNode *node,
 
   NumberKind kind = expected->as.number.kind;
 
-  if (kind == NUMBER_KIND_COUNT || numberKindInfo(kind)->isFloat ||
+  if (kind == NUMBER_KIND_COUNT || kind == NUMBER_KIND_F64 ||
       !numberKindInfo(kind)->isSigned)
     return;
 
@@ -450,9 +462,12 @@ static void typchkMaybeFoldNegativeNumberLiteral(AstNode *node,
       !operand->as.literal.as.number.literalIsPlainInteger)
     return;
 
+  bool isFloat = numberKindInfo(kind)->isFloat;
+  uint64_t largest = isFloat ? typchkLargestExactInteger(kind)
+                             : 0 - (uint64_t)numberKindMin(kind);
+
   if (!operand->as.literal.as.number.literalValueFits ||
-      operand->as.literal.as.number.literalValue >
-          0 - (uint64_t)numberKindMin(kind))
+      operand->as.literal.as.number.literalValue > largest)
     return;
 
   int line = node->line;
@@ -461,8 +476,12 @@ static void typchkMaybeFoldNegativeNumberLiteral(AstNode *node,
   node->as.literal.kind = LITERAL_NUMBER;
   node->as.literal.as.number.kind = kind;
   node->as.literal.as.number.literalIsPlainInteger = false;
-  node->as.literal.as.number.as.i64 =
-      (int64_t)(0 - operand->as.literal.as.number.literalValue);
+  if (isFloat)
+    node->as.literal.as.number.as.f64 =
+        -(double)operand->as.literal.as.number.literalValue;
+  else
+    node->as.literal.as.number.as.i64 =
+        (int64_t)(0 - operand->as.literal.as.number.literalValue);
 }
 
 // Infer the type of an expression

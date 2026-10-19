@@ -37,7 +37,7 @@ static void appendChar(char *buffer, size_t size, size_t *length, char c) {
     buffer[(*length)++] = c;
 }
 
-void formatNumberF64(double value, char *buffer, size_t size) {
+static void formatFloat(double value, bool single, char *buffer, size_t size) {
   if (isnan(value)) {
     snprintf(buffer, size, "nan");
     return;
@@ -61,7 +61,10 @@ void formatNumberF64(double value, char *buffer, size_t size) {
   for (int precision = 0; precision <= 16; precision++) {
     snprintf(scientific, sizeof(scientific), "%.*e", precision, magnitude);
 
-    if (strtod(scientific, NULL) == magnitude)
+    double readBack = single ? (double)strtof(scientific, NULL)
+                             : strtod(scientific, NULL);
+
+    if (readBack == magnitude)
       break;
   }
 
@@ -129,12 +132,16 @@ void formatNumberF64(double value, char *buffer, size_t size) {
     buffer[length] = '\0';
 }
 
+void formatNumberF64(double value, char *buffer, size_t size) {
+  formatFloat(value, false, buffer, size);
+}
+
 void formatNumber(NumberKind kind, NumberPayload payload, char *buffer,
                   size_t size) {
   const NumberKindInfo *info = numberKindInfo(kind);
 
   if (info->isFloat) {
-    formatNumberF64(payload.f64, buffer, size);
+    formatFloat(payload.f64, kind == NUMBER_KIND_F32, buffer, size);
   } else if (size == 0) {
     return;
   } else if (info->isSigned) {

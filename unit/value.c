@@ -58,8 +58,39 @@ static void test_format_number(void) {
   }
 }
 
+// f32 values print with the shortest digits that read back as the same f32.
+static void test_format_f32(void) {
+  struct {
+    float value;
+    const char *expected;
+  } cases[] = {
+      {0.1f, "0.1"},
+      {1.0f / 3, "0.33333334"},
+      {16777216.0f, "16777216"},
+      {123.456f, "123.456"},
+      {-2.5f, "-2.5"},
+      {3.4028235e38f, "3.4028235e+38"},
+      {1e-7f, "1e-7"},
+      {0.0f, "0"},
+      {INFINITY, "inf"},
+  };
+
+  for (size_t i = 0; i < sizeof(cases) / sizeof(cases[0]); i++) {
+    char buffer[NUMBER_STRING_MAX];
+    formatNumber(NUMBER_KIND_F32, (NumberPayload){.f64 = cases[i].value},
+                 buffer, sizeof(buffer));
+
+    if (strcmp(cases[i].expected, buffer) != 0) {
+      fprintf(stderr, "formatNumber f32: expected %s, got %s\n",
+              cases[i].expected, buffer);
+    }
+    assert(strcmp(cases[i].expected, buffer) == 0);
+  }
+}
+
 int main(void) {
   test_format_number();
+  test_format_f32();
   test_nil();
   test_number();
   test_bool_true();
