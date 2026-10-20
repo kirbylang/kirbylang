@@ -618,6 +618,18 @@ static Type *typchkInferLiteral(AstNode *node) {
   return NULL; // unreachable
 }
 
+// A plain integer literal next to a number of another type takes that type
+// when it fits, so `byte + 1` needs no suffix.
+static void typchkCoerceOperand(TypeEnv *env, AstNode *operand, Type **type,
+                                Type *otherType) {
+  if (!typeIsNumber(otherType) || !typeIsNumber(*type))
+    return;
+
+  typchkCoerceIntegerLiteral(operand, otherType);
+  typchkMaybeFoldNegativeNumberLiteral(operand, otherType);
+  *type = typchkInfer(env, operand);
+}
+
 // Infer the type of a unary expressoin
 static Type *typchkInferUnary(TypeEnv *env, AstNode *node) {
   UnaryNode *u = &node->as.unary;
@@ -694,6 +706,11 @@ static Type *typchkInferBinary(TypeEnv *env, AstNode *node) {
 
   if (leftType == NULL || rightType == NULL)
     return NULL;
+
+  if (!typesEqual(leftType, rightType)) {
+    typchkCoerceOperand(env, b->left, &leftType, rightType);
+    typchkCoerceOperand(env, b->right, &rightType, leftType);
+  }
 
   switch (b->op.type) {
   case TOKEN_PLUS:

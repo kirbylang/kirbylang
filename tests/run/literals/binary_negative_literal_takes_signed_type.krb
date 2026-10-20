@@ -1,0 +1,5 @@
+let b: i32 = 7;
+@println(b + -1);
+@println(-1 + b);
+let f: f32 = 1.5f32;
+@println(f * -2);
