@@ -1,0 +1,6 @@
+let nums = [1, 2, 3];
+let i: u32 = 1;
+nums[i] = 20;
+nums[2i64] = 30;
+nums[0u8] = 10;
+@println(nums);

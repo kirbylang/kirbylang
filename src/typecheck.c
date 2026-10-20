@@ -484,6 +484,16 @@ static void typchkMaybeFoldNegativeNumberLiteral(AstNode *node,
         (int64_t)(0 - operand->as.literal.as.number.literalValue);
 }
 
+// An array index is a number of any kind.
+static bool typchkCheckIndex(TypeEnv *env, AstNode *index) {
+  Type *type = typchkInfer(env, index);
+
+  if (type == NULL || typeIsNumber(type))
+    return type != NULL;
+
+  return typchkCheck(env, index, typeF64());
+}
+
 // Infer the type of an expression
 Type *typchkInfer(TypeEnv *env, AstNode *node) {
   switch (node->kind) {
@@ -1232,7 +1242,7 @@ static Type *typchkInferIndexGet(TypeEnv *env, AstNode *node) {
     return NULL;
   }
 
-  if (!typchkCheck(env, ig->index, typeF64()))
+  if (!typchkCheckIndex(env, ig->index))
     return NULL;
 
   return objectType->as.array.elementType;
@@ -1255,7 +1265,7 @@ static Type *typchkInferIndexSet(TypeEnv *env, AstNode *node) {
     return NULL;
   }
 
-  if (!typchkCheck(env, is->index, typeF64()))
+  if (!typchkCheckIndex(env, is->index))
     return NULL;
 
   Type *elementType = objectType->as.array.elementType;
