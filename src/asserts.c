@@ -56,7 +56,7 @@ void assertIsInArrayBounds(VM *vm, ObjArray *array, int index) {
 }
 
 void assertArgIsNumber(VM *vm, const char *function, Value *args, int index) {
-  if (!IS_NUMBER_F64(args[index])) {
+  if (!IS_NUMBER(args[index])) {
     runtimeError(vm, "function %s expects argument %d to be a number.",
                  function, index + 1);
     exit(EXIT_CODE_RUNTIME_ERR);
