@@ -77,8 +77,8 @@ static void test_token_to_cstring(void) {
                 tokenTypeToString(TOKEN_GREATER_EQUAL)) == 0);
   assert(strcmp("TOKEN_LESS", tokenTypeToString(TOKEN_LESS)) == 0);
   assert(strcmp("TOKEN_LESS_EQUAL", tokenTypeToString(TOKEN_LESS_EQUAL)) == 0);
-  assert("TOKEN_QUESTION_QUESTION" ==
-         tokenTypeToString(TOKEN_QUESTION_QUESTION));
+  assert(strcmp("TOKEN_QUESTION_QUESTION",
+                tokenTypeToString(TOKEN_QUESTION_QUESTION)) == 0);
   assert(strcmp("TOKEN_IDENTIFIER", tokenTypeToString(TOKEN_IDENTIFIER)) == 0);
   assert(strcmp("TOKEN_STRING", tokenTypeToString(TOKEN_STRING)) == 0);
   assert(strcmp("TOKEN_NUMBER", tokenTypeToString(TOKEN_NUMBER)) == 0);
