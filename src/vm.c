@@ -422,11 +422,29 @@ static void concatenate(void) {
   pushOnStack(OBJ_VAL(result));
 }
 
-static const char *checkArrayIndex(double index, int count) {
-  if (index != floor(index))
-    return "Array index must be a whole number.";
-  if (index < 0 || index >= count)
+// Turns an index of any number kind into a position in the array. Returns an
+// error message when it is not a whole number inside the array.
+static const char *arrayPosition(Value index, int count, int *position) {
+  NumberKind kind = index.as.number.kind;
+  const NumberKindInfo *info = numberKindInfo(kind);
+  NumberPayload payload = index.as.number.as;
+
+  if (info->isFloat) {
+    if (payload.f64 != floor(payload.f64))
+      return "Array index must be a whole number.";
+
+    if (payload.f64 < 0 || payload.f64 >= count)
+      return "Array index out of bounds.";
+
+    *position = (int)payload.f64;
+    return NULL;
+  }
+
+  if (info->isSigned ? (payload.i64 < 0 || payload.i64 >= count)
+                     : payload.u64 >= (uint64_t)count)
     return "Array index out of bounds.";
+
+  *position = (int)payload.u64;
   return NULL;
 }
 
@@ -1052,21 +1070,19 @@ static InterpretResult run(void) {
         return INTERPRET_RUNTIME_ERROR;
       }
 
-      if (!IS_NUMBER_F64(index)) {
+      if (!IS_NUMBER(index)) {
         runtimeError(&vm, "Array index must be number.");
         return INTERPRET_RUNTIME_ERROR;
       }
 
       ObjArray *array = AS_ARRAY(arrayVal);
 
-      const char *indexError =
-          checkArrayIndex(AS_NUMBER_F64(index), array->count);
+      int i;
+      const char *indexError = arrayPosition(index, array->count, &i);
       if (indexError != NULL) {
         runtimeError(&vm, "%s", indexError);
         return INTERPRET_RUNTIME_ERROR;
       }
-
-      int i = (int)AS_NUMBER_F64(index);
 
       pushOnStack(array->values[i]);
 
@@ -1082,21 +1098,19 @@ static InterpretResult run(void) {
         return INTERPRET_RUNTIME_ERROR;
       }
 
-      if (!IS_NUMBER_F64(index)) {
+      if (!IS_NUMBER(index)) {
         runtimeError(&vm, "Array index must be number.");
         return INTERPRET_RUNTIME_ERROR;
       }
 
       ObjArray *array = AS_ARRAY(arrayValue);
 
-      const char *indexError =
-          checkArrayIndex(AS_NUMBER_F64(index), array->count);
+      int i;
+      const char *indexError = arrayPosition(index, array->count, &i);
       if (indexError != NULL) {
         runtimeError(&vm, "%s", indexError);
         return INTERPRET_RUNTIME_ERROR;
       }
-
-      int i = (int)AS_NUMBER_F64(index);
 
       array->values[i] = value;
 

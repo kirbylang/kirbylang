@@ -1,0 +1,11 @@
+let names = ["a", "b", "c"];
+let i: i32 = 1;
+let u: u8 = 2;
+let big: u64 = 0;
+let neg: i64 = 1;
+@println(names[i]);
+@println(names[u]);
+@println(names[big]);
+@println(names[neg]);
+@println(names[2u16]);
+@println(names[0i8]);
