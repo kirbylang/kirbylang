@@ -1,0 +1,6 @@
+@println(@parseFloat("1.5"));
+@println(@parseFloat("-0.25"));
+@println(@parseFloat("+3"));
+@println(@parseFloat("42"));
+@println(@parseFloat("0.1"));
+@println(@typeof(@parseFloat("1")));

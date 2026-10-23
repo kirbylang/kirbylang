@@ -17,7 +17,7 @@ fun main(): unit {
     logger.info("Finished!");
 }
 
-type LogLevel = f64;
+type LogLevel = i64;
 
 // TODO: Enums will replace this
 let LOG_LEVEL_NONE = 0;

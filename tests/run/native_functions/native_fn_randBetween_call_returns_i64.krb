@@ -1,0 +1,3 @@
+let roll = @randBetween(1, 6);
+@println(roll >= 1 and roll <= 6);
+@println(@typeof(roll));

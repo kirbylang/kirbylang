@@ -1,0 +1,8 @@
+@println(@parseInt("123"));
+@println(@parseInt("-45"));
+@println(@parseInt("+7"));
+@println(@parseInt("0"));
+@println(@parseInt("007"));
+@println(@parseInt("9223372036854775807"));
+@println(@parseInt("-9223372036854775808"));
+@println(@typeof(@parseInt("1")));

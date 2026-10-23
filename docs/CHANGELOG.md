@@ -68,9 +68,12 @@
     `let x: f64 = 42;` works
   - Dividing two integers drops the remainder: `7 / 2` is `3`
   - An `f64` array index is a type error. Cast it with `as i64`
-  - `@argc` returns an `i64`, and `@exit` and `@strRepeat` take an `i64`
+  - `@argc`, `@now` and `@randBetween` return an `i64`, and `@exit`,
+    `@strRepeat` and `@randBetween` take an `i64`
+  - `Date` in `stdlib.krb` uses `i64` for its timestamp and parts
 - Replace `@len` with `@strLen` and `@arrLen` to improve builtin function typechecking
 - `@strIndexOf` returns `-1` instead of `nil` when the string is not found
+- Replace `@parseNumber` with `@parseInt` and `@parseFloat`
 
 ## 0.4.0
 

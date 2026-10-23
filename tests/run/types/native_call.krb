@@ -1,9 +1,11 @@
 let version: string = @version();
 let rounded: f64 = @ceil(1.2);
 let missing: bool = @fileExists("./does/not/exist.txt");
-let parsed: f64 = @parseNumber("42");
+let parsed: i64 = @parseInt("42");
+let ratio: f64 = @parseFloat("0.5");
 
 @println(rounded);
 @println(missing);
 @println(parsed);
+@println(ratio);
 @println(@numberToString(parsed) + "!");

@@ -190,10 +190,10 @@ Get the number of seconds that have passed since the program started.
 
 ### `@now`
 
-Get the current number of seconds since 1970-01-01.
+Get the current number of whole seconds since 1970-01-01.
 
 ```kirby
-let now: f64 = @now();
+let now: i64 = @now();
 
 @println(now);
 ```
@@ -457,12 +457,22 @@ Convert a number of any type to a string.
 @println(@numberToString(255u8)); // "255"
 ```
 
-### `@parseNumber`
+### `@parseFloat`
 
-Parse a string into a number.
+Parse a number such as `1.5` or `-2` into an `f64`.
 
 ```kirby
-@println(@parseNumber("123")); // 123
+@println(@parseFloat("1.5")); // 1.5
+@println(@parseFloat("42")); // 42
+```
+
+### `@parseInt`
+
+Parse a string of digits (with an optional sign `+` or `-`) into an `i64`.
+
+```kirby
+@println(@parseInt("123")); // 123
+@println(@parseInt("-45")); // -45
 ```
 
 ## Random
@@ -485,7 +495,7 @@ Randomly get 0 or 1.
 
 ### `@randBetween`
 
-Get a random number between min and max.
+Get a random whole number from min to max, as an `i64`.
 
 ```kirby
 @println(@randBetween(1, 10)); // 3

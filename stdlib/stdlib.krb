@@ -1,38 +1,30 @@
 // UTC Date Time
-// 
-// Units are stored as f64 but are floored in the absence of integers in the language.
 struct Date {
-    // Unix timestamp
-    let timestamp: f64;
+    // Unix timestamp, in whole seconds
+    let timestamp: i64;
 
-
-    let year: f64;
-    let month: f64;
-    let day: f64;
-    let hour: f64;
-    let minute: f64;
-    let second: f64;
+    let year: i64;
+    let month: i64;
+    let day: i64;
+    let hour: i64;
+    let minute: i64;
+    let second: i64;
 }
 
 impl Date {
     // Create date from a unix timestamp
-    // 
-    // Floor is ran on the timestamp before storing.
-    pub fun new(timestamp: f64): Self {
-        // Only store whole seconds
-        let ts = @floor(timestamp);
+    pub fun new(timestamp: i64): Self {
+        var days = Self.floor_div(timestamp, 86400);
+        let sod = timestamp - days * 86400;
 
-        var days = @floor(ts / 86400);
-        let sod  =  @floor(ts - days * 86400);
-
-        let hour   = @floor(sod / 3600);
-        let minute = @floor((sod % 3600) / 60);
+        let hour = sod / 3600;
+        let minute = (sod % 3600) / 60;
         let second = sod % 60;
 
-        var year: f64 = 1970;
+        var year = 1970;
 
         while (true) {
-            let ydays = if (Self.is_leap(year)) 366.0 else 365.0;
+            let ydays = if (Self.is_leap(year)) 366 else 365;
 
             if (days < ydays) {
                 break;
@@ -42,7 +34,7 @@ impl Date {
             year = year + 1;
         }
 
-        var month: f64 = 1;
+        var month = 1;
 
         while (true) {
             let mdays = Self.days_in_month(year, month);
@@ -55,23 +47,21 @@ impl Date {
             month = month + 1;
         }
 
-        let day = days + 1;
-
         Self {
-            timestamp: ts,
+            timestamp: timestamp,
             year: year,
-            month: @floor(month),
-            day: @floor(day),
-            hour: @floor(hour),
+            month: month,
+            day: days + 1,
+            hour: hour,
             minute: minute,
-            second: @floor(second),
+            second: second,
         }
     }
     
     pub fun now(): Self =
         Self.new(@now());
 
-    pub fun from_parts(year: f64, month: f64, day: f64, hour: f64, minute: f64, second: f64): Self {
+    pub fun from_parts(year: i64, month: i64, day: i64, hour: i64, minute: i64, second: i64): Self {
         @assert(year >= 1 and year <= 9999, $"Year must be between 1-9999: {@numberToString(year)}");
         
         let days_in_month = Self.days_in_month(year, month);
@@ -81,11 +71,7 @@ impl Date {
         @assert(minute >= 0 and minute <= 59, $"Minute must be between 0-59: {@numberToString(minute)}");
         @assert(second >= 0 and second <= 59, $"Second must be between 0-59: {@numberToString(second)}");
 
-        year = @floor(year);
-
-        let days = Self.days_from_civil(year, month, day);
-        let timestamp =  days * 86400 + hour * 3600 + minute * 60 + second;
-        Self.new(timestamp)
+        Self.new(Self.parts_to_timestamp(year, month, day, hour, minute, second))
     }
     
     pub fun from(value: string): Self {
@@ -103,13 +89,13 @@ impl Date {
         @assert(@arrLen(date_parts) == 3, $"invalid input string. expected 3 date parts but got {@numberToString(@arrLen(date_parts))}");
 
         let year_str: string = date_parts[0];
-        let year: f64 = @parseNumber(year_str);
+        let year = @parseInt(year_str);
 
-        let month_str = date_parts[1];
-        let month: f64 = @parseNumber(month_str);
+        let month_str: string = date_parts[1];
+        let month = @parseInt(month_str);
 
         let day_str: string = date_parts[2];
-        let day: f64 =@parseNumber(day_str);
+        let day = @parseInt(day_str);
 
         let time_parts = @strSplit(time_part, ":");
 
@@ -119,32 +105,32 @@ impl Date {
             $"invalid input string. expected 3 time parts but got {@numberToString(@arrLen(time_parts))}: '{time_parts_str}'");
 
         let hour_str: string = time_parts[0];
-        let hour: f64 = @parseNumber(hour_str);
+        let hour = @parseInt(hour_str);
 
         let minute_str: string = time_parts[1];
-        let minute: f64 = @parseNumber(minute_str);
+        let minute = @parseInt(minute_str);
 
         let second_str: string = time_parts[2];
-        let second: f64 = @parseNumber(second_str);
+        let second = @parseInt(second_str);
         
         Self.from_parts(year, month, day, hour, minute, second)
     }
 
-    pub fun get_timestamp(self): f64 = self.timestamp;
-    pub fun get_year(self): f64 = self.year;
-    pub fun get_month(self): f64 = self.month;
-    pub fun get_day(self): f64 = self.day;
-    pub fun get_hour(self): f64 = self.hour;
-    pub fun get_minute(self): f64 = self.minute;
-    pub fun get_second(self): f64 = self.second;
+    pub fun get_timestamp(self): i64 = self.timestamp;
+    pub fun get_year(self): i64 = self.year;
+    pub fun get_month(self): i64 = self.month;
+    pub fun get_day(self): i64 = self.day;
+    pub fun get_hour(self): i64 = self.hour;
+    pub fun get_minute(self): i64 = self.minute;
+    pub fun get_second(self): i64 = self.second;
 
-    fun is_leap(year: f64): bool {
+    fun is_leap(year: i64): bool {
         year % 4 == 0 and (year % 100 != 0 or year % 400 == 0)
     }
 
-    fun is_valid_month(month: f64): bool = month >= 1 and month <= 12;
+    fun is_valid_month(month: i64): bool = month >= 1 and month <= 12;
 
-    fun days_in_month(year: f64, month: f64): f64 {
+    fun days_in_month(year: i64, month: i64): i64 {
         @assert(Self.is_valid_month(month), $"Month must be between 1-12: {@numberToString(month)}");
 
         let lengths = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
@@ -153,19 +139,20 @@ impl Date {
             return 29;
         }
 
-        lengths[(month - 1) as i64] as f64
+        lengths[month - 1]
     }
 
-    fun parts_to_timestamp(year: f64, month: f64, day: f64, hour: f64, minute: f64, second: f64): f64 {
+    fun parts_to_timestamp(year: i64, month: i64, day: i64, hour: i64, minute: i64, second: i64): i64 {
         let days = Self.days_from_civil(year, month, day);
 
         days * 86400 + hour * 3600 + minute * 60 + second
     }
 
-    fun days_from_civil(year: f64, month: f64, day: f64): f64 {
-        year = year - if (month <= 2) 1.0 else 0.0;
+    // Days since 1970-01-01 for a year of 1 or more
+    fun days_from_civil(year: i64, month: i64, day: i64): i64 {
+        year = year - if (month <= 2) 1 else 0;
         
-        let era = @floor(year / 400);
+        let era = year / 400;
 
         // Year Of Era [0, 399]
         let yoe = year - era * 400; 
@@ -174,19 +161,27 @@ impl Date {
         let doy = {
             let month_adjustment = if (month > 2) month - 3 else month + 9;
             
-            @floor((153 * month_adjustment + 2) / 5) + day - 1 
+            (153 * month_adjustment + 2) / 5 + day - 1
         };
         
         // Day Of Era [0, 146096]
-        let doe = yoe * 365 + @floor(yoe / 4) - @floor(yoe / 100) + doy;             
+        let doe = yoe * 365 + yoe / 4 - yoe / 100 + doy;
         
         era * 146097 + doe - 719468
     }
 
-    fun pad_zeros(num: f64, length: f64): string {
+    // Division that rounds down, so a timestamp before 1970 lands on the day
+    // before rather than rounding toward 1970
+    fun floor_div(a: i64, b: i64): i64 {
+        let quotient = a / b;
+
+        if (a % b != 0 and (a < 0) != (b < 0)) quotient - 1 else quotient
+    }
+
+    fun pad_zeros(num: i64, length: i64): string {
         var str = @numberToString(num);
 
-        while ((@strLen(str) as f64) < length) {
+        while (@strLen(str) < length) {
             str = "0" + str;
         }
 
@@ -207,7 +202,7 @@ impl Display for Date {
 }
 
 impl Ord for Date {
-    fun cmp(self, other: Self): f64 = self.timestamp - other.timestamp;
+    fun cmp(self, other: Self): f64 = (self.timestamp - other.timestamp) as f64;
 }
 
 

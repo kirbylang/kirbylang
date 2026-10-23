@@ -245,7 +245,7 @@
     "body": [
       "@now()$0"
     ],
-    "description": "Get the current number of seconds since 1970-01-01"
+    "description": "Get the current number of whole seconds since 1970-01-01"
   },
   "Native: @version": {
     "prefix": "@version",
@@ -387,12 +387,19 @@
     ],
     "description": "Get the number of command-line arguments"
   },
-  "Native: @parseNumber": {
-    "prefix": "@parseNumber",
+  "Native: @parseInt": {
+    "prefix": "@parseInt",
     "body": [
-      "@parseNumber(${1:string})$0"
+      "@parseInt(${1:string})$0"
     ],
-    "description": "Parse a string into a number"
+    "description": "Parse a string into an i64"
+  },
+  "Native: @parseFloat": {
+    "prefix": "@parseFloat",
+    "body": [
+      "@parseFloat(${1:string})$0"
+    ],
+    "description": "Parse a string into an f64"
   },
   "Native: @instanceOf": {
     "prefix": "@instanceOf",

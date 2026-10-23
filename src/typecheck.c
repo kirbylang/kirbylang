@@ -492,8 +492,11 @@ static bool typchkCheckIndex(TypeEnv *env, AstNode *index) {
   if (type == NULL)
     return false;
 
-  if (!typeIsNumber(type))
-    return typchkCheck(env, index, typeF64());
+  if (!typeIsNumber(type)) {
+    typchkErrorAtNodeFmt(index, "Array index must be an integer, got %s.",
+                         typeToString(type));
+    return false;
+  }
 
   if (numberKindInfo(type->as.number.kind)->isFloat) {
     typchkErrorAtNodeFmt(
@@ -623,8 +626,13 @@ static Type *typchkInferLiteral(AstNode *node) {
     return typeBool();
   case LITERAL_NUMBER:
     if (lit->as.number.literalIsPlainInteger) {
-      if (!lit->as.number.literalValueFits ||
-          lit->as.number.literalValue > numberKindMax(NUMBER_KIND_I64)) {
+      if (!lit->as.number.literalValueFits) {
+        typchkErrorAtNode(node,
+                          "Integer literal is too large for any number type.");
+        return NULL;
+      }
+
+      if (lit->as.number.literalValue > numberKindMax(NUMBER_KIND_I64)) {
         typchkErrorAtNode(
             node,
             "Integer literal is too large for i64, add a suffix like u64.");
@@ -672,7 +680,8 @@ static Type *typchkInferUnary(TypeEnv *env, AstNode *node) {
     return NULL;
 
   if (!typeIsNumber(operandType)) {
-    typchkCheck(env, u->operand, typeF64());
+    typchkErrorAtTokenFmt(&u->op, "Can't negate %s.",
+                          typeToString(operandType));
     return NULL;
   }
 

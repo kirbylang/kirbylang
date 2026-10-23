@@ -58,8 +58,11 @@
 @println(@instanceOf);
 @println(@typeof(@instanceOf));
 
-@println(@parseNumber);
-@println(@typeof(@parseNumber));
+@println(@parseInt);
+@println(@typeof(@parseInt));
+
+@println(@parseFloat);
+@println(@typeof(@parseFloat));
 
 @println(@numberToString);
 @println(@typeof(@numberToString));

@@ -1,1 +1,1 @@
-[line 3] Error: Expected f64, got bool.
+[line 3] Error: Array index must be an integer, got bool.

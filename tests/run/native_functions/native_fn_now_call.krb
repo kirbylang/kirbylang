@@ -1,0 +1,2 @@
+let now: i64 = @now();
+@println(now > 1700000000);

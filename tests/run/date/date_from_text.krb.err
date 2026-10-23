@@ -5,7 +5,6 @@
 0007    | OP_POP
 0008    2 OP_NIL
 0009    | OP_RETURN
-assertion failed: Year must be between 1-9999: 0
-[line 75] in from_parts()
-[line 130] in from()
+function @parseInt expects argument 1 to be a whole number but got "abc".
+[line 92] in from()
 [line 1] in script

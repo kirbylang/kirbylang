@@ -10,29 +10,37 @@
 0016    | OP_CONSTANT         7 './does/not/exist.txt'
 0018    | OP_CALL             1
 0020    | OP_DEFINE_GLOBAL    5 'missing'
-0022    4 OP_GET_GLOBAL       9 '@parseNumber'
+0022    4 OP_GET_GLOBAL       9 '@parseInt'
 0024    | OP_CONSTANT        10 '42'
 0026    | OP_CALL             1
 0028    | OP_DEFINE_GLOBAL    8 'parsed'
-0030    6 OP_GET_GLOBAL      11 '@println'
-0032    | OP_GET_GLOBAL       2 'rounded'
+0030    5 OP_GET_GLOBAL      12 '@parseFloat'
+0032    | OP_CONSTANT        13 '0.5'
 0034    | OP_CALL             1
-0036    | OP_POP
-0037    7 OP_GET_GLOBAL      11 '@println'
-0039    | OP_GET_GLOBAL       5 'missing'
-0041    | OP_CALL             1
-0043    | OP_POP
-0044    8 OP_GET_GLOBAL      11 '@println'
-0046    | OP_GET_GLOBAL       8 'parsed'
-0048    | OP_CALL             1
-0050    | OP_POP
-0051    9 OP_GET_GLOBAL      11 '@println'
-0053    | OP_GET_GLOBAL      12 '@numberToString'
-0055    | OP_GET_GLOBAL       8 'parsed'
-0057    | OP_CALL             1
-0059    | OP_CONSTANT        13 '!'
-0061    | OP_ADD
-0062    | OP_CALL             1
-0064    | OP_POP
-0065   10 OP_NIL
-0066    | OP_RETURN
+0036    | OP_DEFINE_GLOBAL   11 'ratio'
+0038    7 OP_GET_GLOBAL      14 '@println'
+0040    | OP_GET_GLOBAL       2 'rounded'
+0042    | OP_CALL             1
+0044    | OP_POP
+0045    8 OP_GET_GLOBAL      14 '@println'
+0047    | OP_GET_GLOBAL       5 'missing'
+0049    | OP_CALL             1
+0051    | OP_POP
+0052    9 OP_GET_GLOBAL      14 '@println'
+0054    | OP_GET_GLOBAL       8 'parsed'
+0056    | OP_CALL             1
+0058    | OP_POP
+0059   10 OP_GET_GLOBAL      14 '@println'
+0061    | OP_GET_GLOBAL      11 'ratio'
+0063    | OP_CALL             1
+0065    | OP_POP
+0066   11 OP_GET_GLOBAL      14 '@println'
+0068    | OP_GET_GLOBAL      15 '@numberToString'
+0070    | OP_GET_GLOBAL       8 'parsed'
+0072    | OP_CALL             1
+0074    | OP_CONSTANT        16 '!'
+0076    | OP_ADD
+0077    | OP_CALL             1
+0079    | OP_POP
+0080   12 OP_NIL
+0081    | OP_RETURN
