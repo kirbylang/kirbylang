@@ -1,4 +1,4 @@
-fun sumBelow(n: f64): f64 {
+fun sumBelow(n: i64): i64 {
   var total = 0;
   var i = 0;
   while (i < n) {

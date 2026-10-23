@@ -101,7 +101,7 @@ int main(void) {
 
   assert_ast("../tests/run/functions/function_body_expressions.krb",
              "(var n 10)\n"
-             "(fun sum (a : f64) : f64 (+ a n))\n"
+             "(fun sum (a : i64) : i64 (+ a n))\n"
              "(call @println (call sum 50))\n");
 
   assert_ast("../tests/run/functions/function_implicit_return.krb",

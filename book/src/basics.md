@@ -27,23 +27,23 @@ let greeting: string = "Hello World";
 
 ## Builtin Types
 
-| Type     |                          Examples | Notes                                              |
-| :------- | --------------------------------: | -------------------------------------------------- |
-| `string` |                   `"Hello World"` |                                                    |
-| `f64`    |               `123f64`, `123.456` | The `f64` suffix is optional                       |
-| `u8`     |                  `123u8`, `255U8` |                                                    |
-| `i32`    |                  `123i32`, `7I32` | Signed 32-bit integer                              |
-| `i64`    |                          `123i64` | Signed 64-bit integer                              |
-| `u64`    |                          `123u64` | Unsigned 64-bit integer                            |
-| `u16`    |                          `123u16` | Unsigned 16-bit integer                            |
-| `u32`    |                          `123u32` | Unsigned 32-bit integer                            |
-| `i8`     |                           `123i8` | Signed 8-bit integer                               |
-| `i16`    |                          `123i16` | Signed 16-bit integer                              |
-| `f32`    |                `123f32`, `1.5f32` | 32-bit float. A decimal literal needs the suffix   |
-| `unit`   |                              `()` |                                                    |
-| `bool`   |                   `true`, `false` |                                                    |
-| `Array`  | `[1, 2, 3]`, `["Hello", "World"]` | A dynamically sized collection of homonogous types |
-| `nil`    |                             `nil` | This will be deprecated in the future.             |
+| Type     |                          Examples | Notes                                                 |
+| :------- | --------------------------------: | ----------------------------------------------------- |
+| `string` |                   `"Hello World"` |                                                       |
+| `f64`    |               `123f64`, `123.456` | 64-bit float. The default for literals with decimals. |
+| `u8`     |                  `123u8`, `255U8` |                                                       |
+| `i32`    |                  `123i32`, `7I32` | Signed 32-bit integer                                 |
+| `i64`    |                          `123i64` | Signed 64-bit integer. The default of integers.       |
+| `u64`    |                          `123u64` | Unsigned 64-bit integer                               |
+| `u16`    |                          `123u16` | Unsigned 16-bit integer                               |
+| `u32`    |                          `123u32` | Unsigned 32-bit integer                               |
+| `i8`     |                           `123i8` | Signed 8-bit integer                                  |
+| `i16`    |                          `123i16` | Signed 16-bit integer                                 |
+| `f32`    |                `123f32`, `1.5f32` | 32-bit float. A decimal literal needs the suffix      |
+| `unit`   |                              `()` |                                                       |
+| `bool`   |                   `true`, `false` |                                                       |
+| `Array`  | `[1, 2, 3]`, `["Hello", "World"]` | A dynamically sized collection of homonogous types    |
+| `nil`    |                             `nil` | This will be deprecated in the future.                |
 
 ### Casting Number Types
 

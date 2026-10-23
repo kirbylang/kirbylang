@@ -1,4 +1,4 @@
-[line 3] Error: Expected string, got f64.
+[line 3] Error: Expected string, got i64.
 [line 4] Error: Expected string, got bool.
 [line 5] Error: Expected string, got unit.
 [line 6] Error: Expected string, got fun (f64) => f64.

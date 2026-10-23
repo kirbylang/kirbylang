@@ -69,8 +69,8 @@ typedef struct {
       NumberPayload as;
       /**
        * A plain, unsuffixed integer literal, e.g. `42` -- as opposed to a
-       * suffixed (`42f64`, `42u8`) or decimal (`1.5`) literal. Only plain
-       * integers may become another integer kind where that kind is expected.
+       * suffixed (`42f64`, `42u8`) or decimal (`1.5`) literal. Its kind is
+       * i64 unless the type checker changes it to the kind that is expected.
        */
       bool literalIsPlainInteger;
       /**

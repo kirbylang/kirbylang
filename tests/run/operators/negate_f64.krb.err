@@ -11,13 +11,12 @@
 0015    | OP_NEGATE
 0016    | OP_CALL             1
 0018    | OP_POP
-0019    4 OP_CONSTANT         5 '3'
-0021    | OP_NEGATE
-0022    | OP_DEFINE_GLOBAL    4 'a'
-0024    5 OP_GET_GLOBAL       0 '@println'
-0026    | OP_GET_GLOBAL       4 'a'
-0028    | OP_NEGATE
-0029    | OP_CALL             1
-0031    | OP_POP
-0032    6 OP_NIL
-0033    | OP_RETURN
+0019    4 OP_CONSTANT         5 '-3'
+0021    | OP_DEFINE_GLOBAL    4 'a'
+0023    5 OP_GET_GLOBAL       0 '@println'
+0025    | OP_GET_GLOBAL       4 'a'
+0027    | OP_NEGATE
+0028    | OP_CALL             1
+0030    | OP_POP
+0031    6 OP_NIL
+0032    | OP_RETURN

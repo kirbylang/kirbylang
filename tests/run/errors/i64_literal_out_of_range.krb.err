@@ -1,1 +1,1 @@
-[line 1] Error: Expected i64, got f64.
+[line 1] Error: Integer literal is too large for i64, add a suffix like u64.

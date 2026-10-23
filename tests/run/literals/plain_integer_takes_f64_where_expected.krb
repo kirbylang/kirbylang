@@ -1,0 +1,11 @@
+let x: f64 = 5;
+@println(x);
+@println(@typeof(x));
+@println(@abs(-5));
+@println(@sqrt(16));
+@println(@pow(2, 10));
+@println(@min(1, 2));
+let big: f64 = 9007199254740992;
+@println(big);
+let neg: f64 = -3;
+@println(neg);

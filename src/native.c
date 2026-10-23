@@ -255,11 +255,11 @@ static Value lenNative(VM *vm, int argCount, Value *args) {
   if (IS_STRING(name)) {
     int length = AS_STRING(name)->length;
 
-    return NUMBER_F64_VAL(length);
+    return NUMBER_I64_VAL(length);
   } else if (IS_ARRAY(name)) {
     ObjArray *array = AS_ARRAY(name);
     int length = array->count;
-    return NUMBER_F64_VAL(length);
+    return NUMBER_I64_VAL(length);
   } else {
     runtimeError(vm,
                  "function len expects argument 1 to be a string or array.");
@@ -881,7 +881,7 @@ static Value argcNative(VM *vm, int argCount, Value *args) {
 
   int argc = vm->argc;
 
-  return NUMBER_F64_VAL(argc);
+  return NUMBER_I64_VAL(argc);
 }
 
 static Value parseNumberNative(VM *vm, int argCount, Value *args) {
@@ -1251,7 +1251,7 @@ static Value strIndexOfNative(VM *vm, int argCount, Value *args) {
     return NIL_VAL;
   }
 
-  return NUMBER_F64_VAL(index);
+  return NUMBER_I64_VAL(index);
 }
 
 // Asserts a number is a whole position in the string: 0 up to and including

@@ -5,12 +5,11 @@
 0006    | OP_CONSTANT         4 '1'
 0008    | OP_CONSTANT         5 '0'
 0010    | OP_CONSTANT         5 '0'
-0012    | OP_CONSTANT         4 '1'
-0014    | OP_NEGATE
-0015    | OP_INVOKE        (6 args)    1 'from_parts'
-0018    | OP_POP
-0019    2 OP_NIL
-0020    | OP_RETURN
+0012    | OP_CONSTANT         6 '-1'
+0014    | OP_INVOKE        (6 args)    1 'from_parts'
+0017    | OP_POP
+0018    2 OP_NIL
+0019    | OP_RETURN
 assertion failed: Second must be between 0-59: -1
 [line 82] in from_parts()
 [line 1] in script

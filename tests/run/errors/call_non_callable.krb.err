@@ -1,1 +1,1 @@
-[line 1] Error at ')': f64 isn't callable.
+[line 1] Error at ')': i64 isn't callable.

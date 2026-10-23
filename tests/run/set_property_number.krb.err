@@ -1,1 +1,1 @@
-[line 1] Error at 'value': Can't set '.value' on a f64.
+[line 1] Error at 'value': Can't set '.value' on a i64.

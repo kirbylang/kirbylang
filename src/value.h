@@ -49,6 +49,9 @@ typedef struct {
 #define NUMBER_F64_VAL(value)                                                  \
   ((Value){.type = VAL_NUMBER,                                                 \
            .as.number = {.kind = NUMBER_KIND_F64, .as = {.f64 = value}}})
+#define NUMBER_I64_VAL(value)                                                  \
+  ((Value){.type = VAL_NUMBER,                                                 \
+           .as.number = {.kind = NUMBER_KIND_I64, .as = {.i64 = (value)}}})
 #define NUMBER_U8_VAL(value)                                                   \
   ((Value){.type = VAL_NUMBER,                                                 \
            .as.number = {.kind = NUMBER_KIND_U8,                               \

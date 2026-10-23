@@ -1,1 +1,1 @@
-[line 2] Error at '+': '+' needs two numbers of the same type or two strings, got f32 and f64.
+[line 2] Error at '+': '+' needs two numbers of the same type or two strings, got f32 and i64.

@@ -1,6 +1,6 @@
-fun id(v: f64): f64 = v;
+fun id(v: i64): i64 = v;
 
-fun inFunction(): f64 {
+fun inFunction(): i64 {
     let a = 1;
     let x = { let n = 2; n + a };
     x
@@ -10,5 +10,5 @@ fun inFunction(): f64 {
 @println([0, { let n = 2; n }]);
 @println(id({ let n = 2; n * 3 }));
 @println(inFunction());
-@println(id({ let n = 5; let f = fun (): f64 { n }; f() }));
+@println(id({ let n = 5; let f = fun (): i64 { n }; f() }));
 @println(id(1 + { let a = 1; { let b = 2; a + b } }));

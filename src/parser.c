@@ -276,10 +276,27 @@ static AstNode *number(Parser *parser, bool canAssign) {
     numberKindFromName(name, nameLength, &kind);
   }
 
+  bool isPlainInteger = plain && !hasPoint;
+
+  if (isPlainInteger)
+    kind = NUMBER_KIND_I64;
+
   AstNode *node = astAlloc(NODE_LITERAL, parser->previous.line);
   node->as.literal.kind = LITERAL_NUMBER;
   node->as.literal.as.number.kind = kind;
-  node->as.literal.as.number.literalIsPlainInteger = plain && !hasPoint;
+  node->as.literal.as.number.literalIsPlainInteger = isPlainInteger;
+
+  if (isPlainInteger) {
+    errno = 0;
+    unsigned long long value = strtoull(text, NULL, 10);
+    bool fits = errno == 0;
+
+    node->as.literal.as.number.literalValue = value;
+    node->as.literal.as.number.literalValueFits = fits;
+    node->as.literal.as.number.as.u64 =
+        fits && value <= numberKindMax(NUMBER_KIND_I64) ? value : 0;
+    return node;
+  }
 
   if (numberKindInfo(kind)->isFloat) {
     if (kind == NUMBER_KIND_F32) {
@@ -291,12 +308,6 @@ static AstNode *number(Parser *parser, bool canAssign) {
       node->as.literal.as.number.as.f64 = single;
     } else {
       node->as.literal.as.number.as.f64 = strtod(text, NULL);
-    }
-
-    if (node->as.literal.as.number.literalIsPlainInteger) {
-      errno = 0;
-      node->as.literal.as.number.literalValue = strtoull(text, NULL, 10);
-      node->as.literal.as.number.literalValueFits = errno == 0;
     }
 
     return node;

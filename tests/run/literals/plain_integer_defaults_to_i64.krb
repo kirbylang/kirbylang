@@ -1,0 +1,15 @@
+@println(@typeof(5));
+@println(@typeof(5.0));
+@println(@typeof(-5));
+@println(@typeof(5i32));
+@println(@typeof([1, 2, 3]));
+let big = 9223372036854775807;
+@println(big);
+@println(big + 1);
+let count = 10;
+@println(count / 4);
+@println(-7 / 2);
+@println(-7 % 2);
+@println(7 / 2.0);
+@println(1 + 2.5);
+@println(@typeof(1 + 2.5));
