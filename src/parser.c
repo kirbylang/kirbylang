@@ -251,24 +251,31 @@ static AstNode *number(Parser *parser, bool canAssign) {
 
   const char *text = parser->previous.start;
   int length = parser->previous.length;
-  NumberKind kind = NUMBER_KIND_F64;
-  bool plain = parser->previous.type == TOKEN_NUMBER;
-  bool hasPoint = false;
-  int digitLength = 0;
 
-  while (digitLength < length &&
-         ((text[digitLength] >= '0' && text[digitLength] <= '9') ||
-          text[digitLength] == '.')) {
-    hasPoint = hasPoint || text[digitLength] == '.';
-    digitLength++;
+  NumberKind kind = NUMBER_KIND_I64;
+
+  bool hasSuffix = parser->previous.type == TOKEN_NUMBER_SUFFIXED;
+  bool hasPoint = false;
+
+  int digitsLength = 0;
+
+  while (digitsLength < length &&
+         ((text[digitsLength] >= '0' && text[digitsLength] <= '9') ||
+          text[digitsLength] == '.')) {
+    hasPoint = hasPoint || text[digitsLength] == '.';
+    digitsLength++;
   }
 
-  if (!plain) {
+  if (hasPoint) {
+    kind = NUMBER_KIND_F64;
+  }
+
+  if (hasSuffix) {
     char name[8] = {0};
-    int nameLength = length - digitLength;
+    int nameLength = length - digitsLength;
 
     if (nameLength > 0 && nameLength < (int)sizeof(name)) {
-      memcpy(name, text + digitLength, (size_t)nameLength);
+      memcpy(name, text + digitsLength, (size_t)nameLength);
       if (name[0] >= 'A' && name[0] <= 'Z')
         name[0] = (char)(name[0] - 'A' + 'a');
     }
@@ -276,10 +283,7 @@ static AstNode *number(Parser *parser, bool canAssign) {
     numberKindFromName(name, nameLength, &kind);
   }
 
-  bool isPlainInteger = plain && !hasPoint;
-
-  if (isPlainInteger)
-    kind = NUMBER_KIND_I64;
+  bool isPlainInteger = !hasSuffix && !hasPoint;
 
   AstNode *node = astAlloc(NODE_LITERAL, parser->previous.line);
   node->as.literal.kind = LITERAL_NUMBER;
@@ -317,11 +321,11 @@ static AstNode *number(Parser *parser, bool canAssign) {
   errno = 0;
   unsigned long long value = 0;
   bool valid =
-      digitLength > 0 && digitLength < (int)sizeof(digits) && !hasPoint;
+      digitsLength > 0 && digitsLength < (int)sizeof(digits) && !hasPoint;
 
   if (valid) {
-    memcpy(digits, text, (size_t)digitLength);
-    digits[digitLength] = '\0';
+    memcpy(digits, text, (size_t)digitsLength);
+    digits[digitsLength] = '\0';
     value = strtoull(digits, NULL, 10);
     valid = errno == 0 && value <= numberKindMax(kind);
   }
