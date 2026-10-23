@@ -23,7 +23,7 @@
 0042    | OP_DEFINE_GLOBAL    0 'chars'
 0044   18 OP_CONSTANT        16 '0'
 0046    | OP_GET_LOCAL        1
-0048    | OP_GET_GLOBAL      17 '@len'
+0048    | OP_GET_GLOBAL      17 '@arrLen'
 0050    | OP_GET_GLOBAL       0 'chars'
 0052    | OP_CALL             1
 0054    | OP_LESS

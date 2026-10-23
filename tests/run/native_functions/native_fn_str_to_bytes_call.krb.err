@@ -4,7 +4,7 @@
 0004    | OP_CALL             1
 0006    | OP_DEFINE_GLOBAL    0 'bytes'
 0008    2 OP_GET_GLOBAL       3 '@println'
-0010    | OP_GET_GLOBAL       4 '@len'
+0010    | OP_GET_GLOBAL       4 '@arrLen'
 0012    | OP_GET_GLOBAL       0 'bytes'
 0014    | OP_CALL             1
 0016    | OP_CALL             1

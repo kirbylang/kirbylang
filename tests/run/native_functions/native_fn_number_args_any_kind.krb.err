@@ -37,19 +37,19 @@
 0065    | OP_GET_GLOBAL      13 '@strSlice'
 0067    | OP_CONSTANT        14 'hello'
 0069    | OP_CONSTANT         5 '1'
-0071    | OP_CONSTANT        15 '3'
+0071    | OP_CONSTANT         3 '3'
 0073    | OP_CALL             3
 0075    | OP_CALL             1
 0077    | OP_POP
 0078    8 OP_GET_GLOBAL       7 '@println'
-0080    | OP_GET_GLOBAL      16 '@isNumber'
-0082    | OP_CONSTANT        17 '5'
+0080    | OP_GET_GLOBAL      15 '@isNumber'
+0082    | OP_CONSTANT        16 '5'
 0084    | OP_CALL             1
 0086    | OP_CALL             1
 0088    | OP_POP
 0089    9 OP_GET_GLOBAL       7 '@println'
-0091    | OP_GET_GLOBAL      16 '@isNumber'
-0093    | OP_CONSTANT        18 '5'
+0091    | OP_GET_GLOBAL      15 '@isNumber'
+0093    | OP_CONSTANT        17 '5'
 0095    | OP_CALL             1
 0097    | OP_CALL             1
 0099    | OP_POP

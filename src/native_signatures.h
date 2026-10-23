@@ -16,8 +16,11 @@ typedef enum {
   NATIVE_BOOL,
   NATIVE_STRING,
   NATIVE_F64,
+  NATIVE_I64,
   NATIVE_NUMBER,
-  NATIVE_LIST
+  NATIVE_LIST,
+  // A placeholder until generic type parameters
+  NATIVE_ANY_ARRAY
 } NativePrimitive;
 
 typedef struct {

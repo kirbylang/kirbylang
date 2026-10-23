@@ -1,6 +1,6 @@
 #!/usr/bin/env krb run
 
-fun fib(n: f64): f64 {
+fun fib(n: i64): i64 {
   if (n < 2) return n;
 
   fib(n - 2) + fib(n - 1)
@@ -13,7 +13,7 @@ let start = @clock();
 
 @println($"{arg}\n");
 
-let n = @parseNumber(arg);
+let n = @parseInt(arg);
 
 let end = @clock();
 let time_taken = end - start;

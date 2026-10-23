@@ -2,6 +2,8 @@
 #define _POSIX_C_SOURCE 200112L
 
 #include "sys/stat.h"
+#include <ctype.h>
+#include <errno.h>
 #include <limits.h>
 #include <math.h>
 #include <stdarg.h>
@@ -145,7 +147,7 @@ static Value randBetweenNative(VM *vm, int argCount, Value *args) {
   double r = (double)rand() / (double)RAND_MAX; // [0, 1]
   double result = min + r * (max - min);        // [min, max)
 
-  return NUMBER_F64_VAL(ceil(result));
+  return NUMBER_I64_VAL((int64_t)ceil(result));
 }
 
 static Value ceilNative(VM *vm, int argCount, Value *args) {
@@ -206,7 +208,7 @@ static Value nowNative(VM *vm, int argCount, Value *args) {
 
   time_t t = time(NULL);
 
-  return NUMBER_F64_VAL(t);
+  return NUMBER_I64_VAL((int64_t)t);
 }
 
 static Value getEnvNative(VM *vm, int argCount, Value *args) {
@@ -247,24 +249,18 @@ static Value setEnvNative(VM *vm, int argCount, Value *args) {
   return NIL_VAL; // or you could return true if you prefer
 }
 
-static Value lenNative(VM *vm, int argCount, Value *args) {
-  assertArgCount(vm, "@len", 1, argCount);
+static Value strLenNative(VM *vm, int argCount, Value *args) {
+  assertArgCount(vm, "@strLen", 1, argCount);
+  assertArgIsString(vm, "@strLen", args, 0);
 
-  Value name = args[0];
+  return NUMBER_I64_VAL(AS_STRING(args[0])->length);
+}
 
-  if (IS_STRING(name)) {
-    int length = AS_STRING(name)->length;
+static Value arrLenNative(VM *vm, int argCount, Value *args) {
+  assertArgCount(vm, "@arrLen", 1, argCount);
+  assertArgIsArray(vm, "@arrLen", args, 0);
 
-    return NUMBER_F64_VAL(length);
-  } else if (IS_ARRAY(name)) {
-    ObjArray *array = AS_ARRAY(name);
-    int length = array->count;
-    return NUMBER_F64_VAL(length);
-  } else {
-    runtimeError(vm,
-                 "function len expects argument 1 to be a string or array.");
-    exit(EXIT_CODE_RUNTIME_ERR);
-  }
+  return NUMBER_I64_VAL(AS_ARRAY(args[0])->count);
 }
 
 // @print, @println, @eprint, and @eprintln write a value the way the print
@@ -881,19 +877,108 @@ static Value argcNative(VM *vm, int argCount, Value *args) {
 
   int argc = vm->argc;
 
-  return NUMBER_F64_VAL(argc);
+  return NUMBER_I64_VAL(argc);
 }
 
-static Value parseNumberNative(VM *vm, int argCount, Value *args) {
-  assertArgCount(vm, "@parseNumber", 1, argCount);
-  assertArgIsString(vm, "@parseNumber", args, 0);
+typedef enum {
+  // An optional sign and digits, such as `-42`
+  NUMBER_TEXT_WHOLE,
+  // A whole number, then an optional `.` and digits, then an optional
+  // exponent, such as `-1.5`, `2.5e-4` or `1E3`
+  NUMBER_TEXT_DECIMAL,
+} NumberTextKind;
 
-  Value value = args[0];
+// Moves `c` past one or more digits. Returns false if there are none.
+static bool skipDigits(const char **c, const char *end) {
+  if (*c == end || !isdigit((unsigned char)**c))
+    return false;
 
-  char *valueString = AS_CSTRING(value);
-  int valueInt = strtol(valueString, NULL, 10);
+  while (*c < end && isdigit((unsigned char)**c))
+    (*c)++;
 
-  return NUMBER_F64_VAL(valueInt);
+  return true;
+}
+
+static void skipSign(const char **c, const char *end) {
+  if (*c < end && (**c == '+' || **c == '-'))
+    (*c)++;
+}
+
+// Whether all of `text` is a number of `kind`. Nothing else, such as spaces,
+// may come before or after.
+static bool isNumberText(const char *text, int length, NumberTextKind kind) {
+  const char *c = text;
+  const char *end = text + length;
+
+  skipSign(&c, end);
+
+  if (!skipDigits(&c, end))
+    return false;
+
+  if (kind == NUMBER_TEXT_DECIMAL) {
+    if (c < end && *c == '.') {
+      c++;
+
+      if (!skipDigits(&c, end))
+        return false;
+    }
+
+    if (c < end && (*c == 'e' || *c == 'E')) {
+      c++;
+      skipSign(&c, end);
+
+      if (!skipDigits(&c, end))
+        return false;
+    }
+  }
+
+  return c == end;
+}
+
+static void parseArgError(VM *vm, const char *function, const char *expectation,
+                          ObjString *text) {
+  runtimeError(vm, "function %s expects argument 1 to be %s but got \"%.*s\".",
+               function, expectation, text->length, text->chars);
+  exit(EXIT_CODE_RUNTIME_ERR);
+}
+
+static Value parseIntNative(VM *vm, int argCount, Value *args) {
+  assertArgCount(vm, "@parseInt", 1, argCount);
+  assertArgIsString(vm, "@parseInt", args, 0);
+
+  ObjString *text = AS_STRING(args[0]);
+
+  if (!isNumberText(text->chars, text->length, NUMBER_TEXT_WHOLE))
+    parseArgError(vm, "@parseInt", "a whole number", text);
+
+  errno = 0;
+  long long value = strtoll(text->chars, NULL, 10);
+
+  if (errno == ERANGE)
+    parseArgError(vm, "@parseInt",
+                  "a whole number from -9223372036854775808 to "
+                  "9223372036854775807",
+                  text);
+
+  return NUMBER_I64_VAL((int64_t)value);
+}
+
+static Value parseFloatNative(VM *vm, int argCount, Value *args) {
+  assertArgCount(vm, "@parseFloat", 1, argCount);
+  assertArgIsString(vm, "@parseFloat", args, 0);
+
+  ObjString *text = AS_STRING(args[0]);
+
+  if (!isNumberText(text->chars, text->length, NUMBER_TEXT_DECIMAL))
+    parseArgError(vm, "@parseFloat", "a number such as 1.5 or 2.5e-4", text);
+
+  errno = 0;
+  double value = strtod(text->chars, NULL);
+
+  if (errno == ERANGE && isinf(value))
+    parseArgError(vm, "@parseFloat", "a number small enough for an f64", text);
+
+  return NUMBER_F64_VAL(value);
 }
 
 static Value numberToStringNative(VM *vm, int argCount, Value *args) {
@@ -1247,11 +1332,7 @@ static Value strIndexOfNative(VM *vm, int argCount, Value *args) {
   int index =
       findBytes(string->chars, string->length, 0, sub->chars, sub->length);
 
-  if (index < 0) {
-    return NIL_VAL;
-  }
-
-  return NUMBER_F64_VAL(index);
+  return NUMBER_I64_VAL(index);
 }
 
 // Asserts a number is a whole position in the string: 0 up to and including
@@ -1410,7 +1491,8 @@ const NativeDefinition nativeDefinitions[] = {
     {"@fileExists", fileExistsNative},
     {"@getenv", getEnvNative},
     {"@setenv", setEnvNative},
-    {"@len", lenNative},
+    {"@strLen", strLenNative},
+    {"@arrLen", arrLenNative},
     {"@typeof", typeofNative},
     {"@print", printNative},
     {"@println", printlnNative},
@@ -1418,7 +1500,8 @@ const NativeDefinition nativeDefinitions[] = {
     {"@eprintln", eprintlnNative},
     {"@argv", argvNative},
     {"@argc", argcNative},
-    {"@parseNumber", parseNumberNative},
+    {"@parseInt", parseIntNative},
+    {"@parseFloat", parseFloatNative},
     {"@instanceOf", instanceOfNative},
     {"@prompt", promptNative},
     {"@stdin", stdinNative},

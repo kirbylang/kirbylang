@@ -1,7 +1,7 @@
-Get the current number of seconds since 1970-01-01.
+Get the current number of whole seconds since 1970-01-01, as an `i64`.
 
 ```kirby
-let now: f64 = @now();
+let now: i64 = @now();
 
 @println(now);
 ```

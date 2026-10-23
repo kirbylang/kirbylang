@@ -1,5 +1,5 @@
 let bytes: Array = @strToBytes("AB");
-@println(@len(bytes));
+@println(@arrLen(bytes));
 @println(bytes[0]);
 @println(bytes[1]);
 @println(@typeof(bytes[0]));

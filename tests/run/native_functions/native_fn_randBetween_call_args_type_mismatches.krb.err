@@ -1,2 +1,2 @@
-[line 1] Error: Expected f64, got bool.
-[line 1] Error: Expected f64, got bool.
+[line 1] Error: Expected i64, got bool.
+[line 1] Error: Expected i64, got bool.

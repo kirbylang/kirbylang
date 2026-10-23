@@ -12,16 +12,16 @@
 0020    | OP_SET_INDEX
 0021    | OP_POP
 0022    4 OP_GET_GLOBAL       0 'nums'
-0024    | OP_CONSTANT         7 '2'
-0026    | OP_CONSTANT         8 '30'
+0024    | OP_CONSTANT         2 '2'
+0026    | OP_CONSTANT         7 '30'
 0028    | OP_SET_INDEX
 0029    | OP_POP
 0030    5 OP_GET_GLOBAL       0 'nums'
-0032    | OP_CONSTANT         9 '0'
-0034    | OP_CONSTANT        10 '10'
+0032    | OP_CONSTANT         8 '0'
+0034    | OP_CONSTANT         9 '10'
 0036    | OP_SET_INDEX
 0037    | OP_POP
-0038    6 OP_GET_GLOBAL      11 '@println'
+0038    6 OP_GET_GLOBAL      10 '@println'
 0040    | OP_GET_GLOBAL       0 'nums'
 0042    | OP_CALL             1
 0044    | OP_POP

@@ -1,4 +1,4 @@
-fun nested(): f64 {
+fun nested(): i64 {
     let a = {
         let b = {
             let c = 1;
@@ -9,7 +9,7 @@ fun nested(): f64 {
     a
 }
 
-fun afterLocals(): f64 {
+fun afterLocals(): i64 {
     let x = 100;
     let y = { let n = 5; x + n };
     x + y

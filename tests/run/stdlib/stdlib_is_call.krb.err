@@ -15,31 +15,38 @@
 0024    | OP_POP
 0025    3 OP_GET_GLOBAL       0 '@println'
 0027    | OP_GET_GLOBAL       1 '@is'
-0029    | OP_CONSTANT         5 '12345'
+0029    | OP_CONSTANT         5 '12.5'
 0031    | OP_CONSTANT         6 'f64'
 0033    | OP_CALL             2
 0035    | OP_CALL             1
 0037    | OP_POP
 0038    4 OP_GET_GLOBAL       0 '@println'
 0040    | OP_GET_GLOBAL       1 '@is'
-0042    | OP_CONSTANT         7 '123'
-0044    | OP_CONSTANT         8 'u8'
+0042    | OP_CONSTANT         7 '12345'
+0044    | OP_CONSTANT         8 'i64'
 0046    | OP_CALL             2
 0048    | OP_CALL             1
 0050    | OP_POP
 0051    5 OP_GET_GLOBAL       0 '@println'
 0053    | OP_GET_GLOBAL       1 '@is'
-0055    | OP_GET_GLOBAL       9 '@ceil'
-0057    | OP_CONSTANT        10 'function'
+0055    | OP_CONSTANT         9 '123'
+0057    | OP_CONSTANT        10 'u8'
 0059    | OP_CALL             2
 0061    | OP_CALL             1
 0063    | OP_POP
 0064    6 OP_GET_GLOBAL       0 '@println'
 0066    | OP_GET_GLOBAL       1 '@is'
-0068    | OP_NIL
-0069    | OP_CONSTANT        11 'nil'
-0071    | OP_CALL             2
-0073    | OP_CALL             1
-0075    | OP_POP
-0076    7 OP_NIL
-0077    | OP_RETURN
+0068    | OP_GET_GLOBAL      11 '@ceil'
+0070    | OP_CONSTANT        12 'function'
+0072    | OP_CALL             2
+0074    | OP_CALL             1
+0076    | OP_POP
+0077    7 OP_GET_GLOBAL       0 '@println'
+0079    | OP_GET_GLOBAL       1 '@is'
+0081    | OP_NIL
+0082    | OP_CONSTANT        13 'nil'
+0084    | OP_CALL             2
+0086    | OP_CALL             1
+0088    | OP_POP
+0089    8 OP_NIL
+0090    | OP_RETURN

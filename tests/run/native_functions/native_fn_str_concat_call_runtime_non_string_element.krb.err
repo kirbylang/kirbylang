@@ -15,5 +15,5 @@
 0025    | OP_POP
 0026    5 OP_NIL
 0027    | OP_RETURN
-function strConcat expects every element of argument 1 to be a string but element 1 is a f64.
+function strConcat expects every element of argument 1 to be a string but element 1 is a i64.
 [line 4] in script

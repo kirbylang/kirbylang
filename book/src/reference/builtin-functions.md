@@ -2,7 +2,7 @@
 
 Kirby has several builtin functions (native functions) available.
 
-Builtin functions are prefixed, making them easy to identifier vs user code functions. e.g. `@len`, `@getenv`
+Builtin functions are prefixed, making them easy to identifier vs user code functions. e.g. `@strLen`, `@getenv`
 
 This also makes `@` a reserved character in identifiers.
 
@@ -97,6 +97,15 @@ Returns if an array is empty or not.
 @println(@arrIsEmpty([1, 2, 3]));
 ```
 
+### `@arrLen`
+
+Get the number of elements in an array, as an `i64`.
+
+```kirby
+@println(@arrLen([1, 2, 3])); // 3
+@println(@arrLen([])); // 0
+```
+
 ### `@arrJoin`
 
 Concatenates every element of an array into one string, separated by a separator string. Every element must already be a string.
@@ -181,10 +190,10 @@ Get the number of seconds that have passed since the program started.
 
 ### `@now`
 
-Get the current number of seconds since 1970-01-01.
+Get the current number of whole seconds since 1970-01-01.
 
 ```kirby
-let now: f64 = @now();
+let now: i64 = @now();
 
 @println(now);
 ```
@@ -244,18 +253,6 @@ Exit (code 70) with an error message.
 
 ```kirby
 @panic("unreachable state"); // panic: unreachable state
-```
-
-## General
-
-### `@len`
-
-Get the length of a string or array.
-
-```kirby
-@println(@len("Hello, World!"));
-
-@println(@len([1, 2 ,3]));
 ```
 
 ## IO
@@ -460,12 +457,23 @@ Convert a number of any type to a string.
 @println(@numberToString(255u8)); // "255"
 ```
 
-### `@parseNumber`
+### `@parseFloat`
 
-Parse a string into a number.
+Parse a number such as `1.5` or `-2` into an `f64`.
 
 ```kirby
-@println(@parseNumber("123")); // 123
+@println(@parseFloat("1.5")); // 1.5
+@println(@parseFloat("42")); // 42
+@println(@parseFloat("2.5e-4")); // 0.00025
+```
+
+### `@parseInt`
+
+Parse a string of digits (with an optional sign `+` or `-`) into an `i64`.
+
+```kirby
+@println(@parseInt("123")); // 123
+@println(@parseInt("-45")); // -45
 ```
 
 ## Random
@@ -488,7 +496,7 @@ Randomly get 0 or 1.
 
 ### `@randBetween`
 
-Get a random number between min and max.
+Get a random whole number from min to max, as an `i64`.
 
 ```kirby
 @println(@randBetween(1, 10)); // 3
@@ -524,11 +532,11 @@ Returns if a string ends with another string.
 
 ### `@strIndexOf`
 
-Get the position where a string first appears in another string, counting from 0. Returns `nil` if it does not appear.
+Get the position where a string first appears in another string, counting from 0, as an `i64`. Returns `-1` if it does not appear.
 
 ```kirby
 @println(@strIndexOf("hello world", "world")); // 6
-@println(@strIndexOf("hello", "xyz")); // nil
+@println(@strIndexOf("hello", "xyz")); // -1
 ```
 
 ### `@strToBytes`
@@ -548,6 +556,15 @@ Returns if a string's length is zero or not.
 ```kirby
 @println(@strIsEmpty("")); // true
 @println(@strIsEmpty("Hello World")); // false
+```
+
+### `@strLen`
+
+Get the number of bytes in a string, as an `i64`.
+
+```kirby
+@println(@strLen("Hello, World!")); // 13
+@println(@strLen("")); // 0
 ```
 
 ### `@strRepeat`

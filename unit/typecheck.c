@@ -186,7 +186,7 @@ static void test_literals(void) {
   TypeEnv *env = checkProgram("var a = 5; var b = \"hi\"; var c = true; "
                               "var d = nil;");
   assert(!typchkHadError());
-  assert(typchkTypeEnvLookup(env, tokenFromCString("a")) == typeF64());
+  assert(typchkTypeEnvLookup(env, tokenFromCString("a")) == typeNumber(NUMBER_KIND_I64));
   assert(typchkTypeEnvLookup(env, tokenFromCString("b")) == typeString());
   assert(typchkTypeEnvLookup(env, tokenFromCString("c")) == typeBool());
   assert(typchkTypeEnvLookup(env, tokenFromCString("d")) == typeUnit());
@@ -198,8 +198,8 @@ static void test_binary_arithmetic_and_concat(void) {
   TypeEnv *env = checkProgram(
       "var sum = 1 + 2; var product = 3 * 4; var greeting = \"a\" + \"b\";");
   assert(!typchkHadError());
-  assert(typchkTypeEnvLookup(env, tokenFromCString("sum")) == typeF64());
-  assert(typchkTypeEnvLookup(env, tokenFromCString("product")) == typeF64());
+  assert(typchkTypeEnvLookup(env, tokenFromCString("sum")) == typeNumber(NUMBER_KIND_I64));
+  assert(typchkTypeEnvLookup(env, tokenFromCString("product")) == typeNumber(NUMBER_KIND_I64));
   assert(typchkTypeEnvLookup(env, tokenFromCString("greeting")) ==
          typeString());
   typchkTypeEnvDestroy(env);
@@ -256,7 +256,7 @@ static void test_unary(void) {
   assert(typchkTypeEnvLookup(env, tokenFromCString("a")) == typeBool());
   assert(typchkTypeEnvLookup(env, tokenFromCString("b")) == typeBool());
   assert(typchkTypeEnvLookup(env, tokenFromCString("c")) == typeBool());
-  assert(typchkTypeEnvLookup(env, tokenFromCString("d")) == typeF64());
+  assert(typchkTypeEnvLookup(env, tokenFromCString("d")) == typeNumber(NUMBER_KIND_I64));
   typchkTypeEnvDestroy(env);
 }
 
@@ -339,11 +339,26 @@ static void test_native_call_with_a_signature_is_checked(void) {
 
 static void test_native_call_without_a_signature_is_unchecked(void) {
   typchkResetError();
-  // `@len` needs generics, so it has no signature -- the call is presumed
+  // `@arrPop` needs generics, so it has no signature -- the call is presumed
   // native, not an error, and infers as "no opinion."
-  TypeEnv *env = checkProgram("var x = @len(\"abc\");");
+  TypeEnv *env = checkProgram("var x = @arrPop([1]);");
   assert(!typchkHadError());
   assert(typchkTypeEnvLookup(env, tokenFromCString("x")) == NULL);
+  typchkTypeEnvDestroy(env);
+}
+
+static void test_native_any_array_param_accepts_every_array(void) {
+  typchkResetError();
+  TypeEnv *env = checkProgram("var a = @arrLen([1, 2]); var b = @arrLen([]); "
+                              "var c = @arrLen([\"x\"]);");
+  assert(!typchkHadError());
+  assert(typchkTypeEnvLookup(env, tokenFromCString("a")) ==
+         typeNumber(NUMBER_KIND_I64));
+  typchkTypeEnvDestroy(env);
+
+  typchkResetError();
+  env = checkProgram("var d = @arrLen(\"abc\");");
+  assert(typchkHadError());
   typchkTypeEnvDestroy(env);
 }
 
@@ -559,8 +574,8 @@ static void test_array_literal_and_index(void) {
   assert(!typchkHadError());
   Type *numsType = typchkTypeEnvLookup(env, tokenFromCString("nums"));
   assert(numsType != NULL && numsType->kind == TYPE_ARRAY);
-  assert(numsType->as.array.elementType == typeF64());
-  assert(typchkTypeEnvLookup(env, tokenFromCString("first")) == typeF64());
+  assert(numsType->as.array.elementType == typeNumber(NUMBER_KIND_I64));
+  assert(typchkTypeEnvLookup(env, tokenFromCString("first")) == typeNumber(NUMBER_KIND_I64));
   Type *emptyType = typchkTypeEnvLookup(env, tokenFromCString("empty"));
   assert(emptyType != NULL && emptyType->kind == TYPE_ARRAY);
   assert(emptyType->as.array.elementType == NULL);
@@ -612,7 +627,7 @@ static void test_block_expression(void) {
   typchkResetError();
   TypeEnv *env = checkProgram("var result = { var a = 1; var b = 2; a + b };");
   assert(!typchkHadError());
-  assert(typchkTypeEnvLookup(env, tokenFromCString("result")) == typeF64());
+  assert(typchkTypeEnvLookup(env, tokenFromCString("result")) == typeNumber(NUMBER_KIND_I64));
   typchkTypeEnvDestroy(env);
 }
 
@@ -745,7 +760,7 @@ static void test_unresolved_variable_is_presumed_native_not_an_error(void) {
 static void test_nested_function_and_closure(void) {
   typchkResetError();
   TypeEnv *env = checkProgram(
-      "fun outer(): fun () => f64 { var a = 123; fun inner(): f64 { "
+      "fun outer(): fun () => i64 { var a = 123; fun inner(): i64 { "
       "return a; } return inner; }");
   assert(!typchkHadError());
   typchkTypeEnvDestroy(env);
@@ -1055,13 +1070,13 @@ static void test_program_trait_coherence_duplicate_fails(void) {
 static void test_program_trait_supertrait_satisfied(void) {
   typchkResetError();
   bool ok = typecheckSource(
-      "struct Money { pub var cents: f64; }\n"
+      "struct Money { pub var cents: i64; }\n"
       "impl Eq for Money {\n"
       "  pub fun equals(self, other: Self): bool = self.cents == "
       "other.cents;\n"
       "}\n"
       "impl Ord for Money {\n"
-      "  pub fun cmp(self, other: Self): f64 = self.cents - other.cents;\n"
+      "  pub fun cmp(self, other: Self): i64 = self.cents - other.cents;\n"
       "}\n"
       "var a = Money { cents: 1 };\n"
       "var b = Money { cents: 2 };\n"
@@ -1072,9 +1087,9 @@ static void test_program_trait_supertrait_satisfied(void) {
 static void test_program_trait_supertrait_missing_fails(void) {
   typchkResetError();
   bool ok = typecheckSource(
-      "struct Money { pub var cents: f64; }\n"
+      "struct Money { pub var cents: i64; }\n"
       "impl Ord for Money {\n"
-      "  pub fun cmp(self, other: Self): f64 = self.cents - other.cents;\n"
+      "  pub fun cmp(self, other: Self): i64 = self.cents - other.cents;\n"
       "}\n");
   assert(!ok);
 }
@@ -1340,6 +1355,7 @@ int main(void) {
   test_function_call_wrong_arity_errors();
   test_native_call_with_a_signature_is_checked();
   test_native_call_without_a_signature_is_unchecked();
+  test_native_any_array_param_accepts_every_array();
   test_struct_instance_field_and_method_access();
   test_struct_static_method_access();
   test_local_variable_shadows_struct_name_for_get();

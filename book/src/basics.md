@@ -27,23 +27,70 @@ let greeting: string = "Hello World";
 
 ## Builtin Types
 
-| Type     |                          Examples | Notes                                              |
-| :------- | --------------------------------: | -------------------------------------------------- |
-| `string` |                   `"Hello World"` |                                                    |
-| `f64`    |               `123f64`, `123.456` | The `f64` suffix is optional                       |
-| `u8`     |                  `123u8`, `255U8` |                                                    |
-| `i32`    |                  `123i32`, `7I32` | Signed 32-bit integer                              |
-| `i64`    |                          `123i64` | Signed 64-bit integer                              |
-| `u64`    |                          `123u64` | Unsigned 64-bit integer                            |
-| `u16`    |                          `123u16` | Unsigned 16-bit integer                            |
-| `u32`    |                          `123u32` | Unsigned 32-bit integer                            |
-| `i8`     |                           `123i8` | Signed 8-bit integer                               |
-| `i16`    |                          `123i16` | Signed 16-bit integer                              |
-| `f32`    |                `123f32`, `1.5f32` | 32-bit float. A decimal literal needs the suffix   |
-| `unit`   |                              `()` |                                                    |
-| `bool`   |                   `true`, `false` |                                                    |
-| `Array`  | `[1, 2, 3]`, `["Hello", "World"]` | A dynamically sized collection of homonogous types |
-| `nil`    |                             `nil` | This will be deprecated in the future.             |
+| Type     |                          Examples | Notes                                                 |
+| :------- | --------------------------------: | ----------------------------------------------------- |
+| `string` |                   `"Hello World"` |                                                       |
+| `f64`    |               `123f64`, `123.456` | 64-bit float. The default for decimal literals        |
+| `u8`     |                  `123u8`, `255U8` |                                                       |
+| `i32`    |                  `123i32`, `7I32` | Signed 32-bit integer                                 |
+| `i64`    |                   `123`, `123i64` | Signed 64-bit integer. The default for whole numbers  |
+| `u64`    |                          `123u64` | Unsigned 64-bit integer                               |
+| `u16`    |                          `123u16` | Unsigned 16-bit integer                               |
+| `u32`    |                          `123u32` | Unsigned 32-bit integer                               |
+| `i8`     |                           `123i8` | Signed 8-bit integer                                  |
+| `i16`    |                          `123i16` | Signed 16-bit integer                                 |
+| `f32`    |                `123f32`, `1.5f32` | 32-bit float. A decimal literal needs the suffix      |
+| `unit`   |                              `()` |                                                       |
+| `bool`   |                   `true`, `false` |                                                       |
+| `Array`  | `[1, 2, 3]`, `["Hello", "World"]` | A dynamically sized collection of homonogous types    |
+| `nil`    |                             `nil` | This will be deprecated in the future.                |
+
+### Number Literals
+
+A whole number such as `42` is an `i64`, and a number with a decimal point such
+as `1.5` is an `f64`.
+
+```krb
+let count = 42;    // i64
+let ratio = 1.5;   // f64
+```
+
+Where a whole number literal is used as another number type, it becomes that
+type. That includes a literal next to a number of another type.
+
+```krb
+let byte: u8 = 65;
+let total: f64 = 100;
+
+let price: f64 = 2.5;
+let doubled = price * 2;          // 2 is an f64 here
+let floats = [1.5, 2, 3];         // the 2 and 3 are f64s here
+```
+
+Arithmetic made only of whole number literals is an `i64`, even where another
+type is expected. Write a decimal point to make it an `f64`.
+
+```krb
+let half: f64 = 7.0 / 2.0;        // 3.5
+let mixed = [1.0, 2.5, 3.0];
+```
+
+A variable keeps its own type. Cast it with `as` to use it as another type.
+
+```krb
+let count = 10;
+let average: f64 = (count as f64) / 4;
+```
+
+Dividing two integers drops the remainder, rounding toward zero. Integer math
+that goes past the type's range wraps around.
+
+```krb
+@println(7 / 2);    // 3
+@println(-7 / 2);   // -3
+@println(7 % 2);    // 1
+@println(7.0 / 2);  // 3.5
+```
 
 ### Casting Number Types
 

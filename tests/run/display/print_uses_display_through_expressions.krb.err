@@ -30,7 +30,7 @@
 0055    | OP_POP
 0056   16 OP_GET_GLOBAL      10 '@println'
 0058    | OP_GET_GLOBAL       6 'boxes'
-0060    | OP_CONSTANT         7 '1'
+0060    | OP_CONSTANT        11 '1'
 0062    | OP_GET_INDEX
 0063    | OP_INVOKE        (0 args)    4 'toString'
 0066    | OP_CALL             1
@@ -38,7 +38,7 @@
 0069   17 OP_GET_GLOBAL      10 '@println'
 0071    | OP_GET_GLOBAL       2 'Box'
 0073    | OP_CONSTANT         3 'value'
-0075    | OP_CONSTANT        11 '4'
+0075    | OP_CONSTANT        12 '4'
 0077    | OP_STRUCT_INIT      1
 0079    | OP_GET_LOCAL        2
 0081    | OP_CLOSE_BLOCK_EXPR    1

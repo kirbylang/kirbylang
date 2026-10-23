@@ -1,7 +1,7 @@
-fun outer (): fun () => f64 {
+fun outer (): fun () => i64 {
     var a = 123;
 
-    fun inner (): f64 {
+    fun inner (): i64 {
         return a;
     }
 

@@ -1,0 +1,1 @@
+let number: i64 = @parseFloat("1");

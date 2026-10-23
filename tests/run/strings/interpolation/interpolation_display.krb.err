@@ -42,7 +42,7 @@
 0078    | OP_INVOKE        (0 args)    2 'toString'
 0081    | OP_CONSTANT        14 ' and '
 0083    | OP_GET_GLOBAL       6 'boxes'
-0085    | OP_CONSTANT         7 '1'
+0085    | OP_CONSTANT        15 '1'
 0087    | OP_GET_INDEX
 0088    | OP_INVOKE        (0 args)    2 'toString'
 0091    | OP_ARRAY            4

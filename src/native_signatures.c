@@ -6,10 +6,10 @@
 const NativeSignature nativeSignatures[] = {
     {"@clock", {0}, 0, NATIVE_F64},
     {"@version", {0}, 0, NATIVE_STRING},
-    {"@exit", {NATIVE_F64}, 1, NATIVE_UNIT},
+    {"@exit", {NATIVE_I64}, 1, NATIVE_UNIT},
     {"@rand", {0}, 0, NATIVE_F64},
     {"@rand01", {0}, 0, NATIVE_F64},
-    {"@randBetween", {NATIVE_F64, NATIVE_F64}, 2, NATIVE_F64},
+    {"@randBetween", {NATIVE_I64, NATIVE_I64}, 2, NATIVE_I64},
     {"@ceil", {NATIVE_F64}, 1, NATIVE_F64},
     {"@readFileToString", {NATIVE_STRING}, 1, NATIVE_STRING},
     {"@writeStringToFile", {NATIVE_STRING, NATIVE_STRING}, 2, NATIVE_UNIT},
@@ -18,8 +18,9 @@ const NativeSignature nativeSignatures[] = {
     {"@fileExists", {NATIVE_STRING}, 1, NATIVE_BOOL},
     {"@getenv", {NATIVE_STRING}, 1, NATIVE_STRING},
     {"@setenv", {NATIVE_STRING, NATIVE_STRING}, 2, NATIVE_UNIT},
-    {"@argc", {0}, 0, NATIVE_F64},
-    {"@parseNumber", {NATIVE_STRING}, 1, NATIVE_F64},
+    {"@argc", {0}, 0, NATIVE_I64},
+    {"@parseInt", {NATIVE_STRING}, 1, NATIVE_I64},
+    {"@parseFloat", {NATIVE_STRING}, 1, NATIVE_F64},
     {"@strIsEmpty", {NATIVE_STRING}, 1, NATIVE_BOOL},
     {"@floor", {NATIVE_F64}, 1, NATIVE_F64},
     {"@round", {NATIVE_F64}, 1, NATIVE_F64},
@@ -37,10 +38,13 @@ const NativeSignature nativeSignatures[] = {
     {"@strTrim", {NATIVE_STRING}, 1, NATIVE_STRING},
     {"@strToUpper", {NATIVE_STRING}, 1, NATIVE_STRING},
     {"@strToLower", {NATIVE_STRING}, 1, NATIVE_STRING},
-    {"@strRepeat", {NATIVE_STRING, NATIVE_F64}, 2, NATIVE_STRING},
+    {"@strRepeat", {NATIVE_STRING, NATIVE_I64}, 2, NATIVE_STRING},
     {"@strSplit", {NATIVE_STRING, NATIVE_STRING}, 2, NATIVE_LIST},
     {"@strToBytes", {NATIVE_STRING}, 1, NATIVE_LIST},
-    {"@now", {0}, 0, NATIVE_F64},
+    {"@strLen", {NATIVE_STRING}, 1, NATIVE_I64},
+    {"@strIndexOf", {NATIVE_STRING, NATIVE_STRING}, 2, NATIVE_I64},
+    {"@arrLen", {NATIVE_ANY_ARRAY}, 1, NATIVE_I64},
+    {"@now", {0}, 0, NATIVE_I64},
 };
 
 const int nativeSignatureCount =
@@ -68,10 +72,14 @@ static Type *primitiveType(NativePrimitive primitive) {
     return typeString();
   case NATIVE_F64:
     return typeF64();
+  case NATIVE_I64:
+    return typeNumber(NUMBER_KIND_I64);
   case NATIVE_NUMBER:
     return typeAnyNumber();
   case NATIVE_LIST:
     return typeArray(NULL);
+  case NATIVE_ANY_ARRAY:
+    return typeAnyArray();
   }
 
   return typeUnit();

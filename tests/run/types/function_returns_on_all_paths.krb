@@ -6,7 +6,7 @@ fun branches(condition: bool): f64 {
     }
 }
 
-fun trailingValue(): f64 {
+fun trailingValue(): i64 {
     let doubled = 2 * 2;
     doubled
 }

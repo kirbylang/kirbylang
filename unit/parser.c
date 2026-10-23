@@ -85,8 +85,9 @@ int main(void) {
 
   assert_ast("../tests/run/primitives/bool_false.krb", "(call @println false)\n");
 
-  assert_ast("../tests/run/native_functions/native_fn_len_call.krb",
-             "(call @println (call @len \"Hello World\"))\n");
+  assert_ast("../tests/run/native_functions/native_fn_str_len_call.krb",
+             "(call @println (call @strLen \"Hello World\"))\n"
+             "(call @println (call @strLen \"\"))\n");
 
   assert_ast("../tests/run/flow_control/for.krb",
              "(for (var i 0) (< i 10) (assign i (+ i 1)) (block (call @println "
@@ -101,7 +102,7 @@ int main(void) {
 
   assert_ast("../tests/run/functions/function_body_expressions.krb",
              "(var n 10)\n"
-             "(fun sum (a : f64) : f64 (+ a n))\n"
+             "(fun sum (a : i64) : i64 (+ a n))\n"
              "(call @println (call sum 50))\n");
 
   assert_ast("../tests/run/functions/function_implicit_return.krb",

@@ -101,15 +101,15 @@
 0168    | OP_CALL             1
 0170    | OP_POP
 0171   21 OP_GET_GLOBAL       2 '@println'
-0173    | OP_CONSTANT        20 '1'
-0175    | OP_CONSTANT        19 '2'
+0173    | OP_CONSTANT        16 '1'
+0175    | OP_CONSTANT        20 '2'
 0177    | OP_ADD
 0178    | OP_CALL             1
 0180    | OP_POP
 0181   22 OP_GET_GLOBAL       2 '@println'
 0183    | OP_GET_GLOBAL      21 '@typeof'
-0185    | OP_CONSTANT        20 '1'
-0187    | OP_CONSTANT        19 '2'
+0185    | OP_CONSTANT        16 '1'
+0187    | OP_CONSTANT        20 '2'
 0189    | OP_ADD
 0190    | OP_CALL             1
 0192    | OP_CALL             1

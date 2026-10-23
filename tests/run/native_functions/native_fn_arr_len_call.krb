@@ -1,0 +1,3 @@
+@println(@arrLen([10, 20, 30, 40]));
+@println(@arrLen(["a", "b"]));
+@println(@arrLen(@strSplit("a,b,c", ",")));

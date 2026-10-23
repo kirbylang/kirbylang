@@ -1,1 +1,1 @@
-[line 1] Error at 'fn': Can't access '.fn' on a f64.
+[line 1] Error at 'fn': Can't access '.fn' on a i64.

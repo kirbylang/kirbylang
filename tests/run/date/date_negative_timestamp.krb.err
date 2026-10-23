@@ -1,19 +1,17 @@
 == <script> ==
 0000    1 OP_GET_GLOBAL       0 '@println'
 0002    | OP_GET_GLOBAL       1 'Date'
-0004    | OP_CONSTANT         3 '1'
-0006    | OP_NEGATE
-0007    | OP_INVOKE        (1 args)    2 'new'
-0010    | OP_INVOKE        (0 args)    4 'toString'
-0013    | OP_CALL             1
-0015    | OP_POP
-0016    2 OP_GET_GLOBAL       0 '@println'
-0018    | OP_GET_GLOBAL       1 'Date'
-0020    | OP_CONSTANT         5 '10000'
-0022    | OP_NEGATE
-0023    | OP_INVOKE        (1 args)    2 'new'
-0026    | OP_INVOKE        (0 args)    4 'toString'
-0029    | OP_CALL             1
-0031    | OP_POP
-0032    3 OP_NIL
-0033    | OP_RETURN
+0004    | OP_CONSTANT         3 '-1'
+0006    | OP_INVOKE        (1 args)    2 'new'
+0009    | OP_INVOKE        (0 args)    4 'toString'
+0012    | OP_CALL             1
+0014    | OP_POP
+0015    2 OP_GET_GLOBAL       0 '@println'
+0017    | OP_GET_GLOBAL       1 'Date'
+0019    | OP_CONSTANT         5 '-10000'
+0021    | OP_INVOKE        (1 args)    2 'new'
+0024    | OP_INVOKE        (0 args)    4 'toString'
+0027    | OP_CALL             1
+0029    | OP_POP
+0030    3 OP_NIL
+0031    | OP_RETURN

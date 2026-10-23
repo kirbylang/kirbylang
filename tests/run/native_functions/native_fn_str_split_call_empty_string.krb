@@ -1,2 +1,2 @@
-@println(@len(@strSplit("", ",")));
+@println(@arrLen(@strSplit("", ",")));
 @println(@strSplit("", ",")[0] == "");

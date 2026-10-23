@@ -1,14 +1,14 @@
 struct Box {
-    pub var value: f64;
+    pub var value: i64;
 }
 
 impl Box {
-    pub fun add(self, a: f64, b: f64): f64 {
+    pub fun add(self, a: i64, b: i64): i64 {
         self.value + a + b
     }
 }
 
-fun run(): f64 {
+fun run(): i64 {
     var box = Box { value: { let n = 1; n } };
     let items = [10, 20, 30];
 

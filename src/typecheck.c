@@ -264,7 +264,8 @@ static void typchkTypeEnvDefineBuiltinTraits(TypeEnv *env) {
   Type **cmpParams = (Type **)typesAllocRaw(sizeof(Type *));
   cmpParams[0] = typeSelfPlaceholder();
   UninternedTypeMember ordInstance[] = {
-      {tokenFromCString("cmp"), typeFunction(cmpParams, 1, typeF64())},
+      {tokenFromCString("cmp"),
+       typeFunction(cmpParams, 1, typeNumber(NUMBER_KIND_I64))},
   };
 
   // Ord
@@ -396,8 +397,11 @@ static void typchkCheckFunctionDecl(TypeEnv *env, AstNode *node);
 
 // The largest integer a literal can be while still being exact in the kind.
 static uint64_t typchkLargestExactInteger(NumberKind kind) {
-  if (numberKindInfo(kind)->isFloat)
+  if (kind == NUMBER_KIND_F32)
     return (uint64_t)1 << 24;
+
+  if (kind == NUMBER_KIND_F64)
+    return (uint64_t)1 << 53;
 
   return numberKindMax(kind);
 }
@@ -413,7 +417,7 @@ static void typchkCoerceIntegerLiteral(AstNode *node, Type *expected) {
 
   NumberKind kind = expected->as.number.kind;
 
-  if (kind == NUMBER_KIND_COUNT || kind == NUMBER_KIND_F64)
+  if (kind == NUMBER_KIND_COUNT)
     return;
 
   if (node->kind != NODE_LITERAL || node->as.literal.kind != LITERAL_NUMBER)
@@ -421,8 +425,7 @@ static void typchkCoerceIntegerLiteral(AstNode *node, Type *expected) {
 
   LiteralNode *lit = &node->as.literal;
 
-  if (lit->as.number.kind != NUMBER_KIND_F64 ||
-      !lit->as.number.literalIsPlainInteger)
+  if (!lit->as.number.literalIsPlainInteger)
     return;
 
   if (!lit->as.number.literalValueFits ||
@@ -430,6 +433,7 @@ static void typchkCoerceIntegerLiteral(AstNode *node, Type *expected) {
     return;
 
   lit->as.number.kind = kind;
+  lit->as.number.literalIsPlainInteger = false;
 
   if (numberKindInfo(kind)->isFloat)
     lit->as.number.as.f64 = (double)lit->as.number.literalValue;
@@ -448,8 +452,7 @@ static void typchkMaybeFoldNegativeNumberLiteral(AstNode *node,
 
   NumberKind kind = expected->as.number.kind;
 
-  if (kind == NUMBER_KIND_COUNT || kind == NUMBER_KIND_F64 ||
-      !numberKindInfo(kind)->isSigned)
+  if (kind == NUMBER_KIND_COUNT || !numberKindInfo(kind)->isSigned)
     return;
 
   AstNode *operand = node->as.unary.operand;
@@ -458,8 +461,7 @@ static void typchkMaybeFoldNegativeNumberLiteral(AstNode *node,
       operand->as.literal.kind != LITERAL_NUMBER)
     return;
 
-  if (operand->as.literal.as.number.kind != NUMBER_KIND_F64 ||
-      !operand->as.literal.as.number.literalIsPlainInteger)
+  if (!operand->as.literal.as.number.literalIsPlainInteger)
     return;
 
   bool isFloat = numberKindInfo(kind)->isFloat;
@@ -488,10 +490,23 @@ static void typchkMaybeFoldNegativeNumberLiteral(AstNode *node,
 static bool typchkCheckIndex(TypeEnv *env, AstNode *index) {
   Type *type = typchkInfer(env, index);
 
-  if (type == NULL || typeIsNumber(type))
-    return type != NULL;
+  if (type == NULL)
+    return false;
 
-  return typchkCheck(env, index, typeF64());
+  if (!typeIsNumber(type)) {
+    typchkErrorAtNodeFmt(index, "Array index must be an integer, got %s.",
+                         typeToString(type));
+    return false;
+  }
+
+  if (numberKindInfo(type->as.number.kind)->isFloat) {
+    typchkErrorAtNodeFmt(
+        index, "Array index must be an integer, got %s. Cast it with `as`.",
+        typeToString(type));
+    return false;
+  }
+
+  return true;
 }
 
 // Infer the type of an expression
@@ -611,6 +626,23 @@ static Type *typchkInferLiteral(AstNode *node) {
   case LITERAL_BOOL:
     return typeBool();
   case LITERAL_NUMBER:
+    if (lit->as.number.literalIsPlainInteger) {
+      if (!lit->as.number.literalValueFits) {
+        typchkErrorAtNode(node,
+                          "Integer literal is too large for any number type.");
+        return NULL;
+      }
+
+      if (lit->as.number.literalValue > numberKindMax(NUMBER_KIND_I64)) {
+        typchkErrorAtNode(
+            node,
+            "Integer literal is too large for i64, add a suffix like u64.");
+        return NULL;
+      }
+
+      return typeNumber(NUMBER_KIND_I64);
+    }
+
     return typeNumber(lit->as.number.kind);
   case LITERAL_STRING:
     return typeString();
@@ -649,7 +681,8 @@ static Type *typchkInferUnary(TypeEnv *env, AstNode *node) {
     return NULL;
 
   if (!typeIsNumber(operandType)) {
-    typchkCheck(env, u->operand, typeF64());
+    typchkErrorAtTokenFmt(&u->op, "Can't negate %s.",
+                          typeToString(operandType));
     return NULL;
   }
 

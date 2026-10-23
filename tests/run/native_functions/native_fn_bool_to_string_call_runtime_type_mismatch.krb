@@ -1,1 +1,1 @@
-@println(@boolToString(@len("abc")));
+@println(@boolToString(@arrPop([3])));

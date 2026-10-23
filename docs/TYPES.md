@@ -9,9 +9,28 @@ Literal values have primitive types.
 | Type     | Example          |
 | -------- | ---------------- |
 | `string` | `"Hello World"`  |
+| `i64`    | `42`             |
 | `f64`    | `1.2345`         |
 | `bool`   | `true` / `false` |
 | `unit`   | `()`             |
+
+### Number Literals
+
+A whole number literal is an `i64` unless it is used where another number type
+is expected. Then it becomes that type, when its value fits exactly.
+
+The expected type comes from an annotation, a parameter or return type, the
+other side of an arithmetic or comparison operator, or the first element of an
+array literal. Only a literal written directly there changes. Arithmetic made
+of literals, such as `7 / 2`, is an `i64`.
+
+```
+let byte: u8 = 255;
+let total = price * 2;     // 2 takes price's type
+let floats = [1.5, 2];     // [f64]
+```
+
+Variables, suffixed literals (`2i64`) and decimal literals keep their own type.
 
 ### Arrays
 
@@ -138,7 +157,9 @@ box.toString(); // "123"
 
 ```
 trait Ord: Eq {
-    fun cmp(self, other: Self): f64;
+    // Negative when self comes first, zero when equal, positive when other
+    // comes first
+    fun cmp(self, other: Self): i64;
 }
 
 trait Eq {
@@ -146,7 +167,7 @@ trait Eq {
 }
 
 struct Box {
-    pub var value: f64;
+    pub var value: i64;
 }
 
 impl Eq for Box {
@@ -154,7 +175,7 @@ impl Eq for Box {
 }
 
 impl Ord for Box {
-    fun cmp(self, other: Self): f64 = self.value - other.value;
+    fun cmp(self, other: Self): i64 = self.value - other.value;
 }
 
 let a = Box { value: 100 };
@@ -190,7 +211,7 @@ var p = Point.origin().translate(3, 4);
 
 ```
 trait Ord: Eq {
-    fun cmp(self, other: Self): f64;
+    fun cmp(self, other: Self): i64;
 }
 ```
 
@@ -247,7 +268,7 @@ let round: fun (f64) => f64 = @ceil;
 ```
 
 A native whose type can't be spelled yet has no signature, and calls to it
-are checked at runtime instead. That covers `@len`, `@typeof`, `@instanceOf`,
+are checked at runtime instead. That covers `@typeof`, `@instanceOf`,
 the `@is*` family and the `@arr*` family, which need generics, and `@argv`,
 `@prompt` and `@stdin`, which return nothing on some paths and so need
 `Option[T]`.
@@ -264,16 +285,16 @@ let count: Number = 42;
 
 ## Operators
 
-| Operator          | Operands        | Result   |
-| ----------------- | --------------- | -------- |
-| `+`               | two `f64`       | `f64`    |
-| `+`               | two `string`    | `string` |
-| `-` `*` `/` `%`   | two `f64`       | `f64`    |
-| `<` `>` `<=` `>=` | two `f64`       | `bool`   |
-| `==` `!=`         | two of one type | `bool`   |
-| `and` `or`        | two `bool`      | `bool`   |
-| `!`               | any             | `bool`   |
-| `-` (negate)      | `f64`           | `f64`    |
+| Operator          | Operands               | Result    |
+| ----------------- | ---------------------- | --------- |
+| `+`               | two of one number type | that type |
+| `+`               | two `string`           | `string`  |
+| `-` `*` `/` `%`   | two of one number type | that type |
+| `<` `>` `<=` `>=` | two of one number type | `bool`    |
+| `==` `!=`         | two of one type        | `bool`    |
+| `and` `or`        | two `bool`             | `bool`    |
+| `!`               | any                    | `bool`    |
+| `-` (negate)      | a signed number        | that type |
 
 `==`/`!=` between two structs additionally requires the struct to
 implement `Eq` -- see [Traits](#traits).

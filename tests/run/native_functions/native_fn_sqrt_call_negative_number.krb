@@ -1,2 +1,2 @@
-var n = -4;
+var n = -4.0;
 @println(@sqrt(n));

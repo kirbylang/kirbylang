@@ -1,5 +1,5 @@
 var n = 10;
 
-fun sum(a: f64): f64 = a + n;
+fun sum(a: i64): i64 = a + n;
 
 @println(sum(50));

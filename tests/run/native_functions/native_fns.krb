@@ -31,8 +31,11 @@
 @println(@setenv);
 @println(@typeof(@setenv));
 
-@println(@len);
-@println(@typeof(@len));
+@println(@strLen);
+@println(@typeof(@strLen));
+
+@println(@arrLen);
+@println(@typeof(@arrLen));
 
 @println(@typeof);
 @println(@typeof(@typeof));
@@ -55,8 +58,11 @@
 @println(@instanceOf);
 @println(@typeof(@instanceOf));
 
-@println(@parseNumber);
-@println(@typeof(@parseNumber));
+@println(@parseInt);
+@println(@typeof(@parseInt));
+
+@println(@parseFloat);
+@println(@typeof(@parseFloat));
 
 @println(@numberToString);
 @println(@typeof(@numberToString));

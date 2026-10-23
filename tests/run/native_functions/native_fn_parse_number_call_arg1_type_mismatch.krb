@@ -1,3 +1,0 @@
-var number = @parseNumber(123);
-
-@println(number);

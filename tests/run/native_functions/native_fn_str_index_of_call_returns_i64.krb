@@ -1,0 +1,1 @@
+let index: f64 = @strIndexOf("abc", "b");

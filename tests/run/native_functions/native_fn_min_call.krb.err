@@ -15,19 +15,17 @@
 0025    | OP_POP
 0026    3 OP_GET_GLOBAL       0 '@println'
 0028    | OP_GET_GLOBAL       1 '@min'
-0030    | OP_CONSTANT         4 '1'
-0032    | OP_NEGATE
-0033    | OP_CONSTANT         5 '5'
-0035    | OP_NEGATE
-0036    | OP_CALL             2
-0038    | OP_CALL             1
-0040    | OP_POP
-0041    4 OP_GET_GLOBAL       0 '@println'
-0043    | OP_GET_GLOBAL       1 '@min'
+0030    | OP_CONSTANT         4 '-1'
+0032    | OP_CONSTANT         5 '-5'
+0034    | OP_CALL             2
+0036    | OP_CALL             1
+0038    | OP_POP
+0039    4 OP_GET_GLOBAL       0 '@println'
+0041    | OP_GET_GLOBAL       1 '@min'
+0043    | OP_CONSTANT         6 '2'
 0045    | OP_CONSTANT         6 '2'
-0047    | OP_CONSTANT         6 '2'
-0049    | OP_CALL             2
-0051    | OP_CALL             1
-0053    | OP_POP
-0054    5 OP_NIL
-0055    | OP_RETURN
+0047    | OP_CALL             2
+0049    | OP_CALL             1
+0051    | OP_POP
+0052    5 OP_NIL
+0053    | OP_RETURN

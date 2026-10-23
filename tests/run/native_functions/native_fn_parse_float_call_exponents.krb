@@ -1,0 +1,5 @@
+@println(@parseFloat("1e3"));
+@println(@parseFloat("2.5E-4"));
+@println(@parseFloat("-1.5e+2"));
+@println(@parseFloat("+7e0"));
+@println(@parseFloat("1e-400"));
