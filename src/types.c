@@ -54,6 +54,7 @@ static Type *boolSingleton = NULL;
 static Type *stringSingleton = NULL;
 static Type *numberSingletons[NUMBER_KIND_COUNT + 1];
 static Type *selfPlaceholderSingleton = NULL;
+static Type *anyArraySingleton = NULL;
 
 void typesFreeAll(void) {
   Slab *s = arenaHead;
@@ -70,6 +71,7 @@ void typesFreeAll(void) {
   stringSingleton = NULL;
   memset(numberSingletons, 0, sizeof(numberSingletons));
   selfPlaceholderSingleton = NULL;
+  anyArraySingleton = NULL;
 
   stringSetFree(&typeNames);
 }
@@ -147,9 +149,18 @@ Type *typeU8(void) { return typeNumber(NUMBER_KIND_U8); }
 
 bool typeIsNumber(const Type *type) { return type->kind == TYPE_NUMBER; }
 
+Type *typeAnyArray(void) {
+  if (anyArraySingleton == NULL)
+    anyArraySingleton = typeArray(NULL);
+  return anyArraySingleton;
+}
+
 bool typeAccepts(const Type *expected, const Type *actual) {
   if (expected == typeAnyNumber())
     return typeIsNumber(actual);
+
+  if (expected != NULL && expected == anyArraySingleton)
+    return actual->kind == TYPE_ARRAY;
 
   return typesEqual(expected, actual);
 }
@@ -591,6 +602,10 @@ static void appendTypeName(StrBuf *sb, Type *type) {
     appendTypeName(sb, type->as.function.returnType);
     break;
   case TYPE_ARRAY:
+    if (type == anyArraySingleton) {
+      sb_append(sb, "array");
+      break;
+    }
     sb_append(sb, "[");
     appendTypeName(sb, type->as.array.elementType);
     sb_append(sb, "]");

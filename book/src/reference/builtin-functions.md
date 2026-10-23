@@ -2,7 +2,7 @@
 
 Kirby has several builtin functions (native functions) available.
 
-Builtin functions are prefixed, making them easy to identifier vs user code functions. e.g. `@len`, `@getenv`
+Builtin functions are prefixed, making them easy to identifier vs user code functions. e.g. `@strLen`, `@getenv`
 
 This also makes `@` a reserved character in identifiers.
 
@@ -95,6 +95,15 @@ Returns if an array is empty or not.
 ```kirby
 @println(@arrIsEmpty([]));
 @println(@arrIsEmpty([1, 2, 3]));
+```
+
+### `@arrLen`
+
+Get the number of elements in an array, as an `i64`.
+
+```kirby
+@println(@arrLen([1, 2, 3])); // 3
+@println(@arrLen([])); // 0
 ```
 
 ### `@arrJoin`
@@ -244,18 +253,6 @@ Exit (code 70) with an error message.
 
 ```kirby
 @panic("unreachable state"); // panic: unreachable state
-```
-
-## General
-
-### `@len`
-
-Get the length of a string or array.
-
-```kirby
-@println(@len("Hello, World!"));
-
-@println(@len([1, 2 ,3]));
 ```
 
 ## IO
@@ -524,11 +521,11 @@ Returns if a string ends with another string.
 
 ### `@strIndexOf`
 
-Get the position where a string first appears in another string, counting from 0. Returns `nil` if it does not appear.
+Get the position where a string first appears in another string, counting from 0, as an `i64`. Returns `-1` if it does not appear.
 
 ```kirby
 @println(@strIndexOf("hello world", "world")); // 6
-@println(@strIndexOf("hello", "xyz")); // nil
+@println(@strIndexOf("hello", "xyz")); // -1
 ```
 
 ### `@strToBytes`
@@ -548,6 +545,15 @@ Returns if a string's length is zero or not.
 ```kirby
 @println(@strIsEmpty("")); // true
 @println(@strIsEmpty("Hello World")); // false
+```
+
+### `@strLen`
+
+Get the number of bytes in a string, as an `i64`.
+
+```kirby
+@println(@strLen("Hello, World!")); // 13
+@println(@strLen("")); // 0
 ```
 
 ### `@strRepeat`

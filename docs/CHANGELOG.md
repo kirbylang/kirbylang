@@ -62,6 +62,15 @@
 - An array index that is not a whole number, such as `array[1.5]` or
   `array[-0.5]`, is now a runtime error instead of being truncated to a whole
   number
+- Make `i64` the default number type. A whole number literal such as `42` is
+  `i64`, and a literal with a decimal point such as `1.5` is `f64`
+  - A whole number literal still takes the expected type, so
+    `let x: f64 = 42;` works
+  - Dividing two integers drops the remainder: `7 / 2` is `3`
+  - An `f64` array index is a type error. Cast it with `as i64`
+  - `@argc` returns an `i64`, and `@exit` and `@strRepeat` take an `i64`
+- Replace `@len` with `@strLen` and `@arrLen` to improve builtin function typechecking
+- `@strIndexOf` returns `-1` instead of `nil` when the string is not found
 
 ## 0.4.0
 

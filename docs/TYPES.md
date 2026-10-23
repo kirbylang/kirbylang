@@ -247,7 +247,7 @@ let round: fun (f64) => f64 = @ceil;
 ```
 
 A native whose type can't be spelled yet has no signature, and calls to it
-are checked at runtime instead. That covers `@len`, `@typeof`, `@instanceOf`,
+are checked at runtime instead. That covers `@typeof`, `@instanceOf`,
 the `@is*` family and the `@arr*` family, which need generics, and `@argv`,
 `@prompt` and `@stdin`, which return nothing on some paths and so need
 `Option[T]`.

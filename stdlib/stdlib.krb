@@ -91,7 +91,7 @@ impl Date {
     pub fun from(value: string): Self {
         let parts: Array = @strSplit(value, " ");
         
-        @assert(@len(parts) == 2, $"invalid input string. expected 2 parts but got {@numberToString(@len(parts))}");
+        @assert(@arrLen(parts) == 2, $"invalid input string. expected 2 parts but got {@numberToString(@arrLen(parts))}");
         
         let date_part: string = parts[0];
         let time_part: string = parts[1];
@@ -100,7 +100,7 @@ impl Date {
 
         let date_parts = @strSplit(date_part, "-");
 
-        @assert(@len(date_parts) == 3, $"invalid input string. expected 3 date parts but got {@numberToString(@len(date_parts))}");
+        @assert(@arrLen(date_parts) == 3, $"invalid input string. expected 3 date parts but got {@numberToString(@arrLen(date_parts))}");
 
         let year_str: string = date_parts[0];
         let year: f64 = @parseNumber(year_str);
@@ -115,8 +115,8 @@ impl Date {
 
         let time_parts_str: string = @arrJoin(time_parts, ", ");
 
-        @assert(@len(time_parts) == 3,
-            $"invalid input string. expected 3 time parts but got {@numberToString(@len(time_parts))}: '{time_parts_str}'");
+        @assert(@arrLen(time_parts) == 3,
+            $"invalid input string. expected 3 time parts but got {@numberToString(@arrLen(time_parts))}: '{time_parts_str}'");
 
         let hour_str: string = time_parts[0];
         let hour: f64 = @parseNumber(hour_str);
@@ -186,7 +186,7 @@ impl Date {
     fun pad_zeros(num: f64, length: f64): string {
         var str = @numberToString(num);
 
-        while ((@len(str) as f64) < length) {
+        while ((@strLen(str) as f64) < length) {
             str = "0" + str;
         }
 

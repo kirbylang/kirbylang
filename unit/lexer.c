@@ -73,7 +73,7 @@ int main(void) {
   };
 
   assert_token_types(
-      "@len();", nativeRefExpected,
+      "@strLen();", nativeRefExpected,
       (int)(sizeof(nativeRefExpected) / sizeof(nativeRefExpected[0])));
 
   TokenType numberExpected[] = {

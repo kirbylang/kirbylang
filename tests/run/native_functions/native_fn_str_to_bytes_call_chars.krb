@@ -15,7 +15,7 @@ var chars = @arrJoin([
 
 var chars = @strSplit(chars, " ");
 
-for (var i = 0; i < @len(chars); i = i + 1) {
+for (var i = 0; i < @arrLen(chars); i = i + 1) {
     let char: string = chars[i];
 
     @print($"{char} = ");

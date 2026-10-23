@@ -366,13 +366,6 @@
     ],
     "description": "Set an environment variable's value"
   },
-  "Native: @len": {
-    "prefix": "@len",
-    "body": [
-      "@len(${1:value})$0"
-    ],
-    "description": "Get the length of a string or array"
-  },
   "Native: @typeof": {
     "prefix": "@typeof",
     "body": [
@@ -471,6 +464,13 @@
     ],
     "description": "Copy an array into a new array"
   },
+  "Native: @arrLen": {
+    "prefix": "@arrLen",
+    "body": [
+      "@arrLen(${1:array})$0"
+    ],
+    "description": "Get the number of elements in an array"
+  },
   "Native: @arrIsEmpty": {
     "prefix": "@arrIsEmpty",
     "body": [
@@ -561,6 +561,13 @@
       "@isNil(${1:value})$0"
     ],
     "description": "Check whether a value is nil"
+  },
+  "Native: @strLen": {
+    "prefix": "@strLen",
+    "body": [
+      "@strLen(${1:string})$0"
+    ],
+    "description": "Get the number of bytes in a string"
   },
   "Native: @strIsEmpty": {
     "prefix": "@strIsEmpty",
@@ -700,7 +707,7 @@
     "body": [
       "@strIndexOf(${1:string}, ${2:substring})$0"
     ],
-    "description": "Get the position of a string inside another string, or nil if it isn't there"
+    "description": "Get the position of a string inside another string, or -1 if it isn't there"
   },
   "Native: @strSlice": {
     "prefix": "@strSlice",

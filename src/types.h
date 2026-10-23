@@ -123,6 +123,10 @@ bool typeIsNumber(const Type *type);
 // Matches a number of any kind. Only usable as a native parameter type.
 Type *typeAnyNumber(void);
 
+// Matches an array of any element type. A placeholder until generic type
+// parameters
+Type *typeAnyArray(void);
+
 // Whether a value of type `actual` can be given where `expected` is wanted
 bool typeAccepts(const Type *expected, const Type *actual);
 

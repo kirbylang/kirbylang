@@ -40,6 +40,9 @@ const NativeSignature nativeSignatures[] = {
     {"@strRepeat", {NATIVE_STRING, NATIVE_I64}, 2, NATIVE_STRING},
     {"@strSplit", {NATIVE_STRING, NATIVE_STRING}, 2, NATIVE_LIST},
     {"@strToBytes", {NATIVE_STRING}, 1, NATIVE_LIST},
+    {"@strLen", {NATIVE_STRING}, 1, NATIVE_I64},
+    {"@strIndexOf", {NATIVE_STRING, NATIVE_STRING}, 2, NATIVE_I64},
+    {"@arrLen", {NATIVE_ANY_ARRAY}, 1, NATIVE_I64},
     {"@now", {0}, 0, NATIVE_F64},
 };
 
@@ -74,6 +77,8 @@ static Type *primitiveType(NativePrimitive primitive) {
     return typeAnyNumber();
   case NATIVE_LIST:
     return typeArray(NULL);
+  case NATIVE_ANY_ARRAY:
+    return typeAnyArray();
   }
 
   return typeUnit();

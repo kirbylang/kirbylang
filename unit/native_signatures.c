@@ -9,19 +9,18 @@
 
 // Natives whose type needs generics. Phase 5.
 static const char *awaitingGenerics[] = {
-    "@len",        "@typeof",     "@is",        "@isNumber",   "@isFunction",
-    "@isBool",     "@isString",   "@isNil",     "@instanceOf", "@arrPush",
-    "@arrPop",     "@arrInsert",  "@arrRemove", "@arrClear",   "@arrContains",
-    "@arrCopy",    "@arrIsEmpty", "@arrEqual",  "@arrSlice",   "@arrConcat",
-    "@arrReverse", "@arrJoin",    "@strConcat", "@print",      "@println",
-    "@eprint",     "@eprintln",
+    "@typeof",     "@is",         "@isNumber",  "@isFunction", "@isBool",
+    "@isString",   "@isNil",      "@instanceOf", "@arrPush",   "@arrPop",
+    "@arrInsert",  "@arrRemove",  "@arrClear",  "@arrContains", "@arrCopy",
+    "@arrIsEmpty", "@arrEqual",   "@arrSlice",  "@arrConcat",  "@arrReverse",
+    "@arrJoin",    "@strConcat",  "@print",     "@println",    "@eprint",
+    "@eprintln",
 };
 
 // Natives that return nothing on some paths, so their type needs Option[T].
 // Phase 6. prompt and stdin also take an optional argument, which the
 // language has no way to spell.
-static const char *awaitingOptionType[] = {"@argv", "@prompt", "@stdin",
-                                           "@strIndexOf"};
+static const char *awaitingOptionType[] = {"@argv", "@prompt", "@stdin"};
 
 // Natives with more parameters than NATIVE_SIGNATURE_MAX_PARAMS allows.
 static const char *awaitingMoreParams[] = {"@strSlice", "@strReplace",
@@ -107,7 +106,27 @@ static void test_signed_natives_resolve_in_a_new_env(void) {
   assert(clock->as.function.paramCount == 0);
   assert(clock->as.function.returnType == typeF64());
 
+  Type *strLen = typchkTypeEnvLookupFunction(env, tokenFromCString("@strLen"));
+  assert(strLen != NULL);
+  assert(strLen->as.function.paramCount == 1);
+  assert(strLen->as.function.paramTypes[0] == typeString());
+  assert(strLen->as.function.returnType == typeNumber(NUMBER_KIND_I64));
+
+  Type *arrLen = typchkTypeEnvLookupFunction(env, tokenFromCString("@arrLen"));
+  assert(arrLen != NULL);
+  assert(arrLen->as.function.paramCount == 1);
+  assert(arrLen->as.function.paramTypes[0] == typeAnyArray());
+  assert(arrLen->as.function.returnType == typeNumber(NUMBER_KIND_I64));
+
+  Type *indexOf =
+      typchkTypeEnvLookupFunction(env, tokenFromCString("@strIndexOf"));
+  assert(indexOf != NULL);
+  assert(indexOf->as.function.paramCount == 2);
+  assert(indexOf->as.function.returnType == typeNumber(NUMBER_KIND_I64));
+
   assert(typchkTypeEnvLookupFunction(env, tokenFromCString("@len")) == NULL);
+  assert(typchkTypeEnvLookupFunction(env, tokenFromCString("@arrPop")) ==
+         NULL);
 
   typchkTypeEnvDestroy(env);
 }

@@ -247,24 +247,18 @@ static Value setEnvNative(VM *vm, int argCount, Value *args) {
   return NIL_VAL; // or you could return true if you prefer
 }
 
-static Value lenNative(VM *vm, int argCount, Value *args) {
-  assertArgCount(vm, "@len", 1, argCount);
+static Value strLenNative(VM *vm, int argCount, Value *args) {
+  assertArgCount(vm, "@strLen", 1, argCount);
+  assertArgIsString(vm, "@strLen", args, 0);
 
-  Value name = args[0];
+  return NUMBER_I64_VAL(AS_STRING(args[0])->length);
+}
 
-  if (IS_STRING(name)) {
-    int length = AS_STRING(name)->length;
+static Value arrLenNative(VM *vm, int argCount, Value *args) {
+  assertArgCount(vm, "@arrLen", 1, argCount);
+  assertArgIsArray(vm, "@arrLen", args, 0);
 
-    return NUMBER_I64_VAL(length);
-  } else if (IS_ARRAY(name)) {
-    ObjArray *array = AS_ARRAY(name);
-    int length = array->count;
-    return NUMBER_I64_VAL(length);
-  } else {
-    runtimeError(vm,
-                 "function len expects argument 1 to be a string or array.");
-    exit(EXIT_CODE_RUNTIME_ERR);
-  }
+  return NUMBER_I64_VAL(AS_ARRAY(args[0])->count);
 }
 
 // @print, @println, @eprint, and @eprintln write a value the way the print
@@ -1247,10 +1241,6 @@ static Value strIndexOfNative(VM *vm, int argCount, Value *args) {
   int index =
       findBytes(string->chars, string->length, 0, sub->chars, sub->length);
 
-  if (index < 0) {
-    return NIL_VAL;
-  }
-
   return NUMBER_I64_VAL(index);
 }
 
@@ -1410,7 +1400,8 @@ const NativeDefinition nativeDefinitions[] = {
     {"@fileExists", fileExistsNative},
     {"@getenv", getEnvNative},
     {"@setenv", setEnvNative},
-    {"@len", lenNative},
+    {"@strLen", strLenNative},
+    {"@arrLen", arrLenNative},
     {"@typeof", typeofNative},
     {"@print", printNative},
     {"@println", printlnNative},
