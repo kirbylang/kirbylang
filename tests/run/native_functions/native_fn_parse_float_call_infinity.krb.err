@@ -7,5 +7,5 @@
 0010    | OP_POP
 0011    2 OP_NIL
 0012    | OP_RETURN
-function @parseFloat expects argument 1 to be a number such as 1.5 but got "inf".
+function @parseFloat expects argument 1 to be a number such as 1.5 or 2.5e-4 but got "inf".
 [line 1] in script

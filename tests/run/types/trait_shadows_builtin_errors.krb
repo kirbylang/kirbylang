@@ -11,5 +11,5 @@ trait Default {
 }
 
 trait Ord: Eq {
-    fun cmp(self, other: Self): f64;
+    fun cmp(self, other: Self): i64;
 }

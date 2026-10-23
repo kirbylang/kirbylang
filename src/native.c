@@ -880,30 +880,56 @@ static Value argcNative(VM *vm, int argCount, Value *args) {
   return NUMBER_I64_VAL(argc);
 }
 
-// Whether `text` is written like a Kirby number literal without a suffix: an
-// optional sign, digits, and when `allowFraction`, an optional `.` followed by
-// more digits. Nothing else may come before or after.
-static bool isNumberText(const char *text, int length, bool allowFraction) {
+typedef enum {
+  // An optional sign and digits, such as `-42`
+  NUMBER_TEXT_WHOLE,
+  // A whole number, then an optional `.` and digits, then an optional
+  // exponent, such as `-1.5`, `2.5e-4` or `1E3`
+  NUMBER_TEXT_DECIMAL,
+} NumberTextKind;
+
+// Moves `c` past one or more digits. Returns false if there are none.
+static bool skipDigits(const char **c, const char *end) {
+  if (*c == end || !isdigit((unsigned char)**c))
+    return false;
+
+  while (*c < end && isdigit((unsigned char)**c))
+    (*c)++;
+
+  return true;
+}
+
+static void skipSign(const char **c, const char *end) {
+  if (*c < end && (**c == '+' || **c == '-'))
+    (*c)++;
+}
+
+// Whether all of `text` is a number of `kind`. Nothing else, such as spaces,
+// may come before or after.
+static bool isNumberText(const char *text, int length, NumberTextKind kind) {
   const char *c = text;
   const char *end = text + length;
 
-  if (c < end && (*c == '+' || *c == '-'))
-    c++;
+  skipSign(&c, end);
 
-  if (c == end || !isdigit((unsigned char)*c))
+  if (!skipDigits(&c, end))
     return false;
 
-  while (c < end && isdigit((unsigned char)*c))
-    c++;
-
-  if (allowFraction && c < end && *c == '.') {
-    c++;
-
-    if (c == end || !isdigit((unsigned char)*c))
-      return false;
-
-    while (c < end && isdigit((unsigned char)*c))
+  if (kind == NUMBER_TEXT_DECIMAL) {
+    if (c < end && *c == '.') {
       c++;
+
+      if (!skipDigits(&c, end))
+        return false;
+    }
+
+    if (c < end && (*c == 'e' || *c == 'E')) {
+      c++;
+      skipSign(&c, end);
+
+      if (!skipDigits(&c, end))
+        return false;
+    }
   }
 
   return c == end;
@@ -922,7 +948,7 @@ static Value parseIntNative(VM *vm, int argCount, Value *args) {
 
   ObjString *text = AS_STRING(args[0]);
 
-  if (!isNumberText(text->chars, text->length, false))
+  if (!isNumberText(text->chars, text->length, NUMBER_TEXT_WHOLE))
     parseArgError(vm, "@parseInt", "a whole number", text);
 
   errno = 0;
@@ -943,8 +969,8 @@ static Value parseFloatNative(VM *vm, int argCount, Value *args) {
 
   ObjString *text = AS_STRING(args[0]);
 
-  if (!isNumberText(text->chars, text->length, true))
-    parseArgError(vm, "@parseFloat", "a number such as 1.5", text);
+  if (!isNumberText(text->chars, text->length, NUMBER_TEXT_DECIMAL))
+    parseArgError(vm, "@parseFloat", "a number such as 1.5 or 2.5e-4", text);
 
   errno = 0;
   double value = strtod(text->chars, NULL);

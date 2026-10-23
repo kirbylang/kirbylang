@@ -74,6 +74,7 @@
 - Replace `@len` with `@strLen` and `@arrLen` to improve builtin function typechecking
 - `@strIndexOf` returns `-1` instead of `nil` when the string is not found
 - Replace `@parseNumber` with `@parseInt` and `@parseFloat`
+- `Ord`'s `cmp` returns an `i64`
 
 ## 0.4.0
 

@@ -464,6 +464,7 @@ Parse a number such as `1.5` or `-2` into an `f64`.
 ```kirby
 @println(@parseFloat("1.5")); // 1.5
 @println(@parseFloat("42")); // 42
+@println(@parseFloat("2.5e-4")); // 0.00025
 ```
 
 ### `@parseInt`

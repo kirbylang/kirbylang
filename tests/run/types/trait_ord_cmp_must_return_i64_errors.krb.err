@@ -1,0 +1,1 @@
+[line 10] Error at 'cmp': 'cmp' doesn't match trait 'Ord': expected fun (Money) => i64, got fun (Money) => f64.

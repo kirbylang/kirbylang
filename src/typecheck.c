@@ -264,7 +264,8 @@ static void typchkTypeEnvDefineBuiltinTraits(TypeEnv *env) {
   Type **cmpParams = (Type **)typesAllocRaw(sizeof(Type *));
   cmpParams[0] = typeSelfPlaceholder();
   UninternedTypeMember ordInstance[] = {
-      {tokenFromCString("cmp"), typeFunction(cmpParams, 1, typeF64())},
+      {tokenFromCString("cmp"),
+       typeFunction(cmpParams, 1, typeNumber(NUMBER_KIND_I64))},
   };
 
   // Ord

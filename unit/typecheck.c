@@ -1070,13 +1070,13 @@ static void test_program_trait_coherence_duplicate_fails(void) {
 static void test_program_trait_supertrait_satisfied(void) {
   typchkResetError();
   bool ok = typecheckSource(
-      "struct Money { pub var cents: f64; }\n"
+      "struct Money { pub var cents: i64; }\n"
       "impl Eq for Money {\n"
       "  pub fun equals(self, other: Self): bool = self.cents == "
       "other.cents;\n"
       "}\n"
       "impl Ord for Money {\n"
-      "  pub fun cmp(self, other: Self): f64 = self.cents - other.cents;\n"
+      "  pub fun cmp(self, other: Self): i64 = self.cents - other.cents;\n"
       "}\n"
       "var a = Money { cents: 1 };\n"
       "var b = Money { cents: 2 };\n"
@@ -1087,9 +1087,9 @@ static void test_program_trait_supertrait_satisfied(void) {
 static void test_program_trait_supertrait_missing_fails(void) {
   typchkResetError();
   bool ok = typecheckSource(
-      "struct Money { pub var cents: f64; }\n"
+      "struct Money { pub var cents: i64; }\n"
       "impl Ord for Money {\n"
-      "  pub fun cmp(self, other: Self): f64 = self.cents - other.cents;\n"
+      "  pub fun cmp(self, other: Self): i64 = self.cents - other.cents;\n"
       "}\n");
   assert(!ok);
 }

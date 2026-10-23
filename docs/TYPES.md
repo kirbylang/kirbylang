@@ -157,7 +157,9 @@ box.toString(); // "123"
 
 ```
 trait Ord: Eq {
-    fun cmp(self, other: Self): f64;
+    // Negative when self comes first, zero when equal, positive when other
+    // comes first
+    fun cmp(self, other: Self): i64;
 }
 
 trait Eq {
@@ -165,7 +167,7 @@ trait Eq {
 }
 
 struct Box {
-    pub var value: f64;
+    pub var value: i64;
 }
 
 impl Eq for Box {
@@ -173,7 +175,7 @@ impl Eq for Box {
 }
 
 impl Ord for Box {
-    fun cmp(self, other: Self): f64 = self.value - other.value;
+    fun cmp(self, other: Self): i64 = self.value - other.value;
 }
 
 let a = Box { value: 100 };
@@ -209,7 +211,7 @@ var p = Point.origin().translate(3, 4);
 
 ```
 trait Ord: Eq {
-    fun cmp(self, other: Self): f64;
+    fun cmp(self, other: Self): i64;
 }
 ```
 

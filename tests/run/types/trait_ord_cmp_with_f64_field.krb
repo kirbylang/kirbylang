@@ -1,0 +1,19 @@
+struct Weight {
+    pub var kg: f64;
+}
+
+impl Eq for Weight {
+    pub fun equals(self, other: Self): bool = self.kg == other.kg;
+}
+
+impl Ord for Weight {
+    pub fun cmp(self, other: Self): i64 =
+        if (self.kg < other.kg) -1 else if (self.kg > other.kg) 1 else 0;
+}
+
+let light = Weight { kg: 1.5 };
+let heavy = Weight { kg: 2.25 };
+
+@println(light.cmp(heavy));
+@println(heavy.cmp(light));
+@println(light.cmp(light));
