@@ -46,55 +46,63 @@ let greeting: string = "Hello World";
 | `[T]`    | `[1, 2, 3]`, `["Hello", "World"]` | A list of one type that can grow, such as `[i64]`       |
 | `[T; n]` |                       `[1, 2, 3]` | An array of one type with `n` items, such as `[i64; 3]` |
 
-### Number Literals
+### Unit
 
-A whole number such as `42` is an `i64`, and a number with a decimal point such
-as `1.5` is an `f64`.
+Kirby has a unit type `unit` using the literal `()`, which only has a single value that represents a function that doesn't return a value.
 
-```krb
-let count = 42;    // i64
-let ratio = 1.5;   // f64
+### Booleans
+
+#### Truthiness
+
+Kirby doesn't support coercsion to boolans.
+
+```kirby
+let values: [bool] = [];
+
+@println(if (values) $"Has {@listLen(values)} items" else "List is empty!");
 ```
 
-Where a whole number literal is used as another number type, it becomes that
-type. This also works for arithmetic made only of literals, `if`/`else`
-branches and the last value of a block.
+This is invalid.
 
-```krb
-let byte: u8 = 65;
-let half: f64 = 7 / 2;            // 3.5
-let total: f64 = if (big) 100 else 10;
+> Error: Expected bool, got [bool].
 
-let price: f64 = 2.5;
-let doubled = price * 2;          // 2 is an f64 here
-let mixed = [1, 2.5, 3];          // an array of 3 f64
+### nil
+
+`nil` is a holdover from Kirby's origins from the language [clox](./getting-started.md#special-thanks). It will be replaced by `Result[T, E]` when that's implemented.
+
+### Strings
+
+Strings are written using double quotes.
+
+```kirby
+@println("Hello World");
 ```
 
-A variable keeps its own type. Cast it with `as` to use it as another type.
+#### Multiline Strings
 
-```krb
-let count = 10;
-let average: f64 = (count as f64) / 4;
+Multiline strings are supported.
+
+```kirby
+@println("Hello
+
+World");
 ```
 
-Dividing two integers drops the remainder, rounding toward zero.
+#### String Interpolation
 
-```krb
-@println(7 / 2);    // 3
-@println(-7 / 2);   // -3
-@println(7 % 2);    // 1
-@println(7.0 / 2);  // 3.5
+Interpolated strings are prefixed with `$` using `{expr}` for interpolated values.
+
+```kirby
+let name: string = @prompt("Name? ");
+
+@println($"Hello {name}");
 ```
 
-Integer math whose result doesn't fit the type is a runtime error, and the
-program stops.
+### Numbers
 
-```krb
-let byte: u8 = 255;
-@println(byte + 1); // Integer overflow: 255 + 1 doesn't fit in u8, which holds 0 to 255.
-```
+Numbers are either signed/unsigned integers (`i64`, `u32`, `u8`) or floats (`f64`, `f32`).
 
-### Casting Number Types
+#### Casting Number Types
 
 Number types can be explicitly converted to another number type with the `as` keyword.
 
@@ -123,6 +131,35 @@ Use parentheses to cast just a part of an expression.
 ```krb
 let sum: u8 = 2 * 3 as u8;      // (2 * 3) as u8
 let total: u8 = a + (b as u8);  // cast only `b`
+```
+
+#### Number Literals
+
+Number literals are digits + an optional decimal point and suffix indicating the number's kind.
+
+- `123`
+- `128u8`
+- `146.48290f32`
+- `105725.278123567f64`
+
+### Arrays
+
+Arrays, `[T; N]`, are fixed sized collections of homogenous types.
+
+```kirby
+let grid: [[bool; 3]; 3] = [[true, false, false], [true, true, true], [false, true, false]];
+
+@println(grid[0][1]); // false
+```
+
+### Lists
+
+Lists, `[T]`, are growable collections of homogenous types.
+
+```
+let scores: [i64] = [100, 53, 77, 41];
+
+@listPush(scores, 87);
 ```
 
 ## Flow Control
