@@ -1,50 +1,70 @@
 #include <stdbool.h>
+#include <stdio.h>
+#include <stdlib.h>
 
 #include "native_signatures.h"
+#include "parser.h"
 #include "token.h"
 
 const NativeSignature nativeSignatures[] = {
-    {"@clock", {0}, 0, NATIVE_F64},
-    {"@version", {0}, 0, NATIVE_STRING},
-    {"@exit", {NATIVE_I64}, 1, NATIVE_UNIT},
-    {"@rand", {0}, 0, NATIVE_F64},
-    {"@rand01", {0}, 0, NATIVE_F64},
-    {"@randBetween", {NATIVE_I64, NATIVE_I64}, 2, NATIVE_I64},
-    {"@ceil", {NATIVE_F64}, 1, NATIVE_F64},
-    {"@readFileToString", {NATIVE_STRING}, 1, NATIVE_STRING},
-    {"@writeStringToFile", {NATIVE_STRING, NATIVE_STRING}, 2, NATIVE_UNIT},
-    {"@numberToString", {NATIVE_NUMBER}, 1, NATIVE_STRING},
-    {"@boolToString", {NATIVE_BOOL}, 1, NATIVE_STRING},
-    {"@fileExists", {NATIVE_STRING}, 1, NATIVE_BOOL},
-    {"@getenv", {NATIVE_STRING}, 1, NATIVE_STRING},
-    {"@setenv", {NATIVE_STRING, NATIVE_STRING}, 2, NATIVE_UNIT},
-    {"@argc", {0}, 0, NATIVE_I64},
-    {"@parseInt", {NATIVE_STRING}, 1, NATIVE_I64},
-    {"@parseFloat", {NATIVE_STRING}, 1, NATIVE_F64},
-    {"@strIsEmpty", {NATIVE_STRING}, 1, NATIVE_BOOL},
-    {"@floor", {NATIVE_F64}, 1, NATIVE_F64},
-    {"@round", {NATIVE_F64}, 1, NATIVE_F64},
-    {"@trunc", {NATIVE_F64}, 1, NATIVE_F64},
-    {"@abs", {NATIVE_F64}, 1, NATIVE_F64},
-    {"@sqrt", {NATIVE_F64}, 1, NATIVE_F64},
-    {"@pow", {NATIVE_F64, NATIVE_F64}, 2, NATIVE_F64},
-    {"@min", {NATIVE_F64, NATIVE_F64}, 2, NATIVE_F64},
-    {"@max", {NATIVE_F64, NATIVE_F64}, 2, NATIVE_F64},
-    {"@assert", {NATIVE_BOOL, NATIVE_STRING}, 2, NATIVE_UNIT},
-    {"@panic", {NATIVE_STRING}, 1, NATIVE_UNIT},
-    {"@strContains", {NATIVE_STRING, NATIVE_STRING}, 2, NATIVE_BOOL},
-    {"@strStartsWith", {NATIVE_STRING, NATIVE_STRING}, 2, NATIVE_BOOL},
-    {"@strEndsWith", {NATIVE_STRING, NATIVE_STRING}, 2, NATIVE_BOOL},
-    {"@strTrim", {NATIVE_STRING}, 1, NATIVE_STRING},
-    {"@strToUpper", {NATIVE_STRING}, 1, NATIVE_STRING},
-    {"@strToLower", {NATIVE_STRING}, 1, NATIVE_STRING},
-    {"@strRepeat", {NATIVE_STRING, NATIVE_I64}, 2, NATIVE_STRING},
-    {"@strSplit", {NATIVE_STRING, NATIVE_STRING}, 2, NATIVE_LIST},
-    {"@strToBytes", {NATIVE_STRING}, 1, NATIVE_LIST},
-    {"@strLen", {NATIVE_STRING}, 1, NATIVE_I64},
-    {"@strIndexOf", {NATIVE_STRING, NATIVE_STRING}, 2, NATIVE_I64},
-    {"@arrLen", {NATIVE_ANY_ARRAY}, 1, NATIVE_I64},
-    {"@now", {0}, 0, NATIVE_I64},
+    {"@clock", "fun () => f64"},
+    {"@version", "fun () => string"},
+    {"@exit", "fun (i64) => unit"},
+    {"@rand", "fun () => f64"},
+    {"@rand01", "fun () => f64"},
+    {"@randBetween", "fun (i64, i64) => i64"},
+    {"@ceil", "fun (f64) => f64"},
+    {"@readFileToString", "fun (string) => string"},
+    {"@writeStringToFile", "fun (string, string) => unit"},
+    {"@numberToString", "fun (number) => string"},
+    {"@boolToString", "fun (bool) => string"},
+    {"@fileExists", "fun (string) => bool"},
+    {"@getenv", "fun (string) => string"},
+    {"@setenv", "fun (string, string) => unit"},
+    {"@argc", "fun () => i64"},
+    {"@parseInt", "fun (string) => i64"},
+    {"@parseFloat", "fun (string) => f64"},
+    {"@strIsEmpty", "fun (string) => bool"},
+    {"@floor", "fun (f64) => f64"},
+    {"@round", "fun (f64) => f64"},
+    {"@trunc", "fun (f64) => f64"},
+    {"@abs", "fun (f64) => f64"},
+    {"@sqrt", "fun (f64) => f64"},
+    {"@pow", "fun (f64, f64) => f64"},
+    {"@min", "fun (f64, f64) => f64"},
+    {"@max", "fun (f64, f64) => f64"},
+    {"@assert", "fun (bool, string) => unit"},
+    {"@panic", "fun (string) => unit"},
+    {"@strContains", "fun (string, string) => bool"},
+    {"@strStartsWith", "fun (string, string) => bool"},
+    {"@strEndsWith", "fun (string, string) => bool"},
+    {"@strTrim", "fun (string) => string"},
+    {"@strToUpper", "fun (string) => string"},
+    {"@strToLower", "fun (string) => string"},
+    {"@strRepeat", "fun (string, i64) => string"},
+    {"@strLen", "fun (string) => i64"},
+    {"@strIndexOf", "fun (string, string) => i64"},
+    {"@strSlice", "fun (string, integer, integer) => string"},
+    {"@strReplace", "fun (string, string, string) => string"},
+    {"@strReplaceAll", "fun (string, string, string) => string"},
+    {"@strSplit", "fun (string, string) => [string]"},
+    {"@strToBytes", "fun (string) => [u8]"},
+    {"@strConcat", "fun ([string]) => string"},
+    {"@now", "fun () => i64"},
+    {"@arrJoin", "fun ([string], string) => string"},
+    {"@arrLen", "fun ([T]) => i64"},
+    {"@arrIsEmpty", "fun ([T]) => bool"},
+    {"@arrPush", "fun ([T], T) => unit"},
+    {"@arrPop", "fun ([T]) => T"},
+    {"@arrInsert", "fun ([T], integer, T) => unit"},
+    {"@arrRemove", "fun ([T], integer) => T"},
+    {"@arrClear", "fun ([T]) => unit"},
+    {"@arrContains", "fun ([T], T) => bool"},
+    {"@arrEqual", "fun ([T], [T]) => bool"},
+    {"@arrCopy", "fun ([T]) => [T]"},
+    {"@arrReverse", "fun ([T]) => [T]"},
+    {"@arrSlice", "fun ([T], integer, integer) => [T]"},
+    {"@arrConcat", "fun ([T], [T]) => [T]"},
 };
 
 const int nativeSignatureCount =
@@ -62,27 +82,13 @@ const NativeArgConstraint nativeArgConstraints[] = {
 const int nativeArgConstraintCount =
     (int)(sizeof(nativeArgConstraints) / sizeof(nativeArgConstraints[0]));
 
-static Type *primitiveType(NativePrimitive primitive) {
-  switch (primitive) {
-  case NATIVE_UNIT:
-    return typeUnit();
-  case NATIVE_BOOL:
-    return typeBool();
-  case NATIVE_STRING:
-    return typeString();
-  case NATIVE_F64:
-    return typeF64();
-  case NATIVE_I64:
-    return typeNumber(NUMBER_KIND_I64);
-  case NATIVE_NUMBER:
-    return typeAnyNumber();
-  case NATIVE_LIST:
-    return typeArray(NULL);
-  case NATIVE_ANY_ARRAY:
-    return typeAnyArray();
-  }
+Type *parseNativeSignature(TypeEnv *env, const char *signature) {
+  bool hadError = false;
+  AstNode *node = parseTypeText(signature, &hadError);
+  if (node == NULL)
+    return NULL;
 
-  return typeUnit();
+  return typchkResolveSignatureType(env, node);
 }
 
 // Natives are global functions as far as the checker is concerned. They are
@@ -90,22 +96,15 @@ static Type *primitiveType(NativePrimitive primitive) {
 // shadows them.
 void defineAllNativeSignatures(TypeEnv *env) {
   for (int i = 0; i < nativeSignatureCount; i++) {
-    const NativeSignature *signature = &nativeSignatures[i];
+    const NativeSignature *native = &nativeSignatures[i];
+    Type *type = parseNativeSignature(env, native->signature);
 
-    Type **paramTypes = NULL;
-
-    if (signature->paramCount > 0) {
-      paramTypes =
-          (Type **)typesAllocRaw(signature->paramCount * sizeof(Type *));
-
-      for (int param = 0; param < signature->paramCount; param++) {
-        paramTypes[param] = primitiveType(signature->paramTypes[param]);
-      }
+    if (type == NULL) {
+      fprintf(stderr, "Invalid signature for native '%s': %s\n", native->name,
+              native->signature);
+      exit(1);
     }
 
-    Type *type = typeFunction(paramTypes, signature->paramCount,
-                              primitiveType(signature->returnType));
-
-    typchkTypeEnvRegisterFunction(env, tokenFromCString(signature->name), type);
+    typchkTypeEnvRegisterFunction(env, tokenFromCString(native->name), type);
   }
 }

@@ -7,27 +7,12 @@
 #include "typecheck.h"
 #include "types.h"
 
-#define NATIVE_SIGNATURE_MAX_PARAMS 2
-
-// The types a native signature can name today. Deliberately narrower than
-// TypeKind
-typedef enum {
-  NATIVE_UNIT,
-  NATIVE_BOOL,
-  NATIVE_STRING,
-  NATIVE_F64,
-  NATIVE_I64,
-  NATIVE_NUMBER,
-  NATIVE_LIST,
-  // A placeholder until generic type parameters
-  NATIVE_ANY_ARRAY
-} NativePrimitive;
-
+// A native's type, written the way Kirby writes function types. Signatures
+// can also name generic parameters T, U, V and W, and `number` and `integer`,
+// which accept any number or integer kind.
 typedef struct {
   const char *name;
-  NativePrimitive paramTypes[NATIVE_SIGNATURE_MAX_PARAMS];
-  int paramCount;
-  NativePrimitive returnType;
+  const char *signature;
 } NativeSignature;
 
 extern const NativeSignature nativeSignatures[];
@@ -44,6 +29,9 @@ typedef struct {
 
 extern const NativeArgConstraint nativeArgConstraints[];
 extern const int nativeArgConstraintCount;
+
+// Returns NULL, after reporting the error, if `signature` isn't a valid type.
+Type *parseNativeSignature(TypeEnv *env, const char *signature);
 
 void defineAllNativeSignatures(TypeEnv *env);
 

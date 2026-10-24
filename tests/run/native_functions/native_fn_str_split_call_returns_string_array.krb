@@ -1,0 +1,3 @@
+let parts = @strSplit("a,b", ",");
+@println(@strLen(parts[0]));
+let count: i64 = parts[1];

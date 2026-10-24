@@ -1,0 +1,2 @@
+let joined = @arrConcat([1], [2]);
+let first: string = joined[0];

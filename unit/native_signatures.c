@@ -2,29 +2,25 @@
 #include <stdio.h>
 #include <string.h>
 
+#include "../src/ast.h"
 #include "../src/native.h"
 #include "../src/native_signatures.h"
 #include "../src/typecheck.h"
 #include "../src/types.h"
 
-// Natives whose type needs generics. Phase 5.
-static const char *awaitingGenerics[] = {
-    "@typeof",     "@is",        "@isNumber",   "@isFunction",  "@isBool",
-    "@isString",   "@isNil",     "@instanceOf", "@arrPush",     "@arrPop",
-    "@arrInsert",  "@arrRemove", "@arrClear",   "@arrContains", "@arrCopy",
-    "@arrIsEmpty", "@arrEqual",  "@arrSlice",   "@arrConcat",   "@arrReverse",
-    "@arrJoin",    "@strConcat", "@print",      "@println",     "@eprint",
-    "@eprintln",
+// Natives that take a value of any type. A generic parameter can describe
+// them, but they aren't signed yet. The print natives also have their own
+// Display check.
+static const char *awaitingAnyTypeSignature[] = {
+    "@typeof", "@is",       "@isNumber", "@isFunction",
+    "@isBool", "@isString", "@isNil",    "@instanceOf",
+    "@print",  "@println",  "@eprint",   "@eprintln",
 };
 
 // Natives that return nothing on some paths, so their type needs Option[T].
 // Phase 6. prompt and stdin also take an optional argument, which the
 // language has no way to spell.
 static const char *awaitingOptionType[] = {"@argv", "@prompt", "@stdin"};
-
-// Natives with more parameters than NATIVE_SIGNATURE_MAX_PARAMS allows.
-static const char *awaitingMoreParams[] = {"@strSlice", "@strReplace",
-                                           "@strReplaceAll"};
 
 static bool listContains(const char *const *names, int count,
                          const char *name) {
@@ -36,16 +32,13 @@ static bool listContains(const char *const *names, int count,
 }
 
 static bool isDeferred(const char *name) {
-  int genericCount =
-      (int)(sizeof(awaitingGenerics) / sizeof(*awaitingGenerics));
+  int anyTypeCount = (int)(sizeof(awaitingAnyTypeSignature) /
+                           sizeof(*awaitingAnyTypeSignature));
   int optionCount =
       (int)(sizeof(awaitingOptionType) / sizeof(*awaitingOptionType));
-  int moreParamsCount =
-      (int)(sizeof(awaitingMoreParams) / sizeof(*awaitingMoreParams));
 
-  return listContains(awaitingGenerics, genericCount, name) ||
-         listContains(awaitingOptionType, optionCount, name) ||
-         listContains(awaitingMoreParams, moreParamsCount, name);
+  return listContains(awaitingAnyTypeSignature, anyTypeCount, name) ||
+         listContains(awaitingOptionType, optionCount, name);
 }
 
 static bool hasSignature(const char *name) {
@@ -91,6 +84,38 @@ static void test_every_signature_names_a_real_native(void) {
   }
 }
 
+// Every signature reads as a function type, and prints back as exactly the
+// same text, so the table is written the way types appear in error messages.
+static void test_every_signature_is_a_valid_function_type(void) {
+  TypeEnv *env = typchkTypeEnvCreate();
+
+  for (int i = 0; i < nativeSignatureCount; i++) {
+    const NativeSignature *signature = &nativeSignatures[i];
+    Type *type = parseNativeSignature(env, signature->signature);
+
+    if (type == NULL || type->kind != TYPE_FN ||
+        strcmp(typeToString(type), signature->signature) != 0) {
+      fprintf(stderr, "signature of '%s' is not a valid function type: %s\n",
+              signature->name, signature->signature);
+      assert(false);
+    }
+  }
+
+  typchkTypeEnvDestroy(env);
+}
+
+static void test_an_invalid_signature_is_rejected(void) {
+  TypeEnv *env = typchkTypeEnvCreate();
+
+  assert(parseNativeSignature(env, "fun (stirng) => unit") == NULL);
+  assert(parseNativeSignature(env, "fun ([T) => T") == NULL);
+  assert(parseNativeSignature(env, "fun (T) => T extra") == NULL);
+  assert(parseNativeSignature(env, "") == NULL);
+
+  typchkResetError();
+  typchkTypeEnvDestroy(env);
+}
+
 static void test_signed_natives_resolve_in_a_new_env(void) {
   TypeEnv *env = typchkTypeEnvCreate();
 
@@ -115,8 +140,7 @@ static void test_signed_natives_resolve_in_a_new_env(void) {
   Type *arrLen = typchkTypeEnvLookupFunction(env, tokenFromCString("@arrLen"));
   assert(arrLen != NULL);
   assert(arrLen->as.function.paramCount == 1);
-  assert(arrLen->as.function.paramTypes[0] == typeAnyArray());
-  assert(arrLen->as.function.returnType == typeNumber(NUMBER_KIND_I64));
+  assert(strcmp(typeToString(arrLen), "fun ([T]) => i64") == 0);
 
   Type *indexOf =
       typchkTypeEnvLookupFunction(env, tokenFromCString("@strIndexOf"));
@@ -125,7 +149,17 @@ static void test_signed_natives_resolve_in_a_new_env(void) {
   assert(indexOf->as.function.returnType == typeNumber(NUMBER_KIND_I64));
 
   assert(typchkTypeEnvLookupFunction(env, tokenFromCString("@len")) == NULL);
-  assert(typchkTypeEnvLookupFunction(env, tokenFromCString("@arrPop")) == NULL);
+  Type *arrPop = typchkTypeEnvLookupFunction(env, tokenFromCString("@arrPop"));
+  assert(arrPop != NULL);
+  assert(strcmp(typeToString(arrPop), "fun ([T]) => T") == 0);
+
+  Type *strSlice =
+      typchkTypeEnvLookupFunction(env, tokenFromCString("@strSlice"));
+  assert(strSlice != NULL);
+  assert(strcmp(typeToString(strSlice),
+                "fun (string, integer, integer) => string") == 0);
+
+  assert(typchkTypeEnvLookupFunction(env, tokenFromCString("@typeof")) == NULL);
 
   typchkTypeEnvDestroy(env);
 }
@@ -157,10 +191,13 @@ static void test_a_user_function_does_not_collide_with_a_native(void) {
 int main(void) {
   test_every_native_is_signed_or_deliberately_deferred();
   test_every_signature_names_a_real_native();
+  test_every_signature_is_a_valid_function_type();
+  test_an_invalid_signature_is_rejected();
   test_signed_natives_resolve_in_a_new_env();
   test_a_user_function_does_not_collide_with_a_native();
 
   typesFreeAll();
+  astFreeAll();
 
   printf("native signature tests passed\n");
   return 0;

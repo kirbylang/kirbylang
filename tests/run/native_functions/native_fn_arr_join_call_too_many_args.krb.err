@@ -1,15 +1,1 @@
-== <script> ==
-0000    1 OP_CONSTANT         1 'a'
-0002    | OP_CONSTANT         2 'b'
-0004    | OP_ARRAY            2
-0006    | OP_DEFINE_GLOBAL    0 'parts'
-0008    3 OP_GET_GLOBAL       3 '@arrJoin'
-0010    | OP_GET_GLOBAL       0 'parts'
-0012    | OP_CONSTANT         4 ', '
-0014    | OP_CONSTANT         5 'extra'
-0016    | OP_CALL             3
-0018    | OP_POP
-0019    4 OP_NIL
-0020    | OP_RETURN
-function @arrJoin expects 2 argument(s) but got 3 instead.
-[line 3] in script
+[line 3] Error at ')': Expected 2 argument(s), got 3.

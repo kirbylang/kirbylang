@@ -54,7 +54,7 @@ static Type *boolSingleton = NULL;
 static Type *stringSingleton = NULL;
 static Type *numberSingletons[NUMBER_KIND_COUNT + 1];
 static Type *selfPlaceholderSingleton = NULL;
-static Type *anyArraySingleton = NULL;
+static Type *anyIntegerSingleton = NULL;
 
 void typesFreeAll(void) {
   Slab *s = arenaHead;
@@ -71,7 +71,7 @@ void typesFreeAll(void) {
   stringSingleton = NULL;
   memset(numberSingletons, 0, sizeof(numberSingletons));
   selfPlaceholderSingleton = NULL;
-  anyArraySingleton = NULL;
+  anyIntegerSingleton = NULL;
 
   stringSetFree(&typeNames);
 }
@@ -143,32 +143,48 @@ Type *typeNumber(NumberKind kind) {
 
 Type *typeAnyNumber(void) { return typeNumber(NUMBER_KIND_COUNT); }
 
+Type *typeAnyInteger(void) {
+  if (anyIntegerSingleton == NULL) {
+    anyIntegerSingleton = allocType(TYPE_NUMBER);
+    anyIntegerSingleton->as.number.kind = NUMBER_KIND_COUNT;
+  }
+  return anyIntegerSingleton;
+}
+
 Type *typeF64(void) { return typeNumber(NUMBER_KIND_F64); }
 
 Type *typeU8(void) { return typeNumber(NUMBER_KIND_U8); }
 
 bool typeIsNumber(const Type *type) { return type->kind == TYPE_NUMBER; }
 
-Type *typeAnyArray(void) {
-  if (anyArraySingleton == NULL)
-    anyArraySingleton = typeArray(NULL);
-  return anyArraySingleton;
-}
-
 bool typeAccepts(const Type *expected, const Type *actual) {
+  if (expected == NULL || actual == NULL)
+    return true;
+
   if (expected == typeAnyNumber())
     return typeIsNumber(actual);
 
-  if (expected != NULL && expected == anyArraySingleton)
-    return actual->kind == TYPE_ARRAY;
+  if (expected == typeAnyInteger())
+    return typeIsNumber(actual) &&
+           actual->as.number.kind != NUMBER_KIND_COUNT &&
+           !numberKindInfo(actual->as.number.kind)->isFloat;
 
-  if (expected != NULL && actual != NULL && expected->kind == TYPE_ARRAY &&
-      actual->kind == TYPE_ARRAY) {
-    Type *expectedItem = expected->as.array.elementType;
-    Type *actualItem = actual->as.array.elementType;
+  if (expected->kind == TYPE_ARRAY && actual->kind == TYPE_ARRAY)
+    return typeAccepts(expected->as.array.elementType,
+                       actual->as.array.elementType);
 
-    return expectedItem == NULL || actualItem == NULL ||
-           typeAccepts(expectedItem, actualItem);
+  if (expected->kind == TYPE_FN && actual->kind == TYPE_FN) {
+    if (expected->as.function.paramCount != actual->as.function.paramCount)
+      return false;
+
+    for (int i = 0; i < expected->as.function.paramCount; i++) {
+      if (!typeAccepts(expected->as.function.paramTypes[i],
+                       actual->as.function.paramTypes[i]))
+        return false;
+    }
+
+    return typeAccepts(expected->as.function.returnType,
+                       actual->as.function.returnType);
   }
 
   return typesEqual(expected, actual);
@@ -400,6 +416,144 @@ Type *typeSubstituteSelf(Type *type, Type *concrete) {
   }
 }
 
+Type *typeGenericParam(int index) {
+  Type *type = allocType(TYPE_GENERIC_PARAM);
+  type->as.genericParam.index = index;
+  return type;
+}
+
+int typeGenericParamCount(Type *type) {
+  if (type == NULL)
+    return 0;
+
+  switch (type->kind) {
+  case TYPE_GENERIC_PARAM:
+    return type->as.genericParam.index + 1;
+
+  case TYPE_ARRAY:
+    return typeGenericParamCount(type->as.array.elementType);
+
+  case TYPE_FN: {
+    int count = typeGenericParamCount(type->as.function.returnType);
+
+    for (int i = 0; i < type->as.function.paramCount; i++) {
+      int paramCount = typeGenericParamCount(type->as.function.paramTypes[i]);
+      if (paramCount > count)
+        count = paramCount;
+    }
+
+    return count;
+  }
+
+  default:
+    return 0;
+  }
+}
+
+void typeBindGenericParams(Type *pattern, Type *actual, Type **bindings,
+                           int count) {
+  if (pattern == NULL || actual == NULL)
+    return;
+
+  switch (pattern->kind) {
+  case TYPE_GENERIC_PARAM: {
+    int index = pattern->as.genericParam.index;
+
+    if (index < count && bindings[index] == NULL)
+      bindings[index] = actual;
+    return;
+  }
+
+  case TYPE_ARRAY:
+    if (actual->kind == TYPE_ARRAY)
+      typeBindGenericParams(pattern->as.array.elementType,
+                            actual->as.array.elementType, bindings, count);
+    return;
+
+  case TYPE_FN:
+    if (actual->kind != TYPE_FN ||
+        actual->as.function.paramCount != pattern->as.function.paramCount)
+      return;
+
+    for (int i = 0; i < pattern->as.function.paramCount; i++) {
+      typeBindGenericParams(pattern->as.function.paramTypes[i],
+                            actual->as.function.paramTypes[i], bindings, count);
+    }
+
+    typeBindGenericParams(pattern->as.function.returnType,
+                          actual->as.function.returnType, bindings, count);
+    return;
+
+  default:
+    return;
+  }
+}
+
+// Replaces each generic parameter with its slot. An empty slot keeps the
+// parameter, or makes it unknown when `eraseEmpty`.
+static Type *substituteGenericParams(Type *type, Type **bindings, int count,
+                                     bool eraseEmpty) {
+  if (type == NULL)
+    return NULL;
+
+  switch (type->kind) {
+  case TYPE_GENERIC_PARAM: {
+    int index = type->as.genericParam.index;
+    Type *bound = index < count ? bindings[index] : NULL;
+
+    if (bound != NULL)
+      return bound;
+
+    return eraseEmpty ? NULL : type;
+  }
+
+  case TYPE_ARRAY: {
+    Type *elementType = substituteGenericParams(type->as.array.elementType,
+                                                bindings, count, eraseEmpty);
+
+    if (elementType == type->as.array.elementType)
+      return type;
+
+    return typeArray(elementType);
+  }
+
+  case TYPE_FN: {
+    int paramCount = type->as.function.paramCount;
+    Type **paramTypes =
+        paramCount > 0
+            ? (Type **)typesAllocRaw((size_t)paramCount * sizeof(Type *))
+            : NULL;
+    bool changed = false;
+
+    for (int i = 0; i < paramCount; i++) {
+      paramTypes[i] = substituteGenericParams(type->as.function.paramTypes[i],
+                                              bindings, count, eraseEmpty);
+      if (paramTypes[i] != type->as.function.paramTypes[i])
+        changed = true;
+    }
+
+    Type *returnType = substituteGenericParams(type->as.function.returnType,
+                                               bindings, count, eraseEmpty);
+
+    if (!changed && returnType == type->as.function.returnType)
+      return type;
+
+    return typeFunction(paramTypes, paramCount, returnType);
+  }
+
+  default:
+    return type;
+  }
+}
+
+Type *typeSubstituteGenericParams(Type *type, Type **bindings, int count) {
+  return substituteGenericParams(type, bindings, count, false);
+}
+
+Type *typeEraseGenericParams(Type *type) {
+  return substituteGenericParams(type, NULL, 0, true);
+}
+
 void typeStructMarkGeneric(Type *type) { type->as.struct_.isGeneric = true; }
 
 bool typeStructIsGeneric(Type *type) {
@@ -455,6 +609,9 @@ bool typesEqual(const Type *a, const Type *b) {
 
   case TYPE_ARRAY:
     return typesEqual(a->as.array.elementType, b->as.array.elementType);
+
+  case TYPE_GENERIC_PARAM:
+    return a->as.genericParam.index == b->as.genericParam.index;
   }
 
   return false; // unreachable
@@ -585,9 +742,12 @@ static void appendTypeName(StrBuf *sb, Type *type) {
     sb_append(sb, "string");
     break;
   case TYPE_NUMBER:
-    sb_append(sb, type->as.number.kind == NUMBER_KIND_COUNT
-                      ? "number"
-                      : numberKindInfo(type->as.number.kind)->name);
+    if (type == anyIntegerSingleton)
+      sb_append(sb, "integer");
+    else
+      sb_append(sb, type->as.number.kind == NUMBER_KIND_COUNT
+                        ? "number"
+                        : numberKindInfo(type->as.number.kind)->name);
     break;
   case TYPE_STRUCT:
     sb_appendf(sb, "%.*s", type->as.struct_.name.length,
@@ -611,14 +771,20 @@ static void appendTypeName(StrBuf *sb, Type *type) {
     appendTypeName(sb, type->as.function.returnType);
     break;
   case TYPE_ARRAY:
-    if (type == anyArraySingleton) {
-      sb_append(sb, "array");
-      break;
-    }
     sb_append(sb, "[");
     appendTypeName(sb, type->as.array.elementType);
     sb_append(sb, "]");
     break;
+  case TYPE_GENERIC_PARAM: {
+    static const char names[] = "TUVW";
+    int index = type->as.genericParam.index;
+
+    if (index < (int)sizeof(names) - 1)
+      sb_appendf(sb, "%c", names[index]);
+    else
+      sb_appendf(sb, "T%d", index);
+    break;
+  }
   }
 }
 

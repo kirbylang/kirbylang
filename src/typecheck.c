@@ -114,6 +114,7 @@ struct TypeEnv {
   Type *_currentReturnType; // NULL when not checking a function/method body, or
                             // its return type didn't resolve.
   Type *_currentImplTargetType; // NULL when not checking an impl block
+  bool _resolvingSignature;     // Allows the names only native signatures use
 };
 
 // Type environment that persists across compilation units
@@ -309,6 +310,32 @@ Type *typchkTypeEnvGetImplTargetType(TypeEnv *env) {
   return env->_currentImplTargetType;
 }
 
+// Names that only native signatures can use: generic parameters T, U, V and
+// W, and `number` and `integer`, which accept any number or integer kind.
+static Type *typchkResolveSignatureName(Token *name) {
+  static const char genericNames[] = "TUVW";
+
+  if (name->length == 1) {
+    const char *found = strchr(genericNames, name->start[0]);
+    if (found != NULL)
+      return typeGenericParam((int)(found - genericNames));
+  }
+
+  if (tokenTextEquals(name, "number"))
+    return typeAnyNumber();
+  if (tokenTextEquals(name, "integer"))
+    return typeAnyInteger();
+
+  return NULL;
+}
+
+Type *typchkResolveSignatureType(TypeEnv *env, AstNode *typeAnnotation) {
+  env->_resolvingSignature = true;
+  Type *type = typchkResolveType(env, typeAnnotation);
+  env->_resolvingSignature = false;
+  return type;
+}
+
 Type *typchkResolveType(TypeEnv *env, AstNode *typeAnnotation) {
   if (typeAnnotation->kind == NODE_TYPE_FUNCTION) {
     TypeFunctionNode *fn = &typeAnnotation->as.typeFunction;
@@ -338,6 +365,12 @@ Type *typchkResolveType(TypeEnv *env, AstNode *typeAnnotation) {
   }
 
   TypeNode *t = &typeAnnotation->as.type_;
+
+  if (env->_resolvingSignature && t->genericArgCount == 0) {
+    Type *signatureType = typchkResolveSignatureName(&t->name);
+    if (signatureType != NULL)
+      return signatureType;
+  }
 
   if (t->genericArgCount > 0) {
     typchkErrorAtToken(&t->name, "Generic types aren't supported yet.");
@@ -1154,6 +1187,11 @@ static Type *typchkInferVariable(TypeEnv *env, AstNode *node) {
   if (type == NULL)
     return NULL;
 
+  // A generic function used as a value, such as `let pop = @arrPop;`, has no
+  // single type to give it.
+  if (typeGenericParamCount(type) > 0)
+    return NULL;
+
   return type;
 }
 
@@ -1310,6 +1348,55 @@ static Type *typchkInferCall(TypeEnv *env, AstNode *node) {
   return typchkCheckCallAgainstFunctionType(env, node, calleeType);
 }
 
+// Checks a call to a function with generic parameters, such as
+// `fun ([T], T) => unit`. Goes through the arguments in order. A parameter
+// with no unfilled generic parameters is checked like any other. Otherwise the
+// argument's type fills them, as `[i64]` fills T in `[T]`. Each argument is
+// checked once. Generic parameters that are never filled are unknown.
+static Type *typchkCheckGenericCall(TypeEnv *env, AstNode *node,
+                                    Type *calleeType, int genericCount) {
+  CallNode *c = &node->as.call;
+  Type **bindings =
+      (Type **)typesAllocRaw((size_t)genericCount * sizeof(Type *));
+  memset(bindings, 0, (size_t)genericCount * sizeof(Type *));
+  bool ok = true;
+
+  for (int i = 0; i < c->argCount; i++) {
+    AstNode *arg = c->args[i];
+    Type *param = typeSubstituteGenericParams(
+        calleeType->as.function.paramTypes[i], bindings, genericCount);
+
+    if (typeGenericParamCount(param) == 0) {
+      if (!typchkCheck(env, arg, param))
+        ok = false;
+      continue;
+    }
+
+    Type *known = typeEraseGenericParams(param);
+    Type *actual = arg->kind == NODE_FUNCTION && arg->as.function.isLambda
+                       ? typchkCheckOrInferLambda(env, arg, known)
+                       : typchkInfer(env, arg);
+
+    if (actual == NULL)
+      continue;
+
+    if (!typeAccepts(known, actual)) {
+      typchkErrorAtNodeFmt(arg, "Expected %s, got %s.", typeToString(param),
+                           typeToString(actual));
+      ok = false;
+      continue;
+    }
+
+    typeBindGenericParams(param, actual, bindings, genericCount);
+  }
+
+  if (!ok)
+    return NULL;
+
+  return typeEraseGenericParams(typeSubstituteGenericParams(
+      calleeType->as.function.returnType, bindings, genericCount));
+}
+
 static Type *typchkCheckCallAgainstFunctionType(TypeEnv *env, AstNode *node,
                                                 Type *calleeType) {
   CallNode *c = &node->as.call;
@@ -1324,6 +1411,11 @@ static Type *typchkCheckCallAgainstFunctionType(TypeEnv *env, AstNode *node,
                           calleeType->as.function.paramCount, c->argCount);
     return NULL;
   }
+
+  int genericCount = typeGenericParamCount(calleeType);
+
+  if (genericCount > 0)
+    return typchkCheckGenericCall(env, node, calleeType, genericCount);
 
   bool ok = true;
   for (int i = 0; i < c->argCount; i++) {
