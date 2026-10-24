@@ -82,6 +82,7 @@
 - Array natives are type checked by their element type: `@arrContains([1, 2], 2.0)` and `@arrPush(numbers, 2.5)` are type errors instead of quietly giving a wrong answer, and `@arrPop` gives the element type
 - `@strSplit` returns an array of `string` and `@strToBytes` an array of `u8`
 - `@strSlice`, `@strReplace` and `@strReplaceAll` are type checked
+- Integer math that overflows its type is a runtime error instead of wrapping around: `255u8 + 1u8` stops with `Integer overflow: 255 + 1 doesn't fit in u8, which holds 0 to 255.`
 
 ## 0.4.0
 

@@ -1,3 +1,0 @@
-@println(200u8 + 100u8);
-let a: u8 = 255;
-@println(a + 1u8);

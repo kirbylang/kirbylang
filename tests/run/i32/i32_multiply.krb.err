@@ -5,7 +5,7 @@
 0006    | OP_MULTIPLY
 0007    | OP_CALL             1
 0009    | OP_POP
-0010    2 OP_CONSTANT         4 '65536'
+0010    2 OP_CONSTANT         4 '46340'
 0012    | OP_DEFINE_GLOBAL    3 'big'
 0014    3 OP_GET_GLOBAL       0 '@println'
 0016    | OP_GET_GLOBAL       3 'big'

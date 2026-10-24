@@ -454,6 +454,39 @@ static bool sameNumberKind(Value a, Value b) {
   return IS_NUMBER(a) && IS_NUMBER(b) && a.as.number.kind == b.as.number.kind;
 }
 
+// Reports an integer result that doesn't fit its kind, e.g. "Integer
+// overflow: 255 + 1 doesn't fit in u8, which holds 0 to 255."
+static void integerOverflowError(NumberKind kind, const char *expression) {
+  char min[NUMBER_STRING_MAX];
+  char max[NUMBER_STRING_MAX];
+
+  formatNumber(kind, (NumberPayload){.i64 = numberKindMin(kind)}, min,
+               sizeof(min));
+  formatNumber(kind, (NumberPayload){.u64 = numberKindMax(kind)}, max,
+               sizeof(max));
+
+  runtimeError(&vm,
+               "Integer overflow: %s doesn't fit in %s, which holds %s to %s.",
+               expression, numberKindInfo(kind)->name, min, max);
+}
+
+static const char *numberOpSymbol(NumberOp op) {
+  switch (op) {
+  case NUMBER_OP_ADD:
+    return "+";
+  case NUMBER_OP_SUBTRACT:
+    return "-";
+  case NUMBER_OP_MULTIPLY:
+    return "*";
+  case NUMBER_OP_DIVIDE:
+    return "/";
+  case NUMBER_OP_MODULO:
+    return "%";
+  }
+
+  return "?";
+}
+
 static bool numberBinary(NumberOp op, const char *mismatchMessage) {
   Value b = peekStack(0);
   Value a = peekStack(1);
@@ -469,13 +502,24 @@ static bool numberBinary(NumberOp op, const char *mismatchMessage) {
   if (op == NUMBER_OP_DIVIDE || (op == NUMBER_OP_MODULO && !isFloat))
     assertNonZeroNumber(&vm, op == NUMBER_OP_DIVIDE ? "/" : "%", b, 1);
 
-  popFromStack();
-  popFromStack();
+  NumberPayload result;
 
-  NumberPayload result =
-      numberArithmetic(kind, op, a.as.number.as, b.as.number.as);
-  Value resultValue = numberValue(kind, result);
-  pushOnStack(resultValue);
+  if (!numberArithmetic(kind, op, a.as.number.as, b.as.number.as, &result)) {
+    char left[NUMBER_STRING_MAX];
+    char right[NUMBER_STRING_MAX];
+    char expression[2 * NUMBER_STRING_MAX + 8];
+
+    formatNumber(kind, a.as.number.as, left, sizeof(left));
+    formatNumber(kind, b.as.number.as, right, sizeof(right));
+    snprintf(expression, sizeof(expression), "%s %s %s", left,
+             numberOpSymbol(op), right);
+    integerOverflowError(kind, expression);
+    return false;
+  }
+
+  popFromStack();
+  popFromStack();
+  pushOnStack(numberValue(kind, result));
 
   return true;
 }
@@ -622,10 +666,21 @@ static InterpretResult run(void) {
         return INTERPRET_RUNTIME_ERROR;
       }
 
+      NumberKind kind = value.as.number.kind;
+      NumberPayload result;
+
+      if (!numberNegateValue(kind, value.as.number.as, &result)) {
+        char operand[NUMBER_STRING_MAX];
+        char expression[NUMBER_STRING_MAX + 4];
+
+        formatNumber(kind, value.as.number.as, operand, sizeof(operand));
+        snprintf(expression, sizeof(expression), "-(%s)", operand);
+        integerOverflowError(kind, expression);
+        return INTERPRET_RUNTIME_ERROR;
+      }
+
       popFromStack();
-      pushOnStack(numberValue(
-          value.as.number.kind,
-          numberNegateValue(value.as.number.kind, value.as.number.as)));
+      pushOnStack(numberValue(kind, result));
 
       break;
     }

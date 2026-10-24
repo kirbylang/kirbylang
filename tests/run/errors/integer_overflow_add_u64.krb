@@ -1,0 +1,2 @@
+let largest = 18446744073709551615u64;
+@println(largest + 1u64);

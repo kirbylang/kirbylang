@@ -1,0 +1,2 @@
+let max: i8 = 127;
+@println(max + 1i8);

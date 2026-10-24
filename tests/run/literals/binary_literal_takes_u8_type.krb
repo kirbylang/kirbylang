@@ -1,0 +1,4 @@
+let a: u8 = 250;
+@println(a + 5);
+@println(a / 2);
+@println(@typeof(a + 5));

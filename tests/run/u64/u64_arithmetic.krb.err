@@ -4,38 +4,20 @@
 0004    2 OP_GET_GLOBAL       2 '@println'
 0006    | OP_GET_GLOBAL       0 'max'
 0008    | OP_CONSTANT         3 '2'
-0010    | OP_ADD
+0010    | OP_DIVIDE
 0011    | OP_CALL             1
 0013    | OP_POP
 0014    3 OP_GET_GLOBAL       2 '@println'
-0016    | OP_CONSTANT         4 '0'
-0018    | OP_CONSTANT         5 '1'
-0020    | OP_SUBTRACT
+0016    | OP_GET_GLOBAL       0 'max'
+0018    | OP_CONSTANT         4 '10'
+0020    | OP_MODULO
 0021    | OP_CALL             1
 0023    | OP_POP
 0024    4 OP_GET_GLOBAL       2 '@println'
 0026    | OP_GET_GLOBAL       0 'max'
-0028    | OP_CONSTANT         3 '2'
-0030    | OP_MULTIPLY
+0028    | OP_GET_GLOBAL       0 'max'
+0030    | OP_DIVIDE
 0031    | OP_CALL             1
 0033    | OP_POP
-0034    5 OP_GET_GLOBAL       2 '@println'
-0036    | OP_GET_GLOBAL       0 'max'
-0038    | OP_CONSTANT         3 '2'
-0040    | OP_DIVIDE
-0041    | OP_CALL             1
-0043    | OP_POP
-0044    6 OP_GET_GLOBAL       2 '@println'
-0046    | OP_GET_GLOBAL       0 'max'
-0048    | OP_CONSTANT         6 '10'
-0050    | OP_MODULO
-0051    | OP_CALL             1
-0053    | OP_POP
-0054    7 OP_GET_GLOBAL       2 '@println'
-0056    | OP_GET_GLOBAL       0 'max'
-0058    | OP_GET_GLOBAL       0 'max'
-0060    | OP_DIVIDE
-0061    | OP_CALL             1
-0063    | OP_POP
-0064    8 OP_NIL
-0065    | OP_RETURN
+0034    5 OP_NIL
+0035    | OP_RETURN
