@@ -18,7 +18,7 @@ If you can, I highly recommend buying a hard copy as the illustrations are gorge
 
 As mentioned above, this is a personal learning project.
 
-On the language implementation side of things, this is my project to explore topics I haven't on my previous languagep rojects.
+On the language implementation side of things, this is my project to explore topics I haven't on my [previous](https://github.com/testingrequired/reqlang-expr) [language](https://github.com/kyleect/locks) [projects](https://github.com/testingrequired/reqlang).
 
 Things like type systems (bounded parametric polymorphism, monomorphization, trade offs in those decisions), modules/namespaces, tooling like a linter and formatter.
 
