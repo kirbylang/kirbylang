@@ -1,1 +1,1 @@
-[line 1] Error: Expected f32, got i64.
+[line 1] Error: Integer literal 16777217 can't be stored exactly in f32, which holds whole numbers from -16777216 to 16777216 exactly.

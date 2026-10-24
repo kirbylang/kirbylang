@@ -1,0 +1,12 @@
+@println([1, 2.5, 3]);
+
+let byte: u8 = 3;
+let bytes = [1, byte, 2];
+@println(bytes);
+@println(@typeof(bytes[0]));
+
+let ints = [1, 2, 3];
+@println(@typeof(ints[0]));
+
+let floats = [2 * 3, -1, 0.5];
+@println(floats);

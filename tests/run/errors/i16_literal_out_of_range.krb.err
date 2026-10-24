@@ -1,1 +1,1 @@
-[line 1] Error: Expected i16, got i64.
+[line 1] Error: Integer literal 32768 doesn't fit in i16, which holds -32768 to 32767.

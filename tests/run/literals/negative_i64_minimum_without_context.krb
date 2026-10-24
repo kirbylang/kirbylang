@@ -1,0 +1,4 @@
+@println(-9223372036854775808);
+@println(@typeof(-9223372036854775808));
+let smallest = -9223372036854775808;
+@println(smallest);

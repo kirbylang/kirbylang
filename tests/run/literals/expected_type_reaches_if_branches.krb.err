@@ -1,0 +1,56 @@
+== <script> ==
+0000   10 OP_CLOSURE          1 <fn pick>
+0002    | OP_DEFINE_GLOBAL    0 'pick'
+0004    1 OP_TRUE
+0005    | OP_DEFINE_GLOBAL    2 'wide'
+0007    3 OP_GET_GLOBAL       2 'wide'
+0009    | OP_JUMP_IF_FALSE    9 -> 18
+0012    | OP_POP
+0013    | OP_CONSTANT         4 '1'
+0015    | OP_JUMP            15 -> 21
+0018    | OP_POP
+0019    | OP_CONSTANT         5 '2'
+0021    | OP_DEFINE_GLOBAL    3 'a'
+0023    4 OP_GET_GLOBAL       6 '@println'
+0025    | OP_GET_GLOBAL       3 'a'
+0027    | OP_CALL             1
+0029    | OP_POP
+0030    5 OP_GET_GLOBAL       6 '@println'
+0032    | OP_GET_GLOBAL       7 '@typeof'
+0034    | OP_GET_GLOBAL       3 'a'
+0036    | OP_CALL             1
+0038    | OP_CALL             1
+0040    | OP_POP
+0041    7 OP_GET_GLOBAL       2 'wide'
+0043    | OP_JUMP_IF_FALSE   43 -> 57
+0046    | OP_POP
+0047    | OP_CONSTANT         9 '10'
+0049    | OP_CONSTANT        10 '4'
+0051    | OP_DIVIDE
+0052    | OP_CLOSE_BLOCK_EXPR    0
+0054    | OP_JUMP            54 -> 62
+0057    | OP_POP
+0058    | OP_CONSTANT        11 '0'
+0060    | OP_CLOSE_BLOCK_EXPR    0
+0062    | OP_DEFINE_GLOBAL    8 'b'
+0064    8 OP_GET_GLOBAL       6 '@println'
+0066    | OP_GET_GLOBAL       8 'b'
+0068    | OP_CALL             1
+0070    | OP_POP
+0071   11 OP_GET_GLOBAL       6 '@println'
+0073    | OP_GET_GLOBAL       0 'pick'
+0075    | OP_FALSE
+0076    | OP_CALL             1
+0078    | OP_CALL             1
+0080    | OP_POP
+0081   12 OP_NIL
+0082    | OP_RETURN
+== pick ==
+0000   10 OP_GET_LOCAL        1
+0002    | OP_JUMP_IF_FALSE    2 -> 11
+0005    | OP_POP
+0006    | OP_CONSTANT         0 '1'
+0008    | OP_JUMP             8 -> 14
+0011    | OP_POP
+0012    | OP_CONSTANT         1 '2'
+0014    | OP_RETURN

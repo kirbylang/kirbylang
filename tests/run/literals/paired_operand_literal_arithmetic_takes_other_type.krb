@@ -1,0 +1,5 @@
+let x: f64 = 1.5;
+
+@println(x + (1 + 2));
+@println(@typeof(x * (2 - 1)));
+@println((10 / 4) + x);

@@ -406,31 +406,43 @@ static uint64_t typchkLargestExactInteger(NumberKind kind) {
   return numberKindMax(kind);
 }
 
-// Where an integer kind is expected, a plain integer literal that fits the
-// kind is treated as a literal of that kind, so `let byte: u8 = 65;` and
-// `sum(1, 2)` don't need a suffix. Suffixed and decimal literals are an
-// explicit choice and never coerce. The compiler reads the literal's kind, so
-// the AST is rewritten here, before compilation.
-static void typchkCoerceIntegerLiteral(AstNode *node, Type *expected) {
-  if (expected == NULL || !typeIsNumber(expected))
-    return;
+static bool typchkIsPlainIntegerLiteral(AstNode *node) {
+  return node->kind == NODE_LITERAL &&
+         node->as.literal.kind == LITERAL_NUMBER &&
+         node->as.literal.as.number.literalIsPlainInteger;
+}
 
-  NumberKind kind = expected->as.number.kind;
+// Whether a plain integer literal, such as `65`, can be written exactly in
+// `kind`. Suffixed and decimal literals are an explicit choice and never fit.
+static bool typchkPlainIntegerFits(AstNode *literal, NumberKind kind) {
+  if (!typchkIsPlainIntegerLiteral(literal))
+    return false;
 
-  if (kind == NUMBER_KIND_COUNT)
-    return;
+  uint64_t value = literal->as.literal.as.number.literalValue;
 
-  if (node->kind != NODE_LITERAL || node->as.literal.kind != LITERAL_NUMBER)
-    return;
+  return literal->as.literal.as.number.literalValueFits &&
+         value <= typchkLargestExactInteger(kind);
+}
 
-  LiteralNode *lit = &node->as.literal;
+// Whether `-literal` can be written exactly in `kind`, which includes the
+// smallest value of a signed kind, such as `-128` for `i8`.
+static bool typchkNegatedPlainIntegerFits(AstNode *literal, NumberKind kind) {
+  const NumberKindInfo *info = numberKindInfo(kind);
 
-  if (!lit->as.number.literalIsPlainInteger)
-    return;
+  if (!info->isSigned || !typchkIsPlainIntegerLiteral(literal) ||
+      !literal->as.literal.as.number.literalValueFits)
+    return false;
 
-  if (!lit->as.number.literalValueFits ||
-      lit->as.number.literalValue > typchkLargestExactInteger(kind))
-    return;
+  uint64_t largest = info->isFloat ? typchkLargestExactInteger(kind)
+                                   : 0 - (uint64_t)numberKindMin(kind);
+
+  return literal->as.literal.as.number.literalValue <= largest;
+}
+
+// Rewrites a plain integer literal as a literal of `kind`. The compiler reads
+// the literal's kind, so this happens before compilation.
+static void typchkSetPlainIntegerKind(AstNode *literal, NumberKind kind) {
+  LiteralNode *lit = &literal->as.literal;
 
   lit->as.number.kind = kind;
   lit->as.number.literalIsPlainInteger = false;
@@ -441,49 +453,246 @@ static void typchkCoerceIntegerLiteral(AstNode *node, Type *expected) {
     lit->as.number.as.u64 = lit->as.number.literalValue;
 }
 
-// Where a signed integer kind is expected, `-5` is a literal of that kind, so
-// the smallest value of the kind can be written. The node is rewritten in
-// place before compilation.
-static void typchkMaybeFoldNegativeNumberLiteral(AstNode *node,
-                                                 Type *expected) {
-  if (expected == NULL || !typeIsNumber(expected) || node->kind != NODE_UNARY ||
-      node->as.unary.op.type != TOKEN_MINUS)
-    return;
+// Rewrites `-literal` as one negative literal of `kind`.
+static void typchkFoldNegatedPlainInteger(AstNode *node, NumberKind kind) {
+  uint64_t value = node->as.unary.operand->as.literal.as.number.literalValue;
 
-  NumberKind kind = expected->as.number.kind;
-
-  if (kind == NUMBER_KIND_COUNT || !numberKindInfo(kind)->isSigned)
-    return;
-
-  AstNode *operand = node->as.unary.operand;
-
-  if (operand->kind != NODE_LITERAL ||
-      operand->as.literal.kind != LITERAL_NUMBER)
-    return;
-
-  if (!operand->as.literal.as.number.literalIsPlainInteger)
-    return;
-
-  bool isFloat = numberKindInfo(kind)->isFloat;
-  uint64_t largest = isFloat ? typchkLargestExactInteger(kind)
-                             : 0 - (uint64_t)numberKindMin(kind);
-
-  if (!operand->as.literal.as.number.literalValueFits ||
-      operand->as.literal.as.number.literalValue > largest)
-    return;
-
-  int line = node->line;
   node->kind = NODE_LITERAL;
-  node->line = line;
   node->as.literal.kind = LITERAL_NUMBER;
   node->as.literal.as.number.kind = kind;
   node->as.literal.as.number.literalIsPlainInteger = false;
-  if (isFloat)
-    node->as.literal.as.number.as.f64 =
-        -(double)operand->as.literal.as.number.literalValue;
+
+  if (numberKindInfo(kind)->isFloat)
+    node->as.literal.as.number.as.f64 = -(double)value;
   else
-    node->as.literal.as.number.as.i64 =
-        (int64_t)(0 - operand->as.literal.as.number.literalValue);
+    node->as.literal.as.number.as.i64 = (int64_t)(0 - value);
+}
+
+static bool typchkIsArithmeticOperator(TokenType type) {
+  return type == TOKEN_PLUS || type == TOKEN_MINUS || type == TOKEN_STAR ||
+         type == TOKEN_SLASH || type == TOKEN_MODULO;
+}
+
+// Called on each leaf of literal arithmetic: a number literal or `-literal`.
+// Returning false stops the walk.
+typedef bool (*LiteralLeafVisitor)(AstNode *leaf, NumberKind kind,
+                                   void *context);
+
+// Walks a value made only of number literals, brackets, `-` and arithmetic,
+// such as `(1 + 2) * -3`, calling `visit` on each leaf. Returns false if the
+// value is anything else, if `visit` returns false, or if `-` is applied to
+// more than a literal while `kind` is unsigned.
+static bool typchkVisitLiteralArithmetic(AstNode *node, NumberKind kind,
+                                         LiteralLeafVisitor visit,
+                                         void *context) {
+  switch (node->kind) {
+  case NODE_LITERAL:
+    return node->as.literal.kind == LITERAL_NUMBER &&
+           visit(node, kind, context);
+  case NODE_GROUPING:
+    return typchkVisitLiteralArithmetic(node->as.grouping.inner, kind, visit,
+                                        context);
+  case NODE_UNARY:
+    if (node->as.unary.op.type != TOKEN_MINUS)
+      return false;
+    if (typchkIsPlainIntegerLiteral(node->as.unary.operand))
+      return visit(node, kind, context);
+    return numberKindInfo(kind)->isSigned &&
+           typchkVisitLiteralArithmetic(node->as.unary.operand, kind, visit,
+                                        context);
+  case NODE_BINARY:
+    return typchkIsArithmeticOperator(node->as.binary.op.type) &&
+           typchkVisitLiteralArithmetic(node->as.binary.left, kind, visit,
+                                        context) &&
+           typchkVisitLiteralArithmetic(node->as.binary.right, kind, visit,
+                                        context);
+  default:
+    return false;
+  }
+}
+
+// A leaf fits if it can be written exactly in `kind` or already is `kind`.
+static bool typchkLiteralLeafFits(AstNode *leaf, NumberKind kind,
+                                  void *context) {
+  (void)context;
+
+  if (leaf->kind == NODE_UNARY)
+    return typchkNegatedPlainIntegerFits(leaf->as.unary.operand, kind);
+
+  if (typchkIsPlainIntegerLiteral(leaf))
+    return typchkPlainIntegerFits(leaf, kind);
+
+  return leaf->as.literal.as.number.kind == kind;
+}
+
+static bool typchkSetLiteralLeafKind(AstNode *leaf, NumberKind kind,
+                                     void *context) {
+  (void)context;
+
+  if (leaf->kind == NODE_UNARY)
+    typchkFoldNegatedPlainInteger(leaf, kind);
+  else if (typchkIsPlainIntegerLiteral(leaf))
+    typchkSetPlainIntegerKind(leaf, kind);
+
+  return true;
+}
+
+static bool typchkLiteralLeafIsPlainInteger(AstNode *leaf, NumberKind kind,
+                                            void *context) {
+  (void)kind;
+  (void)context;
+  return leaf->kind == NODE_UNARY || typchkIsPlainIntegerLiteral(leaf);
+}
+
+// Whether every number in literal arithmetic can be of `kind`.
+static bool typchkLiteralArithmeticFits(AstNode *node, NumberKind kind) {
+  return typchkVisitLiteralArithmetic(node, kind, typchkLiteralLeafFits, NULL);
+}
+
+// Whether a value is literal arithmetic made only of plain integers, such as
+// `2 * 3`, so it has no number type of its own until something gives it one.
+static bool typchkIsPlainIntegerArithmetic(AstNode *node) {
+  return typchkVisitLiteralArithmetic(node, NUMBER_KIND_I64,
+                                      typchkLiteralLeafIsPlainInteger, NULL);
+}
+
+// Records the first leaf that doesn't fit `kind` in `context`.
+static bool typchkFindMisfitLeaf(AstNode *leaf, NumberKind kind,
+                                 void *context) {
+  if (typchkLiteralLeafFits(leaf, kind, NULL))
+    return true;
+
+  *(AstNode **)context = leaf;
+  return false;
+}
+
+// Reports why plain integer arithmetic can't be `kind`, naming the literal
+// and what `kind` holds, e.g. "Integer literal 300 doesn't fit in u8, which
+// holds 0 to 255."
+static void typchkReportLiteralMisfit(AstNode *node, NumberKind kind) {
+  const NumberKindInfo *info = numberKindInfo(kind);
+  AstNode *leaf = NULL;
+
+  typchkVisitLiteralArithmetic(node, kind, typchkFindMisfitLeaf, &leaf);
+
+  if (leaf == NULL) {
+    typchkErrorAtNodeFmt(node, "%s can't be negative.", info->name);
+    return;
+  }
+
+  bool negative = leaf->kind == NODE_UNARY;
+  AstNode *literal = negative ? leaf->as.unary.operand : leaf;
+
+  if (!literal->as.literal.as.number.literalValueFits) {
+    typchkErrorAtNode(leaf,
+                      "Integer literal is too large for any number type.");
+    return;
+  }
+
+  char value[32];
+  snprintf(value, sizeof(value), "%s%llu ", negative ? "-" : "",
+           (unsigned long long)literal->as.literal.as.number.literalValue);
+
+  if (info->isFloat) {
+    unsigned long long largest =
+        (unsigned long long)typchkLargestExactInteger(kind);
+    typchkErrorAtNodeFmt(leaf,
+                         "Integer literal %scan't be stored exactly in %s, "
+                         "which holds whole numbers from -%llu to %llu "
+                         "exactly.",
+                         value, info->name, largest, largest);
+    return;
+  }
+
+  typchkErrorAtNodeFmt(leaf,
+                       "Integer literal %sdoesn't fit in %s, which holds "
+                       "%lld to %llu.",
+                       value, info->name, (long long)numberKindMin(kind),
+                       (unsigned long long)numberKindMax(kind));
+}
+
+// Called on a value, or a value it comes from. Returns true when it handled
+// the value, which stops the walk going inside it.
+typedef bool (*ValueSourceVisitor)(AstNode *value, NumberKind kind);
+
+// Walks the places a value comes from: the value itself, or the value inside
+// brackets, both if/else branches and a block's last value. Returns whether
+// `visit` handled any of them.
+static bool typchkVisitValueSources(AstNode *node, NumberKind kind,
+                                    ValueSourceVisitor visit) {
+  if (node == NULL)
+    return false;
+
+  if (visit(node, kind))
+    return true;
+
+  switch (node->kind) {
+  case NODE_GROUPING:
+    return typchkVisitValueSources(node->as.grouping.inner, kind, visit);
+  case NODE_IF: {
+    bool thenHandled =
+        typchkVisitValueSources(node->as.if_.thenBranch, kind, visit);
+    bool elseHandled =
+        typchkVisitValueSources(node->as.if_.elseBranch, kind, visit);
+    return thenHandled || elseHandled;
+  }
+  case NODE_BLOCK:
+    return typchkVisitValueSources(node->as.block.value, kind, visit);
+  default:
+    return false;
+  }
+}
+
+static bool typchkSetLiteralArithmeticKind(AstNode *value, NumberKind kind) {
+  if (!typchkLiteralArithmeticFits(value, kind))
+    return false;
+
+  typchkVisitLiteralArithmetic(value, kind, typchkSetLiteralLeafKind, NULL);
+  return true;
+}
+
+// Plain integer arithmetic that is still plain didn't fit the expected kind.
+static bool typchkReportPlainIntegerArithmetic(AstNode *value,
+                                               NumberKind kind) {
+  if (!typchkIsPlainIntegerArithmetic(value))
+    return false;
+
+  typchkReportLiteralMisfit(value, kind);
+  return true;
+}
+
+static bool typchkIsPlainIntegerSource(AstNode *value, NumberKind kind) {
+  (void)kind;
+  return typchkIsPlainIntegerArithmetic(value);
+}
+
+// Whether a value, or a value it comes from, is plain integer arithmetic, as
+// in `if (flag) { 1 } else 2`.
+static bool typchkHasPlainIntegerSource(AstNode *node) {
+  return typchkVisitValueSources(node, NUMBER_KIND_I64,
+                                 typchkIsPlainIntegerSource);
+}
+
+static bool typchkIsConcreteNumberType(Type *type) {
+  return type != NULL && typeIsNumber(type) &&
+         type->as.number.kind != NUMBER_KIND_COUNT;
+}
+
+// Gives the number literals in a value the number type expected of the value,
+// so `let byte: u8 = 65;` needs no suffix and `let half: f64 = 7 / 2;` is 3.5.
+// Arithmetic changes only when every number in it is a literal that fits, so
+// a variable always keeps its own type. Plain integer arithmetic that can't
+// be the expected type is reported. Returns false after reporting.
+static bool typchkApplyExpectedNumberType(AstNode *node, Type *expected) {
+  if (node == NULL || !typchkIsConcreteNumberType(expected))
+    return true;
+
+  NumberKind kind = expected->as.number.kind;
+
+  typchkVisitValueSources(node, kind, typchkSetLiteralArithmeticKind);
+
+  return !typchkVisitValueSources(node, kind,
+                                  typchkReportPlainIntegerArithmetic);
 }
 
 // An array index is a number of any kind.
@@ -566,8 +775,8 @@ Type *typchkInfer(TypeEnv *env, AstNode *node) {
 }
 
 bool typchkCheck(TypeEnv *env, AstNode *node, Type *expected) {
-  typchkCoerceIntegerLiteral(node, expected);
-  typchkMaybeFoldNegativeNumberLiteral(node, expected);
+  if (!typchkApplyExpectedNumberType(node, expected))
+    return false;
 
   if (node->kind == NODE_FUNCTION && node->as.function.isLambda)
     return typchkCheckOrInferLambda(env, node, expected) != NULL;
@@ -650,16 +859,21 @@ static Type *typchkInferLiteral(AstNode *node) {
   return NULL; // unreachable
 }
 
-// A plain integer literal next to a number of another type takes that type
-// when it fits, so `byte + 1` needs no suffix.
-static void typchkCoerceOperand(TypeEnv *env, AstNode *operand, Type **type,
-                                Type *otherType) {
-  if (!typeIsNumber(otherType) || !typeIsNumber(*type))
-    return;
+// A plain integer value next to a number of another type takes that type, so
+// `byte + 1` needs no suffix. Used for both sides of an operator and both
+// branches of an if/else. Returns false after reporting a literal that can't
+// be the other type.
+static bool typchkPairNumberType(TypeEnv *env, AstNode *value, Type **type,
+                                 Type *otherType) {
+  if (!typeIsNumber(otherType) || !typeIsNumber(*type) ||
+      typesEqual(*type, otherType) || !typchkHasPlainIntegerSource(value))
+    return true;
 
-  typchkCoerceIntegerLiteral(operand, otherType);
-  typchkMaybeFoldNegativeNumberLiteral(operand, otherType);
-  *type = typchkInfer(env, operand);
+  if (!typchkApplyExpectedNumberType(value, otherType))
+    return false;
+
+  *type = typchkInfer(env, value);
+  return *type != NULL;
 }
 
 // Infer the type of a unary expressoin
@@ -673,6 +887,26 @@ static Type *typchkInferUnary(TypeEnv *env, AstNode *node) {
       return NULL;
 
     return typeBool();
+  }
+
+  // With no expected type, `-literal` is an i64. It stays plain so it can still
+  // take the type of a paired value, as in `byte32 + -1`. Only the smallest
+  // i64 is folded into one literal now, since its digits alone are too large
+  // for an i64.
+  if (typchkIsPlainIntegerLiteral(u->operand)) {
+    Type *i64 = typeNumber(NUMBER_KIND_I64);
+    AstNode *literal = u->operand;
+
+    if (!typchkNegatedPlainIntegerFits(literal, NUMBER_KIND_I64)) {
+      typchkReportLiteralMisfit(node, NUMBER_KIND_I64);
+      return NULL;
+    }
+
+    if (literal->as.literal.as.number.literalValue >
+        numberKindMax(NUMBER_KIND_I64))
+      typchkFoldNegatedPlainInteger(node, NUMBER_KIND_I64);
+
+    return i64;
   }
 
   Type *operandType = typchkInfer(env, u->operand);
@@ -740,10 +974,9 @@ static Type *typchkInferBinary(TypeEnv *env, AstNode *node) {
   if (leftType == NULL || rightType == NULL)
     return NULL;
 
-  if (!typesEqual(leftType, rightType)) {
-    typchkCoerceOperand(env, b->left, &leftType, rightType);
-    typchkCoerceOperand(env, b->right, &rightType, leftType);
-  }
+  if (!typchkPairNumberType(env, b->left, &leftType, rightType) ||
+      !typchkPairNumberType(env, b->right, &rightType, leftType))
+    return NULL;
 
   switch (b->op.type) {
   case TOKEN_PLUS:
@@ -1387,9 +1620,21 @@ static Type *typchkInferArray(TypeEnv *env, AstNode *node) {
   if (a->count == 0)
     return typeArray(NULL); // nothing to learn an element type from yet
 
-  Type *elementType = typchkInfer(env, a->items[0]);
+  // Plain integer elements take the type of the first element that has a type
+  // of its own, so `[1, 2.5]` is an array of f64.
+  int typedIndex = 0;
+  for (int i = 0; i < a->count; i++) {
+    if (!typchkIsPlainIntegerArithmetic(a->items[i])) {
+      typedIndex = i;
+      break;
+    }
+  }
+
+  Type *elementType = typchkInfer(env, a->items[typedIndex]);
   bool ok = true;
-  for (int i = 1; i < a->count; i++) {
+  for (int i = 0; i < a->count; i++) {
+    if (i == typedIndex)
+      continue;
     if (elementType != NULL) {
       if (!typchkCheck(env, a->items[i], elementType))
         ok = false;
@@ -1468,6 +1713,10 @@ static Type *typchkInferIf(TypeEnv *env, AstNode *node) {
     return elseType;
   if (elseIsNeverType)
     return thenType;
+
+  if (!typchkPairNumberType(env, i->thenBranch, &thenType, elseType) ||
+      !typchkPairNumberType(env, i->elseBranch, &elseType, thenType))
+    return NULL;
 
   if (!typesEqual(thenType, elseType)) {
     typchkErrorAtNodeFmt(node,

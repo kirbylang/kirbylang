@@ -1,1 +1,1 @@
-[line 1] Error: Expected u8, got i64.
+[line 1] Error: Integer literal 256 doesn't fit in u8, which holds 0 to 255.

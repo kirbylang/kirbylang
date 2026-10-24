@@ -1,0 +1,2 @@
+let n = 1;
+let mixed = [n, 2.5];

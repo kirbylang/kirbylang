@@ -1,1 +1,1 @@
-[line 1] Error: Expected u16, got i64.
+[line 1] Error: Integer literal 65536 doesn't fit in u16, which holds 0 to 65535.

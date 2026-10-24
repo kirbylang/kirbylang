@@ -1,0 +1,24 @@
+let half: f64 = 7 / 2;
+@println(half);
+@println(@typeof(half));
+
+let mixed: f64 = 2.5 * 2;
+@println(mixed);
+
+let byte: u8 = 200 + 55;
+@println(byte);
+
+let small: i32 = 2 * 3 - 10;
+@println(small);
+
+fun ratio(x: f64): f64 = x;
+@println(ratio(1 / 4));
+
+fun third(): f64 = 1 / 3 * 3;
+@println(third());
+
+@println(@sqrt(8 * 2));
+
+let plain = 7 / 2;
+@println(plain);
+@println(@typeof(plain));

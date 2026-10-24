@@ -1,0 +1,53 @@
+== <script> ==
+0000    1 OP_TRUE
+0001    | OP_DEFINE_GLOBAL    0 'flag'
+0003    2 OP_CONSTANT         2 '1.5'
+0005    | OP_DEFINE_GLOBAL    1 'x'
+0007    4 OP_GET_GLOBAL       0 'flag'
+0009    | OP_JUMP_IF_FALSE    9 -> 18
+0012    | OP_POP
+0013    | OP_GET_GLOBAL       1 'x'
+0015    | OP_JUMP            15 -> 21
+0018    | OP_POP
+0019    | OP_CONSTANT         4 '2'
+0021    | OP_DEFINE_GLOBAL    3 'a'
+0023    5 OP_GET_GLOBAL       5 '@println'
+0025    | OP_GET_GLOBAL       6 '@typeof'
+0027    | OP_GET_GLOBAL       3 'a'
+0029    | OP_CALL             1
+0031    | OP_CALL             1
+0033    | OP_POP
+0034    7 OP_GET_GLOBAL       0 'flag'
+0036    | OP_JUMP_IF_FALSE   36 -> 45
+0039    | OP_POP
+0040    | OP_CONSTANT         4 '2'
+0042    | OP_JUMP            42 -> 48
+0045    | OP_POP
+0046    | OP_GET_GLOBAL       1 'x'
+0048    | OP_DEFINE_GLOBAL    7 'b'
+0050    8 OP_GET_GLOBAL       5 '@println'
+0052    | OP_GET_GLOBAL       6 '@typeof'
+0054    | OP_GET_GLOBAL       7 'b'
+0056    | OP_CALL             1
+0058    | OP_CALL             1
+0060    | OP_POP
+0061   10 OP_GET_GLOBAL       0 'flag'
+0063    | OP_JUMP_IF_FALSE   63 -> 72
+0066    | OP_POP
+0067    | OP_CONSTANT         9 '1'
+0069    | OP_JUMP            69 -> 75
+0072    | OP_POP
+0073    | OP_CONSTANT        10 '0.5'
+0075    | OP_DEFINE_GLOBAL    8 'c'
+0077   11 OP_GET_GLOBAL       5 '@println'
+0079    | OP_GET_GLOBAL       8 'c'
+0081    | OP_CALL             1
+0083    | OP_POP
+0084   12 OP_GET_GLOBAL       5 '@println'
+0086    | OP_GET_GLOBAL       6 '@typeof'
+0088    | OP_GET_GLOBAL       8 'c'
+0090    | OP_CALL             1
+0092    | OP_CALL             1
+0094    | OP_POP
+0095   13 OP_NIL
+0096    | OP_RETURN

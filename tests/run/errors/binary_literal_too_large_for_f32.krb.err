@@ -1,1 +1,1 @@
-[line 2] Error at '+': '+' needs two numbers of the same type or two strings, got f32 and i64.
+[line 2] Error: Integer literal 16777217 can't be stored exactly in f32, which holds whole numbers from -16777216 to 16777216 exactly.
