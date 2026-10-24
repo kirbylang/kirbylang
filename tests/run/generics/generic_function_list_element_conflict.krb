@@ -1,0 +1,6 @@
+fun push_one[T](xs: [T], x: T): [T] {
+  return xs;
+}
+
+let xs: [i64] = [1, 2];
+push_one(xs, "three");

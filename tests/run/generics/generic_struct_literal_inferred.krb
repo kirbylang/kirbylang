@@ -1,0 +1,9 @@
+struct Box[T] {
+  pub var value: T;
+}
+
+let a = Box { value: 5 };
+let b = Box { value: "five" };
+
+@println(a.value + 1);
+@println(b.value + "!");

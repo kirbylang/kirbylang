@@ -1,0 +1,98 @@
+== <script> ==
+0000   14 OP_CLOSURE          1 <fn double>
+0002    | OP_DEFINE_GLOBAL    0 'double'
+0004   15 OP_CLOSURE          3 <fn square>
+0006    | OP_DEFINE_GLOBAL    2 'square'
+0008   16 OP_CLOSURE          5 <fn gt>
+0010    | OP_DEFINE_GLOBAL    4 'gt'
+0012    1 OP_STRUCT           6 'Box'
+0014    | OP_DEFINE_GLOBAL    6 'Box'
+0016    | OP_GET_GLOBAL       6 'Box'
+0018    2 OP_NIL
+0019    | OP_FIELD            7 'value' public mutable
+0023    3 OP_POP
+0024    5 OP_GET_GLOBAL       6 'Box'
+0026    6 OP_CLOSURE          9 <fn new>
+0028    | OP_METHOD           8 'new'
+0030    8 OP_CLOSURE         11 <fn get>
+0032    | OP_METHOD          10 'get'
+0034   11 OP_CLOSURE         13 <fn map>
+0036    | OP_METHOD          12 'map'
+0038   12 OP_POP
+0039   18 OP_GET_GLOBAL       6 'Box'
+0041    | OP_CONSTANT        15 '5'
+0043    | OP_INVOKE        (1 args)    8 'new'
+0046    | OP_DEFINE_GLOBAL   14 'box_a'
+0048   19 OP_GET_GLOBAL      16 '@println'
+0050    | OP_GET_GLOBAL      14 'box_a'
+0052    | OP_INVOKE        (0 args)   10 'get'
+0055    | OP_CALL             1
+0057    | OP_POP
+0058   21 OP_GET_GLOBAL      14 'box_a'
+0060    | OP_GET_GLOBAL       0 'double'
+0062    | OP_INVOKE        (1 args)   12 'map'
+0065    | OP_DEFINE_GLOBAL   17 'box_b'
+0067   22 OP_GET_GLOBAL      16 '@println'
+0069    | OP_GET_GLOBAL      17 'box_b'
+0071    | OP_INVOKE        (0 args)   10 'get'
+0074    | OP_CALL             1
+0076    | OP_POP
+0077   24 OP_GET_GLOBAL      17 'box_b'
+0079    | OP_GET_GLOBAL       2 'square'
+0081    | OP_INVOKE        (1 args)   12 'map'
+0084    | OP_DEFINE_GLOBAL   18 'box_c'
+0086   25 OP_GET_GLOBAL      16 '@println'
+0088    | OP_GET_GLOBAL      18 'box_c'
+0090    | OP_INVOKE        (0 args)   10 'get'
+0093    | OP_CALL             1
+0095    | OP_POP
+0096   27 OP_GET_GLOBAL      18 'box_c'
+0098    | OP_GET_GLOBAL       4 'gt'
+0100    | OP_CONSTANT        20 '1000'
+0102    | OP_CALL             1
+0104    | OP_INVOKE        (1 args)   12 'map'
+0107    | OP_DEFINE_GLOBAL   19 'box_d'
+0109   28 OP_GET_GLOBAL      16 '@println'
+0111    | OP_GET_GLOBAL      19 'box_d'
+0113    | OP_INVOKE        (0 args)   10 'get'
+0116    | OP_CALL             1
+0118    | OP_POP
+0119   29 OP_NIL
+0120    | OP_RETURN
+== double ==
+0000   14 OP_GET_LOCAL        1
+0002    | OP_CONSTANT         0 '2'
+0004    | OP_MULTIPLY
+0005    | OP_RETURN
+== square ==
+0000   15 OP_GET_LOCAL        1
+0002    | OP_GET_LOCAL        1
+0004    | OP_MULTIPLY
+0005    | OP_RETURN
+== gt ==
+0000   16 OP_CLOSURE          0 <fn lambda0x1>
+0002      |                     local 1
+0004    | OP_RETURN
+== lambda0x1 ==
+0000   16 OP_GET_LOCAL        1
+0002    | OP_GET_UPVALUE      0
+0004    | OP_GREATER
+0005    | OP_RETURN
+== new ==
+0000    6 OP_GET_GLOBAL       0 'Box'
+0002    | OP_CONSTANT         1 'value'
+0004    | OP_GET_LOCAL        1
+0006    | OP_STRUCT_INIT      1
+0008    | OP_RETURN
+== get ==
+0000    8 OP_GET_LOCAL        0
+0002    | OP_GET_PROPERTY     0 'value'
+0004    | OP_RETURN
+== map ==
+0000   11 OP_GET_GLOBAL       0 'Box'
+0002    | OP_GET_LOCAL        1
+0004    | OP_GET_LOCAL        0
+0006    | OP_GET_PROPERTY     2 'value'
+0008    | OP_CALL             1
+0010    | OP_INVOKE        (1 args)    1 'new'
+0013    | OP_RETURN

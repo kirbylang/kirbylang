@@ -1,0 +1,10 @@
+struct Point {
+  pub var x: f64;
+  pub var y: f64;
+}
+
+fun id[T](x: T): T {
+  return x;
+}
+
+let q: f64 = id(Point { x: 1, y: 2 });

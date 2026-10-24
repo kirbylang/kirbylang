@@ -1,0 +1,1 @@
+[line 12] Error at 'secret': Method 'secret' is private to 'Box[i64]'.

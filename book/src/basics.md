@@ -219,6 +219,21 @@ fun sum(a: f64, b: f64): f64 = a + b;
 
 This isn't supported for lambdas at this time.
 
+### Generic Functions
+
+A function can take a type that is chosen by each call. Declare it in brackets after the name. The call works out the type from its arguments.
+
+```krb
+fun first[T](items: [T]): T {
+    return items[0];
+}
+
+@println(first([10, 20, 30]));   // 10
+@println(first(["a", "b"]));     // a
+```
+
+Inside the function, nothing is known about `T`, so a `T` can be passed around, returned and stored, but not added or called. Every argument that uses the same `T` has to be the same type.
+
 ### Builtin Functions
 
 Kirby has a number of builtin functions. These are prefixed with `@`.
@@ -263,6 +278,31 @@ impl Counter {
     }
 }
 ```
+
+#### Generic Structs
+
+A struct can take types too. Write them in brackets after the name, and give them when you use the type.
+
+```krb
+struct Box[T] {
+    pub var value: T;
+}
+
+impl Box[T] {
+    pub fun new(value: T): Self[T] = Self { value: value };
+
+    pub fun get(self): T = self.value;
+
+    pub fun map[U](self, f: fun (T) => U): Self[U] = Self.new(f(self.value));
+}
+
+let number = Box.new(5);           // Box[i64]
+let text: Box[string] = Box { value: "hi" };
+
+@println(number.get());            // 5
+```
+
+`Box[i64]` and `Box[string]` are different types. The `impl` repeats the struct's types, and a method can add more, like `U` in `map`.
 
 ## Traits
 

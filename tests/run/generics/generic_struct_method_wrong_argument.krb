@@ -1,0 +1,14 @@
+struct Box[T] {
+  pub var value: T;
+}
+
+impl Box[T] {
+  pub fun set(self, value: T): unit {
+    self.value = value;
+  }
+}
+
+let b = Box { value: 1 };
+b.set(2);
+@println(b.value);
+b.set("two");

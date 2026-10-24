@@ -1,0 +1,6 @@
+struct Box[T] {
+  pub var value: T;
+}
+
+let a: Box[f64] = Box { value: 1 };
+let b: Box[string] = a;

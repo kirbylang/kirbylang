@@ -59,7 +59,17 @@ struct Type {
       int traitStaticMethodCount;
       InternedName *implementedTraits;
       int implementedTraitCount;
-      bool isGeneric;
+      // How many type parameters `struct Box[T]` declares. 0 if none.
+      int genericParamCount;
+      // For an instance such as `Box[f64]`: the declaration it comes from and
+      // the type arguments. An instance holds no members of its own. Looking
+      // one up finds it on the declaration and substitutes the arguments.
+
+      // The generic struct this is an instance of: `Box` for `Box[f64]`.
+      // NULL if this type is a type constructor, or a struct that isn't generic
+      Type *typeConstructor;
+      Type **typeArgs;
+      int typeArgCount;
       // True if any field/method failed to resolve for any reason
       // (missing annotation, unknown type, etc)
       bool hasUnresolvedMembers;
@@ -83,6 +93,12 @@ struct Type {
     struct {
       // 0 is T, 1 is U, 2 is V, and so on
       int index;
+      // The name the program gave it. Native signatures have none.
+      InternedName name;
+      bool hasName;
+      // A declared parameter as seen inside its own declaration: one unknown
+      // type that is never filled in and is only equal to itself.
+      bool isOpaque;
     } genericParam;
     struct {
       InternedName name;
@@ -211,8 +227,16 @@ Type *typeSubstituteSelf(Type *type, Type *concrete);
 // A generic parameter. 0 is T, 1 is U, and so on.
 Type *typeGenericParam(int index);
 
+// A generic parameter a program declared, such as the `T` in `fun id[T]`.
+// Callers fill it in unless `isOpaque`, which is the form it has inside its own
+// declaration.
+Type *typeDeclaredGenericParam(Token name, int index, bool isOpaque);
+
+// The first generic parameter with this index found inside `type`, or NULL.
+Type *typeFindGenericParam(Type *type, int index);
+
 // One more than the largest generic parameter index inside `type`, so 0 when
-// it has none.
+// it has none. Opaque parameters don't count.
 int typeGenericParamCount(Type *type);
 
 // Fills empty `bindings` slots by lining `pattern` up with `actual`: where
@@ -228,14 +252,23 @@ Type *typeSubstituteGenericParams(Type *type, Type **bindings, int count);
 // Replaces each generic parameter left inside `type` with unknown (NULL).
 Type *typeEraseGenericParams(Type *type);
 
-// Marks a struct as using generic parameters in its own declaration. See
-// the isGeneric field's doc comment above for why this exists.
-void typeStructMarkGeneric(Type *type);
+// Records how many type parameters a struct declaration has.
+void typeStructSetGenericParamCount(Type *type, int count);
+
+// True for a struct declared with type parameters, such as `Box` in
+// `struct Box[T]`, and false for an instance such as `Box[f64]`.
 bool typeStructIsGeneric(Type *type);
+
+// `Box[f64]`: the declaration `base` with these type arguments.
+Type *typeStructInstance(Type *base, Type **typeArgs, int typeArgCount);
+
+// The declaration a struct type comes from: `Box` for `Box[f64]`, and the
+// type itself for a declaration or a struct that isn't generic.
+Type *typeStructDeclaration(Type *type);
 
 // Marks a struct as having one or more fields/methods that failed to
 // resolve for any reason. See the hasUnresolvedMembers field's doc
-// comment above for why this exists, and how it differs from isGeneric.
+// comment above for why this exists.
 void typeStructMarkUnresolvedMembers(Type *type);
 bool typeStructHasUnresolvedMembers(Type *type);
 

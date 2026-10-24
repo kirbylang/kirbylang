@@ -1,0 +1,11 @@
+fun outer[T](x: T): T {
+  fun inner[U](a: U, b: T): U {
+    return a;
+  }
+
+  @println(inner(1, x));
+  @println(inner("one", x));
+  return x;
+}
+
+@println(outer(true));

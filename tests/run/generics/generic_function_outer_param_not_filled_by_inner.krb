@@ -1,0 +1,8 @@
+fun outer[T](x: T): T {
+  fun inner[U](a: U): U {
+    return a;
+  }
+
+  let n: i64 = inner(x);
+  return x;
+}

@@ -1,0 +1,11 @@
+struct Stack[T] {
+  pub var items: [T];
+}
+
+impl Stack[T] {
+  pub fun new(): Self[T] = Self { items: [] };
+
+  pub fun size(self): i64 = @listLen(self.items);
+}
+
+let s = Stack.new();

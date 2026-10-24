@@ -1,0 +1,9 @@
+struct Box[T] {
+  pub var value: T;
+}
+
+impl Box[T] {
+  pub fun count(): i64 = 0;
+}
+
+@println(Box.count());

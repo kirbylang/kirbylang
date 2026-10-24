@@ -1,0 +1,8 @@
+fun id[T](x: T): T {
+  return x;
+}
+
+@println(id(5));
+@println(id("hi"));
+@println(id(true));
+@println(id(2.5));

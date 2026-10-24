@@ -1,0 +1,8 @@
+fun twice[T](x: T): T {
+  let g = fun (y: T): T { return y; };
+  let local: T = x;
+  return g(local);
+}
+
+@println(twice(4));
+@println(twice("four"));

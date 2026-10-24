@@ -1,0 +1,1 @@
+[line 5] Error at 'Box': Trait implementations on generic structs aren't supported yet.

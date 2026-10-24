@@ -1,0 +1,9 @@
+fun last[T](xs: [T], i: i64): T {
+  if (i == 0) {
+    return xs[0];
+  }
+  return last(xs, i - 1);
+}
+
+@println(last([1, 2, 3], 2));
+@println(last(["a", "b"], 1));
