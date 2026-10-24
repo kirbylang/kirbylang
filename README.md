@@ -70,4 +70,6 @@ My long term plan is to get the language in a good spot with types and modules b
 
 ## AI Usage
 
+Yes, AI was used in this project but it's more complicated than that.
+
 https://kirbylang.github.io/kirbylang/#ai-usage
