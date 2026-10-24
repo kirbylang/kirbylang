@@ -51,6 +51,10 @@ Type *typchkTypeEnvLookupTrait(TypeEnv *env, Token name);
 // Returns NULL and reports a [line N] Error diagnostic
 Type *typchkResolveType(TypeEnv *env, AstNode *typeAnnotation);
 
+// Like typchkResolveType(), but also accepts the names only native signatures
+// use: generic parameters T, U, V and W, and `number` and `integer`.
+Type *typchkResolveSignatureType(TypeEnv *env, AstNode *typeAnnotation);
+
 void typchkTypeEnvSetSelfType(TypeEnv *env, Type *selfType);
 Type *typchkTypeEnvGetSelfType(TypeEnv *env);
 

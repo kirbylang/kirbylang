@@ -1,4 +1,3 @@
-let parts = ["a"];
-@arrPush(parts, 1);
+let parts = [@typeof(1), @argv(99)];
 
 @println(@strConcat(parts));

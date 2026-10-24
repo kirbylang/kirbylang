@@ -17,7 +17,8 @@ typedef enum {
   TYPE_FN,
   TYPE_ARRAY,
   TYPE_TRAIT,
-  TYPE_SELF, // `Self`
+  TYPE_SELF,          // `Self`
+  TYPE_GENERIC_PARAM, // A placeholder such as the `T` in `fun ([T]) => T`
 } TypeKind;
 
 typedef struct Type Type;
@@ -75,6 +76,10 @@ struct Type {
       Type *elementType;
     } array;
     struct {
+      // 0 is T, 1 is U, 2 is V, and so on
+      int index;
+    } genericParam;
+    struct {
       InternedName name;
       TypeMember *staticMethods;
       int staticMethodCount;
@@ -123,13 +128,12 @@ bool typeIsNumber(const Type *type);
 // Matches a number of any kind. Only usable as a native parameter type.
 Type *typeAnyNumber(void);
 
-// Matches an array of any element type. A placeholder until generic type
-// parameters
-Type *typeAnyArray(void);
+// Matches an integer of any kind. Only usable as a native parameter type.
+Type *typeAnyInteger(void);
 
 // Whether a value of type `actual` can be given where `expected` is wanted.
-// An array whose item type is unknown, such as the result of `@strSplit`,
-// accepts and is accepted by any array.
+// An unknown (NULL) type, or an unknown part of one such as the element type
+// of `[]`, accepts and is accepted by anything.
 bool typeAccepts(const Type *expected, const Type *actual);
 
 // Returns pointer to the `Self` placeholder type
@@ -185,6 +189,26 @@ bool typeTraitIsBuiltin(Type *type);
 
 // Replaces every TYPE_SELF found inside `type` with a `concrete` type.
 Type *typeSubstituteSelf(Type *type, Type *concrete);
+
+// A generic parameter. 0 is T, 1 is U, and so on.
+Type *typeGenericParam(int index);
+
+// One more than the largest generic parameter index inside `type`, so 0 when
+// it has none.
+int typeGenericParamCount(Type *type);
+
+// Fills empty `bindings` slots by lining `pattern` up with `actual`: where
+// `pattern` has generic parameter i and slot i is empty, slot i becomes the
+// matching part of `actual`. Looks inside arrays and functions.
+void typeBindGenericParams(Type *pattern, Type *actual, Type **bindings,
+                           int count);
+
+// Replaces each generic parameter inside `type` with its slot in `bindings`.
+// Parameters with an empty slot are kept.
+Type *typeSubstituteGenericParams(Type *type, Type **bindings, int count);
+
+// Replaces each generic parameter left inside `type` with unknown (NULL).
+Type *typeEraseGenericParams(Type *type);
 
 // Marks a struct as using generic parameters in its own declaration. See
 // the isGeneric field's doc comment above for why this exists.

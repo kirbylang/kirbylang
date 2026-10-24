@@ -269,11 +269,23 @@ let round: fun (f64) => f64 = @ceil;
 @println(round(1.2));
 ```
 
+Array natives are typed by their element type, written `T` in their
+signatures. `@arrPop` is `fun ([T]) => T`, so popping from an array of `i64`
+gives an `i64`, and `@arrPush(numbers, 2.5)` is an error when `numbers` holds
+`i64`s. Positions, such as the index of `@arrInsert`, take an integer of any
+kind.
+
+```
+let words = ["a", "b"];
+let last = @arrPop(words);   // string
+@arrPush(words, 1);          // Error: Expected string, got i64.
+```
+
 A native whose type can't be spelled yet has no signature, and calls to it
-are checked at runtime instead. That covers `@typeof`, `@instanceOf`,
-the `@is*` family and the `@arr*` family, which need generics, and `@argv`,
-`@prompt` and `@stdin`, which return nothing on some paths and so need
-`Option[T]`.
+are checked at runtime instead. That covers `@typeof`, `@instanceOf`, the
+`@is*` family and the print natives, which take a value of any type, and
+`@argv`, `@prompt` and `@stdin`, which return nothing on some paths and so
+need `Option[T]`.
 
 ## Type Aliases
 

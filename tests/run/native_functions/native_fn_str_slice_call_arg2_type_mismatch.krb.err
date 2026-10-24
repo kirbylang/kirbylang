@@ -1,13 +1,1 @@
-== <script> ==
-0000    1 OP_GET_GLOBAL       0 '@println'
-0002    | OP_GET_GLOBAL       1 '@strSlice'
-0004    | OP_CONSTANT         2 'hello'
-0006    | OP_CONSTANT         3 'x'
-0008    | OP_CONSTANT         4 '3'
-0010    | OP_CALL             3
-0012    | OP_CALL             1
-0014    | OP_POP
-0015    2 OP_NIL
-0016    | OP_RETURN
-function @strSlice expects argument 2 to be a number.
-[line 1] in script
+[line 1] Error: Expected integer, got string.

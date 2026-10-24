@@ -1793,6 +1793,21 @@ AstNode **parse(const char *source, int *outCount, bool *hadError,
   return ast;
 }
 
+AstNode *parseTypeText(const char *source, bool *hadError) {
+  TokenStream tokens = lex(source);
+
+  Parser parser;
+  initParser(&parser, &tokens);
+
+  AstNode *type = parseType(&parser);
+  consume(&parser, TOKEN_EOF, "Expect end of type.");
+
+  tsFree(&tokens);
+
+  *hadError = parser.hadError;
+  return parser.hadError ? NULL : type;
+}
+
 static void parse_error_at(Parser *p, Token *token, const char *message) {
   if (p->panicMode)
     return;

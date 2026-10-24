@@ -79,6 +79,9 @@
 - Dividing whole number literals where an `f64` is expected now divides as floats: `let x: f64 = 7 / 2;` is `3.5`, while `let x = 7 / 2;` is still `3`. Integer variables still divide as integers
 - Clearer error when a number is too large for its type: `Integer literal 300 doesn't fit in u8, which holds 0 to 255.`
 - Array types are written `[T]`, such as `let names: [string] = [];` or `fun total(numbers: [i64]): i64`. The `Array` type is removed
+- Array natives are type checked by their element type: `@arrContains([1, 2], 2.0)` and `@arrPush(numbers, 2.5)` are type errors instead of quietly giving a wrong answer, and `@arrPop` gives the element type
+- `@strSplit` returns an array of `string` and `@strToBytes` an array of `u8`
+- `@strSlice`, `@strReplace` and `@strReplaceAll` are type checked
 
 ## 0.4.0
 

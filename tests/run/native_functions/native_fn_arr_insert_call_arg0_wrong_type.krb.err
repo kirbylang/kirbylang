@@ -1,13 +1,1 @@
-== <script> ==
-0000    1 OP_FALSE
-0001    | OP_DEFINE_GLOBAL    0 'value'
-0003    3 OP_GET_GLOBAL       1 '@arrInsert'
-0005    | OP_GET_GLOBAL       0 'value'
-0007    | OP_CONSTANT         2 '0'
-0009    | OP_CONSTANT         3 'Hello'
-0011    | OP_CALL             3
-0013    | OP_POP
-0014    4 OP_NIL
-0015    | OP_RETURN
-function @arrInsert expects argument 1 to be an array.
-[line 3] in script
+[line 3] Error: Expected [T], got bool.

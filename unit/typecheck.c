@@ -1,8 +1,10 @@
 #include <assert.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 
 #include "../src/ast.h"
+#include "../src/native_signatures.h"
 #include "../src/parser.h"
 #include "../src/token.h"
 #include "../src/typecheck.h"
@@ -343,15 +345,15 @@ static void test_native_call_with_a_signature_is_checked(void) {
 
 static void test_native_call_without_a_signature_is_unchecked(void) {
   typchkResetError();
-  // `@arrPop` needs generics, so it has no signature -- the call is presumed
-  // native, not an error, and infers as "no opinion."
-  TypeEnv *env = checkProgram("var x = @arrPop([1]);");
+  // `@typeof` has no signature, so the call is presumed native, not an error,
+  // and infers as "no opinion."
+  TypeEnv *env = checkProgram("var x = @typeof(1);");
   assert(!typchkHadError());
   assert(typchkTypeEnvLookup(env, tokenFromCString("x")) == NULL);
   typchkTypeEnvDestroy(env);
 }
 
-static void test_native_any_array_param_accepts_every_array(void) {
+static void test_generic_array_param_accepts_every_array(void) {
   typchkResetError();
   TypeEnv *env = checkProgram("var a = @arrLen([1, 2]); var b = @arrLen([]); "
                               "var c = @arrLen([\"x\"]);");
@@ -363,6 +365,91 @@ static void test_native_any_array_param_accepts_every_array(void) {
   typchkResetError();
   env = checkProgram("var d = @arrLen(\"abc\");");
   assert(typchkHadError());
+  typchkTypeEnvDestroy(env);
+}
+
+// Like checkProgram, with one more function registered before checking.
+static TypeEnv *checkProgramWithFunction(const char *name, Type *type,
+                                         const char *source) {
+  int outCount = 0;
+  bool hadParseError = false;
+  int endLine = 0;
+  AstNode **ast = parse(source, &outCount, &hadParseError, &endLine);
+  assert(!hadParseError);
+
+  TypeEnv *env = typchkTypeEnvCreate();
+  typchkTypeEnvRegisterFunction(env, tokenFromCString(name), type);
+  typchkTypeEnvBeginScope(env);
+  for (int i = 0; i < outCount; i++) {
+    typchkCheckStmt(env, ast[i]);
+  }
+  free(ast);
+  return env;
+}
+
+static Type *mapType(void) {
+  TypeEnv *env = typchkTypeEnvCreate();
+  Type *type = parseNativeSignature(env, "fun ([T], fun (T) => U) => [U]");
+  typchkTypeEnvDestroy(env);
+  assert(type != NULL);
+  return type;
+}
+
+static void test_generic_call_fills_params_from_a_lambda(void) {
+  typchkResetError();
+  TypeEnv *env = checkProgramWithFunction(
+      "@testMap", mapType(),
+      "var names = @testMap([1, 2], fun (n) { @numberToString(n) });");
+  assert(!typchkHadError());
+  Type *names = typchkTypeEnvLookup(env, tokenFromCString("names"));
+  assert(names != NULL && names->kind == TYPE_ARRAY);
+  assert(names->as.array.elementType == typeString());
+  typchkTypeEnvDestroy(env);
+}
+
+static void test_generic_call_fills_three_params(void) {
+  typchkResetError();
+  TypeEnv *signatureEnv = typchkTypeEnvCreate();
+  Type *combine =
+      parseNativeSignature(signatureEnv, "fun (T, U, fun (T, U) => V) => V");
+  typchkTypeEnvDestroy(signatureEnv);
+  assert(combine != NULL);
+
+  TypeEnv *env = checkProgramWithFunction(
+      "@testCombine", combine,
+      "var joined = @testCombine(1, \"a\", fun (n, s) { s + "
+      "@numberToString(n) });");
+  assert(!typchkHadError());
+  assert(typchkTypeEnvLookup(env, tokenFromCString("joined")) == typeString());
+  typchkTypeEnvDestroy(env);
+}
+
+static void test_generic_call_reports_a_mismatch(void) {
+  typchkResetError();
+  TypeEnv *env = checkProgramWithFunction(
+      "@testMap", mapType(), "@testMap([1], fun (n: string) { n });");
+  assert(typchkHadError());
+  typchkTypeEnvDestroy(env);
+}
+
+static void test_generic_call_leaves_unfilled_params_unknown(void) {
+  typchkResetError();
+  TypeEnv *env = checkProgramWithFunction(
+      "@testMap", mapType(), "var mapped = @testMap([], fun (n) { n });");
+  assert(!typchkHadError());
+  Type *mapped = typchkTypeEnvLookup(env, tokenFromCString("mapped"));
+  assert(mapped != NULL && mapped->kind == TYPE_ARRAY);
+  assert(mapped->as.array.elementType == NULL);
+  typchkTypeEnvDestroy(env);
+}
+
+// A generic function used as a value has no single type to give it.
+static void test_generic_function_as_a_value_is_unknown(void) {
+  typchkResetError();
+  TypeEnv *env =
+      checkProgramWithFunction("@testMap", mapType(), "var map = @testMap;");
+  assert(!typchkHadError());
+  assert(typchkTypeEnvLookup(env, tokenFromCString("map")) == NULL);
   typchkTypeEnvDestroy(env);
 }
 
@@ -1361,7 +1448,12 @@ int main(void) {
   test_function_call_wrong_arity_errors();
   test_native_call_with_a_signature_is_checked();
   test_native_call_without_a_signature_is_unchecked();
-  test_native_any_array_param_accepts_every_array();
+  test_generic_array_param_accepts_every_array();
+  test_generic_call_fills_params_from_a_lambda();
+  test_generic_call_fills_three_params();
+  test_generic_call_reports_a_mismatch();
+  test_generic_call_leaves_unfilled_params_unknown();
+  test_generic_function_as_a_value_is_unknown();
   test_struct_instance_field_and_method_access();
   test_struct_static_method_access();
   test_local_variable_shadows_struct_name_for_get();

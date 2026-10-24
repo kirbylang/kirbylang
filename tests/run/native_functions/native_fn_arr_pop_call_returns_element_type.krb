@@ -1,0 +1,2 @@
+let numbers = [1, 2];
+let last: f64 = @arrPop(numbers);

@@ -1,1 +1,1 @@
-@println(@boolToString(@arrPop([3])));
+@println(@boolToString(@typeof(3)));
