@@ -6,5 +6,5 @@
 0008    | OP_POP
 0009    2 OP_NIL
 0010    | OP_RETURN
-randomRange(min, max) requires min <= max
+function @randBetween expects argument 1 to be less than or equal to argument 2.
 [line 1] in script

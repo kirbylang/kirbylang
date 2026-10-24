@@ -15,5 +15,5 @@
 0026    | OP_POP
 0027    4 OP_NIL
 0028    | OP_RETURN
-function strConcat expects every element of argument 1 to be a string but element 1 is a nil.
+function @strConcat expects every element of argument 1 to be a string but element 1 has type nil.
 [line 3] in script

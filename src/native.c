@@ -141,7 +141,8 @@ static Value randBetweenNative(VM *vm, int argCount, Value *args) {
   double max = numberArg(args[1]);
 
   if (min > max) {
-    raiseError(vm, "randomRange(min, max) requires min <= max");
+    raiseError(vm, "function @randBetween expects argument 1 to be less than "
+                   "or equal to argument 2.");
   }
 
   double r = (double)rand() / (double)RAND_MAX; // [0, 1]
@@ -596,7 +597,8 @@ static Value arrSliceNative(VM *vm, int argCount, Value *args) {
 
   if (start >= end) {
     runtimeError(
-        vm, "function arrSlice expects argument 1 to be less than argument 2.");
+        vm,
+        "function @arrSlice expects argument 2 to be less than argument 3.");
     exit(EXIT_CODE_RUNTIME_ERR);
   }
 
@@ -675,7 +677,7 @@ static Value joinStrings(VM *vm, const char *name, ObjArray *array,
 
       runtimeError(vm,
                    "function %s expects every element of argument 1 to be "
-                   "a string but element %d is a %s.",
+                   "a string but element %d has type %s.",
                    name, i, type);
       exit(EXIT_CODE_RUNTIME_ERR);
     }
@@ -721,7 +723,7 @@ static Value arrJoinNative(VM *vm, int argCount, Value *args) {
 
   ObjString *separator = AS_STRING(args[1]);
 
-  return joinStrings(vm, "arrJoin", AS_ARRAY(args[0]), separator->chars,
+  return joinStrings(vm, "@arrJoin", AS_ARRAY(args[0]), separator->chars,
                      separator->length);
 }
 
@@ -734,7 +736,7 @@ static Value strConcatNative(VM *vm, int argCount, Value *args) {
   assertArgCount(vm, "@strConcat", 1, argCount);
   assertArgIsArray(vm, "@strConcat", args, 0);
 
-  return joinStrings(vm, "strConcat", AS_ARRAY(args[0]), "", 0);
+  return joinStrings(vm, "@strConcat", AS_ARRAY(args[0]), "", 0);
 }
 
 static Value stdinNative(VM *vm, int argCount, Value *args) {
