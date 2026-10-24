@@ -1,0 +1,9 @@
+struct Box[T] {
+  pub var value: T;
+}
+
+type Wrapped[T] = Box[T];
+
+let a: Wrapped[i64] = Box { value: 5 };
+let b: Box[i64] = a;
+let c: Wrapped[string] = a;

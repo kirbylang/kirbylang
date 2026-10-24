@@ -1,0 +1,9 @@
+fun empty[T](): [T] = [];
+
+fun names(): [string] {
+  return empty();
+}
+
+fun numbers(): [i64] = empty();
+
+@println(@listLen(names()) + @listLen(numbers()));

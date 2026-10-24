@@ -1,0 +1,73 @@
+== <script> ==
+0000   15 OP_CLOSURE          1 <fn empty>
+0002    | OP_DEFINE_GLOBAL    0 'empty'
+0004    1 OP_STRUCT           2 'Stack'
+0006    | OP_DEFINE_GLOBAL    2 'Stack'
+0008    | OP_GET_GLOBAL       2 'Stack'
+0010    2 OP_NIL
+0011    | OP_FIELD            3 'items' private mutable
+0015    3 OP_POP
+0016    5 OP_GET_GLOBAL       2 'Stack'
+0018    6 OP_CLOSURE          5 <fn new>
+0020    | OP_METHOD           4 'new'
+0022   10 OP_CLOSURE          7 <fn push>
+0024    | OP_METHOD           6 'push'
+0026   12 OP_CLOSURE          9 <fn len>
+0028    | OP_METHOD           8 'len'
+0030   13 OP_POP
+0031   17 OP_GET_GLOBAL       2 'Stack'
+0033    | OP_INVOKE        (0 args)    4 'new'
+0036    | OP_DEFINE_GLOBAL   10 's'
+0038   18 OP_GET_GLOBAL      10 's'
+0040    | OP_CONSTANT        11 '1'
+0042    | OP_INVOKE        (1 args)    6 'push'
+0045    | OP_POP
+0046   19 OP_GET_GLOBAL      10 's'
+0048    | OP_CONSTANT        12 '2'
+0050    | OP_INVOKE        (1 args)    6 'push'
+0053    | OP_POP
+0054   20 OP_GET_GLOBAL      13 '@println'
+0056    | OP_GET_GLOBAL      10 's'
+0058    | OP_INVOKE        (0 args)    8 'len'
+0061    | OP_CALL             1
+0063    | OP_POP
+0064   22 OP_GET_GLOBAL       0 'empty'
+0066    | OP_CALL             0
+0068    | OP_DEFINE_GLOBAL   14 'words'
+0070   23 OP_GET_GLOBAL      15 '@listPush'
+0072    | OP_GET_GLOBAL      14 'words'
+0074    | OP_CONSTANT        16 'a'
+0076    | OP_CALL             2
+0078    | OP_POP
+0079   24 OP_GET_GLOBAL      13 '@println'
+0081    | OP_GET_GLOBAL      14 'words'
+0083    | OP_CONSTANT        17 '0'
+0085    | OP_GET_INDEX
+0086    | OP_CALL             1
+0088    | OP_POP
+0089   25 OP_NIL
+0090    | OP_RETURN
+== empty ==
+0000   15 OP_LIST             0
+0002    | OP_RETURN
+== new ==
+0000    6 OP_GET_GLOBAL       0 'Stack'
+0002    | OP_CONSTANT         1 'items'
+0004    | OP_LIST             0
+0006    | OP_STRUCT_INIT      1
+0008    | OP_RETURN
+== push ==
+0000    9 OP_GET_GLOBAL       0 '@listPush'
+0002    | OP_GET_LOCAL        0
+0004    | OP_GET_PROPERTY     1 'items'
+0006    | OP_GET_LOCAL        1
+0008    | OP_CALL             2
+0010    | OP_POP
+0011   10 OP_NIL
+0012    | OP_RETURN
+== len ==
+0000   12 OP_GET_GLOBAL       0 '@listLen'
+0002    | OP_GET_LOCAL        0
+0004    | OP_GET_PROPERTY     1 'items'
+0006    | OP_CALL             1
+0008    | OP_RETURN

@@ -1,0 +1,10 @@
+type Callback[T] = fun (T) => T;
+type Items[T] = [T];
+
+fun twice[T](f: Callback[T], x: T): T = f(f(x));
+
+fun first[T](xs: Items[T]): T = xs[0];
+
+let items: Items[i64] = [3, 4];
+
+@println(twice(fun (n) { n * 2 }, first(items)));

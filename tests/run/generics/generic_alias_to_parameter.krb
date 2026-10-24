@@ -1,0 +1,7 @@
+type Same[T] = T;
+
+let n: Same[i64] = 5;
+let s: Same[string] = "a";
+
+@println(n + 1);
+@println(s + "b");

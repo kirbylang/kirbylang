@@ -140,9 +140,21 @@ let b: string = id(5);          // error: Expected string, got i64.
 ```
 
 A parameter that appears in the signature but that no argument fills in is an
-error: `Can't tell what 'T' is from the arguments.`. That includes a parameter
-only in the return type. A parameter that isn't in the signature at all is
-never asked for.
+error: `Can't tell what 'T' is from the arguments.`. A parameter that isn't in
+the signature at all is never asked for.
+
+A parameter only the return type mentions is filled in from the type the call
+is expected to return, when there is one:
+
+```
+fun empty[T](): [T] = [];
+
+let a: [i64] = empty();    // T is i64
+let b = empty();           // error: Can't tell what 'T' is from the arguments.
+```
+
+A method works the same way, so `let s: Stack[i64] = Stack.new();` fills in
+the `T` of `fun new(): Self[T]`.
 
 Inside the function, each parameter is one type that is only equal to itself.
 A value of that type can be passed around, returned and stored, but it can't
@@ -410,6 +422,26 @@ let count: Number = 42;
 @println(count);
 ```
 
+An alias can take type parameters. Using it gives the arguments, and the alias
+stands for its target with them filled in, so `Wrapped[i64]` below is exactly
+`Box[i64]`.
+
+```
+struct Box[T] {
+    pub var value: T;
+}
+
+type Wrapped[T] = Box[T];
+type Callback[T] = fun (T) => T;
+
+let a: Wrapped[i64] = Box { value: 5 };
+let b: Box[i64] = a;                  // same type
+let c: Wrapped = a;                   // error: 'Wrapped' needs 1 type argument(s).
+```
+
+The number of arguments has to match, and an alias with no parameters takes
+none.
+
 ## Operators
 
 | Operator          | Operands               | Result    |
@@ -432,8 +464,7 @@ implement `Eq` -- see [Traits](#traits).
   checked
 - Generic parameters have no trait bounds yet, so a value of a generic type
   can't be added, indexed or have methods called on it
-- Generic type aliases (`type Wrapper[T] = T;`) parse but aren't checked, and
-  a call can't be given type arguments (`parse[f64](s)`)
+- A call can't be given type arguments (`parse[f64](s)`)
 - Lists have no type annotation syntax
 - `impl Trait for` a primitive type isn't supported yet, and operators
   don't dispatch to trait methods -- see [Traits](#traits)
