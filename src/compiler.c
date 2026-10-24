@@ -120,6 +120,7 @@ static void initCompiler(FnCompiler *compiler, FunctionType functionType,
   // Starts at 1 because slot 0 holds the function, or `self` in a method.
   compiler->stackHeight = 1;
   compiler->isReachable = true;
+  compiler->lastOpIsReturn = false;
   compiler->bytesCounted = 0;
   compiler->scopeDepth = 0;
   compiler->upvalueCount = 0;
@@ -174,19 +175,6 @@ static void initCompiler(FnCompiler *compiler, FunctionType functionType,
  * Get the current function being compiled
  */
 static CompiledFn *currentFn(void) { return current->fn; }
-
-/**
- * Get the last emitted opcode
- */
-static uint8_t previousOpCode(void) {
-  CompiledFn *fn = currentFn();
-
-  if (fn->codeCount == 0) {
-    return 0;
-  }
-
-  return fn->code[fn->codeCount - 1];
-}
 
 /**
  * Make a new constant from an identifier token
@@ -450,6 +438,7 @@ static void countEmittedCode(void) {
     int count = info->countOperand >= 0 ? code[1 + info->countOperand] : 0;
 
     applyStackEffect(op, count);
+    current->lastOpIsReturn = op == OP_RETURN;
     current->bytesCounted += length;
   }
 }
@@ -658,7 +647,9 @@ static int endCompiler(void) {
 
   currentLoop = current->enclosingLoop;
 
-  if (previousOpCode() != OP_RETURN) {
+  // The last byte may be an operand, so ask about the last whole instruction.
+  countEmittedCode();
+  if (!current->lastOpIsReturn) {
     emitImplicitReturn();
   }
 

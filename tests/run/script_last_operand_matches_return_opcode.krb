@@ -1,0 +1,9 @@
+// The last instruction is `OP_DEFINE_GLOBAL 11`, and 11 is also OP_RETURN's
+// number. The script must still end with its own return.
+let a = 1;
+let b = 2;
+let c = 3;
+let d = 4;
+let e = 5;
+let f = e;
+let g = 7;

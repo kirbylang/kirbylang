@@ -82,6 +82,8 @@ struct FnCompiler {
    * the jump that lands on it (see patchJump).
    */
   bool isReachable;
+  // True when the last instruction counted was OP_RETURN.
+  bool lastOpIsReturn;
 
   struct LoopCompiler *enclosingLoop;
 };
