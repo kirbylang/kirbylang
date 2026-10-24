@@ -1,6 +1,7 @@
 # Summary
 
 - [Getting Started](./getting-started.md)
+- [CLI](./cli.md)
 - [Basics](./basics.md)
 - [Projects](./projects.md)
 - [Reference](./reference.md)
