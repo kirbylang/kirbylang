@@ -1,0 +1,53 @@
+== <script> ==
+0000    1 OP_GET_GLOBAL       0 '@println'
+0002    | OP_CONSTANT         1 '1'
+0004    | OP_CONSTANT         2 '2.5'
+0006    | OP_CONSTANT         3 '3'
+0008    | OP_ARRAY            3
+0010    | OP_CALL             1
+0012    | OP_POP
+0013    3 OP_CONSTANT         5 '3'
+0015    | OP_DEFINE_GLOBAL    4 'byte'
+0017    4 OP_CONSTANT         7 '1'
+0019    | OP_GET_GLOBAL       4 'byte'
+0021    | OP_CONSTANT         8 '2'
+0023    | OP_ARRAY            3
+0025    | OP_DEFINE_GLOBAL    6 'bytes'
+0027    5 OP_GET_GLOBAL       0 '@println'
+0029    | OP_GET_GLOBAL       6 'bytes'
+0031    | OP_CALL             1
+0033    | OP_POP
+0034    6 OP_GET_GLOBAL       0 '@println'
+0036    | OP_GET_GLOBAL       9 '@typeof'
+0038    | OP_GET_GLOBAL       6 'bytes'
+0040    | OP_CONSTANT        10 '0'
+0042    | OP_GET_INDEX
+0043    | OP_CALL             1
+0045    | OP_CALL             1
+0047    | OP_POP
+0048    8 OP_CONSTANT        12 '1'
+0050    | OP_CONSTANT        13 '2'
+0052    | OP_CONSTANT        14 '3'
+0054    | OP_ARRAY            3
+0056    | OP_DEFINE_GLOBAL   11 'ints'
+0058    9 OP_GET_GLOBAL       0 '@println'
+0060    | OP_GET_GLOBAL       9 '@typeof'
+0062    | OP_GET_GLOBAL      11 'ints'
+0064    | OP_CONSTANT        10 '0'
+0066    | OP_GET_INDEX
+0067    | OP_CALL             1
+0069    | OP_CALL             1
+0071    | OP_POP
+0072   11 OP_CONSTANT        16 '2'
+0074    | OP_CONSTANT         3 '3'
+0076    | OP_MULTIPLY
+0077    | OP_CONSTANT        17 '-1'
+0079    | OP_CONSTANT        18 '0.5'
+0081    | OP_ARRAY            3
+0083    | OP_DEFINE_GLOBAL   15 'floats'
+0085   12 OP_GET_GLOBAL       0 '@println'
+0087    | OP_GET_GLOBAL      15 'floats'
+0089    | OP_CALL             1
+0091    | OP_POP
+0092   13 OP_NIL
+0093    | OP_RETURN

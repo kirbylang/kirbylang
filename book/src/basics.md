@@ -56,23 +56,17 @@ let ratio = 1.5;   // f64
 ```
 
 Where a whole number literal is used as another number type, it becomes that
-type. That includes a literal next to a number of another type.
+type. This also works for arithmetic made only of literals, `if`/`else`
+branches and the last value of a block.
 
 ```krb
 let byte: u8 = 65;
-let total: f64 = 100;
+let half: f64 = 7 / 2;            // 3.5
+let total: f64 = if (big) 100 else 10;
 
 let price: f64 = 2.5;
 let doubled = price * 2;          // 2 is an f64 here
-let floats = [1.5, 2, 3];         // the 2 and 3 are f64s here
-```
-
-Arithmetic made only of whole number literals is an `i64`, even where another
-type is expected. Write a decimal point to make it an `f64`.
-
-```krb
-let half: f64 = 7.0 / 2.0;        // 3.5
-let mixed = [1.0, 2.5, 3.0];
+let mixed = [1, 2.5, 3];          // an array of f64
 ```
 
 A variable keeps its own type. Cast it with `as` to use it as another type.

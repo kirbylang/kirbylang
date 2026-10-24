@@ -5,6 +5,6 @@
 @println(0.1 + 0.2);
 @println(true);
 @println(nil);
-@println([1.0, 2.5, 3.0]);
+@println([1, 2.5, 3]);
 @println(["one", "two"]);
 @print("no newline at the end");

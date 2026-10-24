@@ -7,8 +7,8 @@ fun check(name: string, actual: f64, expected: f64): unit {
   }
 }
 
-check("zero / positive", 0.0 / 5.0, 0.0);
-check("zero / negative", 0.0 / -3.0, 0.0);
-check("negative zero-valued expr / positive", (2.0 - 2.0) / 7.0, 0.0);
-check("zero / positive, non-integer divisor", 0.0 / 2.5, 0.0);
-check("ordinary division still works", 10.0 / 4.0, 2.5);
+check("zero / positive", 0 / 5, 0);
+check("zero / negative", 0 / -3, 0);
+check("negative zero-valued expr / positive", (2 - 2) / 7, 0);
+check("zero / positive, non-integer divisor", 0 / 2.5, 0);
+check("ordinary division still works", 10 / 4, 2.5);

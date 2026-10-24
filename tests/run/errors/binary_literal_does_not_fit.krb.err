@@ -1,1 +1,1 @@
-[line 2] Error at '+': '+' needs two numbers of the same type or two strings, got u8 and i64.
+[line 2] Error: Integer literal 300 doesn't fit in u8, which holds 0 to 255.

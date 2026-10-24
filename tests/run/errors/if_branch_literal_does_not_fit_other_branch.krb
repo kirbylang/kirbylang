@@ -1,0 +1,3 @@
+let byte: u8 = 1;
+let flag = true;
+let x = if (flag) byte else 300;

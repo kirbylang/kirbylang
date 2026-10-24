@@ -1,0 +1,19 @@
+== <script> ==
+0000    2 OP_CONSTANT         1 '1'
+0002    3 OP_CONSTANT         2 '3'
+0004    | OP_CONSTANT         3 '2'
+0006    | OP_DIVIDE
+0007    4 OP_CLOSE_BLOCK_EXPR    1
+0009    | OP_DEFINE_GLOBAL    0 'a'
+0011    5 OP_GET_GLOBAL       4 '@println'
+0013    | OP_GET_GLOBAL       0 'a'
+0015    | OP_CALL             1
+0017    | OP_POP
+0018    6 OP_GET_GLOBAL       4 '@println'
+0020    | OP_GET_GLOBAL       5 '@typeof'
+0022    | OP_GET_GLOBAL       0 'a'
+0024    | OP_CALL             1
+0026    | OP_CALL             1
+0028    | OP_POP
+0029    7 OP_NIL
+0030    | OP_RETURN

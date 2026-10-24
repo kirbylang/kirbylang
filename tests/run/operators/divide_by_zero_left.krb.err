@@ -12,40 +12,39 @@
 0018   11 OP_GET_GLOBAL       0 'check'
 0020    | OP_CONSTANT         5 'zero / negative'
 0022    | OP_CONSTANT         3 '0'
-0024    | OP_CONSTANT         6 '3'
-0026    | OP_NEGATE
-0027    | OP_DIVIDE
-0028    | OP_CONSTANT         3 '0'
-0030    | OP_CALL             3
-0032    | OP_POP
-0033   12 OP_GET_GLOBAL       0 'check'
-0035    | OP_CONSTANT         7 'negative zero-valued expr / positive'
-0037    | OP_CONSTANT         8 '2'
-0039    | OP_CONSTANT         8 '2'
-0041    | OP_SUBTRACT
-0042    | OP_CONSTANT         9 '7'
-0044    | OP_DIVIDE
-0045    | OP_CONSTANT         3 '0'
-0047    | OP_CALL             3
-0049    | OP_POP
-0050   13 OP_GET_GLOBAL       0 'check'
-0052    | OP_CONSTANT        10 'zero / positive, non-integer divisor'
-0054    | OP_CONSTANT         3 '0'
-0056    | OP_CONSTANT        11 '2.5'
-0058    | OP_DIVIDE
-0059    | OP_CONSTANT         3 '0'
-0061    | OP_CALL             3
-0063    | OP_POP
-0064   14 OP_GET_GLOBAL       0 'check'
-0066    | OP_CONSTANT        12 'ordinary division still works'
-0068    | OP_CONSTANT        13 '10'
-0070    | OP_CONSTANT        14 '4'
-0072    | OP_DIVIDE
-0073    | OP_CONSTANT        11 '2.5'
-0075    | OP_CALL             3
-0077    | OP_POP
-0078   15 OP_NIL
-0079    | OP_RETURN
+0024    | OP_CONSTANT         6 '-3'
+0026    | OP_DIVIDE
+0027    | OP_CONSTANT         3 '0'
+0029    | OP_CALL             3
+0031    | OP_POP
+0032   12 OP_GET_GLOBAL       0 'check'
+0034    | OP_CONSTANT         7 'negative zero-valued expr / positive'
+0036    | OP_CONSTANT         8 '2'
+0038    | OP_CONSTANT         8 '2'
+0040    | OP_SUBTRACT
+0041    | OP_CONSTANT         9 '7'
+0043    | OP_DIVIDE
+0044    | OP_CONSTANT         3 '0'
+0046    | OP_CALL             3
+0048    | OP_POP
+0049   13 OP_GET_GLOBAL       0 'check'
+0051    | OP_CONSTANT        10 'zero / positive, non-integer divisor'
+0053    | OP_CONSTANT         3 '0'
+0055    | OP_CONSTANT        11 '2.5'
+0057    | OP_DIVIDE
+0058    | OP_CONSTANT         3 '0'
+0060    | OP_CALL             3
+0062    | OP_POP
+0063   14 OP_GET_GLOBAL       0 'check'
+0065    | OP_CONSTANT        12 'ordinary division still works'
+0067    | OP_CONSTANT        13 '10'
+0069    | OP_CONSTANT        14 '4'
+0071    | OP_DIVIDE
+0072    | OP_CONSTANT        11 '2.5'
+0074    | OP_CALL             3
+0076    | OP_POP
+0077   15 OP_NIL
+0078    | OP_RETURN
 == check ==
 0000    2 OP_GET_LOCAL        2
 0002    | OP_GET_LOCAL        3

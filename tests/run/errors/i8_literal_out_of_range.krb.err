@@ -1,1 +1,1 @@
-[line 1] Error: Expected i8, got i64.
+[line 1] Error: Integer literal 128 doesn't fit in i8, which holds -128 to 127.

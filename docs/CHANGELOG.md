@@ -75,6 +75,9 @@
 - `@strIndexOf` returns `-1` instead of `nil` when the string is not found
 - Replace `@parseNumber` with `@parseInt` and `@parseFloat`
 - `Ord`'s `cmp` returns an `i64`
+- Whole number literals become `f64` where an `f64` is expected, including inside arithmetic, `if`/`else` branches and arrays. `let x: f64 = 7 / 2;` and `[1, 2.5]` no longer need `.0` on every number
+- Dividing whole number literals where an `f64` is expected now divides as floats: `let x: f64 = 7 / 2;` is `3.5`, while `let x = 7 / 2;` is still `3`. Integer variables still divide as integers
+- Clearer error when a number is too large for its type: `Integer literal 300 doesn't fit in u8, which holds 0 to 255.`
 
 ## 0.4.0
 
