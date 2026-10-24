@@ -18,7 +18,7 @@
 0031    | OP_GET_GLOBAL       5 '@numberToString'
 0033    | OP_GET_GLOBAL       2 'b'
 0035    | OP_CALL             1
-0037    6 OP_ARRAY            3
+0037    6 OP_LIST             3
 0039    | OP_CALL             1
 0041    | OP_CALL             1
 0043    | OP_POP

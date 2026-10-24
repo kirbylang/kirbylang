@@ -1095,18 +1095,18 @@ static InterpretResult run(void) {
       frame = &vm.frames[vm.frameCount - 1];
       break;
     }
-    case OP_ARRAY: {
+    case OP_LIST: {
       int count = READ_BYTE();
 
-      ObjArray *array = newArray(vm.gc);
+      ObjList *list = newList(vm.gc);
 
-      pushOnStack(OBJ_VAL(array));
+      pushOnStack(OBJ_VAL(list));
 
       for (int i = count - 1; i >= 0; i--) {
         // Stack layout right now: [..., elem_{count-1}, ..., elem_0, array]
         // so the i-th element (counting from the end) sits one slot further
         // from the top than it did before `array` was pushed.
-        writeValueToArrayObj(vm.gc, array, peekStack(i + 1));
+        writeValueToListObj(vm.gc, list, peekStack(i + 1));
       }
 
       Value arrayValue = popFromStack();
@@ -1116,11 +1116,26 @@ static InterpretResult run(void) {
 
       break;
     }
+    case OP_ARRAY: {
+      int count = READ_BYTE();
+
+      ObjArray *array = newArray(vm.gc, count);
+
+      for (int i = 0; i < count; i++) {
+        array->values[i] =
+            peekStack((count - 1 /* account for off by one */) - i);
+      }
+
+      popNFromStack(count);
+      pushOnStack(OBJ_VAL(array));
+
+      break;
+    }
     case OP_GET_INDEX: {
       Value index = popFromStack();
-      Value arrayVal = popFromStack();
+      Value target = popFromStack();
 
-      if (!IS_ARRAY(arrayVal)) {
+      if (!IS_LIST(target) && !IS_ARRAY(target)) {
         runtimeError(&vm, "Can only index arrays.");
         return INTERPRET_RUNTIME_ERROR;
       }
@@ -1130,25 +1145,28 @@ static InterpretResult run(void) {
         return INTERPRET_RUNTIME_ERROR;
       }
 
-      ObjArray *array = AS_ARRAY(arrayVal);
+      int count =
+          IS_LIST(target) ? AS_LIST(target)->count : AS_ARRAY(target)->count;
+      Value *values =
+          IS_LIST(target) ? AS_LIST(target)->values : AS_ARRAY(target)->values;
 
       int i;
-      const char *indexError = arrayPosition(index, array->count, &i);
+      const char *indexError = arrayPosition(index, count, &i);
       if (indexError != NULL) {
         runtimeError(&vm, "%s", indexError);
         return INTERPRET_RUNTIME_ERROR;
       }
 
-      pushOnStack(array->values[i]);
+      pushOnStack(values[i]);
 
       break;
     }
     case OP_SET_INDEX: {
       Value value = popFromStack();
       Value index = popFromStack();
-      Value arrayValue = popFromStack();
+      Value target = popFromStack();
 
-      if (!IS_ARRAY(arrayValue)) {
+      if (!IS_LIST(target) && !IS_ARRAY(target)) {
         runtimeError(&vm, "Can only index arrays.");
         return INTERPRET_RUNTIME_ERROR;
       }
@@ -1158,16 +1176,19 @@ static InterpretResult run(void) {
         return INTERPRET_RUNTIME_ERROR;
       }
 
-      ObjArray *array = AS_ARRAY(arrayValue);
+      int count =
+          IS_LIST(target) ? AS_LIST(target)->count : AS_ARRAY(target)->count;
+      Value *values =
+          IS_LIST(target) ? AS_LIST(target)->values : AS_ARRAY(target)->values;
 
       int i;
-      const char *indexError = arrayPosition(index, array->count, &i);
+      const char *indexError = arrayPosition(index, count, &i);
       if (indexError != NULL) {
         runtimeError(&vm, "%s", indexError);
         return INTERPRET_RUNTIME_ERROR;
       }
 
-      array->values[i] = value;
+      values[i] = value;
 
       pushOnStack(value);
 

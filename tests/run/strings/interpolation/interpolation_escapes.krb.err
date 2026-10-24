@@ -5,7 +5,7 @@
 0006    | OP_GET_GLOBAL       3 '@strConcat'
 0008    | OP_CONSTANT         4 '{name} is '
 0010    | OP_GET_GLOBAL       0 'name'
-0012    | OP_ARRAY            2
+0012    | OP_LIST             2
 0014    | OP_CALL             1
 0016    | OP_CALL             1
 0018    | OP_POP

@@ -1,0 +1,6 @@
+fun make(): [i64] {
+  return [1, 2];
+}
+let xs = make();
+@listPush(xs, 3);
+@println(xs);

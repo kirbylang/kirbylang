@@ -1,6 +1,6 @@
 var parts = @strSplit("a,b,c", ",");
 @println(parts);
-@println(@arrLen(parts));
+@println(@listLen(parts));
 @println(parts[1]);
 @println(@strSplit("a,b,,c", ","));
 @println(@strSplit("a,b,", ","));

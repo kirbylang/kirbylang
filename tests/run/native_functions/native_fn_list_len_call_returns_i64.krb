@@ -1,0 +1,1 @@
+let length: f64 = @listLen([1, 2]);

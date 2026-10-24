@@ -46,11 +46,12 @@ typedef enum {
   OP_SET_PROPERTY,     // 35
   OP_METHOD,           // 36
   OP_INVOKE,           // 37
-  OP_ARRAY,            // 38
+  OP_LIST,             // 38
   OP_GET_INDEX,        // 39
   OP_SET_INDEX,        // 40
   OP_CLOSE_BLOCK_EXPR, // 41
   OP_CAST,             // 42; operand: target number kind (0 = f64, 1 = u8)
+  OP_ARRAY,            // 43; operand: item count. A fixed size array
   // Sentinel
   OP_COUNT,
 } OpCode;

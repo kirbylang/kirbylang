@@ -1,4 +1,0 @@
-var words = [];
-@arrPush(words, "hello");
-@println(words);
-@println(@arrLen([]));

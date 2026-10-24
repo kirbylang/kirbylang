@@ -1,0 +1,7 @@
+var array: [i64] = [1, 2, 3];
+
+@println(array);
+
+@listClear(array);
+
+@println(array);

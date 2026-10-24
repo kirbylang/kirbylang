@@ -1,0 +1,5 @@
+let m = [[1, 2], [3, 4]];
+m[0][1] = 9;
+@println(m[0][1]);
+@println(m[1][0]);
+@println(m);

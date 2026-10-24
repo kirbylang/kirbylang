@@ -1,3 +1,0 @@
-var empty = [];
-
-@println(@strIsEmpty(@arrJoin(empty, ", ")));

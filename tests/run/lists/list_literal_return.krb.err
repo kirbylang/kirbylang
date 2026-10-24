@@ -1,0 +1,22 @@
+== <script> ==
+0000    3 OP_CLOSURE          1 <fn make>
+0002    | OP_DEFINE_GLOBAL    0 'make'
+0004    4 OP_GET_GLOBAL       0 'make'
+0006    | OP_CALL             0
+0008    | OP_DEFINE_GLOBAL    2 'xs'
+0010    5 OP_GET_GLOBAL       3 '@listPush'
+0012    | OP_GET_GLOBAL       2 'xs'
+0014    | OP_CONSTANT         4 '3'
+0016    | OP_CALL             2
+0018    | OP_POP
+0019    6 OP_GET_GLOBAL       5 '@println'
+0021    | OP_GET_GLOBAL       2 'xs'
+0023    | OP_CALL             1
+0025    | OP_POP
+0026    7 OP_NIL
+0027    | OP_RETURN
+== make ==
+0000    2 OP_CONSTANT         0 '1'
+0002    | OP_CONSTANT         1 '2'
+0004    | OP_LIST             2
+0006    | OP_RETURN

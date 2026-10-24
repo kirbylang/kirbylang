@@ -1,2 +1,0 @@
-let numbers = [1];
-@arrPush(numbers, 2.5);

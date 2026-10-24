@@ -1,15 +1,13 @@
-Copy an array to a new array.
+Copy an array to a new array of the same length.
 
 ```kirby
-var a = [1, 2, 3];
-var b = a;
-var c = @arrCopy(a);
+let a = [1, 2, 3];
+let b = @arrCopy(a);
 
-a[0] = 100;
+b[0] = 100;
 
-@println(a); // [100, 2, 3]
+@println(a); // [1, 2, 3]
 @println(b); // [100, 2, 3]
-@println(c); // [1, 2, 3]
 ```
 
 https://kirbylang.github.io/kirbylang/reference/builtin-functions.html#arrcopy

@@ -705,7 +705,7 @@ static void emitNativeStrConcatEnd(int count, int line) {
   assert(count <= UINT8_MAX);
 
   currentLine = line;
-  emitBytes(OP_ARRAY, (uint8_t)count);
+  emitBytes(OP_LIST, (uint8_t)count);
   emitBytes(OP_CALL, 1);
 }
 
@@ -826,7 +826,7 @@ static void collectStringConcatOperands(AstNode *node, AstNode **operands,
  * Compiles a chain of three or more strings joined with `+` as one join.
  *
  * Returns false without emitting anything when the chain is better left to
- * OP_ADD: two strings are cheaper with a single OP_ADD, and OP_ARRAY holds at
+ * OP_ADD: two strings are cheaper with a single OP_ADD, and OP_LIST holds at
  * most 255 items.
  */
 static bool compileStringConcatChain(AstNode *node) {
@@ -1127,7 +1127,7 @@ static void compileExpr(AstNode *node) {
     for (int i = 0; i < arr->count; i++) {
       compileExpr(arr->items[i]);
     }
-    emitBytes(OP_ARRAY, (uint8_t)arr->count);
+    emitBytes(arr->isFixedSize ? OP_ARRAY : OP_LIST, (uint8_t)arr->count);
     break;
   }
 

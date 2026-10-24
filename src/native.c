@@ -257,11 +257,11 @@ static Value strLenNative(VM *vm, int argCount, Value *args) {
   return NUMBER_I64_VAL(AS_STRING(args[0])->length);
 }
 
-static Value arrLenNative(VM *vm, int argCount, Value *args) {
-  assertArgCount(vm, "@arrLen", 1, argCount);
-  assertArgIsArray(vm, "@arrLen", args, 0);
+static Value listLenNative(VM *vm, int argCount, Value *args) {
+  assertArgCount(vm, "@listLen", 1, argCount);
+  assertArgIsList(vm, "@listLen", args, 0);
 
-  return NUMBER_I64_VAL(AS_ARRAY(args[0])->count);
+  return NUMBER_I64_VAL(AS_LIST(args[0])->count);
 }
 
 // @print, @println, @eprint, and @eprintln write a value the way the print
@@ -403,96 +403,351 @@ static Value instanceOfNative(VM *vm, int argCount, Value *args) {
   return BOOL_VAL(instance->struct_ == struct2);
 }
 
-static Value arrPushNative(VM *vm, int argCount, Value *args) {
-  assertArgCount(vm, "@arrPush", 2, argCount);
-  assertArgIsArray(vm, "@arrPush", args, 0);
+static Value listPushNative(VM *vm, int argCount, Value *args) {
+  assertArgCount(vm, "@listPush", 2, argCount);
+  assertArgIsList(vm, "@listPush", args, 0);
 
-  ObjArray *array = AS_ARRAY(args[0]);
+  ObjList *list = AS_LIST(args[0]);
   Value value = args[1];
 
-  writeValueToArrayObj(vm->gc, array, value);
+  writeValueToListObj(vm->gc, list, value);
 
   return NIL_VAL;
 }
 
-static Value arrPopNative(VM *vm, int argCount, Value *args) {
-  assertArgCount(vm, "@arrPop", 1, argCount);
-  assertArgIsArray(vm, "@arrPop", args, 0);
+static Value listPopNative(VM *vm, int argCount, Value *args) {
+  assertArgCount(vm, "@listPop", 1, argCount);
+  assertArgIsList(vm, "@listPop", args, 0);
 
-  ObjArray *array = AS_ARRAY(args[0]);
+  ObjList *list = AS_LIST(args[0]);
 
-  if (array->count == 0) {
-    runtimeError(vm, "Cannot pop empty array.");
+  if (list->count == 0) {
+    runtimeError(vm, "Cannot pop empty list.");
     exit(EXIT_CODE_RUNTIME_ERR);
   }
 
-  Value value = array->values[array->count - 1];
+  Value value = list->values[list->count - 1];
 
-  array->count--;
+  list->count--;
 
   return value;
 }
 
-static Value arrInsertNative(VM *vm, int argCount, Value *args) {
-  assertArgCount(vm, "@arrInsert", 3, argCount);
-  assertArgIsArray(vm, "@arrInsert", args, 0);
-  assertArgIsNumber(vm, "@arrInsert", args, 1);
+static Value listInsertNative(VM *vm, int argCount, Value *args) {
+  assertArgCount(vm, "@listInsert", 3, argCount);
+  assertArgIsList(vm, "@listInsert", args, 0);
+  assertArgIsNumber(vm, "@listInsert", args, 1);
 
-  ObjArray *array = AS_ARRAY(args[0]);
-  assertWholeNumber(vm, "@arrInsert", numberArg(args[1]), 1);
+  ObjList *list = AS_LIST(args[0]);
+  assertWholeNumber(vm, "@listInsert", numberArg(args[1]), 1);
   int index = (int)numberArg(args[1]);
   Value value = args[2];
 
-  assertIsInArrayBounds(vm, array, index);
+  assertIsInListBounds(vm, list, index);
 
-  writeValueToArrayObj(vm->gc, array, NIL_VAL);
+  writeValueToListObj(vm->gc, list, NIL_VAL);
 
-  for (int i = array->count - 1; i > index; i--) {
-    array->values[i] = array->values[i - 1];
+  for (int i = list->count - 1; i > index; i--) {
+    list->values[i] = list->values[i - 1];
   }
 
-  array->values[index] = value;
+  list->values[index] = value;
 
   return NIL_VAL;
 }
 
-static Value arrRemoveNative(VM *vm, int argCount, Value *args) {
-  assertArgCount(vm, "@arrRemove", 2, argCount);
-  assertArgIsArray(vm, "@arrRemove", args, 0);
-  assertArgIsNumber(vm, "@arrRemove", args, 1);
+static Value listRemoveNative(VM *vm, int argCount, Value *args) {
+  assertArgCount(vm, "@listRemove", 2, argCount);
+  assertArgIsList(vm, "@listRemove", args, 0);
+  assertArgIsNumber(vm, "@listRemove", args, 1);
 
-  ObjArray *array = AS_ARRAY(args[0]);
-  assertWholeNumber(vm, "@arrRemove", numberArg(args[1]), 1);
+  ObjList *list = AS_LIST(args[0]);
+  assertWholeNumber(vm, "@listRemove", numberArg(args[1]), 1);
   int index = (int)numberArg(args[1]);
 
-  assertIsInArrayBounds(vm, array, index);
+  assertIsInListBounds(vm, list, index);
 
-  if (index == array->count) {
-    runtimeError(vm, "index %d out of bounds. array length: %d", index,
-                 array->count);
+  if (index == list->count) {
+    runtimeError(vm, "index %d out of bounds. list length: %d", index,
+                 list->count);
     exit(EXIT_CODE_RUNTIME_ERR);
   }
 
-  Value removed = array->values[index];
+  Value removed = list->values[index];
 
-  for (int i = index; i < array->count - 1; i++) {
-    array->values[i] = array->values[i + 1];
+  for (int i = index; i < list->count - 1; i++) {
+    list->values[i] = list->values[i + 1];
   }
 
-  array->count--;
+  list->count--;
 
   return removed;
 }
 
-static Value arrClearNative(VM *vm, int argCount, Value *args) {
-  assertArgCount(vm, "@arrClear", 1, argCount);
-  assertArgIsArray(vm, "@arrClear", args, 0);
+static Value listClearNative(VM *vm, int argCount, Value *args) {
+  assertArgCount(vm, "@listClear", 1, argCount);
+  assertArgIsList(vm, "@listClear", args, 0);
 
-  ObjArray *array = AS_ARRAY(args[0]);
+  ObjList *list = AS_LIST(args[0]);
 
-  array->count = 0;
+  list->count = 0;
 
   return NIL_VAL;
+}
+
+static Value listContainsNative(VM *vm, int argCount, Value *args) {
+  assertArgCount(vm, "@listContains", 2, argCount);
+  assertArgIsList(vm, "@listContains", args, 0);
+
+  ObjList *list = AS_LIST(args[0]);
+  Value value = args[1];
+
+  for (int i = 0; i < list->count; i++) {
+    if (valuesEqual(list->values[i], value)) {
+      return BOOL_VAL(true);
+    }
+  }
+
+  return BOOL_VAL(false);
+}
+
+static Value listCopyNative(VM *vm, int argCount, Value *args) {
+  assertArgCount(vm, "@listCopy", 1, argCount);
+  assertArgIsList(vm, "@listCopy", args, 0);
+
+  ObjList *list = AS_LIST(args[0]);
+  ObjList *listCopy = newList(vm->gc);
+
+  pushOnStack(OBJ_VAL(listCopy)); // Protect from GC
+
+  for (int i = 0; i < list->count; i++) {
+    writeValueToListObj(vm->gc, listCopy, list->values[i]);
+  }
+
+  popFromStack(); // Clean up after GC protection
+
+  return OBJ_VAL(listCopy);
+}
+
+static Value listIsEmptyNative(VM *vm, int argCount, Value *args) {
+  assertArgCount(vm, "@listIsEmpty", 1, argCount);
+  assertArgIsList(vm, "@listIsEmpty", args, 0);
+
+  ObjList *list = AS_LIST(args[0]);
+
+  bool isEmpty = list->count == 0;
+
+  return BOOL_VAL(isEmpty);
+}
+
+static Value strIsEmptyNative(VM *vm, int argCount, Value *args) {
+  assertArgCount(vm, "@strIsEmpty", 1, argCount);
+  assertArgIsString(vm, "@strIsEmpty", args, 0);
+
+  ObjString *string = AS_STRING(args[0]);
+
+  bool isEmpty = string->length == 0;
+
+  return BOOL_VAL(isEmpty);
+}
+
+static Value listEqualNative(VM *vm, int argCount, Value *args) {
+  assertArgCount(vm, "@listEqual", 2, argCount);
+  assertArgIsList(vm, "@listEqual", args, 0);
+  assertArgIsList(vm, "@listEqual", args, 1);
+
+  ObjList *list_a = AS_LIST(args[0]);
+  ObjList *list_b = AS_LIST(args[1]);
+
+  if (list_a->count != list_b->count) {
+    return BOOL_VAL(false);
+  }
+
+  bool areEqual = true;
+
+  for (int i = 0; i < list_a->count; i++) {
+    bool i_equal = valuesEqual(list_a->values[i], list_b->values[i]);
+
+    if (!i_equal) {
+      areEqual = false;
+      break;
+    }
+  }
+
+  return BOOL_VAL(areEqual);
+}
+
+static Value listSliceNative(VM *vm, int argCount, Value *args) {
+  assertArgCount(vm, "@listSlice", 3, argCount);
+  assertArgIsList(vm, "@listSlice", args, 0);
+  assertArgIsNumber(vm, "@listSlice", args, 1);
+  assertArgIsNumber(vm, "@listSlice", args, 2);
+
+  ObjList *list = AS_LIST(args[0]);
+
+  double start = numberArg(args[1]);
+  assertPositiveNumber(vm, "@listSlice", start, 1);
+  assertWholeNumber(vm, "@listSlice", start, 1);
+  assertIsInListBounds(vm, list, start);
+
+  double end = numberArg(args[2]);
+  assertPositiveNumber(vm, "@listSlice", end, 2);
+  assertWholeNumber(vm, "@listSlice", end, 2);
+  assertIsInListBounds(vm, list, end);
+
+  if (start >= end) {
+    runtimeError(
+        vm,
+        "function @listSlice expects argument 2 to be less than argument 3.");
+    exit(EXIT_CODE_RUNTIME_ERR);
+  }
+
+  ObjList *result = newList(vm->gc);
+
+  pushOnStack(OBJ_VAL(result));
+
+  for (int i = start; i < end; i++) {
+    writeValueToListObj(vm->gc, result, list->values[i]);
+  }
+
+  popFromStack();
+
+  return OBJ_VAL(result);
+}
+
+static Value listConcatNative(VM *vm, int argCount, Value *args) {
+  assertArgCount(vm, "@listConcat", 2, argCount);
+  assertArgIsList(vm, "@listConcat", args, 0);
+  assertArgIsList(vm, "@listConcat", args, 1);
+
+  ObjList *array_a = AS_LIST(args[0]);
+  ObjList *array_b = AS_LIST(args[1]);
+
+  ObjList *new_array = newList(vm->gc);
+
+  pushOnStack(OBJ_VAL(new_array)); // Protect from GC
+
+  for (int i = 0; i < array_a->count; i++) {
+    writeValueToListObj(vm->gc, new_array, array_a->values[i]);
+  }
+
+  for (int i = 0; i < array_b->count; i++) {
+    writeValueToListObj(vm->gc, new_array, array_b->values[i]);
+  }
+
+  popFromStack(); // Clean up after GC protection
+
+  return OBJ_VAL(new_array);
+}
+
+static Value listReverseNative(VM *vm, int argCount, Value *args) {
+  assertArgCount(vm, "@listReverse", 1, argCount);
+  assertArgIsList(vm, "@listReverse", args, 0);
+
+  ObjList *array_a = AS_LIST(args[0]);
+
+  ObjList *new_array = newList(vm->gc);
+
+  pushOnStack(OBJ_VAL(new_array)); // Protect from GC
+
+  for (int i = array_a->count - 1; i >= 0; i--) {
+    writeValueToListObj(vm->gc, new_array, array_a->values[i]);
+  }
+
+  popFromStack(); // Clean up after GC protection
+
+  return OBJ_VAL(new_array);
+}
+
+/**
+ * Joins an array of strings into one string, with `separator` between them.
+ * `name` is the calling native, for error messages.
+ *
+ * Measures first so the result is allocated and copied once.
+ */
+static Value joinStrings(VM *vm, const char *name, Value *values, int count,
+                         const char *separator, int separatorLength) {
+  int length = 0;
+
+  for (int i = 0; i < count; i++) {
+    if (!IS_STRING(values[i])) {
+      char type[VALUE_STRING_MAX];
+
+      valueTypeToString(values[i], type, sizeof(type));
+
+      runtimeError(vm,
+                   "function %s expects every element of argument 1 to be "
+                   "a string but element %d has type %s.",
+                   name, i, type);
+      exit(EXIT_CODE_RUNTIME_ERR);
+    }
+
+    length += AS_STRING(values[i])->length;
+  }
+
+  if (count > 1) {
+    length += separatorLength * (count - 1);
+  }
+
+  // args stay on the VM stack for the duration of a native call, so the list
+  // and its strings are reachable if this allocation triggers a collection.
+  char *chars = ALLOCATE(vm->gc, char, length + 1);
+  int offset = 0;
+
+  for (int i = 0; i < count; i++) {
+    if (i > 0) {
+      memcpy(chars + offset, separator, separatorLength);
+      offset += separatorLength;
+    }
+
+    ObjString *element = AS_STRING(values[i]);
+
+    memcpy(chars + offset, element->chars, element->length);
+    offset += element->length;
+  }
+
+  chars[length] = '\0';
+
+  return OBJ_VAL(takeString(vm->gc, chars, length));
+}
+
+/**
+ * Concatenate every element of an array into one string, separated by a
+ * separator string. Elements must already be strings; the language has no
+ * implicit conversion to string.
+ */
+static Value listJoinNative(VM *vm, int argCount, Value *args) {
+  assertArgCount(vm, "@listJoin", 2, argCount);
+  assertArgIsList(vm, "@listJoin", args, 0);
+  assertArgIsString(vm, "@listJoin", args, 1);
+
+  ObjString *separator = AS_STRING(args[1]);
+
+  ObjList *list = AS_LIST(args[0]);
+
+  return joinStrings(vm, "@listJoin", list->values, list->count,
+                     separator->chars, separator->length);
+}
+
+/**
+ * Concatenate an array of strings into one string. Interpolated strings and
+ * `+` chains of three or more strings compile to this, after converting any
+ * non-string values themselves.
+ */
+static Value strConcatNative(VM *vm, int argCount, Value *args) {
+  assertArgCount(vm, "@strConcat", 1, argCount);
+  assertArgIsList(vm, "@strConcat", args, 0);
+
+  ObjList *list = AS_LIST(args[0]);
+
+  return joinStrings(vm, "@strConcat", list->values, list->count, "", 0);
+}
+
+static Value arrLenNative(VM *vm, int argCount, Value *args) {
+  assertArgCount(vm, "@arrLen", 1, argCount);
+  assertArgIsArray(vm, "@arrLen", args, 0);
+
+  return NUMBER_I64_VAL(AS_ARRAY(args[0])->count);
 }
 
 static Value arrContainsNative(VM *vm, int argCount, Value *args) {
@@ -511,70 +766,65 @@ static Value arrContainsNative(VM *vm, int argCount, Value *args) {
   return BOOL_VAL(false);
 }
 
-static Value arrCopyNative(VM *vm, int argCount, Value *args) {
-  assertArgCount(vm, "@arrCopy", 1, argCount);
-  assertArgIsArray(vm, "@arrCopy", args, 0);
-
-  ObjArray *array = AS_ARRAY(args[0]);
-  ObjArray *result = newArray(vm->gc);
-
-  pushOnStack(OBJ_VAL(result)); // Protect from GC
-
-  for (int i = 0; i < array->count; i++) {
-    writeValueToArrayObj(vm->gc, result, array->values[i]);
-  }
-
-  popFromStack(); // Clean up after GC protection
-
-  return OBJ_VAL(result);
-}
-
-static Value arrIsEmptyNative(VM *vm, int argCount, Value *args) {
-  assertArgCount(vm, "@arrIsEmpty", 1, argCount);
-  assertArgIsArray(vm, "@arrIsEmpty", args, 0);
-
-  ObjArray *array = AS_ARRAY(args[0]);
-
-  bool isEmpty = array->count == 0;
-
-  return BOOL_VAL(isEmpty);
-}
-
-static Value strIsEmptyNative(VM *vm, int argCount, Value *args) {
-  assertArgCount(vm, "@strIsEmpty", 1, argCount);
-  assertArgIsString(vm, "@strIsEmpty", args, 0);
-
-  ObjString *string = AS_STRING(args[0]);
-
-  bool isEmpty = string->length == 0;
-
-  return BOOL_VAL(isEmpty);
-}
-
 static Value arrEqualNative(VM *vm, int argCount, Value *args) {
   assertArgCount(vm, "@arrEqual", 2, argCount);
   assertArgIsArray(vm, "@arrEqual", args, 0);
   assertArgIsArray(vm, "@arrEqual", args, 1);
 
-  ObjArray *array_a = AS_ARRAY(args[0]);
-  ObjArray *array_b = AS_ARRAY(args[1]);
+  ObjArray *a = AS_ARRAY(args[0]);
+  ObjArray *b = AS_ARRAY(args[1]);
 
-  if (array_a->count != array_b->count) {
+  if (a->count != b->count) {
     return BOOL_VAL(false);
   }
 
-  bool areEqual = true;
-
-  for (int i = 0; i < array_a->count; i++) {
-    bool i_equal = valuesEqual(array_a->values[i], array_b->values[i]);
-
-    if (!i_equal) {
-      areEqual = false;
-      break;
+  for (int i = 0; i < a->count; i++) {
+    if (!valuesEqual(a->values[i], b->values[i])) {
+      return BOOL_VAL(false);
     }
   }
 
-  return BOOL_VAL(areEqual);
+  return BOOL_VAL(true);
+}
+
+static Value arrCopyNative(VM *vm, int argCount, Value *args) {
+  assertArgCount(vm, "@arrCopy", 1, argCount);
+  assertArgIsArray(vm, "@arrCopy", args, 0);
+
+  ObjArray *array = AS_ARRAY(args[0]);
+  ObjArray *result = newArray(vm->gc, array->count);
+
+  for (int i = 0; i < array->count; i++) {
+    result->values[i] = array->values[i];
+  }
+
+  return OBJ_VAL(result);
+}
+
+static Value arrReverseNative(VM *vm, int argCount, Value *args) {
+  assertArgCount(vm, "@arrReverse", 1, argCount);
+  assertArgIsArray(vm, "@arrReverse", args, 0);
+
+  ObjArray *array = AS_ARRAY(args[0]);
+  ObjArray *result = newArray(vm->gc, array->count);
+
+  for (int i = 0; i < array->count; i++) {
+    result->values[i] = array->values[array->count - 1 - i];
+  }
+
+  return OBJ_VAL(result);
+}
+
+static Value arrJoinNative(VM *vm, int argCount, Value *args) {
+  assertArgCount(vm, "@arrJoin", 2, argCount);
+  assertArgIsArray(vm, "@arrJoin", args, 0);
+  assertArgIsString(vm, "@arrJoin", args, 1);
+
+  ObjString *separator = AS_STRING(args[1]);
+  ObjArray *array = AS_ARRAY(args[0]);
+
+  return joinStrings(vm, "@arrJoin", array->values, array->count,
+                     separator->chars, separator->length);
 }
 
 static Value arrSliceNative(VM *vm, int argCount, Value *args) {
@@ -602,12 +852,12 @@ static Value arrSliceNative(VM *vm, int argCount, Value *args) {
     exit(EXIT_CODE_RUNTIME_ERR);
   }
 
-  ObjArray *result = newArray(vm->gc);
+  ObjList *result = newList(vm->gc);
 
-  pushOnStack(OBJ_VAL(result));
+  pushOnStack(OBJ_VAL(result)); // Protect from GC
 
   for (int i = start; i < end; i++) {
-    writeValueToArrayObj(vm->gc, result, array->values[i]);
+    writeValueToListObj(vm->gc, result, array->values[i]);
   }
 
   popFromStack();
@@ -620,123 +870,42 @@ static Value arrConcatNative(VM *vm, int argCount, Value *args) {
   assertArgIsArray(vm, "@arrConcat", args, 0);
   assertArgIsArray(vm, "@arrConcat", args, 1);
 
-  ObjArray *array_a = AS_ARRAY(args[0]);
-  ObjArray *array_b = AS_ARRAY(args[1]);
+  ObjArray *a = AS_ARRAY(args[0]);
+  ObjArray *b = AS_ARRAY(args[1]);
 
-  ObjArray *new_array = newArray(vm->gc);
+  ObjList *result = newList(vm->gc);
 
-  pushOnStack(OBJ_VAL(new_array)); // Protect from GC
+  pushOnStack(OBJ_VAL(result)); // Protect from GC
 
-  for (int i = 0; i < array_a->count; i++) {
-    writeValueToArrayObj(vm->gc, new_array, array_a->values[i]);
+  for (int i = 0; i < a->count; i++) {
+    writeValueToListObj(vm->gc, result, a->values[i]);
   }
 
-  for (int i = 0; i < array_b->count; i++) {
-    writeValueToArrayObj(vm->gc, new_array, array_b->values[i]);
+  for (int i = 0; i < b->count; i++) {
+    writeValueToListObj(vm->gc, result, b->values[i]);
   }
 
-  popFromStack(); // Clean up after GC protection
+  popFromStack();
 
-  return OBJ_VAL(new_array);
+  return OBJ_VAL(result);
 }
 
-static Value arrReverseNative(VM *vm, int argCount, Value *args) {
-  assertArgCount(vm, "@arrReverse", 1, argCount);
-  assertArgIsArray(vm, "@arrReverse", args, 0);
+static Value arrToListNative(VM *vm, int argCount, Value *args) {
+  assertArgCount(vm, "@arrToList", 1, argCount);
+  assertArgIsArray(vm, "@arrToList", args, 0);
 
-  ObjArray *array_a = AS_ARRAY(args[0]);
+  ObjArray *array = AS_ARRAY(args[0]);
+  ObjList *result = newList(vm->gc);
 
-  ObjArray *new_array = newArray(vm->gc);
-
-  pushOnStack(OBJ_VAL(new_array)); // Protect from GC
-
-  for (int i = array_a->count - 1; i >= 0; i--) {
-    writeValueToArrayObj(vm->gc, new_array, array_a->values[i]);
-  }
-
-  popFromStack(); // Clean up after GC protection
-
-  return OBJ_VAL(new_array);
-}
-
-/**
- * Joins an array of strings into one string, with `separator` between them.
- * `name` is the calling native, for error messages.
- *
- * Measures first so the result is allocated and copied once.
- */
-static Value joinStrings(VM *vm, const char *name, ObjArray *array,
-                         const char *separator, int separatorLength) {
-  int length = 0;
+  pushOnStack(OBJ_VAL(result)); // Protect from GC
 
   for (int i = 0; i < array->count; i++) {
-    if (!IS_STRING(array->values[i])) {
-      char type[VALUE_STRING_MAX];
-
-      valueTypeToString(array->values[i], type, sizeof(type));
-
-      runtimeError(vm,
-                   "function %s expects every element of argument 1 to be "
-                   "a string but element %d has type %s.",
-                   name, i, type);
-      exit(EXIT_CODE_RUNTIME_ERR);
-    }
-
-    length += AS_STRING(array->values[i])->length;
+    writeValueToListObj(vm->gc, result, array->values[i]);
   }
 
-  if (array->count > 1) {
-    length += separatorLength * (array->count - 1);
-  }
+  popFromStack();
 
-  // args stay on the VM stack for the duration of a native call, so the array
-  // and its strings are reachable if this allocation triggers a collection.
-  char *chars = ALLOCATE(vm->gc, char, length + 1);
-  int offset = 0;
-
-  for (int i = 0; i < array->count; i++) {
-    if (i > 0) {
-      memcpy(chars + offset, separator, separatorLength);
-      offset += separatorLength;
-    }
-
-    ObjString *element = AS_STRING(array->values[i]);
-
-    memcpy(chars + offset, element->chars, element->length);
-    offset += element->length;
-  }
-
-  chars[length] = '\0';
-
-  return OBJ_VAL(takeString(vm->gc, chars, length));
-}
-
-/**
- * Concatenate every element of an array into one string, separated by a
- * separator string. Elements must already be strings; the language has no
- * implicit conversion to string.
- */
-static Value arrJoinNative(VM *vm, int argCount, Value *args) {
-  assertArgCount(vm, "@arrJoin", 2, argCount);
-  assertArgIsArray(vm, "@arrJoin", args, 0);
-  assertArgIsString(vm, "@arrJoin", args, 1);
-
-  ObjString *separator = AS_STRING(args[1]);
-
-  return joinStrings(vm, "@arrJoin", AS_ARRAY(args[0]), separator->chars,
-                     separator->length);
-}
-
-/**
- * Concatenate an array of strings into one string. Interpolated strings and
- * `+` chains of three or more strings compile to this, after converting any
- * non-string values themselves.
- */
-static Value strConcatNative(VM *vm, int argCount, Value *args) {
-  assertArgCount(vm, "@strConcat", 1, argCount);
-  assertArgIsArray(vm, "@strConcat", args, 0);
-
-  return joinStrings(vm, "@strConcat", AS_ARRAY(args[0]), "", 0);
+  return OBJ_VAL(result);
 }
 
 static Value stdinNative(VM *vm, int argCount, Value *args) {
@@ -1279,12 +1448,12 @@ static Value strRepeatNative(VM *vm, int argCount, Value *args) {
 // Appends a copy of `length` bytes to an array as a new string. The new string
 // is held on the VM stack while the array grows, since growing the array can
 // start a collection before the string is reachable from anywhere else.
-static void appendStringCopy(VM *vm, ObjArray *array, const char *chars,
+static void appendStringCopy(VM *vm, ObjList *array, const char *chars,
                              int length) {
   ObjString *piece = copyString(vm->gc, chars, length);
 
   pushOnStack(OBJ_VAL(piece));
-  writeValueToArrayObj(vm->gc, array, OBJ_VAL(piece));
+  writeValueToListObj(vm->gc, array, OBJ_VAL(piece));
   popFromStack();
 }
 
@@ -1296,7 +1465,7 @@ static Value strSplitNative(VM *vm, int argCount, Value *args) {
   ObjString *string = AS_STRING(args[0]);
   ObjString *separator = AS_STRING(args[1]);
 
-  ObjArray *result = newArray(vm->gc);
+  ObjList *result = newList(vm->gc);
 
   pushOnStack(OBJ_VAL(result)); // Protect from GC
 
@@ -1385,13 +1554,13 @@ static Value strToBytesNative(VM *vm, int argCount, Value *args) {
 
   ObjString *string = AS_STRING(args[0]);
 
-  ObjArray *result = newArray(vm->gc);
+  ObjList *result = newList(vm->gc);
 
   pushOnStack(OBJ_VAL(result)); // Protect from GC
 
   for (int i = 0; i < string->length; i++) {
-    writeValueToArrayObj(vm->gc, result,
-                         NUMBER_U8_VAL((uint8_t)string->chars[i]));
+    writeValueToListObj(vm->gc, result,
+                        NUMBER_U8_VAL((uint8_t)string->chars[i]));
   }
 
   popFromStack(); // Clean up after GC protection
@@ -1495,6 +1664,15 @@ const NativeDefinition nativeDefinitions[] = {
     {"@setenv", setEnvNative},
     {"@strLen", strLenNative},
     {"@arrLen", arrLenNative},
+    {"@arrContains", arrContainsNative},
+    {"@arrEqual", arrEqualNative},
+    {"@arrCopy", arrCopyNative},
+    {"@arrReverse", arrReverseNative},
+    {"@arrJoin", arrJoinNative},
+    {"@arrSlice", arrSliceNative},
+    {"@arrConcat", arrConcatNative},
+    {"@arrToList", arrToListNative},
+    {"@listLen", listLenNative},
     {"@typeof", typeofNative},
     {"@print", printNative},
     {"@println", printlnNative},
@@ -1507,19 +1685,19 @@ const NativeDefinition nativeDefinitions[] = {
     {"@instanceOf", instanceOfNative},
     {"@prompt", promptNative},
     {"@stdin", stdinNative},
-    {"@arrPush", arrPushNative},
-    {"@arrPop", arrPopNative},
-    {"@arrInsert", arrInsertNative},
-    {"@arrRemove", arrRemoveNative},
-    {"@arrClear", arrClearNative},
-    {"@arrContains", arrContainsNative},
-    {"@arrCopy", arrCopyNative},
-    {"@arrIsEmpty", arrIsEmptyNative},
-    {"@arrEqual", arrEqualNative},
-    {"@arrSlice", arrSliceNative},
-    {"@arrConcat", arrConcatNative},
-    {"@arrReverse", arrReverseNative},
-    {"@arrJoin", arrJoinNative},
+    {"@listPush", listPushNative},
+    {"@listPop", listPopNative},
+    {"@listInsert", listInsertNative},
+    {"@listRemove", listRemoveNative},
+    {"@listClear", listClearNative},
+    {"@listContains", listContainsNative},
+    {"@listCopy", listCopyNative},
+    {"@listIsEmpty", listIsEmptyNative},
+    {"@listEqual", listEqualNative},
+    {"@listSlice", listSliceNative},
+    {"@listConcat", listConcatNative},
+    {"@listReverse", listReverseNative},
+    {"@listJoin", listJoinNative},
     {"@strConcat", strConcatNative},
     {"@is", isNative},
     {"@isNumber", isNumberNative},

@@ -1,0 +1,5 @@
+var array: [i64] = [10, 20, 30, 40, 50];
+
+var slice = @listSlice(array, 1, 4);
+
+@println(@listEqual([20, 30, 40], slice));

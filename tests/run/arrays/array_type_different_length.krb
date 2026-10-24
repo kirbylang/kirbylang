@@ -1,0 +1,4 @@
+fun f(a: [i64; 2]): unit {}
+fun g(b: [i64; 3]): unit {
+  f(b);
+}

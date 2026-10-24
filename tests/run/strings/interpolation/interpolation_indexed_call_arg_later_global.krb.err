@@ -22,7 +22,7 @@
 0017    | OP_GET_GLOBAL       7 '@boolToString'
 0019    | OP_TRUE
 0020    | OP_CALL             1
-0022    | OP_ARRAY            4
+0022    | OP_LIST             4
 0024    | OP_CALL             1
 0026    | OP_CALL             1
 0028    | OP_POP

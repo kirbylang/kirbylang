@@ -1,0 +1,6 @@
+let a = [10, 20, 30];
+var total = 0;
+for (var i = 0; i < 3; i = i + 1) {
+  total = total + a[i];
+}
+@println(total);

@@ -1,2 +1,0 @@
-@println(@arrIsEmpty([]));
-@println(@arrIsEmpty([1, 2, 3]));

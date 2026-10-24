@@ -1,3 +1,0 @@
-var one = ["only"];
-
-@println(@arrJoin(one, ", "));

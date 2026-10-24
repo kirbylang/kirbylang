@@ -1,13 +1,35 @@
 == <script> ==
-0000    1 OP_GET_GLOBAL       0 '@println'
-0002    | OP_GET_GLOBAL       1 '@arrReverse'
-0004    | OP_CONSTANT         2 '1'
-0006    | OP_CONSTANT         3 '2'
-0008    | OP_CONSTANT         4 '3'
-0010    | OP_CONSTANT         5 '4'
-0012    | OP_ARRAY            4
-0014    | OP_CALL             1
+0000    1 OP_CONSTANT         1 '1'
+0002    | OP_CONSTANT         2 '2'
+0004    | OP_CONSTANT         3 '3'
+0006    | OP_CONSTANT         4 '4'
+0008    | OP_ARRAY            4
+0010    | OP_DEFINE_GLOBAL    0 'a'
+0012    2 OP_GET_GLOBAL       6 '@arrReverse'
+0014    | OP_GET_GLOBAL       0 'a'
 0016    | OP_CALL             1
-0018    | OP_POP
-0019    2 OP_NIL
-0020    | OP_RETURN
+0018    | OP_DEFINE_GLOBAL    5 'b'
+0020    3 OP_GET_GLOBAL       7 '@println'
+0022    | OP_GET_GLOBAL       5 'b'
+0024    | OP_CALL             1
+0026    | OP_POP
+0027    4 OP_GET_GLOBAL       7 '@println'
+0029    | OP_GET_GLOBAL       0 'a'
+0031    | OP_CALL             1
+0033    | OP_POP
+0034    5 OP_GET_GLOBAL       7 '@println'
+0036    | OP_GET_GLOBAL       8 '@typeof'
+0038    | OP_GET_GLOBAL       5 'b'
+0040    | OP_CALL             1
+0042    | OP_CALL             1
+0044    | OP_POP
+0045    6 OP_GET_GLOBAL       5 'b'
+0047    | OP_CONSTANT        10 '0'
+0049    | OP_GET_INDEX
+0050    | OP_DEFINE_GLOBAL    9 'first'
+0052    7 OP_GET_GLOBAL       7 '@println'
+0054    | OP_GET_GLOBAL       9 'first'
+0056    | OP_CALL             1
+0058    | OP_POP
+0059    8 OP_NIL
+0060    | OP_RETURN

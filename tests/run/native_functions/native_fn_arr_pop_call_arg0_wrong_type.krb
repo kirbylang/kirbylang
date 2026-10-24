@@ -1,3 +1,0 @@
-var value = "Hello World";
-
-@arrPop(value);

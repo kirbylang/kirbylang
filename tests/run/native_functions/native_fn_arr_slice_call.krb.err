@@ -5,22 +5,31 @@
 0006    | OP_CONSTANT         4 '40'
 0008    | OP_CONSTANT         5 '50'
 0010    | OP_ARRAY            5
-0012    | OP_DEFINE_GLOBAL    0 'array'
-0014    3 OP_GET_GLOBAL       7 '@arrSlice'
-0016    | OP_GET_GLOBAL       0 'array'
+0012    | OP_DEFINE_GLOBAL    0 'a'
+0014    2 OP_GET_GLOBAL       7 '@arrSlice'
+0016    | OP_GET_GLOBAL       0 'a'
 0018    | OP_CONSTANT         8 '1'
 0020    | OP_CONSTANT         9 '4'
 0022    | OP_CALL             3
-0024    | OP_DEFINE_GLOBAL    6 'slice'
-0026    5 OP_GET_GLOBAL      10 '@println'
-0028    | OP_GET_GLOBAL      11 '@arrEqual'
-0030    | OP_CONSTANT         2 '20'
-0032    | OP_CONSTANT         3 '30'
-0034    | OP_CONSTANT         4 '40'
-0036    | OP_ARRAY            3
-0038    | OP_GET_GLOBAL       6 'slice'
-0040    | OP_CALL             2
-0042    | OP_CALL             1
-0044    | OP_POP
-0045    6 OP_NIL
-0046    | OP_RETURN
+0024    | OP_DEFINE_GLOBAL    6 's'
+0026    3 OP_GET_GLOBAL      10 '@println'
+0028    | OP_GET_GLOBAL       6 's'
+0030    | OP_CALL             1
+0032    | OP_POP
+0033    4 OP_GET_GLOBAL      10 '@println'
+0035    | OP_GET_GLOBAL      11 '@typeof'
+0037    | OP_GET_GLOBAL       6 's'
+0039    | OP_CALL             1
+0041    | OP_CALL             1
+0043    | OP_POP
+0044    5 OP_GET_GLOBAL      12 '@listPush'
+0046    | OP_GET_GLOBAL       6 's'
+0048    | OP_CONSTANT        13 '60'
+0050    | OP_CALL             2
+0052    | OP_POP
+0053    6 OP_GET_GLOBAL      10 '@println'
+0055    | OP_GET_GLOBAL       6 's'
+0057    | OP_CALL             1
+0059    | OP_POP
+0060    7 OP_NIL
+0061    | OP_RETURN

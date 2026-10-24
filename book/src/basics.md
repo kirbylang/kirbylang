@@ -27,23 +27,24 @@ let greeting: string = "Hello World";
 
 ## Builtin Types
 
-| Type     |                          Examples | Notes                                                |
-| :------- | --------------------------------: | ---------------------------------------------------- |
-| `unit`   |                              `()` |                                                      |
-| `bool`   |                   `true`, `false` |                                                      |
-| `nil`    |                             `nil` | This will be deprecated in the future.               |
-| `string` |                   `"Hello World"` | Strings are immutable                                |
-| `i64`    |                   `123`, `123i64` | Signed 64-bit integer. The default for whole numbers |
-| `i32`    |                  `123i32`, `7I32` | Signed 32-bit integer                                |
-| `i16`    |                          `123i16` | Signed 16-bit integer                                |
-| `i8`     |                           `123i8` | Signed 8-bit integer                                 |
-| `u64`    |                          `123u64` | Unsigned 64-bit integer                              |
-| `u32`    |                          `123u32` | Unsigned 32-bit integer                              |
-| `u16`    |                          `123u16` | Unsigned 16-bit integer                              |
-| `u8`     |                  `123u8`, `255U8` | Unsigned 8-bit integer                               |
-| `f64`    |               `123f64`, `123.456` | 64-bit float. The default for decimal literals       |
-| `f32`    |                `123f32`, `1.5f32` | 32-bit float. A decimal literal needs the suffix     |
-| `[T]`    | `[1, 2, 3]`, `["Hello", "World"]` | A growable array of one type, such as `[i64]`        |
+| Type     |                          Examples | Notes                                                   |
+| :------- | --------------------------------: | ------------------------------------------------------- |
+| `unit`   |                              `()` |                                                         |
+| `bool`   |                   `true`, `false` |                                                         |
+| `nil`    |                             `nil` | This will be deprecated in the future.                  |
+| `string` |                   `"Hello World"` | Strings are immutable                                   |
+| `i64`    |                   `123`, `123i64` | Signed 64-bit integer. The default for whole numbers    |
+| `i32`    |                  `123i32`, `7I32` | Signed 32-bit integer                                   |
+| `i16`    |                          `123i16` | Signed 16-bit integer                                   |
+| `i8`     |                           `123i8` | Signed 8-bit integer                                    |
+| `u64`    |                          `123u64` | Unsigned 64-bit integer                                 |
+| `u32`    |                          `123u32` | Unsigned 32-bit integer                                 |
+| `u16`    |                          `123u16` | Unsigned 16-bit integer                                 |
+| `u8`     |                  `123u8`, `255U8` | Unsigned 8-bit integer                                  |
+| `f64`    |               `123f64`, `123.456` | 64-bit float. The default for decimal literals          |
+| `f32`    |                `123f32`, `1.5f32` | 32-bit float. A decimal literal needs the suffix        |
+| `[T]`    | `[1, 2, 3]`, `["Hello", "World"]` | A list of one type that can grow, such as `[i64]`       |
+| `[T; n]` |                       `[1, 2, 3]` | An array of one type with `n` items, such as `[i64; 3]` |
 
 ### Number Literals
 
@@ -66,7 +67,7 @@ let total: f64 = if (big) 100 else 10;
 
 let price: f64 = 2.5;
 let doubled = price * 2;          // 2 is an f64 here
-let mixed = [1, 2.5, 3];          // an array of f64
+let mixed = [1, 2.5, 3];          // an array of 3 f64
 ```
 
 A variable keeps its own type. Cast it with `as` to use it as another type.

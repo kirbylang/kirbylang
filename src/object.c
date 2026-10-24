@@ -117,25 +117,44 @@ ObjNative *newNative(GC *gc, NativeFn function) {
   return native;
 }
 
-ObjArray *newArray(GC *gc) {
+ObjList *newList(GC *gc) {
+  ObjList *list = ALLOCATE_OBJ(gc, ObjList, OBJ_LIST);
+  list->count = 0;
+  list->capacity = 0;
+  list->values = NULL;
+
+  return list;
+}
+
+ObjArray *newArray(GC *gc, int count) {
+  // The values are allocated first: the new object is not reachable until the
+  // caller holds it, so a collection while allocating must not run after it
+  // exists.
+  Value *values = NULL;
+
+  if (count > 0) {
+    values = GROW_ARRAY(gc, Value, NULL, 0, count);
+    for (int i = 0; i < count; i++)
+      values[i] = NIL_VAL;
+  }
+
   ObjArray *array = ALLOCATE_OBJ(gc, ObjArray, OBJ_ARRAY);
-  array->count = 0;
-  array->capacity = 0;
-  array->values = NULL;
+  array->count = count;
+  array->values = values;
 
   return array;
 }
 
-void writeValueToArrayObj(GC *gc, ObjArray *array, Value value) {
-  if (array->capacity < array->count + 1) {
-    int oldCapacity = array->capacity;
-    array->capacity = GROW_CAPACITY(oldCapacity);
+void writeValueToListObj(GC *gc, ObjList *list, Value value) {
+  if (list->capacity < list->count + 1) {
+    int oldCapacity = list->capacity;
+    list->capacity = GROW_CAPACITY(oldCapacity);
 
-    array->values =
-        GROW_ARRAY(gc, Value, array->values, oldCapacity, array->capacity);
+    list->values =
+        GROW_ARRAY(gc, Value, list->values, oldCapacity, list->capacity);
   }
 
-  array->values[array->count++] = value;
+  list->values[list->count++] = value;
 }
 
 static ObjString *allocateString(GC *gc, char *chars, int length,
@@ -256,6 +275,22 @@ void objectToString(Value value, char *buffer, size_t size) {
              AS_BOUND_METHOD(value)->method->function->name->chars);
     break;
   }
+  case OBJ_LIST: {
+    ObjList *list = AS_LIST(value);
+
+    printf("[");
+
+    for (int i = 0; i < list->count; i++) {
+      printValue(list->values[i]);
+
+      if (i < list->count - 1) {
+        printf(", ");
+      }
+    }
+
+    printf("]");
+    break;
+  }
   case OBJ_ARRAY: {
     ObjArray *array = AS_ARRAY(value);
 
@@ -308,6 +343,10 @@ void objectTypeToString(ObjType type, char *buffer, size_t size) {
     snprintf(buffer, size, "function");
     break;
   }
+  case OBJ_LIST: {
+    snprintf(buffer, size, "list");
+    break;
+  }
   case OBJ_ARRAY: {
     snprintf(buffer, size, "array");
     break;
@@ -341,6 +380,22 @@ void printObject(Value value) {
   case OBJ_UPVALUE:
     printf("upvalue");
     break;
+  case OBJ_LIST: {
+    ObjList *list = AS_LIST(value);
+
+    printf("[");
+
+    for (int i = 0; i < list->count; i++) {
+      printValue(list->values[i]);
+
+      if (i < list->count - 1) {
+        printf(", ");
+      }
+    }
+
+    printf("]");
+    break;
+  }
   case OBJ_ARRAY: {
     ObjArray *array = AS_ARRAY(value);
 
@@ -397,6 +452,9 @@ void printObjectToErr(Value value) {
   case OBJ_BOUND_METHOD:
     fprintf(stderr, "<fn method %s>",
             AS_BOUND_METHOD(value)->method->function->name->chars);
+    break;
+  case OBJ_LIST:
+    fprintf(stderr, "<list size=%d>", AS_LIST(value)->count);
     break;
   case OBJ_ARRAY:
     fprintf(stderr, "<array size=%d>", AS_ARRAY(value)->count);

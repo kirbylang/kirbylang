@@ -1,9 +1,6 @@
-var a = [1, 2, 3];
-var b = a;
-var c = @arrCopy(a);
-
-a[0] = 100;
-
-@println(a); // [100, 2, 3]
-@println(b); // [100, 2, 3]
-@println(c); // [1, 2, 3]
+let a = [1, 2, 3];
+let b = @arrCopy(a);
+b[0] = 100;
+@println(a);
+@println(b);
+@println(@typeof(b));

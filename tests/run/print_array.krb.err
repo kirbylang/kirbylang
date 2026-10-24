@@ -29,9 +29,11 @@
 0047    | OP_ARRAY            1
 0049    | OP_CALL             1
 0051    | OP_POP
-0052    6 OP_GET_GLOBAL       0 '@println'
-0054    | OP_ARRAY            0
-0056    | OP_CALL             1
-0058    | OP_POP
-0059    7 OP_NIL
-0060    | OP_RETURN
+0052    6 OP_LIST             0
+0054    | OP_DEFINE_GLOBAL    8 'empty'
+0056    7 OP_GET_GLOBAL       0 '@println'
+0058    | OP_GET_GLOBAL       8 'empty'
+0060    | OP_CALL             1
+0062    | OP_POP
+0063    8 OP_NIL
+0064    | OP_RETURN

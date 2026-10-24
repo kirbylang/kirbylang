@@ -73,7 +73,7 @@
 0044    | OP_GET_GLOBAL       5 '@numberToString'
 0046    | OP_GET_LOCAL        2
 0048    | OP_CALL             1
-0050    | OP_ARRAY            6
+0050    | OP_LIST             6
 0052    | OP_CALL             1
 0054    | OP_CALL             1
 0056    | OP_POP

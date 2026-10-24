@@ -1,0 +1,3 @@
+var one: [string] = ["only"];
+
+@println(@listJoin(one, ", "));

@@ -422,110 +422,110 @@
     ],
     "description": "Read all of stdin until EOF"
   },
-  "Native: @arrPush": {
-    "prefix": "@arrPush",
+  "Native: @listPush": {
+    "prefix": "@listPush",
     "body": [
-      "@arrPush(${1:array}, ${2:value})$0"
+      "@listPush(${1:list}, ${2:value})$0"
     ],
-    "description": "Push a value onto the end of an array"
+    "description": "Push a value onto the end of a list"
   },
-  "Native: @arrPop": {
-    "prefix": "@arrPop",
+  "Native: @listPop": {
+    "prefix": "@listPop",
     "body": [
-      "@arrPop(${1:array})$0"
+      "@listPop(${1:list})$0"
     ],
-    "description": "Remove and return the last value in an array"
+    "description": "Remove and return the last value in a list"
   },
-  "Native: @arrInsert": {
-    "prefix": "@arrInsert",
+  "Native: @listInsert": {
+    "prefix": "@listInsert",
     "body": [
-      "@arrInsert(${1:array}, ${2:index}, ${3:value})$0"
+      "@listInsert(${1:list}, ${2:index}, ${3:value})$0"
     ],
-    "description": "Insert a value into an array at an index"
+    "description": "Insert a value into a list at an index"
   },
-  "Native: @arrRemove": {
-    "prefix": "@arrRemove",
+  "Native: @listRemove": {
+    "prefix": "@listRemove",
     "body": [
-      "@arrRemove(${1:array}, ${2:index})$0"
+      "@listRemove(${1:list}, ${2:index})$0"
     ],
     "description": "Remove and return the value at an index"
   },
-  "Native: @arrClear": {
-    "prefix": "@arrClear",
+  "Native: @listClear": {
+    "prefix": "@listClear",
     "body": [
-      "@arrClear(${1:array})$0"
+      "@listClear(${1:list})$0"
     ],
-    "description": "Remove every value from an array"
+    "description": "Remove every value from a list"
   },
-  "Native: @arrContains": {
-    "prefix": "@arrContains",
+  "Native: @listContains": {
+    "prefix": "@listContains",
     "body": [
-      "@arrContains(${1:array}, ${2:value})$0"
+      "@listContains(${1:list}, ${2:value})$0"
     ],
-    "description": "Check whether an array contains a value"
+    "description": "Check whether a list contains a value"
   },
-  "Native: @arrCopy": {
-    "prefix": "@arrCopy",
+  "Native: @listCopy": {
+    "prefix": "@listCopy",
     "body": [
-      "@arrCopy(${1:array})$0"
+      "@listCopy(${1:list})$0"
     ],
-    "description": "Copy an array into a new array"
+    "description": "Copy a list into a new array"
   },
-  "Native: @arrLen": {
-    "prefix": "@arrLen",
+  "Native: @listLen": {
+    "prefix": "@listLen",
     "body": [
-      "@arrLen(${1:array})$0"
+      "@listLen(${1:list})$0"
     ],
-    "description": "Get the number of elements in an array"
+    "description": "Get the number of elements in a list"
   },
-  "Native: @arrIsEmpty": {
-    "prefix": "@arrIsEmpty",
+  "Native: @listIsEmpty": {
+    "prefix": "@listIsEmpty",
     "body": [
-      "@arrIsEmpty(${1:array})$0"
+      "@listIsEmpty(${1:list})$0"
     ],
-    "description": "Check whether an array is empty"
+    "description": "Check whether a list is empty"
   },
-  "Native: @arrEqual": {
-    "prefix": "@arrEqual",
+  "Native: @listEqual": {
+    "prefix": "@listEqual",
     "body": [
-      "@arrEqual(${1:array1}, ${2:array2})$0"
+      "@listEqual(${1:array1}, ${2:array2})$0"
     ],
     "description": "Check whether two arrays have equal values"
   },
-  "Native: @arrSlice": {
-    "prefix": "@arrSlice",
+  "Native: @listSlice": {
+    "prefix": "@listSlice",
     "body": [
-      "@arrSlice(${1:array}, ${2:start}, ${3:end})$0"
+      "@listSlice(${1:list}, ${2:start}, ${3:end})$0"
     ],
-    "description": "Copy a range of an array into a new array"
+    "description": "Copy a range of a list into a new array"
   },
-  "Native: @arrConcat": {
-    "prefix": "@arrConcat",
+  "Native: @listConcat": {
+    "prefix": "@listConcat",
     "body": [
-      "@arrConcat(${1:array1}, ${2:array2})$0"
+      "@listConcat(${1:array1}, ${2:array2})$0"
     ],
     "description": "Concatenate two arrays into a new array"
   },
-  "Native: @arrReverse": {
-    "prefix": "@arrReverse",
+  "Native: @listReverse": {
+    "prefix": "@listReverse",
     "body": [
-      "@arrReverse(${1:array})$0"
+      "@listReverse(${1:list})$0"
     ],
-    "description": "Reverse an array into a new array"
+    "description": "Reverse a list into a new array"
   },
-  "Native: @arrJoin": {
-    "prefix": "@arrJoin",
+  "Native: @listJoin": {
+    "prefix": "@listJoin",
     "body": [
-      "@arrJoin(${1:array}, ${2:separator})$0"
+      "@listJoin(${1:list}, ${2:separator})$0"
     ],
-    "description": "Join an array of strings into one string"
+    "description": "Join a list of strings into one string"
   },
   "Native: @strConcat": {
     "prefix": "@strConcat",
     "body": [
       "@strConcat(${1:strings})$0"
     ],
-    "description": "Concatenate an array of strings into one string"
+    "description": "Concatenate a list of strings into one string"
   },
   "Native: @is": {
     "prefix": "@is",
@@ -707,7 +707,7 @@
     "body": [
       "@strSplit(${1:string}, ${2:separator})$0"
     ],
-    "description": "Split a string into an array of strings"
+    "description": "Split a string into a list of strings"
   },
   "Native: @strIndexOf": {
     "prefix": "@strIndexOf",
@@ -736,5 +736,68 @@
       "@strReplaceAll(${1:string}, ${2:old}, ${3:new})$0"
     ],
     "description": "Replace every match of a string inside another string"
+  },
+  "Native: @arrLen": {
+    "prefix": "@arrLen",
+    "body": [
+      "@arrLen(${1:array})$0"
+    ],
+    "description": "Get the number of elements in an array, as an `i64`"
+  },
+  "Native: @arrContains": {
+    "prefix": "@arrContains",
+    "body": [
+      "@arrContains(${1:array}, ${2:value})$0"
+    ],
+    "description": "Returns if an array contains a value"
+  },
+  "Native: @arrEqual": {
+    "prefix": "@arrEqual",
+    "body": [
+      "@arrEqual(${1:a}, ${2:b})$0"
+    ],
+    "description": "Shallow compares two arrays' values for equality"
+  },
+  "Native: @arrCopy": {
+    "prefix": "@arrCopy",
+    "body": [
+      "@arrCopy(${1:array})$0"
+    ],
+    "description": "Copy an array to a new array of the same length"
+  },
+  "Native: @arrReverse": {
+    "prefix": "@arrReverse",
+    "body": [
+      "@arrReverse(${1:array})$0"
+    ],
+    "description": "Returns a new array with the items of an array in reverse order, with the same length"
+  },
+  "Native: @arrJoin": {
+    "prefix": "@arrJoin",
+    "body": [
+      "@arrJoin(${1:array}, ${2:separator})$0"
+    ],
+    "description": "Concatenates every element of an array of strings into one string, separated by a separator string"
+  },
+  "Native: @arrSlice": {
+    "prefix": "@arrSlice",
+    "body": [
+      "@arrSlice(${1:array}, ${2:start}, ${3:end})$0"
+    ],
+    "description": "Copies the items from a start index up to an end index of an array into a new list"
+  },
+  "Native: @arrConcat": {
+    "prefix": "@arrConcat",
+    "body": [
+      "@arrConcat(${1:a}, ${2:b})$0"
+    ],
+    "description": "Concatenates two arrays in to a new list"
+  },
+  "Native: @arrToList": {
+    "prefix": "@arrToList",
+    "body": [
+      "@arrToList(${1:array})$0"
+    ],
+    "description": "Copies an array to a new list, which can grow and shrink"
   }
 }

@@ -1,0 +1,3 @@
+var value = false;
+
+@listInsert(value, 0, "Hello");

@@ -1,0 +1,3 @@
+var value = "Hello World";
+
+@listPop(value);

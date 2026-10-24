@@ -1,2 +1,0 @@
-let numbers = [1];
-@arrInsert(numbers, 0, "two");

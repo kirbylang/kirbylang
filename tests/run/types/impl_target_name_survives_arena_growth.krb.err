@@ -248,7 +248,7 @@
 0018    | OP_GET_PROPERTY     5 'y'
 0020    | OP_CALL             1
 0022    | OP_CONSTANT         6 ')'
-0024    | OP_ARRAY            5
+0024    | OP_LIST             5
 0026    | OP_CALL             1
 0028    | OP_RETURN
 == equals ==

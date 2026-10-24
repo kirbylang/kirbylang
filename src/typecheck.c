@@ -358,10 +358,18 @@ Type *typchkResolveType(TypeEnv *env, AstNode *typeAnnotation) {
     return typeFunction(paramTypes, fn->paramCount, returnType);
   }
 
+  if (typeAnnotation->kind == NODE_TYPE_LIST) {
+    Type *elementType =
+        typchkResolveType(env, typeAnnotation->as.typeList.elementType);
+    return elementType == NULL ? NULL : typeList(elementType);
+  }
+
   if (typeAnnotation->kind == NODE_TYPE_ARRAY) {
     Type *elementType =
         typchkResolveType(env, typeAnnotation->as.typeArray.elementType);
-    return elementType == NULL ? NULL : typeArray(elementType);
+    return elementType == NULL
+               ? NULL
+               : typeArray(elementType, typeAnnotation->as.typeArray.length);
   }
 
   TypeNode *t = &typeAnnotation->as.type_;
@@ -819,20 +827,32 @@ bool typchkCheck(TypeEnv *env, AstNode *node, Type *expected) {
     return typchkCheckOrInferLambda(env, node, expected) != NULL;
 
   if (node->kind == NODE_ARRAY && expected != NULL) {
-    if (expected->kind != TYPE_ARRAY) {
+    if (expected->kind != TYPE_LIST && expected->kind != TYPE_ARRAY) {
       typchkErrorAtNodeFmt(node, "Expected %s, got an array.",
                            typeToString(expected));
       return false;
     }
 
     ArrayNode *a = &node->as.array;
+    bool isArray = expected->kind == TYPE_ARRAY;
+    Type *elementType = isArray ? expected->as.array.elementType
+                                : expected->as.list.elementType;
+
+    a->isFixedSize = isArray;
 
     bool ok = true;
+
+    if (isArray && a->count != expected->as.array.length) {
+      typchkErrorAtNodeFmt(
+          node, "Expected %s, got an array literal with %d %s.",
+          typeToString(expected), a->count, a->count == 1 ? "item" : "items");
+      ok = false;
+    }
 
     for (int i = 0; i < a->count; i++) {
       AstNode *item = a->items[i];
 
-      if (!typchkCheck(env, item, expected->as.array.elementType))
+      if (!typchkCheck(env, item, elementType))
         ok = false;
     }
 
@@ -1187,7 +1207,7 @@ static Type *typchkInferVariable(TypeEnv *env, AstNode *node) {
   if (type == NULL)
     return NULL;
 
-  // A generic function used as a value, such as `let pop = @arrPop;`, has no
+  // A generic function used as a value, such as `let pop = @listPop;`, has no
   // single type to give it.
   if (typeGenericParamCount(type) > 0)
     return NULL;
@@ -1373,12 +1393,29 @@ static Type *typchkCheckGenericCall(TypeEnv *env, AstNode *node,
     }
 
     Type *known = typeEraseGenericParams(param);
-    Type *actual = arg->kind == NODE_FUNCTION && arg->as.function.isLambda
-                       ? typchkCheckOrInferLambda(env, arg, known)
-                       : typchkInfer(env, arg);
+    Type *actual;
+
+    if (arg->kind == NODE_ARRAY && arg->as.array.count == 0 &&
+        param->kind == TYPE_LIST) {
+      // A list is expected, so `[]` is a list. Its item type is not known
+      // yet, and the generic parameter stays unfilled
+      actual = typeList(NULL);
+    } else if (arg->kind == NODE_FUNCTION && arg->as.function.isLambda) {
+      actual = typchkCheckOrInferLambda(env, arg, known);
+    } else {
+      actual = typchkInfer(env, arg);
+    }
 
     if (actual == NULL)
       continue;
+
+    // A literal given where a list is expected is a list, as with a
+    // parameter that has no generic parameters in it.
+    if (arg->kind == NODE_ARRAY && param->kind == TYPE_LIST &&
+        actual->kind == TYPE_ARRAY) {
+      arg->as.array.isFixedSize = false;
+      actual = typeList(actual->as.array.elementType);
+    }
 
     if (!typeAccepts(known, actual)) {
       typchkErrorAtNodeFmt(arg, "Expected %s, got %s.", typeToString(param),
@@ -1605,6 +1642,25 @@ static Type *typchkInferSelf(TypeEnv *env, AstNode *node) {
   return selfType;
 }
 
+// Reports an index that is a number literal past the end of an array.
+static bool typchkCheckLiteralIndexInRange(AstNode *index, Type *arrayType) {
+  if (arrayType->kind != TYPE_ARRAY || index->kind != NODE_LITERAL ||
+      index->as.literal.kind != LITERAL_NUMBER)
+    return true;
+
+  LiteralNode *literal = &index->as.literal;
+
+  if (!literal->as.number.literalIsPlainInteger ||
+      !literal->as.number.literalValueFits ||
+      literal->as.number.literalValue < (uint64_t)arrayType->as.array.length)
+    return true;
+
+  typchkErrorAtNodeFmt(index, "Index %llu is out of range for %s.",
+                       (unsigned long long)literal->as.number.literalValue,
+                       typeToString(arrayType));
+  return false;
+}
+
 // Infer the type of an index access get expression
 static Type *typchkInferIndexGet(TypeEnv *env, AstNode *node) {
   IndexGetNode *ig = &node->as.indexGet;
@@ -1615,16 +1671,18 @@ static Type *typchkInferIndexGet(TypeEnv *env, AstNode *node) {
     return NULL;
   }
 
-  if (objectType->kind != TYPE_ARRAY) {
+  if (objectType->kind != TYPE_LIST && objectType->kind != TYPE_ARRAY) {
     typchkErrorAtTokenFmt(&ig->bracket, "Can't index into a %s.",
                           typeToString(objectType));
     return NULL;
   }
 
-  if (!typchkCheckIndex(env, ig->index))
+  if (!typchkCheckIndex(env, ig->index) ||
+      !typchkCheckLiteralIndexInRange(ig->index, objectType))
     return NULL;
 
-  return objectType->as.array.elementType;
+  return objectType->kind == TYPE_ARRAY ? objectType->as.array.elementType
+                                        : objectType->as.list.elementType;
 }
 
 // Infer the type of an index access set expression
@@ -1638,16 +1696,19 @@ static Type *typchkInferIndexSet(TypeEnv *env, AstNode *node) {
     return NULL;
   }
 
-  if (objectType->kind != TYPE_ARRAY) {
+  if (objectType->kind != TYPE_LIST && objectType->kind != TYPE_ARRAY) {
     typchkErrorAtTokenFmt(&is->bracket, "Can't index into a %s.",
                           typeToString(objectType));
     return NULL;
   }
 
-  if (!typchkCheckIndex(env, is->index))
+  if (!typchkCheckIndex(env, is->index) ||
+      !typchkCheckLiteralIndexInRange(is->index, objectType))
     return NULL;
 
-  Type *elementType = objectType->as.array.elementType;
+  Type *elementType = objectType->kind == TYPE_ARRAY
+                          ? objectType->as.array.elementType
+                          : objectType->as.list.elementType;
   if (elementType != NULL) {
     if (!typchkCheck(env, is->value, elementType))
       return NULL;
@@ -1713,8 +1774,13 @@ static Type *typchkInferStructInit(TypeEnv *env, AstNode *node) {
 
 static Type *typchkInferArray(TypeEnv *env, AstNode *node) {
   ArrayNode *a = &node->as.array;
-  if (a->count == 0)
-    return typeArray(NULL); // nothing to learn an element type from yet
+  if (a->count == 0) {
+    typchkErrorAtNode(node, "Can't tell the item type of an empty literal. "
+                            "Add a type, such as `let xs: [i64] = [];`.");
+    return NULL;
+  }
+
+  a->isFixedSize = true;
 
   // Plain integer elements take the type of the first element that has a type
   // of its own, so `[1, 2.5]` is an array of f64.
@@ -1740,7 +1806,7 @@ static Type *typchkInferArray(TypeEnv *env, AstNode *node) {
   }
   if (!ok)
     return NULL;
-  return typeArray(elementType);
+  return typeArray(elementType, a->count);
 }
 
 // Whether a node always jumps e.g. return, break, continue
@@ -2061,6 +2127,11 @@ static void typchkCheckVarDecl(TypeEnv *env, AstNode *node) {
     if (declaredType != NULL) {
       typchkCheck(env, varDecl->initializer, declaredType);
       typchkTypeEnvDeclare(env, varDecl->name, declaredType);
+    } else if (hasExpectedType && varDecl->initializer->kind == NODE_ARRAY &&
+               varDecl->initializer->as.array.count == 0) {
+      // The declared type was already reported as wrong. An empty literal
+      // would only add a second error, about a type that was never given.
+      typchkTypeEnvDeclare(env, varDecl->name, NULL);
     } else {
       Type *inferred = typchkInfer(env, varDecl->initializer);
       typchkTypeEnvDeclare(env, varDecl->name, inferred);
@@ -2278,6 +2349,12 @@ static void typchkResolveAliasDependencies(TypeEnv *env,
                                      fn->paramTypes[i]);
     }
     typchkResolveAliasDependencies(env, unresolvedAlias, count, fn->returnType);
+    return;
+  }
+
+  if (typeAnnotation->kind == NODE_TYPE_LIST) {
+    typchkResolveAliasDependencies(env, unresolvedAlias, count,
+                                   typeAnnotation->as.typeList.elementType);
     return;
   }
 

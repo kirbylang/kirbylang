@@ -19,7 +19,7 @@
 0033    | OP_ADD
 0034    | OP_CLOSE_BLOCK_EXPR    1
 0036    | OP_CONSTANT         9 ' c'
-0038    | OP_ARRAY            5
+0038    | OP_LIST             5
 0040    | OP_CALL             1
 0042    | OP_CALL             1
 0044    | OP_POP
@@ -31,7 +31,7 @@
 0055    | OP_CLOSE_BLOCK_EXPR    1
 0057    | OP_CONSTANT        12 'c'
 0059    | OP_GET_GLOBAL       2 'name'
-0061    | OP_ARRAY            4
+0061    | OP_LIST             4
 0063    | OP_CALL             1
 0065    | OP_CALL             1
 0067    | OP_POP
@@ -58,6 +58,6 @@
 0032    | OP_NOT
 0033    | OP_CLOSE_BLOCK_EXPR    1
 0035    | OP_CALL             1
-0037    | OP_ARRAY            7
+0037    | OP_LIST             7
 0039    | OP_CALL             1
 0041    | OP_RETURN

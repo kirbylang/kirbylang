@@ -1,0 +1,2 @@
+let words: [string] = ["a", "b"];
+let first: i64 = @listRemove(words, 0);

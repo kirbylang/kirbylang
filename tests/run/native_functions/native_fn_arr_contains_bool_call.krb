@@ -1,3 +1,0 @@
-var array = [true, true, false];
-
-@println(@arrContains(array, false));

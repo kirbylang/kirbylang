@@ -1,10 +1,10 @@
 Returns if an array contains a value.
 
 ```kirby
-var array = [1, 2, 3];
+let a = [1, 2, 3];
 
-@println(@arrContains(array, 2)); // true
-@println(@arrContains(array, 99)); // false
+@println(@arrContains(a, 2)); // true
+@println(@arrContains(a, 99)); // false
 ```
 
 https://kirbylang.github.io/kirbylang/reference/builtin-functions.html#arrcontains

@@ -1,3 +1,0 @@
-let copied = @arrReverse(@arrCopy(["a", "b"]));
-@println(copied);
-let first: i64 = copied[0];

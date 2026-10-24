@@ -1,0 +1,6 @@
+var parts: [string] = ["Hello", "World"];
+
+@println(@listJoin(parts, " "));
+@println(@listJoin(parts, ", "));
+@println(@listJoin(parts, ""));
+@println(parts);

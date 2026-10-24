@@ -15,6 +15,7 @@ typedef enum {
   TYPE_NUMBER,
   TYPE_STRUCT,
   TYPE_FN,
+  TYPE_LIST,
   TYPE_ARRAY,
   TYPE_TRAIT,
   TYPE_SELF,          // `Self`
@@ -74,6 +75,10 @@ struct Type {
     } number;
     struct {
       Type *elementType;
+    } list;
+    struct {
+      Type *elementType;
+      int length; // Negative values are length placeholders, see below
     } array;
     struct {
       // 0 is T, 1 is U, 2 is V, and so on
@@ -147,9 +152,22 @@ Type *typeStruct(Token name, UninternedTypeMember *fields, int fieldCount);
 // Returns pointer to the new type in the types arena
 Type *typeFunction(Type **paramTypes, int paramCount, Type *returnType);
 
-// Allocates a new array type
+// Allocates a new list type, such as `[i64]`
 // Returns pointer to the new type in the types arena
-Type *typeArray(Type *elementType);
+Type *typeList(Type *elementType);
+
+// Allocates a new fixed size array type, such as `[i64; 3]`
+// A `length` of -1 is the placeholder `N`, -2 is `M`, and so on.
+// Returns pointer to the new type in the types arena
+Type *typeArray(Type *elementType, int length);
+
+#define ARRAY_LENGTH_PLACEHOLDER(index) (-1 - (index))
+#define ARRAY_LENGTH_IS_PLACEHOLDER(length) ((length) < 0)
+
+// Length placeholders share the binding slots of the generic parameters. `T`
+// to `W` take the first four, then `N` takes the next, and so on.
+#define GENERIC_TYPE_PARAM_SLOTS 4
+#define ARRAY_LENGTH_SLOT(length) (GENERIC_TYPE_PARAM_SLOTS - 1 - (length))
 
 // Allocates a new trait type.
 // Returns pointer to the new type in the types arena

@@ -42,6 +42,6 @@
 0008    | OP_GET_PROPERTY     3 'value'
 0010    | OP_CALL             1
 0012    | OP_CONSTANT         4 ')'
-0014    | OP_ARRAY            3
+0014    | OP_LIST             3
 0016    | OP_CALL             1
 0018    | OP_RETURN

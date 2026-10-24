@@ -77,7 +77,7 @@ EOF
 
 cat >boom.krb <<'EOF'
 @println("before");
-@println([1, 2, 3][10]);
+@println([1, 2, 3][@argc() + 10]);
 @println("after");
 EOF
 

@@ -1,6 +1,0 @@
-var array = [1, 2, 3];
-
-var popped = @arrPop(array);
-
-@println(array);
-@println(popped);

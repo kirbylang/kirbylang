@@ -1,0 +1,3 @@
+let a: [i64; 0] = [];
+@println(a);
+@println(@typeof(a));

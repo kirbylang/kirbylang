@@ -1,0 +1,3 @@
+var array: [string] = [];
+
+@listInsert(array, nil, "Hello");

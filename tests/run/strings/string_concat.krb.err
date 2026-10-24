@@ -4,7 +4,7 @@
 0004    | OP_CONSTANT         2 'Hello'
 0006    | OP_CONSTANT         3 ' '
 0008    | OP_CONSTANT         4 'World'
-0010    | OP_ARRAY            3
+0010    | OP_LIST             3
 0012    | OP_CALL             1
 0014    | OP_CALL             1
 0016    | OP_POP

@@ -1,0 +1,3 @@
+var array: [string] = ["Hello", "World"];
+
+@println(@listContains(array, "Hello"));

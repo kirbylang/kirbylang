@@ -1,0 +1,3 @@
+var array = "Hello";
+
+@listPush(array, "World");

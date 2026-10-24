@@ -1,0 +1,3 @@
+let copied = @listReverse(@listCopy(["a", "b"]));
+@println(copied);
+let first: i64 = copied[0];

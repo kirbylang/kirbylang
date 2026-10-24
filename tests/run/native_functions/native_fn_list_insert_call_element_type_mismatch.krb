@@ -1,0 +1,2 @@
+let numbers: [i64] = [1];
+@listInsert(numbers, 0, "two");

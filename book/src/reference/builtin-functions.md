@@ -6,53 +6,53 @@ Builtin functions are prefixed, making them easy to identifier vs user code func
 
 This also makes `@` a reserved character in identifiers.
 
-## Arrays
+## Lists
 
-### `@arrClear`
+### `@listClear`
 
-Clears all values from an array.
+Clears all values from a list.
 
 ```kirby
-var array = [1, 2, 3];
+var list: [i64] = [1, 2, 3];
 
-@arrClear(array);
+@listClear(list);
 
-@println(array); // []
+@println(list); // []
 ```
 
-### `@arrConcat`
+### `@listConcat`
 
-Concatenates two arrays in to a new array.
+Concatenates two lists in to a new list.
 
 ```kirby
-var a = [1, 2, 3];
-var b = [4, 5, 6];
-var c = @arrConcat(a, b);
+var a: [i64] = [1, 2, 3];
+var b: [i64] = [4, 5, 6];
+var c = @listConcat(a, b);
 
 @println(a); // [1, 2, 3]
 @println(b); // [4, 5, 6]
 @println(c); // [1, 2, 3, 4, 5, 6]
 ```
 
-### `@arrContains`
+### `@listContains`
 
-Returns if an array contains a value.
+Returns if a list contains a value.
 
 ```kirby
-var array = [1, 2, 3];
+var list: [i64] = [1, 2, 3];
 
-@println(@arrContains(array, 2)); // true
-@println(@arrContains(array, 99)); // false
+@println(@listContains(list, 2)); // true
+@println(@listContains(list, 99)); // false
 ```
 
-### `@arrCopy`
+### `@listCopy`
 
-Copy an array to a new array.
+Copy a list to a new list.
 
 ```kirby
-var a = [1, 2, 3];
+var a: [i64] = [1, 2, 3];
 var b = a;
-var c = @arrCopy(a);
+var c = @listCopy(a);
 
 a[0] = 100;
 
@@ -61,121 +61,226 @@ a[0] = 100;
 @println(c); // [1, 2, 3]
 ```
 
-### `@arrEqual`
+### `@listEqual`
 
-Shallow compares two arrays' values for equality.
+Shallow compares two lists' values for equality.
 
 ```kirby
-var a = [1, 2, 3];
+var a: [i64] = [1, 2, 3];
 var b = a;
-var c = @arrCopy(a);
+var c = @listCopy(a);
 
-@println(@arrEqual(a, b)); // true
-@println(@arrEqual(b, c)); // false
-@println(@arrEqual(a, c)); // false
+@println(@listEqual(a, b)); // true
+@println(@listEqual(b, c)); // false
+@println(@listEqual(a, c)); // false
 ```
 
-### `@arrInsert`
+### `@listInsert`
 
-Insert a value into an array at a specific index.
+Insert a value into a list at a specific index.
 
 ```kirby
-var array = [];
+var list: [string] = [];
 
-@arrInsert(array, 0, "Hello");
-@arrInsert(array, 1, "World");
+@listInsert(list, 0, "Hello");
+@listInsert(list, 1, "World");
 
-@println(array); // [Hello, World]
+@println(list); // [Hello, World]
 ```
 
-### `@arrIsEmpty`
+### `@listIsEmpty`
 
-Returns if an array is empty or not.
+Returns if a list is empty or not.
 
 ```kirby
-@println(@arrIsEmpty([]));
-@println(@arrIsEmpty([1, 2, 3]));
+@println(@listIsEmpty([]));
+@println(@listIsEmpty([1, 2, 3]));
 ```
 
-### `@arrLen`
+### `@listLen`
 
-Get the number of elements in an array, as an `i64`.
+Get the number of elements in a list, as an `i64`.
 
 ```kirby
-@println(@arrLen([1, 2, 3])); // 3
-@println(@arrLen([])); // 0
+@println(@listLen([1, 2, 3])); // 3
+@println(@listLen([])); // 0
 ```
 
-### `@arrJoin`
+### `@listJoin`
 
-Concatenates every element of an array into one string, separated by a separator string. Every element must already be a string.
+Concatenates every element of a list into one string, separated by a separator string. Every element must already be a string.
 
 ```kirby
-var parts = ["kirby", "is", "a", "language"];
+var parts: [string] = ["kirby", "is", "a", "language"];
 
-@println(@arrJoin(parts, " ")); // kirby is a language
-@println(@arrJoin(parts, ", ")); // kirby, is, a, language
-@println(@arrJoin(parts, "")); // kirbyisalanguage
+@println(@listJoin(parts, " ")); // kirby is a language
+@println(@listJoin(parts, ", ")); // kirby, is, a, language
+@println(@listJoin(parts, "")); // kirbyisalanguage
 ```
 
-### `@arrPop`
+### `@listPop`
 
-Pop a value onto the end of an array and return it.
+Pop a value onto the end of a list and return it.
 
 ```kirby
-var array = ["Hello", "World"];
-var poppedValue = @arrPop(array);
+var list: [string] = ["Hello", "World"];
+var poppedValue = @listPop(list);
 
-@println(array); // [Hello]
+@println(list); // [Hello]
 @println(poppedValue); // World
 ```
 
-### `@arrPush`
+### `@listPush`
 
-Push a value onto the end of an array.
+Push a value onto the end of a list.
 
 ```kirby
-var array = [];
+var list: [string] = [];
 
-@arrPush(array, "Hello");
-@arrPush(array, "World");
+@listPush(list, "Hello");
+@listPush(list, "World");
 
-@println(array); // [Hello, World]
+@println(list); // [Hello, World]
 ```
 
-### `@arrRemove`
+### `@listRemove`
 
-Insert a value into an array at a specific index.
+Insert a value into a list at a specific index.
 
 ```kirby
-var array = [1, 2, 3];
+var list: [i64] = [1, 2, 3];
 
-@arrRemove(array, 0);
+@listRemove(list, 0);
 
-@println(array); // [2, 3]
+@println(list); // [2, 3]
+```
+
+### `@listReverse`
+
+Reverse a list in place.
+
+```kirby
+var list: [i64] = [1, 2, 3];
+
+@listReverse(list);
+
+@println(list); // [3, 2, 1]
+```
+
+### `@listSlice`
+
+Pop a value onto the end of a list and return it.
+
+```kirby
+var list: [i64] = [10, 20, 30, 40, 50];
+var slice = @listSlice(list, 1, 4);
+
+@println(@listEqual([20, 30, 40], slice));
+```
+
+## Arrays
+
+These work on fixed size arrays such as `[i64; 3]`. An array can't change length, so there are no push or pop functions. Use the `@list` functions on a list `[i64]`, and `@arrToList` to turn an array into a list.
+
+### `@arrLen`
+
+Get the number of elements in an array, as an `i64`. The length is part of the array's type, so it is known when the program is compiled.
+
+```kirby
+let a = [1, 2, 3];
+
+@println(@arrLen(a)); // 3
+```
+
+### `@arrContains`
+
+Returns if an array contains a value.
+
+```kirby
+let a = [1, 2, 3];
+
+@println(@arrContains(a, 2)); // true
+@println(@arrContains(a, 99)); // false
+```
+
+### `@arrEqual`
+
+Shallow compares two arrays' values for equality. Both arrays must have the same length and item type.
+
+```kirby
+let a = [1, 2, 3];
+let b = [1, 2, 3];
+
+@println(@arrEqual(a, b)); // true
+```
+
+### `@arrCopy`
+
+Copy an array to a new array of the same length.
+
+```kirby
+let a = [1, 2, 3];
+let b = @arrCopy(a);
+
+b[0] = 100;
+
+@println(a); // [1, 2, 3]
+@println(b); // [100, 2, 3]
 ```
 
 ### `@arrReverse`
 
-Reverse an array in place.
+Returns a new array with the items of an array in reverse order, with the same length.
 
 ```kirby
-var array = [1, 2, 3];
+let a = [1, 2, 3];
 
-@arrReverse(array);
+@println(@arrReverse(a)); // [3, 2, 1]
+```
 
-@println(array); // [3, 2, 1]
+### `@arrJoin`
+
+Concatenates every element of an array of strings into one string, separated by a separator string.
+
+```kirby
+let parts = ["kirby", "is", "a", "language"];
+
+@println(@arrJoin(parts, " ")); // kirby is a language
 ```
 
 ### `@arrSlice`
 
-Pop a value onto the end of an array and return it.
+Copies the items from a start index up to an end index of an array into a new list. The result is a list because its length isn't known when the program is compiled.
 
 ```kirby
-var array = [10, 20, 30, 40, 50];
-var slice = @arrSlice(array, 1, 4);
+let a = [10, 20, 30, 40, 50];
+let slice = @arrSlice(a, 1, 4);
 
-@println(@arrEqual([20, 30, 40], slice));
+@println(slice); // [20, 30, 40]
+```
+
+### `@arrConcat`
+
+Concatenates two arrays in to a new list. The result is a list because its length isn't known when the program is compiled.
+
+```kirby
+let a = [1, 2, 3];
+let b = [4, 5, 6];
+
+@println(@arrConcat(a, b)); // [1, 2, 3, 4, 5, 6]
+```
+
+### `@arrToList`
+
+Copies an array to a new list, which can grow and shrink.
+
+```kirby
+let a = [1, 2, 3];
+let list = @arrToList(a);
+
+@listPush(list, 4);
+
+@println(list); // [1, 2, 3, 4]
 ```
 
 ## Date/Time
@@ -541,7 +646,7 @@ Get the position where a string first appears in another string, counting from 0
 
 ### `@strToBytes`
 
-Convert a string to an array of `u8` bytes, one element per byte, in order. The elements are `u8`, so bytes 128..255 are preserved.
+Convert a string to a list of `u8` bytes, one element per byte, in order. The elements are `u8`, so bytes 128..255 are preserved.
 
 ```kirby
 let bytes: [u8] = @strToBytes("AB");
@@ -603,7 +708,7 @@ Get the part of a string from `start` up to, but not including, `end`. Both are 
 
 ### `@strConcat`
 
-Concatenate an array of strings into one string. Every element must already be a string.
+Concatenate a list of strings into one string. Every element must already be a string.
 
 ```kirby
 @println(@strConcat(["Hello", ", ", "World"])); // Hello, World
@@ -612,7 +717,7 @@ Concatenate an array of strings into one string. Every element must already be a
 
 ### `@strSplit`
 
-Split a string into an array of strings at each place the separator appears. An empty separator splits the string into single character strings.
+Split a string into a list of strings at each place the separator appears. An empty separator splits the string into single character strings.
 
 ```kirby
 @println(@strSplit("a,b,c", ",")); // [a, b, c]
@@ -706,7 +811,9 @@ Get a value's type.
 @println(@typeof(true)); // "bool"
 @println(@typeof(123)); // "number"
 @println(@typeof("Hello World")); // "string"
-@println(@typeof([])); // "array"
+let items: [i64] = [1, 2];
+@println(@typeof(items)); // "list"
+@println(@typeof([1, 2])); // "array"
 
 struct Food {}
 

@@ -137,7 +137,7 @@ static void test_signed_natives_resolve_in_a_new_env(void) {
   assert(strLen->as.function.paramTypes[0] == typeString());
   assert(strLen->as.function.returnType == typeNumber(NUMBER_KIND_I64));
 
-  Type *arrLen = typchkTypeEnvLookupFunction(env, tokenFromCString("@arrLen"));
+  Type *arrLen = typchkTypeEnvLookupFunction(env, tokenFromCString("@listLen"));
   assert(arrLen != NULL);
   assert(arrLen->as.function.paramCount == 1);
   assert(strcmp(typeToString(arrLen), "fun ([T]) => i64") == 0);
@@ -149,7 +149,7 @@ static void test_signed_natives_resolve_in_a_new_env(void) {
   assert(indexOf->as.function.returnType == typeNumber(NUMBER_KIND_I64));
 
   assert(typchkTypeEnvLookupFunction(env, tokenFromCString("@len")) == NULL);
-  Type *arrPop = typchkTypeEnvLookupFunction(env, tokenFromCString("@arrPop"));
+  Type *arrPop = typchkTypeEnvLookupFunction(env, tokenFromCString("@listPop"));
   assert(arrPop != NULL);
   assert(strcmp(typeToString(arrPop), "fun ([T]) => T") == 0);
 

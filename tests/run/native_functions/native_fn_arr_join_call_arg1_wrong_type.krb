@@ -1,3 +1,2 @@
-var parts = ["a", "b"];
-
+let parts = ["a", "b"];
 @arrJoin(parts, nil);

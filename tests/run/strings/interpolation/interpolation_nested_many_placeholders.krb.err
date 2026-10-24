@@ -15,14 +15,14 @@
 0025    | OP_GET_GLOBAL      10 '@numberToString'
 0027    | OP_GET_GLOBAL       2 'b'
 0029    | OP_CALL             1
-0031    | OP_ARRAY            4
+0031    | OP_LIST             4
 0033    | OP_CALL             1
 0035    | OP_CONSTANT        11 ' then '
 0037    | OP_GET_GLOBAL      12 '@boolToString'
 0039    | OP_GET_GLOBAL       4 'c'
 0041    | OP_CALL             1
 0043    | OP_CONSTANT        13 ' end'
-0045    | OP_ARRAY            5
+0045    | OP_LIST             5
 0047    | OP_CALL             1
 0049    | OP_CALL             1
 0051    | OP_POP
@@ -37,15 +37,15 @@
 0068    | OP_GET_GLOBAL      10 '@numberToString'
 0070    | OP_GET_GLOBAL       2 'b'
 0072    | OP_CALL             1
-0074    | OP_ARRAY            3
+0074    | OP_LIST             3
 0076    | OP_CALL             1
 0078    | OP_GET_GLOBAL      12 '@boolToString'
 0080    | OP_GET_GLOBAL       4 'c'
 0082    | OP_CALL             1
-0084    | OP_ARRAY            3
+0084    | OP_LIST             3
 0086    | OP_CALL             1
 0088    | OP_GET_GLOBAL       0 'a'
-0090    | OP_ARRAY            3
+0090    | OP_LIST             3
 0092    | OP_CALL             1
 0094    | OP_CALL             1
 0096    | OP_POP

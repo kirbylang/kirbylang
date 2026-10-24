@@ -169,8 +169,14 @@ bool typeAccepts(const Type *expected, const Type *actual) {
            actual->as.number.kind != NUMBER_KIND_COUNT &&
            !numberKindInfo(actual->as.number.kind)->isFloat;
 
+  if (expected->kind == TYPE_LIST && actual->kind == TYPE_LIST)
+    return typeAccepts(expected->as.list.elementType,
+                       actual->as.list.elementType);
+
   if (expected->kind == TYPE_ARRAY && actual->kind == TYPE_ARRAY)
-    return typeAccepts(expected->as.array.elementType,
+    return (ARRAY_LENGTH_IS_PLACEHOLDER(expected->as.array.length) ||
+            expected->as.array.length == actual->as.array.length) &&
+           typeAccepts(expected->as.array.elementType,
                        actual->as.array.elementType);
 
   if (expected->kind == TYPE_FN && actual->kind == TYPE_FN) {
@@ -264,9 +270,16 @@ Type *typeFunction(Type **paramTypes, int paramCount, Type *returnType) {
   return type;
 }
 
-Type *typeArray(Type *elementType) {
+Type *typeList(Type *elementType) {
+  Type *type = allocType(TYPE_LIST);
+  type->as.list.elementType = elementType;
+  return type;
+}
+
+Type *typeArray(Type *elementType, int length) {
   Type *type = allocType(TYPE_ARRAY);
   type->as.array.elementType = elementType;
+  type->as.array.length = length;
   return type;
 }
 
@@ -318,17 +331,17 @@ void typeStructAddTraitMethod(Type *type, Token name, Type *methodType,
 
 void typeStructMarkTraitImplemented(Type *type, InternedName traitName) {
   int newCount = type->as.struct_.implementedTraitCount + 1;
-  InternedName *newArray =
+  InternedName *newList =
       (InternedName *)typesAllocRaw(newCount * sizeof(InternedName));
 
   if (type->as.struct_.implementedTraitCount > 0) {
-    memcpy(newArray, type->as.struct_.implementedTraits,
+    memcpy(newList, type->as.struct_.implementedTraits,
            (size_t)type->as.struct_.implementedTraitCount *
                sizeof(InternedName));
   }
 
-  newArray[newCount - 1] = traitName;
-  type->as.struct_.implementedTraits = newArray;
+  newList[newCount - 1] = traitName;
+  type->as.struct_.implementedTraits = newList;
   type->as.struct_.implementedTraitCount = newCount;
 }
 
@@ -401,12 +414,19 @@ Type *typeSubstituteSelf(Type *type, Type *concrete) {
     return typeFunction(paramTypes, type->as.function.paramCount, returnType);
   }
 
+  case TYPE_LIST: {
+    Type *elementType = typeSubstituteSelf(type->as.list.elementType, concrete);
+    if (elementType == type->as.list.elementType)
+      return type;
+    return typeList(elementType);
+  }
+
   case TYPE_ARRAY: {
     Type *elementType =
         typeSubstituteSelf(type->as.array.elementType, concrete);
     if (elementType == type->as.array.elementType)
       return type;
-    return typeArray(elementType);
+    return typeArray(elementType, type->as.array.length);
   }
 
   default:
@@ -422,6 +442,9 @@ Type *typeGenericParam(int index) {
   return type;
 }
 
+// A bound length is kept in the slot as an array type with no item type.
+static Type *lengthBinding(int length) { return typeArray(NULL, length); }
+
 int typeGenericParamCount(Type *type) {
   if (type == NULL)
     return 0;
@@ -430,8 +453,20 @@ int typeGenericParamCount(Type *type) {
   case TYPE_GENERIC_PARAM:
     return type->as.genericParam.index + 1;
 
-  case TYPE_ARRAY:
-    return typeGenericParamCount(type->as.array.elementType);
+  case TYPE_LIST:
+    return typeGenericParamCount(type->as.list.elementType);
+
+  case TYPE_ARRAY: {
+    int count = typeGenericParamCount(type->as.array.elementType);
+
+    if (ARRAY_LENGTH_IS_PLACEHOLDER(type->as.array.length)) {
+      int slots = ARRAY_LENGTH_SLOT(type->as.array.length) + 1;
+      if (slots > count)
+        count = slots;
+    }
+
+    return count;
+  }
 
   case TYPE_FN: {
     int count = typeGenericParamCount(type->as.function.returnType);
@@ -464,10 +499,26 @@ void typeBindGenericParams(Type *pattern, Type *actual, Type **bindings,
     return;
   }
 
+  case TYPE_LIST:
+    if (actual->kind == TYPE_LIST)
+      typeBindGenericParams(pattern->as.list.elementType,
+                            actual->as.list.elementType, bindings, count);
+    return;
+
   case TYPE_ARRAY:
-    if (actual->kind == TYPE_ARRAY)
-      typeBindGenericParams(pattern->as.array.elementType,
-                            actual->as.array.elementType, bindings, count);
+    if (actual->kind != TYPE_ARRAY)
+      return;
+
+    typeBindGenericParams(pattern->as.array.elementType,
+                          actual->as.array.elementType, bindings, count);
+
+    if (ARRAY_LENGTH_IS_PLACEHOLDER(pattern->as.array.length)) {
+      int slot = ARRAY_LENGTH_SLOT(pattern->as.array.length);
+
+      if (slot < count && bindings[slot] == NULL &&
+          !ARRAY_LENGTH_IS_PLACEHOLDER(actual->as.array.length))
+        bindings[slot] = lengthBinding(actual->as.array.length);
+    }
     return;
 
   case TYPE_FN:
@@ -507,14 +558,33 @@ static Type *substituteGenericParams(Type *type, Type **bindings, int count,
     return eraseEmpty ? NULL : type;
   }
 
+  case TYPE_LIST: {
+    Type *elementType = substituteGenericParams(type->as.list.elementType,
+                                                bindings, count, eraseEmpty);
+
+    if (elementType == type->as.list.elementType)
+      return type;
+
+    return typeList(elementType);
+  }
+
   case TYPE_ARRAY: {
     Type *elementType = substituteGenericParams(type->as.array.elementType,
                                                 bindings, count, eraseEmpty);
+    int length = type->as.array.length;
 
-    if (elementType == type->as.array.elementType)
+    if (ARRAY_LENGTH_IS_PLACEHOLDER(length)) {
+      int slot = ARRAY_LENGTH_SLOT(length);
+
+      if (slot < count && bindings[slot] != NULL)
+        length = bindings[slot]->as.array.length;
+    }
+
+    if (elementType == type->as.array.elementType &&
+        length == type->as.array.length)
       return type;
 
-    return typeArray(elementType);
+    return typeArray(elementType, length);
   }
 
   case TYPE_FN: {
@@ -607,8 +677,12 @@ bool typesEqual(const Type *a, const Type *b) {
     }
     return typesEqual(a->as.function.returnType, b->as.function.returnType);
 
+  case TYPE_LIST:
+    return typesEqual(a->as.list.elementType, b->as.list.elementType);
+
   case TYPE_ARRAY:
-    return typesEqual(a->as.array.elementType, b->as.array.elementType);
+    return a->as.array.length == b->as.array.length &&
+           typesEqual(a->as.array.elementType, b->as.array.elementType);
 
   case TYPE_GENERIC_PARAM:
     return a->as.genericParam.index == b->as.genericParam.index;
@@ -725,6 +799,20 @@ TypeMember typeTraitStaticMethodAt(Type *type, int index) {
   return type->as.trait_.staticMethods[index];
 }
 
+static void appendArrayLength(StrBuf *sb, int length) {
+  if (ARRAY_LENGTH_IS_PLACEHOLDER(length)) {
+    static const char names[] = "NMLK";
+    int index = -1 - length;
+    char name[2] = {index < (int)sizeof(names) - 1 ? names[index] : '?', '\0'};
+    sb_append(sb, name);
+    return;
+  }
+
+  char digits[16];
+  snprintf(digits, sizeof(digits), "%d", length);
+  sb_append(sb, digits);
+}
+
 static void appendTypeName(StrBuf *sb, Type *type) {
   if (type == NULL) {
     sb_append(sb, "<unknown>");
@@ -770,9 +858,16 @@ static void appendTypeName(StrBuf *sb, Type *type) {
     sb_append(sb, ") => ");
     appendTypeName(sb, type->as.function.returnType);
     break;
+  case TYPE_LIST:
+    sb_append(sb, "[");
+    appendTypeName(sb, type->as.list.elementType);
+    sb_append(sb, "]");
+    break;
   case TYPE_ARRAY:
     sb_append(sb, "[");
     appendTypeName(sb, type->as.array.elementType);
+    sb_append(sb, "; ");
+    appendArrayLength(sb, type->as.array.length);
     sb_append(sb, "]");
     break;
   case TYPE_GENERIC_PARAM: {

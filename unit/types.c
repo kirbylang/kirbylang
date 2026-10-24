@@ -129,33 +129,92 @@ static void test_type_to_string(void) {
                 "fun (fun (f64) => f64, f64) => f64") == 0);
 }
 
-static void test_array_equality_is_structural(void) {
-  Type *f64Array = typeArray(typeF64());
-  Type *f64ArrayAgain = typeArray(typeF64());
-  Type *stringArray = typeArray(typeString());
+static void test_list_equality_is_structural(void) {
+  Type *f64Array = typeList(typeF64());
+  Type *f64ArrayAgain = typeList(typeF64());
+  Type *stringArray = typeList(typeString());
 
   assert(typesEqual(f64Array, f64ArrayAgain)); // same element type
   assert(!typesEqual(f64Array, stringArray));  // different element type
   assert(!typesEqual(f64Array, typeF64()));    // not even the same kind
 
   // Multidimensional: array-of-array-of-f64 recurses correctly.
-  Type *matrix = typeArray(typeArray(typeF64()));
-  Type *matrixAgain = typeArray(typeArray(typeF64()));
-  Type *notAMatrix = typeArray(typeArray(typeString()));
+  Type *matrix = typeList(typeList(typeF64()));
+  Type *matrixAgain = typeList(typeList(typeF64()));
+  Type *notAMatrix = typeList(typeList(typeString()));
   assert(typesEqual(matrix, matrixAgain));
   assert(!typesEqual(matrix, notAMatrix));
 
   // The empty-array case: no element to infer from yet.
-  Type *emptyArray = typeArray(NULL);
-  Type *emptyArrayAgain = typeArray(NULL);
+  Type *emptyArray = typeList(NULL);
+  Type *emptyArrayAgain = typeList(NULL);
   assert(typesEqual(emptyArray, emptyArrayAgain));
   assert(!typesEqual(emptyArray, f64Array));
 }
 
-static void test_array_to_string(void) {
-  assert(strcmp(typeToString(typeArray(typeF64())), "[f64]") == 0);
-  assert(strcmp(typeToString(typeArray(typeArray(typeF64()))), "[[f64]]") == 0);
-  assert(strcmp(typeToString(typeArray(NULL)), "[<unknown>]") == 0);
+static void test_list_to_string(void) {
+  assert(strcmp(typeToString(typeList(typeF64())), "[f64]") == 0);
+  assert(strcmp(typeToString(typeList(typeList(typeF64()))), "[[f64]]") == 0);
+  assert(strcmp(typeToString(typeList(NULL)), "[<unknown>]") == 0);
+}
+
+static void test_fixed_array_equality_needs_same_length(void) {
+  Type *three = typeArray(typeF64(), 3);
+  Type *threeAgain = typeArray(typeF64(), 3);
+  Type *four = typeArray(typeF64(), 4);
+  Type *strings = typeArray(typeString(), 3);
+
+  assert(typesEqual(three, threeAgain));
+  assert(!typesEqual(three, four));
+  assert(!typesEqual(three, strings));
+  assert(!typesEqual(three, typeList(typeF64())));
+  assert(typeAccepts(three, threeAgain));
+  assert(!typeAccepts(three, four));
+  assert(!typeAccepts(three, typeList(typeF64())));
+  assert(!typeAccepts(typeList(typeF64()), three));
+}
+
+static void test_fixed_array_to_string(void) {
+  assert(strcmp(typeToString(typeArray(typeF64(), 3)), "[f64; 3]") == 0);
+  assert(strcmp(typeToString(typeArray(typeArray(typeF64(), 2), 0)),
+                "[[f64; 2]; 0]") == 0);
+  assert(strcmp(typeToString(typeArray(typeF64(), ARRAY_LENGTH_PLACEHOLDER(0))),
+                "[f64; N]") == 0);
+  assert(strcmp(typeToString(typeArray(typeF64(), ARRAY_LENGTH_PLACEHOLDER(1))),
+                "[f64; M]") == 0);
+}
+
+static void test_length_placeholders_are_filled_from_arguments(void) {
+  Type *n = typeArray(typeGenericParam(0), ARRAY_LENGTH_PLACEHOLDER(0));
+  Type *m = typeArray(typeGenericParam(0), ARRAY_LENGTH_PLACEHOLDER(1));
+
+  assert(typeGenericParamCount(n) == ARRAY_LENGTH_SLOT(-1) + 1);
+  assert(typeGenericParamCount(m) == ARRAY_LENGTH_SLOT(-2) + 1);
+
+  Type *bindings[GENERIC_TYPE_PARAM_SLOTS + 2] = {0};
+  int count = GENERIC_TYPE_PARAM_SLOTS + 2;
+
+  typeBindGenericParams(n, typeArray(typeF64(), 3), bindings, count);
+  typeBindGenericParams(m, typeArray(typeF64(), 5), bindings, count);
+
+  Type *filledN = typeSubstituteGenericParams(n, bindings, count);
+  Type *filledM = typeSubstituteGenericParams(m, bindings, count);
+  assert(typesEqual(filledN, typeArray(typeF64(), 3)));
+  assert(typesEqual(filledM, typeArray(typeF64(), 5)));
+
+  // The first argument that fills a placeholder wins
+  typeBindGenericParams(n, typeArray(typeF64(), 9), bindings, count);
+  assert(typesEqual(typeSubstituteGenericParams(n, bindings, count),
+                    typeArray(typeF64(), 3)));
+}
+
+static void test_length_placeholder_accepts_any_length(void) {
+  Type *anyLength = typeArray(typeF64(), ARRAY_LENGTH_PLACEHOLDER(0));
+
+  assert(typeAccepts(anyLength, typeArray(typeF64(), 0)));
+  assert(typeAccepts(anyLength, typeArray(typeF64(), 7)));
+  assert(!typeAccepts(anyLength, typeList(typeF64())));
+  assert(!typeAccepts(anyLength, typeArray(typeString(), 7)));
 }
 
 static void test_struct_method_lookup(void) {
@@ -415,9 +474,9 @@ static void test_substitute_self_replaces_placeholder(void) {
   assert(substitutedDefault->as.function.returnType == point);
 
   // Self nested inside an array element type: [Self]
-  Type *selfArray = typeArray(typeSelfPlaceholder());
+  Type *selfArray = typeList(typeSelfPlaceholder());
   Type *substitutedArray = typeSubstituteSelf(selfArray, point);
-  assert(substitutedArray->as.array.elementType == point);
+  assert(substitutedArray->as.list.elementType == point);
 
   // A signature with no Self anywhere comes back as the identical pointer,
   // not a needless rebuild.
@@ -447,9 +506,13 @@ int main(void) {
   test_struct_method_lookup();
   test_incremental_struct_construction();
   test_incremental_struct_methods_across_multiple_calls();
+  test_fixed_array_equality_needs_same_length();
+  test_fixed_array_to_string();
+  test_length_placeholders_are_filled_from_arguments();
+  test_length_placeholder_accepts_any_length();
   test_type_to_string();
-  test_array_equality_is_structural();
-  test_array_to_string();
+  test_list_equality_is_structural();
+  test_list_to_string();
   test_struct_trait_method_lookup_is_separate_from_instance();
   test_struct_trait_coherence_bookkeeping();
   test_trait_construction_and_method_lookup();

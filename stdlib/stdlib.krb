@@ -77,7 +77,7 @@ impl Date {
     pub fun from(value: string): Self {
         let parts: [string] = @strSplit(value, " ");
         
-        @assert(@arrLen(parts) == 2, $"invalid input string. expected 2 parts but got {@numberToString(@arrLen(parts))}");
+        @assert(@listLen(parts) == 2, $"invalid input string. expected 2 parts but got {@numberToString(@listLen(parts))}");
         
         let date_part: string = parts[0];
         let time_part: string = parts[1];
@@ -86,7 +86,7 @@ impl Date {
 
         let date_parts = @strSplit(date_part, "-");
 
-        @assert(@arrLen(date_parts) == 3, $"invalid input string. expected 3 date parts but got {@numberToString(@arrLen(date_parts))}");
+        @assert(@listLen(date_parts) == 3, $"invalid input string. expected 3 date parts but got {@numberToString(@listLen(date_parts))}");
 
         let year_str: string = date_parts[0];
         let year = @parseInt(year_str);
@@ -99,10 +99,10 @@ impl Date {
 
         let time_parts = @strSplit(time_part, ":");
 
-        let time_parts_str: string = @arrJoin(time_parts, ", ");
+        let time_parts_str: string = @listJoin(time_parts, ", ");
 
-        @assert(@arrLen(time_parts) == 3,
-            $"invalid input string. expected 3 time parts but got {@numberToString(@arrLen(time_parts))}: '{time_parts_str}'");
+        @assert(@listLen(time_parts) == 3,
+            $"invalid input string. expected 3 time parts but got {@numberToString(@listLen(time_parts))}: '{time_parts_str}'");
 
         let hour_str: string = time_parts[0];
         let hour = @parseInt(hour_str);

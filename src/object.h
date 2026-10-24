@@ -18,6 +18,7 @@ typedef struct VM VM;
 #define IS_FUNCTION(value) isObjType(value, OBJ_FUNCTION)
 #define IS_NATIVE(value) isObjType(value, OBJ_NATIVE)
 #define IS_CLOSURE(value) isObjType(value, OBJ_CLOSURE)
+#define IS_LIST(value) isObjType(value, OBJ_LIST)
 #define IS_ARRAY(value) isObjType(value, OBJ_ARRAY)
 
 #define AS_STRUCT(value) ((ObjStruct *)AS_OBJ(value))
@@ -28,6 +29,7 @@ typedef struct VM VM;
 #define AS_FUNCTION(value) ((ObjFunction *)AS_OBJ(value))
 #define AS_NATIVE(value) (((ObjNative *)AS_OBJ(value))->function)
 #define AS_CLOSURE(value) ((ObjClosure *)AS_OBJ(value))
+#define AS_LIST(value) ((ObjList *)AS_OBJ(value))
 #define AS_ARRAY(value) ((ObjArray *)AS_OBJ(value))
 
 typedef enum {
@@ -39,6 +41,7 @@ typedef enum {
   OBJ_NATIVE,
   OBJ_STRING,
   OBJ_UPVALUE,
+  OBJ_LIST,
   OBJ_ARRAY,
 } ObjType;
 
@@ -59,6 +62,15 @@ typedef struct {
   Obj obj;
   int count;
   int capacity;
+  Value *values;
+} ObjList;
+
+/**
+ * A fixed size array. Its length is set when it is made and never changes.
+ */
+typedef struct {
+  Obj obj;
+  int count;
   Value *values;
 } ObjArray;
 
@@ -114,7 +126,12 @@ typedef struct {
   ObjClosure *method;
 } ObjBoundMethod;
 
-ObjArray *newArray(GC *gc);
+ObjList *newList(GC *gc);
+
+/**
+ * Allocate an array of `count` items, each set to nil
+ */
+ObjArray *newArray(GC *gc, int count);
 
 /**
  * Allocate a new struct
@@ -163,7 +180,7 @@ void objectToString(Value value, char *buffer, size_t size);
 void objectTypeToString(ObjType type, char *buffer, size_t size);
 void printObject(Value value);
 void printObjectToErr(Value value);
-void writeValueToArrayObj(GC *gc, ObjArray *array, Value value);
+void writeValueToListObj(GC *gc, ObjList *list, Value value);
 
 static inline bool isObjType(Value value, ObjType type) {
   return IS_OBJ(value) && AS_OBJ(value)->type == type;
