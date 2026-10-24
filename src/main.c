@@ -102,7 +102,8 @@ static int usageError(void) {
   return 64;
 }
 
-/* Reads kirby.project.toml from the current directory, if present. */
+/* Reads kirby.project.toml from the current directory, if present. The caller
+ * frees the result with freeProject(). */
 static KirbyProject loadProject(void) {
   KirbyProject krb_project = {0};
 
@@ -125,10 +126,20 @@ static KirbyProject loadProject(void) {
       if (examples_value.ok) {
         krb_project.examples = examples_value.u.s;
       }
+
+      toml_free(project);
     }
+
+    free(tomlsource);
   }
 
   return krb_project;
+}
+
+static void freeProject(KirbyProject *project) {
+  free(project->bin);
+  free(project->examples);
+  *project = (KirbyProject){0};
 }
 
 /* The arguments a script sees: the program first, then its own arguments from
@@ -201,12 +212,14 @@ static int cmdInit(int argc, char *argv[]) {
 /* krb run [path] [args...]
  * With no path, or "--" in place of the path, the project's "bin" file runs. */
 static int cmdRun(int argc, char *argv[]) {
+  KirbyProject project = {0};
   char *file = NULL;
 
   if (argc >= 3 && strcmp(argv[2], "--") != 0) {
     file = argv[2];
   } else {
-    file = loadProject().bin;
+    project = loadProject();
+    file = project.bin;
   }
 
   if (file == NULL) {
@@ -215,6 +228,7 @@ static int cmdRun(int argc, char *argv[]) {
   }
 
   runProgram(argc, argv, file);
+  freeProject(&project);
   return 0;
 }
 
@@ -264,6 +278,7 @@ static int cmdExample(int argc, char *argv[]) {
 
   runProgram(argc, argv, file);
   free(file);
+  freeProject(&project);
   return 0;
 }
 
@@ -499,6 +514,9 @@ static int cmdConfig(int argc, char *argv[]) {
       break;
     }
     }
+
+    freeProject(&krb_project);
+    fclose(fp);
   }
 
   return 0;
