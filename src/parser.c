@@ -1193,6 +1193,16 @@ static AstNode *parseType(Parser *p) {
     return node;
   }
 
+  if (match(p, TOKEN_LEFT_BRACKET)) {
+    int line = p->previous.line;
+    AstNode *elementType = parseType(p);
+    consume(p, TOKEN_RIGHT_BRACKET, "Expect ']' after array element type.");
+
+    AstNode *node = astAlloc(NODE_TYPE_ARRAY, line);
+    node->as.typeArray.elementType = elementType;
+    return node;
+  }
+
   consume(p, TOKEN_IDENTIFIER, "Expect type name.");
   Token name = p->previous;
 

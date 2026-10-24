@@ -35,12 +35,13 @@ Variables, suffixed literals (`2i64`) and decimal literals keep their own type.
 
 ### Arrays
 
-An array holds items that all share one type. Generic types aren't supported yet so the type is just `Array`.
+An array holds items that all share one type. The type is written as the item type in brackets: `[i64]` is an array of `i64`, and `[[string]]` is an array of arrays of `string`.
 
 ```
-let arr: Array = [1, 2, 3];
+let numbers: [i64] = [1, 2, 3];
+let names: [string] = [];
 
-@println(list[0]);
+@println(numbers[0]);
 ```
 
 ### Structs

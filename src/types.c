@@ -162,6 +162,15 @@ bool typeAccepts(const Type *expected, const Type *actual) {
   if (expected != NULL && expected == anyArraySingleton)
     return actual->kind == TYPE_ARRAY;
 
+  if (expected != NULL && actual != NULL && expected->kind == TYPE_ARRAY &&
+      actual->kind == TYPE_ARRAY) {
+    Type *expectedItem = expected->as.array.elementType;
+    Type *actualItem = actual->as.array.elementType;
+
+    return expectedItem == NULL || actualItem == NULL ||
+           typeAccepts(expectedItem, actualItem);
+  }
+
   return typesEqual(expected, actual);
 }
 

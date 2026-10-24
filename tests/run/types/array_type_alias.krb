@@ -1,0 +1,4 @@
+type Scores = [f64];
+
+let scores: Scores = [9.5, 7];
+@println(scores);

@@ -620,6 +620,12 @@ static void printNode(StrBuf *sb, AstNode *node) {
     printNode(sb, node->as.typeFunction.returnType);
     sb_append(sb, ")");
     break;
+
+  case NODE_TYPE_ARRAY:
+    sb_append(sb, "[");
+    printNode(sb, node->as.typeArray.elementType);
+    sb_append(sb, "]");
+    break;
   }
 }
 

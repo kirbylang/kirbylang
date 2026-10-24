@@ -1,0 +1,17 @@
+fun total(numbers: [i64]): i64 {
+    var sum = 0;
+
+    for (var i = 0; i < @arrLen(numbers); i = i + 1) {
+        sum = sum + numbers[i];
+    }
+
+    sum
+}
+
+fun names(): [string] = ["kirby", "lang"];
+
+@println(total([1, 2, 3]));
+@println(names());
+
+let apply: fun ([i64]) => i64 = total;
+@println(apply([4, 5]));

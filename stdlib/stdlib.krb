@@ -75,7 +75,7 @@ impl Date {
     }
     
     pub fun from(value: string): Self {
-        let parts: Array = @strSplit(value, " ");
+        let parts: [string] = @strSplit(value, " ");
         
         @assert(@arrLen(parts) == 2, $"invalid input string. expected 2 parts but got {@numberToString(@arrLen(parts))}");
         

@@ -1,4 +1,4 @@
-let bytes: Array = @strToBytes("AB");
+let bytes: [u8] = @strToBytes("AB");
 @println(@arrLen(bytes));
 @println(bytes[0]);
 @println(bytes[1]);

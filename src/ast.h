@@ -42,6 +42,7 @@ typedef enum {
   NODE_TYPE,
   NODE_TYPE_ALIAS,
   NODE_TYPE_FUNCTION,
+  NODE_TYPE_ARRAY,
   NODE_INTERP_STRING,
   NODE_CAST,
   // Sentinel
@@ -245,6 +246,13 @@ typedef struct {
    */
   AstNode *returnType;
 } TypeFunctionNode;
+
+/**
+ * An array type, e.g. `[i64]`.
+ */
+typedef struct {
+  AstNode *elementType;
+} TypeArrayNode;
 
 typedef struct {
   Token name;
@@ -484,6 +492,7 @@ struct AstNode {
     TypeNode type_;
     TypeAliasNode typeAlias;
     TypeFunctionNode typeFunction;
+    TypeArrayNode typeArray;
     InterpStringNode interpString;
     CastNode cast;
   } as;

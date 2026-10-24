@@ -43,7 +43,7 @@ let greeting: string = "Hello World";
 | `u8`     |                  `123u8`, `255U8` | Unsigned 8-bit integer                               |
 | `f64`    |               `123f64`, `123.456` | 64-bit float. The default for decimal literals       |
 | `f32`    |                `123f32`, `1.5f32` | 32-bit float. A decimal literal needs the suffix     |
-| `Array`  | `[1, 2, 3]`, `["Hello", "World"]` | A dynamically sized collection of homonogous types   |
+| `[T]`    | `[1, 2, 3]`, `["Hello", "World"]` | A growable array of one type, such as `[i64]`        |
 
 ### Number Literals
 
