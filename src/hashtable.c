@@ -1,8 +1,8 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "hashtable.h"
 #include "gc.h"
+#include "hashtable.h"
 #include "object.h"
 #include "value.h"
 

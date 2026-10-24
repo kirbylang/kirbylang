@@ -83,7 +83,8 @@ int main(void) {
   assert_ast("../tests/run/strings/string_concat.krb",
              "(call @println (+ (+ \"Hello\" \" \") \"World\"))\n");
 
-  assert_ast("../tests/run/primitives/bool_false.krb", "(call @println false)\n");
+  assert_ast("../tests/run/primitives/bool_false.krb",
+             "(call @println false)\n");
 
   assert_ast("../tests/run/native_functions/native_fn_str_len_call.krb",
              "(call @println (call @strLen \"Hello World\"))\n"
@@ -150,7 +151,7 @@ int main(void) {
              "(call @println count)\n");
 
   assert_ast("../tests/run/types/var_no_annotation.krb", "(var x 5)\n"
-                                                     "(call @println x)\n");
+                                                         "(call @println x)\n");
 
   assert_ast("../tests/run/types/struct_field_annotation.krb",
              "(struct Point (pub-field x : f64) (pub-field y : f64))\n"
@@ -201,15 +202,18 @@ int main(void) {
              "(let box (struct-init Box (field value 100)))\n"
              "(call @println (get box value))\n");
 
-  assert_ast("../tests/run/types/generic_type_and_array_brackets_dont_conflict.krb",
-             "(var typed : Array[f64] (array))\n"
-             "(var numbers (array 1 2 3))\n"
-             "(call @println (index-get numbers 0))\n"
-             "(call @println (index-get numbers 1))\n");
+  assert_ast(
+      "../tests/run/types/generic_type_and_array_brackets_dont_conflict.krb",
+      "(var typed : Array[f64] (array))\n"
+      "(var numbers (array 1 2 3))\n"
+      "(call @println (index-get numbers 0))\n"
+      "(call @println (index-get numbers 1))\n");
 
-  assert_ast("../tests/run/types/type_alias_simple.krb", "(type Wrapper f64)\n");
+  assert_ast("../tests/run/types/type_alias_simple.krb",
+             "(type Wrapper f64)\n");
 
-  assert_ast("../tests/run/types/type_alias_generic.krb", "(type Wrapper[T] T)\n");
+  assert_ast("../tests/run/types/type_alias_generic.krb",
+             "(type Wrapper[T] T)\n");
 
   assert_ast("../tests/run/types/function_type_var.krb",
              "(var handler : (fun (f64) => f64) (lambda (x) (block (value "

@@ -53,9 +53,9 @@ typedef struct {
   ((Value){.type = VAL_NUMBER,                                                 \
            .as.number = {.kind = NUMBER_KIND_I64, .as = {.i64 = (value)}}})
 #define NUMBER_U8_VAL(value)                                                   \
-  ((Value){.type = VAL_NUMBER,                                                 \
-           .as.number = {.kind = NUMBER_KIND_U8,                               \
-                         .as = {.u64 = (uint8_t)(value)}}})
+  ((Value){                                                                    \
+      .type = VAL_NUMBER,                                                      \
+      .as.number = {.kind = NUMBER_KIND_U8, .as = {.u64 = (uint8_t)(value)}}})
 #define OBJ_VAL(object) ((Value){VAL_OBJ, {.obj = (Obj *)object}})
 
 typedef struct {

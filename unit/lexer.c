@@ -65,11 +65,8 @@ int main(void) {
                      (int)(sizeof(traitExpected) / sizeof(traitExpected[0])));
 
   TokenType nativeRefExpected[] = {
-      TOKEN_IDENTIFIER,
-      TOKEN_LEFT_PAREN,
-      TOKEN_RIGHT_PAREN,
-      TOKEN_SEMICOLON,
-      TOKEN_EOF,
+      TOKEN_IDENTIFIER, TOKEN_LEFT_PAREN, TOKEN_RIGHT_PAREN,
+      TOKEN_SEMICOLON,  TOKEN_EOF,
   };
 
   assert_token_types(
@@ -90,17 +87,22 @@ int main(void) {
       TOKEN_EOF,
   };
 
-  assert_token_types("123f64", numberF64Expected,
-                     (int)(sizeof(numberF64Expected) / sizeof(numberF64Expected[0])));
-  assert_token_types("456F64", numberF64Expected,
-                     (int)(sizeof(numberF64Expected) / sizeof(numberF64Expected[0])));
-  assert_token_types("1.5f64", numberF64Expected,
-                     (int)(sizeof(numberF64Expected) / sizeof(numberF64Expected[0])));
+  assert_token_types(
+      "123f64", numberF64Expected,
+      (int)(sizeof(numberF64Expected) / sizeof(numberF64Expected[0])));
+  assert_token_types(
+      "456F64", numberF64Expected,
+      (int)(sizeof(numberF64Expected) / sizeof(numberF64Expected[0])));
+  assert_token_types(
+      "1.5f64", numberF64Expected,
+      (int)(sizeof(numberF64Expected) / sizeof(numberF64Expected[0])));
 
-  assert_token_types("12u8", numberF64Expected,
-                     (int)(sizeof(numberF64Expected) / sizeof(numberF64Expected[0])));
-  assert_token_types("12U8", numberF64Expected,
-                     (int)(sizeof(numberF64Expected) / sizeof(numberF64Expected[0])));
+  assert_token_types(
+      "12u8", numberF64Expected,
+      (int)(sizeof(numberF64Expected) / sizeof(numberF64Expected[0])));
+  assert_token_types(
+      "12U8", numberF64Expected,
+      (int)(sizeof(numberF64Expected) / sizeof(numberF64Expected[0])));
 
   // A partial suffix is not consumed, so it scans as a number followed
   // by an identifier, which the parser rejects.
@@ -143,9 +145,8 @@ int main(void) {
       TOKEN_EOF,
   };
 
-  assert_token_types(
-      "$\"a {x} b {y} c\"", interpExpected,
-      (int)(sizeof(interpExpected) / sizeof(interpExpected[0])));
+  assert_token_types("$\"a {x} b {y} c\"", interpExpected,
+                     (int)(sizeof(interpExpected) / sizeof(interpExpected[0])));
 
   TokenType interpBracesExpected[] = {
       TOKEN_INTERP_START, // $"
@@ -244,8 +245,7 @@ int main(void) {
       TOKEN_EOF,
   };
 
-  assert_token_types("$\"{ { $\"{x}\" } }\"",
-                     interpNestedInsideBracesExpected,
+  assert_token_types("$\"{ { $\"{x}\" } }\"", interpNestedInsideBracesExpected,
                      (int)(sizeof(interpNestedInsideBracesExpected) /
                            sizeof(interpNestedInsideBracesExpected[0])));
 

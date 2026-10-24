@@ -186,7 +186,8 @@ static void test_literals(void) {
   TypeEnv *env = checkProgram("var a = 5; var b = \"hi\"; var c = true; "
                               "var d = nil;");
   assert(!typchkHadError());
-  assert(typchkTypeEnvLookup(env, tokenFromCString("a")) == typeNumber(NUMBER_KIND_I64));
+  assert(typchkTypeEnvLookup(env, tokenFromCString("a")) ==
+         typeNumber(NUMBER_KIND_I64));
   assert(typchkTypeEnvLookup(env, tokenFromCString("b")) == typeString());
   assert(typchkTypeEnvLookup(env, tokenFromCString("c")) == typeBool());
   assert(typchkTypeEnvLookup(env, tokenFromCString("d")) == typeUnit());
@@ -198,8 +199,10 @@ static void test_binary_arithmetic_and_concat(void) {
   TypeEnv *env = checkProgram(
       "var sum = 1 + 2; var product = 3 * 4; var greeting = \"a\" + \"b\";");
   assert(!typchkHadError());
-  assert(typchkTypeEnvLookup(env, tokenFromCString("sum")) == typeNumber(NUMBER_KIND_I64));
-  assert(typchkTypeEnvLookup(env, tokenFromCString("product")) == typeNumber(NUMBER_KIND_I64));
+  assert(typchkTypeEnvLookup(env, tokenFromCString("sum")) ==
+         typeNumber(NUMBER_KIND_I64));
+  assert(typchkTypeEnvLookup(env, tokenFromCString("product")) ==
+         typeNumber(NUMBER_KIND_I64));
   assert(typchkTypeEnvLookup(env, tokenFromCString("greeting")) ==
          typeString());
   typchkTypeEnvDestroy(env);
@@ -256,7 +259,8 @@ static void test_unary(void) {
   assert(typchkTypeEnvLookup(env, tokenFromCString("a")) == typeBool());
   assert(typchkTypeEnvLookup(env, tokenFromCString("b")) == typeBool());
   assert(typchkTypeEnvLookup(env, tokenFromCString("c")) == typeBool());
-  assert(typchkTypeEnvLookup(env, tokenFromCString("d")) == typeNumber(NUMBER_KIND_I64));
+  assert(typchkTypeEnvLookup(env, tokenFromCString("d")) ==
+         typeNumber(NUMBER_KIND_I64));
   typchkTypeEnvDestroy(env);
 }
 
@@ -575,7 +579,8 @@ static void test_array_literal_and_index(void) {
   Type *numsType = typchkTypeEnvLookup(env, tokenFromCString("nums"));
   assert(numsType != NULL && numsType->kind == TYPE_ARRAY);
   assert(numsType->as.array.elementType == typeNumber(NUMBER_KIND_I64));
-  assert(typchkTypeEnvLookup(env, tokenFromCString("first")) == typeNumber(NUMBER_KIND_I64));
+  assert(typchkTypeEnvLookup(env, tokenFromCString("first")) ==
+         typeNumber(NUMBER_KIND_I64));
   Type *emptyType = typchkTypeEnvLookup(env, tokenFromCString("empty"));
   assert(emptyType != NULL && emptyType->kind == TYPE_ARRAY);
   assert(emptyType->as.array.elementType == NULL);
@@ -627,7 +632,8 @@ static void test_block_expression(void) {
   typchkResetError();
   TypeEnv *env = checkProgram("var result = { var a = 1; var b = 2; a + b };");
   assert(!typchkHadError());
-  assert(typchkTypeEnvLookup(env, tokenFromCString("result")) == typeNumber(NUMBER_KIND_I64));
+  assert(typchkTypeEnvLookup(env, tokenFromCString("result")) ==
+         typeNumber(NUMBER_KIND_I64));
   typchkTypeEnvDestroy(env);
 }
 

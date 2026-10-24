@@ -9,11 +9,11 @@
 
 // Natives whose type needs generics. Phase 5.
 static const char *awaitingGenerics[] = {
-    "@typeof",     "@is",         "@isNumber",  "@isFunction", "@isBool",
-    "@isString",   "@isNil",      "@instanceOf", "@arrPush",   "@arrPop",
-    "@arrInsert",  "@arrRemove",  "@arrClear",  "@arrContains", "@arrCopy",
-    "@arrIsEmpty", "@arrEqual",   "@arrSlice",  "@arrConcat",  "@arrReverse",
-    "@arrJoin",    "@strConcat",  "@print",     "@println",    "@eprint",
+    "@typeof",     "@is",        "@isNumber",   "@isFunction",  "@isBool",
+    "@isString",   "@isNil",     "@instanceOf", "@arrPush",     "@arrPop",
+    "@arrInsert",  "@arrRemove", "@arrClear",   "@arrContains", "@arrCopy",
+    "@arrIsEmpty", "@arrEqual",  "@arrSlice",   "@arrConcat",   "@arrReverse",
+    "@arrJoin",    "@strConcat", "@print",      "@println",     "@eprint",
     "@eprintln",
 };
 
@@ -125,8 +125,7 @@ static void test_signed_natives_resolve_in_a_new_env(void) {
   assert(indexOf->as.function.returnType == typeNumber(NUMBER_KIND_I64));
 
   assert(typchkTypeEnvLookupFunction(env, tokenFromCString("@len")) == NULL);
-  assert(typchkTypeEnvLookupFunction(env, tokenFromCString("@arrPop")) ==
-         NULL);
+  assert(typchkTypeEnvLookupFunction(env, tokenFromCString("@arrPop")) == NULL);
 
   typchkTypeEnvDestroy(env);
 }

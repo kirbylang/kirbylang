@@ -17,11 +17,11 @@
 
 typedef enum {
   UNIT_DECODE_OK,
-  UNIT_DECODE_TRUNCATED,         // ends before the data it announces
-  UNIT_DECODE_BAD_MAGIC,         // not a compiled unit
+  UNIT_DECODE_TRUNCATED,          // ends before the data it announces
+  UNIT_DECODE_BAD_MAGIC,          // not a compiled unit
   UNIT_DECODE_BAD_FORMAT_VERSION, // made with a different layout
-  UNIT_DECODE_VERSION_MISMATCH,  // made by a different Kirby version
-  UNIT_DECODE_INVALID,           // an index, offset or count is out of range
+  UNIT_DECODE_VERSION_MISMATCH,   // made by a different Kirby version
+  UNIT_DECODE_INVALID,            // an index, offset or count is out of range
 } UnitDecodeStatus;
 
 /**

@@ -390,7 +390,7 @@ static void testAFailedWriteLeavesAnExistingOutputAlone(void) {
   StrBuf kept = readFile(output);
   assert(kept.len == sizeof PREVIOUS_PROGRAM);
   assert(memcmp(kept.data, PREVIOUS_PROGRAM, sizeof PREVIOUS_PROGRAM) == 0);
-  assert(countFiles() == 2);  // the runtime and the output, nothing left over
+  assert(countFiles() == 2); // the runtime and the output, nothing left over
 
   sb_free(&kept);
   sb_free(&payload);
@@ -417,7 +417,7 @@ static void testReplacingAnOutputGivesTheNewProgramAndLeavesNothingElse(void) {
   StrBuf written = readFile(output);
   assert(written.len == sizeof RUNTIME_BYTES + PACKAGED_TRAILER_SIZE);
   assert(memcmp(written.data, RUNTIME_BYTES, sizeof RUNTIME_BYTES) == 0);
-  assert(countFiles() == 2);  // the runtime and the output, nothing left over
+  assert(countFiles() == 2); // the runtime and the output, nothing left over
 
   sb_free(&written);
   sb_free(&payload);

@@ -61,8 +61,8 @@ static void formatFloat(double value, bool single, char *buffer, size_t size) {
   for (int precision = 0; precision <= 16; precision++) {
     snprintf(scientific, sizeof(scientific), "%.*e", precision, magnitude);
 
-    double readBack = single ? (double)strtof(scientific, NULL)
-                             : strtod(scientific, NULL);
+    double readBack =
+        single ? (double)strtof(scientific, NULL) : strtod(scientific, NULL);
 
     if (readBack == magnitude)
       break;
