@@ -4,3 +4,4 @@
 - [Builtin Functions](./reference/builtin-functions.md)
 - [Opcodes](./reference/opcodes.md)
 - [Tokens](./reference/tokens.md)
+- [Proposals](./reference/proposals.md)

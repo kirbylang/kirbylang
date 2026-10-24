@@ -9,3 +9,4 @@
   - [Opcodes](./reference/opcodes.md)
   - [Tokens](./reference/tokens.md)
   - [AST](./reference/ast.md)
+  - [Proposals](./reference/proposals.md)

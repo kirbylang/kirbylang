@@ -26,7 +26,7 @@ Things like type systems (bounded parametric polymorphism, monomorphization, tra
 
 This is an up front disclosure that AI was used in the development of this project. This was not slop coded project. I fully implemented `clox` by following the book. My online handles and website is "Testing Required". Software quality is a core to me as a developer.
 
-A vast majority of AI usage in this project has been conversational. A tool to explore what I know I want from the language. Agentic coding has gradulally increased over time (80:20 me/agent to 25:75 me/agent now) but it's hands on the wheel at all times. It's not an exageration to say my rejection rate in conversation is 5:1 and my rejection rate of AI written code (considering my edits of it's outputed code) is 30:1.
+A vast majority of AI usage in this project has been conversational (see [proposals](./reference/proposals.md)). A tool to explore what I know I want from the language. Agentic coding has gradulally increased over time (80:20 me/agent to 25:75 me/agent now) but it's hands on the wheel at all times. It's not an exageration to say my rejection rate in conversation is 5:1 and my rejection rate of AI written code (considering my edits of it's outputed code) is 30:1. Changes are presented as `*.patch` files that I manually review and commit by hand. I'll even split patch files up, which is why rejection rate is high.
 
 AI isn't writing code I wouldn't be writing myself. I don't auto approve any writing or editing files. Every edit is reviewed when I click approve or reject. This project has 3000+ E2E tests (and growing) + unit tests written or reviewed by me on every single commit.
 
