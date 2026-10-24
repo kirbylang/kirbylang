@@ -55,6 +55,12 @@ install:
 test *args: build
     ./scripts/tests.sh {{ args }}
 
+# Run the tests, showing only failures and the summary
+check *args: build
+    #!/usr/bin/env bash
+    set -o pipefail
+    ./scripts/tests.sh {{ args }} | awk '/^🔬/ {h=$0; next} /^$|^Total:/ {h=""} h {print h; h=""} {print}'
+
 # Run a set of the tests again, as programs built into executables
 test-packaged *args: build
     ./scripts/tests-packaged.sh {{ args }}
@@ -120,3 +126,11 @@ project *args:
 
 book-serve:
     ./scripts/book-serve.sh
+
+# Format the C lines changed since HEAD
+fmt *paths:
+    ./scripts/format.sh {{ paths }}
+
+# Format all C files
+fmt-all *paths:
+    ./scripts/format-all.sh
