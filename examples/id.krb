@@ -3,17 +3,17 @@ struct Id[T] {
 }
 
 impl Id[T] {
-    pub fun new(value: T): Self[T] =
+    pub fun new(value: T): Id[T] =
         Self { value: value };
 
     pub fun get(self): T =
         self.value;
     
-    pub fun map[U](self, map: fun (T) => U): Self[U] =
-        Self.new(map(self.value));
+    pub fun map[U](self, fn: fun (T) => U): Id[U] =
+        Self.new(fn(self.value));
 
-    pub fun flat_map[U](self, flat_map: fun (T) => Self[U]): Self[U] =
-        flat_map(self.value);
+    pub fun flat_map[U](self, fn: fun (T) => Id[U]): Id[U] =
+        fn(self.value);
 }
 
 let value = Id.new(100)
