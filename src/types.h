@@ -249,6 +249,9 @@ void typeBindGenericParams(Type *pattern, Type *actual, Type **bindings,
 // Parameters with an empty slot are kept.
 Type *typeSubstituteGenericParams(Type *type, Type **bindings, int count);
 
+// True if no part of `type` is unknown (NULL).
+bool typeIsFullyKnown(const Type *type);
+
 // Replaces each generic parameter left inside `type` with unknown (NULL).
 Type *typeEraseGenericParams(Type *type);
 

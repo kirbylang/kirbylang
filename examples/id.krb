@@ -1,0 +1,23 @@
+struct Id[T] {
+    let value: T;
+}
+
+impl Id[T] {
+    pub fun new(value: T): Self[T] =
+        Self { value: value };
+
+    pub fun get(self): T =
+        self.value;
+    
+    pub fun map[U](self, map: fun (T) => U): Self[U] =
+        Self.new(map(self.value));
+
+    pub fun flat_map[U](self, flat_map: fun (T) => Self[U]): Self[U] =
+        flat_map(self.value);
+}
+
+let value = Id.new(100)
+    .map(fun (n) { n * n })
+    .flat_map(Id.new);
+
+@println(value.get());

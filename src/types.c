@@ -630,6 +630,32 @@ void typeBindGenericParams(Type *pattern, Type *actual, Type **bindings,
   }
 }
 
+bool typeIsFullyKnown(const Type *type) {
+  if (type == NULL)
+    return false;
+
+  switch (type->kind) {
+  case TYPE_LIST:
+    return typeIsFullyKnown(type->as.list.elementType);
+  case TYPE_ARRAY:
+    return typeIsFullyKnown(type->as.array.elementType);
+  case TYPE_STRUCT:
+    for (int i = 0; i < type->as.struct_.typeArgCount; i++) {
+      if (!typeIsFullyKnown(type->as.struct_.typeArgs[i]))
+        return false;
+    }
+    return true;
+  case TYPE_FN:
+    for (int i = 0; i < type->as.function.paramCount; i++) {
+      if (!typeIsFullyKnown(type->as.function.paramTypes[i]))
+        return false;
+    }
+    return typeIsFullyKnown(type->as.function.returnType);
+  default:
+    return true;
+  }
+}
+
 // Replaces each generic parameter with its slot. An empty slot keeps the
 // parameter, or makes it unknown when `eraseEmpty`.
 static Type *substituteGenericParams(Type *type, Type **bindings, int count,

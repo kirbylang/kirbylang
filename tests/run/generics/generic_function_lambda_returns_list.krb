@@ -1,0 +1,6 @@
+fun wrap[T, U](x: T, f: fun (T) => [U]): [U] {
+  return f(x);
+}
+
+let xs = wrap(3, fun (n) { let items: [i64] = [n, n]; items });
+@println(xs[1]);

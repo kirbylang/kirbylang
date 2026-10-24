@@ -1,0 +1,53 @@
+== <script> ==
+0000   12 OP_CLOSURE          1 <fn build>
+0002    | OP_DEFINE_GLOBAL    0 'build'
+0004    1 OP_STRUCT           2 'Box'
+0006    | OP_DEFINE_GLOBAL    2 'Box'
+0008    | OP_GET_GLOBAL       2 'Box'
+0010    2 OP_NIL
+0011    | OP_FIELD            3 'value' public mutable
+0015    3 OP_POP
+0016    5 OP_STRUCT           4 'Pair'
+0018    | OP_DEFINE_GLOBAL    4 'Pair'
+0020    | OP_GET_GLOBAL       4 'Pair'
+0022    6 OP_NIL
+0023    | OP_FIELD            5 'first' public mutable
+0027    7 OP_NIL
+0028    | OP_FIELD            6 'second' public mutable
+0032    8 OP_POP
+0033   14 OP_GET_GLOBAL       0 'build'
+0035    | OP_CONSTANT         8 '2'
+0037    | OP_CLOSURE          9 <fn lambda0x1>
+0039    | OP_CALL             2
+0041    | OP_DEFINE_GLOBAL    7 'p'
+0043   15 OP_GET_GLOBAL      10 '@println'
+0045    | OP_GET_GLOBAL       7 'p'
+0047    | OP_GET_PROPERTY     5 'first'
+0049    | OP_GET_PROPERTY     3 'value'
+0051    | OP_GET_GLOBAL       7 'p'
+0053    | OP_GET_PROPERTY     6 'second'
+0055    | OP_ADD
+0056    | OP_CALL             1
+0058    | OP_POP
+0059   16 OP_NIL
+0060    | OP_RETURN
+== build ==
+0000   11 OP_GET_LOCAL        2
+0002    | OP_GET_LOCAL        1
+0004    | OP_CALL             1
+0006    | OP_RETURN
+== lambda0x1 ==
+0000   14 OP_GET_GLOBAL       0 'Pair'
+0002    | OP_CONSTANT         1 'first'
+0004    | OP_GET_GLOBAL       2 'Box'
+0006    | OP_CONSTANT         3 'value'
+0008    | OP_GET_LOCAL        1
+0010    | OP_CONSTANT         4 '2'
+0012    | OP_MULTIPLY
+0013    | OP_STRUCT_INIT      1
+0015    | OP_CONSTANT         5 'second'
+0017    | OP_GET_LOCAL        1
+0019    | OP_CONSTANT         4 '2'
+0021    | OP_MULTIPLY
+0022    | OP_STRUCT_INIT      2
+0024    | OP_RETURN

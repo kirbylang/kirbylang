@@ -1,0 +1,9 @@
+struct Box[T] {
+  pub var value: T;
+}
+
+fun then[T, U](x: T, f: fun (T) => Box[U]): Box[U] {
+  return f(x);
+}
+
+let a: Box[i64] = then(5, fun (n) { Box { value: "five" } });

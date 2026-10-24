@@ -559,6 +559,8 @@ static Type *typchkInferInterpString(TypeEnv *env, AstNode *node);
 static Type *typchkInferIf(TypeEnv *env, AstNode *node);
 static bool typchkAlwaysYields(AstNode *node);
 static Type *typchkInferBlock(TypeEnv *env, AstNode *node);
+static bool typchkCheckInto(TypeEnv *env, AstNode *node, Type *expected,
+                            Type **actualOut);
 static Type *typchkCheckBlockContents(TypeEnv *env, BlockNode *block,
                                       Type *expectedValueType);
 static Type *typchkCheckOrInferLambda(TypeEnv *env, AstNode *node,
@@ -566,6 +568,11 @@ static Type *typchkCheckOrInferLambda(TypeEnv *env, AstNode *node,
 static void typchkCheckVarDecl(TypeEnv *env, AstNode *node);
 static void typchkCheckFunctionDecl(TypeEnv *env, AstNode *node);
 static bool typchkStructMembersUnreliable(Type *type);
+static Type *typchkLookupVariableType(TypeEnv *env, Token *name);
+static bool typchkHasDeclaredGenericParams(Type *type);
+static bool typchkCheckGenericFunctionValue(TypeEnv *env, AstNode *node,
+                                            Type *genericType, Type *expected);
+static Type *typchkFillGenericFunctionValue(Type *genericType, Type *expected);
 static Type *typchkStructInitDeclaration(TypeEnv *env, StructInitNode *si);
 static bool typchkCheckGenericStructInit(TypeEnv *env, AstNode *node,
                                          Type *expected);
@@ -949,7 +956,10 @@ Type *typchkInfer(TypeEnv *env, AstNode *node) {
   }
 }
 
-bool typchkCheck(TypeEnv *env, AstNode *node, Type *expected) {
+// Like typchkCheck. When the value is checked by working out its own type,
+// that type is stored in `actualOut`, otherwise `actualOut` is left alone.
+static bool typchkCheckInto(TypeEnv *env, AstNode *node, Type *expected,
+                            Type **actualOut) {
   if (!typchkApplyExpectedNumberType(node, expected))
     return false;
 
@@ -989,8 +999,18 @@ bool typchkCheck(TypeEnv *env, AstNode *node, Type *expected) {
     return ok;
   }
 
+  if (node->kind == NODE_VARIABLE && expected != NULL &&
+      expected->kind == TYPE_FN) {
+    Type *named = typchkLookupVariableType(env, &node->as.variable.name);
+
+    if (named != NULL && named->kind == TYPE_FN &&
+        typchkHasDeclaredGenericParams(named))
+      return typchkCheckGenericFunctionValue(env, node, named, expected);
+  }
+
   if (node->kind == NODE_STRUCT_INIT && expected != NULL &&
-      expected->kind == TYPE_STRUCT && expected->as.struct_.typeArgCount > 0) {
+      expected->kind == TYPE_STRUCT && expected->as.struct_.typeArgCount > 0 &&
+      typeIsFullyKnown(expected)) {
     Type *declaration = typchkStructInitDeclaration(env, &node->as.structInit);
 
     if (declaration != NULL && declaration == typeStructDeclaration(expected) &&
@@ -1006,13 +1026,24 @@ bool typchkCheck(TypeEnv *env, AstNode *node, Type *expected) {
   if (expected == NULL)
     return true;
 
+  if (expected->kind == TYPE_FN && actual->kind == TYPE_FN &&
+      typchkHasDeclaredGenericParams(actual))
+    return typchkCheckGenericFunctionValue(env, node, actual, expected);
+
   if (!typeAccepts(expected, actual)) {
     typchkErrorAtNodeFmt(node, "Expected %s, got %s.", typeToString(expected),
                          typeToString(actual));
     return false;
   }
 
+  if (actualOut != NULL)
+    *actualOut = actual;
+
   return true;
+}
+
+bool typchkCheck(TypeEnv *env, AstNode *node, Type *expected) {
+  return typchkCheckInto(env, node, expected, NULL);
 }
 
 // True if the struct's members couldn't be type checked
@@ -1334,13 +1365,69 @@ static Type *typchkInferInterpString(TypeEnv *env, AstNode *node) {
   return typeString();
 }
 
-// Infer the type of an variable/identifier expression
-static Type *typchkInferVariable(TypeEnv *env, AstNode *node) {
-  Token *name = &node->as.variable.name;
+// The declared type of a variable or function, which may still be generic
+static Type *typchkLookupVariableType(TypeEnv *env, Token *name) {
   Type *type = typchkTypeEnvLookup(env, *name);
 
   if (type == NULL)
     type = typchkTypeEnvLookupFunction(env, *name);
+
+  return type;
+}
+
+// True if the type holds a generic parameter that a program declared, as
+// opposed to the placeholders in a native's signature
+static bool typchkHasDeclaredGenericParams(Type *type) {
+  for (int i = 0; i < typeGenericParamCount(type); i++) {
+    Type *param = typeFindGenericParam(type, i);
+
+    if (param != NULL && param->as.genericParam.hasName)
+      return true;
+  }
+
+  return false;
+}
+
+// A generic function type with its parameters filled in from `expected`,
+// which is a function type that may be partly unknown.
+static Type *typchkFillGenericFunctionValue(Type *genericType, Type *expected) {
+  int count = typeGenericParamCount(genericType);
+  Type **bindings = (Type **)typesAllocRaw((size_t)count * sizeof(Type *));
+  memset(bindings, 0, (size_t)count * sizeof(Type *));
+
+  if (genericType->as.function.paramCount == expected->as.function.paramCount) {
+    for (int i = 0; i < genericType->as.function.paramCount; i++) {
+      typeBindGenericParams(genericType->as.function.paramTypes[i],
+                            expected->as.function.paramTypes[i], bindings,
+                            count);
+    }
+
+    typeBindGenericParams(genericType->as.function.returnType,
+                          expected->as.function.returnType, bindings, count);
+  }
+
+  return typeSubstituteGenericParams(genericType, bindings, count);
+}
+
+// A generic function used as a value where a function type is expected, such
+// as `let f: fun (i64) => i64 = id;`. The expected type fills in the
+// function's generic parameters, and what is left must be accepted by it.
+static bool typchkCheckGenericFunctionValue(TypeEnv *env, AstNode *node,
+                                            Type *genericType, Type *expected) {
+  (void)env;
+  Type *filled = typchkFillGenericFunctionValue(genericType, expected);
+
+  if (typeAccepts(expected, typeEraseGenericParams(filled)))
+    return true;
+
+  typchkErrorAtNodeFmt(node, "Expected %s, got %s.", typeToString(expected),
+                       typeToString(filled));
+  return false;
+}
+
+// Infer the type of an variable/identifier expression
+static Type *typchkInferVariable(TypeEnv *env, AstNode *node) {
+  Type *type = typchkLookupVariableType(env, &node->as.variable.name);
 
   if (type == NULL)
     return NULL;
@@ -1531,6 +1618,11 @@ static bool typchkUnifyValue(TypeEnv *env, AstNode *arg, Type *pattern,
     actual = typchkCheckOrInferLambda(env, arg, known);
   } else {
     actual = typchkInfer(env, arg);
+
+    if (actual != NULL && actual->kind == TYPE_FN && known->kind == TYPE_FN &&
+        typchkHasDeclaredGenericParams(actual))
+      actual =
+          typeEraseGenericParams(typchkFillGenericFunctionValue(actual, known));
   }
 
   if (actual == NULL) {
@@ -2161,9 +2253,15 @@ static Type *typchkCheckBlockContents(TypeEnv *env, BlockNode *block,
     result = expectedValueType;
   } else if (block->value != NULL) {
     if (expectedValueType != NULL) {
-      result = typchkCheck(env, block->value, expectedValueType)
-                   ? expectedValueType
-                   : NULL;
+      // A partly unknown expected type, such as `Box[?]`, is filled in by
+      // the value's own type
+      Type *actual = NULL;
+      if (!typchkCheckInto(env, block->value, expectedValueType, &actual))
+        result = NULL;
+      else
+        result = actual != NULL && !typeIsFullyKnown(expectedValueType)
+                     ? actual
+                     : expectedValueType;
     } else {
       result = typchkInfer(env, block->value);
     }

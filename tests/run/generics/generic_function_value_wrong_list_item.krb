@@ -1,0 +1,5 @@
+fun head[T](xs: [T]): T {
+  return xs[0];
+}
+
+let f: fun ([string]) => i64 = head;

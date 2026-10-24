@@ -1,0 +1,13 @@
+struct Box[T] {
+  pub var value: T;
+}
+
+fun then[T, U](x: T, f: fun (T) => Box[U]): Box[U] {
+  return f(x);
+}
+
+let a = then(5, fun (n) { Box { value: "five" } });
+@println(a.value + "!");
+
+let b = then("s", fun (s) { Box { value: s + s } });
+@println(b.value);

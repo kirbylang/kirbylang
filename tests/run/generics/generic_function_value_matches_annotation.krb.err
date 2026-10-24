@@ -1,0 +1,55 @@
+== <script> ==
+0000    3 OP_CLOSURE          1 <fn id>
+0002    | OP_DEFINE_GLOBAL    0 'id'
+0004    7 OP_CLOSURE          3 <fn first>
+0006    | OP_DEFINE_GLOBAL    2 'first'
+0008   11 OP_CLOSURE          5 <fn head>
+0010    | OP_DEFINE_GLOBAL    4 'head'
+0012   13 OP_GET_GLOBAL       0 'id'
+0014    | OP_DEFINE_GLOBAL    6 'f'
+0016   14 OP_GET_GLOBAL       0 'id'
+0018    | OP_DEFINE_GLOBAL    7 'g'
+0020   15 OP_GET_GLOBAL       2 'first'
+0022    | OP_DEFINE_GLOBAL    8 'h'
+0024   16 OP_GET_GLOBAL       4 'head'
+0026    | OP_DEFINE_GLOBAL    9 'k'
+0028   18 OP_GET_GLOBAL      10 '@println'
+0030    | OP_GET_GLOBAL       6 'f'
+0032    | OP_CONSTANT        11 '5'
+0034    | OP_CALL             1
+0036    | OP_CALL             1
+0038    | OP_POP
+0039   19 OP_GET_GLOBAL      10 '@println'
+0041    | OP_GET_GLOBAL       7 'g'
+0043    | OP_CONSTANT        12 'hi'
+0045    | OP_CALL             1
+0047    | OP_CALL             1
+0049    | OP_POP
+0050   20 OP_GET_GLOBAL      10 '@println'
+0052    | OP_GET_GLOBAL       8 'h'
+0054    | OP_CONSTANT        13 '1'
+0056    | OP_CONSTANT        14 'one'
+0058    | OP_CALL             2
+0060    | OP_CALL             1
+0062    | OP_POP
+0063   21 OP_GET_GLOBAL      10 '@println'
+0065    | OP_GET_GLOBAL       9 'k'
+0067    | OP_TRUE
+0068    | OP_FALSE
+0069    | OP_LIST             2
+0071    | OP_CALL             1
+0073    | OP_CALL             1
+0075    | OP_POP
+0076   22 OP_NIL
+0077    | OP_RETURN
+== id ==
+0000    2 OP_GET_LOCAL        1
+0002    | OP_RETURN
+== first ==
+0000    6 OP_GET_LOCAL        1
+0002    | OP_RETURN
+== head ==
+0000   10 OP_GET_LOCAL        1
+0002    | OP_CONSTANT         0 '0'
+0004    | OP_GET_INDEX
+0005    | OP_RETURN

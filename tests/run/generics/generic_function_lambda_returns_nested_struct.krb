@@ -1,0 +1,15 @@
+struct Box[T] {
+  pub var value: T;
+}
+
+struct Pair[A, B] {
+  pub var first: A;
+  pub var second: B;
+}
+
+fun build[T, U](x: T, f: fun (T) => Pair[Box[U], U]): Pair[Box[U], U] {
+  return f(x);
+}
+
+let p = build(2, fun (n) { Pair { first: Box { value: n * 2 }, second: n * 2 } });
+@println(p.first.value + p.second);

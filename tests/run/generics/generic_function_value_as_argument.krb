@@ -1,0 +1,14 @@
+fun id[T](x: T): T {
+  return x;
+}
+
+fun run(f: fun (string) => string): string {
+  return f("ran");
+}
+
+fun runBad(f: fun (string) => i64): i64 {
+  return f("ran");
+}
+
+@println(run(id));
+@println(runBad(id));

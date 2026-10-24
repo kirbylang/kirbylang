@@ -154,6 +154,24 @@ fun add[T](a: T, b: T): T = a + b;   // error: '+' needs two numbers ... got T a
 fun bad[A, B](a: A): B = a;          // error: Expected B, got A.
 ```
 
+A generic function can also be used as a value where a function type is
+expected. The expected type fills in the function's type parameters, and the
+result has to match. Here `id` is the function declared above, and its `T`
+becomes `i64`.
+
+```
+fun id[T](x: T): T = x;
+
+let f: fun (i64) => i64 = id;       // ok
+let g: fun (i64) => string = id;    // error: Expected fun (i64) => string, got fun (i64) => i64.
+```
+
+A generic method works the same way, such as `Box.new` for a method declared
+`fun new(value: T): Self[T]`.
+
+With no expected type, as in `let h = id;`, the value has no type and isn't
+checked.
+
 A generic function is compiled once, and the same code runs for every type.
 
 ### Traits
