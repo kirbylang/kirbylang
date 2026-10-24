@@ -1,5 +1,0 @@
-let max: u16 = 65535;
-@println(max + 1u16);
-@println(max + max);
-@println(0u16 - 1u16);
-@println(32768u16 * 2u16);

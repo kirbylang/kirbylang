@@ -1,3 +1,0 @@
-let a: u8 = 250;
-@println(a + 10);
-@println(a * 2);

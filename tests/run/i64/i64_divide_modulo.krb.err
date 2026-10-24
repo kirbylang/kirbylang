@@ -8,44 +8,38 @@
 0012    4 OP_GET_GLOBAL       6 '@println'
 0014    | OP_GET_GLOBAL       0 'min'
 0016    | OP_GET_GLOBAL       2 'negOne'
-0018    | OP_DIVIDE
+0018    | OP_MODULO
 0019    | OP_CALL             1
 0021    | OP_POP
 0022    5 OP_GET_GLOBAL       6 '@println'
-0024    | OP_GET_GLOBAL       0 'min'
-0026    | OP_GET_GLOBAL       2 'negOne'
-0028    | OP_MODULO
+0024    | OP_CONSTANT         7 '7'
+0026    | OP_GET_GLOBAL       4 'negTwo'
+0028    | OP_DIVIDE
 0029    | OP_CALL             1
 0031    | OP_POP
 0032    6 OP_GET_GLOBAL       6 '@println'
 0034    | OP_CONSTANT         7 '7'
 0036    | OP_GET_GLOBAL       4 'negTwo'
-0038    | OP_DIVIDE
+0038    | OP_MODULO
 0039    | OP_CALL             1
 0041    | OP_POP
 0042    7 OP_GET_GLOBAL       6 '@println'
-0044    | OP_CONSTANT         7 '7'
-0046    | OP_GET_GLOBAL       4 'negTwo'
-0048    | OP_MODULO
+0044    | OP_GET_GLOBAL       4 'negTwo'
+0046    | OP_CONSTANT         8 '3'
+0048    | OP_DIVIDE
 0049    | OP_CALL             1
 0051    | OP_POP
 0052    8 OP_GET_GLOBAL       6 '@println'
 0054    | OP_GET_GLOBAL       4 'negTwo'
 0056    | OP_CONSTANT         8 '3'
-0058    | OP_DIVIDE
+0058    | OP_MODULO
 0059    | OP_CALL             1
 0061    | OP_POP
 0062    9 OP_GET_GLOBAL       6 '@println'
-0064    | OP_GET_GLOBAL       4 'negTwo'
-0066    | OP_CONSTANT         8 '3'
-0068    | OP_MODULO
+0064    | OP_CONSTANT         9 '9223372036854775807'
+0066    | OP_CONSTANT        10 '1000'
+0068    | OP_DIVIDE
 0069    | OP_CALL             1
 0071    | OP_POP
-0072   10 OP_GET_GLOBAL       6 '@println'
-0074    | OP_CONSTANT         9 '9223372036854775807'
-0076    | OP_CONSTANT        10 '1000'
-0078    | OP_DIVIDE
-0079    | OP_CALL             1
-0081    | OP_POP
-0082   11 OP_NIL
-0083    | OP_RETURN
+0072   10 OP_NIL
+0073    | OP_RETURN

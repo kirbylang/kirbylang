@@ -1,4 +1,4 @@
 let a: i64 = 9223372036854775807;
 @println(-a);
-let min: i64 = -9223372036854775808;
-@println(-min);
+let nearMin: i64 = -9223372036854775807;
+@println(-nearMin);

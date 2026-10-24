@@ -1,3 +1,3 @@
 @println(6i32 * 7i32);
-let big: i32 = 65536;
+let big: i32 = 46340;
 @println(big * big);

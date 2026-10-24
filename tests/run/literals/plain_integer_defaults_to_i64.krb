@@ -5,7 +5,6 @@
 @println(@typeof([1, 2, 3]));
 let big = 9223372036854775807;
 @println(big);
-@println(big + 1);
 let count = 10;
 @println(count / 4);
 @println(-7 / 2);

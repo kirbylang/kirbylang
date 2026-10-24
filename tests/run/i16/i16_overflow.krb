@@ -1,0 +1,2 @@
+let max: i16 = 32767;
+@println(max + 1i16);

@@ -39,53 +39,47 @@
 0068    | OP_GET_GLOBAL       8 'big'
 0070    | OP_CALL             1
 0072    | OP_POP
-0073    8 OP_GET_GLOBAL       0 '@println'
-0075    | OP_GET_GLOBAL       8 'big'
-0077    | OP_CONSTANT         5 '1'
-0079    | OP_ADD
-0080    | OP_CALL             1
-0082    | OP_POP
-0083    9 OP_CONSTANT        11 '10'
-0085    | OP_DEFINE_GLOBAL   10 'count'
+0073    8 OP_CONSTANT        11 '10'
+0075    | OP_DEFINE_GLOBAL   10 'count'
+0077    9 OP_GET_GLOBAL       0 '@println'
+0079    | OP_GET_GLOBAL      10 'count'
+0081    | OP_CONSTANT        12 '4'
+0083    | OP_DIVIDE
+0084    | OP_CALL             1
+0086    | OP_POP
 0087   10 OP_GET_GLOBAL       0 '@println'
-0089    | OP_GET_GLOBAL      10 'count'
-0091    | OP_CONSTANT        12 '4'
-0093    | OP_DIVIDE
-0094    | OP_CALL             1
-0096    | OP_POP
-0097   11 OP_GET_GLOBAL       0 '@println'
-0099    | OP_CONSTANT        13 '7'
-0101    | OP_NEGATE
-0102    | OP_CONSTANT         6 '2'
-0104    | OP_DIVIDE
-0105    | OP_CALL             1
-0107    | OP_POP
-0108   12 OP_GET_GLOBAL       0 '@println'
-0110    | OP_CONSTANT        13 '7'
-0112    | OP_NEGATE
-0113    | OP_CONSTANT         6 '2'
-0115    | OP_MODULO
+0089    | OP_CONSTANT        13 '7'
+0091    | OP_NEGATE
+0092    | OP_CONSTANT         6 '2'
+0094    | OP_DIVIDE
+0095    | OP_CALL             1
+0097    | OP_POP
+0098   11 OP_GET_GLOBAL       0 '@println'
+0100    | OP_CONSTANT        13 '7'
+0102    | OP_NEGATE
+0103    | OP_CONSTANT         6 '2'
+0105    | OP_MODULO
+0106    | OP_CALL             1
+0108    | OP_POP
+0109   12 OP_GET_GLOBAL       0 '@println'
+0111    | OP_CONSTANT        14 '7'
+0113    | OP_CONSTANT        15 '2'
+0115    | OP_DIVIDE
 0116    | OP_CALL             1
 0118    | OP_POP
 0119   13 OP_GET_GLOBAL       0 '@println'
-0121    | OP_CONSTANT        14 '7'
-0123    | OP_CONSTANT        15 '2'
-0125    | OP_DIVIDE
+0121    | OP_CONSTANT        16 '1'
+0123    | OP_CONSTANT        17 '2.5'
+0125    | OP_ADD
 0126    | OP_CALL             1
 0128    | OP_POP
 0129   14 OP_GET_GLOBAL       0 '@println'
-0131    | OP_CONSTANT        16 '1'
-0133    | OP_CONSTANT        17 '2.5'
-0135    | OP_ADD
-0136    | OP_CALL             1
-0138    | OP_POP
-0139   15 OP_GET_GLOBAL       0 '@println'
-0141    | OP_GET_GLOBAL       1 '@typeof'
-0143    | OP_CONSTANT        16 '1'
-0145    | OP_CONSTANT        17 '2.5'
-0147    | OP_ADD
-0148    | OP_CALL             1
-0150    | OP_CALL             1
-0152    | OP_POP
-0153   16 OP_NIL
-0154    | OP_RETURN
+0131    | OP_GET_GLOBAL       1 '@typeof'
+0133    | OP_CONSTANT        16 '1'
+0135    | OP_CONSTANT        17 '2.5'
+0137    | OP_ADD
+0138    | OP_CALL             1
+0140    | OP_CALL             1
+0142    | OP_POP
+0143   15 OP_NIL
+0144    | OP_RETURN

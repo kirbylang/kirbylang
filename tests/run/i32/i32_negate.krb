@@ -1,8 +1,8 @@
 let y: i32 = 7;
 @println(-y);
 
-let min: i32 = -2147483648;
-@println(-min);
+let nearMin: i32 = -2147483647;
+@println(-nearMin);
 
 let z: i32 = -(y + 1i32);
 @println(z);

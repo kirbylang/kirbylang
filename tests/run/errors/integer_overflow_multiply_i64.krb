@@ -1,0 +1,2 @@
+let big = 3037000500;
+@println(big * big);

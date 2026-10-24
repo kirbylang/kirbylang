@@ -1,3 +1,3 @@
 @println(10u8 - 3u8);
-let a: u8 = 1;
+let a: u8 = 2;
 @println(a - 2u8);

@@ -19,13 +19,17 @@ typedef enum {
 
 bool numberIsZero(NumberKind kind, NumberPayload value);
 
-// Perform arithmetic on number kinds
+// Perform arithmetic on number kinds. Returns false when an integer result
+// doesn't fit the kind, and leaves `result` unchanged.
 //
 // The caller must reject a zero integer divisor first.
-NumberPayload numberArithmetic(NumberKind kind, NumberOp op, NumberPayload a,
-                               NumberPayload b);
+bool numberArithmetic(NumberKind kind, NumberOp op, NumberPayload a,
+                      NumberPayload b, NumberPayload *result);
 
-NumberPayload numberNegateValue(NumberKind kind, NumberPayload value);
+// Returns false when the negated integer doesn't fit the kind, such as the
+// smallest i64, and leaves `result` unchanged.
+bool numberNegateValue(NumberKind kind, NumberPayload value,
+                       NumberPayload *result);
 
 bool numberOpLessThan(NumberKind kind, NumberPayload a, NumberPayload b);
 

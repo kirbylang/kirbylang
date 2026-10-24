@@ -6,10 +6,10 @@
 0008    | OP_NEGATE
 0009    | OP_CALL             1
 0011    | OP_POP
-0012    3 OP_CONSTANT         4 '-9223372036854775808'
-0014    | OP_DEFINE_GLOBAL    3 'min'
+0012    3 OP_CONSTANT         4 '-9223372036854775807'
+0014    | OP_DEFINE_GLOBAL    3 'nearMin'
 0016    4 OP_GET_GLOBAL       2 '@println'
-0018    | OP_GET_GLOBAL       3 'min'
+0018    | OP_GET_GLOBAL       3 'nearMin'
 0020    | OP_NEGATE
 0021    | OP_CALL             1
 0023    | OP_POP

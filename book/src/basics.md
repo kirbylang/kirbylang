@@ -76,14 +76,21 @@ let count = 10;
 let average: f64 = (count as f64) / 4;
 ```
 
-Dividing two integers drops the remainder, rounding toward zero. Integer math
-that goes past the type's range wraps around.
+Dividing two integers drops the remainder, rounding toward zero.
 
 ```krb
 @println(7 / 2);    // 3
 @println(-7 / 2);   // -3
 @println(7 % 2);    // 1
 @println(7.0 / 2);  // 3.5
+```
+
+Integer math whose result doesn't fit the type is a runtime error, and the
+program stops.
+
+```krb
+let byte: u8 = 255;
+@println(byte + 1); // Integer overflow: 255 + 1 doesn't fit in u8, which holds 0 to 255.
 ```
 
 ### Casting Number Types

@@ -26,7 +26,7 @@
 0041    6 OP_GET_GLOBAL       0 '@println'
 0043    | OP_GET_GLOBAL       6 'min'
 0045    | OP_GET_GLOBAL       8 'negOne'
-0047    | OP_DIVIDE
+0047    | OP_MODULO
 0048    | OP_CALL             1
 0050    | OP_POP
 0051    7 OP_NIL

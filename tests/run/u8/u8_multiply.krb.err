@@ -5,11 +5,5 @@
 0006    | OP_MULTIPLY
 0007    | OP_CALL             1
 0009    | OP_POP
-0010    2 OP_GET_GLOBAL       0 '@println'
-0012    | OP_CONSTANT         3 '200'
-0014    | OP_CONSTANT         4 '2'
-0016    | OP_MULTIPLY
-0017    | OP_CALL             1
-0019    | OP_POP
-0020    3 OP_NIL
-0021    | OP_RETURN
+0010    2 OP_NIL
+0011    | OP_RETURN

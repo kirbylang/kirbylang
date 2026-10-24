@@ -1,7 +1,0 @@
-let max: i16 = 32767;
-@println(max + 1i16);
-@println(max + max);
-@println(0i16 - 1i16);
-@println(16384i16 * 2i16);
-let min: i16 = -32768;
-@println(min - 1i16);
