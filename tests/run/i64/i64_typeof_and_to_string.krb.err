@@ -22,7 +22,7 @@
 0038    | OP_GET_GLOBAL       5 '@numberToString'
 0040    | OP_CONSTANT         8 '9223372036854775807'
 0042    | OP_CALL             1
-0044    | OP_ARRAY            3
+0044    | OP_LIST             3
 0046    | OP_CALL             1
 0048    | OP_CALL             1
 0050    | OP_POP

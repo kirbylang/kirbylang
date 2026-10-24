@@ -1,0 +1,27 @@
+== <script> ==
+0000    1 OP_STRUCT           0 'Grid'
+0002    | OP_DEFINE_GLOBAL    0 'Grid'
+0004    | OP_GET_GLOBAL       0 'Grid'
+0006    2 OP_NIL
+0007    | OP_FIELD            1 'cells' public mutable
+0011    3 OP_POP
+0012    4 OP_GET_GLOBAL       0 'Grid'
+0014    | OP_CONSTANT         1 'cells'
+0016    | OP_CONSTANT         3 '4'
+0018    | OP_CONSTANT         4 '5'
+0020    | OP_ARRAY            2
+0022    | OP_STRUCT_INIT      1
+0024    | OP_DEFINE_GLOBAL    2 'g'
+0026    5 OP_GET_GLOBAL       2 'g'
+0028    | OP_GET_PROPERTY     1 'cells'
+0030    | OP_CONSTANT         5 '1'
+0032    | OP_CONSTANT         6 '6'
+0034    | OP_SET_INDEX
+0035    | OP_POP
+0036    6 OP_GET_GLOBAL       7 '@println'
+0038    | OP_GET_GLOBAL       2 'g'
+0040    | OP_GET_PROPERTY     1 'cells'
+0042    | OP_CALL             1
+0044    | OP_POP
+0045    7 OP_NIL
+0046    | OP_RETURN

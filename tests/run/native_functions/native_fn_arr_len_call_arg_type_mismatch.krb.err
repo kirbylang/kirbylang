@@ -1,1 +1,1 @@
-[line 1] Error: Expected [T], got string.
+[line 1] Error: Expected [T; N], got i64.

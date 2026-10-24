@@ -1,0 +1,6 @@
+let keep = [1, 2, 3];
+for (var i = 0; i < 10000; i = i + 1) {
+  let a: [i64; 3] = [i, i, i];
+  let b = [[a[0], 1], [a[1], 2]];
+}
+@println(keep);

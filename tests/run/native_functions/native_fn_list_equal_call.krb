@@ -1,0 +1,17 @@
+var a: [i64] = [1, 2, 3];
+var b = a;
+var c = @listCopy(a);
+
+@println("Before");
+
+@println(@listEqual(a, b));
+@println(@listEqual(b, c));
+@println(@listEqual(a, c));
+
+c[0] = 100;
+
+@println("After");
+
+@println(@listEqual(a, b));
+@println(@listEqual(b, c));
+@println(@listEqual(a, c));

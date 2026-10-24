@@ -1,13 +1,10 @@
-Shallow compares two arrays' values for equality.
+Shallow compares two arrays' values for equality. Both arrays must have the same length and item type.
 
 ```kirby
-var a = [1, 2, 3];
-var b = a;
-var c = @arrCopy(a);
+let a = [1, 2, 3];
+let b = [1, 2, 3];
 
 @println(@arrEqual(a, b)); // true
-@println(@arrEqual(b, c)); // false
-@println(@arrEqual(a, c)); // false
 ```
 
 https://kirbylang.github.io/kirbylang/reference/builtin-functions.html#arrequal

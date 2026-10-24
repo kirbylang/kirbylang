@@ -1,0 +1,13 @@
+== <script> ==
+0000    1 OP_NIL
+0001    | OP_LIST             1
+0003    | OP_DEFINE_GLOBAL    0 'array'
+0005    3 OP_GET_GLOBAL       1 '@println'
+0007    | OP_GET_GLOBAL       2 '@listContains'
+0009    | OP_GET_GLOBAL       0 'array'
+0011    | OP_NIL
+0012    | OP_CALL             2
+0014    | OP_CALL             1
+0016    | OP_POP
+0017    4 OP_NIL
+0018    | OP_RETURN

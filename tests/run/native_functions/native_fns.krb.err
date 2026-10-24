@@ -120,12 +120,12 @@
 0213    | OP_CALL             1
 0215    | OP_POP
 0216   37 OP_GET_GLOBAL       0 '@println'
-0218    | OP_GET_GLOBAL      14 '@arrLen'
+0218    | OP_GET_GLOBAL      14 '@listLen'
 0220    | OP_CALL             1
 0222    | OP_POP
 0223   38 OP_GET_GLOBAL       0 '@println'
 0225    | OP_GET_GLOBAL       2 '@typeof'
-0227    | OP_GET_GLOBAL      14 '@arrLen'
+0227    | OP_GET_GLOBAL      14 '@listLen'
 0229    | OP_CALL             1
 0231    | OP_CALL             1
 0233    | OP_POP
@@ -230,102 +230,102 @@
 0411    | OP_CALL             1
 0413    | OP_POP
 0414   70 OP_GET_GLOBAL       0 '@println'
-0416    | OP_GET_GLOBAL      24 '@arrPush'
+0416    | OP_GET_GLOBAL      24 '@listPush'
 0418    | OP_CALL             1
 0420    | OP_POP
 0421   71 OP_GET_GLOBAL       0 '@println'
 0423    | OP_GET_GLOBAL       2 '@typeof'
-0425    | OP_GET_GLOBAL      24 '@arrPush'
+0425    | OP_GET_GLOBAL      24 '@listPush'
 0427    | OP_CALL             1
 0429    | OP_CALL             1
 0431    | OP_POP
 0432   73 OP_GET_GLOBAL       0 '@println'
-0434    | OP_GET_GLOBAL      25 '@arrPop'
+0434    | OP_GET_GLOBAL      25 '@listPop'
 0436    | OP_CALL             1
 0438    | OP_POP
 0439   74 OP_GET_GLOBAL       0 '@println'
 0441    | OP_GET_GLOBAL       2 '@typeof'
-0443    | OP_GET_GLOBAL      25 '@arrPop'
+0443    | OP_GET_GLOBAL      25 '@listPop'
 0445    | OP_CALL             1
 0447    | OP_CALL             1
 0449    | OP_POP
 0450   76 OP_GET_GLOBAL       0 '@println'
-0452    | OP_GET_GLOBAL      26 '@arrInsert'
+0452    | OP_GET_GLOBAL      26 '@listInsert'
 0454    | OP_CALL             1
 0456    | OP_POP
 0457   77 OP_GET_GLOBAL       0 '@println'
 0459    | OP_GET_GLOBAL       2 '@typeof'
-0461    | OP_GET_GLOBAL      26 '@arrInsert'
+0461    | OP_GET_GLOBAL      26 '@listInsert'
 0463    | OP_CALL             1
 0465    | OP_CALL             1
 0467    | OP_POP
 0468   79 OP_GET_GLOBAL       0 '@println'
-0470    | OP_GET_GLOBAL      27 '@arrRemove'
+0470    | OP_GET_GLOBAL      27 '@listRemove'
 0472    | OP_CALL             1
 0474    | OP_POP
 0475   80 OP_GET_GLOBAL       0 '@println'
 0477    | OP_GET_GLOBAL       2 '@typeof'
-0479    | OP_GET_GLOBAL      27 '@arrRemove'
+0479    | OP_GET_GLOBAL      27 '@listRemove'
 0481    | OP_CALL             1
 0483    | OP_CALL             1
 0485    | OP_POP
 0486   82 OP_GET_GLOBAL       0 '@println'
-0488    | OP_GET_GLOBAL      28 '@arrCopy'
+0488    | OP_GET_GLOBAL      28 '@listCopy'
 0490    | OP_CALL             1
 0492    | OP_POP
 0493   83 OP_GET_GLOBAL       0 '@println'
 0495    | OP_GET_GLOBAL       2 '@typeof'
-0497    | OP_GET_GLOBAL      28 '@arrCopy'
+0497    | OP_GET_GLOBAL      28 '@listCopy'
 0499    | OP_CALL             1
 0501    | OP_CALL             1
 0503    | OP_POP
 0504   85 OP_GET_GLOBAL       0 '@println'
-0506    | OP_GET_GLOBAL      29 '@arrIsEmpty'
+0506    | OP_GET_GLOBAL      29 '@listIsEmpty'
 0508    | OP_CALL             1
 0510    | OP_POP
 0511   86 OP_GET_GLOBAL       0 '@println'
 0513    | OP_GET_GLOBAL       2 '@typeof'
-0515    | OP_GET_GLOBAL      29 '@arrIsEmpty'
+0515    | OP_GET_GLOBAL      29 '@listIsEmpty'
 0517    | OP_CALL             1
 0519    | OP_CALL             1
 0521    | OP_POP
 0522   88 OP_GET_GLOBAL       0 '@println'
-0524    | OP_GET_GLOBAL      30 '@arrEqual'
+0524    | OP_GET_GLOBAL      30 '@listEqual'
 0526    | OP_CALL             1
 0528    | OP_POP
 0529   89 OP_GET_GLOBAL       0 '@println'
 0531    | OP_GET_GLOBAL       2 '@typeof'
-0533    | OP_GET_GLOBAL      30 '@arrEqual'
+0533    | OP_GET_GLOBAL      30 '@listEqual'
 0535    | OP_CALL             1
 0537    | OP_CALL             1
 0539    | OP_POP
 0540   91 OP_GET_GLOBAL       0 '@println'
-0542    | OP_GET_GLOBAL      31 '@arrSlice'
+0542    | OP_GET_GLOBAL      31 '@listSlice'
 0544    | OP_CALL             1
 0546    | OP_POP
 0547   92 OP_GET_GLOBAL       0 '@println'
 0549    | OP_GET_GLOBAL       2 '@typeof'
-0551    | OP_GET_GLOBAL      31 '@arrSlice'
+0551    | OP_GET_GLOBAL      31 '@listSlice'
 0553    | OP_CALL             1
 0555    | OP_CALL             1
 0557    | OP_POP
 0558   94 OP_GET_GLOBAL       0 '@println'
-0560    | OP_GET_GLOBAL      32 '@arrConcat'
+0560    | OP_GET_GLOBAL      32 '@listConcat'
 0562    | OP_CALL             1
 0564    | OP_POP
 0565   95 OP_GET_GLOBAL       0 '@println'
 0567    | OP_GET_GLOBAL       2 '@typeof'
-0569    | OP_GET_GLOBAL      32 '@arrConcat'
+0569    | OP_GET_GLOBAL      32 '@listConcat'
 0571    | OP_CALL             1
 0573    | OP_CALL             1
 0575    | OP_POP
 0576   97 OP_GET_GLOBAL       0 '@println'
-0578    | OP_GET_GLOBAL      33 '@arrReverse'
+0578    | OP_GET_GLOBAL      33 '@listReverse'
 0580    | OP_CALL             1
 0582    | OP_POP
 0583   98 OP_GET_GLOBAL       0 '@println'
 0585    | OP_GET_GLOBAL       2 '@typeof'
-0587    | OP_GET_GLOBAL      33 '@arrReverse'
+0587    | OP_GET_GLOBAL      33 '@listReverse'
 0589    | OP_CALL             1
 0591    | OP_CALL             1
 0593    | OP_POP

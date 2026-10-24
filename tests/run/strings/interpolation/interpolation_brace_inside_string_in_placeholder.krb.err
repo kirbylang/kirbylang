@@ -14,7 +14,7 @@
 0022    | OP_CONSTANT         6 '{}'
 0024    | OP_CONSTANT         7 ' and '
 0026    | OP_GET_GLOBAL       0 'name'
-0028    | OP_ARRAY            3
+0028    | OP_LIST             3
 0030    | OP_CALL             1
 0032    | OP_CALL             1
 0034    | OP_POP
@@ -25,10 +25,10 @@
 0043    | OP_CONSTANT         3 '}'
 0045    | OP_GET_GLOBAL       0 'name'
 0047    | OP_CONSTANT         4 '{'
-0049    | OP_ARRAY            3
+0049    | OP_LIST             3
 0051    | OP_CALL             1
 0053    | OP_CONSTANT         9 ' b'
-0055    | OP_ARRAY            3
+0055    | OP_LIST             3
 0057    | OP_CALL             1
 0059    | OP_CALL             1
 0061    | OP_POP

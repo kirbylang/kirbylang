@@ -14,7 +14,7 @@
 0024    | OP_GET_GLOBAL       0 'version'
 0026    | OP_EQUAL
 0027    | OP_CALL             1
-0029    | OP_ARRAY            2
+0029    | OP_LIST             2
 0031    | OP_CALL             1
 0033    | OP_CALL             1
 0035    | OP_POP

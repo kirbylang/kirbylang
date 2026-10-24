@@ -1,0 +1,3 @@
+var array: [bool] = [true, true, false];
+
+@println(@listContains(array, false));

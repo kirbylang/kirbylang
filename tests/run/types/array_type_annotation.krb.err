@@ -1,15 +1,15 @@
 == <script> ==
 0000    1 OP_CONSTANT         1 '1'
 0002    | OP_CONSTANT         2 '2.5'
-0004    | OP_ARRAY            2
+0004    | OP_LIST             2
 0006    | OP_DEFINE_GLOBAL    0 'floats'
 0008    2 OP_GET_GLOBAL       3 '@println'
 0010    | OP_GET_GLOBAL       0 'floats'
 0012    | OP_CALL             1
 0014    | OP_POP
-0015    4 OP_ARRAY            0
+0015    4 OP_LIST             0
 0017    | OP_DEFINE_GLOBAL    4 'words'
-0019    5 OP_GET_GLOBAL       5 '@arrPush'
+0019    5 OP_GET_GLOBAL       5 '@listPush'
 0021    | OP_GET_GLOBAL       4 'words'
 0023    | OP_CONSTANT         6 'a'
 0025    | OP_CALL             2
@@ -19,11 +19,11 @@
 0032    | OP_CALL             1
 0034    | OP_POP
 0035    8 OP_CONSTANT         8 '1'
-0037    | OP_ARRAY            1
+0037    | OP_LIST             1
 0039    | OP_CONSTANT         9 '2'
 0041    | OP_CONSTANT        10 '3'
-0043    | OP_ARRAY            2
-0045    | OP_ARRAY            2
+0043    | OP_LIST             2
+0045    | OP_LIST             2
 0047    | OP_DEFINE_GLOBAL    7 'nested'
 0049    9 OP_GET_GLOBAL       3 '@println'
 0051    | OP_GET_GLOBAL       7 'nested'
@@ -35,7 +35,7 @@
 0062    | OP_CALL             2
 0064    | OP_DEFINE_GLOBAL   11 'fromSplit'
 0066   12 OP_GET_GLOBAL       3 '@println'
-0068    | OP_GET_GLOBAL      15 '@arrLen'
+0068    | OP_GET_GLOBAL      15 '@listLen'
 0070    | OP_GET_GLOBAL      11 'fromSplit'
 0072    | OP_CALL             1
 0074    | OP_CALL             1

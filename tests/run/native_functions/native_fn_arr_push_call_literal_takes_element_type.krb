@@ -1,6 +1,0 @@
-let floats = [1.5];
-@arrPush(floats, 2);
-@arrInsert(floats, 0, 3);
-@println(floats);
-@println(@typeof(floats[0]));
-@println(@arrContains(floats, 2));

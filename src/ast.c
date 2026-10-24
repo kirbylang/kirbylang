@@ -621,11 +621,26 @@ static void printNode(StrBuf *sb, AstNode *node) {
     sb_append(sb, ")");
     break;
 
-  case NODE_TYPE_ARRAY:
+  case NODE_TYPE_LIST:
     sb_append(sb, "[");
-    printNode(sb, node->as.typeArray.elementType);
+    printNode(sb, node->as.typeList.elementType);
     sb_append(sb, "]");
     break;
+
+  case NODE_TYPE_ARRAY: {
+    char length[16];
+    if (node->as.typeArray.length < 0)
+      snprintf(length, sizeof(length), "%c",
+               "NM"[-1 - node->as.typeArray.length]);
+    else
+      snprintf(length, sizeof(length), "%d", node->as.typeArray.length);
+    sb_append(sb, "[");
+    printNode(sb, node->as.typeArray.elementType);
+    sb_append(sb, "; ");
+    sb_append(sb, length);
+    sb_append(sb, "]");
+    break;
+  }
   }
 }
 

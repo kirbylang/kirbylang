@@ -14,7 +14,7 @@
 0022    | OP_GET_GLOBAL       0 'a'
 0024    | OP_GET_GLOBAL       1 'b'
 0026    | OP_CONSTANT         4 'c'
-0028    | OP_ARRAY            3
+0028    | OP_LIST             3
 0030    | OP_CALL             1
 0032    | OP_CALL             1
 0034    | OP_POP
@@ -24,7 +24,7 @@
 0041    | OP_GET_GLOBAL       0 'a'
 0043    | OP_GET_GLOBAL       1 'b'
 0045    | OP_CONSTANT         6 'y'
-0047    | OP_ARRAY            4
+0047    | OP_LIST             4
 0049    | OP_CALL             1
 0051    | OP_CALL             1
 0053    | OP_POP

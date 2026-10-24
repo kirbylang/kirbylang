@@ -1,5 +1,6 @@
 #include <errno.h>
 #include <float.h>
+#include <limits.h>
 #include <math.h>
 #include <stdbool.h>
 #include <stdio.h>
@@ -12,6 +13,7 @@
 #include "parser.h"
 #include "token.h"
 #include "token_stream.h"
+#include "types.h"
 
 #ifndef TRACELN
 #define TRACELN(...) ((void)0)
@@ -28,6 +30,11 @@ typedef struct {
    * and are only legal where this is 0.
    */
   int blockDepth;
+  /**
+   * Whether an array type may name its length with a placeholder such as
+   * `[T; N]`. Only native function signatures do.
+   */
+  bool allowLengthPlaceholders;
 } Parser;
 
 typedef enum {
@@ -1155,6 +1162,44 @@ static AstNode *statement(Parser *p) {
   return expressionStatement(p);
 }
 
+// Reads the length of an array type from the number just consumed.
+static int parseArrayLength(Parser *p) {
+  const char *text = p->previous.start;
+  int length = p->previous.length;
+  long value = 0;
+
+  for (int i = 0; i < length; i++) {
+    if (text[i] < '0' || text[i] > '9') {
+      parse_error(p, "Array length must be a whole number.");
+      return 0;
+    }
+
+    value = value * 10 + (text[i] - '0');
+
+    if (value > INT_MAX) {
+      parse_error(p, "Array length is too large.");
+      return 0;
+    }
+  }
+
+  return (int)value;
+}
+
+// Reads a length placeholder, `N` or `M`, from the identifier just consumed.
+static int parseArrayLengthPlaceholder(Parser *p) {
+  static const char names[] = "NM";
+
+  if (p->previous.length == 1) {
+    for (int i = 0; names[i] != '\0'; i++) {
+      if (p->previous.start[0] == names[i])
+        return ARRAY_LENGTH_PLACEHOLDER(i);
+    }
+  }
+
+  parse_error(p, "Expect a length placeholder, N or M.");
+  return 0;
+}
+
 static AstNode *parseType(Parser *p) {
   if (match(p, TOKEN_FUN)) {
     int line = p->previous.line;
@@ -1196,10 +1241,29 @@ static AstNode *parseType(Parser *p) {
   if (match(p, TOKEN_LEFT_BRACKET)) {
     int line = p->previous.line;
     AstNode *elementType = parseType(p);
-    consume(p, TOKEN_RIGHT_BRACKET, "Expect ']' after array element type.");
 
-    AstNode *node = astAlloc(NODE_TYPE_ARRAY, line);
-    node->as.typeArray.elementType = elementType;
+    if (match(p, TOKEN_SEMICOLON)) {
+      int length;
+
+      if (p->allowLengthPlaceholders && match(p, TOKEN_IDENTIFIER)) {
+        length = parseArrayLengthPlaceholder(p);
+      } else {
+        consume(p, TOKEN_NUMBER, "Expect array length after ';'.");
+        length = parseArrayLength(p);
+      }
+
+      consume(p, TOKEN_RIGHT_BRACKET, "Expect ']' after array length.");
+
+      AstNode *node = astAlloc(NODE_TYPE_ARRAY, line);
+      node->as.typeArray.elementType = elementType;
+      node->as.typeArray.length = length;
+      return node;
+    }
+
+    consume(p, TOKEN_RIGHT_BRACKET, "Expect ']' after list element type.");
+
+    AstNode *node = astAlloc(NODE_TYPE_LIST, line);
+    node->as.typeList.elementType = elementType;
     return node;
   }
 
@@ -1761,6 +1825,7 @@ static void initParser(Parser *parser, TokenStream *tokens) {
   parser->hadError = false;
   parser->panicMode = false;
   parser->blockDepth = 0;
+  parser->allowLengthPlaceholders = false;
   advance(parser);
 }
 
@@ -1798,6 +1863,8 @@ AstNode *parseTypeText(const char *source, bool *hadError) {
 
   Parser parser;
   initParser(&parser, &tokens);
+
+  parser.allowLengthPlaceholders = true;
 
   AstNode *type = parseType(&parser);
   consume(&parser, TOKEN_EOF, "Expect end of type.");

@@ -2,9 +2,9 @@
 0000    1 OP_CONSTANT         1 '1'
 0002    | OP_CONSTANT         2 '2'
 0004    | OP_CONSTANT         3 '3'
-0006    | OP_ARRAY            3
+0006    | OP_LIST             3
 0008    | OP_DEFINE_GLOBAL    0 'array'
-0010    2 OP_GET_GLOBAL       4 '@arrInsert'
+0010    2 OP_GET_GLOBAL       4 '@listInsert'
 0012    | OP_GET_GLOBAL       0 'array'
 0014    | OP_CONSTANT         5 '1'
 0016    | OP_CONSTANT         6 '9'
@@ -15,7 +15,7 @@
 0025    | OP_CALL             1
 0027    | OP_POP
 0028    4 OP_GET_GLOBAL       7 '@println'
-0030    | OP_GET_GLOBAL       8 '@arrRemove'
+0030    | OP_GET_GLOBAL       8 '@listRemove'
 0032    | OP_GET_GLOBAL       0 'array'
 0034    | OP_CONSTANT         9 '0'
 0036    | OP_CALL             2
@@ -26,7 +26,7 @@
 0045    | OP_CALL             1
 0047    | OP_POP
 0048    6 OP_GET_GLOBAL       7 '@println'
-0050    | OP_GET_GLOBAL      10 '@arrSlice'
+0050    | OP_GET_GLOBAL      10 '@listSlice'
 0052    | OP_GET_GLOBAL       0 'array'
 0054    | OP_CONSTANT        11 '1'
 0056    | OP_CONSTANT        12 '3'

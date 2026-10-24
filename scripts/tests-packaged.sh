@@ -47,7 +47,7 @@ TESTS=(
     run/native_functions/native_fn_prompt_call.krb
     run/native_functions/native_fn_getenv_call.krb
     run/native_functions/native_fn_exit_call.krb
-    run/arrays/array_index_get_out_of_bounds.krb
+    run/lists/array_index_get_out_of_bounds.krb
 
     # Public and private members
     run/structs/struct_private_field_self.krb

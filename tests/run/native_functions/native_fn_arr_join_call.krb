@@ -1,6 +1,3 @@
-var parts = ["Hello", "World"];
-
+let parts = ["Hello", "World"];
 @println(@arrJoin(parts, " "));
-@println(@arrJoin(parts, ", "));
 @println(@arrJoin(parts, ""));
-@println(parts);

@@ -3,4 +3,5 @@
 @println([true, false]);
 @println([nil]);
 @println([@version]);
-@println([]);
+let empty: [i64] = [];
+@println(empty);

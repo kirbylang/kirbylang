@@ -1,0 +1,4 @@
+fun first(a: [i64; 3]): i64 {
+  return 0;
+}
+@println("ok");

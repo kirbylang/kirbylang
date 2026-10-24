@@ -1,3 +1,0 @@
-var parts = ["a", "b"];
-
-@arrJoin(parts, ", ", "extra");

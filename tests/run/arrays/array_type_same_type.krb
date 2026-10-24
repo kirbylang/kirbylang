@@ -1,0 +1,7 @@
+fun f(a: [i64; 2]): [i64; 2] {
+  return a;
+}
+fun g(b: [i64; 2]): [i64; 2] {
+  return f(b);
+}
+@println("ok");

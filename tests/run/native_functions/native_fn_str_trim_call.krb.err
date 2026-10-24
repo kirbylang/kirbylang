@@ -6,7 +6,7 @@
 0008    | OP_CONSTANT         4 '  hello  '
 0010    | OP_CALL             1
 0012    | OP_CONSTANT         5 ']'
-0014    | OP_ARRAY            3
+0014    | OP_LIST             3
 0016    | OP_CALL             1
 0018    | OP_CALL             1
 0020    | OP_POP
@@ -19,7 +19,7 @@
 '
 0031    | OP_CALL             1
 0033    | OP_CONSTANT         5 ']'
-0035    | OP_ARRAY            3
+0035    | OP_LIST             3
 0037    | OP_CALL             1
 0039    | OP_CALL             1
 0041    | OP_POP
@@ -30,7 +30,7 @@
 0050    | OP_CONSTANT         7 'no-trim'
 0052    | OP_CALL             1
 0054    | OP_CONSTANT         5 ']'
-0056    | OP_ARRAY            3
+0056    | OP_LIST             3
 0058    | OP_CALL             1
 0060    | OP_CALL             1
 0062    | OP_POP
@@ -41,7 +41,7 @@
 0071    | OP_CONSTANT         8 '   '
 0073    | OP_CALL             1
 0075    | OP_CONSTANT         5 ']'
-0077    | OP_ARRAY            3
+0077    | OP_LIST             3
 0079    | OP_CALL             1
 0081    | OP_CALL             1
 0083    | OP_POP
@@ -52,7 +52,7 @@
 0092    | OP_CONSTANT         9 ''
 0094    | OP_CALL             1
 0096    | OP_CONSTANT         5 ']'
-0098    | OP_ARRAY            3
+0098    | OP_LIST             3
 0100    | OP_CALL             1
 0102    | OP_CALL             1
 0104    | OP_POP
@@ -63,7 +63,7 @@
 0113    | OP_CONSTANT        10 ' a  b '
 0115    | OP_CALL             1
 0117    | OP_CONSTANT         5 ']'
-0119    | OP_ARRAY            3
+0119    | OP_LIST             3
 0121    | OP_CALL             1
 0123    | OP_CALL             1
 0125    | OP_POP

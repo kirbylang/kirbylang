@@ -8,7 +8,7 @@
 0012    | OP_CONSTANT         5 '1'
 0014    | OP_CONSTANT         6 '2'
 0016    | OP_CONSTANT         7 '3'
-0018    | OP_ARRAY            3
+0018    | OP_LIST             3
 0020    | OP_CALL             1
 0022    | OP_CALL             1
 0024    | OP_POP
@@ -23,7 +23,7 @@
 0040    | OP_GET_GLOBAL       8 'apply'
 0042    | OP_CONSTANT         9 '4'
 0044    | OP_CONSTANT        10 '5'
-0046    | OP_ARRAY            2
+0046    | OP_LIST             2
 0048    | OP_CALL             1
 0050    | OP_CALL             1
 0052    | OP_POP
@@ -33,7 +33,7 @@
 0000    2 OP_CONSTANT         0 '0'
 0002    4 OP_CONSTANT         0 '0'
 0004    | OP_GET_LOCAL        3
-0006    | OP_GET_GLOBAL       1 '@arrLen'
+0006    | OP_GET_GLOBAL       1 '@listLen'
 0008    | OP_GET_LOCAL        1
 0010    | OP_CALL             1
 0012    | OP_LESS
@@ -61,5 +61,5 @@
 == names ==
 0000   11 OP_CONSTANT         0 'kirby'
 0002    | OP_CONSTANT         1 'lang'
-0004    | OP_ARRAY            2
+0004    | OP_LIST             2
 0006    | OP_RETURN

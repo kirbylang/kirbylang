@@ -28,14 +28,14 @@ array literal count too.
 ```
 let half: f64 = 7 / 2;     // 3.5
 let byte: u8 = 200 + 55;   // 255
-let mixed = [1, 2.5];      // [f64]
+let mixed = [1, 2.5];      // [f64; 2]
 ```
 
 Variables, suffixed literals (`2i64`) and decimal literals keep their own type.
 
-### Arrays
+### Lists
 
-An array holds items that all share one type. The type is written as the item type in brackets: `[i64]` is an array of `i64`, and `[[string]]` is an array of arrays of `string`.
+A list holds items that all share one type, and can grow and shrink. The type is written as the item type in brackets: `[i64]` is a list of `i64`, and `[[string]]` is a list of lists of `string`.
 
 ```
 let numbers: [i64] = [1, 2, 3];
@@ -43,6 +43,31 @@ let names: [string] = [];
 
 @println(numbers[0]);
 ```
+
+### Arrays
+
+An array holds a fixed number of items that all share one type. The length is part of the type and is written after the item type: `[i64; 3]` is an array of three `i64`s. The length is a whole number literal, and `[i64; 0]` is allowed.
+
+```
+fun first(values: [i64; 3]): i64 {
+    return values[0];
+}
+```
+
+A literal such as `[1, 2, 3]` is an array of that many items, unless its type is asked for. With a list type expected, the same literal is a list, and with an array type expected it must have exactly that many items. An empty literal `[]` has no items to learn a type from, so it needs a type to be expected, and a list or an array type both work.
+
+```
+let a = [1, 2, 3];              // [i64; 3]
+let b: [i64] = [1, 2, 3];       // [i64]
+let c: [i64; 3] = [1, 2, 3];    // [i64; 3]
+let d: [i64] = [];              // an empty list
+let f = [];                     // error: no item type
+let e: [i64; 2] = [1, 2, 3];    // error: 3 items
+```
+
+An index that is a number literal past the end of an array is an error when the program is compiled. Any other bad index is an error when the program runs.
+
+Two array types are the same type when both the item type and the length match. `[i64; 3]` is not `[i64; 4]`, and neither is `[i64]`. A list is never accepted where an array is expected, and an array is never accepted where a list is expected.
 
 ### Structs
 
@@ -269,17 +294,25 @@ let round: fun (f64) => f64 = @ceil;
 @println(round(1.2));
 ```
 
-Array natives are typed by their element type, written `T` in their
-signatures. `@arrPop` is `fun ([T]) => T`, so popping from an array of `i64`
-gives an `i64`, and `@arrPush(numbers, 2.5)` is an error when `numbers` holds
-`i64`s. Positions, such as the index of `@arrInsert`, take an integer of any
+List natives are typed by their element type, written `T` in their
+signatures. `@listPop` is `fun ([T]) => T`, so popping from a list of `i64`
+gives an `i64`, and `@listPush(numbers, 2.5)` is an error when `numbers` holds
+`i64`s. Positions, such as the index of `@listInsert`, take an integer of any
 kind.
 
 ```
-let words = ["a", "b"];
-let last = @arrPop(words);   // string
-@arrPush(words, 1);          // Error: Expected string, got i64.
+let words: [string] = ["a", "b"];
+let last = @listPop(words);   // string
+@listPush(words, 1);          // Error: Expected string, got i64.
 ```
+
+Array natives, such as `@arrLen` and `@arrCopy`, also name the array's length
+in their signatures with the placeholders `N` and `M`. `@arrCopy` is
+`fun ([T; N]) => [T; N]`, so copying a `[i64; 3]` gives a `[i64; 3]`.
+`@arrEqual` is `fun ([T; N], [T; N]) => bool`, so comparing arrays of different
+lengths is an error. `@arrSlice` and `@arrConcat` give a list, because the
+length of the result isn't known until the program runs. Only native signatures
+can use `N` and `M`.
 
 A native whose type can't be spelled yet has no signature, and calls to it
 are checked at runtime instead. That covers `@typeof`, `@instanceOf`, the

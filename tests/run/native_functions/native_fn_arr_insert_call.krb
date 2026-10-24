@@ -1,6 +1,0 @@
-var array = ["Testing"];
-
-@arrInsert(array, 0, "Hello");
-@arrInsert(array, 1, "World");
-
-@println(array);

@@ -1,4 +1,0 @@
-var array = [1, 2, 3];
-
-@println(@arrContains(array, 2));
-@println(@arrContains(array, 100));

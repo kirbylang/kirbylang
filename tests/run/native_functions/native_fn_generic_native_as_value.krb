@@ -1,2 +1,3 @@
-let pop = @arrPop;
-@println(pop([1, 2]));
+let pop = @listPop;
+let xs: [i64] = [1, 2];
+@println(pop(xs));

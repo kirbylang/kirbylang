@@ -1,1 +1,3 @@
-@println(@arrConcat([1], [2.5]));
+let a = [1, 2];
+let b = ["a"];
+@arrConcat(a, b);

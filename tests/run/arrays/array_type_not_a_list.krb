@@ -1,0 +1,6 @@
+fun total(xs: [i64]): i64 {
+  return 0;
+}
+fun f(a: [i64; 2]): unit {
+  total(a);
+}

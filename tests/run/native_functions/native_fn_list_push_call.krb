@@ -1,0 +1,5 @@
+var array: [i64] = [];
+
+@listPush(array, 123);
+
+@println(array);

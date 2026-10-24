@@ -1,0 +1,4 @@
+var array: [i64] = [1, 2, 3];
+
+@println(@listContains(array, 2));
+@println(@listContains(array, 100));

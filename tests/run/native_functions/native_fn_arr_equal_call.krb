@@ -1,17 +1,6 @@
-var a = [1, 2, 3];
-var b = a;
-var c = @arrCopy(a);
-
-@println("Before");
-
+let a = [1, 2, 3];
+let b = [1, 2, 3];
+let c = [1, 2, 4];
+@println(@arrEqual(a, a));
 @println(@arrEqual(a, b));
-@println(@arrEqual(b, c));
-@println(@arrEqual(a, c));
-
-c[0] = 100;
-
-@println("After");
-
-@println(@arrEqual(a, b));
-@println(@arrEqual(b, c));
 @println(@arrEqual(a, c));

@@ -1,0 +1,4 @@
+let xs: [i64] = [1, 2, 3];
+@listPush(xs, 4);
+@println(xs);
+@println(@typeof(xs));

@@ -29,7 +29,7 @@
 0053    | OP_CONSTANT        11 'one: '
 0055    | OP_GET_GLOBAL       4 'box'
 0057    | OP_INVOKE        (0 args)    2 'toString'
-0060    | OP_ARRAY            2
+0060    | OP_LIST             2
 0062    | OP_CALL             1
 0064    | OP_CALL             1
 0066    | OP_POP
@@ -45,7 +45,7 @@
 0085    | OP_CONSTANT        15 '1'
 0087    | OP_GET_INDEX
 0088    | OP_INVOKE        (0 args)    2 'toString'
-0091    | OP_ARRAY            4
+0091    | OP_LIST             4
 0093    | OP_CALL             1
 0095    | OP_CALL             1
 0097    | OP_POP
@@ -64,6 +64,6 @@
 0008    | OP_GET_PROPERTY     3 'value'
 0010    | OP_CALL             1
 0012    | OP_CONSTANT         4 ')'
-0014    | OP_ARRAY            3
+0014    | OP_LIST             3
 0016    | OP_CALL             1
 0018    | OP_RETURN

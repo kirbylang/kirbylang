@@ -17,7 +17,7 @@ struct StringBuilder {
 
 impl StringBuilder {
     pub fun add(self, add: string): Self {
-        @arrPush(self.value, add);
+        @listPush(self.value, add);
 
         self
     }

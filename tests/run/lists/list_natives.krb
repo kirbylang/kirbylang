@@ -1,0 +1,4 @@
+let xs: [i64] = [1];
+@listPush(xs, 2);
+@println(@listLen(xs));
+@println(@listPop(xs));

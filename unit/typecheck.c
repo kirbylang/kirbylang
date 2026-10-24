@@ -355,15 +355,15 @@ static void test_native_call_without_a_signature_is_unchecked(void) {
 
 static void test_generic_array_param_accepts_every_array(void) {
   typchkResetError();
-  TypeEnv *env = checkProgram("var a = @arrLen([1, 2]); var b = @arrLen([]); "
-                              "var c = @arrLen([\"x\"]);");
+  TypeEnv *env = checkProgram("var a = @listLen([1, 2]); var b = @listLen([]); "
+                              "var c = @listLen([\"x\"]);");
   assert(!typchkHadError());
   assert(typchkTypeEnvLookup(env, tokenFromCString("a")) ==
          typeNumber(NUMBER_KIND_I64));
   typchkTypeEnvDestroy(env);
 
   typchkResetError();
-  env = checkProgram("var d = @arrLen(\"abc\");");
+  env = checkProgram("var d = @listLen(\"abc\");");
   assert(typchkHadError());
   typchkTypeEnvDestroy(env);
 }
@@ -402,8 +402,8 @@ static void test_generic_call_fills_params_from_a_lambda(void) {
       "var names = @testMap([1, 2], fun (n) { @numberToString(n) });");
   assert(!typchkHadError());
   Type *names = typchkTypeEnvLookup(env, tokenFromCString("names"));
-  assert(names != NULL && names->kind == TYPE_ARRAY);
-  assert(names->as.array.elementType == typeString());
+  assert(names != NULL && names->kind == TYPE_LIST);
+  assert(names->as.list.elementType == typeString());
   typchkTypeEnvDestroy(env);
 }
 
@@ -438,8 +438,8 @@ static void test_generic_call_leaves_unfilled_params_unknown(void) {
       "@testMap", mapType(), "var mapped = @testMap([], fun (n) { n });");
   assert(!typchkHadError());
   Type *mapped = typchkTypeEnvLookup(env, tokenFromCString("mapped"));
-  assert(mapped != NULL && mapped->kind == TYPE_ARRAY);
-  assert(mapped->as.array.elementType == NULL);
+  assert(mapped != NULL && mapped->kind == TYPE_LIST);
+  assert(mapped->as.list.elementType == NULL);
   typchkTypeEnvDestroy(env);
 }
 
@@ -661,16 +661,65 @@ static void test_self_outside_method_errors(void) {
 static void test_array_literal_and_index(void) {
   typchkResetError();
   TypeEnv *env = checkProgram(
-      "var nums = [1, 2, 3]; var first = nums[0]; var empty = [];");
+      "var nums = [1, 2, 3]; var first = nums[0]; var empty: [i64] = [];");
   assert(!typchkHadError());
   Type *numsType = typchkTypeEnvLookup(env, tokenFromCString("nums"));
   assert(numsType != NULL && numsType->kind == TYPE_ARRAY);
+  assert(numsType->as.array.length == 3);
   assert(numsType->as.array.elementType == typeNumber(NUMBER_KIND_I64));
   assert(typchkTypeEnvLookup(env, tokenFromCString("first")) ==
          typeNumber(NUMBER_KIND_I64));
   Type *emptyType = typchkTypeEnvLookup(env, tokenFromCString("empty"));
-  assert(emptyType != NULL && emptyType->kind == TYPE_ARRAY);
-  assert(emptyType->as.array.elementType == NULL);
+  assert(emptyType != NULL && emptyType->kind == TYPE_LIST);
+  assert(emptyType->as.list.elementType == typeNumber(NUMBER_KIND_I64));
+  typchkTypeEnvDestroy(env);
+}
+
+static void test_annotated_literal_is_a_list_or_an_array(void) {
+  typchkResetError();
+  TypeEnv *env = checkProgram(
+      "var xs: [i64] = [1, 2]; var ys: [i64; 2] = [1, 2]; var zs: [i64] = [];");
+  assert(!typchkHadError());
+  Type *xs = typchkTypeEnvLookup(env, tokenFromCString("xs"));
+  Type *ys = typchkTypeEnvLookup(env, tokenFromCString("ys"));
+  Type *zs = typchkTypeEnvLookup(env, tokenFromCString("zs"));
+  assert(xs != NULL && xs->kind == TYPE_LIST);
+  assert(ys != NULL && ys->kind == TYPE_ARRAY && ys->as.array.length == 2);
+  assert(zs != NULL && zs->kind == TYPE_LIST);
+  typchkTypeEnvDestroy(env);
+}
+
+static void test_empty_literal_needs_a_type(void) {
+  typchkResetError();
+  TypeEnv *env = checkProgram("var xs = [];");
+  assert(typchkHadError());
+  typchkTypeEnvDestroy(env);
+  typchkResetError();
+
+  env = checkProgram("var xs: [i64; 0] = [];");
+  assert(!typchkHadError());
+  Type *xs = typchkTypeEnvLookup(env, tokenFromCString("xs"));
+  assert(xs != NULL && xs->kind == TYPE_ARRAY && xs->as.array.length == 0);
+  typchkTypeEnvDestroy(env);
+}
+
+static void test_array_literal_with_wrong_count_errors(void) {
+  typchkResetError();
+  TypeEnv *env = checkProgram("var xs: [i64; 3] = [1, 2];");
+  assert(typchkHadError());
+  typchkTypeEnvDestroy(env);
+  typchkResetError();
+}
+
+static void test_array_literal_index_past_the_end_errors(void) {
+  typchkResetError();
+  TypeEnv *env = checkProgram("var xs = [1, 2]; var x = xs[2];");
+  assert(typchkHadError());
+  typchkTypeEnvDestroy(env);
+  typchkResetError();
+
+  env = checkProgram("var xs = [1, 2]; var i = 2; var x = xs[i];");
+  assert(!typchkHadError());
   typchkTypeEnvDestroy(env);
 }
 
@@ -1463,6 +1512,10 @@ int main(void) {
   test_self_type();
   test_self_outside_method_errors();
   test_array_literal_and_index();
+  test_annotated_literal_is_a_list_or_an_array();
+  test_empty_literal_needs_a_type();
+  test_array_literal_with_wrong_count_errors();
+  test_array_literal_index_past_the_end_errors();
   test_array_heterogeneous_elements_error();
   test_index_non_array_errors();
   test_if_expression();

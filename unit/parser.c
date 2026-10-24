@@ -70,7 +70,8 @@ void assert_ast(const char *path, const char *expected) {
 int main(void) {
   assert_ast("../tests/run/empty.krb", "");
 
-  assert_ast("../tests/run/arrays/array_empty.krb", "(array)\n");
+  assert_ast("../tests/run/lists/array_empty.krb",
+             "(let empty : [i64] (array))\n");
 
   assert_ast("../tests/run/comments.krb", "(call @println \"Hello World\")\n");
 
@@ -126,16 +127,16 @@ int main(void) {
   assert_ast("../tests/run/assignments/block_assignment_edge_case.krb",
              "(block (var a \"outer\") (value (block (var a a))))\n");
 
-  assert_ast("../tests/run/arrays/array_index_get.krb",
+  assert_ast("../tests/run/lists/array_index_get.krb",
              "(var array (array 1 2 3))\n"
              "(call @println (index-get array 2))\n");
 
-  assert_ast("../tests/run/arrays/array_index_set.krb",
+  assert_ast("../tests/run/lists/array_index_set.krb",
              "(var array (array 1 2 3))\n"
              "(index-set array 2 100)\n"
              "(call @println (index-get array 2))\n");
 
-  assert_ast("../tests/run/arrays/array_multidimensional.krb",
+  assert_ast("../tests/run/lists/array_multidimensional.krb",
              "(var array (array (array 10 20) (array 30 40)))\n"
              "(call @println (index-get (index-get array 0) 0))\n"
              "(call @println (index-get (index-get array 0) 1))\n"

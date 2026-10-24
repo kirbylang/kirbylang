@@ -268,7 +268,7 @@
 0506    | OP_GET_LOCAL        1
 0508    | OP_GET_LOCAL        1
 0510    | OP_GET_LOCAL        1
-0512    | OP_ARRAY          255
+0512    | OP_LIST           255
 0514    | OP_CALL             1
 0516    | OP_GET_LOCAL        1
 0518    | OP_ADD

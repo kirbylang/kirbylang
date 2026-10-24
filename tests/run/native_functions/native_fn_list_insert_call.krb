@@ -1,0 +1,6 @@
+var array: [string] = ["Testing"];
+
+@listInsert(array, 0, "Hello");
+@listInsert(array, 1, "World");
+
+@println(array);

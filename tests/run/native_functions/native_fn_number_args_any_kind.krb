@@ -1,9 +1,9 @@
-var array = [1, 2, 3];
-@arrInsert(array, 1u8, 9);
+var array: [i64] = [1, 2, 3];
+@listInsert(array, 1u8, 9);
 @println(array);
-@println(@arrRemove(array, 0i64));
+@println(@listRemove(array, 0i64));
 @println(array);
-@println(@arrSlice(array, 1i32, 3u16));
+@println(@listSlice(array, 1i32, 3u16));
 @println(@strSlice("hello", 1u8, 3i64));
 @println(@isNumber(5u8));
 @println(@isNumber(5i64));

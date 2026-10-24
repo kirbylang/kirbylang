@@ -42,6 +42,7 @@ typedef enum {
   NODE_TYPE,
   NODE_TYPE_ALIAS,
   NODE_TYPE_FUNCTION,
+  NODE_TYPE_LIST,
   NODE_TYPE_ARRAY,
   NODE_INTERP_STRING,
   NODE_CAST,
@@ -248,10 +249,18 @@ typedef struct {
 } TypeFunctionNode;
 
 /**
- * An array type, e.g. `[i64]`.
+ * A list type, e.g. `[i64]`.
  */
 typedef struct {
   AstNode *elementType;
+} TypeListNode;
+
+/**
+ * A fixed size array type, e.g. `[i64; 3]`.
+ */
+typedef struct {
+  AstNode *elementType;
+  int length;
 } TypeArrayNode;
 
 typedef struct {
@@ -418,6 +427,11 @@ typedef struct {
    */
   AstNode **items;
   int count;
+  /**
+   * Set by the type checker when the literal makes a fixed size array rather
+   * than a list.
+   */
+  bool isFixedSize;
 } ArrayNode;
 
 /**
@@ -492,6 +506,7 @@ struct AstNode {
     TypeNode type_;
     TypeAliasNode typeAlias;
     TypeFunctionNode typeFunction;
+    TypeListNode typeList;
     TypeArrayNode typeArray;
     InterpStringNode interpString;
     CastNode cast;

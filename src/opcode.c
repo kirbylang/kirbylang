@@ -47,7 +47,7 @@ static const OpInfo opInfos[OP_COUNT] = {
     [OP_METHOD] = {true, 1, -1, -1, 0},
     // The receiver and its arguments become the result.
     [OP_INVOKE] = {true, 2, 0, 1, -1},
-    [OP_ARRAY] = {true, 1, 1, 0, -1},
+    [OP_LIST] = {true, 1, 1, 0, -1},
     [OP_GET_INDEX] = {true, 0, -1, -1, 0},
     [OP_SET_INDEX] = {true, 0, -2, -1, 0},
     // The block's locals are removed from under its result.
@@ -55,6 +55,7 @@ static const OpInfo opInfos[OP_COUNT] = {
     // A number is converted to the operand's target kind; the result takes
     // the operand's place on the stack.
     [OP_CAST] = {true, 1, 0, -1, 0},
+    [OP_ARRAY] = {true, 1, 1, 0, -1},
 };
 
 const OpInfo *opInfo(OpCode op) {

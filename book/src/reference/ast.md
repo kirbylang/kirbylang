@@ -67,6 +67,7 @@ struct AstNode {
 		TypeNode type_;
 		TypeAliasNode typeAlias;
 		TypeFunctionNode typeFunction;
+		TypeListNode typeList;
 		TypeArrayNode typeArray;
 		InterpStringNode interpString;
 		CastNode cast;
@@ -260,10 +261,18 @@ typedef struct {
 } TypeFunctionNode;
 
 /**
- * An array type, e.g. `[i64]`.
+ * A list type, e.g. `[i64]`.
  */
 typedef struct {
   AstNode *elementType;
+} TypeListNode;
+
+/**
+ * A fixed size array type, e.g. `[i64; 3]`.
+ */
+typedef struct {
+  AstNode *elementType;
+  int length;
 } TypeArrayNode;
 ```
 
@@ -579,6 +588,7 @@ void arrayNodeDataFree(ArrayNodeData *and);
 |  30 | `NODE_TYPE`          |
 |  31 | `NODE_TYPE_ALIAS`    |
 |  32 | `NODE_TYPE_FUNCTION` |
-|  33 | `NODE_TYPE_ARRAY`    |
-|  34 | `NODE_INTERP_STRING` |
-|  35 | `NODE_CAST`          |
+|  33 | `NODE_TYPE_LIST`     |
+|  34 | `NODE_TYPE_ARRAY`    |
+|  35 | `NODE_INTERP_STRING` |
+|  36 | `NODE_CAST`          |

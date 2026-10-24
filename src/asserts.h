@@ -10,6 +10,8 @@ void assertArgCount(VM *vm, const char *function, int expectedCount,
 void assertArgIsBool(VM *vm, const char *function, Value *args, int index);
 void assertArgIsStruct(VM *vm, const char *function, Value *args, int index);
 void assertArgIsArray(VM *vm, const char *function, Value *args, int index);
+void assertArgIsList(VM *vm, const char *function, Value *args, int index);
+void assertIsInListBounds(VM *vm, ObjList *array, int index);
 void assertIsInArrayBounds(VM *vm, ObjArray *array, int index);
 void assertArgIsInstance(VM *vm, const char *function, Value *args, int index);
 void assertArgIsNumber(VM *vm, const char *function, Value *args, int index);

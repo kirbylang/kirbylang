@@ -34,8 +34,8 @@
 @println(@strLen);
 @println(@typeof(@strLen));
 
-@println(@arrLen);
-@println(@typeof(@arrLen));
+@println(@listLen);
+@println(@typeof(@listLen));
 
 @println(@typeof);
 @println(@typeof(@typeof));
@@ -67,35 +67,35 @@
 @println(@numberToString);
 @println(@typeof(@numberToString));
 
-@println(@arrPush);
-@println(@typeof(@arrPush));
+@println(@listPush);
+@println(@typeof(@listPush));
 
-@println(@arrPop);
-@println(@typeof(@arrPop));
+@println(@listPop);
+@println(@typeof(@listPop));
 
-@println(@arrInsert);
-@println(@typeof(@arrInsert));
+@println(@listInsert);
+@println(@typeof(@listInsert));
 
-@println(@arrRemove);
-@println(@typeof(@arrRemove));
+@println(@listRemove);
+@println(@typeof(@listRemove));
 
-@println(@arrCopy);
-@println(@typeof(@arrCopy));
+@println(@listCopy);
+@println(@typeof(@listCopy));
 
-@println(@arrIsEmpty);
-@println(@typeof(@arrIsEmpty));
+@println(@listIsEmpty);
+@println(@typeof(@listIsEmpty));
 
-@println(@arrEqual);
-@println(@typeof(@arrEqual));
+@println(@listEqual);
+@println(@typeof(@listEqual));
 
-@println(@arrSlice);
-@println(@typeof(@arrSlice));
+@println(@listSlice);
+@println(@typeof(@listSlice));
 
-@println(@arrConcat);
-@println(@typeof(@arrConcat));
+@println(@listConcat);
+@println(@typeof(@listConcat));
 
-@println(@arrReverse);
-@println(@typeof(@arrReverse));
+@println(@listReverse);
+@println(@typeof(@listReverse));
 
 @println(@is);
 @println(@typeof(@is));

@@ -1,3 +1,0 @@
-var value = false;
-
-@arrInsert(value, 0, "Hello");

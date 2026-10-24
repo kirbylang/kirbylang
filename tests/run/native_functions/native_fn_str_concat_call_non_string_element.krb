@@ -1,2 +1,2 @@
-let numbers = [1, 2];
+let numbers: [i64] = [1, 2];
 @println(@strConcat(numbers));

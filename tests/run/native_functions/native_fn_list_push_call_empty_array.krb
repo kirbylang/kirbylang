@@ -1,0 +1,4 @@
+var words: [string] = [];
+@listPush(words, "hello");
+@println(words);
+@println(@listLen([]));

@@ -1,5 +1,5 @@
 let bytes: [u8] = @strToBytes("AB");
-@println(@arrLen(bytes));
+@println(@listLen(bytes));
 @println(bytes[0]);
 @println(bytes[1]);
 @println(@typeof(bytes[0]));

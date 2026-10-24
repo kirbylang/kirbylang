@@ -1,0 +1,31 @@
+== <script> ==
+0000    1 OP_CONSTANT         1 '1'
+0002    | OP_CONSTANT         2 '2'
+0004    | OP_CONSTANT         3 '3'
+0006    | OP_ARRAY            3
+0008    | OP_DEFINE_GLOBAL    0 'a'
+0010    2 OP_GET_GLOBAL       5 '@arrToList'
+0012    | OP_GET_GLOBAL       0 'a'
+0014    | OP_CALL             1
+0016    | OP_DEFINE_GLOBAL    4 'xs'
+0018    3 OP_GET_GLOBAL       6 '@listPush'
+0020    | OP_GET_GLOBAL       4 'xs'
+0022    | OP_CONSTANT         7 '4'
+0024    | OP_CALL             2
+0026    | OP_POP
+0027    4 OP_GET_GLOBAL       8 '@println'
+0029    | OP_GET_GLOBAL       4 'xs'
+0031    | OP_CALL             1
+0033    | OP_POP
+0034    5 OP_GET_GLOBAL       8 '@println'
+0036    | OP_GET_GLOBAL       0 'a'
+0038    | OP_CALL             1
+0040    | OP_POP
+0041    6 OP_GET_GLOBAL       8 '@println'
+0043    | OP_GET_GLOBAL       9 '@typeof'
+0045    | OP_GET_GLOBAL       4 'xs'
+0047    | OP_CALL             1
+0049    | OP_CALL             1
+0051    | OP_POP
+0052    7 OP_NIL
+0053    | OP_RETURN

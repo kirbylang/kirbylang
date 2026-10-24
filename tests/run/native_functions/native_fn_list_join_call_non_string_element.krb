@@ -1,0 +1,3 @@
+var numbers: [i64] = [1, 2];
+
+@listJoin(numbers, ", ");

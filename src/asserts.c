@@ -39,6 +39,14 @@ void assertArgIsStruct(VM *vm, const char *function, Value *args, int index) {
   }
 }
 
+void assertArgIsList(VM *vm, const char *function, Value *args, int index) {
+  if (!IS_LIST(args[index])) {
+    runtimeError(vm, "function %s expects argument %d to be a list.", function,
+                 index + 1);
+    exit(EXIT_CODE_RUNTIME_ERR);
+  }
+}
+
 void assertArgIsArray(VM *vm, const char *function, Value *args, int index) {
   if (!IS_ARRAY(args[index])) {
     runtimeError(vm, "function %s expects argument %d to be an array.",
@@ -50,6 +58,14 @@ void assertArgIsArray(VM *vm, const char *function, Value *args, int index) {
 void assertIsInArrayBounds(VM *vm, ObjArray *array, int index) {
   if (index < 0 || index > array->count) {
     runtimeError(vm, "index %d out of bounds. array length: %d", index,
+                 array->count);
+    exit(EXIT_CODE_RUNTIME_ERR);
+  }
+}
+
+void assertIsInListBounds(VM *vm, ObjList *array, int index) {
+  if (index < 0 || index > array->count) {
+    runtimeError(vm, "index %d out of bounds. list length: %d", index,
                  array->count);
     exit(EXIT_CODE_RUNTIME_ERR);
   }

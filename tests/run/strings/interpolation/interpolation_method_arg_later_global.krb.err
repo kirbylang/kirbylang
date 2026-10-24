@@ -32,7 +32,7 @@
 0014    | OP_GET_GLOBAL       7 '@boolToString'
 0016    | OP_TRUE
 0017    | OP_CALL             1
-0019    | OP_ARRAY            4
+0019    | OP_LIST             4
 0021    | OP_CALL             1
 0023    | OP_INVOKE        (1 args)    1 'log'
 0026    | OP_POP

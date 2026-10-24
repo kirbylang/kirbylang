@@ -1,0 +1,6 @@
+let floats: [f64] = [1.5];
+@listPush(floats, 2);
+@listInsert(floats, 0, 3);
+@println(floats);
+@println(@typeof(floats[0]));
+@println(@listContains(floats, 2));

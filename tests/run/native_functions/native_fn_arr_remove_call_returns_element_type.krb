@@ -1,2 +1,0 @@
-let words = ["a", "b"];
-let first: i64 = @arrRemove(words, 0);

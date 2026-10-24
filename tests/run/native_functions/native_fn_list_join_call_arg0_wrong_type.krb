@@ -1,0 +1,1 @@
+@listJoin("not an array", ", ");
