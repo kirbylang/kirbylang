@@ -1,0 +1,6 @@
+fun id[T](x: T): T = x;
+
+fun apply[T, U](x: T, f: fun (T) => U): U = f(x);
+
+let n = apply(3, id);
+@println(n + "!");

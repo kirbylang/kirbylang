@@ -9,12 +9,15 @@ impl Id[T] {
     pub fun get(self): T =
         self.value;
     
-    pub fun map[U](self, fn: fun (T) => U): Id[U] =
+    pub fun map[U](self, fn: MapFn[T, U]): Id[U] =
         Self.new(fn(self.value));
 
-    pub fun flat_map[U](self, fn: fun (T) => Id[U]): Id[U] =
+    pub fun flat_map[U](self, fn: FlatMapFn[T, U]): Id[U] =
         fn(self.value);
 }
+
+type MapFn[T, U] = fun (T) => U;
+type FlatMapFn[T, U] = MapFn[T, Id[U]];
 
 let value = Id.new(100)
     .map(fun (n) { n * n })

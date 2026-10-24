@@ -1,0 +1,11 @@
+struct Box[T] {
+  pub var value: T;
+}
+
+type Wrapped[T] = Box[T];
+
+fun wrap[T](x: T): Wrapped[T] = Box { value: x };
+
+fun unwrap[T](w: Wrapped[T]): T = w.value;
+
+@println(unwrap(wrap(41)) + 1);

@@ -1,0 +1,9 @@
+struct Pair[A, B] {
+  pub var first: A;
+  pub var second: B;
+}
+
+type WithName[T] = Pair[string, T];
+
+let p: WithName[bool] = Pair { first: "k", second: true };
+@println(p.first);

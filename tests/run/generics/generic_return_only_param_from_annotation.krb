@@ -1,0 +1,24 @@
+struct Stack[T] {
+  var items: [T];
+}
+
+impl Stack[T] {
+  pub fun new(): Self[T] = Self { items: [] };
+
+  pub fun push(self, item: T): unit {
+    @listPush(self.items, item);
+  }
+
+  pub fun len(self): i64 = @listLen(self.items);
+}
+
+fun empty[T](): [T] = [];
+
+let s: Stack[i64] = Stack.new();
+s.push(1);
+s.push(2);
+@println(s.len());
+
+let words: [string] = empty();
+@listPush(words, "a");
+@println(words[0]);
