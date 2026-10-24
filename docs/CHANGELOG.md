@@ -78,6 +78,7 @@
 - Whole number literals become `f64` where an `f64` is expected, including inside arithmetic, `if`/`else` branches and arrays. `let x: f64 = 7 / 2;` and `[1, 2.5]` no longer need `.0` on every number
 - Dividing whole number literals where an `f64` is expected now divides as floats: `let x: f64 = 7 / 2;` is `3.5`, while `let x = 7 / 2;` is still `3`. Integer variables still divide as integers
 - Clearer error when a number is too large for its type: `Integer literal 300 doesn't fit in u8, which holds 0 to 255.`
+- Array types are written `[T]`, such as `let names: [string] = [];` or `fun total(numbers: [i64]): i64`. The `Array` type is removed
 
 ## 0.4.0
 

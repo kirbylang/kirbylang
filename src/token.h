@@ -90,8 +90,8 @@ bool tokenTextEquals(const Token *token, const char *text);
 // must outlive the token.
 Token tokenFromCString(const char *text);
 
-// True for the names of the types every program has: unit, bool, string, f64
-// and Array
+// True for the names of the types every program has: unit, bool, string and
+// f64
 bool tokenIsPrimitiveTypeName(const Token *token);
 
 #endif

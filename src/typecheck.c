@@ -331,6 +331,12 @@ Type *typchkResolveType(TypeEnv *env, AstNode *typeAnnotation) {
     return typeFunction(paramTypes, fn->paramCount, returnType);
   }
 
+  if (typeAnnotation->kind == NODE_TYPE_ARRAY) {
+    Type *elementType =
+        typchkResolveType(env, typeAnnotation->as.typeArray.elementType);
+    return elementType == NULL ? NULL : typeArray(elementType);
+  }
+
   TypeNode *t = &typeAnnotation->as.type_;
 
   if (t->genericArgCount > 0) {
@@ -347,8 +353,6 @@ Type *typchkResolveType(TypeEnv *env, AstNode *typeAnnotation) {
   NumberKind numberKind;
   if (numberKindFromName(t->name.start, t->name.length, &numberKind))
     return typeNumber(numberKind);
-  if (tokenTextEquals(&t->name, "Array"))
-    return typeArray(NULL);
   if (tokenTextEquals(&t->name, "Self")) {
     return env->_currentImplTargetType != NULL ? env->_currentImplTargetType
                                                : typeSelfPlaceholder();
@@ -1950,7 +1954,7 @@ static void typchkCheckVarDecl(TypeEnv *env, AstNode *node) {
   Type *declaredType =
       hasExpectedType ? typchkResolveType(env, varDecl->declaredType) : NULL;
 
-  if (hasExpectedType) {
+  if (hasExpectedType && varDecl->declaredType->kind == NODE_TYPE) {
     Token declaredTypeIdentifier = varDecl->declaredType->as.type_.name;
     bool isSelf = tokenTextEquals(&declaredTypeIdentifier, "Self");
 
@@ -2182,6 +2186,12 @@ static void typchkResolveAliasDependencies(TypeEnv *env,
                                      fn->paramTypes[i]);
     }
     typchkResolveAliasDependencies(env, unresolvedAlias, count, fn->returnType);
+    return;
+  }
+
+  if (typeAnnotation->kind == NODE_TYPE_ARRAY) {
+    typchkResolveAliasDependencies(env, unresolvedAlias, count,
+                                   typeAnnotation->as.typeArray.elementType);
     return;
   }
 

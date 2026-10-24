@@ -1,0 +1,3 @@
+impl Display for Array {
+    pub fun toString(self): string = "an array";
+}

@@ -34,16 +34,18 @@ static void test_token_from_c_string(void) {
 }
 
 static void test_primitive_type_names(void) {
-  const char *primitives[] = {"unit", "bool", "string", "f64", "Array"};
-  for (int i = 0; i < 5; i++) {
+  const char *primitives[] = {"unit", "bool", "string", "f64"};
+  for (int i = 0; i < 4; i++) {
     Token name = tokenFromCString(primitives[i]);
     assert(tokenIsPrimitiveTypeName(&name));
   }
 
   Token point = tokenFromCString("Point");
   Token number = tokenFromCString("number");
+  Token array = tokenFromCString("Array");
   assert(!tokenIsPrimitiveTypeName(&point));
   assert(!tokenIsPrimitiveTypeName(&number));
+  assert(!tokenIsPrimitiveTypeName(&array));
 }
 
 static void test_token_to_cstring(void) {

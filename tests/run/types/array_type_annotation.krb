@@ -1,0 +1,12 @@
+let floats: [f64] = [1, 2.5];
+@println(floats);
+
+let words: [string] = [];
+@arrPush(words, "a");
+@println(words);
+
+let nested: [[i64]] = [[1], [2, 3]];
+@println(nested);
+
+let fromSplit: [string] = @strSplit("a,b", ",");
+@println(@arrLen(fromSplit));

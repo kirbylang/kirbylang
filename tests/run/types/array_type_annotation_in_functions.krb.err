@@ -1,0 +1,65 @@
+== <script> ==
+0000    9 OP_CLOSURE          1 <fn total>
+0002    | OP_DEFINE_GLOBAL    0 'total'
+0004   11 OP_CLOSURE          3 <fn names>
+0006    | OP_DEFINE_GLOBAL    2 'names'
+0008   13 OP_GET_GLOBAL       4 '@println'
+0010    | OP_GET_GLOBAL       0 'total'
+0012    | OP_CONSTANT         5 '1'
+0014    | OP_CONSTANT         6 '2'
+0016    | OP_CONSTANT         7 '3'
+0018    | OP_ARRAY            3
+0020    | OP_CALL             1
+0022    | OP_CALL             1
+0024    | OP_POP
+0025   14 OP_GET_GLOBAL       4 '@println'
+0027    | OP_GET_GLOBAL       2 'names'
+0029    | OP_CALL             0
+0031    | OP_CALL             1
+0033    | OP_POP
+0034   16 OP_GET_GLOBAL       0 'total'
+0036    | OP_DEFINE_GLOBAL    8 'apply'
+0038   17 OP_GET_GLOBAL       4 '@println'
+0040    | OP_GET_GLOBAL       8 'apply'
+0042    | OP_CONSTANT         9 '4'
+0044    | OP_CONSTANT        10 '5'
+0046    | OP_ARRAY            2
+0048    | OP_CALL             1
+0050    | OP_CALL             1
+0052    | OP_POP
+0053   18 OP_NIL
+0054    | OP_RETURN
+== total ==
+0000    2 OP_CONSTANT         0 '0'
+0002    4 OP_CONSTANT         0 '0'
+0004    | OP_GET_LOCAL        3
+0006    | OP_GET_GLOBAL       1 '@arrLen'
+0008    | OP_GET_LOCAL        1
+0010    | OP_CALL             1
+0012    | OP_LESS
+0013    | OP_JUMP_IF_FALSE   13 -> 45
+0016    | OP_POP
+0017    | OP_JUMP            17 -> 31
+0020    | OP_GET_LOCAL        3
+0022    | OP_CONSTANT         2 '1'
+0024    | OP_ADD
+0025    | OP_SET_LOCAL        3
+0027    | OP_POP
+0028    | OP_LOOP            28 -> 4
+0031    5 OP_GET_LOCAL        2
+0033    | OP_GET_LOCAL        1
+0035    | OP_GET_LOCAL        3
+0037    | OP_GET_INDEX
+0038    | OP_ADD
+0039    | OP_SET_LOCAL        2
+0041    | OP_POP
+0042    6 OP_LOOP            42 -> 20
+0045    | OP_POP
+0046    | OP_POP
+0047    8 OP_GET_LOCAL        2
+0049    | OP_RETURN
+== names ==
+0000   11 OP_CONSTANT         0 'kirby'
+0002    | OP_CONSTANT         1 'lang'
+0004    | OP_ARRAY            2
+0006    | OP_RETURN

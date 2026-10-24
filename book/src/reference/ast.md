@@ -67,6 +67,7 @@ struct AstNode {
 		TypeNode type_;
 		TypeAliasNode typeAlias;
 		TypeFunctionNode typeFunction;
+		TypeArrayNode typeArray;
 		InterpStringNode interpString;
 		CastNode cast;
 	} as;
@@ -257,6 +258,13 @@ typedef struct {
    */
   AstNode *returnType;
 } TypeFunctionNode;
+
+/**
+ * An array type, e.g. `[i64]`.
+ */
+typedef struct {
+  AstNode *elementType;
+} TypeArrayNode;
 ```
 
 ### Let/Var Bindings
@@ -571,5 +579,6 @@ void arrayNodeDataFree(ArrayNodeData *and);
 |  30 | `NODE_TYPE`          |
 |  31 | `NODE_TYPE_ALIAS`    |
 |  32 | `NODE_TYPE_FUNCTION` |
-|  33 | `NODE_INTERP_STRING` |
-|  34 | `NODE_CAST`          |
+|  33 | `NODE_TYPE_ARRAY`    |
+|  34 | `NODE_INTERP_STRING` |
+|  35 | `NODE_CAST`          |

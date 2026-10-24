@@ -127,7 +127,9 @@ Type *typeAnyNumber(void);
 // parameters
 Type *typeAnyArray(void);
 
-// Whether a value of type `actual` can be given where `expected` is wanted
+// Whether a value of type `actual` can be given where `expected` is wanted.
+// An array whose item type is unknown, such as the result of `@strSplit`,
+// accepts and is accepted by any array.
 bool typeAccepts(const Type *expected, const Type *actual);
 
 // Returns pointer to the `Self` placeholder type

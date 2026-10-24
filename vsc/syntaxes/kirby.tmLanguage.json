@@ -166,7 +166,7 @@
     },
     "constants": {
       "name": "constant.language.krb",
-      "match": "\\b(true|false|nil|Self|Array)\\b"
+      "match": "\\b(true|false|nil|Self)\\b"
     },
     "natives": {
       "match": "(@)([A-Za-z_][A-Za-z0-9_]*\\b)",
