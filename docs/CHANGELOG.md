@@ -83,6 +83,8 @@
 - `@strSplit` returns an array of `string` and `@strToBytes` an array of `u8`
 - `@strSlice`, `@strReplace` and `@strReplaceAll` are type checked
 - Integer math that overflows its type is a runtime error instead of wrapping around: `255u8 + 1u8` stops with `Integer overflow: 255 + 1 doesn't fit in u8, which holds 0 to 255.`
+- Fix a crash when a file's last instruction ends in an operand equal to `OP_RETURN`'s number
+  - The compiler mistook it for a return and left out the script's final `OP_NIL` and `OP_RETURN`, so the VM ran past the end of the bytecode
 
 ## 0.4.0
 
