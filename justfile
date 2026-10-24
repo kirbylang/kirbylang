@@ -51,6 +51,14 @@ install:
 install:
     ./scripts/install-macos.sh
 
+# Format the C lines changed since HEAD
+fmt *paths:
+    ./scripts/format.sh {{ paths }}
+
+# Format all C files
+fmt-all *paths:
+    ./scripts/format-all.sh
+
 # Run the tests
 test *args: build
     ./scripts/tests.sh {{ args }}
@@ -82,6 +90,10 @@ coverage *args:
 # Update the test snapshots
 test-update: build
     ./scripts/tests.sh --update
+
+# Create a new E2E test: just new-test tests/run/dir/name.krb
+new-test +paths:
+    ./scripts/new-test.sh {{ paths }}
 
 # Run unit tests
 unit: build-tests
@@ -126,11 +138,3 @@ project *args:
 
 book-serve:
     ./scripts/book-serve.sh
-
-# Format the C lines changed since HEAD
-fmt *paths:
-    ./scripts/format.sh {{ paths }}
-
-# Format all C files
-fmt-all *paths:
-    ./scripts/format-all.sh
