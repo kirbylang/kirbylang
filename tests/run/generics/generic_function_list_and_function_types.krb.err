@@ -1,0 +1,52 @@
+== <script> ==
+0000    3 OP_CLOSURE          1 <fn first>
+0002    | OP_DEFINE_GLOBAL    0 'first'
+0004    7 OP_CLOSURE          3 <fn apply>
+0006    | OP_DEFINE_GLOBAL    2 'apply'
+0008    9 OP_GET_GLOBAL       0 'first'
+0010    | OP_CONSTANT         5 '10'
+0012    | OP_CONSTANT         6 '20'
+0014    | OP_CONSTANT         7 '30'
+0016    | OP_LIST             3
+0018    | OP_CALL             1
+0020    | OP_DEFINE_GLOBAL    4 'n'
+0022   10 OP_GET_GLOBAL       8 '@println'
+0024    | OP_GET_GLOBAL       4 'n'
+0026    | OP_CALL             1
+0028    | OP_POP
+0029   11 OP_GET_GLOBAL       8 '@println'
+0031    | OP_GET_GLOBAL       2 'apply'
+0033    | OP_GET_GLOBAL       4 'n'
+0035    | OP_CLOSURE          9 <fn lambda0x1>
+0037    | OP_CALL             2
+0039    | OP_CALL             1
+0041    | OP_POP
+0042   12 OP_GET_GLOBAL       8 '@println'
+0044    | OP_GET_GLOBAL       2 'apply'
+0046    | OP_CONSTANT        10 'abc'
+0048    | OP_CLOSURE         11 <fn lambda0x2>
+0050    | OP_CALL             2
+0052    | OP_CALL             1
+0054    | OP_POP
+0055   13 OP_NIL
+0056    | OP_RETURN
+== first ==
+0000    2 OP_GET_LOCAL        1
+0002    | OP_CONSTANT         0 '0'
+0004    | OP_GET_INDEX
+0005    | OP_RETURN
+== apply ==
+0000    6 OP_GET_LOCAL        2
+0002    | OP_GET_LOCAL        1
+0004    | OP_CALL             1
+0006    | OP_RETURN
+== lambda0x1 ==
+0000   11 OP_GET_LOCAL        1
+0002    | OP_CONSTANT         0 '5'
+0004    | OP_GREATER
+0005    | OP_RETURN
+== lambda0x2 ==
+0000   12 OP_GET_LOCAL        1
+0002    | OP_CONSTANT         0 '!'
+0004    | OP_ADD
+0005    | OP_RETURN

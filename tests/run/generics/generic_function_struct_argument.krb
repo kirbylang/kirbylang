@@ -1,0 +1,11 @@
+struct Point {
+  pub var x: f64;
+  pub var y: f64;
+}
+
+fun id[T](x: T): T {
+  return x;
+}
+
+let p = id(Point { x: 1, y: 2 });
+@println(p.x + p.y);

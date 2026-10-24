@@ -1,0 +1,5 @@
+struct Point {
+  pub var x: f64;
+}
+
+let p: Point[f64] = Point { x: 1 };

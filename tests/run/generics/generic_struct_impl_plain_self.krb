@@ -1,0 +1,13 @@
+struct Box[T] {
+  pub var value: T;
+}
+
+impl Box[T] {
+  pub fun new(value: T): Self = Self { value: value };
+  pub fun same(self, other: Self): bool = true;
+  pub fun copy(self): Self = Self { value: self.value };
+}
+
+let a = Box.new(5);
+@println(a.same(Box.new(6)));
+@println(a.copy().value);

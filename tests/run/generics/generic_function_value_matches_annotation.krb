@@ -1,0 +1,21 @@
+fun id[T](x: T): T {
+  return x;
+}
+
+fun first[T, U](a: T, b: U): T {
+  return a;
+}
+
+fun head[T](xs: [T]): T {
+  return xs[0];
+}
+
+let f: fun (i64) => i64 = id;
+let g: fun (string) => string = id;
+let h: fun (i64, string) => i64 = first;
+let k: fun ([bool]) => bool = head;
+
+@println(f(5));
+@println(g("hi"));
+@println(h(1, "one"));
+@println(k([true, false]));

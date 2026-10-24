@@ -1,0 +1,13 @@
+struct Box[T] {
+  pub var value: T;
+}
+
+impl Box[T] {
+  pub fun new(value: T): Self[T] = Self { value: value };
+}
+
+fun make(f: fun (string) => Box[i64]): Box[i64] {
+  return f("hi");
+}
+
+@println(make(Box.new).value);

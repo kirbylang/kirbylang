@@ -1,0 +1,10 @@
+struct Box[T] {
+  pub var value: T;
+}
+
+let inner: Box[i64] = Box { value: 1 };
+let outer: Box[Box[i64]] = Box { value: inner };
+let list: Box[[i64]] = Box { value: [1, 2, 3] };
+
+@println(outer.value.value);
+@println(list.value[1]);

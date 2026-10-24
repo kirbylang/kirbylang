@@ -1,0 +1,45 @@
+== <script> ==
+0000    1 OP_STRUCT           0 'Pair'
+0002    | OP_DEFINE_GLOBAL    0 'Pair'
+0004    | OP_GET_GLOBAL       0 'Pair'
+0006    2 OP_NIL
+0007    | OP_FIELD            1 'first' public mutable
+0011    3 OP_NIL
+0012    | OP_FIELD            2 'second' public mutable
+0016    4 OP_POP
+0017    6 OP_GET_GLOBAL       0 'Pair'
+0019    | OP_CONSTANT         1 'first'
+0021    | OP_CONSTANT         4 '1'
+0023    | OP_CONSTANT         2 'second'
+0025    | OP_CONSTANT         5 'two'
+0027    | OP_STRUCT_INIT      2
+0029    | OP_DEFINE_GLOBAL    3 'p'
+0031    7 OP_GET_GLOBAL       0 'Pair'
+0033    | OP_CONSTANT         1 'first'
+0035    | OP_TRUE
+0036    | OP_CONSTANT         2 'second'
+0038    | OP_CONSTANT         7 '2.5'
+0040    | OP_STRUCT_INIT      2
+0042    | OP_DEFINE_GLOBAL    6 'q'
+0044    9 OP_GET_GLOBAL       8 '@println'
+0046    | OP_GET_GLOBAL       3 'p'
+0048    | OP_GET_PROPERTY     1 'first'
+0050    | OP_CALL             1
+0052    | OP_POP
+0053   10 OP_GET_GLOBAL       8 '@println'
+0055    | OP_GET_GLOBAL       3 'p'
+0057    | OP_GET_PROPERTY     2 'second'
+0059    | OP_CALL             1
+0061    | OP_POP
+0062   11 OP_GET_GLOBAL       8 '@println'
+0064    | OP_GET_GLOBAL       6 'q'
+0066    | OP_GET_PROPERTY     1 'first'
+0068    | OP_CALL             1
+0070    | OP_POP
+0071   12 OP_GET_GLOBAL       8 '@println'
+0073    | OP_GET_GLOBAL       6 'q'
+0075    | OP_GET_PROPERTY     2 'second'
+0077    | OP_CALL             1
+0079    | OP_POP
+0080   13 OP_NIL
+0081    | OP_RETURN

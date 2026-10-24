@@ -1,0 +1,13 @@
+fun id[T](x: T): T {
+  return x;
+}
+
+fun pick(): fun (i64) => i64 {
+  return id;
+}
+
+fun pickBad(): fun (i64) => bool {
+  return id;
+}
+
+@println(pick()(7));

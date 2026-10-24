@@ -1,0 +1,7 @@
+struct Box[T] {
+  pub var value: T;
+}
+
+impl Box {
+  pub fun get(self): i64 = 1;
+}

@@ -1,0 +1,27 @@
+== <script> ==
+0000    5 OP_CLOSURE          1 <fn twice>
+0002    | OP_DEFINE_GLOBAL    0 'twice'
+0004    7 OP_GET_GLOBAL       2 '@println'
+0006    | OP_GET_GLOBAL       0 'twice'
+0008    | OP_CONSTANT         3 '4'
+0010    | OP_CALL             1
+0012    | OP_CALL             1
+0014    | OP_POP
+0015    8 OP_GET_GLOBAL       2 '@println'
+0017    | OP_GET_GLOBAL       0 'twice'
+0019    | OP_CONSTANT         4 'four'
+0021    | OP_CALL             1
+0023    | OP_CALL             1
+0025    | OP_POP
+0026    9 OP_NIL
+0027    | OP_RETURN
+== twice ==
+0000    2 OP_CLOSURE          0 <fn lambda0x1>
+0002    3 OP_GET_LOCAL        1
+0004    4 OP_GET_LOCAL        2
+0006    | OP_GET_LOCAL        3
+0008    | OP_CALL             1
+0010    | OP_RETURN
+== lambda0x1 ==
+0000    2 OP_GET_LOCAL        1
+0002    | OP_RETURN

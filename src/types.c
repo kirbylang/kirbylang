@@ -193,6 +193,21 @@ bool typeAccepts(const Type *expected, const Type *actual) {
                        actual->as.function.returnType);
   }
 
+  if (expected->kind == TYPE_STRUCT && actual->kind == TYPE_STRUCT &&
+      expected->as.struct_.typeArgCount > 0) {
+    if (!internedNamesEqual(expected->as.struct_.name,
+                            actual->as.struct_.name) ||
+        expected->as.struct_.typeArgCount != actual->as.struct_.typeArgCount)
+      return false;
+
+    for (int i = 0; i < expected->as.struct_.typeArgCount; i++) {
+      if (!typeAccepts(expected->as.struct_.typeArgs[i],
+                       actual->as.struct_.typeArgs[i]))
+        return false;
+    }
+    return true;
+  }
+
   return typesEqual(expected, actual);
 }
 
@@ -348,8 +363,10 @@ void typeStructMarkTraitImplemented(Type *type, InternedName traitName) {
 bool typeStructImplementsTrait(Type *type, InternedName traitName) {
   if (type == NULL || type->kind != TYPE_STRUCT)
     return false;
-  for (int i = 0; i < type->as.struct_.implementedTraitCount; i++) {
-    if (internedNamesEqual(type->as.struct_.implementedTraits[i], traitName))
+  Type *declaration = typeStructDeclaration(type);
+  for (int i = 0; i < declaration->as.struct_.implementedTraitCount; i++) {
+    if (internedNamesEqual(declaration->as.struct_.implementedTraits[i],
+                           traitName))
       return true;
   }
   return false;
@@ -442,6 +459,51 @@ Type *typeGenericParam(int index) {
   return type;
 }
 
+Type *typeDeclaredGenericParam(Token name, int index, bool isOpaque) {
+  Type *type = typeGenericParam(index);
+  type->as.genericParam.name = internTokenName(name);
+  type->as.genericParam.hasName = true;
+  type->as.genericParam.isOpaque = isOpaque;
+  return type;
+}
+
+Type *typeFindGenericParam(Type *type, int index) {
+  if (type == NULL)
+    return NULL;
+
+  switch (type->kind) {
+  case TYPE_GENERIC_PARAM:
+    return type->as.genericParam.index == index ? type : NULL;
+
+  case TYPE_LIST:
+    return typeFindGenericParam(type->as.list.elementType, index);
+
+  case TYPE_STRUCT:
+    for (int i = 0; i < type->as.struct_.typeArgCount; i++) {
+      Type *found = typeFindGenericParam(type->as.struct_.typeArgs[i], index);
+      if (found != NULL)
+        return found;
+    }
+    return NULL;
+
+  case TYPE_ARRAY:
+    return typeFindGenericParam(type->as.array.elementType, index);
+
+  case TYPE_FN: {
+    for (int i = 0; i < type->as.function.paramCount; i++) {
+      Type *found =
+          typeFindGenericParam(type->as.function.paramTypes[i], index);
+      if (found != NULL)
+        return found;
+    }
+    return typeFindGenericParam(type->as.function.returnType, index);
+  }
+
+  default:
+    return NULL;
+  }
+}
+
 // A bound length is kept in the slot as an array type with no item type.
 static Type *lengthBinding(int length) { return typeArray(NULL, length); }
 
@@ -451,10 +513,22 @@ int typeGenericParamCount(Type *type) {
 
   switch (type->kind) {
   case TYPE_GENERIC_PARAM:
-    return type->as.genericParam.index + 1;
+    return type->as.genericParam.isOpaque ? 0 : type->as.genericParam.index + 1;
 
   case TYPE_LIST:
     return typeGenericParamCount(type->as.list.elementType);
+
+  case TYPE_STRUCT: {
+    int count = 0;
+
+    for (int i = 0; i < type->as.struct_.typeArgCount; i++) {
+      int argCount = typeGenericParamCount(type->as.struct_.typeArgs[i]);
+      if (argCount > count)
+        count = argCount;
+    }
+
+    return count;
+  }
 
   case TYPE_ARRAY: {
     int count = typeGenericParamCount(type->as.array.elementType);
@@ -494,6 +568,9 @@ void typeBindGenericParams(Type *pattern, Type *actual, Type **bindings,
   case TYPE_GENERIC_PARAM: {
     int index = pattern->as.genericParam.index;
 
+    if (pattern->as.genericParam.isOpaque)
+      return;
+
     if (index < count && bindings[index] == NULL)
       bindings[index] = actual;
     return;
@@ -503,6 +580,19 @@ void typeBindGenericParams(Type *pattern, Type *actual, Type **bindings,
     if (actual->kind == TYPE_LIST)
       typeBindGenericParams(pattern->as.list.elementType,
                             actual->as.list.elementType, bindings, count);
+    return;
+
+  case TYPE_STRUCT:
+    if (actual->kind != TYPE_STRUCT ||
+        !internedNamesEqual(pattern->as.struct_.name,
+                            actual->as.struct_.name) ||
+        pattern->as.struct_.typeArgCount != actual->as.struct_.typeArgCount)
+      return;
+
+    for (int i = 0; i < pattern->as.struct_.typeArgCount; i++) {
+      typeBindGenericParams(pattern->as.struct_.typeArgs[i],
+                            actual->as.struct_.typeArgs[i], bindings, count);
+    }
     return;
 
   case TYPE_ARRAY:
@@ -540,6 +630,32 @@ void typeBindGenericParams(Type *pattern, Type *actual, Type **bindings,
   }
 }
 
+bool typeIsFullyKnown(const Type *type) {
+  if (type == NULL)
+    return false;
+
+  switch (type->kind) {
+  case TYPE_LIST:
+    return typeIsFullyKnown(type->as.list.elementType);
+  case TYPE_ARRAY:
+    return typeIsFullyKnown(type->as.array.elementType);
+  case TYPE_STRUCT:
+    for (int i = 0; i < type->as.struct_.typeArgCount; i++) {
+      if (!typeIsFullyKnown(type->as.struct_.typeArgs[i]))
+        return false;
+    }
+    return true;
+  case TYPE_FN:
+    for (int i = 0; i < type->as.function.paramCount; i++) {
+      if (!typeIsFullyKnown(type->as.function.paramTypes[i]))
+        return false;
+    }
+    return typeIsFullyKnown(type->as.function.returnType);
+  default:
+    return true;
+  }
+}
+
 // Replaces each generic parameter with its slot. An empty slot keeps the
 // parameter, or makes it unknown when `eraseEmpty`.
 static Type *substituteGenericParams(Type *type, Type **bindings, int count,
@@ -551,6 +667,9 @@ static Type *substituteGenericParams(Type *type, Type **bindings, int count,
   case TYPE_GENERIC_PARAM: {
     int index = type->as.genericParam.index;
     Type *bound = index < count ? bindings[index] : NULL;
+
+    if (type->as.genericParam.isOpaque)
+      return type;
 
     if (bound != NULL)
       return bound;
@@ -566,6 +685,28 @@ static Type *substituteGenericParams(Type *type, Type **bindings, int count,
       return type;
 
     return typeList(elementType);
+  }
+
+  case TYPE_STRUCT: {
+    int argCount = type->as.struct_.typeArgCount;
+    if (argCount == 0)
+      return type;
+
+    Type **typeArgs = (Type **)typesAllocRaw((size_t)argCount * sizeof(Type *));
+    bool changed = false;
+
+    for (int i = 0; i < argCount; i++) {
+      typeArgs[i] = substituteGenericParams(type->as.struct_.typeArgs[i],
+                                            bindings, count, eraseEmpty);
+      if (typeArgs[i] != type->as.struct_.typeArgs[i])
+        changed = true;
+    }
+
+    if (!changed)
+      return type;
+
+    return typeStructInstance(type->as.struct_.typeConstructor, typeArgs,
+                              argCount);
   }
 
   case TYPE_ARRAY: {
@@ -624,11 +765,45 @@ Type *typeEraseGenericParams(Type *type) {
   return substituteGenericParams(type, NULL, 0, true);
 }
 
-void typeStructMarkGeneric(Type *type) { type->as.struct_.isGeneric = true; }
+void typeStructSetGenericParamCount(Type *type, int count) {
+  type->as.struct_.genericParamCount = count;
+}
 
 bool typeStructIsGeneric(Type *type) {
   return type != NULL && type->kind == TYPE_STRUCT &&
-         type->as.struct_.isGeneric;
+         type->as.struct_.genericParamCount > 0;
+}
+
+Type *typeStructInstance(Type *base, Type **typeArgs, int typeArgCount) {
+  Type *type = allocType(TYPE_STRUCT);
+  type->as.struct_.name = base->as.struct_.name;
+  type->as.struct_.typeConstructor = base;
+  type->as.struct_.typeArgCount = typeArgCount;
+
+  if (typeArgCount > 0) {
+    type->as.struct_.typeArgs =
+        (Type **)typesAllocRaw((size_t)typeArgCount * sizeof(Type *));
+    memcpy(type->as.struct_.typeArgs, typeArgs,
+           (size_t)typeArgCount * sizeof(Type *));
+  }
+
+  return type;
+}
+
+Type *typeStructDeclaration(Type *type) {
+  return type->as.struct_.typeConstructor != NULL
+             ? type->as.struct_.typeConstructor
+             : type;
+}
+
+// A member found on a declaration, as seen from `type`: for an instance such
+// as `Box[f64]`, its type arguments stand in for the declaration's parameters.
+static Type *instantiateMember(Type *type, Type *member) {
+  if (member == NULL || type->as.struct_.typeConstructor == NULL)
+    return member;
+
+  return typeSubstituteGenericParams(member, type->as.struct_.typeArgs,
+                                     type->as.struct_.typeArgCount);
 }
 
 void typeStructMarkUnresolvedMembers(Type *type) {
@@ -637,7 +812,7 @@ void typeStructMarkUnresolvedMembers(Type *type) {
 
 bool typeStructHasUnresolvedMembers(Type *type) {
   return type != NULL && type->kind == TYPE_STRUCT &&
-         type->as.struct_.hasUnresolvedMembers;
+         typeStructDeclaration(type)->as.struct_.hasUnresolvedMembers;
 }
 
 bool typesEqual(const Type *a, const Type *b) {
@@ -659,8 +834,16 @@ bool typesEqual(const Type *a, const Type *b) {
     return a->as.number.kind == b->as.number.kind;
 
   case TYPE_STRUCT:
-    // Nominal Equality
-    return internedNamesEqual(a->as.struct_.name, b->as.struct_.name);
+    // Nominal Equality, and the type arguments of an instance
+    if (!internedNamesEqual(a->as.struct_.name, b->as.struct_.name) ||
+        a->as.struct_.typeArgCount != b->as.struct_.typeArgCount)
+      return false;
+
+    for (int i = 0; i < a->as.struct_.typeArgCount; i++) {
+      if (!typesEqual(a->as.struct_.typeArgs[i], b->as.struct_.typeArgs[i]))
+        return false;
+    }
+    return true;
 
   case TYPE_TRAIT:
     // Nominal Equality
@@ -685,6 +868,10 @@ bool typesEqual(const Type *a, const Type *b) {
            typesEqual(a->as.array.elementType, b->as.array.elementType);
 
   case TYPE_GENERIC_PARAM:
+    // Opaque parameters are equal only to themselves, which the check at the
+    // top already caught
+    if (a->as.genericParam.isOpaque || b->as.genericParam.isOpaque)
+      return false;
     return a->as.genericParam.index == b->as.genericParam.index;
   }
 
@@ -702,22 +889,30 @@ static Type *memberLookup(TypeMember *members, int count, Token name) {
 Type *typeStructFieldLookup(Type *type, Token fieldName) {
   if (type == NULL || type->kind != TYPE_STRUCT)
     return NULL;
-  return memberLookup(type->as.struct_.fields, type->as.struct_.fieldCount,
-                      fieldName);
+  Type *declaration = typeStructDeclaration(type);
+  return instantiateMember(
+      type, memberLookup(declaration->as.struct_.fields,
+                         declaration->as.struct_.fieldCount, fieldName));
 }
 
 Type *typeStructInstanceMethodLookup(Type *type, Token methodName) {
   if (type == NULL || type->kind != TYPE_STRUCT)
     return NULL;
-  return memberLookup(type->as.struct_.instanceMethods,
-                      type->as.struct_.instanceMethodCount, methodName);
+  Type *declaration = typeStructDeclaration(type);
+  return instantiateMember(
+      type,
+      memberLookup(declaration->as.struct_.instanceMethods,
+                   declaration->as.struct_.instanceMethodCount, methodName));
 }
 
 Type *typeStructStaticMethodLookup(Type *type, Token methodName) {
   if (type == NULL || type->kind != TYPE_STRUCT)
     return NULL;
-  return memberLookup(type->as.struct_.staticMethods,
-                      type->as.struct_.staticMethodCount, methodName);
+  Type *declaration = typeStructDeclaration(type);
+  return instantiateMember(
+      type,
+      memberLookup(declaration->as.struct_.staticMethods,
+                   declaration->as.struct_.staticMethodCount, methodName));
 }
 
 static bool memberIsPublicLookup(TypeMember *members, bool *isPublicArray,
@@ -734,34 +929,44 @@ bool typeStructInstanceMethodIsPublic(Type *type, Token methodName) {
   if (type == NULL || type->kind != TYPE_STRUCT)
     return false;
 
-  return memberIsPublicLookup(type->as.struct_.instanceMethods,
-                              type->as.struct_.instanceMethodIsPublic,
-                              type->as.struct_.instanceMethodCount, methodName);
+  Type *declaration = typeStructDeclaration(type);
+  return memberIsPublicLookup(declaration->as.struct_.instanceMethods,
+                              declaration->as.struct_.instanceMethodIsPublic,
+                              declaration->as.struct_.instanceMethodCount,
+                              methodName);
 }
 
 bool typeStructStaticMethodIsPublic(Type *type, Token methodName) {
   if (type == NULL || type->kind != TYPE_STRUCT)
     return false;
 
-  return memberIsPublicLookup(type->as.struct_.staticMethods,
-                              type->as.struct_.staticMethodIsPublic,
-                              type->as.struct_.staticMethodCount, methodName);
+  Type *declaration = typeStructDeclaration(type);
+  return memberIsPublicLookup(declaration->as.struct_.staticMethods,
+                              declaration->as.struct_.staticMethodIsPublic,
+                              declaration->as.struct_.staticMethodCount,
+                              methodName);
 }
 
 Type *typeStructTraitInstanceMethodLookup(Type *type, Token methodName) {
   if (type == NULL || type->kind != TYPE_STRUCT)
     return NULL;
 
-  return memberLookup(type->as.struct_.traitInstanceMethods,
-                      type->as.struct_.traitInstanceMethodCount, methodName);
+  Type *declaration = typeStructDeclaration(type);
+  return instantiateMember(
+      type, memberLookup(declaration->as.struct_.traitInstanceMethods,
+                         declaration->as.struct_.traitInstanceMethodCount,
+                         methodName));
 }
 
 Type *typeStructTraitStaticMethodLookup(Type *type, Token methodName) {
   if (type == NULL || type->kind != TYPE_STRUCT)
     return NULL;
 
-  return memberLookup(type->as.struct_.traitStaticMethods,
-                      type->as.struct_.traitStaticMethodCount, methodName);
+  Type *declaration = typeStructDeclaration(type);
+  return instantiateMember(
+      type,
+      memberLookup(declaration->as.struct_.traitStaticMethods,
+                   declaration->as.struct_.traitStaticMethodCount, methodName));
 }
 
 Type *typeTraitInstanceMethodLookup(Type *type, Token methodName) {
@@ -840,6 +1045,15 @@ static void appendTypeName(StrBuf *sb, Type *type) {
   case TYPE_STRUCT:
     sb_appendf(sb, "%.*s", type->as.struct_.name.length,
                internedNameChars(type->as.struct_.name));
+    if (type->as.struct_.typeArgCount > 0) {
+      sb_append(sb, "[");
+      for (int i = 0; i < type->as.struct_.typeArgCount; i++) {
+        if (i > 0)
+          sb_append(sb, ", ");
+        appendTypeName(sb, type->as.struct_.typeArgs[i]);
+      }
+      sb_append(sb, "]");
+    }
     break;
   case TYPE_TRAIT:
     sb_appendf(sb, "%.*s", type->as.trait_.name.length,
@@ -874,7 +1088,10 @@ static void appendTypeName(StrBuf *sb, Type *type) {
     static const char names[] = "TUVW";
     int index = type->as.genericParam.index;
 
-    if (index < (int)sizeof(names) - 1)
+    if (type->as.genericParam.hasName)
+      sb_appendf(sb, "%.*s", type->as.genericParam.name.length,
+                 internedNameChars(type->as.genericParam.name));
+    else if (index < (int)sizeof(names) - 1)
       sb_appendf(sb, "%c", names[index]);
     else
       sb_appendf(sb, "T%d", index);

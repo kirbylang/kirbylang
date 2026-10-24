@@ -1,0 +1,6 @@
+fun empty[T](): [T] {
+  let xs: [T] = [];
+  return xs;
+}
+
+let xs = empty();

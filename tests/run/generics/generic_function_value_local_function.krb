@@ -1,0 +1,11 @@
+fun outer(): unit {
+  fun inner[U](a: U): U {
+    return a;
+  }
+
+  let ok: fun (i64) => i64 = inner;
+  @println(ok(3));
+  let bad: fun (i64) => string = inner;
+}
+
+outer();

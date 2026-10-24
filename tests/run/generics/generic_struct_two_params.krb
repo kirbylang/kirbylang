@@ -1,0 +1,12 @@
+struct Pair[A, B] {
+  pub var first: A;
+  pub var second: B;
+}
+
+let p: Pair[i64, string] = Pair { first: 1, second: "two" };
+let q = Pair { first: true, second: 2.5 };
+
+@println(p.first);
+@println(p.second);
+@println(q.first);
+@println(q.second);

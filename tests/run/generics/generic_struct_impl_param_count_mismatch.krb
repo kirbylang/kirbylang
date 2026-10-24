@@ -1,0 +1,7 @@
+struct Box[T] {
+  pub var value: T;
+}
+
+impl Box[T, U] {
+  pub fun get(self): T = self.value;
+}

@@ -1,0 +1,11 @@
+struct T {
+  pub var x: i64;
+}
+
+fun id[T](v: T): T {
+  return v;
+}
+
+@println(id("shadowed"));
+let t: T = T { x: 1 };
+@println(id(t).x);

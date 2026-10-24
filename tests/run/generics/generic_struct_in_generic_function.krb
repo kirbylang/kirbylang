@@ -1,0 +1,16 @@
+struct Box[T] {
+  pub var value: T;
+}
+
+fun wrap[T](x: T): Box[T] {
+  return Box { value: x };
+}
+
+fun unwrap[T](b: Box[T]): T {
+  return b.value;
+}
+
+let b = wrap("hi");
+@println(unwrap(b));
+@println(unwrap(wrap(3)) + 1);
+let n: i64 = unwrap(wrap("no"));

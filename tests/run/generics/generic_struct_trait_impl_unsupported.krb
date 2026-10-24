@@ -1,0 +1,7 @@
+struct Box[T] {
+  pub var value: T;
+}
+
+impl Display for Box {
+  fun toString(self): string = "box";
+}

@@ -379,9 +379,8 @@ typedef struct {
   Token targetName;
   /**
    * arena-allocated array of bare generic parameter name tokens, e.g. the
-   * `T` in `impl Box[T]`. Written independently of the struct's own
-   * declared parameters for now (Phase 1 is grammar only -- nothing
-   * cross-checks these match the struct's `genericParams` yet).
+   * `T` in `impl Box[T]`. There must be as many as the struct declares. They
+   * stand for the struct's parameters in order, and the names can differ.
    */
   Token *genericParams;
   int genericParamCount;

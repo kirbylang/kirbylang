@@ -1,0 +1,11 @@
+struct Box[T] {
+  pub var value: T;
+}
+
+impl Box[T] {
+  pub fun same(self, other: Self): bool = true;
+}
+
+let a = Box { value: 1 };
+let b = Box { value: "one" };
+a.same(b);

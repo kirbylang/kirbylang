@@ -1,0 +1,12 @@
+struct Box[T] {
+  pub var value: T;
+}
+
+impl Box[T] {
+  fun secret(self): T = self.value;
+  pub fun reveal(self): T = self.secret();
+}
+
+let b = Box { value: 1 };
+@println(b.reveal());
+@println(b.secret());

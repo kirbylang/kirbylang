@@ -83,16 +83,96 @@ let box: Box = Box { value: 100 };
 @println(box.value);
 ```
 
-#### Generics
+#### Generic Structs
 
-Not supported yet. Generic parameters parse, but declaring or using one is
-an error.
+A struct can declare type parameters in brackets. They are written as
+arguments when the type is used. `Box[f64]` and `Box[string]` are different
+types, and the number of arguments has to match.
 
 ```
 struct Box[T] {
     pub var value: T;
 }
+
+let a: Box[f64] = Box { value: 1 };
+let b = Box { value: "hi" };     // Box[string]
+let c: Box[string] = a;          // error: Expected Box[string], got Box[f64].
 ```
+
+A literal works out its arguments from its fields. When a type is asked for,
+the fields are checked against it, so the `1` above can be an `f64`. A
+literal that can't work out an argument is an error.
+
+An `impl` declares the same number of parameters, and they stand for the
+struct's parameters in order. A method can declare more, which are numbered
+after the impl's.
+
+```
+impl Box[T] {
+    pub fun new(value: T): Self[T] = Self { value: value };
+    pub fun get(self): T = self.value;
+    pub fun map[U](self, f: fun (T) => U): Self[U] = Self.new(f(self.value));
+}
+
+let box = Box.new(5);            // Box[i64]
+let text = box.map(fun (n: i64): string { "n" });   // Box[string]
+```
+
+In a type, `Self[T]` is the struct with arguments and a plain `Self` is
+`Box[T]`. In an expression, `Self` and `Box` are the struct itself, and a
+call or literal works out the arguments.
+
+`impl Trait for` a generic struct isn't supported yet.
+
+### Generic Functions
+
+A function can declare type parameters after its name. A call fills each one
+in from its arguments, the first argument that mentions it fills it, and every
+later argument has to agree.
+
+```
+fun id[T](x: T): T = x;
+fun first[T](xs: [T]): T = xs[0];
+fun apply[T, U](x: T, f: fun (T) => U): U = f(x);
+
+let a = id(5);                  // i64
+let b: string = id(5);          // error: Expected string, got i64.
+```
+
+A parameter that appears in the signature but that no argument fills in is an
+error: `Can't tell what 'T' is from the arguments.`. That includes a parameter
+only in the return type. A parameter that isn't in the signature at all is
+never asked for.
+
+Inside the function, each parameter is one type that is only equal to itself.
+A value of that type can be passed around, returned and stored, but it can't
+be added, indexed or have a method called on it, because nothing says its type
+supports that. The error is reported in the function, not at the call.
+
+```
+fun add[T](a: T, b: T): T = a + b;   // error: '+' needs two numbers ... got T and T.
+fun bad[A, B](a: A): B = a;          // error: Expected B, got A.
+```
+
+A generic function can also be used as a value where a function type is
+expected. The expected type fills in the function's type parameters, and the
+result has to match. Here `id` is the function declared above, and its `T`
+becomes `i64`.
+
+```
+fun id[T](x: T): T = x;
+
+let f: fun (i64) => i64 = id;       // ok
+let g: fun (i64) => string = id;    // error: Expected fun (i64) => string, got fun (i64) => i64.
+```
+
+A generic method works the same way, such as `Box.new` for a method declared
+`fun new(value: T): Self[T]`.
+
+With no expected type, as in `let h = id;`, the value has no type and isn't
+checked.
+
+A generic function is compiled once, and the same code runs for every type.
 
 ### Traits
 
@@ -350,7 +430,10 @@ implement `Eq` -- see [Traits](#traits).
 
 - Some native functions have no signature yet, so calls to them aren't
   checked
-- Generic types parse but aren't checked
+- Generic parameters have no trait bounds yet, so a value of a generic type
+  can't be added, indexed or have methods called on it
+- Generic type aliases (`type Wrapper[T] = T;`) parse but aren't checked, and
+  a call can't be given type arguments (`parse[f64](s)`)
 - Lists have no type annotation syntax
 - `impl Trait for` a primitive type isn't supported yet, and operators
   don't dispatch to trait methods -- see [Traits](#traits)
