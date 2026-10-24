@@ -40,3 +40,7 @@ Finally, this language is not designed for production use. It's a learning proje
 2. Install the [CLI](./cli.md).
 3. Use the [REPL](./cli.md#repl) and explore the [basics](./basics.md).
 4. Create a [project](./projects.md#new-project).
+
+## Other Links
+
+- [CHANGELOG.md](https://github.com/kirbylang/kirbylang/blob/main/docs/CHANGELOG.md)
