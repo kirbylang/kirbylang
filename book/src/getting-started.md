@@ -1,6 +1,6 @@
 ## Kirby
 
-Kirby is a statically typed interpreted language. It's design was inspired by many programming languages I've used. Both the good (parts I wanted to include) and the bad (things I wanted to avoid).
+[Kirby](https://github.com/kirbylang/kirbylang) is a statically typed interpreted language. It's design was inspired by many programming languages I've used. Both the good (parts I wanted to include) and the bad (things I wanted to avoid).
 
 - Rust
 - Typescript
