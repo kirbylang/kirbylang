@@ -70,6 +70,14 @@ static void bindingArrayWrite(TypeEnvBinding **array, int *count, int *capacity,
   (*count)++;
 }
 
+// A generic type alias. `target` holds the alias's parameters as unfilled
+// generic parameters, and is NULL if it didn't resolve.
+typedef struct {
+  InternedName name;
+  int paramCount;
+  Type *target;
+} GenericAlias;
+
 static Type *bindingArrayLookup(TypeEnvBinding *array, int count, Token name) {
   // Most recently declared binding wins
   for (int i = count - 1; i >= 0; i--) {
@@ -108,8 +116,8 @@ struct TypeEnv {
   int traitCount;
   int traitCapacity;
 
-  // Names of generic type aliases, which are parsed but not supported yet
-  TypeEnvBinding *genericAliases;
+  // Generic type aliases such as `type Wrapper[T] = Box[T];`
+  GenericAlias *genericAliases;
   int genericAliasCount;
   int genericAliasCapacity;
 
@@ -132,7 +140,19 @@ struct TypeEnv {
   Type **_implGenericTypes;
   int _implGenericCount;
   Type *_currentImplSelfType;
+  // The type the call being checked is expected to return, passed along to the
+  // call check. Read once and cleared.
+  Type *_callExpected;
 };
+
+static GenericAlias *genericAliasLookup(TypeEnv *env, Token name) {
+  for (int i = env->genericAliasCount - 1; i >= 0; i--) {
+    if (internedNameEqualsToken(env->genericAliases[i].name, name))
+      return &env->genericAliases[i];
+  }
+
+  return NULL;
+}
 
 // Type environment that persists across compilation units
 static TypeEnv *sessionEnv = NULL;
@@ -392,6 +412,35 @@ Type *typchkResolveSignatureType(TypeEnv *env, AstNode *typeAnnotation) {
 }
 
 // Resolves a type written with type arguments, such as `Box[f64]`, or
+// `Wrapper[i64]`: the alias's target with its parameters replaced by the
+// arguments.
+static Type *typchkInstantiateGenericAlias(TypeEnv *env, TypeNode *t,
+                                           GenericAlias *alias) {
+  if (t->genericArgCount != alias->paramCount) {
+    typchkErrorAtTokenFmt(&t->name, "'%.*s' takes %d type argument(s), got %d.",
+                          t->name.length, t->name.start, alias->paramCount,
+                          t->genericArgCount);
+    return NULL;
+  }
+
+  Type **typeArgs =
+      (Type **)typesAllocRaw((size_t)t->genericArgCount * sizeof(Type *));
+
+  for (int i = 0; i < t->genericArgCount; i++) {
+    typeArgs[i] = typchkResolveType(env, t->genericArgs[i]);
+
+    if (typeArgs[i] == NULL)
+      return NULL;
+  }
+
+  // The alias's own error was already reported
+  if (alias->target == NULL)
+    return NULL;
+
+  return typeSubstituteGenericParams(alias->target, typeArgs,
+                                     t->genericArgCount);
+}
+
 // `Self[U]` inside the impl of a generic struct.
 static Type *typchkResolveGenericInstance(TypeEnv *env, TypeNode *t) {
   Type *declaration;
@@ -409,14 +458,18 @@ static Type *typchkResolveGenericInstance(TypeEnv *env, TypeNode *t) {
   }
 
   if (declaration == NULL) {
-    bool isGenericAlias =
-        bindingArrayLookup(env->genericAliases, env->genericAliasCount,
-                           t->name) != NULL;
+    GenericAlias *alias = genericAliasLookup(env, t->name);
 
-    typchkErrorAtToken(
-        &t->name, isGenericAlias ? "Generic type aliases aren't supported yet."
-                                 : "Unknown type.");
-    return NULL;
+    if (alias == NULL) {
+      if (typchkTypeEnvLookupAlias(env, t->name) != NULL)
+        typchkErrorAtTokenFmt(&t->name, "'%.*s' doesn't take type arguments.",
+                              t->name.length, t->name.start);
+      else
+        typchkErrorAtToken(&t->name, "Unknown type.");
+      return NULL;
+    }
+
+    return typchkInstantiateGenericAlias(env, t, alias);
   }
 
   if (!typeStructIsGeneric(declaration)) {
@@ -532,6 +585,14 @@ Type *typchkResolveType(TypeEnv *env, AstNode *typeAnnotation) {
   Type *aliasType = typchkTypeEnvLookupAlias(env, t->name);
   if (aliasType != NULL)
     return aliasType;
+
+  GenericAlias *genericAlias = genericAliasLookup(env, t->name);
+  if (genericAlias != NULL) {
+    typchkErrorAtTokenFmt(&t->name, "'%.*s' needs %d type argument(s).",
+                          t->name.length, t->name.start,
+                          genericAlias->paramCount);
+    return NULL;
+  }
 
   typchkErrorAtToken(&t->name, "Unknown type.");
   return NULL;
@@ -1017,6 +1078,9 @@ static bool typchkCheckInto(TypeEnv *env, AstNode *node, Type *expected,
         !typchkStructMembersUnreliable(declaration))
       return typchkCheckGenericStructInit(env, node, expected);
   }
+
+  if (node->kind == NODE_CALL)
+    env->_callExpected = expected;
 
   Type *actual = typchkInfer(env, node);
 
@@ -1547,6 +1611,8 @@ static bool isPrintNative(Token *name) {
 
 static Type *typchkInferCall(TypeEnv *env, AstNode *node) {
   CallNode *c = &node->as.call;
+  Type *expected = env->_callExpected;
+  env->_callExpected = NULL;
 
   if (c->callee->kind == NODE_VARIABLE) {
     Token *name = &c->callee->as.variable.name;
@@ -1568,6 +1634,7 @@ static Type *typchkInferCall(TypeEnv *env, AstNode *node) {
       return NULL;
     }
 
+    env->_callExpected = expected;
     Type *returnType =
         typchkCheckCallAgainstFunctionType(env, node, calleeType);
 
@@ -1590,6 +1657,7 @@ static Type *typchkInferCall(TypeEnv *env, AstNode *node) {
     return NULL;
   }
 
+  env->_callExpected = expected;
   return typchkCheckCallAgainstFunctionType(env, node, calleeType);
 }
 
@@ -1619,7 +1687,11 @@ static bool typchkUnifyValue(TypeEnv *env, AstNode *arg, Type *pattern,
   } else {
     actual = typchkInfer(env, arg);
 
+    if (actual == NULL && arg->kind == NODE_VARIABLE)
+      actual = typchkLookupVariableType(env, &arg->as.variable.name);
+
     if (actual != NULL && actual->kind == TYPE_FN && known->kind == TYPE_FN &&
+        actual->as.function.paramCount == known->as.function.paramCount &&
         typchkHasDeclaredGenericParams(actual))
       actual =
           typeEraseGenericParams(typchkFillGenericFunctionValue(actual, known));
@@ -1652,7 +1724,8 @@ static bool typchkUnifyValue(TypeEnv *env, AstNode *arg, Type *pattern,
 // `fun ([T], T) => unit`. Goes through the arguments in order, each checked
 // once. Generic parameters that are never filled are unknown for a native.
 static Type *typchkCheckGenericCall(TypeEnv *env, AstNode *node,
-                                    Type *calleeType, int genericCount) {
+                                    Type *calleeType, int genericCount,
+                                    Type *expected) {
   CallNode *c = &node->as.call;
   Type **bindings =
       (Type **)typesAllocRaw((size_t)genericCount * sizeof(Type *));
@@ -1669,6 +1742,13 @@ static Type *typchkCheckGenericCall(TypeEnv *env, AstNode *node,
 
   if (!ok)
     return NULL;
+
+  // What the call is expected to return fills any parameter the arguments left
+  // empty, such as the `T` of `fun new(): Self[T]`
+  if (expected != NULL) {
+    typeBindGenericParams(calleeType->as.function.returnType, expected,
+                          bindings, genericCount);
+  }
 
   // A parameter the program declared has to be filled in by the arguments. A
   // native's stays unknown. An argument that already failed to check explains
@@ -1693,6 +1773,8 @@ static Type *typchkCheckGenericCall(TypeEnv *env, AstNode *node,
 static Type *typchkCheckCallAgainstFunctionType(TypeEnv *env, AstNode *node,
                                                 Type *calleeType) {
   CallNode *c = &node->as.call;
+  Type *expected = env->_callExpected;
+  env->_callExpected = NULL;
 
   if (calleeType->kind != TYPE_FN) {
     typchkErrorAtTokenFmt(&c->paren, "%s isn't callable.",
@@ -1708,7 +1790,8 @@ static Type *typchkCheckCallAgainstFunctionType(TypeEnv *env, AstNode *node,
   int genericCount = typeGenericParamCount(calleeType);
 
   if (genericCount > 0)
-    return typchkCheckGenericCall(env, node, calleeType, genericCount);
+    return typchkCheckGenericCall(env, node, calleeType, genericCount,
+                                  expected);
 
   bool ok = true;
   for (int i = 0; i < c->argCount; i++) {
@@ -2742,6 +2825,27 @@ static void typchkResolvePendingAlias(TypeEnv *env,
                                       UnresolvedTypeAlias *unresolvedAlias,
                                       int count, int index);
 
+static void typchkRegisterGenericAlias(TypeEnv *env, Token name, int paramCount,
+                                       Type *target) {
+  if (env->genericAliasCount == env->genericAliasCapacity) {
+    env->genericAliasCapacity =
+        env->genericAliasCapacity < 8 ? 8 : env->genericAliasCapacity * 2;
+    env->genericAliases = (GenericAlias *)realloc(
+        env->genericAliases,
+        sizeof(GenericAlias) * (size_t)env->genericAliasCapacity);
+
+    if (env->genericAliases == NULL) {
+      fprintf(stderr, "realloc failed in typchkRegisterGenericAlias\n");
+      exit(1);
+    }
+  }
+
+  GenericAlias *alias = &env->genericAliases[env->genericAliasCount++];
+  alias->name = internTokenName(name);
+  alias->paramCount = paramCount;
+  alias->target = target;
+}
+
 // Resolves any alias `typeAnnotation` names before it is itself resolved,
 // so an alias declared later in the file still works.
 static void typchkResolveAliasDependencies(TypeEnv *env,
@@ -2807,6 +2911,20 @@ static void typchkResolvePendingAlias(TypeEnv *env,
   typchkResolveAliasDependencies(env, unresolvedAlias, count, decl->target);
   alias->resolving = false;
   alias->resolved = true;
+
+  if (decl->genericParamCount > 0) {
+    Type **placeholders = (Type **)typesAllocRaw(
+        (size_t)decl->genericParamCount * sizeof(Type *));
+    int previousCount = typchkEnterGenericParams(env, decl->genericParams,
+                                                 decl->genericParamCount, 0,
+                                                 false, placeholders);
+    Type *target = typchkResolveType(env, decl->target);
+    typchkLeaveGenericParams(env, previousCount);
+
+    typchkRegisterGenericAlias(env, decl->name, decl->genericParamCount,
+                               target);
+    return;
+  }
 
   Type *target = typchkResolveType(env, decl->target);
 
@@ -3417,13 +3535,8 @@ bool typchkCheckProgram(AstNode **program, int count) {
   for (int i = 0; i < count; i++) {
     // Generic aliases aren't checked yet. Remember their names so that using
     // one reports "not supported" instead of "Unknown type."
-    if (program[i]->kind == NODE_TYPE_ALIAS &&
-        program[i]->as.typeAlias.genericParamCount == 0) {
+    if (program[i]->kind == NODE_TYPE_ALIAS) {
       pendingAliasCount++;
-    } else if (program[i]->kind == NODE_TYPE_ALIAS) {
-      bindingArrayWrite(&env->genericAliases, &env->genericAliasCount,
-                        &env->genericAliasCapacity,
-                        program[i]->as.typeAlias.name, typeUnit());
     }
   }
 
@@ -3433,10 +3546,8 @@ bool typchkCheckProgram(AstNode **program, int count) {
 
     int next = 0;
     for (int i = 0; i < count; i++) {
-      if (program[i]->kind == NODE_TYPE_ALIAS &&
-          program[i]->as.typeAlias.genericParamCount == 0) {
+      if (program[i]->kind == NODE_TYPE_ALIAS)
         unresolvedAliasAliases[next++].node = program[i];
-      }
     }
 
     for (int i = 0; i < pendingAliasCount; i++) {

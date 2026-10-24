@@ -1,0 +1,20 @@
+struct Box[T] {
+  pub var value: T;
+}
+
+type Maybe[T] = [T];
+type Wrapped[T] = Box[T];
+
+struct Holder[T] {
+  pub var items: Maybe[T];
+}
+
+impl Holder[T] {
+  pub fun first(self): T = self.items[0];
+
+  pub fun boxed(self): Wrapped[T] = Box { value: self.items[0] };
+}
+
+let h = Holder { items: [7, 8] };
+@println(h.first() + 1);
+@println(h.boxed().value + 2);

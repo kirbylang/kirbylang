@@ -1,0 +1,14 @@
+struct Stack[T] {
+  var items: [T];
+}
+
+impl Stack[T] {
+  pub fun new(): Self[T] = Self { items: [] };
+
+  pub fun push(self, item: T): unit {
+    @listPush(self.items, item);
+  }
+}
+
+let s: Stack[i64] = Stack.new();
+s.push("a");
