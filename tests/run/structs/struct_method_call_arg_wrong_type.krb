@@ -1,5 +1,5 @@
 struct Logger {
-    pub var prefix: string;
+    pub prefix: string;
 }
 
 impl Logger {

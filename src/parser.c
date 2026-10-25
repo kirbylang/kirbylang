@@ -1559,10 +1559,28 @@ static AstNode *structDeclaration(Parser *p) {
         functionDeclaration(p, /*isMethod=*/true);
       }
       p->panicMode = false;
-    } else if (isPublic) {
-      error_at_current(p, "Expect field declaration after 'pub'.");
     } else {
-      error_at_current(p, "Expect field declaration.");
+      consumeDeclarationIdentifier(p, "Expected a field name, let, or var");
+      Token fieldName = p->previous;
+
+      AstNode *fieldType = NULL;
+      if (match(p, TOKEN_COLON)) {
+        fieldType = parseType(p);
+      }
+
+      if (match(p, TOKEN_EQUAL)) {
+        parse_error(p, "Struct fields don't support default values");
+      }
+
+      consume(p, TOKEN_SEMICOLON, "Expect ';' after field.");
+
+      fieldBuf[fieldCount].name = fieldName;
+      fieldBuf[fieldCount].initializer = NULL;
+      fieldBuf[fieldCount].declaredType = fieldType;
+      fieldBuf[fieldCount].isMutable = false;
+      fieldBuf[fieldCount].isPublic = isPublic;
+      fieldBuf[fieldCount].declEndLine = p->previous.line; // the ';'
+      fieldCount++;
     }
 
     recoverInBraceBody(p);

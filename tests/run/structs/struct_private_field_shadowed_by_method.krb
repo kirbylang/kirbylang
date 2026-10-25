@@ -1,6 +1,6 @@
 // A private field must not hide a public accessor that shares its name.
 struct Counter {
-    var count: f64;
+    count: f64;
 }
 
 impl Counter {

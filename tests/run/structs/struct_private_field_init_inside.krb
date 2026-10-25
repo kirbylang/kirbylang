@@ -1,5 +1,5 @@
 struct Account {
-    var _balance: f64;
+    _balance: f64;
 }
 
 impl Account {

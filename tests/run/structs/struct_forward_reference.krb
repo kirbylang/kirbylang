@@ -1,8 +1,8 @@
 var p = Point { x: 1, y: 2 };
 
 struct Point {
-    pub var x: f64;
-    pub var y: f64;
+    pub x: f64;
+    pub y: f64;
 }
 
 @println(p.x);

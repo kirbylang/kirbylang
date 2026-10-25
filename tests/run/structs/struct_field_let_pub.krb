@@ -1,5 +1,5 @@
 struct Box {
-    pub let value: f64;
+    pub value: f64;
 }
 
 let box = Box { value: 100 };

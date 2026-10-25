@@ -3,3 +3,5 @@ struct Point {
 }
 
 var point = Point { x 1 };
+
+// TODO: Why doesn't the lack of type error with struct declaration?
