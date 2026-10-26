@@ -3,5 +3,3 @@ struct Point {
 }
 
 var point = Point() { x: 1 };
-
-// TODO: What is this test?

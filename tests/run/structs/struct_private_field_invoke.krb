@@ -1,9 +1,0 @@
-struct Holder {
-    pub callback: fun () => string;
-}
-
-var h = Holder {
-    callback: fun () { "called" }
-};
-
-@println(h.callback());

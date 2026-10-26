@@ -197,7 +197,9 @@ static bool callValue(Value callee, int argCount) {
     }
     }
   }
-  runtimeError(&vm, "Can only call functions and structs.");
+
+  runtimeError(&vm, "Not callable.");
+
   return false;
 }
 

@@ -9,5 +9,5 @@
 0013    | OP_POP
 0014    4 OP_NIL
 0015    | OP_RETURN
-Can only call functions and structs.
+Not callable.
 [line 3] in script

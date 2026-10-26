@@ -31,11 +31,51 @@
   "Struct declaration": {
     "prefix": "struct",
     "body": [
-      "struct ${1:Name} {",
-      "\tvar ${2:field};$0",
-      "}"
+      "struct ${1} {$2}$0"
     ],
     "description": "Declare a struct"
+  },
+  "Struct field (private, immutable)": {
+    "prefix": [
+      "field",
+      "let"
+    ],
+    "body": [
+      "${1:field}: ${2:T};"
+    ],
+    "description": "Declare a struct field (private, immutable)"
+  },
+  "Struct field (public, immutable)": {
+    "prefix": [
+      "field",
+      "let",
+      "pub"
+    ],
+    "body": [
+      "pub ${1:field}: ${2:T};"
+    ],
+    "description": "Declare a struct field (public, immutable)"
+  },
+  "Struct field (private, mutable)": {
+    "prefix": [
+      "field",
+      "var"
+    ],
+    "body": [
+      "var ${1:field}: ${2:T};"
+    ],
+    "description": "Declare a struct field (private, mutable)"
+  },
+  "Struct field (public, mutable)": {
+    "prefix": [
+      "field",
+      "var",
+      "pub"
+    ],
+    "body": [
+      "pub var ${1:field}: ${2:T};"
+    ],
+    "description": "Declare a struct field (public, mutable)"
   },
   "Trait declaration": {
     "prefix": "trait",
