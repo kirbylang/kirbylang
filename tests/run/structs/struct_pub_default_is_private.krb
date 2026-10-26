@@ -1,7 +1,7 @@
 // The `pub` on `label` must not leak to the field declared after it.
 struct Config {
-    pub var label: string;
-    var token: string;
+    pub label: string;
+    token: string;
 }
 
 impl Config {

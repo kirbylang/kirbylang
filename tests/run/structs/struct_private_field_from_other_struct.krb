@@ -1,11 +1,17 @@
 struct Secret {
-    var value = 42;
+    value: i64;
+}
+
+impl Secret {
+    pub fun new(value: i64): Self = Self {
+        value: value
+    };
 }
 
 struct Thief {}
 
 impl Thief {
-    pub fun steal(self, secret) = secret.value;
+    pub fun steal(self, secret: Secret): i64 = secret.value;
 }
 
-@println(Thief {}.steal(Secret {}));
+@println(Thief {}.steal(Secret.new(123)));

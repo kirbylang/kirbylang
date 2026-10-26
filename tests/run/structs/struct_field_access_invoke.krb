@@ -1,13 +1,19 @@
+type Fn = fun () => unit;
+
 struct Struct {
-    var fn: fun () => unit;
+    pub fn: Fn;
 }
 
-var instance = Struct {};
-
-fun fn(): unit {
-    @println("Hello World");
+impl Struct {
+    pub fun new(fn: Fn): Self = Self {
+        fn: fn
+    };
 }
 
-instance.fn = fn;
+var instance = Struct.new(hello);
 
 instance.fn();
+
+fun hello(): unit {
+    @println("Hello World");
+}

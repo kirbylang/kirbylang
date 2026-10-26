@@ -1,8 +1,10 @@
 struct Struct {
-    var hello: string;
+    pub var hello: string;
 }
 
-var instance = Struct {};
+var instance = Struct {
+    hello: "Hello"
+};
 
 instance.hello = "World";
 

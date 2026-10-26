@@ -1,1 +1,1 @@
-[line 2] Error at ';': Expect field declaration after 'pub'.
+[line 2] Error at ';': Expected a field name, let, or var

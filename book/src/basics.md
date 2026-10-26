@@ -281,18 +281,25 @@ Kirby has a number of builtin functions. These are prefixed with `@`.
 
 Structs are a custom data types that group together a set of [variables](#variables) (fields) and [functions](#functions) (methods) that operator on those fields.
 
-Fields and methods are private by default. The `pub` keyword declares them as public.
-
 #### Fields
 
 Fields are defined in the struct's declaration body.
 
 ```krb
 struct Counter {
+    // Immutable
+    initial: f64;
     let limit: f64;
+
+    // Mutable
     var count: f64;
 }
 ```
+
+Fields are private and immutable by default.
+
+- Use the `var` keyword to make fields mutable. This only controls whether the field can be reassigned, not whether its value can change.
+- Use the `pub` keyword to make fields public.
 
 #### Methods
 
@@ -315,6 +322,8 @@ impl Counter {
     }
 }
 ```
+
+Methods are private by default. Use the `pub` keyword to make fields public.
 
 #### Generic Structs
 

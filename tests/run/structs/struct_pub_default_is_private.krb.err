@@ -3,9 +3,9 @@
 0002    | OP_DEFINE_GLOBAL    0 'Config'
 0004    | OP_GET_GLOBAL       0 'Config'
 0006    3 OP_NIL
-0007    | OP_FIELD            1 'label' public mutable
+0007    | OP_FIELD            1 'label' public immutable
 0011    4 OP_NIL
-0012    | OP_FIELD            2 'token' private mutable
+0012    | OP_FIELD            2 'token' private immutable
 0016    5 OP_POP
 0017    7 OP_GET_GLOBAL       0 'Config'
 0019   11 OP_CLOSURE          4 <fn new>

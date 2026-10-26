@@ -1,5 +1,5 @@
 struct Counter {
-    var count: f64;
+    count: f64;
 }
 
 impl Counter {

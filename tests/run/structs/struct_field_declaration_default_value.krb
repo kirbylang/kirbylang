@@ -1,3 +1,0 @@
-struct Struct {
-    pub var value = "Hello World";
-}

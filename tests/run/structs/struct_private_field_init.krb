@@ -1,5 +1,5 @@
 struct Account {
-    var balance = 0;
+    balance: i64;
 }
 
 var a = Account { balance: 100 };
