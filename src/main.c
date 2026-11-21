@@ -22,14 +22,25 @@
 #include "version.h"
 #include "vm.h"
 
+/* What a piece of source is. An entry file is the program `krb run` starts, a
+ * library file is loaded for what it declares (the standard library), and a
+ * snippet is code from the REPL or `krb exec`. */
+typedef enum {
+  SOURCE_ENTRY_FILE,
+  SOURCE_LIBRARY_FILE,
+  SOURCE_SNIPPET
+} SourceKind;
+
 static void repl(void);
 static char *readFile(const char *path);
-static CompiledUnit *compileSource(const char *source, bool typecheck);
+static CompiledUnit *compileSource(const char *source, SourceKind kind,
+                                   bool typecheck);
 static void runFile(const char *path);
+static void loadFile(const char *source);
 static char *readFileNoExit(const char *path);
 static void runCode(const char *source, bool disassembleCode);
-static void compileFile(const char *path);
-static void compileCode(const char *source);
+static void compileFile(const char *path, SourceKind kind);
+static void compileCode(const char *source, SourceKind kind);
 
 char *doc = ""
             "bin = \"bin/main.krb\"\n";
@@ -170,7 +181,7 @@ static char **scriptArgv(char *program, int argc, char *argv[], int first,
 static void sessionBegin(int argc, char *argv[]) {
   initVM(argc, argv);
   typchkSessionBegin();
-  runCode(KIRBY_STDLIB, /*disassembleCode=*/false);
+  loadFile(KIRBY_STDLIB);
 }
 
 static void sessionEnd(void) {
@@ -316,8 +327,8 @@ static int cmdCompile(int argc, char *argv[]) {
     return usageError();
 
   typchkSessionBegin();
-  compileCode(KIRBY_STDLIB);
-  compileFile(argv[2]);
+  compileCode(KIRBY_STDLIB, SOURCE_LIBRARY_FILE);
+  compileFile(argv[2], SOURCE_ENTRY_FILE);
   compilerSessionEnd();
   typchkSessionEnd();
   fprintf(stderr, "Compiled!\n");
@@ -378,12 +389,14 @@ static int cmdBuild(int argc, char *argv[]) {
 
   typchkSessionBegin();
 
-  CompiledUnit *stdlib = compileSource(KIRBY_STDLIB, /*typecheck=*/true);
+  CompiledUnit *stdlib =
+      compileSource(KIRBY_STDLIB, SOURCE_LIBRARY_FILE, /*typecheck=*/true);
 
   if (stdlib == NULL)
     exit(EXIT_CODE_COMPILER_ERR);
 
-  CompiledUnit *program = compileSource(source, /*typecheck=*/true);
+  CompiledUnit *program =
+      compileSource(source, SOURCE_ENTRY_FILE, /*typecheck=*/true);
   free(source);
 
   if (program == NULL)
@@ -600,7 +613,8 @@ static void repl(void) {
       continue;
     }
 
-    CompiledUnit *unit = compileSource(line, /*typecheck=*/true);
+    CompiledUnit *unit =
+        compileSource(line, SOURCE_SNIPPET, /*typecheck=*/true);
 
     if (unit == NULL) {
       fprintf(stderr, "Compiler Error!\n");
@@ -677,7 +691,10 @@ static char *readFileNoExit(const char *path) {
   return buffer;
 }
 
-static CompiledUnit *compileSource(const char *source, bool typecheck) {
+static CompiledUnit *compileSource(const char *source, SourceKind kind,
+                                   bool typecheck) {
+  (void)kind;
+
   // Entries recorded here are keyed by AstNode* identity, valid only for
   // the AST this one call parses and (if it gets that far) compiles --
   // see resolved_impl_targets.h.
@@ -702,14 +719,14 @@ static CompiledUnit *compileSource(const char *source, bool typecheck) {
   return unit;
 }
 
-static void compileFile(const char *path) {
+static void compileFile(const char *path, SourceKind kind) {
   char *source = readFile(path);
-  compileCode(source);
+  compileCode(source, kind);
   free(source);
 }
 
-static void compileCode(const char *source) {
-  CompiledUnit *unit = compileSource(source, /*typecheck=*/true);
+static void compileCode(const char *source, SourceKind kind) {
+  CompiledUnit *unit = compileSource(source, kind, /*typecheck=*/true);
 
   if (unit == NULL) {
     exit(EXIT_CODE_COMPILER_ERR);
@@ -718,7 +735,8 @@ static void compileCode(const char *source) {
 
 static void runFile(const char *path) {
   char *source = readFile(path);
-  CompiledUnit *unit = compileSource(source, /*typecheck=*/true);
+  CompiledUnit *unit =
+      compileSource(source, SOURCE_ENTRY_FILE, /*typecheck=*/true);
   free(source);
 
   if (unit == NULL) {
@@ -731,8 +749,24 @@ static void runFile(const char *path) {
     exit(EXIT_CODE_RUNTIME_ERR);
 }
 
+/* Compiles and runs library file source without printing its bytecode. */
+static void loadFile(const char *source) {
+  CompiledUnit *unit =
+      compileSource(source, SOURCE_LIBRARY_FILE, /*typecheck=*/true);
+
+  if (unit == NULL) {
+    exit(EXIT_CODE_COMPILER_ERR);
+  }
+
+  InterpretResult result = interpret(unit, false);
+
+  if (result == INTERPRET_RUNTIME_ERROR)
+    exit(EXIT_CODE_RUNTIME_ERR);
+}
+
 static void runCode(const char *source, bool disassembleCode) {
-  CompiledUnit *unit = compileSource(source, /*typecheck=*/true);
+  CompiledUnit *unit =
+      compileSource(source, SOURCE_SNIPPET, /*typecheck=*/true);
 
   if (unit == NULL) {
     exit(EXIT_CODE_COMPILER_ERR);
