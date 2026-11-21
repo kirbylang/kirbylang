@@ -1,2 +1,4 @@
 let n = 10;
 let x: f64 = n / 4;
+
+fun main(): unit {}

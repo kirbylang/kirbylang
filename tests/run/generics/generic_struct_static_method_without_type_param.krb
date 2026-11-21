@@ -6,4 +6,4 @@ impl Box[T] {
   pub fun count(): i64 = 0;
 }
 
-@println(Box.count());
+fun main(): unit { @println(Box.count()); }

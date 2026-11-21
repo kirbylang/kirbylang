@@ -1,5 +1,5 @@
 var a = 123;
 
-a = 456;
+fun main(): unit { a = 456;
 
-@println(a);
+@println(a); }

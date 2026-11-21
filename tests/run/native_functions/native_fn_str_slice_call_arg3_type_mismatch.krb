@@ -1,1 +1,1 @@
-@println(@strSlice("hello", 1, "y"));
+fun main(): unit { @println(@strSlice("hello", 1, "y")); }

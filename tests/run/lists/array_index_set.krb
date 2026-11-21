@@ -1,5 +1,5 @@
 var array = [1, 2, 3];
 
-array[2] = 100;
+fun main(): unit { array[2] = 100;
 
-@println(array[2]);
+@println(array[2]); }

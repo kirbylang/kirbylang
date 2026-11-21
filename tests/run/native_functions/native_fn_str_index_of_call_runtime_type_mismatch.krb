@@ -1,1 +1,1 @@
-@println(@strIndexOf(@isNumber(1), "a"));
+fun main(): unit { @println(@strIndexOf(@isNumber(1), "a")); }

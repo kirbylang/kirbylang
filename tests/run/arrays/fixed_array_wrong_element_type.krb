@@ -1,1 +1,3 @@
 let a: [i64; 2] = [1, "two"];
+
+fun main(): unit {}

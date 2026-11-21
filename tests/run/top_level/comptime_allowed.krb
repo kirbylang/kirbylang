@@ -1,0 +1,22 @@
+struct Point { pub var x: f64; pub var y: f64; }
+
+fun helper(): unit {}
+
+let secondsPerDay = 24 * 60 * 60;
+let origin = Point { x: 0, y: 0 };
+let names = ["a", "b"];
+let square = fun (n: f64): f64 { n * n };
+let callback = helper;
+let alias = names;
+let nothing = ();
+var count = 0;
+
+fun main(): unit {
+  count = count + 1;
+  @println(secondsPerDay);
+  @println(origin.x);
+  @println(names[1]);
+  @println(square(4));
+  callback();
+  @println(count);
+}

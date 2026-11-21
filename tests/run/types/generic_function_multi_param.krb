@@ -1,2 +1,2 @@
 fun first[T, U](a: T, b: U): T = a;
-@println(first(1, "two"));
+fun main(): unit { @println(first(1, "two")); }

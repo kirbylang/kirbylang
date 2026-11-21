@@ -5,3 +5,5 @@ struct Box[T] {
 impl Box[T] {
   pub fun zero(): Self[T] = Self { value: 0 };
 }
+
+fun main(): unit {}

@@ -5,3 +5,5 @@ struct Point {
 impl NotATrait for Point {
     pub fun toString(self): string = "Point";
 }
+
+fun main(): unit {}

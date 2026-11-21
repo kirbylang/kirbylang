@@ -1,16 +1,21 @@
 == <script> ==
-0000    1 OP_STRUCT           0 'Account'
-0002    | OP_DEFINE_GLOBAL    0 'Account'
-0004    | OP_GET_GLOBAL       0 'Account'
-0006    2 OP_NIL
-0007    | OP_FIELD            1 'balance' private immutable
-0011    3 OP_POP
-0012    5 OP_GET_GLOBAL       0 'Account'
-0014    | OP_CONSTANT         1 'balance'
-0016    | OP_CONSTANT         3 '100'
-0018    | OP_STRUCT_INIT      1
-0020    | OP_DEFINE_GLOBAL    2 'a'
-0022    6 OP_NIL
-0023    | OP_RETURN
+0000    7 OP_CLOSURE          1 <fn main>
+0002    | OP_DEFINE_GLOBAL    0 'main'
+0004    1 OP_STRUCT           2 'Account'
+0006    | OP_DEFINE_GLOBAL    2 'Account'
+0008    | OP_GET_GLOBAL       2 'Account'
+0010    2 OP_NIL
+0011    | OP_FIELD            3 'balance' private immutable
+0015    3 OP_POP
+0016    5 OP_GET_GLOBAL       2 'Account'
+0018    | OP_CONSTANT         3 'balance'
+0020    | OP_CONSTANT         5 '100'
+0022    | OP_STRUCT_INIT      1
+0024    | OP_DEFINE_GLOBAL    4 'a'
+0026    8 OP_NIL
+0027    | OP_RETURN
+== main ==
+0000    7 OP_NIL
+0001    | OP_RETURN
 Field 'balance' is private to 'Account'.
 [line 5] in script

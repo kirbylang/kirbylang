@@ -9,6 +9,6 @@ impl Box[T] {
 }
 
 let b = Box { value: 1 };
-b.set(2);
+fun main(): unit { b.set(2);
 @println(b.value);
-b.set("two");
+b.set("two"); }

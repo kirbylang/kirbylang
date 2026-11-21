@@ -1,2 +1,56 @@
-[line 15] Error at 'globalSet': 'globalSet' might not be assigned yet.
-[line 16] Error at 'globalGet': 'globalGet' might not be assigned yet.
+== <script> ==
+0000   12 OP_CLOSURE          1 <fn setup>
+0002    | OP_DEFINE_GLOBAL    0 'setup'
+0004   18 OP_CLOSURE          3 <fn main>
+0006    | OP_DEFINE_GLOBAL    2 'main'
+0008    1 OP_CLOSURE          5 <fn lambda0x1>
+0010    | OP_DEFINE_GLOBAL    4 'globalSet'
+0012    2 OP_CLOSURE          7 <fn lambda0x2>
+0014    | OP_DEFINE_GLOBAL    6 'globalGet'
+0016   19 OP_NIL
+0017    | OP_RETURN
+== setup ==
+0000    5 OP_CONSTANT         0 'initial'
+0002    7 OP_CLOSURE          1 <fn set>
+0004      |                     local 1
+0006    8 OP_CLOSURE          2 <fn get>
+0008      |                     local 1
+0010   10 OP_GET_LOCAL        2
+0012    | OP_SET_GLOBAL       3 'globalSet'
+0014    | OP_POP
+0015   11 OP_GET_LOCAL        3
+0017    | OP_SET_GLOBAL       4 'globalGet'
+0019    | OP_POP
+0020   12 OP_NIL
+0021    | OP_RETURN
+== set ==
+0000    7 OP_CONSTANT         0 'updated'
+0002    | OP_SET_UPVALUE      0
+0004    | OP_POP
+0005    | OP_NIL
+0006    | OP_RETURN
+== get ==
+0000    8 OP_GET_GLOBAL       0 '@println'
+0002    | OP_GET_UPVALUE      0
+0004    | OP_CALL             1
+0006    | OP_POP
+0007    | OP_NIL
+0008    | OP_RETURN
+== main ==
+0000   15 OP_GET_GLOBAL       0 'setup'
+0002    | OP_CALL             0
+0004    | OP_POP
+0005   16 OP_GET_GLOBAL       1 'globalSet'
+0007    | OP_CALL             0
+0009    | OP_POP
+0010   17 OP_GET_GLOBAL       2 'globalGet'
+0012    | OP_CALL             0
+0014    | OP_POP
+0015   18 OP_NIL
+0016    | OP_RETURN
+== lambda0x1 ==
+0000    1 OP_NIL
+0001    | OP_RETURN
+== lambda0x2 ==
+0000    2 OP_NIL
+0001    | OP_RETURN

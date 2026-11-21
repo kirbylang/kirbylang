@@ -4,4 +4,4 @@ fun report(): unit {
 
 let handlers = [fun (s: string): unit { @println(s); }];
 
-report();
+fun main(): unit { report(); }

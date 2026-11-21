@@ -1,4 +1,4 @@
-let version = @version();
+fun main(): unit { let version = @version();
 let expected_version = @getenv("EXPECTED_KIRBY_VERSION");
 
-@println($"@version() returns version from VERSION.txt: {expected_version == version}");
+@println($"@version() returns version from VERSION.txt: {expected_version == version}"); }

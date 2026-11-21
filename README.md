@@ -31,12 +31,14 @@ impl Display for StringBuilder {
     fun toString(self): string = @strConcat(self.value);
 }
 
-let builder = StringBuilder.default()
-    .add("Hello")
-    .add(" ")
-    .add("World");
+fun main(): unit {
+    let builder = StringBuilder.default()
+        .add("Hello")
+        .add(" ")
+        .add("World");
 
-@println(builder);
+    @println(builder);
+}
 ```
 
 ## What Is It?

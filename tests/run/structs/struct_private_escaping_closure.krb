@@ -11,6 +11,6 @@ impl Counter {
     }
 }
 
-var read = Counter { count: 7 }.reader();
+fun main(): unit { var read = Counter { count: 7 }.reader();
 
-@println(read());
+@println(read()); }

@@ -1,1 +1,1 @@
-@println(@pow("x", 3));
+fun main(): unit { @println(@pow("x", 3)); }

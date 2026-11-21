@@ -7,4 +7,4 @@ fun first[T](xs: Items[T]): T = xs[0];
 
 let items: Items[i64] = [3, 4];
 
-@println(twice(fun (n) { n * 2 }, first(items)));
+fun main(): unit { @println(twice(fun (n) { n * 2 }, first(items))); }

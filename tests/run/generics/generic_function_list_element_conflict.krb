@@ -3,4 +3,4 @@ fun push_one[T](xs: [T], x: T): [T] {
 }
 
 let xs: [i64] = [1, 2];
-push_one(xs, "three");
+fun main(): unit { push_one(xs, "three"); }

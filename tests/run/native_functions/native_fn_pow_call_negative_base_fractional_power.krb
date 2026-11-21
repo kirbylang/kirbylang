@@ -1,1 +1,1 @@
-@println(@pow(-8, 0.5));
+fun main(): unit { @println(@pow(-8, 0.5)); }

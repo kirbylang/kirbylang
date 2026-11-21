@@ -1,3 +1,5 @@
-@println(sum(1, 2));
+fun main(): unit { @println(sum(1, 2)); }
+
+
 
 fun sum (a: f64, b: f64): f64 = { a + b };

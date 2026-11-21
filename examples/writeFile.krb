@@ -1,6 +1,8 @@
 #!/usr/bin/env krb run
 
-var path = @prompt("File: ");
-var text = @prompt("Text: ");
+fun main(): unit {
+  var path = @prompt("File: ");
+  var text = @prompt("Text: ");
 
-@writeStringToFile(path, text);
+  @writeStringToFile(path, text);
+}

@@ -1,31 +1,35 @@
 == <script> ==
-0000   19 OP_CLOSURE          1 <fn hello>
-0002    | OP_DEFINE_GLOBAL    0 'hello'
-0004    3 OP_STRUCT           2 'Struct'
-0006    | OP_DEFINE_GLOBAL    2 'Struct'
-0008    | OP_GET_GLOBAL       2 'Struct'
-0010    4 OP_NIL
-0011    | OP_FIELD            3 'fn' public immutable
-0015    5 OP_POP
-0016    7 OP_GET_GLOBAL       2 'Struct'
-0018   10 OP_CLOSURE          5 <fn new>
-0020    | OP_METHOD           4 'new'
-0022   11 OP_POP
-0023   13 OP_GET_GLOBAL       2 'Struct'
-0025    | OP_GET_GLOBAL       0 'hello'
-0027    | OP_INVOKE        (1 args)    4 'new'
-0030    | OP_DEFINE_GLOBAL    6 'instance'
-0032   15 OP_GET_GLOBAL       6 'instance'
-0034    | OP_INVOKE        (0 args)    3 'fn'
-0037    | OP_POP
-0038   20 OP_NIL
-0039    | OP_RETURN
+0000   15 OP_CLOSURE          1 <fn main>
+0002    | OP_DEFINE_GLOBAL    0 'main'
+0004   23 OP_CLOSURE          3 <fn hello>
+0006    | OP_DEFINE_GLOBAL    2 'hello'
+0008    3 OP_STRUCT           4 'Struct'
+0010    | OP_DEFINE_GLOBAL    4 'Struct'
+0012    | OP_GET_GLOBAL       4 'Struct'
+0014    4 OP_NIL
+0015    | OP_FIELD            5 'fn' public immutable
+0019    5 OP_POP
+0020    7 OP_GET_GLOBAL       4 'Struct'
+0022   10 OP_CLOSURE          7 <fn new>
+0024    | OP_METHOD           6 'new'
+0026   11 OP_POP
+0027   24 OP_NIL
+0028    | OP_RETURN
+== main ==
+0000   13 OP_GET_GLOBAL       0 'Struct'
+0002    | OP_GET_GLOBAL       2 'hello'
+0004    | OP_INVOKE        (1 args)    1 'new'
+0007   15 OP_GET_LOCAL        1
+0009    | OP_INVOKE        (0 args)    3 'fn'
+0012    | OP_POP
+0013    | OP_NIL
+0014    | OP_RETURN
 == hello ==
-0000   18 OP_GET_GLOBAL       0 '@println'
+0000   22 OP_GET_GLOBAL       0 '@println'
 0002    | OP_CONSTANT         1 'Hello World'
 0004    | OP_CALL             1
 0006    | OP_POP
-0007   19 OP_NIL
+0007   23 OP_NIL
 0008    | OP_RETURN
 == new ==
 0000    8 OP_GET_GLOBAL       0 'Struct'

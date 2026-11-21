@@ -1,3 +1,5 @@
 let value = 10;
 
 let value = 20;
+
+fun main(): unit {}

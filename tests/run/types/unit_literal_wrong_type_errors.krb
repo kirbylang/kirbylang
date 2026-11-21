@@ -1,1 +1,3 @@
 let count: f64 = ();
+
+fun main(): unit {}

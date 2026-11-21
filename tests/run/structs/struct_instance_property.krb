@@ -6,6 +6,6 @@ var instance = Struct {
     hello: "Hello"
 };
 
-instance.hello = "World";
+fun main(): unit { instance.hello = "World";
 
-@println(instance.hello);
+@println(instance.hello); }

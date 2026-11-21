@@ -1,0 +1,86 @@
+== <script> ==
+0000    3 OP_CLOSURE          1 <fn helper>
+0002    | OP_DEFINE_GLOBAL    0 'helper'
+0004   22 OP_CLOSURE          3 <fn main>
+0006    | OP_DEFINE_GLOBAL    2 'main'
+0008    1 OP_STRUCT           4 'Point'
+0010    | OP_DEFINE_GLOBAL    4 'Point'
+0012    | OP_GET_GLOBAL       4 'Point'
+0014    | OP_NIL
+0015    | OP_FIELD            5 'x' public mutable
+0019    | OP_NIL
+0020    | OP_FIELD            6 'y' public mutable
+0024    | OP_POP
+0025    5 OP_CONSTANT         8 '24'
+0027    | OP_CONSTANT         9 '60'
+0029    | OP_MULTIPLY
+0030    | OP_CONSTANT         9 '60'
+0032    | OP_MULTIPLY
+0033    | OP_DEFINE_GLOBAL    7 'secondsPerDay'
+0035    6 OP_GET_GLOBAL       4 'Point'
+0037    | OP_CONSTANT         5 'x'
+0039    | OP_CONSTANT        11 '0'
+0041    | OP_CONSTANT         6 'y'
+0043    | OP_CONSTANT        11 '0'
+0045    | OP_STRUCT_INIT      2
+0047    | OP_DEFINE_GLOBAL   10 'origin'
+0049    7 OP_CONSTANT        13 'a'
+0051    | OP_CONSTANT        14 'b'
+0053    | OP_ARRAY            2
+0055    | OP_DEFINE_GLOBAL   12 'names'
+0057    8 OP_CLOSURE         16 <fn lambda0x1>
+0059    | OP_DEFINE_GLOBAL   15 'square'
+0061    9 OP_GET_GLOBAL       0 'helper'
+0063    | OP_DEFINE_GLOBAL   17 'callback'
+0065   10 OP_GET_GLOBAL      12 'names'
+0067    | OP_DEFINE_GLOBAL   18 'alias'
+0069   11 OP_NIL
+0070    | OP_DEFINE_GLOBAL   19 'nothing'
+0072   12 OP_CONSTANT        21 '0'
+0074    | OP_DEFINE_GLOBAL   20 'count'
+0076   23 OP_NIL
+0077    | OP_RETURN
+== helper ==
+0000    3 OP_NIL
+0001    | OP_RETURN
+== main ==
+0000   15 OP_GET_GLOBAL       0 'count'
+0002    | OP_CONSTANT         1 '1'
+0004    | OP_ADD
+0005    | OP_SET_GLOBAL       0 'count'
+0007    | OP_POP
+0008   16 OP_GET_GLOBAL       2 '@println'
+0010    | OP_GET_GLOBAL       3 'secondsPerDay'
+0012    | OP_CALL             1
+0014    | OP_POP
+0015   17 OP_GET_GLOBAL       2 '@println'
+0017    | OP_GET_GLOBAL       4 'origin'
+0019    | OP_GET_PROPERTY     5 'x'
+0021    | OP_CALL             1
+0023    | OP_POP
+0024   18 OP_GET_GLOBAL       2 '@println'
+0026    | OP_GET_GLOBAL       6 'names'
+0028    | OP_CONSTANT         1 '1'
+0030    | OP_GET_INDEX
+0031    | OP_CALL             1
+0033    | OP_POP
+0034   19 OP_GET_GLOBAL       2 '@println'
+0036    | OP_GET_GLOBAL       7 'square'
+0038    | OP_CONSTANT         8 '4'
+0040    | OP_CALL             1
+0042    | OP_CALL             1
+0044    | OP_POP
+0045   20 OP_GET_GLOBAL       9 'callback'
+0047    | OP_CALL             0
+0049    | OP_POP
+0050   21 OP_GET_GLOBAL       2 '@println'
+0052    | OP_GET_GLOBAL       0 'count'
+0054    | OP_CALL             1
+0056    | OP_POP
+0057   22 OP_NIL
+0058    | OP_RETURN
+== lambda0x1 ==
+0000    8 OP_GET_LOCAL        1
+0002    | OP_GET_LOCAL        1
+0004    | OP_MULTIPLY
+0005    | OP_RETURN

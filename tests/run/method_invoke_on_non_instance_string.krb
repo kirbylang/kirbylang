@@ -1,1 +1,1 @@
-"Hello World".fn();
+fun main(): unit { "Hello World".fn(); }

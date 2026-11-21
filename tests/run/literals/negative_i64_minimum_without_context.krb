@@ -1,4 +1,4 @@
-@println(-9223372036854775808);
+fun main(): unit { @println(-9223372036854775808);
 @println(@typeof(-9223372036854775808));
 let smallest = -9223372036854775808;
-@println(smallest);
+@println(smallest); }

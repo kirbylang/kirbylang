@@ -6,3 +6,5 @@ trait MyOrd: MyEq {
     fun cmp(self, other: Self): f64;
 }
 
+
+fun main(): unit {}

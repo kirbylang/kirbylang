@@ -1,5 +1,5 @@
 var a = 1;
 
-@println({
+fun main(): unit { @println({
   a = 42
-});
+}); }

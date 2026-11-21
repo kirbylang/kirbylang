@@ -1,1 +1,1 @@
-@println(@typeof(@println("x")));
+fun main(): unit { @println(@typeof(@println("x"))); }

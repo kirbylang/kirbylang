@@ -1,40 +1,44 @@
 == <script> ==
-0000    1 OP_CONSTANT         1 '0'
-0002    | OP_DEFINE_GLOBAL    0 'i'
-0004    2 OP_GET_GLOBAL       0 'i'
-0006    | OP_CONSTANT         2 '5'
-0008    | OP_LESS
-0009    | OP_JUMP_IF_FALSE    9 -> 54
-0012    | OP_POP
-0013    3 OP_GET_GLOBAL       0 'i'
-0015    | OP_CONSTANT         3 '2'
-0017    | OP_MULTIPLY
-0018    4 OP_GET_GLOBAL       0 'i'
-0020    | OP_CONSTANT         4 '3'
-0022    | OP_EQUAL
-0023    | OP_JUMP_IF_FALSE   23 -> 34
-0026    | OP_POP
-0027    | OP_POP
-0028    | OP_JUMP            28 -> 55
-0031    | OP_JUMP            31 -> 35
-0034    | OP_POP
-0035    5 OP_GET_GLOBAL       5 '@println'
-0037    | OP_GET_LOCAL        1
-0039    | OP_CALL             1
-0041    | OP_POP
-0042    6 OP_GET_GLOBAL       0 'i'
-0044    | OP_CONSTANT         6 '1'
-0046    | OP_ADD
-0047    | OP_SET_GLOBAL       0 'i'
-0049    | OP_POP
-0050    7 OP_POP
-0051    | OP_LOOP            51 -> 4
-0054    | OP_POP
-0055    8 OP_CONSTANT         8 'still alive'
-0057    | OP_DEFINE_GLOBAL    7 'after'
-0059    9 OP_GET_GLOBAL       5 '@println'
-0061    | OP_GET_GLOBAL       7 'after'
-0063    | OP_CALL             1
-0065    | OP_POP
-0066   10 OP_NIL
-0067    | OP_RETURN
+0000    9 OP_CLOSURE          1 <fn main>
+0002    | OP_DEFINE_GLOBAL    0 'main'
+0004    1 OP_CONSTANT         3 '0'
+0006    | OP_DEFINE_GLOBAL    2 'i'
+0008   10 OP_NIL
+0009    | OP_RETURN
+== main ==
+0000    2 OP_GET_GLOBAL       0 'i'
+0002    | OP_CONSTANT         1 '5'
+0004    | OP_LESS
+0005    | OP_JUMP_IF_FALSE    5 -> 50
+0008    | OP_POP
+0009    3 OP_GET_GLOBAL       0 'i'
+0011    | OP_CONSTANT         2 '2'
+0013    | OP_MULTIPLY
+0014    4 OP_GET_GLOBAL       0 'i'
+0016    | OP_CONSTANT         3 '3'
+0018    | OP_EQUAL
+0019    | OP_JUMP_IF_FALSE   19 -> 30
+0022    | OP_POP
+0023    | OP_POP
+0024    | OP_JUMP            24 -> 51
+0027    | OP_JUMP            27 -> 31
+0030    | OP_POP
+0031    5 OP_GET_GLOBAL       4 '@println'
+0033    | OP_GET_LOCAL        1
+0035    | OP_CALL             1
+0037    | OP_POP
+0038    6 OP_GET_GLOBAL       0 'i'
+0040    | OP_CONSTANT         5 '1'
+0042    | OP_ADD
+0043    | OP_SET_GLOBAL       0 'i'
+0045    | OP_POP
+0046    7 OP_POP
+0047    | OP_LOOP            47 -> 0
+0050    | OP_POP
+0051    8 OP_CONSTANT         6 'still alive'
+0053    9 OP_GET_GLOBAL       4 '@println'
+0055    | OP_GET_LOCAL        1
+0057    | OP_CALL             1
+0059    | OP_POP
+0060    | OP_NIL
+0061    | OP_RETURN

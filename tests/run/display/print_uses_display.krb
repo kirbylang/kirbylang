@@ -12,5 +12,5 @@ struct Plain {
 
 let box = Box { value: 123 };
 
-@println(box);
-@println(Plain { value: 1 });
+fun main(): unit { @println(box);
+@println(Plain { value: 1 }); }

@@ -1,3 +1,5 @@
 struct Struct {
     pub var value: string;
 }
+
+fun main(): unit {}

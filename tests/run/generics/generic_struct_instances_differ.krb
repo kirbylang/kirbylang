@@ -4,3 +4,5 @@ struct Box[T] {
 
 let a: Box[f64] = Box { value: 1 };
 let b: Box[string] = a;
+
+fun main(): unit {}

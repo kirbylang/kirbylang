@@ -1,1 +1,1 @@
-let length: f64 = @strLen("abc");
+fun main(): unit { let length: f64 = @strLen("abc"); }

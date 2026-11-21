@@ -1,2 +1,2 @@
 let neg: i64 = -1;
-@println(neg as u32);
+fun main(): unit { @println(neg as u32); }

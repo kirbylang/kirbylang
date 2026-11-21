@@ -1,12 +1,15 @@
 == <script> ==
-0000    2 OP_CONSTANT         1 '1'
+0000    3 OP_CLOSURE          1 <fn main>
+0002    | OP_DEFINE_GLOBAL    0 'main'
+0004    4 OP_NIL
+0005    | OP_RETURN
+== main ==
+0000    2 OP_CONSTANT         0 '1'
 0002    | OP_NEGATE
 0003    | OP_CAST          i32
-0005    | OP_DEFINE_GLOBAL    0 'a'
-0007    3 OP_GET_GLOBAL       0 'a'
-0009    | OP_CAST          u8
-0011    | OP_DEFINE_GLOBAL    2 'b'
-0013    4 OP_NIL
-0014    | OP_RETURN
+0005    3 OP_GET_LOCAL        1
+0007    | OP_CAST          u8
+0009    | OP_NIL
+0010    | OP_RETURN
 can't convert i32 -1 to u8, expected an integer from 0 to 255.
-[line 3] in script
+[line 3] in main()

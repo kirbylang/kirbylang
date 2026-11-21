@@ -1,2 +1,2 @@
-@println(Date.new(-1));
-@println(Date.new(-10000));
+fun main(): unit { @println(Date.new(-1));
+@println(Date.new(-10000)); }

@@ -1,1 +1,1 @@
-@println(@isFunction(@ceil, @ceil));
+fun main(): unit { @println(@isFunction(@ceil, @ceil)); }

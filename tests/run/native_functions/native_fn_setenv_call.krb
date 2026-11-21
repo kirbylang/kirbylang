@@ -1,3 +1,3 @@
-@println(@setenv("HELLO", "WORLD"));
+fun main(): unit { @println(@setenv("HELLO", "WORLD"));
 
-@println(@getenv("HELLO"));
+@println(@getenv("HELLO")); }

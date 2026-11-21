@@ -1,24 +1,29 @@
 == <script> ==
-0000    1 OP_STRUCT           0 'Counter'
-0002    | OP_DEFINE_GLOBAL    0 'Counter'
-0004    | OP_GET_GLOBAL       0 'Counter'
-0006    2 OP_NIL
-0007    | OP_FIELD            1 'count' private immutable
-0011    3 OP_POP
-0012    5 OP_GET_GLOBAL       0 'Counter'
-0014    6 OP_CLOSURE          3 <fn new>
-0016    | OP_METHOD           2 'new'
-0018   13 OP_CLOSURE          5 <fn read>
-0020    | OP_METHOD           4 'read'
-0022   14 OP_POP
-0023   16 OP_GET_GLOBAL       6 '@println'
-0025    | OP_GET_GLOBAL       0 'Counter'
-0027    | OP_INVOKE        (0 args)    2 'new'
-0030    | OP_INVOKE        (0 args)    4 'read'
-0033    | OP_CALL             1
-0035    | OP_POP
-0036   17 OP_NIL
-0037    | OP_RETURN
+0000   16 OP_CLOSURE          1 <fn main>
+0002    | OP_DEFINE_GLOBAL    0 'main'
+0004    1 OP_STRUCT           2 'Counter'
+0006    | OP_DEFINE_GLOBAL    2 'Counter'
+0008    | OP_GET_GLOBAL       2 'Counter'
+0010    2 OP_NIL
+0011    | OP_FIELD            3 'count' private immutable
+0015    3 OP_POP
+0016    5 OP_GET_GLOBAL       2 'Counter'
+0018    6 OP_CLOSURE          5 <fn new>
+0020    | OP_METHOD           4 'new'
+0022   13 OP_CLOSURE          7 <fn read>
+0024    | OP_METHOD           6 'read'
+0026   14 OP_POP
+0027   17 OP_NIL
+0028    | OP_RETURN
+== main ==
+0000   16 OP_GET_GLOBAL       0 '@println'
+0002    | OP_GET_GLOBAL       1 'Counter'
+0004    | OP_INVOKE        (0 args)    2 'new'
+0007    | OP_INVOKE        (0 args)    3 'read'
+0010    | OP_CALL             1
+0012    | OP_POP
+0013    | OP_NIL
+0014    | OP_RETURN
 == new ==
 0000    6 OP_GET_GLOBAL       0 'Counter'
 0002    | OP_CONSTANT         1 'count'

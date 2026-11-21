@@ -4,3 +4,5 @@ fun total(xs: [i64]): i64 {
 fun f(a: [i64; 2]): unit {
   total(a);
 }
+
+fun main(): unit {}

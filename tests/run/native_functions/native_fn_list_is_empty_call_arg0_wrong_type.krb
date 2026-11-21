@@ -1,1 +1,1 @@
-@listIsEmpty(nil);
+fun main(): unit { @listIsEmpty(nil); }

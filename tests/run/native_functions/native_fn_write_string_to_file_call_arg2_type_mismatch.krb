@@ -1,1 +1,1 @@
-@writeStringToFile("./path/to/file.txt", 123);
+fun main(): unit { @writeStringToFile("./path/to/file.txt", 123); }

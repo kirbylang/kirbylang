@@ -7,6 +7,6 @@ impl Default for Point {
     pub fun default(): Self = Point { x: 0, y: 0 };
 }
 
-var origin: Point = Point.default();
+fun main(): unit { var origin: Point = Point.default();
 @println(origin.x);
-@println(origin.y);
+@println(origin.y); }

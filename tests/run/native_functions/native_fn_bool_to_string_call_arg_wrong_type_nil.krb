@@ -1,1 +1,1 @@
-@boolToString(nil);
+fun main(): unit { @boolToString(nil); }

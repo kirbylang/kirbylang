@@ -4,3 +4,5 @@ impl Struct {
     pub fun dup(self): string = "first";
     pub fun dup(self): string = "second";
 }
+
+fun main(): unit {}

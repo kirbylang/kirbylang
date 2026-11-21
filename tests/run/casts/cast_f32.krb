@@ -1,4 +1,4 @@
-@println(0.1f32 as f64);
+fun main(): unit { @println(0.1f32 as f64);
 @println(0.1 as f32);
 @println(16777217 as f32);
 @println(16777217i32 as f32);
@@ -8,4 +8,4 @@
 @println(300.0f32 as u16);
 @println(123456789i64 as f32);
 @println(18446744073709551615u64 as f32);
-@println(3.5f32 as f32);
+@println(3.5f32 as f32); }

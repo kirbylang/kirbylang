@@ -17,6 +17,7 @@
 #include "stdlib_source.h"
 #include "strbuf.h"
 #include "token_stream.h"
+#include "top_level.h"
 #include "typecheck.h"
 #include "unit_bytes.h"
 #include "version.h"
@@ -693,8 +694,6 @@ static char *readFileNoExit(const char *path) {
 
 static CompiledUnit *compileSource(const char *source, SourceKind kind,
                                    bool typecheck) {
-  (void)kind;
-
   // Entries recorded here are keyed by AstNode* identity, valid only for
   // the AST this one call parses and (if it gets that far) compiles --
   // see resolved_impl_targets.h.
@@ -705,10 +704,21 @@ static CompiledUnit *compileSource(const char *source, SourceKind kind,
   int endLine = 0;
   AstNode **ast = parse(source, &count, &hadError, &endLine);
 
+  // Only files are held to declarations. The type checker still runs after
+  // a top-level error, so one run shows both kinds.
+  bool topLevelOk = true;
+  if (!hadError && kind != SOURCE_SNIPPET) {
+    topLevelOk = topLevelCheck(ast, count, kind == SOURCE_ENTRY_FILE);
+  }
+
   if (!hadError && typecheck) {
     if (!typchkCheckProgram(ast, count)) {
       hadError = true;
     }
+  }
+
+  if (!topLevelOk) {
+    hadError = true;
   }
 
   CompiledUnit *unit = hadError ? NULL : compile(ast, count, endLine);
@@ -747,6 +757,9 @@ static void runFile(const char *path) {
   }
 
   InterpretResult result = interpret(unit, true);
+
+  if (result == INTERPRET_OK)
+    result = interpretMain();
 
   if (result == INTERPRET_RUNTIME_ERROR)
     exit(EXIT_CODE_RUNTIME_ERR);

@@ -1,17 +1,22 @@
 == <script> ==
-0000    1 OP_CONSTANT         1 'a'
-0002    | OP_CONSTANT         2 'b'
-0004    | OP_ARRAY            2
-0006    | OP_DEFINE_GLOBAL    0 'words'
-0008    2 OP_GET_GLOBAL       3 '@println'
-0010    | OP_GET_GLOBAL       0 'words'
-0012    | OP_CONSTANT         4 '0'
-0014    | OP_GET_INDEX
-0015    | OP_GET_GLOBAL       0 'words'
-0017    | OP_CONSTANT         5 '1'
-0019    | OP_GET_INDEX
-0020    | OP_ADD
-0021    | OP_CALL             1
-0023    | OP_POP
-0024    3 OP_NIL
-0025    | OP_RETURN
+0000    2 OP_CLOSURE          1 <fn main>
+0002    | OP_DEFINE_GLOBAL    0 'main'
+0004    1 OP_CONSTANT         3 'a'
+0006    | OP_CONSTANT         4 'b'
+0008    | OP_ARRAY            2
+0010    | OP_DEFINE_GLOBAL    2 'words'
+0012    3 OP_NIL
+0013    | OP_RETURN
+== main ==
+0000    2 OP_GET_GLOBAL       0 '@println'
+0002    | OP_GET_GLOBAL       1 'words'
+0004    | OP_CONSTANT         2 '0'
+0006    | OP_GET_INDEX
+0007    | OP_GET_GLOBAL       1 'words'
+0009    | OP_CONSTANT         3 '1'
+0011    | OP_GET_INDEX
+0012    | OP_ADD
+0013    | OP_CALL             1
+0015    | OP_POP
+0016    | OP_NIL
+0017    | OP_RETURN

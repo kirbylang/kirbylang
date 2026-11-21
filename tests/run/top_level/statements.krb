@@ -1,0 +1,12 @@
+fun greet(): unit {}
+
+@println("hello");
+greet();
+if (true) { greet(); }
+while (false) {}
+for (var i = 0; i < 1; i = i + 1) {}
+{ greet(); }
+var count = 0;
+count = 1;
+
+fun main(): unit {}

@@ -91,6 +91,13 @@ InterpretResult interpretFunction(ObjFunction *function);
  */
 InterpretResult interpret(CompiledUnit *unit, bool disassembleCode);
 
+/**
+ * Call the global function `main` with no arguments and run it.
+ *
+ * @return INTERPRET_RUNTIME_ERROR if there is no `main`.
+ */
+InterpretResult interpretMain(void);
+
 void runtimeError(VM *vm, const char *format, ...)
     __attribute__((format(printf, 2, 3)));
 

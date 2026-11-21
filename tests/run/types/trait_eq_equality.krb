@@ -10,7 +10,7 @@ impl Eq for Box {
     fun equals(self, other: Self): bool = self.value == self.value;
 }
 
-let a = Box.default();
+fun main(): unit { let a = Box.default();
 let b = Box.default();
 
 @println(a == a);
@@ -20,4 +20,4 @@ let b = Box.default();
 @println(b.equals(b));
 
 @println(a == b);
-@println(a.equals(b));
+@println(a.equals(b)); }

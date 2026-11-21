@@ -6,4 +6,4 @@ struct Point {
 var a = Point { x: 1, y: 2 };
 var b = Point { x: 1, y: 2 };
 
-@println(a == b);
+fun main(): unit { @println(a == b); }

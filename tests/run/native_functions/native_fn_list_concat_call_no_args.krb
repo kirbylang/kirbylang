@@ -1,1 +1,1 @@
-@listConcat();
+fun main(): unit { @listConcat(); }

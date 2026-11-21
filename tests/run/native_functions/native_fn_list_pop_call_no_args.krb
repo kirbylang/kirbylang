@@ -1,1 +1,1 @@
-@listPop();
+fun main(): unit { @listPop(); }

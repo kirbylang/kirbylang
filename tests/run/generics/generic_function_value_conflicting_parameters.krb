@@ -3,3 +3,5 @@ fun same[T](a: T, b: T): T {
 }
 
 let f: fun (i64, string) => i64 = same;
+
+fun main(): unit {}

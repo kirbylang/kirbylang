@@ -4,6 +4,8 @@
 //
 // cat path/to/file.txt | kirby stdin.krb
 
-var text = @stdin();
+fun main(): unit {
+  var text = @stdin();
 
-@println(text);
+  @println(text);
+}

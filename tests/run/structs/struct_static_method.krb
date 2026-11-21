@@ -9,7 +9,7 @@ impl Point {
     pub fun origin(): Point = Point.new(0, 0);
 }
 
-var point = Point.origin();
+fun main(): unit { var point = Point.origin();
 
 @println(point.x);
-@println(point.y);
+@println(point.y); }

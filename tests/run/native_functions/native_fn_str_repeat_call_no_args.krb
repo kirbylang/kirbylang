@@ -1,1 +1,1 @@
-@println(@strRepeat());
+fun main(): unit { @println(@strRepeat()); }

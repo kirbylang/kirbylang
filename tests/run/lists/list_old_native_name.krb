@@ -1,2 +1,2 @@
 let xs: [i64] = [1];
-@arrPush(xs, 2);
+fun main(): unit { @arrPush(xs, 2); }

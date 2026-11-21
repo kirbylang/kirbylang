@@ -1,6 +1,6 @@
 // Cast an f64 to u8. The value must be an integer from 0 to 255.
 let v: f64 = 255.0;
-let byte: u8 = v as u8;
+fun main(): unit { let byte: u8 = v as u8;
 @println(byte);
 
 let pi: f64 = 3.14159;
@@ -11,4 +11,4 @@ let pi: f64 = 3.14159;
 @println(2 * 3 as u8);
 
 // A cast works on literals too.
-@println(7 as u8);
+@println(7 as u8); }

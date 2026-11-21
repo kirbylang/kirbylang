@@ -1,4 +1,4 @@
 var greeting = "Hello";
 var name = "World";
 
-@println(greeting + " " + name);
+fun main(): unit { @println(greeting + " " + name); }

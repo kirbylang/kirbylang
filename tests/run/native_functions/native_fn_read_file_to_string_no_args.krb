@@ -1,1 +1,1 @@
-@println(@readFileToString());
+fun main(): unit { @println(@readFileToString()); }

@@ -2,3 +2,5 @@ fun f(a: [i64; 2]): unit {}
 fun g(xs: [i64]): unit {
   f(xs);
 }
+
+fun main(): unit {}

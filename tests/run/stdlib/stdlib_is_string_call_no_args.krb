@@ -1,1 +1,1 @@
-@println(@isString());
+fun main(): unit { @println(@isString()); }

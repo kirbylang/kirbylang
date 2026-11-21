@@ -1,1 +1,1 @@
-@println(@fileExists("./path/to/file.txt", "another/path/to/fix.txt"));
+fun main(): unit { @println(@fileExists("./path/to/file.txt", "another/path/to/fix.txt")); }

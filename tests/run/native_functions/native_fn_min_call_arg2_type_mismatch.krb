@@ -1,1 +1,1 @@
-@println(@min(2, "y"));
+fun main(): unit { @println(@min(2, "y")); }

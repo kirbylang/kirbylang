@@ -1,1 +1,1 @@
-@listJoin();
+fun main(): unit { @listJoin(); }

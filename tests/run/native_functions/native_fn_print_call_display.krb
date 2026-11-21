@@ -8,9 +8,9 @@ impl Display for Box {
 
 let box = Box { value: 123 };
 
-@print(box);
+fun main(): unit { @print(box);
 @println("");
 @println(box);
 @eprint(box);
 @eprintln(box);
-@println(Box { value: 1 });
+@println(Box { value: 1 }); }

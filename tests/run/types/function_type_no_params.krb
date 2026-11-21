@@ -1,7 +1,9 @@
-var greeter: fun () => unit;
+fun main(): unit { var greeter: fun () => unit;
 
-fun greet(): unit { @println("hi"); }
+
 
 greeter = greet;
 
-greeter();
+greeter(); }
+
+fun greet(): unit { @println("hi"); }

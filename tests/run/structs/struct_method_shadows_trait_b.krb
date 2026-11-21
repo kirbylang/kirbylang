@@ -16,7 +16,7 @@ impl Box {
     pub fun get(self): string = @numberToString(self.value);
 }
 
-let box = Box.new(100);
+fun main(): unit { let box = Box.new(100);
 var n: string = box.get();
 
-@println(n);
+@println(n); }

@@ -1,3 +1,3 @@
 var array: [bool] = [true, true, false];
 
-@println(@listContains(array, false));
+fun main(): unit { @println(@listContains(array, false)); }

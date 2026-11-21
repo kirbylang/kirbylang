@@ -1,1 +1,3 @@
 let x: f32 = 16777217;
+
+fun main(): unit {}

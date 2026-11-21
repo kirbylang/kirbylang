@@ -3,33 +3,10 @@
 0002    | OP_DEFINE_GLOBAL    0 'first'
 0004    7 OP_CLOSURE          3 <fn apply>
 0006    | OP_DEFINE_GLOBAL    2 'apply'
-0008    9 OP_GET_GLOBAL       0 'first'
-0010    | OP_CONSTANT         5 '10'
-0012    | OP_CONSTANT         6 '20'
-0014    | OP_CONSTANT         7 '30'
-0016    | OP_LIST             3
-0018    | OP_CALL             1
-0020    | OP_DEFINE_GLOBAL    4 'n'
-0022   10 OP_GET_GLOBAL       8 '@println'
-0024    | OP_GET_GLOBAL       4 'n'
-0026    | OP_CALL             1
-0028    | OP_POP
-0029   11 OP_GET_GLOBAL       8 '@println'
-0031    | OP_GET_GLOBAL       2 'apply'
-0033    | OP_GET_GLOBAL       4 'n'
-0035    | OP_CLOSURE          9 <fn lambda0x1>
-0037    | OP_CALL             2
-0039    | OP_CALL             1
-0041    | OP_POP
-0042   12 OP_GET_GLOBAL       8 '@println'
-0044    | OP_GET_GLOBAL       2 'apply'
-0046    | OP_CONSTANT        10 'abc'
-0048    | OP_CLOSURE         11 <fn lambda0x2>
-0050    | OP_CALL             2
-0052    | OP_CALL             1
-0054    | OP_POP
-0055   13 OP_NIL
-0056    | OP_RETURN
+0008   12 OP_CLOSURE          5 <fn main>
+0010    | OP_DEFINE_GLOBAL    4 'main'
+0012   13 OP_NIL
+0013    | OP_RETURN
 == first ==
 0000    2 OP_GET_LOCAL        1
 0002    | OP_CONSTANT         0 '0'
@@ -40,6 +17,33 @@
 0002    | OP_GET_LOCAL        1
 0004    | OP_CALL             1
 0006    | OP_RETURN
+== main ==
+0000    9 OP_GET_GLOBAL       0 'first'
+0002    | OP_CONSTANT         1 '10'
+0004    | OP_CONSTANT         2 '20'
+0006    | OP_CONSTANT         3 '30'
+0008    | OP_LIST             3
+0010    | OP_CALL             1
+0012   10 OP_GET_GLOBAL       4 '@println'
+0014    | OP_GET_LOCAL        1
+0016    | OP_CALL             1
+0018    | OP_POP
+0019   11 OP_GET_GLOBAL       4 '@println'
+0021    | OP_GET_GLOBAL       5 'apply'
+0023    | OP_GET_LOCAL        1
+0025    | OP_CLOSURE          6 <fn lambda0x1>
+0027    | OP_CALL             2
+0029    | OP_CALL             1
+0031    | OP_POP
+0032   12 OP_GET_GLOBAL       4 '@println'
+0034    | OP_GET_GLOBAL       5 'apply'
+0036    | OP_CONSTANT         7 'abc'
+0038    | OP_CLOSURE          8 <fn lambda0x2>
+0040    | OP_CALL             2
+0042    | OP_CALL             1
+0044    | OP_POP
+0045    | OP_NIL
+0046    | OP_RETURN
 == lambda0x1 ==
 0000   11 OP_GET_LOCAL        1
 0002    | OP_CONSTANT         0 '5'

@@ -1,36 +1,41 @@
 == <script> ==
-0000    1 OP_STRUCT           0 'Counter'
-0002    | OP_DEFINE_GLOBAL    0 'Counter'
-0004    | OP_GET_GLOBAL       0 'Counter'
-0006    2 OP_NIL
-0007    | OP_FIELD            1 'count' public mutable
-0011    3 OP_POP
-0012    5 OP_GET_GLOBAL       0 'Counter'
-0014    8 OP_CLOSURE          3 <fn increment>
-0016    | OP_METHOD           2 'increment'
-0018    9 OP_POP
-0019   11 OP_GET_GLOBAL       0 'Counter'
-0021   14 OP_CLOSURE          5 <fn get>
-0023    | OP_METHOD           4 'get'
-0025   15 OP_POP
-0026   17 OP_GET_GLOBAL       0 'Counter'
-0028    | OP_CONSTANT         1 'count'
-0030    | OP_CONSTANT         7 '0'
-0032    | OP_STRUCT_INIT      1
-0034    | OP_DEFINE_GLOBAL    6 'counter'
-0036   19 OP_GET_GLOBAL       6 'counter'
-0038    | OP_INVOKE        (0 args)    2 'increment'
-0041    | OP_POP
-0042   20 OP_GET_GLOBAL       6 'counter'
-0044    | OP_INVOKE        (0 args)    2 'increment'
-0047    | OP_POP
-0048   22 OP_GET_GLOBAL       8 '@println'
-0050    | OP_GET_GLOBAL       6 'counter'
-0052    | OP_INVOKE        (0 args)    4 'get'
-0055    | OP_CALL             1
-0057    | OP_POP
-0058   23 OP_NIL
-0059    | OP_RETURN
+0000   22 OP_CLOSURE          1 <fn main>
+0002    | OP_DEFINE_GLOBAL    0 'main'
+0004    1 OP_STRUCT           2 'Counter'
+0006    | OP_DEFINE_GLOBAL    2 'Counter'
+0008    | OP_GET_GLOBAL       2 'Counter'
+0010    2 OP_NIL
+0011    | OP_FIELD            3 'count' public mutable
+0015    3 OP_POP
+0016    5 OP_GET_GLOBAL       2 'Counter'
+0018    8 OP_CLOSURE          5 <fn increment>
+0020    | OP_METHOD           4 'increment'
+0022    9 OP_POP
+0023   11 OP_GET_GLOBAL       2 'Counter'
+0025   14 OP_CLOSURE          7 <fn get>
+0027    | OP_METHOD           6 'get'
+0029   15 OP_POP
+0030   17 OP_GET_GLOBAL       2 'Counter'
+0032    | OP_CONSTANT         3 'count'
+0034    | OP_CONSTANT         9 '0'
+0036    | OP_STRUCT_INIT      1
+0038    | OP_DEFINE_GLOBAL    8 'counter'
+0040   23 OP_NIL
+0041    | OP_RETURN
+== main ==
+0000   19 OP_GET_GLOBAL       0 'counter'
+0002    | OP_INVOKE        (0 args)    1 'increment'
+0005    | OP_POP
+0006   20 OP_GET_GLOBAL       0 'counter'
+0008    | OP_INVOKE        (0 args)    1 'increment'
+0011    | OP_POP
+0012   22 OP_GET_GLOBAL       2 '@println'
+0014    | OP_GET_GLOBAL       0 'counter'
+0016    | OP_INVOKE        (0 args)    3 'get'
+0019    | OP_CALL             1
+0021    | OP_POP
+0022    | OP_NIL
+0023    | OP_RETURN
 == increment ==
 0000    7 OP_GET_LOCAL        0
 0002    | OP_GET_LOCAL        0

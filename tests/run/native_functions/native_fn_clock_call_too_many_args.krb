@@ -1,1 +1,1 @@
-@clock(true);
+fun main(): unit { @clock(true); }

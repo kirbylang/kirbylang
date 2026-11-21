@@ -1,1 +1,1 @@
-@println(@strToUpper("abc", 1, 2));
+fun main(): unit { @println(@strToUpper("abc", 1, 2)); }

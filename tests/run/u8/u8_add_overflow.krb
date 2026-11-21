@@ -1,2 +1,2 @@
 let a: u8 = 255;
-@println(a + 1u8);
+fun main(): unit { @println(a + 1u8); }

@@ -1,1 +1,3 @@
 let xs = [];
+
+fun main(): unit {}

@@ -1,1 +1,1 @@
-nil.fn();
+fun main(): unit { nil.fn(); }

@@ -2,5 +2,5 @@ fun grow(xs: [i64]): unit {
   @listPush(xs, 0);
 }
 let ys: [i64] = [];
-grow(ys);
-@println(ys);
+fun main(): unit { grow(ys);
+@println(ys); }

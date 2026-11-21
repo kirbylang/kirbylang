@@ -1,1 +1,1 @@
-@numberToString("123");
+fun main(): unit { @numberToString("123"); }

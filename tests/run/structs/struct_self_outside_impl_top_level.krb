@@ -1,1 +1,1 @@
-@println(self);
+fun main(): unit { @println(self); }

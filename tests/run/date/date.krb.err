@@ -1,37 +1,41 @@
 == <script> ==
-0000    1 OP_GET_GLOBAL       1 'Date'
-0002    | OP_CONSTANT         3 '0'
-0004    | OP_INVOKE        (1 args)    2 'new'
-0007    | OP_DEFINE_GLOBAL    0 'date'
-0009    3 OP_GET_GLOBAL       4 '@println'
-0011    | OP_GET_GLOBAL       0 'date'
-0013    | OP_INVOKE        (0 args)    5 'get_year'
-0016    | OP_CALL             1
-0018    | OP_POP
-0019    4 OP_GET_GLOBAL       4 '@println'
-0021    | OP_GET_GLOBAL       0 'date'
-0023    | OP_INVOKE        (0 args)    6 'get_month'
-0026    | OP_CALL             1
-0028    | OP_POP
-0029    5 OP_GET_GLOBAL       4 '@println'
-0031    | OP_GET_GLOBAL       0 'date'
-0033    | OP_INVOKE        (0 args)    7 'get_day'
-0036    | OP_CALL             1
-0038    | OP_POP
-0039    6 OP_GET_GLOBAL       4 '@println'
-0041    | OP_GET_GLOBAL       0 'date'
-0043    | OP_INVOKE        (0 args)    8 'get_hour'
-0046    | OP_CALL             1
-0048    | OP_POP
-0049    7 OP_GET_GLOBAL       4 '@println'
-0051    | OP_GET_GLOBAL       0 'date'
-0053    | OP_INVOKE        (0 args)    9 'get_minute'
-0056    | OP_CALL             1
-0058    | OP_POP
-0059    8 OP_GET_GLOBAL       4 '@println'
-0061    | OP_GET_GLOBAL       0 'date'
-0063    | OP_INVOKE        (0 args)   10 'get_second'
-0066    | OP_CALL             1
-0068    | OP_POP
-0069    9 OP_NIL
-0070    | OP_RETURN
+0000    8 OP_CLOSURE          1 <fn main>
+0002    | OP_DEFINE_GLOBAL    0 'main'
+0004    9 OP_NIL
+0005    | OP_RETURN
+== main ==
+0000    1 OP_GET_GLOBAL       0 'Date'
+0002    | OP_CONSTANT         2 '0'
+0004    | OP_INVOKE        (1 args)    1 'new'
+0007    3 OP_GET_GLOBAL       3 '@println'
+0009    | OP_GET_LOCAL        1
+0011    | OP_INVOKE        (0 args)    4 'get_year'
+0014    | OP_CALL             1
+0016    | OP_POP
+0017    4 OP_GET_GLOBAL       3 '@println'
+0019    | OP_GET_LOCAL        1
+0021    | OP_INVOKE        (0 args)    5 'get_month'
+0024    | OP_CALL             1
+0026    | OP_POP
+0027    5 OP_GET_GLOBAL       3 '@println'
+0029    | OP_GET_LOCAL        1
+0031    | OP_INVOKE        (0 args)    6 'get_day'
+0034    | OP_CALL             1
+0036    | OP_POP
+0037    6 OP_GET_GLOBAL       3 '@println'
+0039    | OP_GET_LOCAL        1
+0041    | OP_INVOKE        (0 args)    7 'get_hour'
+0044    | OP_CALL             1
+0046    | OP_POP
+0047    7 OP_GET_GLOBAL       3 '@println'
+0049    | OP_GET_LOCAL        1
+0051    | OP_INVOKE        (0 args)    8 'get_minute'
+0054    | OP_CALL             1
+0056    | OP_POP
+0057    8 OP_GET_GLOBAL       3 '@println'
+0059    | OP_GET_LOCAL        1
+0061    | OP_INVOKE        (0 args)    9 'get_second'
+0064    | OP_CALL             1
+0066    | OP_POP
+0067    | OP_NIL
+0068    | OP_RETURN

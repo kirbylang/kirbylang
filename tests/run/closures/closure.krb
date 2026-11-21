@@ -8,6 +8,6 @@ fun outer (): fun () => i64 {
     return inner;
 }
 
-var inner = outer();
+fun main(): unit { var inner = outer();
 
-@println(inner());
+@println(inner()); }

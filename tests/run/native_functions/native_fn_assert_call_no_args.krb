@@ -1,1 +1,1 @@
-@assert();
+fun main(): unit { @assert(); }

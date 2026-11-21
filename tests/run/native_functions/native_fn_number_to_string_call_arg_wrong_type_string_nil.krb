@@ -1,1 +1,1 @@
-@numberToString(nil);
+fun main(): unit { @numberToString(nil); }

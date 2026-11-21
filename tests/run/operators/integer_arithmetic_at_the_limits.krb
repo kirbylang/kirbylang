@@ -2,7 +2,7 @@ let largest = 9223372036854775807;
 let smallest = -9223372036854775808;
 let negativeOne = -1;
 
-@println(largest + 0);
+fun main(): unit { @println(largest + 0);
 @println(largest - largest);
 @println(smallest + largest);
 @println(smallest + 0);
@@ -24,4 +24,4 @@ let largestU64 = 18446744073709551615u64;
 
 let small: i8 = -128;
 @println(small + 127);
-@println(small * 1);
+@println(small * 1); }

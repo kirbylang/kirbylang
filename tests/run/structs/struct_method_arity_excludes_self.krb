@@ -8,4 +8,4 @@ impl Greeter {
 
 var greeter = Greeter {};
 
-greeter.greet("World", "Extra");
+fun main(): unit { greeter.greet("World", "Extra"); }

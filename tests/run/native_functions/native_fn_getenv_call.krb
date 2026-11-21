@@ -1,1 +1,1 @@
-@println(@getenv("KIRBY_TEST"));
+fun main(): unit { @println(@getenv("KIRBY_TEST")); }

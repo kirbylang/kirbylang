@@ -5,3 +5,5 @@ struct Point {
 impl Display for Point {
     pub fun toString(): string = "Point";
 }
+
+fun main(): unit {}

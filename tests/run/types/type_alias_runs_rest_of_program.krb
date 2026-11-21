@@ -2,8 +2,10 @@ type Wrapper[T] = T;
 
 var x: Wrapper[f64] = 5;
 
-@println(x);
+fun main(): unit { @println(x);
+
+
+
+@println(add(1, 2)); }
 
 fun add(a: f64, b: f64): f64 = a + b;
-
-@println(add(1, 2));

@@ -1,2 +1,2 @@
 let big = 3037000500;
-@println(big * big);
+fun main(): unit { @println(big * big); }

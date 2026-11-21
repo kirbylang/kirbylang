@@ -1,1 +1,1 @@
-@print("a", "b");
+fun main(): unit { @print("a", "b"); }

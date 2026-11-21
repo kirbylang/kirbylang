@@ -1,28 +1,33 @@
 == <script> ==
-0000    1 OP_STRUCT           0 'Account'
-0002    | OP_DEFINE_GLOBAL    0 'Account'
-0004    | OP_GET_GLOBAL       0 'Account'
-0006    2 OP_NIL
-0007    | OP_FIELD            1 '_balance' private mutable
-0011    3 OP_POP
-0012    5 OP_GET_GLOBAL       0 'Account'
-0014    6 OP_CLOSURE          3 <fn new>
-0016    | OP_METHOD           2 'new'
-0018   11 OP_CLOSURE          5 <fn deposit>
-0020    | OP_METHOD           4 'deposit'
-0022   13 OP_CLOSURE          7 <fn balance>
-0024    | OP_METHOD           6 'balance'
-0026   14 OP_POP
-0027   16 OP_GET_GLOBAL       8 '@println'
-0029    | OP_GET_GLOBAL       0 'Account'
-0031    | OP_INVOKE        (0 args)    2 'new'
-0034    | OP_CONSTANT         9 '50'
-0036    | OP_INVOKE        (1 args)    4 'deposit'
-0039    | OP_INVOKE        (0 args)    6 'balance'
-0042    | OP_CALL             1
-0044    | OP_POP
-0045   17 OP_NIL
-0046    | OP_RETURN
+0000   16 OP_CLOSURE          1 <fn main>
+0002    | OP_DEFINE_GLOBAL    0 'main'
+0004    1 OP_STRUCT           2 'Account'
+0006    | OP_DEFINE_GLOBAL    2 'Account'
+0008    | OP_GET_GLOBAL       2 'Account'
+0010    2 OP_NIL
+0011    | OP_FIELD            3 '_balance' private mutable
+0015    3 OP_POP
+0016    5 OP_GET_GLOBAL       2 'Account'
+0018    6 OP_CLOSURE          5 <fn new>
+0020    | OP_METHOD           4 'new'
+0022   11 OP_CLOSURE          7 <fn deposit>
+0024    | OP_METHOD           6 'deposit'
+0026   13 OP_CLOSURE          9 <fn balance>
+0028    | OP_METHOD           8 'balance'
+0030   14 OP_POP
+0031   17 OP_NIL
+0032    | OP_RETURN
+== main ==
+0000   16 OP_GET_GLOBAL       0 '@println'
+0002    | OP_GET_GLOBAL       1 'Account'
+0004    | OP_INVOKE        (0 args)    2 'new'
+0007    | OP_CONSTANT         4 '50'
+0009    | OP_INVOKE        (1 args)    3 'deposit'
+0012    | OP_INVOKE        (0 args)    5 'balance'
+0015    | OP_CALL             1
+0017    | OP_POP
+0018    | OP_NIL
+0019    | OP_RETURN
 == new ==
 0000    6 OP_GET_GLOBAL       0 'Account'
 0002    | OP_CONSTANT         1 '_balance'

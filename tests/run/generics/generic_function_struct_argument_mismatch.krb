@@ -7,4 +7,4 @@ fun id[T](x: T): T {
   return x;
 }
 
-let q: f64 = id(Point { x: 1, y: 2 });
+fun main(): unit { let q: f64 = id(Point { x: 1, y: 2 }); }

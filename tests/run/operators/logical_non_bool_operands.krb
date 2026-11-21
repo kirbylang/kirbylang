@@ -1,1 +1,1 @@
-@println("left" and "right");
+fun main(): unit { @println("left" and "right"); }

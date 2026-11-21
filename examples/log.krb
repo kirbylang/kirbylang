@@ -95,5 +95,3 @@ impl Default for Logger {
         prefix: "| ",
     };
 }
-
-main();

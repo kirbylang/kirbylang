@@ -1,5 +1,5 @@
-@println(@strStartsWith("hello", "he"));
+fun main(): unit { @println(@strStartsWith("hello", "he"));
 @println(@strStartsWith("hello", "lo"));
 @println(@strStartsWith("hello", ""));
 @println(@strStartsWith("he", "hello"));
-@println(@strStartsWith("hello", "hello"));
+@println(@strStartsWith("hello", "hello")); }

@@ -1,6 +1,6 @@
-123;
+fun main(): unit { 123;
 true;
 false;
 1 + 1;
 "Hello World";
-nil;
+nil; }

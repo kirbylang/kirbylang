@@ -1,0 +1,18 @@
+struct Zoo { pub var animals: f64; }
+
+impl Zoo {
+  pub fun init(): Zoo = Zoo { animals: 1 };
+}
+
+var count = 0;
+let names = ["a", "b"];
+
+var start = @clock();
+let limit = @parseInt("5");
+var zoo = Zoo.init();
+var first = names[0];
+var copy = count;
+var later = tail;
+let tail = 1;
+
+fun main(): unit {}

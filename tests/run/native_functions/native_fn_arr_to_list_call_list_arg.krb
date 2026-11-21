@@ -1,2 +1,2 @@
 let xs: [i64] = [1];
-@arrToList(xs);
+fun main(): unit { @arrToList(xs); }

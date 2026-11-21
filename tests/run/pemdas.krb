@@ -1,2 +1,2 @@
-@println(1 + 2 * 3 == 7);
-@println((1 + 2) * 3 == 9);
+fun main(): unit { @println(1 + 2 * 3 == 7);
+@println((1 + 2) * 3 == 9); }

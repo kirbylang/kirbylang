@@ -66,22 +66,28 @@ fun greet(name: string): string {
   return $"Hello, {name}!";
 }
 
-@println(greet("packaged world"));
+fun main(): unit {
+    @println(greet("packaged world"));
+}
 EOF
 
 cat >args.krb <<'EOF'
-@println(@argc());
-@println(@argv(1));
-@println(@argv(2));
+fun main(): unit {
+    @println(@argc());
+    @println(@argv(1));
+    @println(@argv(2));
+}
 EOF
 
 cat >boom.krb <<'EOF'
-@println("before");
-@println([1, 2, 3][@argc() + 10]);
-@println("after");
+fun main(): unit {
+    @println("before");
+    @println([1, 2, 3][@argc() + 10]);
+    @println("after");
+}
 EOF
 
-printf 'let x: number = "not a number";\n' >broken.krb
+printf 'fun main(): unit{ let x: number = "not a number"; }\n' >broken.krb
 
 echo "A built program"
 
@@ -93,7 +99,7 @@ cp hello elsewhere/moved
 capture bash -c 'cd elsewhere && PATH=/usr/bin:/bin ./moved'
 check "runs after being moved, without krb" "Hello, packaged world!" "$out"
 
-printf '@println(@argv(0));\n' >zero.krb
+printf 'fun main(): unit { @println(@argv(0)); }\n' >zero.krb
 capture "$BIN" build zero.krb -o ./zero-app
 capture ./zero-app
 check "@argv(0) is the program, as it was typed" "./zero-app" "$out"
@@ -102,7 +108,7 @@ capture "$BIN" build boom.krb -o boom
 capture ./boom
 check "stops with the runtime error exit code" "70" "$code"
 check "prints what ran before the error" "before" "$out"
-check_contains "reports the error with its line" "[line 2] in script" "$err"
+check_contains "reports the error with its line" "[line 3] in main()" "$err"
 
 echo
 echo "Building over a program that exists"

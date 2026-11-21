@@ -4,4 +4,4 @@ struct Box {
 
 let box = Box { value: 100 };
 
-@println(box.value);
+fun main(): unit { @println(box.value); }

@@ -1,1 +1,1 @@
-@println((fun (message: string) { message })("Hello World"));
+fun main(): unit { @println((fun (message: string) { message })("Hello World")); }

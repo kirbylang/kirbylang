@@ -1,9 +1,9 @@
 var i = 0;
-while (i < 5) {
+fun main(): unit { while (i < 5) {
   var doubled = i * 2;
   if (i == 3) break;
   @println(doubled);
   i = i + 1;
 }
 var after = "still alive";
-@println(after);
+@println(after); }

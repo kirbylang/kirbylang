@@ -1,0 +1,1 @@
+[line 1] Error at 'pending': A top-level 'var' must be assigned a comptime value.

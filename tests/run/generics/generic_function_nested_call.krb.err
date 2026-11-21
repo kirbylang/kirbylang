@@ -3,20 +3,10 @@
 0002    | OP_DEFINE_GLOBAL    0 'id'
 0004    7 OP_CLOSURE          3 <fn twice>
 0006    | OP_DEFINE_GLOBAL    2 'twice'
-0008    9 OP_GET_GLOBAL       4 '@println'
-0010    | OP_GET_GLOBAL       2 'twice'
-0012    | OP_CONSTANT         5 '7'
-0014    | OP_CALL             1
-0016    | OP_CALL             1
-0018    | OP_POP
-0019   10 OP_GET_GLOBAL       4 '@println'
-0021    | OP_GET_GLOBAL       2 'twice'
-0023    | OP_CONSTANT         6 'seven'
-0025    | OP_CALL             1
-0027    | OP_CALL             1
-0029    | OP_POP
-0030   11 OP_NIL
-0031    | OP_RETURN
+0008   10 OP_CLOSURE          5 <fn main>
+0010    | OP_DEFINE_GLOBAL    4 'main'
+0012   11 OP_NIL
+0013    | OP_RETURN
 == id ==
 0000    2 OP_GET_LOCAL        1
 0002    | OP_RETURN
@@ -27,3 +17,18 @@
 0006    | OP_CALL             1
 0008    | OP_CALL             1
 0010    | OP_RETURN
+== main ==
+0000    9 OP_GET_GLOBAL       0 '@println'
+0002    | OP_GET_GLOBAL       1 'twice'
+0004    | OP_CONSTANT         2 '7'
+0006    | OP_CALL             1
+0008    | OP_CALL             1
+0010    | OP_POP
+0011   10 OP_GET_GLOBAL       0 '@println'
+0013    | OP_GET_GLOBAL       1 'twice'
+0015    | OP_CONSTANT         3 'seven'
+0017    | OP_CALL             1
+0019    | OP_CALL             1
+0021    | OP_POP
+0022    | OP_NIL
+0023    | OP_RETURN

@@ -1,4 +1,4 @@
-var fn1 = fun () {};
+fun main(): unit { var fn1 = fun () {};
 @println(fn1);
 
 var fn2 = fun () {};
@@ -56,5 +56,5 @@ var fn19 = fun () {};
 @println(fn19);
 
 var fn20 = fun () {};
-@println(fn20);
+@println(fn20); }
 

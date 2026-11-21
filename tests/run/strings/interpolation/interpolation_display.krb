@@ -9,6 +9,6 @@ impl Display for Box {
 let box = Box { value: 123 };
 let boxes = [Box { value: 1 }, Box { value: 2 }];
 
-@println($"one: {box}");
+fun main(): unit { @println($"one: {box}");
 @println($"two: {boxes[0]} and {boxes[1]}");
-@println($"{box}");
+@println($"{box}"); }

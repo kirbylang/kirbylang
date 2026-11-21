@@ -8,4 +8,4 @@ fun outer(): unit {
   let bad: fun (i64) => string = inner;
 }
 
-outer();
+fun main(): unit { outer(); }

@@ -1,1 +1,1 @@
-var number = @parseInt(123);
+fun main(): unit { var number = @parseInt(123); }

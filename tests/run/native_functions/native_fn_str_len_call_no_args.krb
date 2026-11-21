@@ -1,1 +1,1 @@
-@println(@strLen());
+fun main(): unit { @println(@strLen()); }

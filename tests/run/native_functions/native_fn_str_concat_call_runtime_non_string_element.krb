@@ -1,3 +1,3 @@
-let parts: [string] = [@typeof(1), @argv(99)];
+fun main(): unit { let parts: [string] = [@typeof(1), @argv(99)];
 
-@println(@strConcat(parts));
+@println(@strConcat(parts)); }

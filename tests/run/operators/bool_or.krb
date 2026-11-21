@@ -1,4 +1,4 @@
-@println(false or true);
+fun main(): unit { @println(false or true);
 @println(false || true);
 
 @println(true or false);
@@ -10,9 +10,14 @@
 @println(false or false);
 @println(false || false);
 
+
+
+
+
+
+@println(true or should_not_call()); }
+
 fun should_not_call (): bool {
     @println("Should not print");
     return false;
 }
-
-@println(true or should_not_call());

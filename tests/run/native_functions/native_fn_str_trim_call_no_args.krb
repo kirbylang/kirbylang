@@ -1,1 +1,1 @@
-@println(@strTrim());
+fun main(): unit { @println(@strTrim()); }

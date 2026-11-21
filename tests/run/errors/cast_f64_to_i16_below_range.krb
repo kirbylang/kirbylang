@@ -1,1 +1,1 @@
-@println(-32769.0 as i16);
+fun main(): unit { @println(-32769.0 as i16); }

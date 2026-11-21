@@ -3,25 +3,10 @@
 0002    | OP_DEFINE_GLOBAL    0 'f'
 0004    9 OP_CLOSURE          3 <fn g>
 0006    | OP_DEFINE_GLOBAL    2 'g'
-0008   11 OP_GET_GLOBAL       4 '@println'
-0010    | OP_GET_GLOBAL       0 'f'
-0012    | OP_CALL             0
-0014    | OP_CALL             1
-0016    | OP_POP
-0017   12 OP_GET_GLOBAL       4 '@println'
-0019    | OP_GET_GLOBAL       2 'g'
-0021    | OP_TRUE
-0022    | OP_CALL             1
-0024    | OP_CALL             1
-0026    | OP_POP
-0027   13 OP_GET_GLOBAL       4 '@println'
-0029    | OP_GET_GLOBAL       2 'g'
-0031    | OP_FALSE
-0032    | OP_CALL             1
-0034    | OP_CALL             1
-0036    | OP_POP
-0037   14 OP_NIL
-0038    | OP_RETURN
+0008   13 OP_CLOSURE          5 <fn main>
+0010    | OP_DEFINE_GLOBAL    4 'main'
+0012   14 OP_NIL
+0013    | OP_RETURN
 == f ==
 0000    2 OP_CONSTANT         0 '5'
 0002    | OP_POP
@@ -39,3 +24,23 @@
 0015    | OP_POP
 0016    8 OP_CONSTANT         2 '3'
 0018    | OP_RETURN
+== main ==
+0000   11 OP_GET_GLOBAL       0 '@println'
+0002    | OP_GET_GLOBAL       1 'f'
+0004    | OP_CALL             0
+0006    | OP_CALL             1
+0008    | OP_POP
+0009   12 OP_GET_GLOBAL       0 '@println'
+0011    | OP_GET_GLOBAL       2 'g'
+0013    | OP_TRUE
+0014    | OP_CALL             1
+0016    | OP_CALL             1
+0018    | OP_POP
+0019   13 OP_GET_GLOBAL       0 '@println'
+0021    | OP_GET_GLOBAL       2 'g'
+0023    | OP_FALSE
+0024    | OP_CALL             1
+0026    | OP_CALL             1
+0028    | OP_POP
+0029    | OP_NIL
+0030    | OP_RETURN

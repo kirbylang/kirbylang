@@ -5,3 +5,5 @@ impl Struct {
         @println(self);
     }
 }
+
+fun main(): unit {}

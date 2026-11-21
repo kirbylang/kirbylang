@@ -90,6 +90,7 @@ set(KIRBY_SOURCES
     src/stringset.c
     src/token_stream.c
     src/token.c
+    src/top_level.c
     src/typecheck.c
     src/types.c
     src/unit_bytes.c

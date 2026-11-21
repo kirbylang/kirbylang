@@ -2,4 +2,4 @@ fun id[T](x: T): T {
   return x;
 }
 
-let s: string = id(5);
+fun main(): unit { let s: string = id(5); }

@@ -5,3 +5,5 @@ trait A: B {
 trait B: A {
     fun bar(self): string;
 }
+
+fun main(): unit {}

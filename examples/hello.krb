@@ -1,6 +1,8 @@
 #!/usr/bin/env krb run
 
-var name: string = @prompt("Name: ");
-var n = @parseInt(@prompt("!#: "));
+fun main(): unit {
+  var name: string = @prompt("Name: ");
+  var n = @parseInt(@prompt("!#: "));
 
-@println($"Hello {name}{@strRepeat("!", n)}");
+  @println($"Hello {name}{@strRepeat("!", n)}");
+}

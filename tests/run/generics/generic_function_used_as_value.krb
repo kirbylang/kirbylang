@@ -3,3 +3,5 @@ fun id[T](x: T): T {
 }
 
 let f = id;
+
+fun main(): unit {}

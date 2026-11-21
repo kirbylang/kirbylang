@@ -1,2 +1,2 @@
 let words = ["a", "b"];
-@println(words[0] + words[1]);
+fun main(): unit { @println(words[0] + words[1]); }

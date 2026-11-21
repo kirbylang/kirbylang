@@ -1,4 +1,4 @@
-var closure = {
+fun main(): unit { var closure = {
   var x = "hello";
 
   fun inner() = x;
@@ -6,4 +6,4 @@ var closure = {
   inner
 };
 
-@println(closure());
+@println(closure()); }

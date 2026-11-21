@@ -1,2 +1,2 @@
 let big: i32 = 65536;
-@println(big * big);
+fun main(): unit { @println(big * big); }

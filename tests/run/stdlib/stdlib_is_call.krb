@@ -1,7 +1,7 @@
-@println(@is(true, "bool"));
+fun main(): unit { @println(@is(true, "bool"));
 @println(@is("Hello", "string"));
 @println(@is(12.5, "f64"));
 @println(@is(12345, "i64"));
 @println(@is(123u8, "u8"));
 @println(@is(@ceil, "function"));
-@println(@is(nil, "nil"));
+@println(@is(nil, "nil")); }

@@ -4,3 +4,5 @@ struct Point {
 }
 
 var point = Point { x: 1 };
+
+fun main(): unit {}

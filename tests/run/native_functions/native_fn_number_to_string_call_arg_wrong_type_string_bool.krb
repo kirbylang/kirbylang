@@ -1,1 +1,1 @@
-@numberToString(false);
+fun main(): unit { @numberToString(false); }

@@ -8,4 +8,4 @@ fun outer[T](x: T): T {
   return x;
 }
 
-@println(outer(true));
+fun main(): unit { @println(outer(true)); }

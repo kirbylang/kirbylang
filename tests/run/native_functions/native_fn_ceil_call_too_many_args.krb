@@ -1,1 +1,1 @@
-@println(@ceil(1, 2, 3));
+fun main(): unit { @println(@ceil(1, 2, 3)); }

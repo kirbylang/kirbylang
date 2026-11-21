@@ -1,3 +1,5 @@
 let a: T = 1;
 let b: integer = 1;
 let c: number = 1;
+
+fun main(): unit {}

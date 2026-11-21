@@ -1,1 +1,1 @@
-@println(@readFileToString("path/to/file/doesnt.exist"));
+fun main(): unit { @println(@readFileToString("path/to/file/doesnt.exist")); }

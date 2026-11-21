@@ -1,2 +1,2 @@
-let now: i64 = @now();
-@println(now > 1700000000);
+fun main(): unit { let now: i64 = @now();
+@println(now > 1700000000); }

@@ -10,5 +10,5 @@ fun runBad(f: fun (string) => i64): i64 {
   return f("ran");
 }
 
-@println(run(id));
-@println(runBad(id));
+fun main(): unit { @println(run(id));
+@println(runBad(id)); }

@@ -1,7 +1,7 @@
 var array: [i64] = [1, 2, 3];
 
-@println(array);
+fun main(): unit { @println(array);
 
 @listClear(array);
 
-@println(array);
+@println(array); }

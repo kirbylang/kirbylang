@@ -1,1 +1,1 @@
-@println(@listReverse([1, 2, 3, 4], [5, 6, 7, 8]));
+fun main(): unit { @println(@listReverse([1, 2, 3, 4], [5, 6, 7, 8])); }

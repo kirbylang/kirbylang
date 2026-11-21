@@ -7,5 +7,5 @@ impl Box[T] {
   pub fun get(self): T = self.value;
 }
 
-var b = Box.new(5);
-@println(b.get());
+fun main(): unit { var b = Box.new(5);
+@println(b.get()); }

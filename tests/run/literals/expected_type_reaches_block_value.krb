@@ -1,6 +1,6 @@
-let a: f64 = {
+fun main(): unit { let a: f64 = {
     let unused = 1;
     3 / 2
 };
 @println(a);
-@println(@typeof(a));
+@println(@typeof(a)); }

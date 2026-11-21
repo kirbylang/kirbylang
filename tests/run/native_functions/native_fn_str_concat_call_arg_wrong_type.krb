@@ -1,1 +1,1 @@
-@strConcat("abc");
+fun main(): unit { @strConcat("abc"); }

@@ -12,7 +12,7 @@ impl Display for Box {
     fun toString(self): string = "Hello World";
 }
 
-let box = Box.new(100);
+fun main(): unit { let box = Box.new(100);
 var n: f64 = box.toString();
 
-@println(n);
+@println(n); }

@@ -1,40 +1,45 @@
 == <script> ==
-0000    1 OP_STRUCT           0 'Point'
-0002    | OP_DEFINE_GLOBAL    0 'Point'
-0004    | OP_GET_GLOBAL       0 'Point'
-0006    2 OP_NIL
-0007    | OP_FIELD            1 'x' public mutable
-0011    3 OP_NIL
-0012    | OP_FIELD            2 'y' public mutable
-0016    4 OP_POP
-0017    6 OP_GET_GLOBAL       0 'Point'
-0019    7 OP_CLOSURE          4 <fn toString>
-0021    | OP_METHOD           3 'toString'
-0023    8 OP_POP
-0024   10 OP_GET_GLOBAL       0 'Point'
-0026   11 OP_CLOSURE          6 <fn equals>
-0028    | OP_METHOD           5 'equals'
-0030   12 OP_POP
-0031   14 OP_GET_GLOBAL       0 'Point'
-0033    | OP_CONSTANT         1 'x'
-0035    | OP_CONSTANT         8 '1'
-0037    | OP_CONSTANT         2 'y'
-0039    | OP_CONSTANT         9 '2'
-0041    | OP_STRUCT_INIT      2
-0043    | OP_DEFINE_GLOBAL    7 'a'
-0045   16 OP_GET_GLOBAL      10 '@println'
-0047    | OP_GET_GLOBAL       7 'a'
-0049    | OP_INVOKE        (0 args)    3 'toString'
-0052    | OP_CALL             1
-0054    | OP_POP
-0055   17 OP_GET_GLOBAL      10 '@println'
-0057    | OP_GET_GLOBAL       7 'a'
-0059    | OP_GET_GLOBAL       7 'a'
-0061    | OP_INVOKE        (1 args)    5 'equals'
-0064    | OP_CALL             1
-0066    | OP_POP
-0067   18 OP_NIL
-0068    | OP_RETURN
+0000   17 OP_CLOSURE          1 <fn main>
+0002    | OP_DEFINE_GLOBAL    0 'main'
+0004    1 OP_STRUCT           2 'Point'
+0006    | OP_DEFINE_GLOBAL    2 'Point'
+0008    | OP_GET_GLOBAL       2 'Point'
+0010    2 OP_NIL
+0011    | OP_FIELD            3 'x' public mutable
+0015    3 OP_NIL
+0016    | OP_FIELD            4 'y' public mutable
+0020    4 OP_POP
+0021    6 OP_GET_GLOBAL       2 'Point'
+0023    7 OP_CLOSURE          6 <fn toString>
+0025    | OP_METHOD           5 'toString'
+0027    8 OP_POP
+0028   10 OP_GET_GLOBAL       2 'Point'
+0030   11 OP_CLOSURE          8 <fn equals>
+0032    | OP_METHOD           7 'equals'
+0034   12 OP_POP
+0035   14 OP_GET_GLOBAL       2 'Point'
+0037    | OP_CONSTANT         3 'x'
+0039    | OP_CONSTANT        10 '1'
+0041    | OP_CONSTANT         4 'y'
+0043    | OP_CONSTANT        11 '2'
+0045    | OP_STRUCT_INIT      2
+0047    | OP_DEFINE_GLOBAL    9 'a'
+0049   18 OP_NIL
+0050    | OP_RETURN
+== main ==
+0000   16 OP_GET_GLOBAL       0 '@println'
+0002    | OP_GET_GLOBAL       1 'a'
+0004    | OP_INVOKE        (0 args)    2 'toString'
+0007    | OP_CALL             1
+0009    | OP_POP
+0010   17 OP_GET_GLOBAL       0 '@println'
+0012    | OP_GET_GLOBAL       1 'a'
+0014    | OP_GET_GLOBAL       1 'a'
+0016    | OP_INVOKE        (1 args)    3 'equals'
+0019    | OP_CALL             1
+0021    | OP_POP
+0022    | OP_NIL
+0023    | OP_RETURN
 == toString ==
 0000    7 OP_CONSTANT         0 'Point'
 0002    | OP_RETURN

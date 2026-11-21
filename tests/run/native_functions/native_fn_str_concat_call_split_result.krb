@@ -1,1 +1,1 @@
-@println(@strConcat(@strSplit("a,b,c", ",")));
+fun main(): unit { @println(@strConcat(@strSplit("a,b,c", ","))); }

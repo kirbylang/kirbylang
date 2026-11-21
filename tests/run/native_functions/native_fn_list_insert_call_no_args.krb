@@ -1,1 +1,1 @@
-@listInsert();
+fun main(): unit { @listInsert(); }

@@ -12,5 +12,5 @@ impl Struct {
 
 var instance = Struct {};
 
-@println(instance.init());
-@println(Struct.init2());
+fun main(): unit { @println(instance.init());
+@println(Struct.init2()); }

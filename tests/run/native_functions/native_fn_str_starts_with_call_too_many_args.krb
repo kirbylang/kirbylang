@@ -1,1 +1,1 @@
-@println(@strStartsWith("abc", "a", 1, 2));
+fun main(): unit { @println(@strStartsWith("abc", "a", 1, 2)); }

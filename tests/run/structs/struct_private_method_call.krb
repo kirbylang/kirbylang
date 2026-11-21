@@ -4,4 +4,4 @@ impl Greeter {
     fun greet(self): string = "Hello World";
 }
 
-@println(Greeter {}.greet());
+fun main(): unit { @println(Greeter {}.greet()); }

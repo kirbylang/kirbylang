@@ -1,3 +1,5 @@
 type Number = f64;
 
 let a: Number[i64] = 1;
+
+fun main(): unit {}

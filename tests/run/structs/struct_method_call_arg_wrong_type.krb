@@ -10,4 +10,4 @@ impl Logger {
 
 let logger = Logger { prefix: "> " };
 
-logger.log(123);
+fun main(): unit { logger.log(123); }

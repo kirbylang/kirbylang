@@ -4,4 +4,4 @@ fun c(): unit {
   c("too", "many");
 }
 
-a();
+fun main(): unit { a(); }

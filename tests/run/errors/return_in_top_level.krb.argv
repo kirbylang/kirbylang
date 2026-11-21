@@ -1,2 +1,2 @@
-run
-$file
+exec
+$(cat $file)

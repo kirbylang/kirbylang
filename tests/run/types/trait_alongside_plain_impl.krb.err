@@ -1,41 +1,46 @@
 == <script> ==
-0000    1 OP_STRUCT           0 'Counter'
-0002    | OP_DEFINE_GLOBAL    0 'Counter'
-0004    | OP_GET_GLOBAL       0 'Counter'
-0006    2 OP_NIL
-0007    | OP_FIELD            1 'count' public mutable
-0011    3 OP_POP
-0012   11 OP_GET_GLOBAL       0 'Counter'
-0014   12 OP_CLOSURE          3 <fn toString>
-0016    | OP_METHOD           2 'toString'
-0018   13 OP_POP
-0019    5 OP_GET_GLOBAL       0 'Counter'
-0021    8 OP_CLOSURE          5 <fn increment>
-0023    | OP_METHOD           4 'increment'
-0025    9 OP_POP
-0026   15 OP_GET_GLOBAL       0 'Counter'
-0028    | OP_CONSTANT         1 'count'
-0030    | OP_CONSTANT         7 '0'
-0032    | OP_STRUCT_INIT      1
-0034    | OP_DEFINE_GLOBAL    6 'c'
-0036   16 OP_GET_GLOBAL       6 'c'
-0038    | OP_INVOKE        (0 args)    4 'increment'
-0041    | OP_POP
-0042   17 OP_GET_GLOBAL       6 'c'
-0044    | OP_INVOKE        (0 args)    4 'increment'
-0047    | OP_POP
-0048   19 OP_GET_GLOBAL       8 '@println'
-0050    | OP_GET_GLOBAL       6 'c'
-0052    | OP_GET_PROPERTY     1 'count'
-0054    | OP_CALL             1
-0056    | OP_POP
-0057   20 OP_GET_GLOBAL       8 '@println'
-0059    | OP_GET_GLOBAL       6 'c'
-0061    | OP_INVOKE        (0 args)    2 'toString'
-0064    | OP_CALL             1
-0066    | OP_POP
-0067   21 OP_NIL
-0068    | OP_RETURN
+0000   20 OP_CLOSURE          1 <fn main>
+0002    | OP_DEFINE_GLOBAL    0 'main'
+0004    1 OP_STRUCT           2 'Counter'
+0006    | OP_DEFINE_GLOBAL    2 'Counter'
+0008    | OP_GET_GLOBAL       2 'Counter'
+0010    2 OP_NIL
+0011    | OP_FIELD            3 'count' public mutable
+0015    3 OP_POP
+0016   11 OP_GET_GLOBAL       2 'Counter'
+0018   12 OP_CLOSURE          5 <fn toString>
+0020    | OP_METHOD           4 'toString'
+0022   13 OP_POP
+0023    5 OP_GET_GLOBAL       2 'Counter'
+0025    8 OP_CLOSURE          7 <fn increment>
+0027    | OP_METHOD           6 'increment'
+0029    9 OP_POP
+0030   15 OP_GET_GLOBAL       2 'Counter'
+0032    | OP_CONSTANT         3 'count'
+0034    | OP_CONSTANT         9 '0'
+0036    | OP_STRUCT_INIT      1
+0038    | OP_DEFINE_GLOBAL    8 'c'
+0040   21 OP_NIL
+0041    | OP_RETURN
+== main ==
+0000   16 OP_GET_GLOBAL       0 'c'
+0002    | OP_INVOKE        (0 args)    1 'increment'
+0005    | OP_POP
+0006   17 OP_GET_GLOBAL       0 'c'
+0008    | OP_INVOKE        (0 args)    1 'increment'
+0011    | OP_POP
+0012   19 OP_GET_GLOBAL       2 '@println'
+0014    | OP_GET_GLOBAL       0 'c'
+0016    | OP_GET_PROPERTY     3 'count'
+0018    | OP_CALL             1
+0020    | OP_POP
+0021   20 OP_GET_GLOBAL       2 '@println'
+0023    | OP_GET_GLOBAL       0 'c'
+0025    | OP_INVOKE        (0 args)    4 'toString'
+0028    | OP_CALL             1
+0030    | OP_POP
+0031    | OP_NIL
+0032    | OP_RETURN
 == toString ==
 0000   12 OP_CONSTANT         0 'Counter'
 0002    | OP_RETURN

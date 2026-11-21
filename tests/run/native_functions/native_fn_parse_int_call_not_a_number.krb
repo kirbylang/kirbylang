@@ -1,1 +1,1 @@
-@println(@parseInt("abc"));
+fun main(): unit { @println(@parseInt("abc")); }

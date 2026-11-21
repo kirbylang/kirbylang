@@ -1,3 +1,5 @@
 type Number = f64;
 
 let count: Number = "not a number";
+
+fun main(): unit {}

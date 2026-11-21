@@ -16,7 +16,7 @@ impl Bag {
     pub fun empty(): Self = Self.of(0);
 }
 
-var b1 = Box.zero();
+fun main(): unit { var b1 = Box.zero();
 var b2 = Bag.empty();
 @println(b1.value);
-@println(b2.items);
+@println(b2.items); }

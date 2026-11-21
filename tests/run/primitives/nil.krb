@@ -1,1 +1,1 @@
-@println(nil);
+fun main(): unit { @println(nil); }

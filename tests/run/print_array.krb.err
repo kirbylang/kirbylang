@@ -1,4 +1,9 @@
 == <script> ==
+0000    7 OP_CLOSURE          1 <fn main>
+0002    | OP_DEFINE_GLOBAL    0 'main'
+0004    8 OP_NIL
+0005    | OP_RETURN
+== main ==
 0000    1 OP_GET_GLOBAL       0 '@println'
 0002    | OP_CONSTANT         1 '1'
 0004    | OP_CONSTANT         2 '2'
@@ -30,10 +35,9 @@
 0049    | OP_CALL             1
 0051    | OP_POP
 0052    6 OP_LIST             0
-0054    | OP_DEFINE_GLOBAL    8 'empty'
-0056    7 OP_GET_GLOBAL       0 '@println'
-0058    | OP_GET_GLOBAL       8 'empty'
-0060    | OP_CALL             1
-0062    | OP_POP
-0063    8 OP_NIL
-0064    | OP_RETURN
+0054    7 OP_GET_GLOBAL       0 '@println'
+0056    | OP_GET_LOCAL        1
+0058    | OP_CALL             1
+0060    | OP_POP
+0061    | OP_NIL
+0062    | OP_RETURN

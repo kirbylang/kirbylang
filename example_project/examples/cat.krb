@@ -1,17 +1,19 @@
 #!/usr/bin/env krb run
 
-if (@argc() != 2) {
-  @println("Usage: krb example cat <file>");
-  @exit(1);
+fun main(): unit {
+  if (@argc() != 2) {
+    @println("Usage: krb example cat <file>");
+    @exit(1);
+  }
+
+  let path: string = @argv(1);
+
+  if (!@fileExists(path)) {
+    @println($"File doesn't exist '{path}'");
+    @exit(1);
+  }
+
+  let fileText = @readFileToString(path);
+
+  @println(fileText);
 }
-
-let path: string = @argv(1);
-
-if (!@fileExists(path)) {
-  @println($"File doesn't exist '{path}'");
-  @exit(1);
-}
-
-let fileText = @readFileToString(path);
-
-@println(fileText);

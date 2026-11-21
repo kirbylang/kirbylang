@@ -1,2 +1,2 @@
 let largest = 9223372036854775807;
-@println(largest + 1);
+fun main(): unit { @println(largest + 1); }

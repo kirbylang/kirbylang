@@ -2,4 +2,4 @@ type A = B;
 type B = f64;
 
 let value: A = 7;
-@println(value);
+fun main(): unit { @println(value); }

@@ -1,3 +1,5 @@
 fun convert[A, B](a: A): B {
   return a;
 }
+
+fun main(): unit {}

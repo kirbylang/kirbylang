@@ -1,43 +1,48 @@
 == <script> ==
-0000    1 OP_CONSTANT         1 '10'
-0002    | OP_CONSTANT         2 '20'
-0004    | OP_ARRAY            2
-0006    | OP_CONSTANT         3 '30'
-0008    | OP_CONSTANT         4 '40'
-0010    | OP_ARRAY            2
-0012    | OP_ARRAY            2
-0014    | OP_DEFINE_GLOBAL    0 'array'
-0016    3 OP_GET_GLOBAL       5 '@println'
-0018    | OP_GET_GLOBAL       0 'array'
-0020    | OP_CONSTANT         6 '0'
+0000    6 OP_CLOSURE          1 <fn main>
+0002    | OP_DEFINE_GLOBAL    0 'main'
+0004    1 OP_CONSTANT         3 '10'
+0006    | OP_CONSTANT         4 '20'
+0008    | OP_ARRAY            2
+0010    | OP_CONSTANT         5 '30'
+0012    | OP_CONSTANT         6 '40'
+0014    | OP_ARRAY            2
+0016    | OP_ARRAY            2
+0018    | OP_DEFINE_GLOBAL    2 'array'
+0020    7 OP_NIL
+0021    | OP_RETURN
+== main ==
+0000    3 OP_GET_GLOBAL       0 '@println'
+0002    | OP_GET_GLOBAL       1 'array'
+0004    | OP_CONSTANT         2 '0'
+0006    | OP_GET_INDEX
+0007    | OP_CONSTANT         2 '0'
+0009    | OP_GET_INDEX
+0010    | OP_CALL             1
+0012    | OP_POP
+0013    4 OP_GET_GLOBAL       0 '@println'
+0015    | OP_GET_GLOBAL       1 'array'
+0017    | OP_CONSTANT         2 '0'
+0019    | OP_GET_INDEX
+0020    | OP_CONSTANT         3 '1'
 0022    | OP_GET_INDEX
-0023    | OP_CONSTANT         6 '0'
-0025    | OP_GET_INDEX
-0026    | OP_CALL             1
-0028    | OP_POP
-0029    4 OP_GET_GLOBAL       5 '@println'
-0031    | OP_GET_GLOBAL       0 'array'
-0033    | OP_CONSTANT         6 '0'
+0023    | OP_CALL             1
+0025    | OP_POP
+0026    5 OP_GET_GLOBAL       0 '@println'
+0028    | OP_GET_GLOBAL       1 'array'
+0030    | OP_CONSTANT         3 '1'
+0032    | OP_GET_INDEX
+0033    | OP_CONSTANT         2 '0'
 0035    | OP_GET_INDEX
-0036    | OP_CONSTANT         7 '1'
-0038    | OP_GET_INDEX
-0039    | OP_CALL             1
-0041    | OP_POP
-0042    5 OP_GET_GLOBAL       5 '@println'
-0044    | OP_GET_GLOBAL       0 'array'
-0046    | OP_CONSTANT         7 '1'
+0036    | OP_CALL             1
+0038    | OP_POP
+0039    6 OP_GET_GLOBAL       0 '@println'
+0041    | OP_GET_GLOBAL       1 'array'
+0043    | OP_CONSTANT         3 '1'
+0045    | OP_GET_INDEX
+0046    | OP_CONSTANT         3 '1'
 0048    | OP_GET_INDEX
-0049    | OP_CONSTANT         6 '0'
-0051    | OP_GET_INDEX
-0052    | OP_CALL             1
-0054    | OP_POP
-0055    6 OP_GET_GLOBAL       5 '@println'
-0057    | OP_GET_GLOBAL       0 'array'
-0059    | OP_CONSTANT         7 '1'
-0061    | OP_GET_INDEX
-0062    | OP_CONSTANT         7 '1'
-0064    | OP_GET_INDEX
-0065    | OP_CALL             1
-0067    | OP_POP
-0068    7 OP_NIL
-0069    | OP_RETURN
+0049    | OP_CALL             1
+0051    | OP_POP
+0052    | OP_NIL
+0053    | OP_RETURN

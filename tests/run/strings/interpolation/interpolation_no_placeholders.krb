@@ -1,2 +1,2 @@
-@println($"plain text");
-@println($"");
+fun main(): unit { @println($"plain text");
+@println($""); }

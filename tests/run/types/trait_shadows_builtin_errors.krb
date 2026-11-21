@@ -13,3 +13,5 @@ trait Default {
 trait Ord: Eq {
     fun cmp(self, other: Self): i64;
 }
+
+fun main(): unit {}

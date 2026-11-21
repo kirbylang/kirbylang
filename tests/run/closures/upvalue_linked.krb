@@ -1,4 +1,4 @@
-{
+fun main(): unit { {
   var a = 1;
   fun f(): unit {
     @println(a);
@@ -15,5 +15,5 @@
   f();
   g();
   h();
-}
+} }
 

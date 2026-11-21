@@ -1,37 +1,42 @@
 == <script> ==
-0000    1 OP_CONSTANT         1 '10'
-0002    | OP_CONSTANT         2 '20'
-0004    | OP_CONSTANT         3 '30'
-0006    | OP_ARRAY            3
-0008    | OP_DEFINE_GLOBAL    0 'a'
-0010    2 OP_CONSTANT         5 '0'
-0012    | OP_DEFINE_GLOBAL    4 'total'
-0014    3 OP_CONSTANT         5 '0'
-0016    | OP_GET_LOCAL        1
-0018    | OP_CONSTANT         6 '3'
-0020    | OP_LESS
-0021    | OP_JUMP_IF_FALSE   21 -> 53
-0024    | OP_POP
-0025    | OP_JUMP            25 -> 39
-0028    | OP_GET_LOCAL        1
-0030    | OP_CONSTANT         7 '1'
+0000    6 OP_CLOSURE          1 <fn main>
+0002    | OP_DEFINE_GLOBAL    0 'main'
+0004    1 OP_CONSTANT         3 '10'
+0006    | OP_CONSTANT         4 '20'
+0008    | OP_CONSTANT         5 '30'
+0010    | OP_ARRAY            3
+0012    | OP_DEFINE_GLOBAL    2 'a'
+0014    2 OP_CONSTANT         7 '0'
+0016    | OP_DEFINE_GLOBAL    6 'total'
+0018    7 OP_NIL
+0019    | OP_RETURN
+== main ==
+0000    3 OP_CONSTANT         0 '0'
+0002    | OP_GET_LOCAL        1
+0004    | OP_CONSTANT         1 '3'
+0006    | OP_LESS
+0007    | OP_JUMP_IF_FALSE    7 -> 39
+0010    | OP_POP
+0011    | OP_JUMP            11 -> 25
+0014    | OP_GET_LOCAL        1
+0016    | OP_CONSTANT         2 '1'
+0018    | OP_ADD
+0019    | OP_SET_LOCAL        1
+0021    | OP_POP
+0022    | OP_LOOP            22 -> 2
+0025    4 OP_GET_GLOBAL       3 'total'
+0027    | OP_GET_GLOBAL       4 'a'
+0029    | OP_GET_LOCAL        1
+0031    | OP_GET_INDEX
 0032    | OP_ADD
-0033    | OP_SET_LOCAL        1
+0033    | OP_SET_GLOBAL       3 'total'
 0035    | OP_POP
-0036    | OP_LOOP            36 -> 16
-0039    4 OP_GET_GLOBAL       4 'total'
-0041    | OP_GET_GLOBAL       0 'a'
-0043    | OP_GET_LOCAL        1
-0045    | OP_GET_INDEX
-0046    | OP_ADD
-0047    | OP_SET_GLOBAL       4 'total'
-0049    | OP_POP
-0050    5 OP_LOOP            50 -> 28
-0053    | OP_POP
-0054    | OP_POP
-0055    6 OP_GET_GLOBAL       8 '@println'
-0057    | OP_GET_GLOBAL       4 'total'
-0059    | OP_CALL             1
-0061    | OP_POP
-0062    7 OP_NIL
-0063    | OP_RETURN
+0036    5 OP_LOOP            36 -> 14
+0039    | OP_POP
+0040    | OP_POP
+0041    6 OP_GET_GLOBAL       5 '@println'
+0043    | OP_GET_GLOBAL       3 'total'
+0045    | OP_CALL             1
+0047    | OP_POP
+0048    | OP_NIL
+0049    | OP_RETURN

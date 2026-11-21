@@ -1,1 +1,1 @@
-@println(@ceil("not a number"));
+fun main(): unit { @println(@ceil("not a number")); }

@@ -1,5 +1,5 @@
-let bytes: [u8] = @strToBytes("AB");
+fun main(): unit { let bytes: [u8] = @strToBytes("AB");
 @println(@listLen(bytes));
 @println(bytes[0]);
 @println(bytes[1]);
-@println(@typeof(bytes[0]));
+@println(@typeof(bytes[0])); }

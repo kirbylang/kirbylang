@@ -10,4 +10,4 @@ fun make(f: fun (string) => Box[string]): Box[string] {
   return f("hi");
 }
 
-@println(make(Box.new).value);
+fun main(): unit { @println(make(Box.new).value); }

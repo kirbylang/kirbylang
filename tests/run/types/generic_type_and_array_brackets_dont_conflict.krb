@@ -1,5 +1,5 @@
 var typed: Array[f64] = [];
 
 var numbers = [1, 2, 3];
-@println(numbers[0]);
-@println(numbers[1]);
+fun main(): unit { @println(numbers[0]);
+@println(numbers[1]); }

@@ -1,1 +1,3 @@
 let empty: [i64] = [];
+
+fun main(): unit {}

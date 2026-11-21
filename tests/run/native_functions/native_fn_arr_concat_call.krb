@@ -1,7 +1,7 @@
 let a = [1, 2, 3];
 let b = [4, 5];
-let c = @arrConcat(a, b);
+fun main(): unit { let c = @arrConcat(a, b);
 @println(c);
 @println(@typeof(c));
 @listPush(c, 6);
-@println(c);
+@println(c); }

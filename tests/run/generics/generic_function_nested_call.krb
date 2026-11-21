@@ -6,5 +6,5 @@ fun twice[T](x: T): T {
   return id(id(x));
 }
 
-@println(twice(7));
-@println(twice("seven"));
+fun main(): unit { @println(twice(7));
+@println(twice("seven")); }

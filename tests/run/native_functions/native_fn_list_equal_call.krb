@@ -1,5 +1,5 @@
 var a: [i64] = [1, 2, 3];
-var b = a;
+fun main(): unit { var b = a;
 var c = @listCopy(a);
 
 @println("Before");
@@ -14,4 +14,4 @@ c[0] = 100;
 
 @println(@listEqual(a, b));
 @println(@listEqual(b, c));
-@println(@listEqual(a, c));
+@println(@listEqual(a, c)); }

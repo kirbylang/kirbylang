@@ -1,5 +1,5 @@
-{
+fun main(): unit { {
   var a = 123;
 }
 
-@println(a);
+@println(a); }

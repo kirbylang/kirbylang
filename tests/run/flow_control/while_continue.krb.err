@@ -1,38 +1,43 @@
 == <script> ==
-0000    1 OP_CONSTANT         1 '0'
-0002    | OP_DEFINE_GLOBAL    0 'i'
-0004    3 OP_TRUE
-0005    | OP_JUMP_IF_FALSE    5 -> 62
-0008    | OP_POP
-0009    4 OP_GET_GLOBAL       0 'i'
-0011    | OP_CONSTANT         2 '1'
-0013    | OP_ADD
-0014    | OP_SET_GLOBAL       0 'i'
-0016    | OP_POP
-0017    6 OP_GET_GLOBAL       0 'i'
-0019    | OP_CONSTANT         3 '3'
-0021    | OP_EQUAL
-0022    | OP_JUMP_IF_FALSE   22 -> 32
-0025    | OP_POP
-0026    | OP_LOOP            26 -> 4
-0029    | OP_JUMP            29 -> 33
-0032    | OP_POP
-0033    8 OP_GET_GLOBAL       4 '@println'
-0035    | OP_GET_GLOBAL       0 'i'
-0037    | OP_CALL             1
-0039    | OP_POP
-0040   10 OP_GET_GLOBAL       0 'i'
-0042    | OP_CONSTANT         5 '10'
-0044    | OP_EQUAL
-0045    | OP_JUMP_IF_FALSE   45 -> 56
-0048    | OP_POP
-0049    | OP_JUMP            49 -> 63
-0052    | OP_NIL
-0053    | OP_JUMP            53 -> 58
-0056    | OP_POP
-0057    | OP_NIL
+0000   11 OP_CLOSURE          1 <fn main>
+0002    | OP_DEFINE_GLOBAL    0 'main'
+0004    1 OP_CONSTANT         3 '0'
+0006    | OP_DEFINE_GLOBAL    2 'i'
+0008   12 OP_NIL
+0009    | OP_RETURN
+== main ==
+0000    3 OP_TRUE
+0001    | OP_JUMP_IF_FALSE    1 -> 58
+0004    | OP_POP
+0005    4 OP_GET_GLOBAL       0 'i'
+0007    | OP_CONSTANT         1 '1'
+0009    | OP_ADD
+0010    | OP_SET_GLOBAL       0 'i'
+0012    | OP_POP
+0013    6 OP_GET_GLOBAL       0 'i'
+0015    | OP_CONSTANT         2 '3'
+0017    | OP_EQUAL
+0018    | OP_JUMP_IF_FALSE   18 -> 28
+0021    | OP_POP
+0022    | OP_LOOP            22 -> 0
+0025    | OP_JUMP            25 -> 29
+0028    | OP_POP
+0029    8 OP_GET_GLOBAL       3 '@println'
+0031    | OP_GET_GLOBAL       0 'i'
+0033    | OP_CALL             1
+0035    | OP_POP
+0036   10 OP_GET_GLOBAL       0 'i'
+0038    | OP_CONSTANT         4 '10'
+0040    | OP_EQUAL
+0041    | OP_JUMP_IF_FALSE   41 -> 52
+0044    | OP_POP
+0045    | OP_JUMP            45 -> 59
+0048    | OP_NIL
+0049    | OP_JUMP            49 -> 54
+0052    | OP_POP
+0053    | OP_NIL
+0054    | OP_POP
+0055   11 OP_LOOP            55 -> 0
 0058    | OP_POP
-0059   11 OP_LOOP            59 -> 4
-0062    | OP_POP
-0063   12 OP_NIL
-0064    | OP_RETURN
+0059    | OP_NIL
+0060    | OP_RETURN

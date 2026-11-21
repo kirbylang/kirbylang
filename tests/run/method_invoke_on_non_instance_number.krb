@@ -1,1 +1,1 @@
-123.fn();
+fun main(): unit { 123.fn(); }

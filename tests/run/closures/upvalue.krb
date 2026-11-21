@@ -5,4 +5,4 @@ fun outer(): unit {
   }
   inner();
 }
-outer();
+fun main(): unit { outer(); }

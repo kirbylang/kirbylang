@@ -1,5 +1,46 @@
 # Basics
 
+## Programs
+
+A file holds declarations: `fun`, `struct`, `impl`, `trait`, `type`, and `let` /
+`var` bindings. Loading a file runs none of your code. To run a file, it needs a
+`main` function. Kirby calls it after the file has loaded.
+
+```krb
+fun main(): unit {
+    @println("Hello, World!");
+}
+```
+
+A top-level `let` or `var` must be given a _comptime value_: a value fixed by the
+source text alone. These are literals, operators over comptime values, array and
+struct literals of comptime values, lambdas, the name of a top-level `fun`, and
+the name of an earlier comptime `let`. A call, field access, indexing, or the name
+of a `var` is not a comptime value.
+
+```krb
+let secondsPerDay = 24 * 60 * 60;
+var count = 0;
+
+var start = @clock(); // Error: A top-level 'var' can only be assigned a comptime value.
+
+fun main(): unit {
+    count = count + 1;
+}
+```
+
+Calls and other statements at the top level are an error. Put them in a function.
+
+```krb
+@println("loaded"); // Error: Only declarations can appear at the top level of a file.
+```
+
+The REPL and `krb exec` take snippets, which can hold statements and need no
+`main`.
+
+The examples on the rest of this page are snippets. To run one from a file, put its
+statements inside `main`.
+
 ## Variables
 
 Variables can be a mutable binding using the `var` keyword or an immutable binding using the `let` keyword.

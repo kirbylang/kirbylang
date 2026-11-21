@@ -1,6 +1,6 @@
-@println(@strIsEmpty(""));
+fun main(): unit { @println(@strIsEmpty(""));
 @println(@strIsEmpty("Hello World"));
 @println(@strIsEmpty(123));
 @println(@strIsEmpty(true));
 @println(@strIsEmpty(nil));
-@println(@strIsEmpty(@ceil));
+@println(@strIsEmpty(@ceil)); }

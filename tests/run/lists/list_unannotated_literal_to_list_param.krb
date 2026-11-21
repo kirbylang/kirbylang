@@ -2,4 +2,4 @@ fun total(xs: [i64]): i64 {
   return 0;
 }
 let a = [1, 2];
-@println(total(a));
+fun main(): unit { @println(total(a)); }

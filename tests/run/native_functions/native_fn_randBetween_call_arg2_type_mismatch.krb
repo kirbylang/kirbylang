@@ -1,1 +1,1 @@
-@randBetween(true, 10);
+fun main(): unit { @randBetween(true, 10); }

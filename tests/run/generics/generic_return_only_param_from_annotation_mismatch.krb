@@ -10,5 +10,5 @@ impl Stack[T] {
   }
 }
 
-let s: Stack[i64] = Stack.new();
-s.push("a");
+fun main(): unit { let s: Stack[i64] = Stack.new();
+s.push("a"); }

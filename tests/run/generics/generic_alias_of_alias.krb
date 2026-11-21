@@ -7,4 +7,4 @@ type Boxed[T] = Inner[T];
 type Inner[T] = Box[T];
 
 let n: Numbers = Box { value: 1 };
-@println(n.value + 1);
+fun main(): unit { @println(n.value + 1); }

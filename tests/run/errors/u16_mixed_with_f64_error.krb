@@ -1,1 +1,1 @@
-@println(1u16 + 1.5);
+fun main(): unit { @println(1u16 + 1.5); }

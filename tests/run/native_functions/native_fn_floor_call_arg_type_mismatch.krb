@@ -1,1 +1,1 @@
-@println(@floor("x"));
+fun main(): unit { @println(@floor("x")); }

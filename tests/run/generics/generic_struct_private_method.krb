@@ -8,5 +8,5 @@ impl Box[T] {
 }
 
 let b = Box { value: 1 };
-@println(b.reveal());
-@println(b.secret());
+fun main(): unit { @println(b.reveal());
+@println(b.secret()); }

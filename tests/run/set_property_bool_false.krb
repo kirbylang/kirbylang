@@ -1,1 +1,1 @@
-false.value = false;
+fun main(): unit { false.value = false; }

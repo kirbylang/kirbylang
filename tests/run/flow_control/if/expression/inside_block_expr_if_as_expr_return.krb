@@ -1,5 +1,15 @@
-test(true);
-test(false);
+fun main(): unit { test(true);
+test(false); }
+
+
+
+
+
+
+
+
+
+
 
 fun test (a: bool): unit = {
   var x = {

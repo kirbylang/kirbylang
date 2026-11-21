@@ -1,4 +1,4 @@
-@println(0.1f32);
+fun main(): unit { @println(0.1f32);
 @println(1.5f32);
 @println(16777216f32);
 @println(340282350000000000000000000000000000000f32);
@@ -7,4 +7,4 @@ let x: f32 = 3;
 let n: f32 = -3;
 @println(n);
 let tiny: f32 = 0.0000001f32;
-@println(tiny);
+@println(tiny); }

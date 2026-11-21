@@ -11,7 +11,7 @@ impl Config {
     };
 }
 
-var c = Config.new("visible", "hidden");
+fun main(): unit { var c = Config.new("visible", "hidden");
 
 @println(c.label);
-@println(c.token);
+@println(c.token); }

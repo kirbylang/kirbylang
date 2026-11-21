@@ -1,2 +1,2 @@
-@println(@strLen("Hello World"));
-@println(@strLen(""));
+fun main(): unit { @println(@strLen("Hello World"));
+@println(@strLen("")); }

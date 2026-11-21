@@ -1,3 +1,5 @@
 let value = 10;
 
 fun value (): unit {}
+
+fun main(): unit {}

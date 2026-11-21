@@ -6,4 +6,4 @@ struct Pair[A, B] {
 type WithName[T] = Pair[string, T];
 
 let p: WithName[bool] = Pair { first: "k", second: true };
-@println(p.first);
+fun main(): unit { @println(p.first); }

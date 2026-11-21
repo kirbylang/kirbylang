@@ -2,3 +2,5 @@ struct Struct {}
 
 fun Struct (): unit {}
 
+
+fun main(): unit {}

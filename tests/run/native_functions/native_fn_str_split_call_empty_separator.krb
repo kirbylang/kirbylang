@@ -1,3 +1,3 @@
-@println(@strSplit("abc", ""));
+fun main(): unit { @println(@strSplit("abc", ""));
 @println(@listLen(@strSplit("abc", "")));
-@println(@listLen(@strSplit("", "")));
+@println(@listLen(@strSplit("", ""))); }

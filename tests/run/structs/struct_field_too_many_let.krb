@@ -1,5 +1,5 @@
 struct Struct {
-  // 257 field declarations
+  // 255 field declarations. `main` takes two more constants in the script.
   field1: f64;
   field2: f64;
   field3: f64;
@@ -255,6 +255,6 @@ struct Struct {
   field253: f64;
   field254: f64;
   field255: f64;
-  field256: f64;
-  field257: f64;
 }
+
+fun main(): unit {}

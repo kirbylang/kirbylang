@@ -1,7 +1,7 @@
 let name = "World";
 
-@println($"{ "}" }");
+fun main(): unit { @println($"{ "}" }");
 @println($"{ "{" }");
 @println($"{ "{}" } and {name}");
 @println($"a { "}" + name + "{" } b");
-@println($"{ "{{x}}" }");
+@println($"{ "{{x}}" }"); }

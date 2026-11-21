@@ -1,2 +1,2 @@
 let max: u16 = 65535;
-@println(max + 1u16);
+fun main(): unit { @println(max + 1u16); }

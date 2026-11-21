@@ -1,1 +1,3 @@
 let value: Self = 123;
+
+fun main(): unit {}

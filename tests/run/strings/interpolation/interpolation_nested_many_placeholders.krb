@@ -2,5 +2,5 @@ let a = "Hello World";
 let b = 123;
 let c = true;
 
-@println($"outer {$"inner {a} and {b}"} then {c} end");
-@println($"1{$"2{$"3{a}{b}"}{c}"}{a}");
+fun main(): unit { @println($"outer {$"inner {a} and {b}"} then {c} end");
+@println($"1{$"2{$"3{a}{b}"}{c}"}{a}"); }

@@ -1,0 +1,6 @@
+[line 10] Error at 'start': A top-level 'var' can only be assigned a comptime value.
+[line 11] Error at 'limit': A top-level 'let' can only be assigned a comptime value.
+[line 12] Error at 'zoo': A top-level 'var' can only be assigned a comptime value.
+[line 13] Error at 'first': A top-level 'var' can only be assigned a comptime value.
+[line 14] Error at 'copy': A top-level 'var' can only be assigned a comptime value.
+[line 15] Error at 'later': A top-level 'var' can only be assigned a comptime value.

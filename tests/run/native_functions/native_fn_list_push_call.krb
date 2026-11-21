@@ -1,5 +1,5 @@
 var array: [i64] = [];
 
-@listPush(array, 123);
+fun main(): unit { @listPush(array, 123);
 
-@println(array);
+@println(array); }

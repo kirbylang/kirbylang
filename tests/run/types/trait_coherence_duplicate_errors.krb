@@ -9,3 +9,5 @@ impl Display for Point {
 impl Display for Point {
     pub fun toString(self): string = "second";
 }
+
+fun main(): unit {}

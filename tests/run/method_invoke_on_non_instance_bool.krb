@@ -1,1 +1,1 @@
-true.fn();
+fun main(): unit { true.fn(); }

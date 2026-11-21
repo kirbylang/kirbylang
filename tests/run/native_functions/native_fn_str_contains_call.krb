@@ -1,6 +1,6 @@
-@println(@strContains("hello world", "lo wo"));
+fun main(): unit { @println(@strContains("hello world", "lo wo"));
 @println(@strContains("hello world", "xyz"));
 @println(@strContains("hello", ""));
 @println(@strContains("", "a"));
 @println(@strContains("", ""));
-@println(@strContains("abc", "abcd"));
+@println(@strContains("abc", "abcd")); }

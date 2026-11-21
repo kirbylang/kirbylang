@@ -1,1 +1,1 @@
-@listClear();
+fun main(): unit { @listClear(); }

@@ -1,4 +1,4 @@
 var a = 123;
 var a = 456;
 
-@println(a);
+fun main(): unit { @println(a); }

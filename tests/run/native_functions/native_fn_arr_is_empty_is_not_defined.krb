@@ -1,2 +1,2 @@
 let a: [i64; 0] = [];
-@arrIsEmpty(a);
+fun main(): unit { @arrIsEmpty(a); }

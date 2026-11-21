@@ -1,1 +1,1 @@
-@println(-1.0f32 as u8);
+fun main(): unit { @println(-1.0f32 as u8); }

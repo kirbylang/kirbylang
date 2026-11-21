@@ -1,3 +1,5 @@
 fun bad[T](x: T): T {
   return true;
 }
+
+fun main(): unit {}

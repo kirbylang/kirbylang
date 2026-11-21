@@ -1,2 +1,2 @@
 let zero: u64 = 0;
-@println(1u64 % zero);
+fun main(): unit { @println(1u64 % zero); }

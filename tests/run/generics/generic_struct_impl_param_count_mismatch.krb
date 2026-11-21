@@ -5,3 +5,5 @@ struct Box[T] {
 impl Box[T, U] {
   pub fun get(self): T = self.value;
 }
+
+fun main(): unit {}

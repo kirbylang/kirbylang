@@ -79,6 +79,27 @@ InterpretResult interpret(CompiledUnit *unit, bool disassembleCode) {
   return interpretFunction(function);
 }
 
+InterpretResult interpretMain(void) {
+  TRACELN("vm.interpretMain()");
+
+  // Nothing allocates between copyString() and tableGet(), so the new string
+  // needs no GC protection.
+  ObjString *name = copyString(vm.gc, "main", 4);
+  Value main;
+
+  if (!tableGet(&vm.globals, name, &main) || !IS_CLOSURE(main)) {
+    runtimeError(&vm, "No 'main' function.");
+    return INTERPRET_RUNTIME_ERROR;
+  }
+
+  pushOnStack(main);
+
+  if (!call(AS_CLOSURE(main), 0))
+    return INTERPRET_RUNTIME_ERROR;
+
+  return run();
+}
+
 static void resetStack(void) {
   vm.stackTop = vm.stack;
   vm.frameCount = 0;

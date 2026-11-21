@@ -2,4 +2,4 @@ struct Struct {}
 
 var instance = Struct {};
 
-@println(@instanceOf(instance, "Hello World"));
+fun main(): unit { @println(@instanceOf(instance, "Hello World")); }

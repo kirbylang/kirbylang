@@ -8,4 +8,4 @@ impl Box[T] {
 
 let a = Box { value: 1 };
 let b = Box { value: "one" };
-a.same(b);
+fun main(): unit { a.same(b); }

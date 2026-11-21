@@ -7,3 +7,5 @@ impl Display for Struct {
 impl Struct {
     pub fun toString(self): string = "Struct!";
 }
+
+fun main(): unit {}

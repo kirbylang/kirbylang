@@ -1,6 +1,6 @@
 let max: u64 = 18446744073709551615;
 let half: u64 = 9223372036854775807;
-@println(half as i64);
+fun main(): unit { @println(half as i64);
 let neg: i64 = -1;
 @println((5i64) as u64);
 @println(max as f64);
@@ -10,4 +10,4 @@ let neg: i64 = -1;
 @println(18446744073709549568.0 as u64);
 @println(255i64 as u8);
 @println(5u8 as u64);
-@println(5u8 as i64);
+@println(5u8 as i64); }

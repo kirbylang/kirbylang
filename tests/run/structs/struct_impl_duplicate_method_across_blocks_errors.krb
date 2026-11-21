@@ -7,3 +7,5 @@ impl Struct {
 impl Struct {
     pub fun dup(self): string = "second";
 }
+
+fun main(): unit {}

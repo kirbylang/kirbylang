@@ -1,1 +1,1 @@
-nil.value = nil;
+fun main(): unit { nil.value = nil; }

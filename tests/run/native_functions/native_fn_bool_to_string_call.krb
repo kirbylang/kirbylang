@@ -1,3 +1,3 @@
-@println(@boolToString(true));
+fun main(): unit { @println(@boolToString(true));
 @println(@boolToString(false));
-@println(@typeof(@boolToString(true)));
+@println(@typeof(@boolToString(true))); }

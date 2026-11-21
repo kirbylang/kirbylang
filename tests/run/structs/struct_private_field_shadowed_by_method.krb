@@ -8,7 +8,7 @@ impl Counter {
     pub fun count(self): f64 = self.count;
 }
 
-var c = Counter.new();
+fun main(): unit { var c = Counter.new();
 
 @println(c.count());
-@println(c.count);
+@println(c.count); }

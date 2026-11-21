@@ -1,2 +1,2 @@
 let max: i8 = 127;
-@println(max + 1i8);
+fun main(): unit { @println(max + 1i8); }

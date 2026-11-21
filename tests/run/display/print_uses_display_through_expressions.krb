@@ -12,6 +12,6 @@ fun show(box: Box): unit {
 
 let boxes = [Box { value: 1 }, Box { value: 2 }];
 
-show(Box { value: 3 });
+fun main(): unit { show(Box { value: 3 });
 @println(boxes[1]);
-@println({ let b = Box { value: 4 }; b });
+@println({ let b = Box { value: 4 }; b }); }

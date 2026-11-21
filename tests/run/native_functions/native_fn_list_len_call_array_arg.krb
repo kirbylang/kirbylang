@@ -1,2 +1,2 @@
 let a = [1, 2];
-@listLen(a);
+fun main(): unit { @listLen(a); }

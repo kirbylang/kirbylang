@@ -1,4 +1,4 @@
 let name = "World";
 
-@println($"{{name}} is {name}");
-@println($"tab:\tquote:\"");
+fun main(): unit { @println($"{{name}} is {name}");
+@println($"tab:\tquote:\""); }

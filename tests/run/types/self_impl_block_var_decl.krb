@@ -13,3 +13,5 @@ impl Struct {
         other
     }
 }
+
+fun main(): unit {}

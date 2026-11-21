@@ -1,4 +1,6 @@
-@println(@argc());
-@println(@argv(1));
-@println(@argv(2));
-@println(@argv(3));
+fun main(): unit {
+    @println(@argc());
+    @println(@argv(1));
+    @println(@argv(2));
+    @println(@argv(3));
+}

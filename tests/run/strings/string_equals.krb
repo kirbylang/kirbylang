@@ -1,1 +1,1 @@
-@println("Hello" == "Hello");
+fun main(): unit { @println("Hello" == "Hello"); }

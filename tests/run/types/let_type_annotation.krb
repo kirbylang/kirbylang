@@ -1,2 +1,2 @@
 let count: f64 = 3;
-@println(count);
+fun main(): unit { @println(count); }

@@ -47,16 +47,26 @@ krb parse path/to/file.krb
 krb exec '@println("Hello World");'
 ```
 
+## Files And Snippets
+
+`krb run`, `krb example`, `krb compile` and `krb build` take a file. A file holds
+only declarations (`fun`, `struct`, `impl`, `trait`, `type`, and `let` / `var`
+with a comptime value) and needs a `fun main(): unit`, which Kirby calls after the
+file has loaded.
+
+`krb exec` and `krb repl` take snippets. A snippet can hold statements and needs
+no `main`.
+
 ## Script Arguments
 
 However a script is started, `@argv(0)` is the program and `@argv(1)` onward are
 the script's own arguments.
 
-| Started with                | `@argv(0)`                   | `@argc()` for `a b` |
-| --------------------------- | ---------------------------- | ------------------- |
-| `krb run file.krb a b`      | `file.krb`                   | 3                   |
-| `krb run -- a b`            | the project's `bin` file     | 3                   |
-| `krb example name a b`      | `<examples>/name.krb`        | 3                   |
-| `krb exec '<code>' a b`     | `exec`                       | 3                   |
-| `krb repl`                  | `repl`                       | 1                   |
-| `./app a b` (`krb build`)   | `./app`, as it was typed     | 3                   |
+| Started with              | `@argv(0)`               | `@argc()` for `a b` |
+| ------------------------- | ------------------------ | ------------------- |
+| `krb run file.krb a b`    | `file.krb`               | 3                   |
+| `krb run -- a b`          | the project's `bin` file | 3                   |
+| `krb example name a b`    | `<examples>/name.krb`    | 3                   |
+| `krb exec '<code>' a b`   | `exec`                   | 3                   |
+| `krb repl`                | `repl`                   | 1                   |
+| `./app a b` (`krb build`) | `./app`, as it was typed | 3                   |

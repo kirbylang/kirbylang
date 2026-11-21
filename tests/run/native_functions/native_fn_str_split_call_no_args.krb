@@ -1,1 +1,1 @@
-@println(@strSplit());
+fun main(): unit { @println(@strSplit()); }

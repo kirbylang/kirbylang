@@ -1,4 +1,4 @@
-@println(127i8 / 7i8);
+fun main(): unit { @println(127i8 / 7i8);
 @println(127i8 % 7i8);
 let min: i8 = -128;
 let negOne: i8 = -1;
@@ -7,4 +7,4 @@ let negTwo: i8 = -2;
 @println(7i8 / negTwo);
 @println(7i8 % negTwo);
 @println(negTwo / 3i8);
-@println(negTwo % 3i8);
+@println(negTwo % 3i8); }

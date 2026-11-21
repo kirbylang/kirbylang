@@ -1,9 +1,9 @@
 var array: [i64] = [1, 2, 3];
-@listInsert(array, 1u8, 9);
+fun main(): unit { @listInsert(array, 1u8, 9);
 @println(array);
 @println(@listRemove(array, 0i64));
 @println(array);
 @println(@listSlice(array, 1i32, 3u16));
 @println(@strSlice("hello", 1u8, 3i64));
 @println(@isNumber(5u8));
-@println(@isNumber(5i64));
+@println(@isNumber(5i64)); }

@@ -10,7 +10,7 @@ fun unwrap[T](b: Box[T]): T {
   return b.value;
 }
 
-let b = wrap("hi");
+fun main(): unit { let b = wrap("hi");
 @println(unwrap(b));
 @println(unwrap(wrap(3)) + 1);
-let n: i64 = unwrap(wrap("no"));
+let n: i64 = unwrap(wrap("no")); }

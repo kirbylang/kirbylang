@@ -1,1 +1,1 @@
-let date = Date.new(86399.9);
+fun main(): unit { let date = Date.new(86399.9); }

@@ -1,1 +1,1 @@
-@println(@max(2, "y"));
+fun main(): unit { @println(@max(2, "y")); }

@@ -1,4 +1,4 @@
-@println(@strConcat(["Hello", ", ", "World", "!"]));
+fun main(): unit { @println(@strConcat(["Hello", ", ", "World", "!"]));
 @println(@strConcat(["one"]));
 @println(@strConcat([]));
-@println(@typeof(@strConcat(["a", "b"])));
+@println(@typeof(@strConcat(["a", "b"]))); }

@@ -2,4 +2,4 @@ fun id[T](x: T): T = x;
 
 fun apply[T, U](x: T, f: fun (T, T) => U): U = f(x, x);
 
-@println(apply(3, id));
+fun main(): unit { @println(apply(3, id)); }

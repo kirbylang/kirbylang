@@ -1,1 +1,1 @@
-@println(@instanceOf(1, 2, 3));
+fun main(): unit { @println(@instanceOf(1, 2, 3)); }

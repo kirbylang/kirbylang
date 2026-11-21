@@ -1,2 +1,2 @@
 let numbers: [i64] = [1];
-@listPush(numbers, 2.5);
+fun main(): unit { @listPush(numbers, 2.5); }

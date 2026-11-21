@@ -2,4 +2,4 @@ struct Struct {}
 
 fun test(): unit {}
 
-@println(@instanceOf(test, Struct));
+fun main(): unit { @println(@instanceOf(test, Struct)); }

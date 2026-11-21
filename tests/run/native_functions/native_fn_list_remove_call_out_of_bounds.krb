@@ -1,3 +1,3 @@
 var array: [i64] = [];
 
-@listRemove(array, 1);
+fun main(): unit { @listRemove(array, 1); }

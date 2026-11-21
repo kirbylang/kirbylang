@@ -1,4 +1,4 @@
-@println(@typeof(5));
+fun main(): unit { @println(@typeof(5));
 @println(@typeof(5.0));
 @println(@typeof(-5));
 @println(@typeof(5i32));
@@ -11,4 +11,4 @@ let count = 10;
 @println(-7 % 2);
 @println(7 / 2.0);
 @println(1 + 2.5);
-@println(@typeof(1 + 2.5));
+@println(@typeof(1 + 2.5)); }

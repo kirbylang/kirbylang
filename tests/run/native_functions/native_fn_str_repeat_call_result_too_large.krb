@@ -1,1 +1,1 @@
-@println(@strRepeat("ab", 2000000000));
+fun main(): unit { @println(@strRepeat("ab", 2000000000)); }

@@ -2,4 +2,4 @@ fun fn(): f64 {
     @println("no return here");
 }
 
-@println(fn());
+fun main(): unit { @println(fn()); }

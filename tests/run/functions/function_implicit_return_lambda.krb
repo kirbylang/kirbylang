@@ -2,4 +2,4 @@ fun gt(threshold: f64): fun (f64) => bool {
  fun (value: f64): bool { value > threshold }
 }
 
-@println(gt(10)(100));
+fun main(): unit { @println(gt(10)(100)); }

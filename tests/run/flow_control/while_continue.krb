@@ -1,6 +1,6 @@
 var i = 0;
 
-while (true) {
+fun main(): unit { while (true) {
     i = i + 1;
 
     if (i == 3) continue;
@@ -8,4 +8,4 @@ while (true) {
     @println(i);
 
     if (i == 10) break;
-}
+} }

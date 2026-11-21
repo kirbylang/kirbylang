@@ -1,18 +1,22 @@
 == <script> ==
-0000    1 OP_CONSTANT         1 '10'
-0002    | OP_CONSTANT         2 '20'
-0004    | OP_CONSTANT         3 '30'
-0006    | OP_CONSTANT         4 '40'
-0008    | OP_CONSTANT         5 '50'
-0010    | OP_LIST             5
-0012    | OP_DEFINE_GLOBAL    0 'array'
-0014    3 OP_GET_GLOBAL       7 '@listSlice'
-0016    | OP_GET_GLOBAL       0 'array'
-0018    | OP_CONSTANT         8 '100'
-0020    | OP_CONSTANT         8 '100'
-0022    | OP_CALL             3
-0024    | OP_DEFINE_GLOBAL    6 'slice'
-0026    4 OP_NIL
-0027    | OP_RETURN
+0000    3 OP_CLOSURE          1 <fn main>
+0002    | OP_DEFINE_GLOBAL    0 'main'
+0004    1 OP_CONSTANT         3 '10'
+0006    | OP_CONSTANT         4 '20'
+0008    | OP_CONSTANT         5 '30'
+0010    | OP_CONSTANT         6 '40'
+0012    | OP_CONSTANT         7 '50'
+0014    | OP_LIST             5
+0016    | OP_DEFINE_GLOBAL    2 'array'
+0018    4 OP_NIL
+0019    | OP_RETURN
+== main ==
+0000    3 OP_GET_GLOBAL       0 '@listSlice'
+0002    | OP_GET_GLOBAL       1 'array'
+0004    | OP_CONSTANT         2 '100'
+0006    | OP_CONSTANT         2 '100'
+0008    | OP_CALL             3
+0010    | OP_NIL
+0011    | OP_RETURN
 index 100 out of bounds. list length: 5
-[line 3] in script
+[line 3] in main()

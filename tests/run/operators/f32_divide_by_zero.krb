@@ -1,2 +1,2 @@
 let zero: f32 = 0;
-@println(1f32 / zero);
+fun main(): unit { @println(1f32 / zero); }

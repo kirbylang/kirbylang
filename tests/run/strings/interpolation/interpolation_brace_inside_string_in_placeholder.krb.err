@@ -1,40 +1,45 @@
 == <script> ==
-0000    1 OP_CONSTANT         1 'World'
-0002    | OP_DEFINE_GLOBAL    0 'name'
-0004    3 OP_GET_GLOBAL       2 '@println'
-0006    | OP_CONSTANT         3 '}'
-0008    | OP_CALL             1
-0010    | OP_POP
-0011    4 OP_GET_GLOBAL       2 '@println'
-0013    | OP_CONSTANT         4 '{'
-0015    | OP_CALL             1
-0017    | OP_POP
-0018    5 OP_GET_GLOBAL       2 '@println'
-0020    | OP_GET_GLOBAL       5 '@strConcat'
-0022    | OP_CONSTANT         6 '{}'
-0024    | OP_CONSTANT         7 ' and '
-0026    | OP_GET_GLOBAL       0 'name'
-0028    | OP_LIST             3
-0030    | OP_CALL             1
-0032    | OP_CALL             1
-0034    | OP_POP
-0035    6 OP_GET_GLOBAL       2 '@println'
-0037    | OP_GET_GLOBAL       5 '@strConcat'
-0039    | OP_CONSTANT         8 'a '
-0041    | OP_GET_GLOBAL       5 '@strConcat'
-0043    | OP_CONSTANT         3 '}'
-0045    | OP_GET_GLOBAL       0 'name'
-0047    | OP_CONSTANT         4 '{'
-0049    | OP_LIST             3
-0051    | OP_CALL             1
-0053    | OP_CONSTANT         9 ' b'
-0055    | OP_LIST             3
-0057    | OP_CALL             1
-0059    | OP_CALL             1
-0061    | OP_POP
-0062    7 OP_GET_GLOBAL       2 '@println'
-0064    | OP_CONSTANT        10 '{{x}}'
-0066    | OP_CALL             1
-0068    | OP_POP
-0069    8 OP_NIL
-0070    | OP_RETURN
+0000    7 OP_CLOSURE          1 <fn main>
+0002    | OP_DEFINE_GLOBAL    0 'main'
+0004    1 OP_CONSTANT         3 'World'
+0006    | OP_DEFINE_GLOBAL    2 'name'
+0008    8 OP_NIL
+0009    | OP_RETURN
+== main ==
+0000    3 OP_GET_GLOBAL       0 '@println'
+0002    | OP_CONSTANT         1 '}'
+0004    | OP_CALL             1
+0006    | OP_POP
+0007    4 OP_GET_GLOBAL       0 '@println'
+0009    | OP_CONSTANT         2 '{'
+0011    | OP_CALL             1
+0013    | OP_POP
+0014    5 OP_GET_GLOBAL       0 '@println'
+0016    | OP_GET_GLOBAL       3 '@strConcat'
+0018    | OP_CONSTANT         4 '{}'
+0020    | OP_CONSTANT         5 ' and '
+0022    | OP_GET_GLOBAL       6 'name'
+0024    | OP_LIST             3
+0026    | OP_CALL             1
+0028    | OP_CALL             1
+0030    | OP_POP
+0031    6 OP_GET_GLOBAL       0 '@println'
+0033    | OP_GET_GLOBAL       3 '@strConcat'
+0035    | OP_CONSTANT         7 'a '
+0037    | OP_GET_GLOBAL       3 '@strConcat'
+0039    | OP_CONSTANT         1 '}'
+0041    | OP_GET_GLOBAL       6 'name'
+0043    | OP_CONSTANT         2 '{'
+0045    | OP_LIST             3
+0047    | OP_CALL             1
+0049    | OP_CONSTANT         8 ' b'
+0051    | OP_LIST             3
+0053    | OP_CALL             1
+0055    | OP_CALL             1
+0057    | OP_POP
+0058    7 OP_GET_GLOBAL       0 '@println'
+0060    | OP_CONSTANT         9 '{{x}}'
+0062    | OP_CALL             1
+0064    | OP_POP
+0065    | OP_NIL
+0066    | OP_RETURN

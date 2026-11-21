@@ -12,6 +12,6 @@ impl Struct {
 
 var instance = Struct {};
 
-var closure = instance.printSelf();
+fun main(): unit { var closure = instance.printSelf();
 
-closure();
+closure(); }

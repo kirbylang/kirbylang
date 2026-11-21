@@ -1,2 +1,2 @@
 let xs = [1, 2];
-@listPush(xs, 3);
+fun main(): unit { @listPush(xs, 3); }

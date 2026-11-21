@@ -5,3 +5,5 @@ trait Greet {
 trait Greet {
     fun goodbye(self): string;
 }
+
+fun main(): unit {}

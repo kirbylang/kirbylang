@@ -8,4 +8,4 @@ impl Greeter {
 
 var greeter = Greeter {};
 
-@println(@typeof(greeter.greet));
+fun main(): unit { @println(@typeof(greeter.greet)); }

@@ -1,1 +1,1 @@
-true.value = true;
+fun main(): unit { true.value = true; }

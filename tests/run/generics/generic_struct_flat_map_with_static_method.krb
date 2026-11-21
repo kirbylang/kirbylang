@@ -16,8 +16,8 @@ impl Id[T] {
         flat_map(self.value);
 }
 
-let value = Id.new(100)
+fun main(): unit { let value = Id.new(100)
     .map(fun (n) { n * n })
     .flat_map(Id.new);
 
-@println(value.get());
+@println(value.get()); }
