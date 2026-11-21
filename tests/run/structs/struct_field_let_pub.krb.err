@@ -15,16 +15,5 @@
 0026    | OP_GET_PROPERTY     1 'value'
 0028    | OP_CALL             1
 0030    | OP_POP
-0031    9 OP_GET_GLOBAL       2 'box'
-0033    | OP_CONSTANT         5 '123'
-0035    | OP_SET_PROPERTY     1 'value'
-0037    | OP_POP
-0038   11 OP_GET_GLOBAL       4 '@println'
-0040    | OP_GET_GLOBAL       2 'box'
-0042    | OP_GET_PROPERTY     1 'value'
-0044    | OP_CALL             1
-0046    | OP_POP
-0047   12 OP_NIL
-0048    | OP_RETURN
-Field 'value' is immutable
-[line 9] in script
+0031    9 OP_NIL
+0032    | OP_RETURN

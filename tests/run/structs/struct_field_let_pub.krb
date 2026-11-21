@@ -6,6 +6,3 @@ let box = Box { value: 100 };
 
 @println(box.value);
 
-box.value = 123;
-
-@println(box.value);

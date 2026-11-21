@@ -323,7 +323,7 @@ impl Counter {
 }
 ```
 
-Methods are private by default. Use the `pub` keyword to make fields public.
+Methods are private by default. Use the `pub` keyword to make methods public.
 
 #### Generic Structs
 

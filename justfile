@@ -88,8 +88,8 @@ coverage *args:
     ./scripts/coverage.sh {{ args }}
 
 # Update the test snapshots
-test-update: build
-    ./scripts/tests.sh --update
+test-update *args: build
+    ./scripts/tests.sh --update {{ args }}
 
 # Create a new E2E test: just new-test tests/run/dir/name.krb
 new-test +paths:
