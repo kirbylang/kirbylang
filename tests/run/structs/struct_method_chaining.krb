@@ -1,5 +1,5 @@
 struct Chain {
-    var value: f64;
+    value: f64;
 }
 
 impl Chain {

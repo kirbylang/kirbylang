@@ -3,9 +3,9 @@
 0002    | OP_DEFINE_GLOBAL    0 'Point'
 0004    | OP_GET_GLOBAL       0 'Point'
 0006    2 OP_NIL
-0007    | OP_FIELD            1 'x' public mutable
+0007    | OP_FIELD            1 'x' public immutable
 0011    3 OP_NIL
-0012    | OP_FIELD            2 'y' public mutable
+0012    | OP_FIELD            2 'y' public immutable
 0016    4 OP_POP
 0017    6 OP_GET_GLOBAL       0 'Point'
 0019    | OP_CONSTANT         2 'y'

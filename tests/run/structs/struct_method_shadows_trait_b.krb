@@ -1,5 +1,5 @@
 struct Box {
-    var value: f64;
+    value: f64;
 }
 
 trait Unbox {
@@ -17,6 +17,6 @@ impl Box {
 }
 
 let box = Box.new(100);
-var n: f64 = box.get();
+var n: string = box.get();
 
 @println(n);

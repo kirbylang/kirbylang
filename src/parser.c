@@ -1505,52 +1505,10 @@ static AstNode *structDeclaration(Parser *p) {
     }
 
     bool isPublic = match(p, TOKEN_PUB);
+    bool isMutable = match(p, TOKEN_VAR);
+    bool hasVarOrLet = isMutable || match(p, TOKEN_LET);
 
-    if (match(p, TOKEN_VAR)) {
-      consumeDeclarationIdentifier(p, "Expect field name.");
-      Token fieldName = p->previous;
-
-      AstNode *fieldType = NULL;
-      if (match(p, TOKEN_COLON)) {
-        fieldType = parseType(p);
-      }
-
-      if (match(p, TOKEN_EQUAL)) {
-        parse_error(p, "Struct fields don't support default values");
-      }
-
-      consume(p, TOKEN_SEMICOLON, "Expect ';' after field.");
-
-      fieldBuf[fieldCount].name = fieldName;
-      fieldBuf[fieldCount].initializer = NULL;
-      fieldBuf[fieldCount].declaredType = fieldType;
-      fieldBuf[fieldCount].isMutable = true;
-      fieldBuf[fieldCount].isPublic = isPublic;
-      fieldBuf[fieldCount].declEndLine = p->previous.line; // the ';'
-      fieldCount++;
-    } else if (match(p, TOKEN_LET)) {
-      consumeDeclarationIdentifier(p, "Expect field name.");
-      Token fieldName = p->previous;
-
-      AstNode *fieldType = NULL;
-      if (match(p, TOKEN_COLON)) {
-        fieldType = parseType(p);
-      }
-
-      if (match(p, TOKEN_EQUAL)) {
-        parse_error(p, "Struct fields don't support default values");
-      }
-
-      consume(p, TOKEN_SEMICOLON, "Expect ';' after field.");
-
-      fieldBuf[fieldCount].name = fieldName;
-      fieldBuf[fieldCount].initializer = NULL;
-      fieldBuf[fieldCount].declaredType = fieldType;
-      fieldBuf[fieldCount].isMutable = false;
-      fieldBuf[fieldCount].isPublic = isPublic;
-      fieldBuf[fieldCount].declEndLine = p->previous.line; // the ';'
-      fieldCount++;
-    } else if (check(p, TOKEN_FUN)) {
+    if (!hasVarOrLet && check(p, TOKEN_FUN)) {
       error_at_current(p, "Expect field declaration. Methods belong in an "
                           "'impl' block.");
       advance(p); // 'fun'
@@ -1559,10 +1517,30 @@ static AstNode *structDeclaration(Parser *p) {
         functionDeclaration(p, /*isMethod=*/true);
       }
       p->panicMode = false;
-    } else if (isPublic) {
-      error_at_current(p, "Expect field declaration after 'pub'.");
     } else {
-      error_at_current(p, "Expect field declaration.");
+      consumeDeclarationIdentifier(
+          p, hasVarOrLet ? "Expect field name."
+                         : "Expect field name, 'let', or 'var'.");
+      Token fieldName = p->previous;
+
+      AstNode *fieldType = NULL;
+      if (match(p, TOKEN_COLON)) {
+        fieldType = parseType(p);
+      }
+
+      if (match(p, TOKEN_EQUAL)) {
+        parse_error(p, "Struct fields don't support default values");
+      }
+
+      consume(p, TOKEN_SEMICOLON, "Expect ';' after field.");
+
+      fieldBuf[fieldCount].name = fieldName;
+      fieldBuf[fieldCount].initializer = NULL;
+      fieldBuf[fieldCount].declaredType = fieldType;
+      fieldBuf[fieldCount].isMutable = isMutable;
+      fieldBuf[fieldCount].isPublic = isPublic;
+      fieldBuf[fieldCount].declEndLine = p->previous.line; // the ';'
+      fieldCount++;
     }
 
     recoverInBraceBody(p);

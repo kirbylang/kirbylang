@@ -1,5 +1,5 @@
 struct Point {
-    var _x: f64;
+    _x: f64;
 }
 
 impl Point {

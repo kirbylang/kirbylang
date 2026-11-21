@@ -1,5 +1,5 @@
 struct Box {
-    let value: f64;
+    value: f64;
 }
 
 impl Box {

@@ -1,5 +1,5 @@
 struct Id[T] {
-    let value: T;
+    value: T;
 }
 
 impl Id[T] {

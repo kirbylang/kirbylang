@@ -1,7 +1,13 @@
 struct Account {
-    var balance = 100;
+    balance: i64;
 }
 
-var a = Account {};
+impl Account {
+    pub fun new(value: i64): Self = Self {
+        balance: value
+    };
+}
+
+var a = Account.new(100);
 
 @println(a.balance);

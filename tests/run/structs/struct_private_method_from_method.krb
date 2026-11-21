@@ -1,5 +1,5 @@
 struct Greeter {
-    var name: string;
+    name: string;
 }
 
 impl Greeter {

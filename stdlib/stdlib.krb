@@ -1,14 +1,14 @@
 // UTC Date Time
 struct Date {
     // Unix timestamp, in whole seconds
-    let timestamp: i64;
+    timestamp: i64;
 
-    let year: i64;
-    let month: i64;
-    let day: i64;
-    let hour: i64;
-    let minute: i64;
-    let second: i64;
+    year: i64;
+    month: i64;
+    day: i64;
+    hour: i64;
+    minute: i64;
+    second: i64;
 }
 
 impl Date {

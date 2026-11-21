@@ -12,7 +12,7 @@
 #!/usr/bin/env krb run
 
 struct StringBuilder {
-    let value: [string];
+    value: [string];
 }
 
 impl StringBuilder {

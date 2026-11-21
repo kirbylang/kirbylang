@@ -1,1 +1,46 @@
-[line 20] Error: Expected f64, got string.
+== <script> ==
+0000    1 OP_STRUCT           0 'Box'
+0002    | OP_DEFINE_GLOBAL    0 'Box'
+0004    | OP_GET_GLOBAL       0 'Box'
+0006    2 OP_NIL
+0007    | OP_FIELD            1 'value' private immutable
+0011    3 OP_POP
+0012    9 OP_GET_GLOBAL       0 'Box'
+0014   10 OP_CLOSURE          3 <fn get>
+0016    | OP_METHOD           2 'get'
+0018   11 OP_POP
+0019   13 OP_GET_GLOBAL       0 'Box'
+0021   14 OP_CLOSURE          5 <fn new>
+0023    | OP_METHOD           4 'new'
+0025   16 OP_CLOSURE          6 <fn get>
+0027    | OP_METHOD           2 'get'
+0029   17 OP_POP
+0030   19 OP_GET_GLOBAL       0 'Box'
+0032    | OP_CONSTANT         8 '100'
+0034    | OP_INVOKE        (1 args)    4 'new'
+0037    | OP_DEFINE_GLOBAL    7 'box'
+0039   20 OP_GET_GLOBAL       7 'box'
+0041    | OP_INVOKE        (0 args)    2 'get'
+0044    | OP_DEFINE_GLOBAL    9 'n'
+0046   22 OP_GET_GLOBAL      10 '@println'
+0048    | OP_GET_GLOBAL       9 'n'
+0050    | OP_CALL             1
+0052    | OP_POP
+0053   23 OP_NIL
+0054    | OP_RETURN
+== get ==
+0000   10 OP_GET_LOCAL        0
+0002    | OP_GET_PROPERTY     0 'value'
+0004    | OP_RETURN
+== new ==
+0000   14 OP_GET_GLOBAL       0 'Box'
+0002    | OP_CONSTANT         1 'value'
+0004    | OP_GET_LOCAL        1
+0006    | OP_STRUCT_INIT      1
+0008    | OP_RETURN
+== get ==
+0000   16 OP_GET_GLOBAL       0 '@numberToString'
+0002    | OP_GET_LOCAL        0
+0004    | OP_GET_PROPERTY     1 'value'
+0006    | OP_CALL             1
+0008    | OP_RETURN

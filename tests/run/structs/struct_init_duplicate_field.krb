@@ -1,6 +1,8 @@
 struct Point {
-    var x;
-    var y;
+    x;
+    y;
 }
 
 var point = Point { x: 1, x: 2, y: 3 };
+
+// TODO: Why doesn't the lack of types in the struct declaration error?

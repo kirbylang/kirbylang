@@ -1,0 +1,5 @@
+struct Struct {
+    a = "Hello World";
+    let b = "Hello World";
+    var c = "Hello World";
+}
