@@ -731,6 +731,9 @@ static void compileCode(const char *source, SourceKind kind) {
   if (unit == NULL) {
     exit(EXIT_CODE_COMPILER_ERR);
   }
+
+  freeCompiledUnit(unit);
+  free(unit);
 }
 
 static void runFile(const char *path) {
