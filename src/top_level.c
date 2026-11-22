@@ -135,7 +135,7 @@ static bool isMainShape(const AstNode *node) {
 
   const FunctionNode *fn = &node->as.function;
 
-  if (fn->isLambda || fn->arity != 0 || fn->genericParamCount != 0)
+  if (fn->arity != 0 || fn->genericParamCount != 0)
     return false;
 
   const AstNode *returnType = fn->returnType;
