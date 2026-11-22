@@ -38,10 +38,12 @@ Variables, suffixed literals (`2i64`) and decimal literals keep their own type.
 A list holds items that all share one type, and can grow and shrink. The type is written as the item type in brackets: `[i64]` is a list of `i64`, and `[[string]]` is a list of lists of `string`.
 
 ```
-let numbers: [i64] = [1, 2, 3];
-let names: [string] = [];
+fun main(): unit {
+    let numbers: [i64] = [1, 2, 3];
+    let names: [string] = [];
 
-@println(numbers[0]);
+    @println(numbers[0]);
+}
 ```
 
 ### Arrays
@@ -78,9 +80,11 @@ struct Box {
     pub var value: f64;
 }
 
-let box: Box = Box { value: 100 };
+fun main(): unit {
+    let box: Box = Box { value: 100 };
 
-@println(box.value);
+    @println(box.value);
+}
 ```
 
 #### Generic Structs
@@ -114,8 +118,10 @@ impl Box[T] {
     pub fun map[U](self, f: fun (T) => U): Self[U] = Self.new(f(self.value));
 }
 
-let box = Box.new(5);            // Box[i64]
-let text = box.map(fun (n: i64): string { "n" });   // Box[string]
+fun main(): unit {
+    let box = Box.new(5);            // Box[i64]
+    let text = box.map(fun (n: i64): string { "n" });   // Box[string]
+}
 ```
 
 In a type, `Self[T]` is the struct with arguments and a plain `Self` is
@@ -135,8 +141,10 @@ fun id[T](x: T): T = x;
 fun first[T](xs: [T]): T = xs[0];
 fun apply[T, U](x: T, f: fun (T) => U): U = f(x);
 
-let a = id(5);                  // i64
-let b: string = id(5);          // error: Expected string, got i64.
+fun main(): unit {
+    let a = id(5);                  // i64
+    let b: string = id(5);          // error: Expected string, got i64.
+}
 ```
 
 A parameter that appears in the signature but that no argument fills in is an
@@ -149,8 +157,10 @@ is expected to return, when there is one:
 ```
 fun empty[T](): [T] = [];
 
-let a: [i64] = empty();    // T is i64
-let b = empty();           // error: Can't tell what 'T' is from the arguments.
+fun main(): unit {
+    let a: [i64] = empty();    // T is i64
+    let b = empty();           // error: Can't tell what 'T' is from the arguments.
+}
 ```
 
 A method works the same way, so `let s: Stack[i64] = Stack.new();` fills in
@@ -204,7 +214,9 @@ impl Display for Point {
     fun toString(self): string = "Point";
 }
 
-@println((Point { x: 1, y: 2 }).toString());
+fun main(): unit {
+    @println((Point { x: 1, y: 2 }).toString());
+}
 ```
 
 #### Builtin traits
@@ -226,10 +238,12 @@ impl Eq for Box {
     fun equals(self, other: Self): bool = self.value == other.value;
 }
 
-let a = Box { value: 100 };
-let b = Box { value: 100 };
+fun main(): unit {
+    let a = Box { value: 100 };
+    let b = Box { value: 100 };
 
-a.equals(b); // true
+    a.equals(b); // true
+}
 ```
 
 ##### Default
@@ -267,9 +281,11 @@ impl Display for Box {
     fun toString(self): string = @numberToString(self.value);
 }
 
-let box = Box { value: 123 };
+fun main(): unit {
+    let box = Box { value: 123 };
 
-box.toString(); // "123"
+    box.toString(); // "123"
+}
 ```
 
 ##### Ord
@@ -297,10 +313,12 @@ impl Ord for Box {
     fun cmp(self, other: Self): i64 = self.value - other.value;
 }
 
-let a = Box { value: 100 };
-let b = Box { value: 123 };
+fun main(): unit {
+    let a = Box { value: 100 };
+    let b = Box { value: 123 };
 
-a.cmp(b); // -23
+    a.cmp(b); // -23
+}
 ```
 
 #### `Self`
@@ -320,7 +338,9 @@ impl Point {
         Self { x: self.x + dx, y: self.y + dy };
 }
 
-var p = Point.origin().translate(3, 4);
+fun main(): unit {
+    var p = Point.origin().translate(3, 4);
+}
 ```
 
 #### Supertraits
@@ -352,9 +372,11 @@ syntax. Every parameter and the return type must be annotated.
 ```
 fun sum(a: f64, b: f64): f64 = a + b;
 
-let sum2: fun (f64, f64) => f64 = sum;
+fun main(): unit {
+    let sum2: fun (f64, f64) => f64 = sum;
 
-@println(sum2(1, 2));
+    @println(sum2(1, 2));
+}
 ```
 
 ### Lambdas
@@ -362,18 +384,22 @@ let sum2: fun (f64, f64) => f64 = sum;
 Lambdas use the same type syntax.
 
 ```
-let sum: fun (f64, f64) => f64 = fun (a: f64, b: f64): f64 { a + b };
+fun main(): unit {
+    let sum: fun (f64, f64) => f64 = fun (a: f64, b: f64): f64 { a + b };
 
-@println(sum(1, 2));
+    @println(sum(1, 2));
+}
 ```
 
 A lambda's parameter types can be left off when the type it is checked
 against already supplies them.
 
 ```
-let double: fun (f64) => f64 = fun (n) { n * 2 };
+fun main(): unit {
+    let double: fun (f64) => f64 = fun (n) { n * 2 };
 
-@println(double(21));
+    @println(double(21));
+}
 ```
 
 ### Native Functions
@@ -381,9 +407,11 @@ let double: fun (f64) => f64 = fun (n) { n * 2 };
 Native functions start with `@` (a reserved character in user code).
 
 ```
-let round: fun (f64) => f64 = @ceil;
+fun main(): unit {
+    let round: fun (f64) => f64 = @ceil;
 
-@println(round(1.2));
+    @println(round(1.2));
+}
 ```
 
 List natives are typed by their element type, written `T` in their
@@ -417,9 +445,11 @@ need `Option[T]`.
 ```
 type Number = f64;
 
-let count: Number = 42;
+fun main(): unit {
+    let count: Number = 42;
 
-@println(count);
+    @println(count);
+}
 ```
 
 An alias can take type parameters. Using it gives the arguments, and the alias

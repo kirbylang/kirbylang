@@ -96,15 +96,24 @@ Code
 
 ```
 var foo = "bar";
+
+fun main(): unit {}
 ```
 
 Bytecode
 
+The first listing is the file loading. The second is the body of `main`.
+
 ```
-0000    1 OP_CONSTANT         1 'bar'
-0002    | OP_DEFINE_GLOBAL    0 'foo'
-0004    | OP_NIL
-0005    | OP_RETURN
+0000    3 OP_CLOSURE          1 <fn main>
+0002    | OP_DEFINE_GLOBAL    0 'main'
+0004    1 OP_CONSTANT         3 'bar'
+0006    | OP_DEFINE_GLOBAL    2 'foo'
+0008    4 OP_NIL
+0009    | OP_RETURN
+
+0000    3 OP_NIL
+0001    | OP_RETURN
 ```
 
 ## Addition
@@ -112,16 +121,27 @@ Bytecode
 Code
 
 ```
-@println(1 + 2);
+fun main(): unit {
+    @println(1 + 2);
+}
 ```
 
 Bytecode
 
+The first listing is the file loading. The second is the body of `main`.
+
 ```
-0000    1 OP_CONSTANT         0 '1'
-0002    | OP_CONSTANT         1 '2'
-0004    | OP_ADD
-0005    | OP_PRINT
-0006    | OP_NIL
-0007    | OP_RETURN
+0000    3 OP_CLOSURE          1 <fn main>
+0002    | OP_DEFINE_GLOBAL    0 'main'
+0004    4 OP_NIL
+0005    | OP_RETURN
+
+0000    2 OP_GET_GLOBAL       0 '@println'
+0002    | OP_CONSTANT         1 '1'
+0004    | OP_CONSTANT         2 '2'
+0006    | OP_ADD
+0007    | OP_CALL             1
+0009    | OP_POP
+0010    3 OP_NIL
+0011    | OP_RETURN
 ```

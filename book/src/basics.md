@@ -98,9 +98,11 @@ Kirby has a unit type `unit` using the literal `()`, which only has a single val
 Kirby doesn't support coercsion to boolans.
 
 ```kirby
-let values: [bool] = [];
+fun main(): unit {
+    let values: [bool] = [];
 
-@println(if (values) $"Has {@listLen(values)} items" else "List is empty!");
+    @println(if (values) $"Has {@listLen(values)} items" else "List is empty!");
+}
 ```
 
 This is invalid.
@@ -116,7 +118,9 @@ This is invalid.
 Strings are written using double quotes.
 
 ```kirby
-@println("Hello World");
+fun main(): unit {
+    @println("Hello World");
+}
 ```
 
 #### Multiline Strings
@@ -124,9 +128,11 @@ Strings are written using double quotes.
 Multiline strings are supported.
 
 ```kirby
-@println("Hello
+fun main(): unit {
+    @println("Hello
 
-World");
+    World");
+}
 ```
 
 #### String Interpolation
@@ -134,9 +140,11 @@ World");
 Interpolated strings are prefixed with `$` using `{expr}` for interpolated values.
 
 ```kirby
-let name: string = @prompt("Name? ");
+fun main(): unit {
+    let name: string = @prompt("Name? ");
 
-@println($"Hello {name}");
+    @println($"Hello {name}");
+}
 ```
 
 ### Numbers
@@ -148,11 +156,13 @@ Numbers are either signed/unsigned integers (`i64`, `u32`, `u8`) or floats (`f64
 Number types can be explicitly converted to another number type with the `as` keyword.
 
 ```krb
-let value: f64 = 42.0;
-let byte: u8 = value as u8;
+fun main(): unit {
+    let value: f64 = 42.0;
+    let byte: u8 = value as u8;
 
-let widened: f64 = byte as f64;
-let int: i32 = value as i32;
+    let widened: f64 = byte as f64;
+    let int: i32 = value as i32;
+}
 ```
 
 | From          | To         | Result                                                            |
@@ -170,8 +180,10 @@ let byte: u8 = too_big as u8; // Error: can't convert f64 300 to u8
 Use parentheses to cast just a part of an expression.
 
 ```krb
-let sum: u8 = 2 * 3 as u8;      // (2 * 3) as u8
-let total: u8 = a + (b as u8);  // cast only `b`
+fun main(): unit {
+    let sum: u8 = 2 * 3 as u8;      // (2 * 3) as u8
+    let total: u8 = a + (b as u8);  // cast only `b`
+}
 ```
 
 #### Number Literals
@@ -188,9 +200,11 @@ Number literals are digits + an optional decimal point and suffix indicating the
 Arrays, `[T; N]`, are fixed sized collections of homogenous types.
 
 ```kirby
-let grid: [[bool; 3]; 3] = [[true, false, false], [true, true, true], [false, true, false]];
+fun main(): unit {
+    let grid: [[bool; 3]; 3] = [[true, false, false], [true, true, true], [false, true, false]];
 
-@println(grid[0][1]); // false
+    @println(grid[0][1]); // false
+}
 ```
 
 ### Lists
@@ -198,9 +212,11 @@ let grid: [[bool; 3]; 3] = [[true, false, false], [true, true, true], [false, tr
 Lists, `[T]`, are growable collections of homogenous types.
 
 ```
-let scores: [i64] = [100, 53, 77, 41];
+fun main(): unit {
+    let scores: [i64] = [100, 53, 77, 41];
 
-@listPush(scores, 87);
+    @listPush(scores, 87);
+}
 ```
 
 ## Flow Control
@@ -208,13 +224,15 @@ let scores: [i64] = [100, 53, 77, 41];
 ### `if`
 
 ```krb
-let value = 123;
-var even_or_odd = "";
+fun main(): unit {
+    let value = 123;
+    var even_or_odd = "";
 
-if (value % 2 == 0) {
-    even_or_odd = "Even";
-} else {
-    even_or_odd = "Even";
+    if (value % 2 == 0) {
+        even_or_odd = "Even";
+    } else {
+        even_or_odd = "Even";
+    }
 }
 ```
 
@@ -223,27 +241,33 @@ if (value % 2 == 0) {
 When in an expression position, `if` is treated as an expression. All branches must return the same type.
 
 ```krb
-let value = 123;
-let even_or_odd = if (value % 2 == 0) "Even" else "Odd";
+fun main(): unit {
+    let value = 123;
+    let even_or_odd = if (value % 2 == 0) "Even" else "Odd";
+}
 ```
 
 ### `while`
 
 ```krb
-var count = 0;
+fun main(): unit {
+    var count = 0;
 
-while (count <= 10) {
-    count = count + 1;
+    while (count <= 10) {
+        count = count + 1;
 
-    @println($"Count: {count}");
+        @println($"Count: {count}");
+    }
 }
 ```
 
 ### `for`
 
 ```
-for (var i = 0; i < 10; i = i + 1) {
-    @println($"Count: {i}");
+fun main(): unit {
+    for (var i = 0; i < 10; i = i + 1) {
+        @println($"Count: {i}");
+    }
 }
 ```
 
@@ -306,8 +330,10 @@ fun first[T](items: [T]): T {
     return items[0];
 }
 
-@println(first([10, 20, 30]));   // 10
-@println(first(["a", "b"]));     // a
+fun main(): unit {
+    @println(first([10, 20, 30]));   // 10
+    @println(first(["a", "b"]));     // a
+}
 ```
 
 Inside the function, nothing is known about `T`, so a `T` can be passed around, returned and stored, but not added or called. Every argument that uses the same `T` has to be the same type.
@@ -383,10 +409,12 @@ impl Box[T] {
     pub fun map[U](self, f: fun (T) => U): Self[U] = Self.new(f(self.value));
 }
 
-let number = Box.new(5);           // Box[i64]
-let text: Box[string] = Box { value: "hi" };
+fun main(): unit {
+    let number = Box.new(5);           // Box[i64]
+    let text: Box[string] = Box { value: "hi" };
 
-@println(number.get());            // 5
+    @println(number.get());            // 5
+}
 ```
 
 `Box[i64]` and `Box[string]` are different types. The `impl` repeats the struct's types, and a method can add more, like `U` in `map`.
@@ -409,7 +437,7 @@ struct Rect {
     pub let height: f64;
 }
 
-impl Area for Square {
+impl Area for Rect {
     fun get_area(self): f64 =
         self.width * self.height;
 }
@@ -419,9 +447,11 @@ impl Area for Square {
         self.size * self.size;
 }
 
-let square = Square { size: 10 };
-let rect = Rect { width: 5, height: 10 };
+fun main(): unit {
+    let square = Square { size: 10 };
+    let rect = Rect { width: 5, height: 10 };
 
-@println($"Square: {square.get_area()}");  // Square: 100
-@println($"Rect: {rect.get_area()}");  // Rect: 50
+    @println($"Square: {square.get_area()}");  // Square: 100
+    @println($"Rect: {rect.get_area()}");  // Rect: 50
+}
 ```
