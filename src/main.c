@@ -329,7 +329,7 @@ static int cmdCompile(int argc, char *argv[]) {
 
   typchkSessionBegin();
   compileCode(KIRBY_STDLIB, SOURCE_LIBRARY_FILE);
-  compileFile(argv[2], SOURCE_ENTRY_FILE);
+  compileFile(argv[2], SOURCE_LIBRARY_FILE);
   compilerSessionEnd();
   typchkSessionEnd();
   fprintf(stderr, "Compiled!\n");

@@ -47,16 +47,6 @@ krb parse path/to/file.krb
 krb exec '@println("Hello World");'
 ```
 
-## Files And Snippets
-
-`krb run`, `krb example`, `krb compile` and `krb build` take a file. A file holds
-only declarations (`fun`, `struct`, `impl`, `trait`, `type`, and `let` / `var`
-with a comptime value) and needs a `fun main(): unit`, which Kirby calls after the
-file has loaded.
-
-`krb exec` and `krb repl` take snippets. A snippet can hold statements and needs
-no `main`.
-
 ## Script Arguments
 
 However a script is started, `@argv(0)` is the program and `@argv(1)` onward are

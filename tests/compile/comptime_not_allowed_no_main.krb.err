@@ -1,0 +1,11 @@
+[line 12] Error at 'start': A top-level 'var' can only be assigned a comptime value.
+[line 13] Error at 'limit': A top-level 'let' can only be assigned a comptime value.
+[line 14] Error at 'zoo': A top-level 'var' can only be assigned a comptime value.
+[line 15] Error at 'zoo_init': A top-level 'var' can only be assigned a comptime value.
+[line 16] Error at 'first': A top-level 'var' can only be assigned a comptime value.
+[line 17] Error at 'copy': A top-level 'var' can only be assigned a comptime value.
+[line 18] Error at 'later': A top-level 'var' can only be assigned a comptime value.
+[line 20] Error at 'times': A top-level 'let' can only be assigned a comptime value.
+[line 21] Error at 'either': A top-level 'var' can only be assigned a comptime value.
+[line 7] Error at '+': '+' needs two numbers of the same type or two strings, got T and T.
+[line 15] Error: Expected f64, got i64.
