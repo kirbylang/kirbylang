@@ -1,2 +1,1 @@
-Error: No 'main' function. Running a file needs 'fun main(): unit'.
-[line 1] Error at 'number': Unknown type.
+[line 2] Error at 'number': Unknown type.

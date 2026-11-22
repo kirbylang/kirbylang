@@ -1,1 +1,3 @@
-let x: number = "not a number";
+fun main(): unit {
+    let x: number = "not a number";
+}
