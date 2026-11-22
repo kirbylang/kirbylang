@@ -14,6 +14,7 @@
 #include "native.h"
 #include "number_ops.h"
 #include "object.h"
+#include "random.h"
 #include "string.h"
 #include "version.h"
 #include "vm.h"
@@ -110,7 +111,7 @@ void runtimeError(VM *vm, const char *format, ...) {
 
 void initVM(int argc, char *argv[]) {
   TRACELN("vm.initVM()");
-  srand(time(NULL));
+  randomInit();
   resetStack();
   vm.argc = argc;
   vm.argv = argv;

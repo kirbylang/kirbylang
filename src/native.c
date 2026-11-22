@@ -16,6 +16,7 @@
 #include "gc.h"
 #include "native.h"
 #include "object.h"
+#include "random.h"
 #include "version.h"
 #include "vm.h"
 
@@ -121,7 +122,7 @@ static Value randNative(VM *vm, int argCount, Value *args) {
 
   assertArgCount(vm, "@rand", 0, argCount);
 
-  return NUMBER_F64_VAL((double)rand());
+  return NUMBER_F64_VAL((double)randomNext());
 }
 
 static Value rand01Native(VM *vm, int argCount, Value *args) {
@@ -129,7 +130,7 @@ static Value rand01Native(VM *vm, int argCount, Value *args) {
 
   assertArgCount(vm, "@rand01", 0, argCount);
 
-  return NUMBER_F64_VAL((double)rand() / (double)RAND_MAX);
+  return NUMBER_F64_VAL((double)randomNext() / (double)RANDOM_MAX);
 }
 
 static Value randBetweenNative(VM *vm, int argCount, Value *args) {
@@ -145,7 +146,7 @@ static Value randBetweenNative(VM *vm, int argCount, Value *args) {
                    "or equal to argument 2.");
   }
 
-  double r = (double)rand() / (double)RAND_MAX; // [0, 1]
+  double r = (double)randomNext() / (double)RANDOM_MAX; // [0, 1]
   double result = min + r * (max - min);        // [min, max)
 
   return NUMBER_I64_VAL((int64_t)ceil(result));

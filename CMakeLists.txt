@@ -83,6 +83,7 @@ set(KIRBY_SOURCES
     src/opcode.c
     src/packaged_program.c
     src/parser.c
+    src/random.c
     src/resolved_impl_targets.c
     src/scanner.c
     src/strbuf.c
@@ -246,6 +247,7 @@ set(KIRBY_RUNTIME_SOURCES
     src/number_ops.c
     src/object.c
     src/packaged_program.c
+    src/random.c
     src/stringset.c
     src/strbuf.c
     src/unit_bytes.c
@@ -412,6 +414,23 @@ if(BUILD_TESTS)
     add_test(
         NAME kirby-version-unit-test
         COMMAND kirby-version-unit-test
+    )
+
+    add_executable(kirby-random-unit-test
+        unit/random.c
+    )
+
+    target_link_libraries(kirby-random-unit-test
+        PRIVATE
+            kirby_core_debug
+    )
+
+    configure_kirby_target(kirby-random-unit-test)
+    enable_coverage(kirby-random-unit-test)
+
+    add_test(
+        NAME kirby-random-unit-test
+        COMMAND kirby-random-unit-test
     )
 
     add_executable(kirby-runtime-link-unit-test
