@@ -1,0 +1,16 @@
+var globalSet: fun () => unit;
+var globalGet: fun () => unit;
+
+fun setup(): unit {
+  var a = "initial";
+
+  fun set(): unit { a = "updated"; }
+  fun get(): unit { @println(a); }
+
+  globalSet = set;
+  globalGet = get;
+}
+
+setup();
+globalSet();
+globalGet();

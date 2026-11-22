@@ -1,0 +1,20 @@
+struct Point { pub var x: f64; }
+
+fun f(): f64 = 1;
+
+var count = 0;
+
+var negated = -f();
+var grouped = (f());
+var left = f() + 1;
+var right = 1 + f();
+var both_left = f() == 1 and true;
+var both_right = true and f() == 1;
+var inline_if = if (true) 1 else 2;
+var inline_block = { 1 };
+var native = @println;
+let copied = count;
+var item = [1, f()];
+var field = Point { x: f() };
+
+fun main(): unit {}

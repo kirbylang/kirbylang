@@ -89,6 +89,8 @@ EOF
 
 printf 'fun main(): unit{ let x: number = "not a number"; }\n' >broken.krb
 
+printf 'fun helper(): unit {}\n' >no-main.krb
+
 echo "A built program"
 
 capture "$BIN" build hello.krb -o hello
@@ -135,6 +137,11 @@ echo "A build that fails"
 
 capture "$BIN" build broken.krb -o broken
 check "leaves no output" "no" "$([[ -e broken ]] && echo yes || echo no)"
+
+capture "$BIN" build no-main.krb -o no-main
+check "refuses a file with no main" "65" "$code"
+check_contains "says main is missing" "No 'main' function" "$err"
+check "leaves no output" "no" "$([[ -e no-main ]] && echo yes || echo no)"
 
 capture "$BIN" build nope.krb -o nope
 check "leaves no output" "no" "$([[ -e nope ]] && echo yes || echo no)"

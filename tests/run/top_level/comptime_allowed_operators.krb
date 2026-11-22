@@ -1,0 +1,23 @@
+let negative = -(1 + 2);
+let inverted = !true;
+let both = true and false;
+let either = true or false;
+let fallback = nil ?? 1;
+let grouped = (1 + 2) * 3;
+let joined = "a" + "b";
+let early = later;
+var counter = 1 + 1;
+
+fun main(): unit {
+  @println(negative);
+  @println(inverted);
+  @println(both);
+  @println(either);
+  @println(fallback);
+  @println(grouped);
+  @println(joined);
+  early();
+  @println(counter);
+}
+
+fun later(): unit { @println("later"); }
