@@ -1,1 +1,1 @@
-[line 7] Error at 'test': A top-level 'let' can only be assigned a comptime value.
+Compiled!
