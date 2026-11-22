@@ -1,5 +1,6 @@
 #include <stdio.h>
 
+#include "strbuf.h"
 #include "stringset.h"
 #include "top_level.h"
 
@@ -67,9 +68,36 @@ static bool isComptime(const AstNode *node, ComptimeNames *names) {
   }
 }
 
+/* Writes one finished line and frees it. Every error in this file goes through
+ * here, so this is the only place that touches stderr. */
+static void writeError(StrBuf *line) {
+  fwrite(line->data, 1, line->len, stderr);
+  sb_free(line);
+}
+
+/* `[line N] Error at 'x': message` */
 static void errorAtToken(const Token *token, const char *message) {
-  fprintf(stderr, "[line %d] Error at '%.*s': %s\n", token->line, token->length,
-          token->start, message);
+  StrBuf line;
+  sb_init(&line);
+  sb_appendf(&line, "[line %d] Error at '%.*s': %s\n", token->line,
+             token->length, token->start, message);
+  writeError(&line);
+}
+
+/* `[line N] Error: message`, for nodes that have a line but no token. */
+static void errorAtLine(int lineNumber, const char *message) {
+  StrBuf line;
+  sb_init(&line);
+  sb_appendf(&line, "[line %d] Error: %s\n", lineNumber, message);
+  writeError(&line);
+}
+
+/* `Error: message`, for problems with the file as a whole. */
+static void errorNoLocation(const char *message) {
+  StrBuf line;
+  sb_init(&line);
+  sb_appendf(&line, "Error: %s\n", message);
+  writeError(&line);
 }
 
 /* Checks one top-level `let` or `var`. Returns false if it was reported. */
@@ -145,8 +173,8 @@ static bool checkMain(AstNode **ast, int count) {
   }
 
   if (!found) {
-    fprintf(stderr, "Error: No 'main' function. Running a file needs 'fun "
-                    "main(): unit'.\n");
+    errorNoLocation(
+        "No 'main' function. Running a file needs 'fun main(): unit'.");
     ok = false;
   }
 
@@ -170,10 +198,8 @@ bool topLevelCheck(AstNode **ast, int count, bool isEntryFile) {
   for (int i = 0; i < count; i++) {
     if (!isDeclaration(ast[i])) {
       // Statement nodes have a line but no token, so there is no `at 'x'`.
-      fprintf(stderr,
-              "[line %d] Error: Only declarations can appear at the top level "
-              "of a file.\n",
-              ast[i]->line);
+      errorAtLine(ast[i]->line,
+                  "Only declarations can appear at the top level of a file.");
       ok = false;
     } else if (ast[i]->kind == NODE_VAR_DECL) {
       if (!checkVarDecl(&ast[i]->as.varDecl, &names))
