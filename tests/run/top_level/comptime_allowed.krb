@@ -10,6 +10,7 @@ let callback = helper;
 let alias = names;
 let nothing = ();
 var count = 0;
+var either = nil ?? true;
 
 fun main(): unit {
   count = count + 1;
