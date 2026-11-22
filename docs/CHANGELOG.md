@@ -91,6 +91,7 @@
   - The compiler mistook it for a return and left out the script's final `OP_NIL` and `OP_RETURN`, so the VM ran past the end of the bytecode
 - Implement function and struct generics, without trait bounds, in the typechecker. This was only in the parser before.
 - The `let` keyword on immutable struct fields is now optional `struct Box[T] { value: T; }`
+- Fix `@rand`, `@rand01` and `@randBetween` returning nearly the same value on every run on systems whose `rand()` changes little between close seeds, such as macOS. Random numbers now come from `arc4random` on macOS, and from `random` seeded with the time (with nanoseconds) and the process ID elsewhere
 
 ## 0.4.0
 
