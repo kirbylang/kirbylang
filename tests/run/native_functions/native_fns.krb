@@ -1,4 +1,4 @@
-@println(@exit);
+fun main(): unit { @println(@exit);
 @println(@typeof(@exit));
 
 @println(@version);
@@ -182,4 +182,4 @@
 @println(@typeof(@strReplace));
 
 @println(@strReplaceAll);
-@println(@typeof(@strReplaceAll));
+@println(@typeof(@strReplaceAll)); }

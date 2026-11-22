@@ -120,6 +120,11 @@ int main(int argc, char *argv[]) {
     }
   }
 
+  // The last unit is the program. The ones before it are libraries.
+  if (interpretMain() == INTERPRET_RUNTIME_ERROR) {
+    exit(EXIT_CODE_RUNTIME_ERR);
+  }
+
   free(units);
   freeVM();
   return 0;

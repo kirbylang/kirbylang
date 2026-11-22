@@ -1,3 +1,5 @@
 fun show[T](a: T): string {
   return a.toString();
 }
+
+fun main(): unit {}

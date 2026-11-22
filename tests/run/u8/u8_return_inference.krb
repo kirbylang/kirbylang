@@ -2,4 +2,4 @@ fun answer(): u8 {
     return 42;
 }
 
-@println(answer());
+fun main(): unit { @println(answer()); }

@@ -14,9 +14,9 @@ impl StringBuilder {
     }
 }
 
-var builder = StringBuilder { string: "" }
+fun main(): unit { var builder = StringBuilder { string: "" }
     .add("Hello")
     .add(" ")
     .add("World");
 
-@println(builder.to_string());
+@println(builder.to_string()); }

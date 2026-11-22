@@ -1,3 +1,5 @@
 fun describe(): string = $"later={later}";
 
 let later = "x";
+
+fun main(): unit {}

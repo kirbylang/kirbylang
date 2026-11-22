@@ -1,1 +1,1 @@
-@println(1f32 / 3f32 == 0.33333334f32);
+fun main(): unit { @println(1f32 / 3f32 == 0.33333334f32); }

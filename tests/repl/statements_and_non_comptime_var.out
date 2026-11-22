@@ -1,0 +1,4 @@
+> var length = @strLen("abc");
+> @println(length);
+3
+> 

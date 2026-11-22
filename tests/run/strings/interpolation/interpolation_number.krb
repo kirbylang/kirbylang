@@ -1,4 +1,4 @@
 let count = 3;
 
-@println($"count={count}");
-@println($"pi is roughly {3.14159}");
+fun main(): unit { @println($"count={count}");
+@println($"pi is roughly {3.14159}"); }

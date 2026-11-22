@@ -1,7 +1,9 @@
-var apply: fun (fun (f64) => f64, f64) => f64;
+fun main(): unit { var apply: fun (fun (f64) => f64, f64) => f64;
 
-fun run(f: fun (f64) => f64, x: f64): f64 = f(x);
+
 
 apply = run;
 
-@println(apply(fun (x) { x + 1 }, 5));
+@println(apply(fun (x) { x + 1 }, 5)); }
+
+fun run(f: fun (f64) => f64, x: f64): f64 = f(x);

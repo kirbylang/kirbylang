@@ -1,0 +1,92 @@
+== <script> ==
+0000   21 OP_CLOSURE          1 <fn main>
+0002    | OP_DEFINE_GLOBAL    0 'main'
+0004   23 OP_CLOSURE          3 <fn later>
+0006    | OP_DEFINE_GLOBAL    2 'later'
+0008    1 OP_CONSTANT         5 '1'
+0010    | OP_CONSTANT         6 '2'
+0012    | OP_ADD
+0013    | OP_NEGATE
+0014    | OP_DEFINE_GLOBAL    4 'negative'
+0016    2 OP_TRUE
+0017    | OP_NOT
+0018    | OP_DEFINE_GLOBAL    7 'inverted'
+0020    3 OP_TRUE
+0021    | OP_JUMP_IF_FALSE   21 -> 26
+0024    | OP_POP
+0025    | OP_FALSE
+0026    | OP_DEFINE_GLOBAL    8 'both'
+0028    4 OP_TRUE
+0029    | OP_JUMP_IF_FALSE   29 -> 35
+0032    | OP_JUMP            32 -> 37
+0035    | OP_POP
+0036    | OP_FALSE
+0037    | OP_DEFINE_GLOBAL    9 'either'
+0039    5 OP_NIL
+0040    | OP_JUMP_IF_NOT_NIL   40 -> 46
+0043    | OP_POP
+0044    | OP_CONSTANT         5 '1'
+0046    | OP_DEFINE_GLOBAL   10 'fallback'
+0048    6 OP_CONSTANT         5 '1'
+0050    | OP_CONSTANT         6 '2'
+0052    | OP_ADD
+0053    | OP_CONSTANT        12 '3'
+0055    | OP_MULTIPLY
+0056    | OP_DEFINE_GLOBAL   11 'grouped'
+0058    7 OP_CONSTANT        14 'a'
+0060    | OP_CONSTANT        15 'b'
+0062    | OP_ADD
+0063    | OP_DEFINE_GLOBAL   13 'joined'
+0065    8 OP_GET_GLOBAL       2 'later'
+0067    | OP_DEFINE_GLOBAL   16 'early'
+0069    9 OP_CONSTANT         5 '1'
+0071    | OP_CONSTANT         5 '1'
+0073    | OP_ADD
+0074    | OP_DEFINE_GLOBAL   17 'counter'
+0076   24 OP_NIL
+0077    | OP_RETURN
+== main ==
+0000   12 OP_GET_GLOBAL       0 '@println'
+0002    | OP_GET_GLOBAL       1 'negative'
+0004    | OP_CALL             1
+0006    | OP_POP
+0007   13 OP_GET_GLOBAL       0 '@println'
+0009    | OP_GET_GLOBAL       2 'inverted'
+0011    | OP_CALL             1
+0013    | OP_POP
+0014   14 OP_GET_GLOBAL       0 '@println'
+0016    | OP_GET_GLOBAL       3 'both'
+0018    | OP_CALL             1
+0020    | OP_POP
+0021   15 OP_GET_GLOBAL       0 '@println'
+0023    | OP_GET_GLOBAL       4 'either'
+0025    | OP_CALL             1
+0027    | OP_POP
+0028   16 OP_GET_GLOBAL       0 '@println'
+0030    | OP_GET_GLOBAL       5 'fallback'
+0032    | OP_CALL             1
+0034    | OP_POP
+0035   17 OP_GET_GLOBAL       0 '@println'
+0037    | OP_GET_GLOBAL       6 'grouped'
+0039    | OP_CALL             1
+0041    | OP_POP
+0042   18 OP_GET_GLOBAL       0 '@println'
+0044    | OP_GET_GLOBAL       7 'joined'
+0046    | OP_CALL             1
+0048    | OP_POP
+0049   19 OP_GET_GLOBAL       8 'early'
+0051    | OP_CALL             0
+0053    | OP_POP
+0054   20 OP_GET_GLOBAL       0 '@println'
+0056    | OP_GET_GLOBAL       9 'counter'
+0058    | OP_CALL             1
+0060    | OP_POP
+0061   21 OP_NIL
+0062    | OP_RETURN
+== later ==
+0000   23 OP_GET_GLOBAL       0 '@println'
+0002    | OP_CONSTANT         1 'later'
+0004    | OP_CALL             1
+0006    | OP_POP
+0007    | OP_NIL
+0008    | OP_RETURN

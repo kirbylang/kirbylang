@@ -1,6 +1,6 @@
-{
+fun main(): unit { {
   var a = "outer";
   {
     var a = a;
   }
-}
+} }

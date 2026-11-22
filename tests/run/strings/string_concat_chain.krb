@@ -1,7 +1,7 @@
 let a = "a";
 let b = "b";
 
-@println(a + b);
+fun main(): unit { @println(a + b);
 @println(a + b + "c");
 @println("x" + (a + b) + "y");
-@println((1 + 2) + 3);
+@println((1 + 2) + 3); }

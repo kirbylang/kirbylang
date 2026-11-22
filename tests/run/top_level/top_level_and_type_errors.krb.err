@@ -1,0 +1,3 @@
+[line 1] Error: Only declarations can appear at the top level of a file.
+[line 3] Error at 's': A top-level 'var' can only be assigned a comptime value.
+[line 2] Error: Expected f64, got string.

@@ -29,6 +29,12 @@ krb repl
 krb run path/to/file.krb
 ```
 
+Kirby loads the file and then calls its `main` function. A file needs
+`fun main(): unit` to be run. See [Programs](./basics.md#programs).
+
+`krb exec` and the REPL run snippets. A snippet can hold statements and needs no
+`main`.
+
 ## Build Standalone Executable
 
 A standalone executable can be built from a `*.krb` file.

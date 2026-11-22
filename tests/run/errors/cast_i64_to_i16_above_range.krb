@@ -1,2 +1,2 @@
 let big: i64 = 32768;
-@println(big as i16);
+fun main(): unit { @println(big as i16); }

@@ -1,8 +1,8 @@
 let name = "John";
-@println(name);
+fun main(): unit { @println(name);
 
 let n = 42;
 @println(n);
 
 let flag = true;
-@println(flag);
+@println(flag); }

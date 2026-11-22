@@ -1,3 +1,5 @@
 struct Struct {
     pub field;
 }
+
+fun main(): unit {}

@@ -1,3 +1,3 @@
 let parts = ["Hello", "World"];
-@println(@arrJoin(parts, " "));
-@println(@arrJoin(parts, ""));
+fun main(): unit { @println(@arrJoin(parts, " "));
+@println(@arrJoin(parts, "")); }

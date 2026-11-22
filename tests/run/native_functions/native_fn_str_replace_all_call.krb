@@ -1,7 +1,7 @@
-@println(@strReplaceAll("a-b-c", "-", "+"));
+fun main(): unit { @println(@strReplaceAll("a-b-c", "-", "+"));
 @println(@strReplaceAll("banana", "an", "AN"));
 @println(@strReplaceAll("aaa", "aa", "b"));
 @println(@strReplaceAll("hello", "xyz", "!"));
 @println(@strReplaceAll("abab", "ab", ""));
 @println(@strReplaceAll("a.b.c", ".", ".."));
-@println(@strReplaceAll("", "a", "b"));
+@println(@strReplaceAll("", "a", "b")); }

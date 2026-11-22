@@ -6,7 +6,7 @@ struct Pair[A, B] {
 let p: Pair[i64, string] = Pair { first: 1, second: "two" };
 let q = Pair { first: true, second: 2.5 };
 
-@println(p.first);
+fun main(): unit { @println(p.first);
 @println(p.second);
 @println(q.first);
-@println(q.second);
+@println(q.second); }

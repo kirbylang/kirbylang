@@ -1,2 +1,2 @@
 let b: f64 = 1;
-@println(1u8 == b);
+fun main(): unit { @println(1u8 == b); }

@@ -4,4 +4,4 @@ var instance = Struct {};
 
 fun test(): unit {}
 
-@println(@instanceOf(instance, test));
+fun main(): unit { @println(@instanceOf(instance, test)); }

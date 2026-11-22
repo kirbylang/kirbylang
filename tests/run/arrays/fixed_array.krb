@@ -1,4 +1,4 @@
 let a: [i64; 3] = [1, 2, 3];
-a[0] = 9;
+fun main(): unit { a[0] = 9;
 @println(a[0]);
-@println(a);
+@println(a); }

@@ -10,8 +10,8 @@ fun total(numbers: [i64]): i64 {
 
 fun names(): [string] = ["kirby", "lang"];
 
-@println(total([1, 2, 3]));
+fun main(): unit { @println(total([1, 2, 3]));
 @println(names());
 
 let apply: fun ([i64]) => i64 = total;
-@println(apply([4, 5]));
+@println(apply([4, 5])); }

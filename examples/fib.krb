@@ -6,18 +6,20 @@ fun fib(n: i64): i64 {
   fib(n - 2) + fib(n - 1)
 }
 
-@println("Fibonacci");
+fun main(): unit {
+  @println("Fibonacci");
 
-let arg: string = @argv(1) ?? @prompt("n: ");
-let start = @clock();
+  let arg: string = @argv(1) ?? @prompt("n: ");
+  let start = @clock();
 
-@println($"{arg}\n");
+  @println($"{arg}\n");
 
-let n = @parseInt(arg);
+  let n = @parseInt(arg);
 
-let end = @clock();
-let time_taken = end - start;
+  let end = @clock();
+  let time_taken = end - start;
 
-@println($"Result:\n{fib(n)}\n");
+  @println($"Result:\n{fib(n)}\n");
 
-@println($"Time Taken: {@clock() - start}");
+  @println($"Time Taken: {@clock() - start}");
+}

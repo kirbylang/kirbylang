@@ -1,3 +1,5 @@
 fun printSelf(): unit {
     @println(self);
 }
+
+fun main(): unit {}

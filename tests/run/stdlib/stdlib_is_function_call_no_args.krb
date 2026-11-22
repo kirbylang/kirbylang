@@ -1,1 +1,1 @@
-@println(@isFunction());
+fun main(): unit { @println(@isFunction()); }

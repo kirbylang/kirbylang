@@ -10,4 +10,4 @@ fun pickBad(): fun (i64) => bool {
   return id;
 }
 
-@println(pick()(7));
+fun main(): unit { @println(pick()(7)); }

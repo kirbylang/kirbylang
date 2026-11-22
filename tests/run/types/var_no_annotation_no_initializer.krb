@@ -1,2 +1,2 @@
-var x;
-@println(x);
+fun main(): unit { var x;
+@println(x); }

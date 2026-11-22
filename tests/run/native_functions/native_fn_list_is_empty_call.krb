@@ -1,2 +1,2 @@
-@println(@listIsEmpty([]));
-@println(@listIsEmpty([1, 2, 3]));
+fun main(): unit { @println(@listIsEmpty([]));
+@println(@listIsEmpty([1, 2, 3])); }

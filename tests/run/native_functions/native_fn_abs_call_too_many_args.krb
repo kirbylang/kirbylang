@@ -1,1 +1,1 @@
-@println(@abs(2.5, 1, 2));
+fun main(): unit { @println(@abs(2.5, 1, 2)); }

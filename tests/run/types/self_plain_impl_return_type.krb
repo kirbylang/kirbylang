@@ -6,5 +6,5 @@ impl Struct {
     pub fun new(): Self = Struct {};
 }
 
-var s = Struct.new();
-@println(s);
+fun main(): unit { var s = Struct.new();
+@println(s); }

@@ -6,9 +6,9 @@ fun inFunction(): i64 {
     x
 }
 
-@println(1 + { let n = 2; n * 3 });
+fun main(): unit { @println(1 + { let n = 2; n * 3 });
 @println([0, { let n = 2; n }]);
 @println(id({ let n = 2; n * 3 }));
 @println(inFunction());
 @println(id({ let n = 5; let f = fun (): i64 { n }; f() }));
-@println(id(1 + { let a = 1; { let b = 2; a + b } }));
+@println(id(1 + { let a = 1; { let b = 2; a + b } })); }

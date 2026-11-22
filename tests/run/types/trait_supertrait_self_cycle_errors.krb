@@ -1,3 +1,5 @@
 trait A: A {
     fun foo(self): string;
 }
+
+fun main(): unit {}

@@ -1,1 +1,1 @@
-@println(@setenv());
+fun main(): unit { @println(@setenv()); }

@@ -1,1 +1,1 @@
-@println(@strReplace());
+fun main(): unit { @println(@strReplace()); }

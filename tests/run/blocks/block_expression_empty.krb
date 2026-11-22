@@ -1,2 +1,2 @@
-@println({});
-@println({{{{{{{{{}}}}}}}}});
+fun main(): unit { @println({});
+@println({{{{{{{{{}}}}}}}}}); }

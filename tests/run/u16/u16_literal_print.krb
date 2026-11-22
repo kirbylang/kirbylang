@@ -1,5 +1,5 @@
-@println(65535u16);
+fun main(): unit { @println(65535u16);
 @println(1u16);
 @println(0u16);
 let big: u16 = 65535;
-@println(big);
+@println(big); }

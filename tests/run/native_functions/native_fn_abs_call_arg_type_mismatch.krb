@@ -1,1 +1,1 @@
-@println(@abs("x"));
+fun main(): unit { @println(@abs("x")); }

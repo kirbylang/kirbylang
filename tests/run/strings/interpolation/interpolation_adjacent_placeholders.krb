@@ -1,4 +1,4 @@
 let a = "a";
 let b = "b";
 
-@println($"{a}{b}");
+fun main(): unit { @println($"{a}{b}"); }

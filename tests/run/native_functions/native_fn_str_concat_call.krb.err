@@ -1,4 +1,9 @@
 == <script> ==
+0000    4 OP_CLOSURE          1 <fn main>
+0002    | OP_DEFINE_GLOBAL    0 'main'
+0004    5 OP_NIL
+0005    | OP_RETURN
+== main ==
 0000    1 OP_GET_GLOBAL       0 '@println'
 0002    | OP_GET_GLOBAL       1 '@strConcat'
 0004    | OP_CONSTANT         2 'Hello'
@@ -32,5 +37,5 @@
 0057    | OP_CALL             1
 0059    | OP_CALL             1
 0061    | OP_POP
-0062    5 OP_NIL
+0062    | OP_NIL
 0063    | OP_RETURN

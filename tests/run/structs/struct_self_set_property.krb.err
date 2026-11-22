@@ -1,43 +1,47 @@
 == <script> ==
-0000    1 OP_STRUCT           0 'Struct'
-0002    | OP_DEFINE_GLOBAL    0 'Struct'
-0004    | OP_GET_GLOBAL       0 'Struct'
-0006    2 OP_NIL
-0007    | OP_FIELD            1 'value' private mutable
-0011    3 OP_POP
-0012   13 OP_GET_GLOBAL       0 'Struct'
-0014   14 OP_CLOSURE          3 <fn default>
-0016    | OP_METHOD           2 'default'
-0018   15 OP_POP
-0019    5 OP_GET_GLOBAL       0 'Struct'
-0021    8 OP_CLOSURE          5 <fn set>
-0023    | OP_METHOD           4 'set'
-0025   10 OP_CLOSURE          7 <fn get>
-0027    | OP_METHOD           6 'get'
-0029   11 OP_POP
-0030   17 OP_GET_GLOBAL       0 'Struct'
-0032    | OP_INVOKE        (0 args)    2 'default'
-0035    | OP_DEFINE_GLOBAL    8 'instance'
-0037   19 OP_GET_GLOBAL       8 'instance'
-0039    | OP_CONSTANT         9 'Hello'
-0041    | OP_INVOKE        (1 args)    4 'set'
-0044    | OP_POP
-0045   21 OP_GET_GLOBAL      10 '@println'
-0047    | OP_GET_GLOBAL       8 'instance'
-0049    | OP_INVOKE        (0 args)    6 'get'
-0052    | OP_CALL             1
-0054    | OP_POP
-0055   23 OP_GET_GLOBAL       8 'instance'
-0057    | OP_CONSTANT        11 'World'
-0059    | OP_INVOKE        (1 args)    4 'set'
-0062    | OP_POP
-0063   25 OP_GET_GLOBAL      10 '@println'
-0065    | OP_GET_GLOBAL       8 'instance'
-0067    | OP_INVOKE        (0 args)    6 'get'
-0070    | OP_CALL             1
-0072    | OP_POP
-0073   26 OP_NIL
-0074    | OP_RETURN
+0000   25 OP_CLOSURE          1 <fn main>
+0002    | OP_DEFINE_GLOBAL    0 'main'
+0004    1 OP_STRUCT           2 'Struct'
+0006    | OP_DEFINE_GLOBAL    2 'Struct'
+0008    | OP_GET_GLOBAL       2 'Struct'
+0010    2 OP_NIL
+0011    | OP_FIELD            3 'value' private mutable
+0015    3 OP_POP
+0016   13 OP_GET_GLOBAL       2 'Struct'
+0018   14 OP_CLOSURE          5 <fn default>
+0020    | OP_METHOD           4 'default'
+0022   15 OP_POP
+0023    5 OP_GET_GLOBAL       2 'Struct'
+0025    8 OP_CLOSURE          7 <fn set>
+0027    | OP_METHOD           6 'set'
+0029   10 OP_CLOSURE          9 <fn get>
+0031    | OP_METHOD           8 'get'
+0033   11 OP_POP
+0034   26 OP_NIL
+0035    | OP_RETURN
+== main ==
+0000   17 OP_GET_GLOBAL       0 'Struct'
+0002    | OP_INVOKE        (0 args)    1 'default'
+0005   19 OP_GET_LOCAL        1
+0007    | OP_CONSTANT         3 'Hello'
+0009    | OP_INVOKE        (1 args)    2 'set'
+0012    | OP_POP
+0013   21 OP_GET_GLOBAL       4 '@println'
+0015    | OP_GET_LOCAL        1
+0017    | OP_INVOKE        (0 args)    5 'get'
+0020    | OP_CALL             1
+0022    | OP_POP
+0023   23 OP_GET_LOCAL        1
+0025    | OP_CONSTANT         6 'World'
+0027    | OP_INVOKE        (1 args)    2 'set'
+0030    | OP_POP
+0031   25 OP_GET_GLOBAL       4 '@println'
+0033    | OP_GET_LOCAL        1
+0035    | OP_INVOKE        (0 args)    5 'get'
+0038    | OP_CALL             1
+0040    | OP_POP
+0041    | OP_NIL
+0042    | OP_RETURN
 == default ==
 0000   14 OP_GET_GLOBAL       0 'Struct'
 0002    | OP_CONSTANT         1 'value'

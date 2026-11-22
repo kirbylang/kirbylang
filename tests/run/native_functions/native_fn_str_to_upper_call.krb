@@ -1,4 +1,4 @@
-@println(@strToUpper("Hello, World 123!"));
+fun main(): unit { @println(@strToUpper("Hello, World 123!"));
 @println(@strToUpper("already UPPER"));
 @println(@strToUpper(""));
-@println(@strToUpper("café"));
+@println(@strToUpper("café")); }

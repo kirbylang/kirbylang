@@ -1,2 +1,2 @@
-@println(@strIsEmpty(""));
-@println(@strIsEmpty("Hello World"));
+fun main(): unit { @println(@strIsEmpty(""));
+@println(@strIsEmpty("Hello World")); }

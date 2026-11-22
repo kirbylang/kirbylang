@@ -1,2 +1,2 @@
-@println("Hello");
-@println("World");
+fun main(): unit { @println("Hello");
+@println("World"); }

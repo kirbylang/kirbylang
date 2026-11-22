@@ -5,3 +5,5 @@ struct Box[T] {
 impl Box[T] {
   pub fun broken(self): T = 1;
 }
+
+fun main(): unit {}

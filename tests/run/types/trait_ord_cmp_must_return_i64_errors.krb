@@ -9,3 +9,5 @@ impl Eq for Money {
 impl Ord for Money {
     pub fun cmp(self, other: Self): f64 = (self.cents - other.cents) as f64;
 }
+
+fun main(): unit {}

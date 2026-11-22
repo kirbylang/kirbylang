@@ -1,2 +1,2 @@
 let a = [1, 2];
-a[0] = "x";
+fun main(): unit { a[0] = "x"; }

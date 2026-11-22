@@ -14,4 +14,4 @@ impl Thief {
     pub fun steal(self, secret: Secret): i64 = secret.value;
 }
 
-@println(Thief {}.steal(Secret.new(123)));
+fun main(): unit { @println(Thief {}.steal(Secret.new(123))); }

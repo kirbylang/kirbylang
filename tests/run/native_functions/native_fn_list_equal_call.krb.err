@@ -1,69 +1,72 @@
 == <script> ==
-0000    1 OP_CONSTANT         1 '1'
-0002    | OP_CONSTANT         2 '2'
-0004    | OP_CONSTANT         3 '3'
-0006    | OP_LIST             3
-0008    | OP_DEFINE_GLOBAL    0 'a'
-0010    2 OP_GET_GLOBAL       0 'a'
-0012    | OP_DEFINE_GLOBAL    4 'b'
-0014    3 OP_GET_GLOBAL       6 '@listCopy'
-0016    | OP_GET_GLOBAL       0 'a'
-0018    | OP_CALL             1
-0020    | OP_DEFINE_GLOBAL    5 'c'
-0022    5 OP_GET_GLOBAL       7 '@println'
-0024    | OP_CONSTANT         8 'Before'
-0026    | OP_CALL             1
-0028    | OP_POP
-0029    7 OP_GET_GLOBAL       7 '@println'
-0031    | OP_GET_GLOBAL       9 '@listEqual'
-0033    | OP_GET_GLOBAL       0 'a'
-0035    | OP_GET_GLOBAL       4 'b'
-0037    | OP_CALL             2
-0039    | OP_CALL             1
-0041    | OP_POP
-0042    8 OP_GET_GLOBAL       7 '@println'
-0044    | OP_GET_GLOBAL       9 '@listEqual'
-0046    | OP_GET_GLOBAL       4 'b'
-0048    | OP_GET_GLOBAL       5 'c'
-0050    | OP_CALL             2
-0052    | OP_CALL             1
-0054    | OP_POP
-0055    9 OP_GET_GLOBAL       7 '@println'
-0057    | OP_GET_GLOBAL       9 '@listEqual'
-0059    | OP_GET_GLOBAL       0 'a'
-0061    | OP_GET_GLOBAL       5 'c'
-0063    | OP_CALL             2
-0065    | OP_CALL             1
-0067    | OP_POP
-0068   11 OP_GET_GLOBAL       5 'c'
-0070    | OP_CONSTANT        10 '0'
-0072    | OP_CONSTANT        11 '100'
-0074    | OP_SET_INDEX
-0075    | OP_POP
-0076   13 OP_GET_GLOBAL       7 '@println'
-0078    | OP_CONSTANT        12 'After'
-0080    | OP_CALL             1
-0082    | OP_POP
-0083   15 OP_GET_GLOBAL       7 '@println'
-0085    | OP_GET_GLOBAL       9 '@listEqual'
-0087    | OP_GET_GLOBAL       0 'a'
-0089    | OP_GET_GLOBAL       4 'b'
-0091    | OP_CALL             2
-0093    | OP_CALL             1
-0095    | OP_POP
-0096   16 OP_GET_GLOBAL       7 '@println'
-0098    | OP_GET_GLOBAL       9 '@listEqual'
-0100    | OP_GET_GLOBAL       4 'b'
-0102    | OP_GET_GLOBAL       5 'c'
-0104    | OP_CALL             2
-0106    | OP_CALL             1
-0108    | OP_POP
-0109   17 OP_GET_GLOBAL       7 '@println'
-0111    | OP_GET_GLOBAL       9 '@listEqual'
-0113    | OP_GET_GLOBAL       0 'a'
-0115    | OP_GET_GLOBAL       5 'c'
-0117    | OP_CALL             2
-0119    | OP_CALL             1
-0121    | OP_POP
-0122   18 OP_NIL
-0123    | OP_RETURN
+0000   17 OP_CLOSURE          1 <fn main>
+0002    | OP_DEFINE_GLOBAL    0 'main'
+0004    1 OP_CONSTANT         3 '1'
+0006    | OP_CONSTANT         4 '2'
+0008    | OP_CONSTANT         5 '3'
+0010    | OP_LIST             3
+0012    | OP_DEFINE_GLOBAL    2 'a'
+0014   18 OP_NIL
+0015    | OP_RETURN
+== main ==
+0000    2 OP_GET_GLOBAL       0 'a'
+0002    3 OP_GET_GLOBAL       1 '@listCopy'
+0004    | OP_GET_GLOBAL       0 'a'
+0006    | OP_CALL             1
+0008    5 OP_GET_GLOBAL       2 '@println'
+0010    | OP_CONSTANT         3 'Before'
+0012    | OP_CALL             1
+0014    | OP_POP
+0015    7 OP_GET_GLOBAL       2 '@println'
+0017    | OP_GET_GLOBAL       4 '@listEqual'
+0019    | OP_GET_GLOBAL       0 'a'
+0021    | OP_GET_LOCAL        1
+0023    | OP_CALL             2
+0025    | OP_CALL             1
+0027    | OP_POP
+0028    8 OP_GET_GLOBAL       2 '@println'
+0030    | OP_GET_GLOBAL       4 '@listEqual'
+0032    | OP_GET_LOCAL        1
+0034    | OP_GET_LOCAL        2
+0036    | OP_CALL             2
+0038    | OP_CALL             1
+0040    | OP_POP
+0041    9 OP_GET_GLOBAL       2 '@println'
+0043    | OP_GET_GLOBAL       4 '@listEqual'
+0045    | OP_GET_GLOBAL       0 'a'
+0047    | OP_GET_LOCAL        2
+0049    | OP_CALL             2
+0051    | OP_CALL             1
+0053    | OP_POP
+0054   11 OP_GET_LOCAL        2
+0056    | OP_CONSTANT         5 '0'
+0058    | OP_CONSTANT         6 '100'
+0060    | OP_SET_INDEX
+0061    | OP_POP
+0062   13 OP_GET_GLOBAL       2 '@println'
+0064    | OP_CONSTANT         7 'After'
+0066    | OP_CALL             1
+0068    | OP_POP
+0069   15 OP_GET_GLOBAL       2 '@println'
+0071    | OP_GET_GLOBAL       4 '@listEqual'
+0073    | OP_GET_GLOBAL       0 'a'
+0075    | OP_GET_LOCAL        1
+0077    | OP_CALL             2
+0079    | OP_CALL             1
+0081    | OP_POP
+0082   16 OP_GET_GLOBAL       2 '@println'
+0084    | OP_GET_GLOBAL       4 '@listEqual'
+0086    | OP_GET_LOCAL        1
+0088    | OP_GET_LOCAL        2
+0090    | OP_CALL             2
+0092    | OP_CALL             1
+0094    | OP_POP
+0095   17 OP_GET_GLOBAL       2 '@println'
+0097    | OP_GET_GLOBAL       4 '@listEqual'
+0099    | OP_GET_GLOBAL       0 'a'
+0101    | OP_GET_LOCAL        2
+0103    | OP_CALL             2
+0105    | OP_CALL             1
+0107    | OP_POP
+0108    | OP_NIL
+0109    | OP_RETURN

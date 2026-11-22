@@ -14,7 +14,7 @@ impl Default for Struct {
     fun default(): Self = Self { value: "" };
 }
 
-var instance = Struct.default();
+fun main(): unit { var instance = Struct.default();
 
 instance.set("Hello");
 
@@ -22,4 +22,4 @@ instance.set("Hello");
 
 instance.set("World");
 
-@println(instance.get());
+@println(instance.get()); }

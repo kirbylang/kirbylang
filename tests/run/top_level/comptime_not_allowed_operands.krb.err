@@ -1,0 +1,12 @@
+[line 7] Error at 'negated': A top-level 'var' can only be assigned a comptime value.
+[line 8] Error at 'grouped': A top-level 'var' can only be assigned a comptime value.
+[line 9] Error at 'left': A top-level 'var' can only be assigned a comptime value.
+[line 10] Error at 'right': A top-level 'var' can only be assigned a comptime value.
+[line 11] Error at 'both_left': A top-level 'var' can only be assigned a comptime value.
+[line 12] Error at 'both_right': A top-level 'var' can only be assigned a comptime value.
+[line 13] Error at 'inline_if': A top-level 'var' can only be assigned a comptime value.
+[line 14] Error at 'inline_block': A top-level 'var' can only be assigned a comptime value.
+[line 15] Error at 'native': A top-level 'var' can only be assigned a comptime value.
+[line 16] Error at 'copied': A top-level 'let' can only be assigned a comptime value.
+[line 17] Error at 'item': A top-level 'var' can only be assigned a comptime value.
+[line 18] Error at 'field': A top-level 'var' can only be assigned a comptime value.

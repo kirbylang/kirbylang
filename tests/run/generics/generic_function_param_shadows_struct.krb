@@ -6,6 +6,6 @@ fun id[T](v: T): T {
   return v;
 }
 
-@println(id("shadowed"));
+fun main(): unit { @println(id("shadowed"));
 let t: T = T { x: 1 };
-@println(id(t).x);
+@println(id(t).x); }

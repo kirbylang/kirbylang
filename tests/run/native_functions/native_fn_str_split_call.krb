@@ -1,4 +1,4 @@
-var parts = @strSplit("a,b,c", ",");
+fun main(): unit { var parts = @strSplit("a,b,c", ",");
 @println(parts);
 @println(@listLen(parts));
 @println(parts[1]);
@@ -7,4 +7,4 @@ var parts = @strSplit("a,b,c", ",");
 @println(@strSplit(",a", ","));
 @println(@strSplit("abc", ","));
 @println(@strSplit("a--b--c", "--"));
-@println(@strSplit("aaa", "aa"));
+@println(@strSplit("aaa", "aa")); }

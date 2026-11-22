@@ -1,2 +1,4 @@
 struct Struct {}
 struct Struct {}
+
+fun main(): unit {}

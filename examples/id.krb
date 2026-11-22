@@ -30,5 +30,3 @@ impl Id[T] {
     pub fun flat_map[U](self, fn: fun (T) => Id[U]): Id[U] =
         fn(self.value);
 }
-
-main();

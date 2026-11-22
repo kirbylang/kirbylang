@@ -4,5 +4,5 @@ impl Struct {
     pub fun new(): Self = Self {};
 }
 
-var s = Struct.new();
-@println(s);
+fun main(): unit { var s = Struct.new();
+@println(s); }

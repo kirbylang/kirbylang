@@ -1,1 +1,1 @@
-@println(@strToLower(1));
+fun main(): unit { @println(@strToLower(1)); }

@@ -5,5 +5,5 @@ struct Point {
 
 var point = Point { x: 1, y: 2 };
 
-@println(point.x);
-@println(point.y);
+fun main(): unit { @println(point.x);
+@println(point.y); }

@@ -1,3 +1,5 @@
 type Wrapped[T] = [T];
 
 let a: Wrapped = [1];
+
+fun main(): unit {}

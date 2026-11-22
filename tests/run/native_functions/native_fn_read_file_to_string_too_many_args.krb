@@ -1,1 +1,1 @@
-@println(@readFileToString("./path/to/file.txt", "another/path/to/fix"));
+fun main(): unit { @println(@readFileToString("./path/to/file.txt", "another/path/to/fix")); }

@@ -1,0 +1,3 @@
+var pending: f64;
+
+fun main(): unit {}

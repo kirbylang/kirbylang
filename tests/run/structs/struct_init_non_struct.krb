@@ -1,3 +1,5 @@
 var value = 123;
 
 var instance = value {};
+
+fun main(): unit {}

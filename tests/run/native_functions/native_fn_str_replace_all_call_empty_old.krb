@@ -1,1 +1,1 @@
-@println(@strReplaceAll("abc", "", "x"));
+fun main(): unit { @println(@strReplaceAll("abc", "", "x")); }

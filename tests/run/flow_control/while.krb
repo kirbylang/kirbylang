@@ -1,6 +1,6 @@
 var cond = true;
 
-while (cond) {
+fun main(): unit { while (cond) {
     cond = !cond;
     @println("Hello World");
-}
+} }

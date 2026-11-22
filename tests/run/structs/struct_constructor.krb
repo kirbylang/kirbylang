@@ -12,6 +12,6 @@ impl Struct {
     }
 }
 
-var instance = Struct.new(123);
+fun main(): unit { var instance = Struct.new(123);
 
-@println(instance.value);
+@println(instance.value); }

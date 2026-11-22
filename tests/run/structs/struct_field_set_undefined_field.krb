@@ -3,4 +3,4 @@ struct Struct {
 
 var instance = Struct {};
 
-instance.value = 123;
+fun main(): unit { instance.value = 123; }

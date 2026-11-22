@@ -1,4 +1,4 @@
-@println(@pow(2, 10));
+fun main(): unit { @println(@pow(2, 10));
 @println(@pow(9, 0.5));
 @println(@pow(2, -1));
-@println(@pow(5, 0));
+@println(@pow(5, 0)); }

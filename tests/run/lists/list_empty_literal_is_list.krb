@@ -1,4 +1,4 @@
 let xs: [string] = [];
-@listPush(xs, "a");
+fun main(): unit { @listPush(xs, "a");
 @println(xs);
-@println(@typeof(xs));
+@println(@typeof(xs)); }

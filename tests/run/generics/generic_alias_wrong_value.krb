@@ -1,3 +1,5 @@
 type Items[T] = [T];
 
 let a: Items[string] = [1, 2];
+
+fun main(): unit {}

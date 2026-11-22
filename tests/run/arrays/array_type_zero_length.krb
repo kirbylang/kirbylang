@@ -1,2 +1,2 @@
 fun f(a: [string; 0]): unit {}
-@println("ok");
+fun main(): unit { @println("ok"); }

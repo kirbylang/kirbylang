@@ -7,5 +7,5 @@ type Wrapped[T] = Box[T];
 let a: Wrapped[i64] = Box { value: 5 };
 let b: Wrapped[string] = Box { value: "hi" };
 
-@println(a.value + 1);
-@println(b.value + "!");
+fun main(): unit { @println(a.value + 1);
+@println(b.value + "!"); }

@@ -1,3 +1,3 @@
-var text = @stdin();
+fun main(): unit { var text = @stdin();
 
-@println("Hello " + text);
+@println("Hello " + text); }

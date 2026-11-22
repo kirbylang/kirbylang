@@ -6,4 +6,4 @@ var h = Holder {
     callback: fun () { "called" }
 };
 
-@println(h.callback());
+fun main(): unit { @println(h.callback()); }

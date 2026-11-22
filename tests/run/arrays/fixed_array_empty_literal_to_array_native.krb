@@ -1,1 +1,1 @@
-@println(@arrLen([]));
+fun main(): unit { @println(@arrLen([])); }

@@ -1,2 +1,2 @@
 let zero: i16 = 0;
-@println(1i16 / zero);
+fun main(): unit { @println(1i16 / zero); }

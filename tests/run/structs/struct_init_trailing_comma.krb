@@ -8,5 +8,5 @@ var point = Point {
     y: 2,
 };
 
-@println(point.x);
-@println(point.y);
+fun main(): unit { @println(point.x);
+@println(point.y); }

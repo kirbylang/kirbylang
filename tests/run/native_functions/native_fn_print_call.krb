@@ -1,4 +1,4 @@
-@print("Hello");
+fun main(): unit { @print("Hello");
 @print(", ");
 @println("World");
 @println(10);
@@ -7,4 +7,4 @@
 @println(nil);
 @println([1, 2.5, 3]);
 @println(["one", "two"]);
-@print("no newline at the end");
+@print("no newline at the end"); }

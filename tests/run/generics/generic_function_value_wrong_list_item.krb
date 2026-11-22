@@ -3,3 +3,5 @@ fun head[T](xs: [T]): T {
 }
 
 let f: fun ([string]) => i64 = head;
+
+fun main(): unit {}

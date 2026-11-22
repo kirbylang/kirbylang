@@ -1,1 +1,3 @@
 let x: u8 = 5f64;
+
+fun main(): unit {}

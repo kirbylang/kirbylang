@@ -8,4 +8,4 @@ impl Stack[T] {
   pub fun size(self): i64 = @listLen(self.items);
 }
 
-let s = Stack.new();
+fun main(): unit { let s = Stack.new(); }

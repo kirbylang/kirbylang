@@ -1,1 +1,1 @@
-@println($"type={@typeof(3)}");
+fun main(): unit { @println($"type={@typeof(3)}"); }

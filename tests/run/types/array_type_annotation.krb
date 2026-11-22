@@ -1,5 +1,5 @@
 let floats: [f64] = [1, 2.5];
-@println(floats);
+fun main(): unit { @println(floats);
 
 let words: [string] = [];
 @listPush(words, "a");
@@ -9,4 +9,4 @@ let nested: [[i64]] = [[1], [2, 3]];
 @println(nested);
 
 let fromSplit: [string] = @strSplit("a,b", ",");
-@println(@listLen(fromSplit));
+@println(@listLen(fromSplit)); }

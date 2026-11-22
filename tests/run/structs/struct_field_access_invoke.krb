@@ -10,9 +10,13 @@ impl Struct {
     };
 }
 
-var instance = Struct.new(hello);
+fun main(): unit { var instance = Struct.new(hello);
 
-instance.fn();
+instance.fn(); }
+
+
+
+
 
 fun hello(): unit {
     @println("Hello World");

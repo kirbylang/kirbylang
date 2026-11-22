@@ -3,20 +3,10 @@
 0002    | OP_DEFINE_GLOBAL    0 'isEven'
 0004    2 OP_CLOSURE          3 <fn isOdd>
 0006    | OP_DEFINE_GLOBAL    2 'isOdd'
-0008    4 OP_GET_GLOBAL       4 '@println'
-0010    | OP_GET_GLOBAL       0 'isEven'
-0012    | OP_CONSTANT         5 '10'
-0014    | OP_CALL             1
-0016    | OP_CALL             1
-0018    | OP_POP
-0019    5 OP_GET_GLOBAL       4 '@println'
-0021    | OP_GET_GLOBAL       2 'isOdd'
-0023    | OP_CONSTANT         6 '7'
-0025    | OP_CALL             1
-0027    | OP_CALL             1
-0029    | OP_POP
-0030    6 OP_NIL
-0031    | OP_RETURN
+0008    5 OP_CLOSURE          5 <fn main>
+0010    | OP_DEFINE_GLOBAL    4 'main'
+0012    6 OP_NIL
+0013    | OP_RETURN
 == isEven ==
 0000    1 OP_GET_LOCAL        1
 0002    | OP_CONSTANT         0 '0'
@@ -49,3 +39,18 @@
 0021    | OP_SUBTRACT
 0022    | OP_CALL             1
 0024    | OP_RETURN
+== main ==
+0000    4 OP_GET_GLOBAL       0 '@println'
+0002    | OP_GET_GLOBAL       1 'isEven'
+0004    | OP_CONSTANT         2 '10'
+0006    | OP_CALL             1
+0008    | OP_CALL             1
+0010    | OP_POP
+0011    5 OP_GET_GLOBAL       0 '@println'
+0013    | OP_GET_GLOBAL       3 'isOdd'
+0015    | OP_CONSTANT         4 '7'
+0017    | OP_CALL             1
+0019    | OP_CALL             1
+0021    | OP_POP
+0022    | OP_NIL
+0023    | OP_RETURN

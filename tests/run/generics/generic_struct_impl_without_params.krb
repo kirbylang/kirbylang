@@ -5,3 +5,5 @@ struct Box[T] {
 impl Box {
   pub fun get(self): i64 = 1;
 }
+
+fun main(): unit {}

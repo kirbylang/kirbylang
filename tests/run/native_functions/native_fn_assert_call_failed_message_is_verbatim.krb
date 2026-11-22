@@ -1,1 +1,1 @@
-@assert(false, "50%s off, 100%d done");
+fun main(): unit { @assert(false, "50%s off, 100%d done"); }

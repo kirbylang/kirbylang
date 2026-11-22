@@ -5,3 +5,5 @@ struct Money {
 impl Ord for Money {
     pub fun cmp(self, other: Self): i64 = self.cents - other.cents;
 }
+
+fun main(): unit {}

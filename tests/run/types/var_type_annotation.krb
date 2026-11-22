@@ -1,2 +1,2 @@
 var name: string = "Hello";
-@println(name);
+fun main(): unit { @println(name); }

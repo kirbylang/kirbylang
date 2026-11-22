@@ -1,0 +1,2 @@
+[line 15] Error at 'globalSet': 'globalSet' might not be assigned yet.
+[line 16] Error at 'globalGet': 'globalGet' might not be assigned yet.

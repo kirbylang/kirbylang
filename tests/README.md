@@ -77,7 +77,9 @@ the project's banner, is written as `<version>` in the snapshots.
    $file
    ```
 
-3. Add test kirby code
+3. Add test kirby code. A program run with `krb run` holds only declarations and
+   needs a `fun main(): unit`. A program run with `exec` is a snippet and needs
+   neither.
 4. Implement feature being tested
 5. [Update snapshots](#update-snapshots) which will create `./tests/run/new_test.krb.out`, `./tests/run/new_test.krb.err`, `./tests/run/new_test.krb.exit` files
 6. Validate new snapshots. Confirm no other snapshots updated.

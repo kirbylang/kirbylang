@@ -1,0 +1,5 @@
+fun main(): unit {
+  @println("before");
+  @exit(3);
+  @println("after");
+}

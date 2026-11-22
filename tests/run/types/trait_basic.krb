@@ -8,4 +8,4 @@ impl Display for Point {
 }
 
 var p = Point { x: 1, y: 2 };
-@println(p.toString());
+fun main(): unit { @println(p.toString()); }

@@ -2,4 +2,4 @@ struct Greeter {}
 
 var greeter = Greeter {};
 
-greeter.greet("World");
+fun main(): unit { greeter.greet("World"); }

@@ -1,6 +1,6 @@
-@println("[" + @strTrim("  hello  ") + "]");
+fun main(): unit { @println("[" + @strTrim("  hello  ") + "]");
 @println("[" + @strTrim("\t\n hi \r\n") + "]");
 @println("[" + @strTrim("no-trim") + "]");
 @println("[" + @strTrim("   ") + "]");
 @println("[" + @strTrim("") + "]");
-@println("[" + @strTrim(" a  b ") + "]");
+@println("[" + @strTrim(" a  b ") + "]"); }

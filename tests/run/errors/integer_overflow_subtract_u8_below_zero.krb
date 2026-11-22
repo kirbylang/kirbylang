@@ -1,2 +1,2 @@
 let byte: u8 = 0;
-@println(byte - 1);
+fun main(): unit { @println(byte - 1); }

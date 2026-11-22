@@ -1,1 +1,1 @@
-@println(@sqrt(4, 1, 2));
+fun main(): unit { @println(@sqrt(4, 1, 2)); }

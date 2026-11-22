@@ -1,5 +1,5 @@
-while (false) {
+fun main(): unit { while (false) {
     @println("Hello");
 }
 
-@println("World");
+@println("World"); }

@@ -92,6 +92,7 @@
 - Implement function and struct generics, without trait bounds, in the typechecker. This was only in the parser before.
 - The `let` keyword on immutable struct fields is now optional `struct Box[T] { value: T; }`
 - Fix `@rand`, `@rand01` and `@randBetween` returning nearly the same value on every run on systems whose `rand()` changes little between close seeds, such as macOS. Random numbers now come from `arc4random` on macOS, and from `random` seeded with the time (with nanoseconds) and the process ID elsewhere
+- Change to require that the top level of a Kirby file must only be declarations. Any assigned values must be comptime values (literal values or references to already declared items e.g. function or let)
 
 ## 0.4.0
 

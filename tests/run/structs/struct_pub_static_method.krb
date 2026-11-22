@@ -6,4 +6,4 @@ impl Point {
     pub fun origin(): Point = Point { x: 0 };
 }
 
-@println(Point.origin().x);
+fun main(): unit { @println(Point.origin().x); }

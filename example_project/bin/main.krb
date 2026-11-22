@@ -1,9 +1,11 @@
-for (;;) {
-    let input = @prompt("Echo: ");
+fun main(): unit {
+    for (;;) {
+        let input = @prompt("Echo: ");
 
-    if (input == "/exit") {
-        break;
+        if (input == "/exit") {
+            break;
+        }
+
+        @println(input);
     }
-
-    @println(input);
 }

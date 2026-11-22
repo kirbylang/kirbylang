@@ -1,1 +1,1 @@
-@println(@strReplaceAll(@strRepeat("a", 1000000), "a", @strRepeat("b", 3000)));
+fun main(): unit { @println(@strReplaceAll(@strRepeat("a", 1000000), "a", @strRepeat("b", 3000))); }

@@ -6,4 +6,4 @@ impl Struct {
 
 var instance = Struct {};
 
-instance.hello();
+fun main(): unit { instance.hello(); }

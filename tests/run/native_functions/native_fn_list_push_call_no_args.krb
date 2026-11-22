@@ -1,1 +1,1 @@
-@listPush();
+fun main(): unit { @listPush(); }

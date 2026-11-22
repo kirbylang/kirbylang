@@ -7,6 +7,6 @@ impl Point {
   pub fun new(x, y): Point = Point { x: x, y: y };
 }
 
-var p = Point.new(1, 2);
+fun main(): unit { var p = Point.new(1, 2);
 @println(p.x);
-@println(p.y);
+@println(p.y); }

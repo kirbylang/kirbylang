@@ -1,6 +1,9 @@
-@println(test(true, false));
+fun main(): unit { @println(test(true, false));
 @println(test(false, true));
-@println(test(false, false));
+@println(test(false, false)); }
+
+
+
 
 fun test (a: bool, b: bool): string =
     if (a) "Hello" else if (b) "World" else { "Goodbye" };

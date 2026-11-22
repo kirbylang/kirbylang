@@ -1,1 +1,1 @@
-@println(@isNumber(12345, 67890));
+fun main(): unit { @println(@isNumber(12345, 67890)); }

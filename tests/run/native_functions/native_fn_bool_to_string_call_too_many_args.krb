@@ -1,1 +1,1 @@
-@println(@boolToString(true, false));
+fun main(): unit { @println(@boolToString(true, false)); }

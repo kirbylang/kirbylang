@@ -1,32 +1,37 @@
 == <script> ==
-0000    1 OP_CONSTANT         1 'Hello'
-0002    | OP_CONSTANT         2 'World'
-0004    | OP_LIST             2
-0006    | OP_DEFINE_GLOBAL    0 'parts'
-0008    3 OP_GET_GLOBAL       3 '@println'
-0010    | OP_GET_GLOBAL       4 '@listJoin'
-0012    | OP_GET_GLOBAL       0 'parts'
-0014    | OP_CONSTANT         5 ' '
-0016    | OP_CALL             2
-0018    | OP_CALL             1
-0020    | OP_POP
-0021    4 OP_GET_GLOBAL       3 '@println'
-0023    | OP_GET_GLOBAL       4 '@listJoin'
-0025    | OP_GET_GLOBAL       0 'parts'
-0027    | OP_CONSTANT         6 ', '
-0029    | OP_CALL             2
-0031    | OP_CALL             1
-0033    | OP_POP
-0034    5 OP_GET_GLOBAL       3 '@println'
-0036    | OP_GET_GLOBAL       4 '@listJoin'
-0038    | OP_GET_GLOBAL       0 'parts'
-0040    | OP_CONSTANT         7 ''
-0042    | OP_CALL             2
-0044    | OP_CALL             1
-0046    | OP_POP
-0047    6 OP_GET_GLOBAL       3 '@println'
-0049    | OP_GET_GLOBAL       0 'parts'
-0051    | OP_CALL             1
-0053    | OP_POP
-0054    7 OP_NIL
-0055    | OP_RETURN
+0000    6 OP_CLOSURE          1 <fn main>
+0002    | OP_DEFINE_GLOBAL    0 'main'
+0004    1 OP_CONSTANT         3 'Hello'
+0006    | OP_CONSTANT         4 'World'
+0008    | OP_LIST             2
+0010    | OP_DEFINE_GLOBAL    2 'parts'
+0012    7 OP_NIL
+0013    | OP_RETURN
+== main ==
+0000    3 OP_GET_GLOBAL       0 '@println'
+0002    | OP_GET_GLOBAL       1 '@listJoin'
+0004    | OP_GET_GLOBAL       2 'parts'
+0006    | OP_CONSTANT         3 ' '
+0008    | OP_CALL             2
+0010    | OP_CALL             1
+0012    | OP_POP
+0013    4 OP_GET_GLOBAL       0 '@println'
+0015    | OP_GET_GLOBAL       1 '@listJoin'
+0017    | OP_GET_GLOBAL       2 'parts'
+0019    | OP_CONSTANT         4 ', '
+0021    | OP_CALL             2
+0023    | OP_CALL             1
+0025    | OP_POP
+0026    5 OP_GET_GLOBAL       0 '@println'
+0028    | OP_GET_GLOBAL       1 '@listJoin'
+0030    | OP_GET_GLOBAL       2 'parts'
+0032    | OP_CONSTANT         5 ''
+0034    | OP_CALL             2
+0036    | OP_CALL             1
+0038    | OP_POP
+0039    6 OP_GET_GLOBAL       0 '@println'
+0041    | OP_GET_GLOBAL       2 'parts'
+0043    | OP_CALL             1
+0045    | OP_POP
+0046    | OP_NIL
+0047    | OP_RETURN

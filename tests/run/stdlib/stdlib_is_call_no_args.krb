@@ -1,1 +1,1 @@
-@is();
+fun main(): unit { @is(); }

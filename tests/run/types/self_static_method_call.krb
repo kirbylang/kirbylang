@@ -21,9 +21,9 @@ impl Display for StringBuilder {
     pub fun toString(self): string = self.string;
 }
 
-var builder = StringBuilder.default()
+fun main(): unit { var builder = StringBuilder.default()
     .add("Hello")
     .add(" ")
     .add("World");
 
-@println(builder.toString());
+@println(builder.toString()); }

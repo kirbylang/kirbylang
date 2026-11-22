@@ -1,57 +1,62 @@
 == <script> ==
-0000    1 OP_CONSTANT         1 '1'
-0002    | OP_CONSTANT         2 '2'
-0004    | OP_CONSTANT         3 '3'
-0006    | OP_LIST             3
-0008    | OP_DEFINE_GLOBAL    0 'array'
-0010    2 OP_GET_GLOBAL       4 '@listInsert'
-0012    | OP_GET_GLOBAL       0 'array'
-0014    | OP_CONSTANT         5 '1'
-0016    | OP_CONSTANT         6 '9'
-0018    | OP_CALL             3
-0020    | OP_POP
-0021    3 OP_GET_GLOBAL       7 '@println'
-0023    | OP_GET_GLOBAL       0 'array'
-0025    | OP_CALL             1
-0027    | OP_POP
-0028    4 OP_GET_GLOBAL       7 '@println'
-0030    | OP_GET_GLOBAL       8 '@listRemove'
-0032    | OP_GET_GLOBAL       0 'array'
-0034    | OP_CONSTANT         9 '0'
-0036    | OP_CALL             2
-0038    | OP_CALL             1
-0040    | OP_POP
-0041    5 OP_GET_GLOBAL       7 '@println'
-0043    | OP_GET_GLOBAL       0 'array'
-0045    | OP_CALL             1
-0047    | OP_POP
-0048    6 OP_GET_GLOBAL       7 '@println'
-0050    | OP_GET_GLOBAL      10 '@listSlice'
-0052    | OP_GET_GLOBAL       0 'array'
-0054    | OP_CONSTANT        11 '1'
-0056    | OP_CONSTANT        12 '3'
-0058    | OP_CALL             3
-0060    | OP_CALL             1
-0062    | OP_POP
-0063    7 OP_GET_GLOBAL       7 '@println'
-0065    | OP_GET_GLOBAL      13 '@strSlice'
-0067    | OP_CONSTANT        14 'hello'
-0069    | OP_CONSTANT         5 '1'
-0071    | OP_CONSTANT         3 '3'
-0073    | OP_CALL             3
-0075    | OP_CALL             1
-0077    | OP_POP
-0078    8 OP_GET_GLOBAL       7 '@println'
-0080    | OP_GET_GLOBAL      15 '@isNumber'
-0082    | OP_CONSTANT        16 '5'
-0084    | OP_CALL             1
-0086    | OP_CALL             1
-0088    | OP_POP
-0089    9 OP_GET_GLOBAL       7 '@println'
-0091    | OP_GET_GLOBAL      15 '@isNumber'
-0093    | OP_CONSTANT        17 '5'
-0095    | OP_CALL             1
-0097    | OP_CALL             1
-0099    | OP_POP
-0100   10 OP_NIL
-0101    | OP_RETURN
+0000    9 OP_CLOSURE          1 <fn main>
+0002    | OP_DEFINE_GLOBAL    0 'main'
+0004    1 OP_CONSTANT         3 '1'
+0006    | OP_CONSTANT         4 '2'
+0008    | OP_CONSTANT         5 '3'
+0010    | OP_LIST             3
+0012    | OP_DEFINE_GLOBAL    2 'array'
+0014   10 OP_NIL
+0015    | OP_RETURN
+== main ==
+0000    2 OP_GET_GLOBAL       0 '@listInsert'
+0002    | OP_GET_GLOBAL       1 'array'
+0004    | OP_CONSTANT         2 '1'
+0006    | OP_CONSTANT         3 '9'
+0008    | OP_CALL             3
+0010    | OP_POP
+0011    3 OP_GET_GLOBAL       4 '@println'
+0013    | OP_GET_GLOBAL       1 'array'
+0015    | OP_CALL             1
+0017    | OP_POP
+0018    4 OP_GET_GLOBAL       4 '@println'
+0020    | OP_GET_GLOBAL       5 '@listRemove'
+0022    | OP_GET_GLOBAL       1 'array'
+0024    | OP_CONSTANT         6 '0'
+0026    | OP_CALL             2
+0028    | OP_CALL             1
+0030    | OP_POP
+0031    5 OP_GET_GLOBAL       4 '@println'
+0033    | OP_GET_GLOBAL       1 'array'
+0035    | OP_CALL             1
+0037    | OP_POP
+0038    6 OP_GET_GLOBAL       4 '@println'
+0040    | OP_GET_GLOBAL       7 '@listSlice'
+0042    | OP_GET_GLOBAL       1 'array'
+0044    | OP_CONSTANT         8 '1'
+0046    | OP_CONSTANT         9 '3'
+0048    | OP_CALL             3
+0050    | OP_CALL             1
+0052    | OP_POP
+0053    7 OP_GET_GLOBAL       4 '@println'
+0055    | OP_GET_GLOBAL      10 '@strSlice'
+0057    | OP_CONSTANT        11 'hello'
+0059    | OP_CONSTANT         2 '1'
+0061    | OP_CONSTANT        12 '3'
+0063    | OP_CALL             3
+0065    | OP_CALL             1
+0067    | OP_POP
+0068    8 OP_GET_GLOBAL       4 '@println'
+0070    | OP_GET_GLOBAL      13 '@isNumber'
+0072    | OP_CONSTANT        14 '5'
+0074    | OP_CALL             1
+0076    | OP_CALL             1
+0078    | OP_POP
+0079    9 OP_GET_GLOBAL       4 '@println'
+0081    | OP_GET_GLOBAL      13 '@isNumber'
+0083    | OP_CONSTANT        15 '5'
+0085    | OP_CALL             1
+0087    | OP_CALL             1
+0089    | OP_POP
+0090    | OP_NIL
+0091    | OP_RETURN

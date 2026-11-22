@@ -1,0 +1,239 @@
+#!/usr/bin/env krb run
+
+fun main(): unit {
+    let word_to_guess = pick_random_word();
+    
+    // Track what letters of the word have been discovered
+    var letters_to_guess = @strSplit(word_to_guess, "");
+    fun filter_characters_left(guess: string): unit {
+        letters_to_guess = list_filter(
+            letters_to_guess,
+            fun (word_char) { word_char != guess }
+        );
+    }
+
+    // Track the user's guesses
+    let guesses: [string] = [];
+    var guesses_left = MAX_GUESSES;
+
+    // Check if the letter guessed is one of the remaining letters to guess
+    fun check_guess(guess: string): unit {
+        if (!@listContains(letters_to_guess, guess)) {
+            guesses_left = guesses_left - 1;
+        }
+
+        @listPush(guesses, guess);
+
+        filter_characters_left(guess);
+    }
+
+    // Check if all the letters to guess have been guessed
+    fun check_for_winner(): unit {
+        if (@listLen(letters_to_guess) == 0) {
+            @eprintln("You win!");
+            @exit(0);
+        } 
+    }
+
+    // Prints the hangman progress and the word to guess progress
+    fun print_hangman_and_word(): string =
+        @eprintln($"\n{render_hangman(guesses_left)}\n\n{render_word(word_to_guess, guesses)}\n");
+
+    // Game starts here
+
+    print_game_header();
+    print_hangman_and_word();
+
+    while (guesses_left > 0) {
+        let guess = prompt_for_guess();
+
+        if (guess == "exit" or guess == "quit") {
+            @eprintln("Exiting...");
+            @exit(0);
+        }
+
+        if (guess == "about") {
+            print_about();
+            continue;
+        }
+
+        if (guess == "help" or @strLen(guess) != 1) {
+            print_help();
+            continue;
+        }
+
+        check_guess(guess);
+
+        print_hangman_and_word();
+
+        check_for_winner();      
+    }
+
+    @eprintln($"You lose! The word was: '{word_to_guess}'");
+    @exit(1);
+}
+
+// Prompt user for their guess
+fun prompt_for_guess(): string = @strToLower(@prompt("> "));
+
+// Pick a random word from the word list
+fun pick_random_word(): string {
+    let list: [string] = @arrToList(POSSIBLE_WORDS);
+    let random_idx = list_rand_index(list);
+    
+    POSSIBLE_WORDS[random_idx]
+}
+
+fun print_game_header(): unit {
+    @eprintln("-------------------------------------------------------------------------------");
+    @eprintln("Hangman!\n");
+    @eprintln("Enter a letter to guess");
+    @eprintln("You can also try 'help', 'about', or 'exit'");
+    @eprintln("-------------------------------------------------------------------------------");
+}
+
+fun print_about(): unit {
+    @eprintln(@strTrim("
+-------------------------------------------------------------------------------
+ (c) 2026 Kylee Tilley <kyleetilley@gmail.com>
+-------------------------------------------------------------------------------
+"));
+}
+
+fun print_help(): unit {
+    @eprintln(@strTrim("
+-------------------------------------------------------------------------------
+ Hangman! Help
+-------------------------------------------------------------------------------
+
+    Guess using single letters
+
+    > a
+
+    You can also enter the following commands:
+
+    help  | Print this help text
+    about | Information about this game
+    exit  | Exit this game
+
+-------------------------------------------------------------------------------
+"));
+}
+
+// Render the hangman ASCII art
+fun render_hangman(guesses_left: i64): string =
+    @strTrim(HANGMAN_STAGES[guesses_left]);
+
+// Render the current word being guessed
+// 
+// _ello _o_ld
+fun render_word(word: string, guesses: [string]): string {
+    let chars: [string] = [];
+
+    for (var i = 0; i < @strLen(word); i = i + 1) {
+        let c: string = @strSlice(word, i, i+1);
+
+        @listPush(chars, if (@listContains(guesses, c)) c else "_");
+    }
+
+    $"Word: {@listJoin(chars, "")}"
+}
+
+let MAX_GUESSES = 6;
+
+let POSSIBLE_WORDS: [string; 15] = [
+    "taco",
+    "burger",
+    "fries",
+    "hotdog",
+    "soup",
+    "sandwich",
+    "sushi",
+    "coffee",
+    "tea",
+    "cheese",
+    "potato",
+    "tomato",
+    "onion",
+    "milk",
+    "eggs"
+];
+
+ let HANGMAN_STAGES: [string; 7] = [
+                "
+--+---+
+  |   |
+  O   |
+ /|\\  |
+ / \\  |
+      |
+=========",
+        "
+--+---+
+  |   |
+  O   |
+ /|\\  |
+ /    |
+      |
+=========",
+        "
+--+---+
+  |   |
+  O   |
+ /|\\  |
+      |
+      |
+=========",
+        "
+--+---+
+  |   |
+  O   |
+ /|   |
+      |
+      |
+=========",
+        "
+--+---+
+  |   |
+  O   |
+  |   |
+      |
+      |
+=========",
+        "
+--+---+
+  |   |
+  O   |
+      |
+      |
+      |
+=========",
+        "
+ --+---+
+  |   |
+      |
+      |
+      |
+      |
+========="
+    ];
+
+// Get a random index from a list
+fun list_rand_index[T](list: [T]): i64 {
+     let random_idx = @randBetween(0, @listLen(list) - 1);
+
+     random_idx
+}
+
+// Filter a list based on a condition
+fun list_filter[T](list: [T], condition: fun (T) => bool): [T] {
+    let new: [T] = [];
+
+    for (var i = 0; i < @listLen(list); i = i + 1) {
+        if (condition(list[i])) {
+            @listPush(new, list[i]);
+        }
+    }
+
+    new
+}

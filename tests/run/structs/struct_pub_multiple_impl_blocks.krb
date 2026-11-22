@@ -15,9 +15,9 @@ impl Counter {
     pub fun get(self): f64 = self.count;
 }
 
-var counter = Counter.new();
+fun main(): unit { var counter = Counter.new();
 
 counter.increment();
 counter.increment();
 
-@println(counter.get());
+@println(counter.get()); }

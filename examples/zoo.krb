@@ -27,19 +27,21 @@ impl Zoo {
   pub fun mouse(self): i64 = self.fox;
 }
 
-var zoo = Zoo.init();
-var start = @clock();
+fun main(): unit {
+  var zoo = Zoo.init();
+  var start = @clock();
 
-var sum = 0;
+  var sum = 0;
 
-while (sum < 100000000) {
-  sum = sum + zoo.ant()
-            + zoo.banana()
-            + zoo.tuna()
-            + zoo.hay()
-            + zoo.grass()
-            + zoo.mouse();
+  while (sum < 100000000) {
+    sum = sum + zoo.ant()
+              + zoo.banana()
+              + zoo.tuna()
+              + zoo.hay()
+              + zoo.grass()
+              + zoo.mouse();
+  }
+
+  @println(@clock() - start);
+  @println(sum);
 }
-
-@println(@clock() - start);
-@println(sum);

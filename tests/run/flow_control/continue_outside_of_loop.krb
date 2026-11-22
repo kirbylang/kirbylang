@@ -1,1 +1,1 @@
-continue;
+fun main(): unit { continue; }

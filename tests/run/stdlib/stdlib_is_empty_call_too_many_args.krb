@@ -1,1 +1,1 @@
-@strIsEmpty("Hello World", nil);
+fun main(): unit { @strIsEmpty("Hello World", nil); }

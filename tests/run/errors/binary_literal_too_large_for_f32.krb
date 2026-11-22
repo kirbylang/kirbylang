@@ -1,2 +1,2 @@
 let c: f32 = 1.5f32;
-@println(c + 16777217);
+fun main(): unit { @println(c + 16777217); }

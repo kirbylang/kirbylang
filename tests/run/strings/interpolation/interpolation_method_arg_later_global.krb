@@ -14,4 +14,4 @@ fun report(): unit {
 
 let logger = Logger { prefix: "> " };
 
-report();
+fun main(): unit { report(); }

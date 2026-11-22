@@ -3,3 +3,5 @@ type Coord = f64;
 impl Coord {
     pub fun get(self): f64 = self;
 }
+
+fun main(): unit {}

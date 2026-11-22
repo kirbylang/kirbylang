@@ -4,5 +4,5 @@ fun twice[T](x: T): T {
   return g(local);
 }
 
-@println(twice(4));
-@println(twice("four"));
+fun main(): unit { @println(twice(4));
+@println(twice("four")); }

@@ -1,3 +1,3 @@
-var text = @prompt();
+fun main(): unit { var text = @prompt();
 
-@println("Hello " + text);
+@println("Hello " + text); }

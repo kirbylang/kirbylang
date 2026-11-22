@@ -1,1 +1,1 @@
-@println(@trunc("x"));
+fun main(): unit { @println(@trunc("x")); }

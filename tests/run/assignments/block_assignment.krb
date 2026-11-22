@@ -1,8 +1,8 @@
 var a = 123;
 
-{
+fun main(): unit { {
     var a = 456;
     @println(a);
 }
 
-@println(a);
+@println(a); }

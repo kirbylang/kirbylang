@@ -7,5 +7,5 @@ fun outer(): fun () => unit {
   return inner;
 }
 
-var closure = outer();
-closure();
+fun main(): unit { var closure = outer();
+closure(); }

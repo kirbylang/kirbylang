@@ -12,3 +12,5 @@ impl Struct {
     pub fun toString(self): string = "Struct!";
     pub fun test(self): unit {}
 }
+
+fun main(): unit {}

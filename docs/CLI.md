@@ -52,11 +52,11 @@ krb exec '@println("Hello World");'
 However a script is started, `@argv(0)` is the program and `@argv(1)` onward are
 the script's own arguments.
 
-| Started with                | `@argv(0)`                   | `@argc()` for `a b` |
-| --------------------------- | ---------------------------- | ------------------- |
-| `krb run file.krb a b`      | `file.krb`                   | 3                   |
-| `krb run -- a b`            | the project's `bin` file     | 3                   |
-| `krb example name a b`      | `<examples>/name.krb`        | 3                   |
-| `krb exec '<code>' a b`     | `exec`                       | 3                   |
-| `krb repl`                  | `repl`                       | 1                   |
-| `./app a b` (`krb build`)   | `./app`, as it was typed     | 3                   |
+| Started with              | `@argv(0)`               | `@argc()` for `a b` |
+| ------------------------- | ------------------------ | ------------------- |
+| `krb run file.krb a b`    | `file.krb`               | 3                   |
+| `krb run -- a b`          | the project's `bin` file | 3                   |
+| `krb example name a b`    | `<examples>/name.krb`    | 3                   |
+| `krb exec '<code>' a b`   | `exec`                   | 3                   |
+| `krb repl`                | `repl`                   | 1                   |
+| `./app a b` (`krb build`) | `./app`, as it was typed | 3                   |

@@ -6,3 +6,5 @@ fun outer[T](x: T): T {
   let n: i64 = inner(x);
   return x;
 }
+
+fun main(): unit {}

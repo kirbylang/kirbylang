@@ -1,2 +1,2 @@
 let count = 10;
-@println(count + 2.5);
+fun main(): unit { @println(count + 2.5); }

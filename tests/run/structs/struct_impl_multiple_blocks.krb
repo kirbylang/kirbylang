@@ -16,7 +16,7 @@ impl Counter {
 
 var counter = Counter { count: 0 };
 
-counter.increment();
+fun main(): unit { counter.increment();
 counter.increment();
 
-@println(counter.get());
+@println(counter.get()); }

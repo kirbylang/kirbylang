@@ -4,7 +4,7 @@ struct StructB {}
 var instanceA = StructA {};
 var instanceB = StructB {};
 
-@println(@instanceOf(instanceA, StructA));
+fun main(): unit { @println(@instanceOf(instanceA, StructA));
 @println(@instanceOf(instanceB, StructB));
 @println(@instanceOf(instanceA, StructB));
-@println(@instanceOf(instanceB, StructA));
+@println(@instanceOf(instanceB, StructA)); }

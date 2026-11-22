@@ -1,1 +1,1 @@
-@arrLen();
+fun main(): unit { @arrLen(); }

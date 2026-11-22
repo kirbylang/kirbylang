@@ -1,1 +1,1 @@
-"Hello" + 10;
+fun main(): unit { "Hello" + 10; }

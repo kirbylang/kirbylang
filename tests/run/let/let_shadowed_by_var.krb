@@ -1,9 +1,9 @@
 let b = 10;
 
-{
+fun main(): unit { {
   var b = 20;
   b = 21;
   @println(b);
 }
 
-@println(b);
+@println(b); }

@@ -1,1 +1,1 @@
-@println(1i32 % 0i32);
+fun main(): unit { @println(1i32 % 0i32); }

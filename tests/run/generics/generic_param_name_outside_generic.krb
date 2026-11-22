@@ -1,3 +1,5 @@
 fun f(x: T): T {
   return x;
 }
+
+fun main(): unit {}

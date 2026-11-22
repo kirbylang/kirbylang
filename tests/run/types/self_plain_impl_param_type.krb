@@ -12,8 +12,8 @@ impl Point {
     pub fun equals(self, other: Self): bool = self.x == other.x and self.y == other.y;
 }
 
-var p = Point.origin();
+fun main(): unit { var p = Point.origin();
 var p2 = p.translate(3, 4);
 @println(p2.x);
 @println(p2.y);
-@println(p2.equals(p2));
+@println(p2.equals(p2)); }

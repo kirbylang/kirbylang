@@ -15,7 +15,7 @@ fun double(value: i64): i64 = value * 2;
 fun square(value: i64): i64 = value * value;
 fun gt(threshold: i64): fun (i64) => bool = fun (value) { value > threshold };
 
-let box_a = Box.new(5);
+fun main(): unit { let box_a = Box.new(5);
 @println(box_a.get());
 
 let box_b = box_a.map(double);
@@ -25,4 +25,4 @@ let box_c = box_b.map(square);
 @println(box_c.get());
 
 let box_d = box_c.map(gt(1000));
-@println(box_d.get());
+@println(box_d.get()); }

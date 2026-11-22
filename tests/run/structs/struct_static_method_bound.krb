@@ -6,6 +6,6 @@ impl Struct {
     }
 }
 
-var hello = Struct.hello;
+fun main(): unit { var hello = Struct.hello;
 
-hello();
+hello(); }

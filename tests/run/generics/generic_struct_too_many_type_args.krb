@@ -3,3 +3,5 @@ struct Box[T] {
 }
 
 let a: Box[f64, f64] = Box { value: 1 };
+
+fun main(): unit {}

@@ -1,6 +1,6 @@
 // @typeof has no signature yet, so calls to it are inferred as unknown and
 // checked at runtime instead.
 
-let kind: i64 = @typeof(3);
+fun main(): unit { let kind: i64 = @typeof(3);
 
-@println(kind);
+@println(kind); }

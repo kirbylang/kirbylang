@@ -1,35 +1,51 @@
 == <script> ==
-0000    1 OP_STRUCT           0 'Id'
-0002    | OP_DEFINE_GLOBAL    0 'Id'
-0004    | OP_GET_GLOBAL       0 'Id'
-0006    2 OP_NIL
-0007    | OP_FIELD            1 'value' private immutable
-0011    3 OP_POP
-0012    5 OP_GET_GLOBAL       0 'Id'
-0014    7 OP_CLOSURE          3 <fn new>
-0016    | OP_METHOD           2 'new'
-0018   10 OP_CLOSURE          5 <fn get>
-0020    | OP_METHOD           4 'get'
-0022   13 OP_CLOSURE          7 <fn map>
-0024    | OP_METHOD           6 'map'
-0026   16 OP_CLOSURE          9 <fn flat_map>
-0028    | OP_METHOD           8 'flat_map'
-0030   17 OP_POP
-0031   19 OP_GET_GLOBAL       0 'Id'
-0033    | OP_CONSTANT        10 '100'
-0035    | OP_INVOKE        (1 args)    2 'new'
-0038   20 OP_CLOSURE         11 <fn lambda0x1>
-0040    | OP_INVOKE        (1 args)    6 'map'
-0043   21 OP_CLOSURE         12 <fn lambda0x2>
-0045    | OP_INVOKE        (1 args)    8 'flat_map'
-0048    | OP_DEFINE_GLOBAL    1 'value'
-0050   23 OP_GET_GLOBAL      13 '@println'
-0052    | OP_GET_GLOBAL       1 'value'
-0054    | OP_INVOKE        (0 args)    4 'get'
-0057    | OP_CALL             1
-0059    | OP_POP
-0060   24 OP_NIL
-0061    | OP_RETURN
+0000   23 OP_CLOSURE          1 <fn main>
+0002    | OP_DEFINE_GLOBAL    0 'main'
+0004    1 OP_STRUCT           2 'Id'
+0006    | OP_DEFINE_GLOBAL    2 'Id'
+0008    | OP_GET_GLOBAL       2 'Id'
+0010    2 OP_NIL
+0011    | OP_FIELD            3 'value' private immutable
+0015    3 OP_POP
+0016    5 OP_GET_GLOBAL       2 'Id'
+0018    7 OP_CLOSURE          5 <fn new>
+0020    | OP_METHOD           4 'new'
+0022   10 OP_CLOSURE          7 <fn get>
+0024    | OP_METHOD           6 'get'
+0026   13 OP_CLOSURE          9 <fn map>
+0028    | OP_METHOD           8 'map'
+0030   16 OP_CLOSURE         11 <fn flat_map>
+0032    | OP_METHOD          10 'flat_map'
+0034   17 OP_POP
+0035   24 OP_NIL
+0036    | OP_RETURN
+== main ==
+0000   19 OP_GET_GLOBAL       0 'Id'
+0002    | OP_CONSTANT         2 '100'
+0004    | OP_INVOKE        (1 args)    1 'new'
+0007   20 OP_CLOSURE          4 <fn lambda0x1>
+0009    | OP_INVOKE        (1 args)    3 'map'
+0012   21 OP_CLOSURE          6 <fn lambda0x2>
+0014    | OP_INVOKE        (1 args)    5 'flat_map'
+0017   23 OP_GET_GLOBAL       7 '@println'
+0019    | OP_GET_LOCAL        1
+0021    | OP_INVOKE        (0 args)    8 'get'
+0024    | OP_CALL             1
+0026    | OP_POP
+0027    | OP_NIL
+0028    | OP_RETURN
+== lambda0x1 ==
+0000   20 OP_GET_LOCAL        1
+0002    | OP_GET_LOCAL        1
+0004    | OP_MULTIPLY
+0005    | OP_RETURN
+== lambda0x2 ==
+0000   21 OP_GET_GLOBAL       0 'Id'
+0002    | OP_GET_LOCAL        1
+0004    | OP_GET_LOCAL        1
+0006    | OP_MULTIPLY
+0007    | OP_INVOKE        (1 args)    1 'new'
+0010    | OP_RETURN
 == new ==
 0000    7 OP_GET_GLOBAL       0 'Id'
 0002    | OP_CONSTANT         1 'value'
@@ -54,15 +70,3 @@
 0004    | OP_GET_PROPERTY     0 'value'
 0006    | OP_CALL             1
 0008    | OP_RETURN
-== lambda0x1 ==
-0000   20 OP_GET_LOCAL        1
-0002    | OP_GET_LOCAL        1
-0004    | OP_MULTIPLY
-0005    | OP_RETURN
-== lambda0x2 ==
-0000   21 OP_GET_GLOBAL       0 'Id'
-0002    | OP_GET_LOCAL        1
-0004    | OP_GET_LOCAL        1
-0006    | OP_MULTIPLY
-0007    | OP_INVOKE        (1 args)    1 'new'
-0010    | OP_RETURN

@@ -1,7 +1,7 @@
-@println(@argc());
+fun main(): unit { @println(@argc());
 @println(@argv(0));
 @println(@argv(1));
 @println(@argv(2));
 @println(@argv(3));
 @println(@argv(4));
-@println(@argv(99));
+@println(@argv(99)); }

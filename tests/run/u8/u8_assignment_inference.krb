@@ -1,3 +1,3 @@
 var x: u8 = 1;
-x = 255;
-@println(x);
+fun main(): unit { x = 255;
+@println(x); }

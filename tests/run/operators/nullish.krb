@@ -1,11 +1,11 @@
-@println(nil ?? 123);
+fun main(): unit { @println(nil ?? 123);
 @println(nil ?? nil ?? 456);
 @println(789 ?? 000);
 
-fun should_not_call (): bool {
-    @println("Should not print");
-    return false;
-}
+
+
+
+
 
 @println("Hello World" ?? should_not_call());
 
@@ -15,12 +15,21 @@ if (false ?? should_not_call()) {
     @println("False condition met");
 }
 
-fun returns_nil (): unit {
-    return nil;
-}
+
+
+
 
 if (returns_nil() ?? true) {
     @println("True condition met");
 } else {
     @println("False condition met");
+} }
+
+fun should_not_call (): bool {
+    @println("Should not print");
+    return false;
+}
+
+fun returns_nil (): unit {
+    return nil;
 }

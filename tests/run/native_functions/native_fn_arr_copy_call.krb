@@ -1,6 +1,6 @@
 let a = [1, 2, 3];
-let b = @arrCopy(a);
+fun main(): unit { let b = @arrCopy(a);
 b[0] = 100;
 @println(a);
 @println(b);
-@println(@typeof(b));
+@println(@typeof(b)); }

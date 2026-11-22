@@ -1,1 +1,1 @@
-@println(@isBool(true, true));
+fun main(): unit { @println(@isBool(true, true)); }

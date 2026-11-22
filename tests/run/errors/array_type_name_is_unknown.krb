@@ -1,1 +1,3 @@
 let names: Array = [];
+
+fun main(): unit {}

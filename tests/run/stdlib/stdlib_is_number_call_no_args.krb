@@ -1,1 +1,1 @@
-@println(@isNumber());
+fun main(): unit { @println(@isNumber()); }

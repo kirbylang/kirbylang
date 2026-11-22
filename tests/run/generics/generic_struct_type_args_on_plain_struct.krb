@@ -3,3 +3,5 @@ struct Point {
 }
 
 let p: Point[f64] = Point { x: 1 };
+
+fun main(): unit {}

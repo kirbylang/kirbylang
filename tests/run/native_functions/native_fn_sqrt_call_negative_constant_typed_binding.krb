@@ -1,1 +1,1 @@
-let root: f64 = @sqrt(-9);
+fun main(): unit { let root: f64 = @sqrt(-9); }

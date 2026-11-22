@@ -1,4 +1,4 @@
-for (;;) {
+fun main(): unit { for (;;) {
     @println("done");
     break;
-}
+} }

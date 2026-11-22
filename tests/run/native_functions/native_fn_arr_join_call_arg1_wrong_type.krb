@@ -1,2 +1,2 @@
 let parts = ["a", "b"];
-@arrJoin(parts, nil);
+fun main(): unit { @arrJoin(parts, nil); }

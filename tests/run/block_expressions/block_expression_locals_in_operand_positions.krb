@@ -24,4 +24,4 @@ fun run(): i64 {
     sum
 }
 
-@println(run());
+fun main(): unit { @println(run()); }

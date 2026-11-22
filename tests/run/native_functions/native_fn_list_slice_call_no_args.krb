@@ -1,1 +1,1 @@
-@listSlice();
+fun main(): unit { @listSlice(); }

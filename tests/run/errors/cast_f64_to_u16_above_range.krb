@@ -1,1 +1,1 @@
-@println(65536.0 as u16);
+fun main(): unit { @println(65536.0 as u16); }

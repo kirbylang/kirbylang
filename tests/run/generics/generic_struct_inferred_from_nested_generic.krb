@@ -6,5 +6,5 @@ struct Node[T] {
 let leaf: Node[i64] = Node { value: 2, children: [] };
 let root = Node { value: 1, children: [leaf] };
 
-@println(root.value);
-@println(root.children[0].value);
+fun main(): unit { @println(root.value);
+@println(root.children[0].value); }

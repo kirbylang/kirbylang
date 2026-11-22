@@ -1,6 +1,6 @@
 let a = [10, 20, 30];
 let none: [i64; 0] = [];
-@println(@arrLen(a));
+fun main(): unit { @println(@arrLen(a));
 @println(@arrLen(none));
 @println(@arrLen(["a", "b"]));
-@println(@typeof(@arrLen(a)));
+@println(@typeof(@arrLen(a))); }

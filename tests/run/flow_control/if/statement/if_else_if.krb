@@ -1,6 +1,15 @@
-test(true, false);
+fun main(): unit { test(true, false);
 test(false, true);
-test(false, false);
+test(false, false); }
+
+
+
+
+
+
+
+
+
 
 fun test (a: bool, b: bool): unit {
     if (a) {

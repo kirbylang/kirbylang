@@ -10,6 +10,6 @@ impl Box {
     pub fun get(self): f64 = self.value;
 }
 
-let box = Box.new(100);
+fun main(): unit { let box = Box.new(100);
 
-@println(box.get());
+@println(box.get()); }

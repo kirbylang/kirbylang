@@ -1,4 +1,4 @@
 fun ceil(value: string): string = value + "!";
 
-@println(ceil("hello"));
-@println(@ceil(2.5));
+fun main(): unit { @println(ceil("hello"));
+@println(@ceil(2.5)); }

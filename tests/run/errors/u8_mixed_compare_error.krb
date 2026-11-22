@@ -1,3 +1,3 @@
 let a: u8 = 1;
 let b: f64 = 2;
-@println(a < b);
+fun main(): unit { @println(a < b); }

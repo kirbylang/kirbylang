@@ -1,1 +1,3 @@
 let x: i32 = 5f64;
+
+fun main(): unit {}

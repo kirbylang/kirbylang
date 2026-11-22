@@ -1,11 +1,16 @@
 == <script> ==
+0000    5 OP_CLOSURE          1 <fn main>
+0002    | OP_DEFINE_GLOBAL    0 'main'
+0004    6 OP_NIL
+0005    | OP_RETURN
+== main ==
 0000    2 OP_CONSTANT         0 '123'
 0002    3 OP_POP
 0003    5 OP_GET_GLOBAL       1 '@println'
 0005    | OP_GET_GLOBAL       2 'a'
 0007    | OP_CALL             1
 0009    | OP_POP
-0010    6 OP_NIL
+0010    | OP_NIL
 0011    | OP_RETURN
 Undefined variable 'a'.
-[line 5] in script
+[line 5] in main()

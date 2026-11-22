@@ -1,6 +1,6 @@
 var array: [string] = [];
 
-@listInsert(array, 0, "Hello");
+fun main(): unit { @listInsert(array, 0, "Hello");
 @listInsert(array, 1, "World");
-@listInsert(array, 10, "World");
+@listInsert(array, 10, "World"); }
 

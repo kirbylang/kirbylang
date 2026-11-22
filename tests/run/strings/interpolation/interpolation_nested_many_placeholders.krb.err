@@ -1,53 +1,58 @@
 == <script> ==
-0000    1 OP_CONSTANT         1 'Hello World'
-0002    | OP_DEFINE_GLOBAL    0 'a'
-0004    2 OP_CONSTANT         3 '123'
-0006    | OP_DEFINE_GLOBAL    2 'b'
-0008    3 OP_TRUE
-0009    | OP_DEFINE_GLOBAL    4 'c'
-0011    5 OP_GET_GLOBAL       5 '@println'
-0013    | OP_GET_GLOBAL       6 '@strConcat'
-0015    | OP_CONSTANT         7 'outer '
-0017    | OP_GET_GLOBAL       6 '@strConcat'
-0019    | OP_CONSTANT         8 'inner '
-0021    | OP_GET_GLOBAL       0 'a'
-0023    | OP_CONSTANT         9 ' and '
-0025    | OP_GET_GLOBAL      10 '@numberToString'
-0027    | OP_GET_GLOBAL       2 'b'
-0029    | OP_CALL             1
-0031    | OP_LIST             4
-0033    | OP_CALL             1
-0035    | OP_CONSTANT        11 ' then '
-0037    | OP_GET_GLOBAL      12 '@boolToString'
-0039    | OP_GET_GLOBAL       4 'c'
-0041    | OP_CALL             1
-0043    | OP_CONSTANT        13 ' end'
-0045    | OP_LIST             5
-0047    | OP_CALL             1
-0049    | OP_CALL             1
-0051    | OP_POP
-0052    6 OP_GET_GLOBAL       5 '@println'
-0054    | OP_GET_GLOBAL       6 '@strConcat'
-0056    | OP_CONSTANT        14 '1'
-0058    | OP_GET_GLOBAL       6 '@strConcat'
-0060    | OP_CONSTANT        15 '2'
-0062    | OP_GET_GLOBAL       6 '@strConcat'
-0064    | OP_CONSTANT        16 '3'
-0066    | OP_GET_GLOBAL       0 'a'
-0068    | OP_GET_GLOBAL      10 '@numberToString'
-0070    | OP_GET_GLOBAL       2 'b'
-0072    | OP_CALL             1
-0074    | OP_LIST             3
-0076    | OP_CALL             1
-0078    | OP_GET_GLOBAL      12 '@boolToString'
-0080    | OP_GET_GLOBAL       4 'c'
-0082    | OP_CALL             1
-0084    | OP_LIST             3
-0086    | OP_CALL             1
-0088    | OP_GET_GLOBAL       0 'a'
-0090    | OP_LIST             3
-0092    | OP_CALL             1
-0094    | OP_CALL             1
-0096    | OP_POP
-0097    7 OP_NIL
-0098    | OP_RETURN
+0000    6 OP_CLOSURE          1 <fn main>
+0002    | OP_DEFINE_GLOBAL    0 'main'
+0004    1 OP_CONSTANT         3 'Hello World'
+0006    | OP_DEFINE_GLOBAL    2 'a'
+0008    2 OP_CONSTANT         5 '123'
+0010    | OP_DEFINE_GLOBAL    4 'b'
+0012    3 OP_TRUE
+0013    | OP_DEFINE_GLOBAL    6 'c'
+0015    7 OP_NIL
+0016    | OP_RETURN
+== main ==
+0000    5 OP_GET_GLOBAL       0 '@println'
+0002    | OP_GET_GLOBAL       1 '@strConcat'
+0004    | OP_CONSTANT         2 'outer '
+0006    | OP_GET_GLOBAL       1 '@strConcat'
+0008    | OP_CONSTANT         3 'inner '
+0010    | OP_GET_GLOBAL       4 'a'
+0012    | OP_CONSTANT         5 ' and '
+0014    | OP_GET_GLOBAL       6 '@numberToString'
+0016    | OP_GET_GLOBAL       7 'b'
+0018    | OP_CALL             1
+0020    | OP_LIST             4
+0022    | OP_CALL             1
+0024    | OP_CONSTANT         8 ' then '
+0026    | OP_GET_GLOBAL       9 '@boolToString'
+0028    | OP_GET_GLOBAL      10 'c'
+0030    | OP_CALL             1
+0032    | OP_CONSTANT        11 ' end'
+0034    | OP_LIST             5
+0036    | OP_CALL             1
+0038    | OP_CALL             1
+0040    | OP_POP
+0041    6 OP_GET_GLOBAL       0 '@println'
+0043    | OP_GET_GLOBAL       1 '@strConcat'
+0045    | OP_CONSTANT        12 '1'
+0047    | OP_GET_GLOBAL       1 '@strConcat'
+0049    | OP_CONSTANT        13 '2'
+0051    | OP_GET_GLOBAL       1 '@strConcat'
+0053    | OP_CONSTANT        14 '3'
+0055    | OP_GET_GLOBAL       4 'a'
+0057    | OP_GET_GLOBAL       6 '@numberToString'
+0059    | OP_GET_GLOBAL       7 'b'
+0061    | OP_CALL             1
+0063    | OP_LIST             3
+0065    | OP_CALL             1
+0067    | OP_GET_GLOBAL       9 '@boolToString'
+0069    | OP_GET_GLOBAL      10 'c'
+0071    | OP_CALL             1
+0073    | OP_LIST             3
+0075    | OP_CALL             1
+0077    | OP_GET_GLOBAL       4 'a'
+0079    | OP_LIST             3
+0081    | OP_CALL             1
+0083    | OP_CALL             1
+0085    | OP_POP
+0086    | OP_NIL
+0087    | OP_RETURN

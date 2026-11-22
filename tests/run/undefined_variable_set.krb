@@ -1,1 +1,1 @@
-a = 123;
+fun main(): unit { a = 123; }

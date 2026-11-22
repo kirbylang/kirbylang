@@ -1,4 +1,4 @@
 var words: [string] = [];
-@listPush(words, "hello");
+fun main(): unit { @listPush(words, "hello");
 @println(words);
-@println(@listLen([]));
+@println(@listLen([])); }

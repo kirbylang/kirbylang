@@ -1,1 +1,1 @@
-@writeStringToFile("path/to/file/doesnt.exist", "Hello World");
+fun main(): unit { @writeStringToFile("path/to/file/doesnt.exist", "Hello World"); }

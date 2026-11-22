@@ -1,2 +1,2 @@
 let a = [1];
-@arrPush(a, 2);
+fun main(): unit { @arrPush(a, 2); }

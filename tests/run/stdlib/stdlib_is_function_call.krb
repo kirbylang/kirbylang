@@ -1,5 +1,5 @@
-@println(@isFunction(@ceil));
+fun main(): unit { @println(@isFunction(@ceil));
 @println(@isFunction(true));
 @println(@isFunction(12345));
 @println(@isFunction("Hello"));
-@println(@isFunction(nil));
+@println(@isFunction(nil)); }

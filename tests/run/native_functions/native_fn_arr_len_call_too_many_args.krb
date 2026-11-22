@@ -1,2 +1,2 @@
 let a = [1];
-@arrLen(a, a);
+fun main(): unit { @arrLen(a, a); }

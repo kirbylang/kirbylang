@@ -2,5 +2,5 @@ struct Grid {
   pub var cells: [i64; 2];
 }
 let g = Grid { cells: [4, 5] };
-g.cells[1] = 6;
-@println(g.cells);
+fun main(): unit { g.cells[1] = 6;
+@println(g.cells); }

@@ -1,4 +1,4 @@
 var a = [1, 2, 3];
-var b = a;
+fun main(): unit { var b = a;
 
-@println(@listEqual(a, b, nil));
+@println(@listEqual(a, b, nil)); }

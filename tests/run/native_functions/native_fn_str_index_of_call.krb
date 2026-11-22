@@ -1,7 +1,7 @@
-@println(@strIndexOf("hello world", "o"));
+fun main(): unit { @println(@strIndexOf("hello world", "o"));
 @println(@strIndexOf("hello world", "world"));
 @println(@strIndexOf("hello", "xyz"));
 @println(@strIndexOf("hello", ""));
 @println(@strIndexOf("", "a"));
 @println(@strIndexOf("", ""));
-@println(@strIndexOf("aaa", "aa"));
+@println(@strIndexOf("aaa", "aa")); }

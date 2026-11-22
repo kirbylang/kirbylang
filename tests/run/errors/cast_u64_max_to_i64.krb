@@ -1,2 +1,2 @@
 let max: u64 = 18446744073709551615;
-@println(max as i64);
+fun main(): unit { @println(max as i64); }

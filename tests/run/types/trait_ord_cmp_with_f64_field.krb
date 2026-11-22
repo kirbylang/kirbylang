@@ -14,6 +14,6 @@ impl Ord for Weight {
 let light = Weight { kg: 1.5 };
 let heavy = Weight { kg: 2.25 };
 
-@println(light.cmp(heavy));
+fun main(): unit { @println(light.cmp(heavy));
 @println(heavy.cmp(light));
-@println(light.cmp(light));
+@println(light.cmp(light)); }

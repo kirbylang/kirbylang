@@ -2,4 +2,4 @@ fun sum(x: u8, y: u8): u8 {
     return x + y;
 }
 
-@println(sum(123, 45));
+fun main(): unit { @println(sum(123, 45)); }

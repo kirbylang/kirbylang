@@ -1,23 +1,20 @@
 == <script> ==
 0000   25 OP_CLOSURE          1 <fn run>
 0002    | OP_DEFINE_GLOBAL    0 'run'
-0004    1 OP_STRUCT           2 'Box'
-0006    | OP_DEFINE_GLOBAL    2 'Box'
-0008    | OP_GET_GLOBAL       2 'Box'
-0010    2 OP_NIL
-0011    | OP_FIELD            3 'value' public mutable
-0015    3 OP_POP
-0016    5 OP_GET_GLOBAL       2 'Box'
-0018    8 OP_CLOSURE          5 <fn add>
-0020    | OP_METHOD           4 'add'
-0022    9 OP_POP
-0023   27 OP_GET_GLOBAL       6 '@println'
-0025    | OP_GET_GLOBAL       0 'run'
-0027    | OP_CALL             0
-0029    | OP_CALL             1
-0031    | OP_POP
-0032   28 OP_NIL
-0033    | OP_RETURN
+0004   27 OP_CLOSURE          3 <fn main>
+0006    | OP_DEFINE_GLOBAL    2 'main'
+0008    1 OP_STRUCT           4 'Box'
+0010    | OP_DEFINE_GLOBAL    4 'Box'
+0012    | OP_GET_GLOBAL       4 'Box'
+0014    2 OP_NIL
+0015    | OP_FIELD            5 'value' public mutable
+0019    3 OP_POP
+0020    5 OP_GET_GLOBAL       4 'Box'
+0022    8 OP_CLOSURE          7 <fn add>
+0024    | OP_METHOD           6 'add'
+0026    9 OP_POP
+0027   28 OP_NIL
+0028    | OP_RETURN
 == run ==
 0000   12 OP_GET_GLOBAL       0 'Box'
 0002    | OP_CONSTANT         1 'value'
@@ -74,6 +71,14 @@
 0097    | OP_POP
 0098   24 OP_GET_LOCAL        3
 0100    | OP_RETURN
+== main ==
+0000   27 OP_GET_GLOBAL       0 '@println'
+0002    | OP_GET_GLOBAL       1 'run'
+0004    | OP_CALL             0
+0006    | OP_CALL             1
+0008    | OP_POP
+0009    | OP_NIL
+0010    | OP_RETURN
 == add ==
 0000    7 OP_GET_LOCAL        0
 0002    | OP_GET_PROPERTY     0 'value'

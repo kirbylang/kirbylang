@@ -1,1 +1,1 @@
-@listEqual();
+fun main(): unit { @listEqual(); }

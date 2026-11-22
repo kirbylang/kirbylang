@@ -1,5 +1,5 @@
 let a: u8 = 5;
-@println(a + 2);
+fun main(): unit { @println(a + 2);
 @println(2 + a);
 @println(a * 3);
 @println(a - 1);
@@ -20,4 +20,4 @@ let x: f64 = 2.5;
 @println(x * 2);
 @println(1 + 2);
 @println(@typeof(1 + 2));
-@println(@typeof(b + 1));
+@println(@typeof(b + 1)); }

@@ -3,4 +3,4 @@ fun empty[T](): [T] {
   return xs;
 }
 
-let xs = empty();
+fun main(): unit { let xs = empty(); }

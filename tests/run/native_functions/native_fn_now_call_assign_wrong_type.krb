@@ -1,1 +1,1 @@
-let now: string = @now();
+fun main(): unit { let now: string = @now(); }

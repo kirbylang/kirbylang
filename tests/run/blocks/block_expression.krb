@@ -9,4 +9,4 @@ fun process(a: f64, b: f64): f64 = {
     result
 };
 
-@println(process(5, 20));
+fun main(): unit { @println(process(5, 20)); }

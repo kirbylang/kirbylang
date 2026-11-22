@@ -1,4 +1,4 @@
 let byte: u8 = 123;
 let top: u8 = 255;
-@println(byte);
-@println(top);
+fun main(): unit { @println(byte);
+@println(top); }

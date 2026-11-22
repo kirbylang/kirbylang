@@ -3,6 +3,6 @@ struct Box[T] {
 }
 
 let a = Box { value: 1 };
-a.value = 2;
+fun main(): unit { a.value = 2;
 @println(a.value);
-a.value = "three";
+a.value = "three"; }

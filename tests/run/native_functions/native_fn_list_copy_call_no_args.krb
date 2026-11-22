@@ -1,1 +1,1 @@
-@listCopy();
+fun main(): unit { @listCopy(); }

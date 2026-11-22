@@ -1,1 +1,3 @@
 let x: u16 = 65536;
+
+fun main(): unit {}

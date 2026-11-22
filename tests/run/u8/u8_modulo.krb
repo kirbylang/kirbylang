@@ -1,2 +1,2 @@
-@println(7u8 % 3u8);
-@println(250u8 % 7u8);
+fun main(): unit { @println(7u8 % 3u8);
+@println(250u8 % 7u8); }

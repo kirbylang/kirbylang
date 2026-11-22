@@ -1,1 +1,1 @@
-@writeStringToFile();
+fun main(): unit { @writeStringToFile(); }

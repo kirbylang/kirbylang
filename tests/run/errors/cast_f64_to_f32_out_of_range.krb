@@ -1,2 +1,2 @@
-let big: f64 = @pow(10, 300);
-@println(big as f32);
+fun main(): unit { let big: f64 = @pow(10, 300);
+@println(big as f32); }

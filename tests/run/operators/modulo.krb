@@ -1,2 +1,2 @@
-@println(10 % 2);
-@println(100 % 6);
+fun main(): unit { @println(10 % 2);
+@println(100 % 6); }

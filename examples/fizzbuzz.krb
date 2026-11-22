@@ -6,8 +6,10 @@ fun fizzbuzz(n: i64): string =
     else if (n % 5 == 0) "Buzz"
     else @numberToString(n);
 
-var limit = @parseInt(@prompt("limit: "));
+fun main(): unit {
+    var limit = @parseInt(@prompt("limit: "));
 
-for (var i = 1; i <= limit; i = i + 1) {
-    @println(fizzbuzz(i));
+    for (var i = 1; i <= limit; i = i + 1) {
+        @println(fizzbuzz(i));
+    }
 }

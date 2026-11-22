@@ -1,1 +1,1 @@
-@println(@getenv("DOESNTEXIST"));
+fun main(): unit { @println(@getenv("DOESNTEXIST")); }

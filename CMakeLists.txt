@@ -90,6 +90,7 @@ set(KIRBY_SOURCES
     src/stringset.c
     src/token_stream.c
     src/token.c
+    src/top_level.c
     src/typecheck.c
     src/types.c
     src/unit_bytes.c
@@ -759,6 +760,23 @@ if(BUILD_TESTS)
     add_test(
         NAME kirby-vm-invoke-unit-test
         COMMAND kirby-vm-invoke-unit-test
+    )
+
+    add_executable(kirby-vm-interpret-main-unit-test
+        unit/vm_interpret_main.c
+    )
+
+    target_link_libraries(kirby-vm-interpret-main-unit-test
+        PRIVATE
+            kirby_core_debug
+    )
+
+    configure_kirby_target(kirby-vm-interpret-main-unit-test)
+    enable_coverage(kirby-vm-interpret-main-unit-test)
+
+    add_test(
+        NAME kirby-vm-interpret-main-unit-test
+        COMMAND kirby-vm-interpret-main-unit-test
     )
 
     add_executable(kirby-vm-repl-immutability-unit-test

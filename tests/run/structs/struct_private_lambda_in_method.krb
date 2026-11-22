@@ -13,4 +13,4 @@ impl Counter {
     }
 }
 
-@println(Counter.new().read());
+fun main(): unit { @println(Counter.new().read()); }

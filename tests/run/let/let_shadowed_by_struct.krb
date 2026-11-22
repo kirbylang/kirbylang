@@ -1,3 +1,5 @@
 let value = 10;
 
 struct value {}
+
+fun main(): unit {}

@@ -1,6 +1,6 @@
 let a = [1, 2, 3];
 let b = [1, 2, 3];
 let c = [1, 2, 4];
-@println(@arrEqual(a, a));
+fun main(): unit { @println(@arrEqual(a, a));
 @println(@arrEqual(a, b));
-@println(@arrEqual(a, c));
+@println(@arrEqual(a, c)); }

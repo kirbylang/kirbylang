@@ -3,4 +3,4 @@ struct Counter {
     pub count: f64;
 }
 
-@println(Counter { count: 0 }.count());
+fun main(): unit { @println(Counter { count: 0 }.count()); }

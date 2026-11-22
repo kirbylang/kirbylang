@@ -1,46 +1,51 @@
 == <script> ==
-0000    1 OP_STRUCT           0 'Box'
-0002    | OP_DEFINE_GLOBAL    0 'Box'
-0004    | OP_GET_GLOBAL       0 'Box'
-0006    2 OP_NIL
-0007    | OP_FIELD            1 'value' public mutable
-0011    3 OP_POP
-0012    8 OP_STRUCT           2 'Holder'
-0014    | OP_DEFINE_GLOBAL    2 'Holder'
-0016    | OP_GET_GLOBAL       2 'Holder'
-0018    9 OP_NIL
-0019    | OP_FIELD            3 'items' public mutable
-0023   10 OP_POP
-0024   12 OP_GET_GLOBAL       2 'Holder'
-0026   13 OP_CLOSURE          5 <fn first>
-0028    | OP_METHOD           4 'first'
-0030   15 OP_CLOSURE          7 <fn boxed>
-0032    | OP_METHOD           6 'boxed'
-0034   16 OP_POP
-0035   18 OP_GET_GLOBAL       2 'Holder'
-0037    | OP_CONSTANT         3 'items'
-0039    | OP_CONSTANT         9 '7'
-0041    | OP_CONSTANT        10 '8'
-0043    | OP_LIST             2
-0045    | OP_STRUCT_INIT      1
-0047    | OP_DEFINE_GLOBAL    8 'h'
-0049   19 OP_GET_GLOBAL      11 '@println'
-0051    | OP_GET_GLOBAL       8 'h'
-0053    | OP_INVOKE        (0 args)    4 'first'
-0056    | OP_CONSTANT        12 '1'
-0058    | OP_ADD
-0059    | OP_CALL             1
-0061    | OP_POP
-0062   20 OP_GET_GLOBAL      11 '@println'
-0064    | OP_GET_GLOBAL       8 'h'
-0066    | OP_INVOKE        (0 args)    6 'boxed'
-0069    | OP_GET_PROPERTY     1 'value'
-0071    | OP_CONSTANT        13 '2'
-0073    | OP_ADD
-0074    | OP_CALL             1
-0076    | OP_POP
-0077   21 OP_NIL
-0078    | OP_RETURN
+0000   20 OP_CLOSURE          1 <fn main>
+0002    | OP_DEFINE_GLOBAL    0 'main'
+0004    1 OP_STRUCT           2 'Box'
+0006    | OP_DEFINE_GLOBAL    2 'Box'
+0008    | OP_GET_GLOBAL       2 'Box'
+0010    2 OP_NIL
+0011    | OP_FIELD            3 'value' public mutable
+0015    3 OP_POP
+0016    8 OP_STRUCT           4 'Holder'
+0018    | OP_DEFINE_GLOBAL    4 'Holder'
+0020    | OP_GET_GLOBAL       4 'Holder'
+0022    9 OP_NIL
+0023    | OP_FIELD            5 'items' public mutable
+0027   10 OP_POP
+0028   12 OP_GET_GLOBAL       4 'Holder'
+0030   13 OP_CLOSURE          7 <fn first>
+0032    | OP_METHOD           6 'first'
+0034   15 OP_CLOSURE          9 <fn boxed>
+0036    | OP_METHOD           8 'boxed'
+0038   16 OP_POP
+0039   18 OP_GET_GLOBAL       4 'Holder'
+0041    | OP_CONSTANT         5 'items'
+0043    | OP_CONSTANT        11 '7'
+0045    | OP_CONSTANT        12 '8'
+0047    | OP_LIST             2
+0049    | OP_STRUCT_INIT      1
+0051    | OP_DEFINE_GLOBAL   10 'h'
+0053   21 OP_NIL
+0054    | OP_RETURN
+== main ==
+0000   19 OP_GET_GLOBAL       0 '@println'
+0002    | OP_GET_GLOBAL       1 'h'
+0004    | OP_INVOKE        (0 args)    2 'first'
+0007    | OP_CONSTANT         3 '1'
+0009    | OP_ADD
+0010    | OP_CALL             1
+0012    | OP_POP
+0013   20 OP_GET_GLOBAL       0 '@println'
+0015    | OP_GET_GLOBAL       1 'h'
+0017    | OP_INVOKE        (0 args)    4 'boxed'
+0020    | OP_GET_PROPERTY     5 'value'
+0022    | OP_CONSTANT         6 '2'
+0024    | OP_ADD
+0025    | OP_CALL             1
+0027    | OP_POP
+0028    | OP_NIL
+0029    | OP_RETURN
 == first ==
 0000   13 OP_GET_LOCAL        0
 0002    | OP_GET_PROPERTY     0 'items'

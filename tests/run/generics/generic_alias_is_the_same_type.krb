@@ -7,3 +7,5 @@ type Wrapped[T] = Box[T];
 let a: Wrapped[i64] = Box { value: 5 };
 let b: Box[i64] = a;
 let c: Wrapped[string] = a;
+
+fun main(): unit {}

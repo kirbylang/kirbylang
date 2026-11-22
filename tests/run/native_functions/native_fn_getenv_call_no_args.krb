@@ -1,1 +1,1 @@
-@getenv();
+fun main(): unit { @getenv(); }

@@ -1,5 +1,5 @@
 let name = "World";
 let n = 42;
 
-@println($"{name}");
-@println($"{n}");
+fun main(): unit { @println($"{name}");
+@println($"{n}"); }

@@ -7,5 +7,5 @@ impl Struct {
 
 var instance = Struct {};
 
-@println(instance.hello);
-@println(instance.world);
+fun main(): unit { @println(instance.hello);
+@println(instance.world); }

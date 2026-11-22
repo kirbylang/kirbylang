@@ -1,4 +1,4 @@
 let a: i64 = 9223372036854775807;
-@println(-a);
+fun main(): unit { @println(-a);
 let nearMin: i64 = -9223372036854775807;
-@println(-nearMin);
+@println(-nearMin); }

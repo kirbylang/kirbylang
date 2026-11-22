@@ -1,21 +1,26 @@
 == <script> ==
-0000    1 OP_STRUCT           0 'Greeter'
-0002    | OP_DEFINE_GLOBAL    0 'Greeter'
-0004    | OP_GET_GLOBAL       0 'Greeter'
-0006    | OP_POP
-0007    3 OP_GET_GLOBAL       0 'Greeter'
-0009    6 OP_CLOSURE          2 <fn greet>
-0011    | OP_METHOD           1 'greet'
-0013    7 OP_POP
-0014    9 OP_GET_GLOBAL       0 'Greeter'
-0016    | OP_STRUCT_INIT      0
-0018    | OP_DEFINE_GLOBAL    3 'greeter'
-0020   11 OP_GET_GLOBAL       3 'greeter'
-0022    | OP_CONSTANT         4 'World'
-0024    | OP_INVOKE        (1 args)    1 'greet'
-0027    | OP_POP
-0028   12 OP_NIL
-0029    | OP_RETURN
+0000   11 OP_CLOSURE          1 <fn main>
+0002    | OP_DEFINE_GLOBAL    0 'main'
+0004    1 OP_STRUCT           2 'Greeter'
+0006    | OP_DEFINE_GLOBAL    2 'Greeter'
+0008    | OP_GET_GLOBAL       2 'Greeter'
+0010    | OP_POP
+0011    3 OP_GET_GLOBAL       2 'Greeter'
+0013    6 OP_CLOSURE          4 <fn greet>
+0015    | OP_METHOD           3 'greet'
+0017    7 OP_POP
+0018    9 OP_GET_GLOBAL       2 'Greeter'
+0020    | OP_STRUCT_INIT      0
+0022    | OP_DEFINE_GLOBAL    5 'greeter'
+0024   12 OP_NIL
+0025    | OP_RETURN
+== main ==
+0000   11 OP_GET_GLOBAL       0 'greeter'
+0002    | OP_CONSTANT         2 'World'
+0004    | OP_INVOKE        (1 args)    1 'greet'
+0007    | OP_POP
+0008    | OP_NIL
+0009    | OP_RETURN
 == greet ==
 0000    5 OP_GET_GLOBAL       0 '@println'
 0002    | OP_CONSTANT         1 'Hello '

@@ -1,1 +1,1 @@
-var value: Self;
+fun main(): unit { var value: Self; }

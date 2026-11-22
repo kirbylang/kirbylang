@@ -15,7 +15,7 @@ let g: fun (string) => string = id;
 let h: fun (i64, string) => i64 = first;
 let k: fun ([bool]) => bool = head;
 
-@println(f(5));
+fun main(): unit { @println(f(5));
 @println(g("hi"));
 @println(h(1, "one"));
-@println(k([true, false]));
+@println(k([true, false])); }

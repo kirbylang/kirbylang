@@ -1,7 +1,7 @@
 let flag = true;
 let x: f64 = 1.5;
 
-let a = if (flag) x else 2;
+fun main(): unit { let a = if (flag) x else 2;
 @println(@typeof(a));
 
 let b = if (flag) 2 else x;
@@ -9,4 +9,4 @@ let b = if (flag) 2 else x;
 
 let c = if (flag) 1 else 0.5;
 @println(c);
-@println(@typeof(c));
+@println(@typeof(c)); }

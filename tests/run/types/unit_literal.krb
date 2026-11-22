@@ -1,15 +1,21 @@
 let nothing: unit = ();
 
-@println(nothing);
+fun main(): unit { @println(nothing);
+
+
+
+
+
+doNothing();
+
+
+
+alsoNothing();
+
+@println(() == ()); }
 
 fun doNothing(): unit {
     return ();
 }
 
-doNothing();
-
 fun alsoNothing(): unit = ();
-
-alsoNothing();
-
-@println(() == ());

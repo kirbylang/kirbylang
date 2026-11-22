@@ -122,5 +122,5 @@ let identifier97 = 97;
 let identifier98 = 98;
 let identifier99 = 99;
 
-let p = Point.new(identifier0, identifier99);
-@println(p.toString());
+fun main(): unit { let p = Point.new(identifier0, identifier99);
+@println(p.toString()); }

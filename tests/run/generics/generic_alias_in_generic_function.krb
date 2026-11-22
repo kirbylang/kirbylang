@@ -8,4 +8,4 @@ fun wrap[T](x: T): Wrapped[T] = Box { value: x };
 
 fun unwrap[T](w: Wrapped[T]): T = w.value;
 
-@println(unwrap(wrap(41)) + 1);
+fun main(): unit { @println(unwrap(wrap(41)) + 1); }

@@ -39,7 +39,7 @@ krb config examples
 
 ## Run
 
-By default `krb run` (no being file passed) will run what's configured at `krb config bin`.
+By default `krb run` (no being file passed) will run what's configured at `krb config bin`. Like any file that is run, it needs a `fun main(): unit`.
 
 ```
 krb run

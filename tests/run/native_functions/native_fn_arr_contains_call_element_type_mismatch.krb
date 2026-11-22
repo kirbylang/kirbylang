@@ -1,2 +1,2 @@
 let a = [1, 2];
-@arrContains(a, "one");
+fun main(): unit { @arrContains(a, "one"); }

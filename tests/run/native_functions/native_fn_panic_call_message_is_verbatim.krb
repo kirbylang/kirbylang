@@ -1,1 +1,1 @@
-@panic("50%s off, 100%d done");
+fun main(): unit { @panic("50%s off, 100%d done"); }

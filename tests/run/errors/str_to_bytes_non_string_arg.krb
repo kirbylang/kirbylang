@@ -1,2 +1,2 @@
 // @strToBytes takes a string; a u8 argument is a compile-time type error.
-let bytes: [u8] = @strToBytes(5u8);
+fun main(): unit { let bytes: [u8] = @strToBytes(5u8); }

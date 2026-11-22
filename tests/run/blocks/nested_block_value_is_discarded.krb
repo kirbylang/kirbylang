@@ -8,6 +8,6 @@ fun g(condition: bool): f64 {
   3
 }
 
-@println(f());
+fun main(): unit { @println(f());
 @println(g(true));
-@println(g(false));
+@println(g(false)); }

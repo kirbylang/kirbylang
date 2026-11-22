@@ -1,6 +1,6 @@
-@println(@strReplace("a-b-c", "-", "+"));
+fun main(): unit { @println(@strReplace("a-b-c", "-", "+"));
 @println(@strReplace("hello", "l", "L"));
 @println(@strReplace("hello", "xyz", "!"));
 @println(@strReplace("hello", "hello", ""));
 @println(@strReplace("abc", "b", "1234"));
-@println(@strReplace("", "a", "b"));
+@println(@strReplace("", "a", "b")); }

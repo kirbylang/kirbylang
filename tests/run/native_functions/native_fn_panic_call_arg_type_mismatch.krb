@@ -1,1 +1,1 @@
-@panic(1);
+fun main(): unit { @panic(1); }

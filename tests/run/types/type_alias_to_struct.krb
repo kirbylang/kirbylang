@@ -8,5 +8,5 @@ impl Point {
   pub fun new(x: f64): Coord = Point { x: x };
 }
 
-let p: Coord = Point.new(3);
-@println(p.x);
+fun main(): unit { let p: Coord = Point.new(3);
+@println(p.x); }

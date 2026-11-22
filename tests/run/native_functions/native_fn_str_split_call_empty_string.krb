@@ -1,2 +1,2 @@
-@println(@listLen(@strSplit("", ",")));
-@println(@strSplit("", ",")[0] == "");
+fun main(): unit { @println(@listLen(@strSplit("", ",")));
+@println(@strSplit("", ",")[0] == ""); }

@@ -1,1 +1,1 @@
-@boolToString(1);
+fun main(): unit { @boolToString(1); }

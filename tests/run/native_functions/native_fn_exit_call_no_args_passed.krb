@@ -1,1 +1,1 @@
-@exit();
+fun main(): unit { @exit(); }

@@ -23,8 +23,8 @@ fun returnsUnit(): unit {
     @println("nothing to return");
 }
 
-@println(branches(true));
+fun main(): unit { @println(branches(true));
 @println(branches(false));
 @println(trailingValue());
 @println(afterALoop());
-returnsUnit();
+returnsUnit(); }

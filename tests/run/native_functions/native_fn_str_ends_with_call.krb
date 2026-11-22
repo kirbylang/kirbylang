@@ -1,5 +1,5 @@
-@println(@strEndsWith("hello", "lo"));
+fun main(): unit { @println(@strEndsWith("hello", "lo"));
 @println(@strEndsWith("hello", "he"));
 @println(@strEndsWith("hello", ""));
 @println(@strEndsWith("lo", "hello"));
-@println(@strEndsWith("hello", "hello"));
+@println(@strEndsWith("hello", "hello")); }

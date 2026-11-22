@@ -2,3 +2,5 @@ trait Constructible {
     fun make(): Self;
 }
 
+
+fun main(): unit {}

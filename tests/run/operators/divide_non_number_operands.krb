@@ -1,1 +1,1 @@
-@println("Hello" / 2);
+fun main(): unit { @println("Hello" / 2); }

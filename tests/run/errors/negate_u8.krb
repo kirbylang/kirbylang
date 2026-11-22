@@ -1,2 +1,2 @@
 let x: u8 = 5;
-@println(-x);
+fun main(): unit { @println(-x); }

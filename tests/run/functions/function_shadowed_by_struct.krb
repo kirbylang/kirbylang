@@ -1,3 +1,5 @@
 fun fn (): unit {}
 
 struct fn {}
+
+fun main(): unit {}

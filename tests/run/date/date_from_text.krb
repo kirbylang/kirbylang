@@ -1,1 +1,1 @@
-Date.from("abc-def-ghi h:m:s");
+fun main(): unit { Date.from("abc-def-ghi h:m:s"); }

@@ -1,1 +1,1 @@
-@println(@strIsEmpty(true));
+fun main(): unit { @println(@strIsEmpty(true)); }

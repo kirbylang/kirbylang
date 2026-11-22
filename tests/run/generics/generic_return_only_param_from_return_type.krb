@@ -6,4 +6,4 @@ fun names(): [string] {
 
 fun numbers(): [i64] = empty();
 
-@println(@listLen(names()) + @listLen(numbers()));
+fun main(): unit { @println(@listLen(names()) + @listLen(numbers())); }

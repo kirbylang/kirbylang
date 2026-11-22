@@ -1,8 +1,8 @@
-var x = {
+fun main(): unit { var x = {
   if (true) {
     @println("hi");
   };
   
   5
 };
-@println(x);
+@println(x); }

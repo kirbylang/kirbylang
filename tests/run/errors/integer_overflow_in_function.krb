@@ -4,5 +4,5 @@ fun factorial(n: i64): i64 {
     n * factorial(n - 1)
 }
 
-@println(factorial(20));
-@println(factorial(21));
+fun main(): unit { @println(factorial(20));
+@println(factorial(21)); }

@@ -6,3 +6,5 @@ impl Display for Point {
     pub fun toString(self): string = "Point";
     pub fun extra(self): f64 = self.x;
 }
+
+fun main(): unit {}

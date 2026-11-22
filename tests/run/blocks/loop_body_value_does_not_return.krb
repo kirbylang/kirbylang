@@ -8,4 +8,4 @@ fun sumBelow(n: i64): i64 {
   total
 }
 
-@println(sumBelow(5));
+fun main(): unit { @println(sumBelow(5)); }

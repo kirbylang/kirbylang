@@ -1,1 +1,1 @@
-@println(@max("x", 3));
+fun main(): unit { @println(@max("x", 3)); }

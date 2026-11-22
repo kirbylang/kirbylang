@@ -1,6 +1,6 @@
 var parts: [string] = ["Hello", "World"];
 
-@println(@listJoin(parts, " "));
+fun main(): unit { @println(@listJoin(parts, " "));
 @println(@listJoin(parts, ", "));
 @println(@listJoin(parts, ""));
-@println(parts);
+@println(parts); }

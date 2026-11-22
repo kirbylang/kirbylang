@@ -1,2 +1,2 @@
-@println(true and true);
-@println(true && true);
+fun main(): unit { @println(true and true);
+@println(true && true); }

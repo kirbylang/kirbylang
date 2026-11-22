@@ -8,6 +8,6 @@ impl Account {
     };
 }
 
-var a = Account.new(100);
+fun main(): unit { var a = Account.new(100);
 
-@println(a.balance);
+@println(a.balance); }

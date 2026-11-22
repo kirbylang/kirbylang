@@ -6,5 +6,5 @@ struct Pair[A, B] {
 type Flipped[A, B] = Pair[B, A];
 
 let p: Flipped[string, i64] = Pair { first: 1, second: "x" };
-@println(p.first + 1);
-@println(p.second + "y");
+fun main(): unit { @println(p.first + 1);
+@println(p.second + "y"); }

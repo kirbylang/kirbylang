@@ -15,5 +15,5 @@ fun afterLocals(): i64 {
     x + y
 }
 
-@println(nested());
-@println(afterLocals());
+fun main(): unit { @println(nested());
+@println(afterLocals()); }

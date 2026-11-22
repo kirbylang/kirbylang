@@ -3,3 +3,5 @@ struct Account {
 }
 
 var a = Account { balance: 100 };
+
+fun main(): unit {}

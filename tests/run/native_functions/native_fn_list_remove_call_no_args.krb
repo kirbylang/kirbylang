@@ -1,1 +1,1 @@
-@listRemove();
+fun main(): unit { @listRemove(); }

@@ -1,0 +1,23 @@
+struct Zoo { pub var animals: f64; }
+
+impl Zoo {
+  pub fun init(): Zoo = Zoo { animals: 1 };
+}
+
+fun sum[T](a: T, b: T): T = a + b;
+
+var count = 0;
+let names = ["a", "b"];
+
+var start = @clock();
+let limit = @parseInt("5");
+var zoo = Zoo.init();
+var zoo_init = Zoo { animals: sum(limit, 1) };
+var first = names[0];
+var copy = count;
+var later = tail;
+let tail = 1;
+let times = [start, @clock()];
+var either = nil ?? @clock();
+
+fun main(): unit {}

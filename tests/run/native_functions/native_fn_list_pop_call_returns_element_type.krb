@@ -1,2 +1,2 @@
 let numbers: [i64] = [1, 2];
-let last: f64 = @listPop(numbers);
+fun main(): unit { let last: f64 = @listPop(numbers); }

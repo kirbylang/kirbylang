@@ -1,1 +1,1 @@
-@println(@fileExists(false));
+fun main(): unit { @println(@fileExists(false)); }

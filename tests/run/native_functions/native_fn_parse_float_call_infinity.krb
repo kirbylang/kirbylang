@@ -1,1 +1,1 @@
-@println(@parseFloat("inf"));
+fun main(): unit { @println(@parseFloat("inf")); }
