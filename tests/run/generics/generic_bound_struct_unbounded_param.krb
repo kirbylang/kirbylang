@@ -1,0 +1,7 @@
+struct Labeled[T: Display] {
+  pub var value: T;
+}
+
+fun wrap[T](x: T): Labeled[T] = Labeled { value: x };
+
+fun main(): unit {}

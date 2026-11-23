@@ -793,6 +793,10 @@ bool typeStructIsGeneric(Type *type) {
          type->as.struct_.genericParamCount > 0;
 }
 
+void typeStructSetGenericParams(Type *type, Type **params) {
+  type->as.struct_.genericParams = params;
+}
+
 Type *typeStructInstance(Type *base, Type **typeArgs, int typeArgCount) {
   Type *type = allocType(TYPE_STRUCT);
   type->as.struct_.name = base->as.struct_.name;

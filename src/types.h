@@ -61,6 +61,9 @@ struct Type {
       int implementedTraitCount;
       // How many type parameters `struct Box[T]` declares. 0 if none.
       int genericParamCount;
+      // The declaration's parameter types, in order, which hold the bounds of
+      // `struct Box[T: Display]`. NULL until they are set.
+      Type **genericParams;
       // For an instance such as `Box[f64]`: the declaration it comes from and
       // the type arguments. An instance holds no members of its own. Looking
       // one up finds it on the declaration and substitutes the arguments.
@@ -270,6 +273,9 @@ void typeStructSetGenericParamCount(Type *type, int count);
 // True for a struct declared with type parameters, such as `Box` in
 // `struct Box[T]`, and false for an instance such as `Box[f64]`.
 bool typeStructIsGeneric(Type *type);
+
+// Records the parameter types of a generic struct's declaration.
+void typeStructSetGenericParams(Type *type, Type **params);
 
 // `Box[f64]`: the declaration `base` with these type arguments.
 Type *typeStructInstance(Type *base, Type **typeArgs, int typeArgCount);

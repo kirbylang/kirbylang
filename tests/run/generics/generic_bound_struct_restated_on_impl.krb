@@ -1,0 +1,7 @@
+struct Labeled[T: Display] {
+  pub var value: T;
+}
+
+impl Labeled[T: Display] {
+  pub fun get(self): T = self.value;
+}

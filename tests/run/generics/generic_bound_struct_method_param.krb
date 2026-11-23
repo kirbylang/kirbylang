@@ -1,0 +1,9 @@
+struct Labeled[T: Display] {
+  pub var value: T;
+}
+
+impl Labeled[T] {
+  pub fun map[U](self, f: fun (T) => U): Self[U] = Self { value: f(self.value) };
+}
+
+fun main(): unit {}

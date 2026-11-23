@@ -482,6 +482,16 @@ fun describe[T: Display + Eq](a: T, b: T): string {
 }
 ```
 
-Only functions and methods can have bounds for now.
+Structs and type aliases can have bounds too. An `impl` takes the bounds of its struct, so you don't write them again.
+
+```
+struct Labeled[T: Display] {
+    pub var value: T;
+}
+
+impl Labeled[T] {
+    pub fun label(self): string = $"<{self.value}>";
+}
+```
 
 Calling a static trait method through a bound, like `T.default()`, isn't supported yet.

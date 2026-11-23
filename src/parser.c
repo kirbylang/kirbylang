@@ -1544,9 +1544,9 @@ static AstNode *structDeclaration(Parser *p) {
   int line = name.line;
 
   Token genericParamBuf[256];
+  GenericBounds genericBoundBuf[256];
   int genericParamCount = parseGenericParamList(
-      p, genericParamBuf, /*boundBuf=*/NULL,
-      "Bounds on struct type parameters aren't supported yet.");
+      p, genericParamBuf, genericBoundBuf, /*noBoundsMessage=*/NULL);
 
   consume(p, TOKEN_LEFT_BRACE, "Expect '{' before struct body.");
 
@@ -1621,8 +1621,11 @@ static AstNode *structDeclaration(Parser *p) {
         (Token *)astAllocRaw(genericParamCount * sizeof(Token));
     memcpy(genericParams, genericParamBuf, genericParamCount * sizeof(Token));
     node->as.struct_.genericParams = genericParams;
+    node->as.struct_.genericBounds =
+        copyGenericBounds(genericBoundBuf, genericParamCount);
   } else {
     node->as.struct_.genericParams = NULL;
+    node->as.struct_.genericBounds = NULL;
   }
   node->as.struct_.genericParamCount = genericParamCount;
 
@@ -1640,7 +1643,7 @@ static AstNode *implDeclaration(Parser *p) {
   Token genericParamBuf[256];
   int genericParamCount = parseGenericParamList(
       p, genericParamBuf, /*boundBuf=*/NULL,
-      "Bounds on impl type parameters aren't supported yet.");
+      "An impl's type parameters take their bounds from the struct.");
 
   bool hasTraitName = false;
   Token traitName = name;
@@ -1797,9 +1800,9 @@ static AstNode *typeAliasDeclaration(Parser *p) {
   int line = name.line;
 
   Token paramBuf[256];
-  int paramCount = parseGenericParamList(
-      p, paramBuf, /*boundBuf=*/NULL,
-      "Bounds on type alias parameters aren't supported yet.");
+  GenericBounds boundBuf[256];
+  int paramCount =
+      parseGenericParamList(p, paramBuf, boundBuf, /*noBoundsMessage=*/NULL);
 
   consume(p, TOKEN_EQUAL, "Expect '=' after type alias name.");
   AstNode *target = parseType(p);
@@ -1814,6 +1817,7 @@ static AstNode *typeAliasDeclaration(Parser *p) {
   AstNode *node = astAlloc(NODE_TYPE_ALIAS, line);
   node->as.typeAlias.name = name;
   node->as.typeAlias.genericParams = genericParams;
+  node->as.typeAlias.genericBounds = copyGenericBounds(boundBuf, paramCount);
   node->as.typeAlias.genericParamCount = paramCount;
   node->as.typeAlias.target = target;
   return node;

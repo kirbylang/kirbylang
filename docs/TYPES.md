@@ -368,8 +368,8 @@ trait Ord: Eq {
 ### Trait Bounds
 
 A type parameter can name a trait that its type must implement. The trait is
-written after a colon, and `+` asks for more than one. Only functions and
-methods can have bounds for now.
+written after a colon, and `+` asks for more than one. Functions, methods,
+structs and type aliases can have bounds.
 
 ```
 trait Shape {
@@ -439,18 +439,43 @@ listed. If two of the traits have a method of the same name the call is
 ambiguous: `Method 'label' is in both Named and Titled.` A call that fills the
 parameter with a type missing one of them names that trait.
 
+#### Structs and type aliases
+
+A struct's type parameter can have a bound. Every use of the struct is checked,
+whether it is written with a type (`Labeled[Rock]`), made by a literal
+(`Labeled { value: rock }`), or made by a static method (`Labeled.new(rock)`).
+
+```
+struct Labeled[T: Display] {
+    pub var value: T;
+}
+
+impl Labeled[T] {
+    pub fun label(self): string = $"<{self.value}>";
+}
+
+let a: Labeled[Rock] = ...;   // error: Rock doesn't implement Display, required by Labeled.
+```
+
+An `impl` takes the bounds of its struct, so `impl Labeled[T]` has `T: Display`
+and the methods can use it. Writing a bound on an `impl` is an error: `An impl's
+type parameters take their bounds from the struct.`
+
+A type alias can have bounds too, and they are checked where the alias is used.
+An alias or function that passes its own parameter to a bounded struct needs the
+same bound: `type Plain[T] = Labeled[T];` is an error, but
+`type Plain[T: Display] = Labeled[T];` is fine.
+
 #### Limitations
 
 - The trait has to exist, and a struct name isn't a trait:
   `Unknown trait 'Nope'.` A trait can be declared after the function that uses it.
-- Only functions and methods can have bounds for now. On a `struct`, `impl` or
-  `type` parameter they are an error: `Bounds on struct type parameters aren't
-  supported yet.`
 - A primitive can't implement a trait yet, so `i64`, `string` and the other
   primitives can't fill a bounded parameter.
 - A static trait method can't be called through a bound. `T.default()` is an
   error: `Can't call a static method on type parameter 'T'.` This needs a
   separate copy of the function for each type, which is not implemented.
+- A bound can't be added to an `impl` beyond its struct's bounds.
 - A bounded generic function used as a value with no expected type, such as
   `let f = describe;`, has no type, so its bounds aren't checked. See
   [Generic Functions](#generic-functions).
@@ -585,8 +610,7 @@ implement `Eq` -- see [Traits](#traits).
 
 - Some native functions have no signature yet, so calls to them aren't
   checked
-- A generic parameter can have bounds on functions and methods only.
-  A value of a generic type can't be added or indexed, and has methods only
+- A value of a generic type can't be added or indexed, and has methods only
   through its bounds -- see [Trait Bounds](#trait-bounds)
 - A call can't be given type arguments (`parse[f64](s)`)
 - Lists have no type annotation syntax

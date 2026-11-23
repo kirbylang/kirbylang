@@ -419,6 +419,7 @@ static void printNode(StrBuf *sb, AstNode *node) {
         if (i > 0)
           sb_append(sb, " ");
         sb_append_token(sb, node->as.struct_.genericParams[i]);
+        appendGenericBounds(sb, &node->as.struct_.genericBounds[i]);
       }
       sb_append(sb, "]");
     }
@@ -610,6 +611,7 @@ static void printNode(StrBuf *sb, AstNode *node) {
         if (i > 0)
           sb_append(sb, " ");
         sb_append_token(sb, node->as.typeAlias.genericParams[i]);
+        appendGenericBounds(sb, &node->as.typeAlias.genericBounds[i]);
       }
       sb_append(sb, "]");
     }

@@ -235,6 +235,8 @@ typedef struct {
    */
   Token *genericParams;
   int genericParamCount;
+  /** The traits each parameter must implement. NULL when there are none. */
+  GenericBounds *genericBounds;
   /**
    * The type expression on the right of `=`.
    */
@@ -366,8 +368,9 @@ typedef struct {
 } GenericBounds;
 ```
 
-`krb parse` prints a bound after its parameter, as `T:Display+Eq`. Only functions have
-bounds for now.
+`krb parse` prints a bound after its parameter, as `T:Display+Eq`. Functions,
+structs and type aliases have bounds. An `impl` doesn't: it takes them from its
+struct.
 
 ### Functions
 
@@ -428,6 +431,8 @@ typedef struct {
    */
   Token *genericParams;
   int genericParamCount;
+  /** The traits each parameter must implement. NULL when there are none. */
+  GenericBounds *genericBounds;
   VarDeclNode *fields;
   int fieldCount;
   int endLine;

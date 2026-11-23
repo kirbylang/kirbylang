@@ -1,3 +1,0 @@
-struct Wrapper[T: Display] {
-  pub var inner: T;
-}

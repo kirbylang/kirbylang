@@ -1,1 +1,1 @@
-[line 5] Error at ':': Bounds on impl type parameters aren't supported yet.
+[line 5] Error at ':': An impl's type parameters take their bounds from the struct.

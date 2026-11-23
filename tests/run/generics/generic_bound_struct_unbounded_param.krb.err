@@ -1,0 +1,2 @@
+[line 5] Error at 'Labeled': T doesn't implement Display, required by Labeled.
+[line 5] Error: T doesn't implement Display, required by Labeled.

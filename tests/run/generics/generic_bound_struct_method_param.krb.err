@@ -1,0 +1,2 @@
+[line 6] Error at 'Self': U doesn't implement Display, required by Labeled.
+[line 6] Error: U doesn't implement Display, required by Labeled.

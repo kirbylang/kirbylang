@@ -1,0 +1,16 @@
+struct Money {
+  pub var cents: i64;
+}
+
+impl Display for Money {
+  fun toString(self): string = $"${self.cents}";
+}
+
+type Showable[T: Display] = [T];
+
+fun first[T: Display](items: Showable[T]): string = items[0].toString();
+
+fun main(): unit {
+  let items: Showable[Money] = [Money { cents: 3 }];
+  @println(first(items));
+}

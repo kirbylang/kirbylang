@@ -1,0 +1,5 @@
+struct Labeled[T: Nope] {
+  pub var value: T;
+}
+
+fun main(): unit {}

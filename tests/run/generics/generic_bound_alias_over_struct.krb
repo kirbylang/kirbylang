@@ -1,0 +1,7 @@
+struct Labeled[T: Display] {
+  pub var value: T;
+}
+
+type Plain[T] = Labeled[T];
+
+fun main(): unit {}

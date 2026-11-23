@@ -233,6 +233,9 @@ typedef struct {
    */
   Token *genericParams;
   int genericParamCount;
+  /** The traits each parameter must implement. NULL when there are no
+   * parameters. */
+  GenericBounds *genericBounds;
   /**
    * The type expression on the right of `=`.
    */
@@ -374,6 +377,9 @@ typedef struct {
    */
   Token *genericParams;
   int genericParamCount;
+  /** The traits each parameter must implement. NULL when there are no
+   * parameters. */
+  GenericBounds *genericBounds;
   VarDeclNode *fields;
   int fieldCount;
   int endLine;
