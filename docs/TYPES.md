@@ -367,8 +367,9 @@ trait Ord: Eq {
 
 ### Trait Bounds
 
-A type parameter of a function or a method can name a trait that its type must
-implement. The trait is written after a colon.
+A type parameter can name a trait that its type must implement. The trait is
+written after a colon, and `+` asks for more than one. Only functions and
+methods can have bounds for now.
 
 ```
 trait Shape {
@@ -403,7 +404,7 @@ as a value is checked the same way, so `let f: fun (Rock) => f64 = describe;` is
 the same error.
 
 Inside the function, a value of the parameter's type has the methods of its
-trait and nothing else. It also has the methods of the trait's supertraits, so
+traits and nothing else. It also has the methods of the traits' supertraits, so
 `T: Ord` gives `equals` from `Eq`. `Self` in a trait method stands for the
 parameter, so with `T: Cloneable`, `x.clone()` is a `T`.
 
@@ -426,12 +427,20 @@ type used with it has that method. Fields can't be read either.
 A value whose bound is `Display` can also be given to `@println` and put in a
 string with `$"{x}"`, the same as a struct that implements `Display`.
 
-A bounded parameter can be given to another bounded function when its own bound
-has the trait that function needs. `fun f[T: Ord](x: T) = g(x)` works when `g`
+A bounded parameter can be given to another bounded function when its own bounds
+have the trait that function needs. `fun f[T: Ord](x: T) = g(x)` works when `g`
 needs `Ord` or `Eq`. It is an error when it doesn't, as when `T` has no bound:
 `T doesn't implement Eq, required by U.`
 
-- A parameter has one bound.
+#### Multiple bounds
+
+`T: Display + Eq` needs both traits. The value has the methods of every trait
+listed. If two of the traits have a method of the same name the call is
+ambiguous: `Method 'label' is in both Named and Titled.` A call that fills the
+parameter with a type missing one of them names that trait.
+
+#### Limitations
+
 - The trait has to exist, and a struct name isn't a trait:
   `Unknown trait 'Nope'.` A trait can be declared after the function that uses it.
 - Only functions and methods can have bounds for now. On a `struct`, `impl` or
@@ -442,11 +451,11 @@ needs `Ord` or `Eq`. It is an error when it doesn't, as when `T` has no bound:
 - A static trait method can't be called through a bound. `T.default()` is an
   error: `Can't call a static method on type parameter 'T'.` This needs a
   separate copy of the function for each type, which is not implemented.
-- `==` on a bounded value is still the built-in equality and doesn't call
-  `equals`. Call `a.equals(b)` to use the trait.
 - A bounded generic function used as a value with no expected type, such as
   `let f = describe;`, has no type, so its bounds aren't checked. See
   [Generic Functions](#generic-functions).
+- `==` on a bounded value is still the built-in equality and doesn't call
+  `equals`. Call `a.equals(b)` to use the trait.
 
 ### Functions
 
@@ -576,9 +585,9 @@ implement `Eq` -- see [Traits](#traits).
 
 - Some native functions have no signature yet, so calls to them aren't
   checked
-- A generic parameter can have one trait bound, on functions and methods only.
+- A generic parameter can have bounds on functions and methods only.
   A value of a generic type can't be added or indexed, and has methods only
-  through its bound -- see [Trait Bounds](#trait-bounds)
+  through its bounds -- see [Trait Bounds](#trait-bounds)
 - A call can't be given type arguments (`parse[f64](s)`)
 - Lists have no type annotation syntax
 - `impl Trait for` a primitive type isn't supported yet, and operators

@@ -1,0 +1,1 @@
+fun show[T: Display +](x: T): T = x;

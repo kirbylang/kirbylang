@@ -99,11 +99,11 @@ struct Type {
       // A declared parameter as seen inside its own declaration: one unknown
       // type that is never filled in and is only equal to itself.
       bool isOpaque;
-      // The trait a type has to implement to fill this parameter, as in
-      // `T: Display`. Only the name is kept, because a trait is found
+      // The traits a type has to implement to fill this parameter, as in
+      // `T: Display + Eq`. Only the names are kept, because a trait is found
       // through the type environment.
-      bool hasBound;
-      InternedName boundTrait;
+      InternedName *boundTraits;
+      int boundCount;
     } genericParam;
     struct {
       InternedName name;
@@ -237,8 +237,9 @@ Type *typeGenericParam(int index);
 // declaration.
 Type *typeDeclaredGenericParam(Token name, int index, bool isOpaque);
 
-// Requires any type that fills `param` to implement the trait.
-void typeGenericParamSetBound(Type *param, InternedName traitName);
+// Requires any type that fills `param` to implement the trait too. A trait
+// already required is ignored.
+void typeGenericParamAddBound(Type *param, InternedName traitName);
 
 // The first generic parameter with this index found inside `type`, or NULL.
 Type *typeFindGenericParam(Type *type, int index);

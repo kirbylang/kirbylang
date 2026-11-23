@@ -467,9 +467,23 @@ Type *typeDeclaredGenericParam(Token name, int index, bool isOpaque) {
   return type;
 }
 
-void typeGenericParamSetBound(Type *param, InternedName traitName) {
-  param->as.genericParam.hasBound = true;
-  param->as.genericParam.boundTrait = traitName;
+void typeGenericParamAddBound(Type *param, InternedName traitName) {
+  int count = param->as.genericParam.boundCount;
+
+  for (int i = 0; i < count; i++) {
+    if (internedNamesEqual(param->as.genericParam.boundTraits[i], traitName))
+      return;
+  }
+
+  InternedName *traits =
+      (InternedName *)typesAllocRaw((size_t)(count + 1) * sizeof(InternedName));
+
+  for (int i = 0; i < count; i++)
+    traits[i] = param->as.genericParam.boundTraits[i];
+
+  traits[count] = traitName;
+  param->as.genericParam.boundTraits = traits;
+  param->as.genericParam.boundCount = count + 1;
 }
 
 Type *typeFindGenericParam(Type *type, int index) {

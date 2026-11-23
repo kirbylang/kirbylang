@@ -1435,11 +1435,12 @@ static AstNode *functionTail(Parser *p, Token name, int line, bool isMethod,
  * fun sum[T](a: T, b: T): T = a + b;
  * fun show[T: Display](x: T): string = x.toString();
  *
- * `boundBuf` receives the trait after each `:`, or an empty token for a
- * parameter without one. It is NULL where bounds aren't supported, and a `:`
- * is then an error with `noBoundsMessage`.
+ * `boundBuf` receives the traits after each `:`, separated by `+`, and a count
+ * of 0 for a parameter without any. It is NULL where bounds aren't supported,
+ * and a `:` is then an error with `noBoundsMessage`.
  */
-static int parseGenericParamList(Parser *p, Token *paramBuf, Token *boundBuf,
+static int parseGenericParamList(Parser *p, Token *paramBuf,
+                                 GenericBounds *boundBuf,
                                  const char *noBoundsMessage) {
   int count = 0;
 
@@ -1452,16 +1453,34 @@ static int parseGenericParamList(Parser *p, Token *paramBuf, Token *boundBuf,
       paramBuf[count] = p->previous;
 
       if (boundBuf != NULL)
-        memset(&boundBuf[count], 0, sizeof(Token));
+        memset(&boundBuf[count], 0, sizeof(GenericBounds));
 
       if (match(p, TOKEN_COLON)) {
         if (boundBuf == NULL)
           parse_error(p, noBoundsMessage);
 
-        consume(p, TOKEN_IDENTIFIER, "Expect trait name after ':'.");
+        Token traitBuf[256];
+        int traitCount = 0;
 
-        if (boundBuf != NULL)
-          boundBuf[count] = p->previous;
+        do {
+          consume(p, TOKEN_IDENTIFIER,
+                  traitCount == 0 ? "Expect trait name after ':'."
+                                  : "Expect trait name after '+'.");
+
+          if (traitCount >= 255) {
+            error_at_current(p, "Can't have more than 255 bounds.");
+          } else {
+            traitBuf[traitCount++] = p->previous;
+          }
+        } while (match(p, TOKEN_PLUS));
+
+        if (boundBuf != NULL) {
+          boundBuf[count].traits =
+              (Token *)astAllocRaw((size_t)traitCount * sizeof(Token));
+          memcpy(boundBuf[count].traits, traitBuf,
+                 (size_t)traitCount * sizeof(Token));
+          boundBuf[count].count = traitCount;
+        }
       }
 
       count++;
@@ -1471,6 +1490,16 @@ static int parseGenericParamList(Parser *p, Token *paramBuf, Token *boundBuf,
   return count;
 }
 
+static GenericBounds *copyGenericBounds(GenericBounds *buf, int count) {
+  if (count == 0)
+    return NULL;
+
+  GenericBounds *bounds =
+      (GenericBounds *)astAllocRaw(count * sizeof(GenericBounds));
+  memcpy(bounds, buf, count * sizeof(GenericBounds));
+  return bounds;
+}
+
 static AstNode *functionDeclaration(Parser *p, bool isMethod) {
   if (!isMethod)
     consumeDeclarationIdentifier(p, "Expect function name.");
@@ -1478,7 +1507,7 @@ static AstNode *functionDeclaration(Parser *p, bool isMethod) {
   int line = name.line;
 
   Token genericParamBuf[256];
-  Token genericBoundBuf[256];
+  GenericBounds genericBoundBuf[256];
   int genericParamCount = parseGenericParamList(
       p, genericParamBuf, genericBoundBuf, /*noBoundsMessage=*/NULL);
 
@@ -1491,10 +1520,8 @@ static AstNode *functionDeclaration(Parser *p, bool isMethod) {
     memcpy(genericParams, genericParamBuf, genericParamCount * sizeof(Token));
     node->as.function.genericParams = genericParams;
 
-    Token *genericBounds =
-        (Token *)astAllocRaw(genericParamCount * sizeof(Token));
-    memcpy(genericBounds, genericBoundBuf, genericParamCount * sizeof(Token));
-    node->as.function.genericBounds = genericBounds;
+    node->as.function.genericBounds =
+        copyGenericBounds(genericBoundBuf, genericParamCount);
   } else {
     node->as.function.genericParams = NULL;
     node->as.function.genericBounds = NULL;

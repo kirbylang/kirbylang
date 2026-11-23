@@ -354,11 +354,12 @@ Type *typchkTypeEnvGetImplTargetType(TypeEnv *env) {
 // is also written to `types`, and numbered from `firstIndex`. A parameter
 // callers fill in is made when
 // `isOpaque` is false, and the fixed type the declaration's own body sees when
-// it is true. `bounds` has the trait each parameter must implement, with an
-// empty token for none, or is NULL where a declaration has no bounds. An
-// unknown trait is reported once, for the form callers fill in.
-static int typchkEnterGenericParams(TypeEnv *env, Token *names, Token *bounds,
-                                    int count, int firstIndex, bool isOpaque,
+// it is true. `bounds` has the traits each parameter must implement, or is
+// NULL where a declaration has no bounds. An unknown trait is reported once,
+// for the form callers fill in.
+static int typchkEnterGenericParams(TypeEnv *env, Token *names,
+                                    GenericBounds *bounds, int count,
+                                    int firstIndex, bool isOpaque,
                                     Type **types) {
   int previousCount = env->_genericParamCount;
 
@@ -377,14 +378,15 @@ static int typchkEnterGenericParams(TypeEnv *env, Token *names, Token *bounds,
 
     types[i] = typeDeclaredGenericParam(names[i], firstIndex + i, isOpaque);
 
-    if (bounds != NULL && bounds[i].length > 0) {
-      Type *boundTrait = typchkTypeEnvLookupTrait(env, bounds[i]);
+    for (int j = 0; bounds != NULL && j < bounds[i].count; j++) {
+      Token *traitName = &bounds[i].traits[j];
+      Type *boundTrait = typchkTypeEnvLookupTrait(env, *traitName);
 
       if (boundTrait != NULL) {
-        typeGenericParamSetBound(types[i], boundTrait->as.trait_.name);
+        typeGenericParamAddBound(types[i], boundTrait->as.trait_.name);
       } else if (!isOpaque) {
-        typchkErrorAtTokenFmt(&bounds[i], "Unknown trait '%.*s'.",
-                              bounds[i].length, bounds[i].start);
+        typchkErrorAtTokenFmt(traitName, "Unknown trait '%.*s'.",
+                              traitName->length, traitName->start);
       }
     }
 
@@ -399,59 +401,92 @@ static void typchkLeaveGenericParams(TypeEnv *env, int previousCount) {
   env->_genericParamCount = previousCount;
 }
 
-// Whether values of `type` have the methods of a trait. A struct needs an
-// impl. A generic parameter has them through its bound, or through a
-// supertrait of its bound, so `T: Ord` also gives `Eq`.
-static bool typchkTypeImplementsTrait(TypeEnv *env, Type *type,
-                                      InternedName traitName) {
-  if (type == NULL || type->kind != TYPE_GENERIC_PARAM)
-    return typeStructImplementsTrait(type, traitName);
-
-  if (!type->as.genericParam.hasBound)
-    return false;
-
-  InternedName current = type->as.genericParam.boundTrait;
+// Whether `trait` is `traitName` or has it as a supertrait.
+static bool typchkTraitChainHas(TypeEnv *env, InternedName trait,
+                                InternedName traitName) {
+  InternedName current = trait;
 
   // A supertrait cycle is reported elsewhere, so the walk must still end
   for (int step = 0; step <= env->traitCount; step++) {
     if (internedNamesEqual(current, traitName))
       return true;
 
-    Type *trait = typchkTypeEnvLookupTrait(env, internedNameToToken(current));
+    Type *found = typchkTypeEnvLookupTrait(env, internedNameToToken(current));
 
-    if (trait == NULL || !trait->as.trait_.hasSupertrait)
+    if (found == NULL || !found->as.trait_.hasSupertrait)
       return false;
 
-    current = trait->as.trait_.supertraitName;
+    current = found->as.trait_.supertraitName;
   }
 
   return false;
 }
 
-// The type of a method a generic parameter's bound gives it, with `Self` read
-// as the parameter. The method is looked up on the bound trait and then on its
-// supertraits. NULL if there is none.
-static Type *typchkBoundMethodLookup(TypeEnv *env, Type *param, Token name) {
-  InternedName current = param->as.genericParam.boundTrait;
+// Whether values of `type` have the methods of a trait. A struct needs an
+// impl. A generic parameter has them through a bound, or through a supertrait
+// of a bound, so `T: Ord` also gives `Eq`.
+static bool typchkTypeImplementsTrait(TypeEnv *env, Type *type,
+                                      InternedName traitName) {
+  if (type == NULL || type->kind != TYPE_GENERIC_PARAM)
+    return typeStructImplementsTrait(type, traitName);
 
-  for (int step = 0; step <= env->traitCount; step++) {
-    Type *trait = typchkTypeEnvLookupTrait(env, internedNameToToken(current));
-
-    if (trait == NULL)
-      return NULL;
-
-    Type *methodType = typeTraitInstanceMethodLookup(trait, name);
-
-    if (methodType != NULL)
-      return typeSubstituteSelf(methodType, param);
-
-    if (!trait->as.trait_.hasSupertrait)
-      return NULL;
-
-    current = trait->as.trait_.supertraitName;
+  for (int i = 0; i < type->as.genericParam.boundCount; i++) {
+    if (typchkTraitChainHas(env, type->as.genericParam.boundTraits[i],
+                            traitName))
+      return true;
   }
 
-  return NULL;
+  return false;
+}
+
+typedef enum {
+  BOUND_METHOD_FOUND,
+  BOUND_METHOD_MISSING,
+  BOUND_METHOD_AMBIGUOUS
+} BoundMethodResult;
+
+// The type of a method a generic parameter's bounds give it, with `Self` read
+// as the parameter. The method is looked up on each bound trait and then on
+// its supertraits. A method that two different traits both have is ambiguous,
+// and the two trait names are written to `first` and `second`.
+static BoundMethodResult typchkBoundMethodLookup(TypeEnv *env, Type *param,
+                                                 Token name, Type **found,
+                                                 InternedName *first,
+                                                 InternedName *second) {
+  *found = NULL;
+
+  for (int i = 0; i < param->as.genericParam.boundCount; i++) {
+    InternedName current = param->as.genericParam.boundTraits[i];
+
+    for (int step = 0; step <= env->traitCount; step++) {
+      Type *trait = typchkTypeEnvLookupTrait(env, internedNameToToken(current));
+
+      if (trait == NULL)
+        break;
+
+      Type *methodType = typeTraitInstanceMethodLookup(trait, name);
+
+      if (methodType != NULL) {
+        if (*found != NULL && !internedNamesEqual(*first, current)) {
+          *second = current;
+          return BOUND_METHOD_AMBIGUOUS;
+        }
+
+        if (*found == NULL) {
+          *found = typeSubstituteSelf(methodType, param);
+          *first = current;
+        }
+        break;
+      }
+
+      if (!trait->as.trait_.hasSupertrait)
+        break;
+
+      current = trait->as.trait_.supertraitName;
+    }
+  }
+
+  return *found != NULL ? BOUND_METHOD_FOUND : BOUND_METHOD_MISSING;
 }
 
 // Names that only native signatures can use: generic parameters T, U, V and
@@ -1524,29 +1559,36 @@ static bool typchkHasDeclaredGenericParams(Type *type) {
 }
 
 // The index of the first generic parameter of `genericType` that was filled
-// with a type that doesn't implement the parameter's bound, or -1. A parameter
-// that wasn't filled, or whose type isn't fully known yet, can't be judged.
+// with a type that doesn't implement one of the parameter's bounds, or -1.
+// The trait that is missing is written to `unmetTrait`. A parameter that
+// wasn't filled, or whose type isn't fully known yet, can't be judged.
 static int typchkUnmetBoundIndex(TypeEnv *env, Type *genericType,
-                                 Type **bindings, int count) {
+                                 Type **bindings, int count,
+                                 InternedName *unmetTrait) {
   for (int i = 0; i < count; i++) {
     Type *param = typeFindGenericParam(genericType, i);
 
-    if (param == NULL || !param->as.genericParam.hasBound ||
+    if (param == NULL || param->as.genericParam.boundCount == 0 ||
         !typeIsFullyKnown(bindings[i]))
       continue;
 
-    if (!typchkTypeImplementsTrait(env, bindings[i],
-                                   param->as.genericParam.boundTrait))
-      return i;
+    for (int j = 0; j < param->as.genericParam.boundCount; j++) {
+      InternedName bound = param->as.genericParam.boundTraits[j];
+
+      if (!typchkTypeImplementsTrait(env, bindings[i], bound)) {
+        *unmetTrait = bound;
+        return i;
+      }
+    }
   }
 
   return -1;
 }
 
 static void typchkErrorUnmetBound(AstNode *node, Type *genericType,
-                                  Type **bindings, int index) {
+                                  Type **bindings, int index,
+                                  InternedName bound) {
   Type *param = typeFindGenericParam(genericType, index);
-  InternedName bound = param->as.genericParam.boundTrait;
   InternedName name = param->as.genericParam.name;
 
   typchkErrorAtNodeFmt(node, "%s doesn't implement %.*s, required by %.*s.",
@@ -1576,10 +1618,12 @@ static Type *typchkFillGenericFunctionValue(TypeEnv *env, AstNode *node,
                           expected->as.function.returnType, bindings, count);
   }
 
-  int unmet = typchkUnmetBoundIndex(env, genericType, bindings, count);
+  InternedName unmetTrait;
+  int unmet =
+      typchkUnmetBoundIndex(env, genericType, bindings, count, &unmetTrait);
 
   if (unmet >= 0) {
-    typchkErrorUnmetBound(node, genericType, bindings, unmet);
+    typchkErrorUnmetBound(node, genericType, bindings, unmet, unmetTrait);
     return NULL;
   }
 
@@ -1905,11 +1949,13 @@ static Type *typchkCheckGenericCall(TypeEnv *env, AstNode *node,
   }
 
   // Each type that filled a parameter has to implement the parameter's bound
-  int unmet = typchkUnmetBoundIndex(env, calleeType, bindings, genericCount);
+  InternedName unmetTrait;
+  int unmet = typchkUnmetBoundIndex(env, calleeType, bindings, genericCount,
+                                    &unmetTrait);
 
   if (unmet >= 0) {
     typchkErrorUnmetBound(typchkArgumentOfParam(node, calleeType, unmet),
-                          calleeType, bindings, unmet);
+                          calleeType, bindings, unmet, unmetTrait);
     return NULL;
   }
 
@@ -2025,22 +2071,44 @@ static Type *typchkInferGet(TypeEnv *env, AstNode *node) {
   if (objectType == NULL)
     return NULL;
 
-  // A generic parameter has the methods of its bound, and nothing else
+  // A generic parameter has the methods of its bounds, and nothing else
   if (objectType->kind == TYPE_GENERIC_PARAM &&
-      objectType->as.genericParam.hasBound) {
-    Type *methodType = typchkBoundMethodLookup(env, objectType, get->name);
+      objectType->as.genericParam.boundCount > 0) {
+    Type *methodType = NULL;
+    InternedName first, second;
+    BoundMethodResult result = typchkBoundMethodLookup(
+        env, objectType, get->name, &methodType, &first, &second);
 
-    if (methodType == NULL) {
-      InternedName bound = objectType->as.genericParam.boundTrait;
-      Type *boundTrait =
-          typchkTypeEnvLookupTrait(env, internedNameToToken(bound));
+    if (result == BOUND_METHOD_AMBIGUOUS) {
+      typchkErrorAtTokenFmt(
+          &get->name, "Method '%.*s' is in both %.*s and %.*s.",
+          get->name.length, get->name.start, first.length,
+          internedNameChars(first), second.length, internedNameChars(second));
+      return NULL;
+    }
+
+    if (result == BOUND_METHOD_MISSING) {
+      char names[256] = "";
+      bool unresolved = false;
+      int count = objectType->as.genericParam.boundCount;
+
+      for (int i = 0; i < count; i++) {
+        InternedName bound = objectType->as.genericParam.boundTraits[i];
+        Type *boundTrait =
+            typchkTypeEnvLookupTrait(env, internedNameToToken(bound));
+
+        unresolved = unresolved || typeTraitHasUnresolvedMembers(boundTrait);
+        size_t used = strlen(names);
+        snprintf(names + used, sizeof(names) - used, "%s%.*s",
+                 i == 0 ? "" : " + ", bound.length, internedNameChars(bound));
+      }
 
       // A trait that didn't resolve was already reported
-      if (!typeTraitHasUnresolvedMembers(boundTrait))
+      if (!unresolved)
         typchkErrorAtTokenFmt(
-            &get->name, "%s's bound '%.*s' has no method '%.*s'.",
-            typeToString(objectType), bound.length, internedNameChars(bound),
-            get->name.length, get->name.start);
+            &get->name, "%s's %s '%s' %s no method '%.*s'.",
+            typeToString(objectType), count == 1 ? "bound" : "bounds", names,
+            count == 1 ? "has" : "have", get->name.length, get->name.start);
     }
 
     return methodType;

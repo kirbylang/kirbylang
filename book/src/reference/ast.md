@@ -116,6 +116,7 @@ AstNode *right;
  */
 bool isStringConcat;
 } BinaryNode;
+
 ```
 
 ### Grouping Expression
@@ -352,6 +353,22 @@ AstNode *value;
 } ReturnNode;
 ```
 
+### Generic Bounds
+
+```c
+/**
+ * The traits one generic parameter must implement, as written after the `:`
+ * in `T: Display + Eq`. `count` is 0 for a parameter with no bound.
+ */
+typedef struct {
+  Token *traits;
+  int count;
+} GenericBounds;
+```
+
+`krb parse` prints a bound after its parameter, as `T:Display+Eq`. Only functions have
+bounds for now.
+
 ### Functions
 
 ```c
@@ -391,12 +408,12 @@ typedef struct {
   Token *genericParams;
   int genericParamCount;
   /**
-   * The trait each generic parameter must implement, such as the `Display` in
-   * `fun show[T: Display](x: T)`. Has one entry per generic parameter, and an
-   * empty token (length 0) for a parameter with no bound. NULL when
-   * `genericParamCount` is 0.
+   * The traits each generic parameter must implement, such as the `Display` in
+   * `fun show[T: Display](x: T)`. Has one entry per generic parameter, with a
+   * count of 0 for a parameter with no bound. NULL when `genericParamCount` is
+   * 0.
    */
-  Token *genericBounds;
+  GenericBounds *genericBounds;
 } FunctionNode;
 ```
 
