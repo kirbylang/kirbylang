@@ -494,4 +494,26 @@ impl Labeled[T] {
 }
 ```
 
+#### Operators
+
+An operator on a struct calls a method of a trait: `a + b` calls `a.add(b)` from the `Add` trait. The traits are `Add`, `Sub`, `Mul`, `Div`, `Mod` (`+ - * / %`), `Neg` (unary `-`), `Eq` (`==` and `!=`) and `Ord` (`<`, `>`, `<=` and `>=`).
+
+```
+struct Vec2 {
+    pub var x: f64;
+    pub var y: f64;
+}
+
+impl Add for Vec2 {
+    fun add(self, other: Self): Self =
+        Vec2 { x: self.x + other.x, y: self.y + other.y };
+}
+
+fun main(): unit {
+    let v = Vec2 { x: 1, y: 2 } + Vec2 { x: 3, y: 4 };   // Vec2 { x: 4, y: 6 }
+}
+```
+
+`==` on two structs calls their `equals`, so it follows the struct's `Eq` impl.
+
 Calling a static trait method through a bound, like `T.default()`, isn't supported yet.

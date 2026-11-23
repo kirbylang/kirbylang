@@ -105,6 +105,11 @@ typedef struct {
 typedef struct {
 Token op;
 AstNode *operand;
+/**
+ * Set by the type checker when the operand is a struct or a generic
+ * parameter, so `-a` calls the operand's trait method. NULL for a number.
+ */
+const OperatorTrait *traitDispatch;
 } UnaryNode;
 
 typedef struct {
@@ -115,7 +120,22 @@ AstNode *right;
  * `+` on two strings. Set by the type checker.
  */
 bool isStringConcat;
+/**
+ * Set by the type checker when the operands are structs or generic
+ * parameters, so the operator calls the left operand's trait method. NULL
+ * for numbers and strings.
+ */
+const OperatorTrait *traitDispatch;
 } BinaryNode;
+
+/** One row of the operator table in `operator_traits.h`. */
+typedef struct {
+TokenType token;
+const char *trait;  // "Add"
+const char *method; // "add"
+bool isUnary;
+bool definesTrait;
+} OperatorTrait;
 
 ```
 

@@ -14,7 +14,7 @@
 |   `9` | `OP_NEGATE`           |                                    |      -1 +1 |                                                                                                 |
 |  `10` | `OP_PRINT`            |                                    |         -1 |                                                                                                 |
 |  `11` | `OP_RETURN`           |                                    |         -1 | Discards the call's frame, then pushes the value for the caller.                                |
-|  `12` | `OP_EQUAL`            |                                    |      -2 +1 |                                                                                                 |
+|  `12` | `OP_EQUAL`            |                                    |      -2 +1 | Built-in equality. `==` on structs and generic parameters is compiled to `OP_INVOKE` of `equals` instead. |
 |  `13` | `OP_NOT`              |                                    |      -1 +1 |                                                                                                 |
 |  `14` | `OP_POP`              |                                    |         -1 |                                                                                                 |
 |  `15` | `OP_CLOSE_UPVALUE`    |                                    |         -1 | Moves the captured value off the stack first.                                                   |

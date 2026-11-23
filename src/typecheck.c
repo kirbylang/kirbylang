@@ -280,7 +280,8 @@ Type *typchkTypeEnvLookupTrait(TypeEnv *env, Token name) {
 /**
  * Define the builtin traits
  *
- * Display, Eq, Ord (a supertrait of Eq), and Default
+ * Display, Eq, Ord (a supertrait of Eq), Default, and the operator traits
+ * Add, Sub, Mul, Div, Mod and Neg
  */
 static void typchkTypeEnvDefineBuiltinTraits(TypeEnv *env) {
   // Display
@@ -316,6 +317,34 @@ static void typchkTypeEnvDefineBuiltinTraits(TypeEnv *env) {
   typeTraitSetSupertrait(ord, eq->as.trait_.name);
   typeTraitMarkBuiltin(ord);
   typchkTypeEnvRegisterTrait(env, tokenFromCString("Ord"), ord);
+
+  // Operator traits: Add, Sub, Mul, Div, Mod and Neg
+
+  int operatorCount;
+  operatorTraitAt(0, &operatorCount);
+
+  for (int i = 0; i < operatorCount; i++) {
+    const OperatorTrait *entry = operatorTraitAt(i, &operatorCount);
+
+    if (!entry->definesTrait)
+      continue;
+
+    Type **params = NULL;
+
+    if (!entry->isUnary) {
+      params = (Type **)typesAllocRaw(sizeof(Type *));
+      params[0] = typeSelfPlaceholder();
+    }
+
+    UninternedTypeMember members[] = {
+        {tokenFromCString(entry->method),
+         typeFunction(params, entry->isUnary ? 0 : 1, typeSelfPlaceholder())},
+    };
+    Type *trait =
+        typeTrait(tokenFromCString(entry->trait), NULL, 0, members, 1);
+    typeTraitMarkBuiltin(trait);
+    typchkTypeEnvRegisterTrait(env, tokenFromCString(entry->trait), trait);
+  }
 
   // Default
 
@@ -1304,6 +1333,27 @@ static bool typchkPairNumberType(TypeEnv *env, AstNode *value, Type **type,
 }
 
 // Infer the type of a unary expressoin
+// Whether an operator can work on `type` through a trait, rather than as a
+// built-in: a struct.
+static bool typchkIsTraitOperand(Type *type) {
+  return type->kind == TYPE_STRUCT;
+}
+
+// Checks that `type` implements the trait of `entry`, which `-a` or `a + b`
+// calls a method of. Reports it at `op` when it doesn't.
+static bool typchkRequireOperatorTrait(TypeEnv *env, Type *type,
+                                       const OperatorTrait *entry, Token *op) {
+  InternedName trait = internTokenName(tokenFromCString(entry->trait));
+
+  if (typchkTypeImplementsTrait(env, type, trait))
+    return true;
+
+  typchkErrorAtTokenFmt(op, "%s doesn't implement %s, required by '%.*s'.",
+                        typeToString(type), entry->trait, op->length,
+                        op->start);
+  return false;
+}
+
 static Type *typchkInferUnary(TypeEnv *env, AstNode *node) {
   UnaryNode *u = &node->as.unary;
 
@@ -1340,6 +1390,14 @@ static Type *typchkInferUnary(TypeEnv *env, AstNode *node) {
 
   if (operandType == NULL)
     return NULL;
+
+  if (typchkIsTraitOperand(operandType)) {
+    u->traitDispatch = operatorTraitFor(u->op.type, /*isUnary=*/true);
+    return typchkRequireOperatorTrait(env, operandType, u->traitDispatch,
+                                      &u->op)
+               ? operandType
+               : NULL;
+  }
 
   if (!typeIsNumber(operandType)) {
     typchkErrorAtTokenFmt(&u->op, "Can't negate %s.",
@@ -1416,6 +1474,13 @@ static Type *typchkInferBinary(TypeEnv *env, AstNode *node) {
       return typeString();
     }
 
+    if (typchkIsTraitOperand(leftType) && typesEqual(leftType, rightType)) {
+      b->traitDispatch = operatorTraitFor(b->op.type, /*isUnary=*/false);
+      return typchkRequireOperatorTrait(env, leftType, b->traitDispatch, &b->op)
+                 ? leftType
+                 : NULL;
+    }
+
     typchkErrorAtTokenFmt(
         &b->op,
         "'+' needs two numbers of the same type or two strings, got %s and %s.",
@@ -1428,6 +1493,13 @@ static Type *typchkInferBinary(TypeEnv *env, AstNode *node) {
   case TOKEN_MODULO:
     if (typeIsNumber(leftType) && typesEqual(leftType, rightType))
       return leftType;
+
+    if (typchkIsTraitOperand(leftType) && typesEqual(leftType, rightType)) {
+      b->traitDispatch = operatorTraitFor(b->op.type, /*isUnary=*/false);
+      return typchkRequireOperatorTrait(env, leftType, b->traitDispatch, &b->op)
+                 ? leftType
+                 : NULL;
+    }
 
     typchkErrorAtTokenFmt(
         &b->op, "'%s' needs two numbers of the same type, got %s and %s.",
@@ -1454,6 +1526,14 @@ static Type *typchkInferBinary(TypeEnv *env, AstNode *node) {
                             b->op.type == TOKEN_EQUAL_EQUAL ? "==" : "!=");
       return NULL;
     }
+
+    if (typchkIsTraitOperand(leftType)) {
+      b->traitDispatch = operatorTraitFor(b->op.type, /*isUnary=*/false);
+
+      if (!typchkRequireOperatorTrait(env, leftType, b->traitDispatch, &b->op))
+        return NULL;
+    }
+
     return typeBool();
 
   case TOKEN_LESS:
@@ -1462,6 +1542,13 @@ static Type *typchkInferBinary(TypeEnv *env, AstNode *node) {
   case TOKEN_GREATER_EQUAL:
     if (typeIsNumber(leftType) && typesEqual(leftType, rightType))
       return typeBool();
+
+    if (typchkIsTraitOperand(leftType) && typesEqual(leftType, rightType)) {
+      b->traitDispatch = operatorTraitFor(b->op.type, /*isUnary=*/false);
+      return typchkRequireOperatorTrait(env, leftType, b->traitDispatch, &b->op)
+                 ? typeBool()
+                 : NULL;
+    }
 
     typchkErrorAtTokenFmt(
         &b->op, "'%s' needs two numbers of the same type, got %s and %s.",

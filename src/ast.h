@@ -5,6 +5,7 @@
 #include <stdlib.h>
 
 #include "number_kind.h"
+#include "operator_traits.h"
 #include "strbuf.h"
 #include "token.h"
 
@@ -101,6 +102,11 @@ typedef struct {
 typedef struct {
   Token op;
   AstNode *operand;
+  /**
+   * Set by the type checker when the operand is a struct or a generic
+   * parameter, so `-a` calls the operand's trait method. NULL for a number.
+   */
+  const OperatorTrait *traitDispatch;
 } UnaryNode;
 
 typedef struct {
@@ -112,6 +118,12 @@ typedef struct {
    * this to let it join chains of strings with @strConcat.
    */
   bool isStringConcat;
+  /**
+   * Set by the type checker when the operands are structs or generic
+   * parameters, so the operator calls the left operand's trait method. NULL
+   * for numbers and strings.
+   */
+  const OperatorTrait *traitDispatch;
 } BinaryNode;
 
 typedef struct {

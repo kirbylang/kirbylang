@@ -1,0 +1,11 @@
+struct Money {
+  pub var cents: i64;
+}
+
+impl Add for Money {
+  fun add(self, other: Self): Self = Money { cents: self.cents + other.cents };
+}
+
+fun main(): unit {
+  @println((Money { cents: 1 } + 2).cents);
+}

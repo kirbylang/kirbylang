@@ -1,0 +1,20 @@
+struct Point {
+  pub var x: f64;
+  pub var y: f64;
+}
+
+impl Eq for Point {
+  fun equals(self, other: Self): bool = self.x == other.x;
+}
+
+fun main(): unit {
+  let a = Point { x: 1, y: 2 };
+  let b = Point { x: 1, y: 3 };
+  let c = Point { x: 2, y: 2 };
+
+  @println(a == b);
+  @println(a != b);
+  @println(a == c);
+  @println(a != c);
+  @println(a == a);
+}
