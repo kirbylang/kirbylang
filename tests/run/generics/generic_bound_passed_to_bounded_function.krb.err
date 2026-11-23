@@ -1,0 +1,107 @@
+== <script> ==
+0000   17 OP_CLOSURE          1 <fn show>
+0002    | OP_DEFINE_GLOBAL    0 'show'
+0004   19 OP_CLOSURE          3 <fn showTwice>
+0006    | OP_DEFINE_GLOBAL    2 'showTwice'
+0008   21 OP_CLOSURE          5 <fn same>
+0010    | OP_DEFINE_GLOBAL    4 'same'
+0012   23 OP_CLOSURE          7 <fn sameWhenOrdered>
+0014    | OP_DEFINE_GLOBAL    6 'sameWhenOrdered'
+0016   28 OP_CLOSURE          9 <fn main>
+0018    | OP_DEFINE_GLOBAL    8 'main'
+0020    1 OP_STRUCT          10 'Money'
+0022    | OP_DEFINE_GLOBAL   10 'Money'
+0024    | OP_GET_GLOBAL      10 'Money'
+0026    2 OP_NIL
+0027    | OP_FIELD           11 'cents' public mutable
+0031    3 OP_POP
+0032    5 OP_GET_GLOBAL      10 'Money'
+0034    6 OP_CLOSURE         13 <fn toString>
+0036    | OP_METHOD          12 'toString'
+0038    7 OP_POP
+0039    9 OP_GET_GLOBAL      10 'Money'
+0041   10 OP_CLOSURE         15 <fn equals>
+0043    | OP_METHOD          14 'equals'
+0045   11 OP_POP
+0046   13 OP_GET_GLOBAL      10 'Money'
+0048   14 OP_CLOSURE         17 <fn cmp>
+0050    | OP_METHOD          16 'cmp'
+0052   15 OP_POP
+0053   29 OP_NIL
+0054    | OP_RETURN
+== show ==
+0000   17 OP_GET_LOCAL        1
+0002    | OP_INVOKE        (0 args)    0 'toString'
+0005    | OP_RETURN
+== showTwice ==
+0000   19 OP_GET_GLOBAL       0 '@strConcat'
+0002    | OP_GET_GLOBAL       1 'show'
+0004    | OP_GET_LOCAL        1
+0006    | OP_CALL             1
+0008    | OP_CONSTANT         2 ' '
+0010    | OP_GET_GLOBAL       1 'show'
+0012    | OP_GET_LOCAL        1
+0014    | OP_CALL             1
+0016    | OP_LIST             3
+0018    | OP_CALL             1
+0020    | OP_RETURN
+== same ==
+0000   21 OP_GET_LOCAL        1
+0002    | OP_GET_LOCAL        2
+0004    | OP_INVOKE        (1 args)    0 'equals'
+0007    | OP_RETURN
+== sameWhenOrdered ==
+0000   23 OP_GET_GLOBAL       0 'same'
+0002    | OP_GET_LOCAL        1
+0004    | OP_GET_LOCAL        2
+0006    | OP_CALL             2
+0008    | OP_RETURN
+== main ==
+0000   26 OP_GET_GLOBAL       0 '@println'
+0002    | OP_GET_GLOBAL       1 'showTwice'
+0004    | OP_GET_GLOBAL       2 'Money'
+0006    | OP_CONSTANT         3 'cents'
+0008    | OP_CONSTANT         4 '5'
+0010    | OP_STRUCT_INIT      1
+0012    | OP_CALL             1
+0014    | OP_CALL             1
+0016    | OP_POP
+0017   27 OP_GET_GLOBAL       0 '@println'
+0019    | OP_GET_GLOBAL       5 'sameWhenOrdered'
+0021    | OP_GET_GLOBAL       2 'Money'
+0023    | OP_CONSTANT         3 'cents'
+0025    | OP_CONSTANT         4 '5'
+0027    | OP_STRUCT_INIT      1
+0029    | OP_GET_GLOBAL       2 'Money'
+0031    | OP_CONSTANT         3 'cents'
+0033    | OP_CONSTANT         4 '5'
+0035    | OP_STRUCT_INIT      1
+0037    | OP_CALL             2
+0039    | OP_CALL             1
+0041    | OP_POP
+0042   28 OP_NIL
+0043    | OP_RETURN
+== toString ==
+0000    6 OP_GET_GLOBAL       0 '@strConcat'
+0002    | OP_GET_GLOBAL       1 '@numberToString'
+0004    | OP_GET_LOCAL        0
+0006    | OP_GET_PROPERTY     2 'cents'
+0008    | OP_CALL             1
+0010    | OP_CONSTANT         3 ' cents'
+0012    | OP_LIST             2
+0014    | OP_CALL             1
+0016    | OP_RETURN
+== equals ==
+0000   10 OP_GET_LOCAL        0
+0002    | OP_GET_PROPERTY     0 'cents'
+0004    | OP_GET_LOCAL        1
+0006    | OP_GET_PROPERTY     0 'cents'
+0008    | OP_EQUAL
+0009    | OP_RETURN
+== cmp ==
+0000   14 OP_GET_LOCAL        0
+0002    | OP_GET_PROPERTY     0 'cents'
+0004    | OP_GET_LOCAL        1
+0006    | OP_GET_PROPERTY     0 'cents'
+0008    | OP_SUBTRACT
+0009    | OP_RETURN

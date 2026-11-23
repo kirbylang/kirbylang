@@ -467,6 +467,11 @@ Type *typeDeclaredGenericParam(Token name, int index, bool isOpaque) {
   return type;
 }
 
+void typeGenericParamSetBound(Type *param, InternedName traitName) {
+  param->as.genericParam.hasBound = true;
+  param->as.genericParam.boundTrait = traitName;
+}
+
 Type *typeFindGenericParam(Type *type, int index) {
   if (type == NULL)
     return NULL;

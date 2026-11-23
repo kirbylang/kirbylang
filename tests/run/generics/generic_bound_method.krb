@@ -1,0 +1,23 @@
+struct Dog {
+  pub var name: string;
+}
+
+impl Display for Dog {
+  fun toString(self): string = self.name;
+}
+
+struct Box[T] {
+  pub var value: T;
+}
+
+impl Box[T] {
+  pub fun describe[U: Display](self, extra: U): string = extra.toString();
+
+  pub fun label[U: Display](extra: U): string = extra.toString();
+}
+
+fun main(): unit {
+  let box = Box { value: 1 };
+  @println(box.describe(Dog { name: "Rex" }));
+  @println(Box.label(Dog { name: "Fido" }));
+}

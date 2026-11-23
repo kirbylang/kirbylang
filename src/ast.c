@@ -356,6 +356,11 @@ static void printNode(StrBuf *sb, AstNode *node) {
           if (i > 0)
             sb_append(sb, " ");
           sb_append_token(sb, node->as.function.genericParams[i]);
+
+          if (node->as.function.genericBounds[i].length > 0) {
+            sb_append(sb, ":");
+            sb_append_token(sb, node->as.function.genericBounds[i]);
+          }
         }
         sb_append(sb, "]");
       }

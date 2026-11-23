@@ -336,7 +336,7 @@ fun main(): unit {
 }
 ```
 
-Inside the function, nothing is known about `T`, so a `T` can be passed around, returned and stored, but not added or called. Every argument that uses the same `T` has to be the same type.
+Inside the function, nothing is known about `T`, so a `T` can be passed around, returned and stored, but not added or called. Every argument that uses the same `T` has to be the same type. A [trait bound](#trait-bounds) lets the function call a trait's methods on a `T`.
 
 ### Builtin Functions
 
@@ -455,3 +455,17 @@ fun main(): unit {
     @println($"Rect: {rect.get_area()}");  // Rect: 50
 }
 ```
+
+### Trait Bounds
+
+A [generic function](#generic-functions) can say that its type has to implement a trait. Write the trait after a colon. The function can then call the trait's methods on that type.
+
+```
+fun double_area[T: Area](shape: T): f64 = shape.get_area() * 2;
+
+fun main(): unit {
+    @println(double_area(Rect { width: 5, height: 10 }));  // 100
+}
+```
+
+A call with a type that doesn't implement the trait is an error: `Rock doesn't implement Area, required by T.` A parameter has one bound, and only functions and methods can have them for now.

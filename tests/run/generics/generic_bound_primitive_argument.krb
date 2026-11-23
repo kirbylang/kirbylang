@@ -1,0 +1,5 @@
+fun show[T: Display](x: T): string = x.toString();
+
+fun main(): unit {
+  @println(show(5));
+}

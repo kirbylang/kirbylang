@@ -390,6 +390,13 @@ typedef struct {
    */
   Token *genericParams;
   int genericParamCount;
+  /**
+   * The trait each generic parameter must implement, such as the `Display` in
+   * `fun show[T: Display](x: T)`. Has one entry per generic parameter, and an
+   * empty token (length 0) for a parameter with no bound. NULL when
+   * `genericParamCount` is 0.
+   */
+  Token *genericBounds;
 } FunctionNode;
 ```
 

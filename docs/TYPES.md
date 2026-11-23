@@ -169,7 +169,8 @@ the `T` of `fun new(): Self[T]`.
 Inside the function, each parameter is one type that is only equal to itself.
 A value of that type can be passed around, returned and stored, but it can't
 be added, indexed or have a method called on it, because nothing says its type
-supports that. The error is reported in the function, not at the call.
+supports that. A [trait bound](#trait-bounds) is the exception: it allows the
+methods of its trait. The error is reported in the function, not at the call.
 
 ```
 fun add[T](a: T, b: T): T = a + b;   // error: '+' needs two numbers ... got T and T.
@@ -364,6 +365,86 @@ trait Ord: Eq {
 
 - `impl Trait for UndefinedStruct` is a runtime error
 
+### Trait Bounds
+
+A type parameter of a function or a method can name a trait that its type must
+implement. The trait is written after a colon.
+
+```
+trait Shape {
+    fun area(self): f64;
+}
+
+struct Square {
+    pub var side: f64;
+}
+
+impl Shape for Square {
+    fun area(self): f64 = self.side * self.side;
+}
+
+struct Rock {
+    pub var weight: f64;
+}
+
+fun describe[T: Shape](shape: T): f64 = shape.area();
+
+fun main(): unit {
+    describe(Square { side: 2 });   // ok
+    describe(Rock { weight: 1 });   // error: Rock doesn't implement Shape, required by T.
+    describe(5);                    // error: i64 doesn't implement Shape, required by T.
+}
+```
+
+A call is checked once its arguments have filled in the parameter. The error
+points at the first argument that mentions the parameter, or at the call when
+only the type the call is expected to return filled it. A generic function used
+as a value is checked the same way, so `let f: fun (Rock) => f64 = describe;` is
+the same error.
+
+Inside the function, a value of the parameter's type has the methods of its
+trait and nothing else. It also has the methods of the trait's supertraits, so
+`T: Ord` gives `equals` from `Eq`. `Self` in a trait method stands for the
+parameter, so with `T: Cloneable`, `x.clone()` is a `T`.
+
+```
+fun largest[T: Ord](a: T, b: T): T {
+    if (a.cmp(b) >= 0) {
+        return a;
+    }
+
+    return b;
+}
+
+fun compare[T: Eq](a: T, b: T): i64 = a.cmp(b);
+// error: T's bound 'Eq' has no method 'cmp'.
+```
+
+A method the trait doesn't declare is an error in the function, even when every
+type used with it has that method. Fields can't be read either.
+
+A value whose bound is `Display` can also be given to `@println` and put in a
+string with `$"{x}"`, the same as a struct that implements `Display`.
+
+A bounded parameter can be given to another bounded function when its own bound
+has the trait that function needs. `fun f[T: Ord](x: T) = g(x)` works when `g`
+needs `Ord` or `Eq`. It is an error when it doesn't, as when `T` has no bound:
+`T doesn't implement Eq, required by U.`
+
+- A parameter has one bound.
+- The trait has to exist, and a struct name isn't a trait:
+  `Unknown trait 'Nope'.` A trait can be declared after the function that uses it.
+- Only functions and methods can have bounds for now. On a `struct`, `impl` or
+  `type` parameter they are an error: `Bounds on struct type parameters aren't
+  supported yet.`
+- A primitive can't implement a trait yet, so `i64`, `string` and the other
+  primitives can't fill a bounded parameter.
+- `==` on a bounded value is still the built-in equality and doesn't call
+  `equals`. Call `a.equals(b)` to use the trait.
+- A bounded generic function used as a value with no expected type, such as
+  `let f = describe;`, has no type, so its bounds aren't checked. See
+  [Generic Functions](#generic-functions).
+
 ### Functions
 
 Functions are referred to as a type using the `fun ([T0,] [T1,]) => U`
@@ -492,8 +573,9 @@ implement `Eq` -- see [Traits](#traits).
 
 - Some native functions have no signature yet, so calls to them aren't
   checked
-- Generic parameters have no trait bounds yet, so a value of a generic type
-  can't be added, indexed or have methods called on it
+- A generic parameter can have one trait bound, on functions and methods only.
+  A value of a generic type can't be added or indexed, and has methods only
+  through its bound -- see [Trait Bounds](#trait-bounds)
 - A call can't be given type arguments (`parse[f64](s)`)
 - Lists have no type annotation syntax
 - `impl Trait for` a primitive type isn't supported yet, and operators

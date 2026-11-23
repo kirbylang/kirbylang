@@ -1,0 +1,33 @@
+trait Shape {
+  fun area(self): f64;
+  fun scale(self, factor: f64): f64;
+}
+
+struct Square {
+  pub var side: f64;
+}
+
+struct Rect {
+  pub var width: f64;
+  pub var height: f64;
+}
+
+impl Shape for Square {
+  fun area(self): f64 = self.side * self.side;
+  fun scale(self, factor: f64): f64 = self.side * self.side * factor;
+}
+
+impl Shape for Rect {
+  fun area(self): f64 = self.width * self.height;
+  fun scale(self, factor: f64): f64 = self.width * self.height * factor;
+}
+
+fun totalArea[T: Shape](a: T, b: T): f64 = a.area() + b.area();
+
+fun scaled[T: Shape](shape: T): f64 = shape.scale(2);
+
+fun main(): unit {
+  @println(totalArea(Square { side: 2 }, Square { side: 3 }));
+  @println(totalArea(Rect { width: 2, height: 5 }, Rect { width: 1, height: 1 }));
+  @println(scaled(Rect { width: 2, height: 5 }));
+}

@@ -1,0 +1,16 @@
+struct Dog {
+  pub var name: string;
+}
+
+impl Display for Dog {
+  fun toString(self): string = $"Dog {self.name}";
+}
+
+fun announce[T: Display](x: T): unit {
+  @println(x);
+  @println($"hello {x}");
+}
+
+fun main(): unit {
+  announce(Dog { name: "Rex" });
+}

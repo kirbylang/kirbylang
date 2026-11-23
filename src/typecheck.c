@@ -354,9 +354,11 @@ Type *typchkTypeEnvGetImplTargetType(TypeEnv *env) {
 // is also written to `types`, and numbered from `firstIndex`. A parameter
 // callers fill in is made when
 // `isOpaque` is false, and the fixed type the declaration's own body sees when
-// it is true.
-static int typchkEnterGenericParams(TypeEnv *env, Token *names, int count,
-                                    int firstIndex, bool isOpaque,
+// it is true. `bounds` has the trait each parameter must implement, with an
+// empty token for none, or is NULL where a declaration has no bounds. An
+// unknown trait is reported once, for the form callers fill in.
+static int typchkEnterGenericParams(TypeEnv *env, Token *names, Token *bounds,
+                                    int count, int firstIndex, bool isOpaque,
                                     Type **types) {
   int previousCount = env->_genericParamCount;
 
@@ -374,6 +376,18 @@ static int typchkEnterGenericParams(TypeEnv *env, Token *names, int count,
     }
 
     types[i] = typeDeclaredGenericParam(names[i], firstIndex + i, isOpaque);
+
+    if (bounds != NULL && bounds[i].length > 0) {
+      Type *boundTrait = typchkTypeEnvLookupTrait(env, bounds[i]);
+
+      if (boundTrait != NULL) {
+        typeGenericParamSetBound(types[i], boundTrait->as.trait_.name);
+      } else if (!isOpaque) {
+        typchkErrorAtTokenFmt(&bounds[i], "Unknown trait '%.*s'.",
+                              bounds[i].length, bounds[i].start);
+      }
+    }
+
     bindingArrayWrite(&env->_genericParams, &env->_genericParamCount,
                       &env->_genericParamCapacity, names[i], types[i]);
   }
@@ -383,6 +397,61 @@ static int typchkEnterGenericParams(TypeEnv *env, Token *names, int count,
 
 static void typchkLeaveGenericParams(TypeEnv *env, int previousCount) {
   env->_genericParamCount = previousCount;
+}
+
+// Whether values of `type` have the methods of a trait. A struct needs an
+// impl. A generic parameter has them through its bound, or through a
+// supertrait of its bound, so `T: Ord` also gives `Eq`.
+static bool typchkTypeImplementsTrait(TypeEnv *env, Type *type,
+                                      InternedName traitName) {
+  if (type == NULL || type->kind != TYPE_GENERIC_PARAM)
+    return typeStructImplementsTrait(type, traitName);
+
+  if (!type->as.genericParam.hasBound)
+    return false;
+
+  InternedName current = type->as.genericParam.boundTrait;
+
+  // A supertrait cycle is reported elsewhere, so the walk must still end
+  for (int step = 0; step <= env->traitCount; step++) {
+    if (internedNamesEqual(current, traitName))
+      return true;
+
+    Type *trait = typchkTypeEnvLookupTrait(env, internedNameToToken(current));
+
+    if (trait == NULL || !trait->as.trait_.hasSupertrait)
+      return false;
+
+    current = trait->as.trait_.supertraitName;
+  }
+
+  return false;
+}
+
+// The type of a method a generic parameter's bound gives it, with `Self` read
+// as the parameter. The method is looked up on the bound trait and then on its
+// supertraits. NULL if there is none.
+static Type *typchkBoundMethodLookup(TypeEnv *env, Type *param, Token name) {
+  InternedName current = param->as.genericParam.boundTrait;
+
+  for (int step = 0; step <= env->traitCount; step++) {
+    Type *trait = typchkTypeEnvLookupTrait(env, internedNameToToken(current));
+
+    if (trait == NULL)
+      return NULL;
+
+    Type *methodType = typeTraitInstanceMethodLookup(trait, name);
+
+    if (methodType != NULL)
+      return typeSubstituteSelf(methodType, param);
+
+    if (!trait->as.trait_.hasSupertrait)
+      return NULL;
+
+    current = trait->as.trait_.supertraitName;
+  }
+
+  return NULL;
 }
 
 // Names that only native signatures can use: generic parameters T, U, V and
@@ -633,7 +702,8 @@ static Type *typchkLookupVariableType(TypeEnv *env, Token *name);
 static bool typchkHasDeclaredGenericParams(Type *type);
 static bool typchkCheckGenericFunctionValue(TypeEnv *env, AstNode *node,
                                             Type *genericType, Type *expected);
-static Type *typchkFillGenericFunctionValue(Type *genericType, Type *expected);
+static Type *typchkFillGenericFunctionValue(TypeEnv *env, AstNode *node,
+                                            Type *genericType, Type *expected);
 static Type *typchkStructInitDeclaration(TypeEnv *env, StructInitNode *si);
 static bool typchkCheckGenericStructInit(TypeEnv *env, AstNode *node,
                                          Type *expected);
@@ -1221,9 +1291,9 @@ static Type *typchkInferUnary(TypeEnv *env, AstNode *node) {
 
 // Infer the type of a binary expression
 // Does the type have a Display impl, and so a toString() method?
-static bool typeImplementsDisplay(Type *type) {
-  return typeStructImplementsTrait(
-      type, internTokenName(tokenFromCString("Display")));
+static bool typeImplementsDisplay(TypeEnv *env, Type *type) {
+  return typchkTypeImplementsTrait(
+      env, type, internTokenName(tokenFromCString("Display")));
 }
 
 // The user-facing symbol for a binary operator token, used in error messages.
@@ -1373,14 +1443,15 @@ static Type *typchkInferCast(TypeEnv *env, AstNode *node) {
  * Chooses how a value of this type becomes a string. Returns false when it
  * can't: only strings, numbers, bool, and types that implement Display can.
  */
-static bool chooseStringConversion(Type *type, StringConversion *conversion) {
+static bool chooseStringConversion(TypeEnv *env, Type *type,
+                                   StringConversion *conversion) {
   if (typesEqual(type, typeString())) {
     *conversion = STRING_CONVERSION_STRING;
   } else if (typeIsNumber(type)) {
     *conversion = STRING_CONVERSION_NUMBER;
   } else if (typesEqual(type, typeBool())) {
     *conversion = STRING_CONVERSION_BOOL;
-  } else if (typeImplementsDisplay(type)) {
+  } else if (typeImplementsDisplay(env, type)) {
     *conversion = STRING_CONVERSION_DISPLAY;
   } else {
     return false;
@@ -1417,7 +1488,7 @@ static Type *typchkInferInterpString(TypeEnv *env, AstNode *node) {
       continue;
     }
 
-    if (!chooseStringConversion(type, &part->conversion)) {
+    if (!chooseStringConversion(env, type, &part->conversion)) {
       typchkErrorAtNodeFmt(part->expr,
                            "Can't interpolate %s. Only string, numbers, bool, "
                            "and types that implement Display can be "
@@ -1452,9 +1523,44 @@ static bool typchkHasDeclaredGenericParams(Type *type) {
   return false;
 }
 
+// The index of the first generic parameter of `genericType` that was filled
+// with a type that doesn't implement the parameter's bound, or -1. A parameter
+// that wasn't filled, or whose type isn't fully known yet, can't be judged.
+static int typchkUnmetBoundIndex(TypeEnv *env, Type *genericType,
+                                 Type **bindings, int count) {
+  for (int i = 0; i < count; i++) {
+    Type *param = typeFindGenericParam(genericType, i);
+
+    if (param == NULL || !param->as.genericParam.hasBound ||
+        !typeIsFullyKnown(bindings[i]))
+      continue;
+
+    if (!typchkTypeImplementsTrait(env, bindings[i],
+                                   param->as.genericParam.boundTrait))
+      return i;
+  }
+
+  return -1;
+}
+
+static void typchkErrorUnmetBound(AstNode *node, Type *genericType,
+                                  Type **bindings, int index) {
+  Type *param = typeFindGenericParam(genericType, index);
+  InternedName bound = param->as.genericParam.boundTrait;
+  InternedName name = param->as.genericParam.name;
+
+  typchkErrorAtNodeFmt(node, "%s doesn't implement %.*s, required by %.*s.",
+                       typeToString(bindings[index]), bound.length,
+                       internedNameChars(bound), name.length,
+                       internedNameChars(name));
+}
+
 // A generic function type with its parameters filled in from `expected`,
-// which is a function type that may be partly unknown.
-static Type *typchkFillGenericFunctionValue(Type *genericType, Type *expected) {
+// which is a function type that may be partly unknown. A parameter filled
+// with a type that doesn't implement its bound is reported at `node`, and the
+// result is NULL.
+static Type *typchkFillGenericFunctionValue(TypeEnv *env, AstNode *node,
+                                            Type *genericType, Type *expected) {
   int count = typeGenericParamCount(genericType);
   Type **bindings = (Type **)typesAllocRaw((size_t)count * sizeof(Type *));
   memset(bindings, 0, (size_t)count * sizeof(Type *));
@@ -1470,6 +1576,13 @@ static Type *typchkFillGenericFunctionValue(Type *genericType, Type *expected) {
                           expected->as.function.returnType, bindings, count);
   }
 
+  int unmet = typchkUnmetBoundIndex(env, genericType, bindings, count);
+
+  if (unmet >= 0) {
+    typchkErrorUnmetBound(node, genericType, bindings, unmet);
+    return NULL;
+  }
+
   return typeSubstituteGenericParams(genericType, bindings, count);
 }
 
@@ -1478,8 +1591,11 @@ static Type *typchkFillGenericFunctionValue(Type *genericType, Type *expected) {
 // function's generic parameters, and what is left must be accepted by it.
 static bool typchkCheckGenericFunctionValue(TypeEnv *env, AstNode *node,
                                             Type *genericType, Type *expected) {
-  (void)env;
-  Type *filled = typchkFillGenericFunctionValue(genericType, expected);
+  Type *filled =
+      typchkFillGenericFunctionValue(env, node, genericType, expected);
+
+  if (filled == NULL)
+    return false;
 
   if (typeAccepts(expected, typeEraseGenericParams(filled)))
     return true;
@@ -1627,7 +1743,8 @@ static Type *typchkInferCall(TypeEnv *env, AstNode *node) {
       for (int i = 0; i < c->argCount; i++) {
         Type *argType = typchkInfer(env, c->args[i]);
 
-        if (i == 0 && isPrintNative(name) && typeImplementsDisplay(argType))
+        if (i == 0 && isPrintNative(name) &&
+            typeImplementsDisplay(env, argType))
           c->argUsesDisplay = true;
       }
 
@@ -1692,9 +1809,14 @@ static bool typchkUnifyValue(TypeEnv *env, AstNode *arg, Type *pattern,
 
     if (actual != NULL && actual->kind == TYPE_FN && known->kind == TYPE_FN &&
         actual->as.function.paramCount == known->as.function.paramCount &&
-        typchkHasDeclaredGenericParams(actual))
-      actual =
-          typeEraseGenericParams(typchkFillGenericFunctionValue(actual, known));
+        typchkHasDeclaredGenericParams(actual)) {
+      Type *filled = typchkFillGenericFunctionValue(env, arg, actual, known);
+
+      if (filled == NULL)
+        return false;
+
+      actual = typeEraseGenericParams(filled);
+    }
   }
 
   if (actual == NULL) {
@@ -1718,6 +1840,22 @@ static bool typchkUnifyValue(TypeEnv *env, AstNode *arg, Type *pattern,
 
   typeBindGenericParams(param, actual, bindings, genericCount);
   return true;
+}
+
+// The first argument of a call whose parameter type mentions generic parameter
+// `index`, to point an error at. The call itself when none does, as when only
+// the type the call is expected to return filled it.
+static AstNode *typchkArgumentOfParam(AstNode *call, Type *calleeType,
+                                      int index) {
+  CallNode *c = &call->as.call;
+
+  for (int i = 0; i < c->argCount; i++) {
+    if (typeFindGenericParam(calleeType->as.function.paramTypes[i], index) !=
+        NULL)
+      return c->args[i];
+  }
+
+  return call;
 }
 
 // Checks a call to a function with generic parameters, such as
@@ -1764,6 +1902,15 @@ static Type *typchkCheckGenericCall(TypeEnv *env, AstNode *node,
                             internedNameChars(param->as.genericParam.name));
       return NULL;
     }
+  }
+
+  // Each type that filled a parameter has to implement the parameter's bound
+  int unmet = typchkUnmetBoundIndex(env, calleeType, bindings, genericCount);
+
+  if (unmet >= 0) {
+    typchkErrorUnmetBound(typchkArgumentOfParam(node, calleeType, unmet),
+                          calleeType, bindings, unmet);
+    return NULL;
   }
 
   return typeEraseGenericParams(typeSubstituteGenericParams(
@@ -1868,6 +2015,27 @@ static Type *typchkInferGet(TypeEnv *env, AstNode *node) {
   // No type found, bail
   if (objectType == NULL)
     return NULL;
+
+  // A generic parameter has the methods of its bound, and nothing else
+  if (objectType->kind == TYPE_GENERIC_PARAM &&
+      objectType->as.genericParam.hasBound) {
+    Type *methodType = typchkBoundMethodLookup(env, objectType, get->name);
+
+    if (methodType == NULL) {
+      InternedName bound = objectType->as.genericParam.boundTrait;
+      Type *boundTrait =
+          typchkTypeEnvLookupTrait(env, internedNameToToken(bound));
+
+      // A trait that didn't resolve was already reported
+      if (!typeTraitHasUnresolvedMembers(boundTrait))
+        typchkErrorAtTokenFmt(
+            &get->name, "%s's bound '%.*s' has no method '%.*s'.",
+            typeToString(objectType), bound.length, internedNameChars(bound),
+            get->name.length, get->name.start);
+    }
+
+    return methodType;
+  }
 
   // The object's type isn't a struct
   if (objectType->kind != TYPE_STRUCT) {
@@ -2638,8 +2806,9 @@ static void typchkCheckGenericFunctionBody(TypeEnv *env, FunctionNode *fn,
   for (int i = 0; i < implCount; i++)
     fixed[i] = env->_implGenericTypes[i];
 
-  int previousCount = typchkEnterGenericParams(
-      env, fn->genericParams, count, implCount, true, fixed + implCount);
+  int previousCount =
+      typchkEnterGenericParams(env, fn->genericParams, fn->genericBounds, count,
+                               implCount, true, fixed + implCount);
 
   Type **paramTypes =
       fn->arity > 0 ? (Type **)typesAllocRaw(fn->arity * sizeof(Type *)) : NULL;
@@ -2667,9 +2836,9 @@ static void typchkCheckFunctionDecl(TypeEnv *env, AstNode *node) {
       genericCount > 0
           ? (Type **)typesAllocRaw((size_t)genericCount * sizeof(Type *))
           : NULL;
-  int previousCount =
-      typchkEnterGenericParams(env, fn->genericParams, genericCount,
-                               env->_implGenericCount, false, placeholders);
+  int previousCount = typchkEnterGenericParams(
+      env, fn->genericParams, fn->genericBounds, genericCount,
+      env->_implGenericCount, false, placeholders);
 
   for (int i = 0; i < fn->arity; i++) {
     paramTypes[i] = (fn->paramTypes != NULL && fn->paramTypes[i] != NULL)
@@ -2780,9 +2949,9 @@ static Type *typchkResolveFunctionSignature(TypeEnv *env, FunctionNode *fn) {
           ? (Type **)typesAllocRaw((size_t)fn->genericParamCount *
                                    sizeof(Type *))
           : NULL;
-  int previousCount =
-      typchkEnterGenericParams(env, fn->genericParams, fn->genericParamCount,
-                               env->_implGenericCount, false, placeholders);
+  int previousCount = typchkEnterGenericParams(
+      env, fn->genericParams, fn->genericBounds, fn->genericParamCount,
+      env->_implGenericCount, false, placeholders);
 
   for (int i = 0; i < fn->arity; i++) {
     if (fn->paramTypes == NULL || fn->paramTypes[i] == NULL) {
@@ -2915,9 +3084,9 @@ static void typchkResolvePendingAlias(TypeEnv *env,
   if (decl->genericParamCount > 0) {
     Type **placeholders = (Type **)typesAllocRaw(
         (size_t)decl->genericParamCount * sizeof(Type *));
-    int previousCount = typchkEnterGenericParams(env, decl->genericParams,
-                                                 decl->genericParamCount, 0,
-                                                 false, placeholders);
+    int previousCount = typchkEnterGenericParams(
+        env, decl->genericParams, /*bounds=*/NULL, decl->genericParamCount, 0,
+        false, placeholders);
     Type *target = typchkResolveType(env, decl->target);
     typchkLeaveGenericParams(env, previousCount);
 
@@ -2945,9 +3114,9 @@ static void typchkResolveStructFields(TypeEnv *env, AstNode *node) {
           ? (Type **)typesAllocRaw((size_t)struct_->genericParamCount *
                                    sizeof(Type *))
           : NULL;
-  int previousCount = typchkEnterGenericParams(env, struct_->genericParams,
-                                               struct_->genericParamCount, 0,
-                                               false, placeholders);
+  int previousCount = typchkEnterGenericParams(
+      env, struct_->genericParams, /*bounds=*/NULL, struct_->genericParamCount,
+      0, false, placeholders);
 
   UninternedTypeMember *fields =
       struct_->fieldCount > 0
@@ -3341,8 +3510,9 @@ static void typchkRegisterImplMethods(TypeEnv *env, AstNode *node) {
       declaredCount > 0
           ? (Type **)typesAllocRaw((size_t)declaredCount * sizeof(Type *))
           : NULL;
-  int previousGenericCount = typchkEnterGenericParams(
-      env, impl->genericParams, declaredCount, 0, false, implParams);
+  int previousGenericCount =
+      typchkEnterGenericParams(env, impl->genericParams, /*bounds=*/NULL,
+                               declaredCount, 0, false, implParams);
 
   typchkTypeEnvSetImplTargetType(env, structType);
   env->_implGenericTypes = implParams;
@@ -3423,8 +3593,8 @@ static void checkImplMethodBodies(TypeEnv *env, AstNode *node) {
   if (isGenericImpl) {
     fixedParams =
         (Type **)typesAllocRaw((size_t)declaredCount * sizeof(Type *));
-    typchkEnterGenericParams(env, impl->genericParams, declaredCount, 0, true,
-                             fixedParams);
+    typchkEnterGenericParams(env, impl->genericParams, /*bounds=*/NULL,
+                             declaredCount, 0, true, fixedParams);
     env->_implGenericTypes = fixedParams;
     env->_implGenericCount = declaredCount;
     env->_currentImplSelfType =

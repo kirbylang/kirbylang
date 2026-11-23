@@ -1,0 +1,3 @@
+fun nameOf[T: Display](x: T): string = x.name;
+
+fun main(): unit {}

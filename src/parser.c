@@ -1433,8 +1433,14 @@ static AstNode *functionTail(Parser *p, Token name, int line, bool isMethod,
  *
  * struct Struct[T, U] {}
  * fun sum[T](a: T, b: T): T = a + b;
+ * fun show[T: Display](x: T): string = x.toString();
+ *
+ * `boundBuf` receives the trait after each `:`, or an empty token for a
+ * parameter without one. It is NULL where bounds aren't supported, and a `:`
+ * is then an error with `noBoundsMessage`.
  */
-static int parseGenericParamList(Parser *p, Token *paramBuf) {
+static int parseGenericParamList(Parser *p, Token *paramBuf, Token *boundBuf,
+                                 const char *noBoundsMessage) {
   int count = 0;
 
   if (match(p, TOKEN_LEFT_BRACKET)) {
@@ -1443,7 +1449,22 @@ static int parseGenericParamList(Parser *p, Token *paramBuf) {
         error_at_current(p, "Can't have more than 255 generic parameters.");
       }
       consumeDeclarationIdentifier(p, "Expect generic parameter name.");
-      paramBuf[count++] = p->previous;
+      paramBuf[count] = p->previous;
+
+      if (boundBuf != NULL)
+        memset(&boundBuf[count], 0, sizeof(Token));
+
+      if (match(p, TOKEN_COLON)) {
+        if (boundBuf == NULL)
+          parse_error(p, noBoundsMessage);
+
+        consume(p, TOKEN_IDENTIFIER, "Expect trait name after ':'.");
+
+        if (boundBuf != NULL)
+          boundBuf[count] = p->previous;
+      }
+
+      count++;
     } while (match(p, TOKEN_COMMA));
     consume(p, TOKEN_RIGHT_BRACKET, "Expect ']' after generic parameters.");
   }
@@ -1457,7 +1478,9 @@ static AstNode *functionDeclaration(Parser *p, bool isMethod) {
   int line = name.line;
 
   Token genericParamBuf[256];
-  int genericParamCount = parseGenericParamList(p, genericParamBuf);
+  Token genericBoundBuf[256];
+  int genericParamCount = parseGenericParamList(
+      p, genericParamBuf, genericBoundBuf, /*noBoundsMessage=*/NULL);
 
   AstNode *node = functionTail(p, name, line, isMethod, /*isLambda=*/false,
                                /*signatureOnly=*/false);
@@ -1467,8 +1490,14 @@ static AstNode *functionDeclaration(Parser *p, bool isMethod) {
         (Token *)astAllocRaw(genericParamCount * sizeof(Token));
     memcpy(genericParams, genericParamBuf, genericParamCount * sizeof(Token));
     node->as.function.genericParams = genericParams;
+
+    Token *genericBounds =
+        (Token *)astAllocRaw(genericParamCount * sizeof(Token));
+    memcpy(genericBounds, genericBoundBuf, genericParamCount * sizeof(Token));
+    node->as.function.genericBounds = genericBounds;
   } else {
     node->as.function.genericParams = NULL;
+    node->as.function.genericBounds = NULL;
   }
   node->as.function.genericParamCount = genericParamCount;
 
@@ -1488,7 +1517,9 @@ static AstNode *structDeclaration(Parser *p) {
   int line = name.line;
 
   Token genericParamBuf[256];
-  int genericParamCount = parseGenericParamList(p, genericParamBuf);
+  int genericParamCount = parseGenericParamList(
+      p, genericParamBuf, /*boundBuf=*/NULL,
+      "Bounds on struct type parameters aren't supported yet.");
 
   consume(p, TOKEN_LEFT_BRACE, "Expect '{' before struct body.");
 
@@ -1580,7 +1611,9 @@ static AstNode *implDeclaration(Parser *p) {
   int line = name.line;
 
   Token genericParamBuf[256];
-  int genericParamCount = parseGenericParamList(p, genericParamBuf);
+  int genericParamCount = parseGenericParamList(
+      p, genericParamBuf, /*boundBuf=*/NULL,
+      "Bounds on impl type parameters aren't supported yet.");
 
   bool hasTraitName = false;
   Token traitName = name;
@@ -1737,7 +1770,9 @@ static AstNode *typeAliasDeclaration(Parser *p) {
   int line = name.line;
 
   Token paramBuf[256];
-  int paramCount = parseGenericParamList(p, paramBuf);
+  int paramCount = parseGenericParamList(
+      p, paramBuf, /*boundBuf=*/NULL,
+      "Bounds on type alias parameters aren't supported yet.");
 
   consume(p, TOKEN_EQUAL, "Expect '=' after type alias name.");
   AstNode *target = parseType(p);

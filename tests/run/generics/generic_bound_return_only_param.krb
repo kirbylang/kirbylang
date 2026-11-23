@@ -1,0 +1,9 @@
+struct Rock {
+  pub var weight: f64;
+}
+
+fun none[T: Display](): [T] = [];
+
+fun main(): unit {
+  let rocks: [Rock] = none();
+}

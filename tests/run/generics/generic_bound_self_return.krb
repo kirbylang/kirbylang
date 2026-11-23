@@ -1,0 +1,20 @@
+trait Cloneable {
+  fun clone(self): Self;
+}
+
+struct Point {
+  pub var x: f64;
+  pub var y: f64;
+}
+
+impl Cloneable for Point {
+  fun clone(self): Self = Point { x: self.x + 1, y: self.y };
+}
+
+fun twice[T: Cloneable](value: T): T = value.clone().clone();
+
+fun main(): unit {
+  let p = twice(Point { x: 1, y: 2 });
+  @println(p.x);
+  @println(p.y);
+}

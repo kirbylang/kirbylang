@@ -1,0 +1,18 @@
+struct Dog {
+  pub var name: string;
+}
+
+impl Display for Dog {
+  fun toString(self): string = self.name;
+}
+
+fun show[T: Display](x: T): string = x.toString();
+
+fun apply[A, B](value: A, f: fun (A) => B): B = f(value);
+
+let f: fun (Dog) => string = show;
+
+fun main(): unit {
+  @println(f(Dog { name: "Rex" }));
+  @println(apply(Dog { name: "Fido" }, show));
+}
