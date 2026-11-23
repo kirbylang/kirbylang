@@ -1,0 +1,18 @@
+struct Test {
+    pub let value: u8;
+}
+
+impl Test {
+    pub fun new(value: u8): Self = Self { value: value };
+}
+
+impl Eq for Test {
+    fun equals(self, other: Self): bool = self.value == other.value;
+}
+
+fun main(): unit {
+    let a = Test.new(2);
+    let b = Test.new(2);
+
+    @assert(a == b, "They are not the same");
+}

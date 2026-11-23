@@ -134,7 +134,6 @@ TokenType token;
 const char *trait;  // "Add"
 const char *method; // "add"
 bool isUnary;
-bool definesTrait;
 } OperatorTrait;
 
 ```

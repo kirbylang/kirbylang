@@ -289,12 +289,56 @@ static bool invokeStatic(ObjStruct *struct_, ObjString *name, int argCount) {
   return call(AS_CLOSURE(method), argCount);
 }
 
+#define NUMBERS_OF_SAME_TYPE "Operands must be two numbers of the same type."
+
+static bool numberBinary(NumberOp op, const char *mismatchMessage);
+static bool numberNegate(void);
+static bool numberThreeWayCompare(void);
+
+// The methods a number has for the operator traits (Add, Sub, Mul, Div, Mod,
+// Neg, Eq and Ord), so generic code that calls them works when the type
+// argument is a number.
+static bool invokeNumber(ObjString *name, int argCount) {
+  static const struct {
+    const char *name;
+    NumberOp op;
+  } arithmetic[] = {
+      {"add", NUMBER_OP_ADD},      {"sub", NUMBER_OP_SUBTRACT},
+      {"mul", NUMBER_OP_MULTIPLY}, {"div", NUMBER_OP_DIVIDE},
+      {"mod", NUMBER_OP_MODULO},
+  };
+
+  for (size_t i = 0; i < sizeof(arithmetic) / sizeof(arithmetic[0]); i++) {
+    if (strcmp(name->chars, arithmetic[i].name) == 0 && argCount == 1)
+      return numberBinary(arithmetic[i].op, NUMBERS_OF_SAME_TYPE);
+  }
+
+  if (strcmp(name->chars, "neg") == 0 && argCount == 0)
+    return numberNegate();
+
+  if (strcmp(name->chars, "equals") == 0 && argCount == 1) {
+    Value b = popFromStack();
+    Value a = popFromStack();
+    pushOnStack(BOOL_VAL(valuesEqual(a, b)));
+    return true;
+  }
+
+  if (strcmp(name->chars, "cmp") == 0 && argCount == 1)
+    return numberThreeWayCompare();
+
+  runtimeError(&vm, "Only instances have methods.");
+  return false;
+}
+
 static bool invoke(ObjString *name, int argCount) {
   Value caller = peekStack(argCount);
 
   if (IS_STRUCT(caller)) {
     return invokeStatic(AS_STRUCT(caller), name, argCount);
   }
+
+  if (IS_NUMBER(caller))
+    return invokeNumber(name, argCount);
 
   if (!IS_INSTANCE(caller)) {
     runtimeError(&vm, "Only instances have methods.");
@@ -472,8 +516,6 @@ static const char *arrayPosition(Value index, int count, int *position) {
   return NULL;
 }
 
-#define NUMBERS_OF_SAME_TYPE "Operands must be two numbers of the same type."
-
 static bool sameNumberKind(Value a, Value b) {
   return IS_NUMBER(a) && IS_NUMBER(b) && a.as.number.kind == b.as.number.kind;
 }
@@ -545,6 +587,59 @@ static bool numberBinary(NumberOp op, const char *mismatchMessage) {
   popFromStack();
   pushOnStack(numberValue(kind, result));
 
+  return true;
+}
+
+// Replaces the number on top of the stack with its negation.
+static bool numberNegate(void) {
+  Value value = peekStack(0);
+
+  if (!IS_NUMBER(value)) {
+    runtimeError(&vm, "Operand must be a number.");
+    return false;
+  }
+
+  NumberKind kind = value.as.number.kind;
+  NumberPayload result;
+
+  if (!numberNegateValue(kind, value.as.number.as, &result)) {
+    char operand[NUMBER_STRING_MAX];
+    char expression[NUMBER_STRING_MAX + 4];
+
+    formatNumber(kind, value.as.number.as, operand, sizeof(operand));
+    snprintf(expression, sizeof(expression), "-(%s)", operand);
+    integerOverflowError(kind, expression);
+    return false;
+  }
+
+  popFromStack();
+  pushOnStack(numberValue(kind, result));
+
+  return true;
+}
+
+// Replaces two numbers with -1, 0 or 1 for whether the first is less than,
+// equal to or greater than the second.
+static bool numberThreeWayCompare(void) {
+  Value b = peekStack(0);
+  Value a = peekStack(1);
+
+  if (!sameNumberKind(a, b)) {
+    runtimeError(&vm, NUMBERS_OF_SAME_TYPE);
+    return false;
+  }
+
+  NumberKind kind = a.as.number.kind;
+  int64_t order = 0;
+
+  if (numberOpLessThan(kind, a.as.number.as, b.as.number.as))
+    order = -1;
+  else if (numberOpLessThan(kind, b.as.number.as, a.as.number.as))
+    order = 1;
+
+  popFromStack();
+  popFromStack();
+  pushOnStack(numberValue(NUMBER_KIND_I64, (NumberPayload){.i64 = order}));
   return true;
 }
 
@@ -682,32 +777,10 @@ static InterpretResult run(void) {
       pushOnStack(result);
       break;
     }
-    case OP_NEGATE: {
-      Value value = peekStack(0);
-
-      if (!IS_NUMBER(value)) {
-        runtimeError(&vm, "Operand must be a number.");
+    case OP_NEGATE:
+      if (!numberNegate())
         return INTERPRET_RUNTIME_ERROR;
-      }
-
-      NumberKind kind = value.as.number.kind;
-      NumberPayload result;
-
-      if (!numberNegateValue(kind, value.as.number.as, &result)) {
-        char operand[NUMBER_STRING_MAX];
-        char expression[NUMBER_STRING_MAX + 4];
-
-        formatNumber(kind, value.as.number.as, operand, sizeof(operand));
-        snprintf(expression, sizeof(expression), "-(%s)", operand);
-        integerOverflowError(kind, expression);
-        return INTERPRET_RUNTIME_ERROR;
-      }
-
-      popFromStack();
-      pushOnStack(numberValue(kind, result));
-
       break;
-    }
     case OP_CAST: {
       uint8_t target = READ_BYTE();
       Value value = popFromStack();

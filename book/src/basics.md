@@ -336,7 +336,7 @@ fun main(): unit {
 }
 ```
 
-Inside the function, nothing is known about `T`, so a `T` can be passed around, returned and stored, but not added or called. Every argument that uses the same `T` has to be the same type. A [trait bound](#trait-bounds) lets the function call a trait's methods on a `T`.
+Inside the function, nothing is known about `T`, so a `T` can be passed around, returned and stored, but not added, compared or called. Every argument that uses the same `T` has to be the same type. A [trait bound](#trait-bounds) lets the function call a trait's methods on a `T`.
 
 ### Builtin Functions
 
@@ -496,7 +496,7 @@ impl Labeled[T] {
 
 #### Operators
 
-An operator on a struct calls a method of a trait: `a + b` calls `a.add(b)` from the `Add` trait. The traits are `Add`, `Sub`, `Mul`, `Div`, `Mod` (`+ - * / %`), `Neg` (unary `-`), `Eq` (`==` and `!=`) and `Ord` (`<`, `>`, `<=` and `>=`).
+An operator on a struct calls a method of a trait: `a + b` calls `a.add(b)` from the `Add` trait. The traits are `Add`, `Sub`, `Mul`, `Div`, `Mod` (`+ - * / %`), `Neg` (unary `-`), `Eq` (`==` and `!=`) and `Ord` (`<`, `>`, `<=` and `>=`). A bound lets generic code use them, and numbers can be used with any of these bounds.
 
 ```
 struct Vec2 {
@@ -509,8 +509,11 @@ impl Add for Vec2 {
         Vec2 { x: self.x + other.x, y: self.y + other.y };
 }
 
+fun sum[T: Add](a: T, b: T): T = a + b;
+
 fun main(): unit {
-    let v = Vec2 { x: 1, y: 2 } + Vec2 { x: 3, y: 4 };   // Vec2 { x: 4, y: 6 }
+    @println(sum(1, 2));                                   // 3
+    let v = sum(Vec2 { x: 1, y: 2 }, Vec2 { x: 3, y: 4 }); // Vec2 { x: 4, y: 6 }
 }
 ```
 

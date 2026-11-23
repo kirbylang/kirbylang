@@ -277,6 +277,27 @@ Type *typchkTypeEnvLookupTrait(TypeEnv *env, Token name) {
   return bindingArrayLookup(env->traits, env->traitCount, name);
 }
 
+// Defines a builtin trait of one method that returns `Self`, as in
+// `fun add(self, other: Self): Self`. `takesOther` is false for `fun neg(self):
+// Self`.
+static void typchkDefineOperatorTrait(TypeEnv *env, const char *traitName,
+                                      const char *methodName, bool takesOther) {
+  Type **params = NULL;
+
+  if (takesOther) {
+    params = (Type **)typesAllocRaw(sizeof(Type *));
+    params[0] = typeSelfPlaceholder();
+  }
+
+  UninternedTypeMember members[] = {
+      {tokenFromCString(methodName),
+       typeFunction(params, takesOther ? 1 : 0, typeSelfPlaceholder())},
+  };
+  Type *trait = typeTrait(tokenFromCString(traitName), NULL, 0, members, 1);
+  typeTraitMarkBuiltin(trait);
+  typchkTypeEnvRegisterTrait(env, tokenFromCString(traitName), trait);
+}
+
 /**
  * Define the builtin traits
  *
@@ -318,33 +339,14 @@ static void typchkTypeEnvDefineBuiltinTraits(TypeEnv *env) {
   typeTraitMarkBuiltin(ord);
   typchkTypeEnvRegisterTrait(env, tokenFromCString("Ord"), ord);
 
-  // Operator traits: Add, Sub, Mul, Div, Mod and Neg
+  // Add, Sub, Mul, Div, Mod and Neg
 
-  int operatorCount;
-  operatorTraitAt(0, &operatorCount);
-
-  for (int i = 0; i < operatorCount; i++) {
-    const OperatorTrait *entry = operatorTraitAt(i, &operatorCount);
-
-    if (!entry->definesTrait)
-      continue;
-
-    Type **params = NULL;
-
-    if (!entry->isUnary) {
-      params = (Type **)typesAllocRaw(sizeof(Type *));
-      params[0] = typeSelfPlaceholder();
-    }
-
-    UninternedTypeMember members[] = {
-        {tokenFromCString(entry->method),
-         typeFunction(params, entry->isUnary ? 0 : 1, typeSelfPlaceholder())},
-    };
-    Type *trait =
-        typeTrait(tokenFromCString(entry->trait), NULL, 0, members, 1);
-    typeTraitMarkBuiltin(trait);
-    typchkTypeEnvRegisterTrait(env, tokenFromCString(entry->trait), trait);
-  }
+  typchkDefineOperatorTrait(env, "Add", "add", /*takesOther=*/true);
+  typchkDefineOperatorTrait(env, "Sub", "sub", /*takesOther=*/true);
+  typchkDefineOperatorTrait(env, "Mul", "mul", /*takesOther=*/true);
+  typchkDefineOperatorTrait(env, "Div", "div", /*takesOther=*/true);
+  typchkDefineOperatorTrait(env, "Mod", "mod", /*takesOther=*/true);
+  typchkDefineOperatorTrait(env, "Neg", "neg", /*takesOther=*/false);
 
   // Default
 
@@ -470,11 +472,31 @@ static bool typchkTraitChainHas(TypeEnv *env, InternedName trait,
   return false;
 }
 
+// Numbers have the operator traits built in, until primitives can implement
+// traits themselves. Only a signed number can be negated.
+static bool typchkNumberImplementsTrait(Type *number, InternedName traitName) {
+  int count = getOperatorTraitCount();
+
+  for (int i = 0; i < count; i++) {
+    const OperatorTrait *entry = &table[i];
+
+    if (!internedNameEqualsToken(traitName, tokenFromCString(entry->trait)))
+      continue;
+
+    return !entry->isUnary || numberKindInfo(number->as.number.kind)->isSigned;
+  }
+
+  return false;
+}
+
 // Whether values of `type` have the methods of a trait. A struct needs an
 // impl. A generic parameter has them through a bound, or through a supertrait
 // of a bound, so `T: Ord` also gives `Eq`.
 static bool typchkTypeImplementsTrait(TypeEnv *env, Type *type,
                                       InternedName traitName) {
+  if (type != NULL && typeIsNumber(type))
+    return typchkNumberImplementsTrait(type, traitName);
+
   if (type == NULL || type->kind != TYPE_GENERIC_PARAM)
     return typeStructImplementsTrait(type, traitName);
 
@@ -1334,9 +1356,9 @@ static bool typchkPairNumberType(TypeEnv *env, AstNode *value, Type **type,
 
 // Infer the type of a unary expressoin
 // Whether an operator can work on `type` through a trait, rather than as a
-// built-in: a struct.
+// built-in: a struct, or a generic parameter.
 static bool typchkIsTraitOperand(Type *type) {
-  return type->kind == TYPE_STRUCT;
+  return type->kind == TYPE_STRUCT || type->kind == TYPE_GENERIC_PARAM;
 }
 
 // Checks that `type` implements the trait of `entry`, which `-a` or `a + b`

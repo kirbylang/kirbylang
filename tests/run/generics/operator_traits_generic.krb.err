@@ -1,0 +1,349 @@
+== <script> ==
+0000   21 OP_CLOSURE          1 <fn add_twice>
+0002    | OP_DEFINE_GLOBAL    0 'add_twice'
+0004   23 OP_CLOSURE          3 <fn negated>
+0006    | OP_DEFINE_GLOBAL    2 'negated'
+0008   25 OP_CLOSURE          5 <fn scaled>
+0010    | OP_DEFINE_GLOBAL    4 'scaled'
+0012   27 OP_CLOSURE          7 <fn difference>
+0014    | OP_DEFINE_GLOBAL    6 'difference'
+0016   29 OP_CLOSURE          9 <fn remainder>
+0018    | OP_DEFINE_GLOBAL    8 'remainder'
+0020   37 OP_CLOSURE         11 <fn largest>
+0022    | OP_DEFINE_GLOBAL   10 'largest'
+0024   39 OP_CLOSURE         13 <fn in_range>
+0026    | OP_DEFINE_GLOBAL   12 'in_range'
+0028   41 OP_CLOSURE         15 <fn smaller>
+0030    | OP_DEFINE_GLOBAL   14 'smaller'
+0032   43 OP_CLOSURE         17 <fn same>
+0034    | OP_DEFINE_GLOBAL   16 'same'
+0036   45 OP_CLOSURE         19 <fn different>
+0038    | OP_DEFINE_GLOBAL   18 'different'
+0040   47 OP_CLOSURE         21 <fn same_through_ord>
+0042    | OP_DEFINE_GLOBAL   20 'same_through_ord'
+0044   69 OP_CLOSURE         23 <fn main>
+0046    | OP_DEFINE_GLOBAL   22 'main'
+0048    1 OP_STRUCT          24 'Money'
+0050    | OP_DEFINE_GLOBAL   24 'Money'
+0052    | OP_GET_GLOBAL      24 'Money'
+0054    2 OP_NIL
+0055    | OP_FIELD           25 'cents' public mutable
+0059    3 OP_POP
+0060    5 OP_GET_GLOBAL      24 'Money'
+0062    6 OP_CLOSURE         27 <fn add>
+0064    | OP_METHOD          26 'add'
+0066    7 OP_POP
+0067    9 OP_GET_GLOBAL      24 'Money'
+0069   10 OP_CLOSURE         29 <fn neg>
+0071    | OP_METHOD          28 'neg'
+0073   11 OP_POP
+0074   13 OP_GET_GLOBAL      24 'Money'
+0076   14 OP_CLOSURE         31 <fn equals>
+0078    | OP_METHOD          30 'equals'
+0080   15 OP_POP
+0081   17 OP_GET_GLOBAL      24 'Money'
+0083   18 OP_CLOSURE         33 <fn cmp>
+0085    | OP_METHOD          32 'cmp'
+0087   19 OP_POP
+0088   70 OP_NIL
+0089    | OP_RETURN
+== add_twice ==
+0000   21 OP_GET_LOCAL        1
+0002    | OP_GET_LOCAL        2
+0004    | OP_INVOKE        (1 args)    0 'add'
+0007    | OP_GET_LOCAL        2
+0009    | OP_INVOKE        (1 args)    0 'add'
+0012    | OP_RETURN
+== negated ==
+0000   23 OP_GET_LOCAL        1
+0002    | OP_INVOKE        (0 args)    0 'neg'
+0005    | OP_RETURN
+== scaled ==
+0000   25 OP_GET_LOCAL        1
+0002    | OP_GET_LOCAL        2
+0004    | OP_INVOKE        (1 args)    0 'mul'
+0007    | OP_GET_LOCAL        2
+0009    | OP_INVOKE        (1 args)    1 'div'
+0012    | OP_RETURN
+== difference ==
+0000   27 OP_GET_LOCAL        1
+0002    | OP_GET_LOCAL        2
+0004    | OP_INVOKE        (1 args)    0 'sub'
+0007    | OP_RETURN
+== remainder ==
+0000   29 OP_GET_LOCAL        1
+0002    | OP_GET_LOCAL        2
+0004    | OP_INVOKE        (1 args)    0 'mod'
+0007    | OP_RETURN
+== largest ==
+0000   32 OP_GET_LOCAL        1
+0002    | OP_GET_LOCAL        2
+0004    | OP_INVOKE        (1 args)    0 'cmp'
+0007    | OP_CONSTANT         1 '0'
+0009    | OP_GREATER
+0010    | OP_JUMP_IF_FALSE   10 -> 20
+0013    | OP_POP
+0014   33 OP_GET_LOCAL        1
+0016    | OP_RETURN
+0017   34 OP_JUMP            17 -> 21
+0020    | OP_POP
+0021   36 OP_GET_LOCAL        2
+0023    | OP_RETURN
+== in_range ==
+0000   39 OP_GET_LOCAL        1
+0002    | OP_GET_LOCAL        2
+0004    | OP_INVOKE        (1 args)    0 'cmp'
+0007    | OP_CONSTANT         1 '0'
+0009    | OP_LESS
+0010    | OP_NOT
+0011    | OP_JUMP_IF_FALSE   11 -> 26
+0014    | OP_POP
+0015    | OP_GET_LOCAL        1
+0017    | OP_GET_LOCAL        3
+0019    | OP_INVOKE        (1 args)    0 'cmp'
+0022    | OP_CONSTANT         1 '0'
+0024    | OP_GREATER
+0025    | OP_NOT
+0026    | OP_RETURN
+== smaller ==
+0000   41 OP_GET_LOCAL        1
+0002    | OP_GET_LOCAL        2
+0004    | OP_INVOKE        (1 args)    0 'cmp'
+0007    | OP_CONSTANT         1 '0'
+0009    | OP_LESS
+0010    | OP_RETURN
+== same ==
+0000   43 OP_GET_LOCAL        1
+0002    | OP_GET_LOCAL        2
+0004    | OP_INVOKE        (1 args)    0 'equals'
+0007    | OP_RETURN
+== different ==
+0000   45 OP_GET_LOCAL        1
+0002    | OP_GET_LOCAL        2
+0004    | OP_INVOKE        (1 args)    0 'equals'
+0007    | OP_NOT
+0008    | OP_RETURN
+== same_through_ord ==
+0000   47 OP_GET_LOCAL        1
+0002    | OP_GET_LOCAL        2
+0004    | OP_INVOKE        (1 args)    0 'equals'
+0007    | OP_RETURN
+== main ==
+0000   50 OP_GET_GLOBAL       0 '@println'
+0002    | OP_GET_GLOBAL       1 'add_twice'
+0004    | OP_CONSTANT         2 '1'
+0006    | OP_CONSTANT         3 '2'
+0008    | OP_CALL             2
+0010    | OP_CALL             1
+0012    | OP_POP
+0013   51 OP_GET_GLOBAL       0 '@println'
+0015    | OP_GET_GLOBAL       1 'add_twice'
+0017    | OP_CONSTANT         4 '1.5'
+0019    | OP_CONSTANT         5 '2.5'
+0021    | OP_CALL             2
+0023    | OP_CALL             1
+0025    | OP_POP
+0026   52 OP_GET_GLOBAL       0 '@println'
+0028    | OP_GET_GLOBAL       1 'add_twice'
+0030    | OP_GET_GLOBAL       6 'Money'
+0032    | OP_CONSTANT         7 'cents'
+0034    | OP_CONSTANT         2 '1'
+0036    | OP_STRUCT_INIT      1
+0038    | OP_GET_GLOBAL       6 'Money'
+0040    | OP_CONSTANT         7 'cents'
+0042    | OP_CONSTANT         3 '2'
+0044    | OP_STRUCT_INIT      1
+0046    | OP_CALL             2
+0048    | OP_GET_PROPERTY     7 'cents'
+0050    | OP_CALL             1
+0052    | OP_POP
+0053   53 OP_GET_GLOBAL       0 '@println'
+0055    | OP_GET_GLOBAL       8 'negated'
+0057    | OP_CONSTANT         9 '5'
+0059    | OP_CALL             1
+0061    | OP_CALL             1
+0063    | OP_POP
+0064   54 OP_GET_GLOBAL       0 '@println'
+0066    | OP_GET_GLOBAL       8 'negated'
+0068    | OP_GET_GLOBAL       6 'Money'
+0070    | OP_CONSTANT         7 'cents'
+0072    | OP_CONSTANT         9 '5'
+0074    | OP_STRUCT_INIT      1
+0076    | OP_CALL             1
+0078    | OP_GET_PROPERTY     7 'cents'
+0080    | OP_CALL             1
+0082    | OP_POP
+0083   55 OP_GET_GLOBAL       0 '@println'
+0085    | OP_GET_GLOBAL      10 'scaled'
+0087    | OP_CONSTANT        11 '6'
+0089    | OP_CONSTANT        12 '3'
+0091    | OP_CALL             2
+0093    | OP_CALL             1
+0095    | OP_POP
+0096   56 OP_GET_GLOBAL       0 '@println'
+0098    | OP_GET_GLOBAL      13 'difference'
+0100    | OP_CONSTANT        14 '10'
+0102    | OP_CONSTANT        15 '4'
+0104    | OP_CALL             2
+0106    | OP_CALL             1
+0108    | OP_POP
+0109   57 OP_GET_GLOBAL       0 '@println'
+0111    | OP_GET_GLOBAL      16 'remainder'
+0113    | OP_CONSTANT        14 '10'
+0115    | OP_CONSTANT        15 '4'
+0117    | OP_CALL             2
+0119    | OP_CALL             1
+0121    | OP_POP
+0122   58 OP_GET_GLOBAL       0 '@println'
+0124    | OP_GET_GLOBAL      17 'largest'
+0126    | OP_CONSTANT        12 '3'
+0128    | OP_CONSTANT        18 '8'
+0130    | OP_CALL             2
+0132    | OP_CALL             1
+0134    | OP_POP
+0135   59 OP_GET_GLOBAL       0 '@println'
+0137    | OP_GET_GLOBAL      17 'largest'
+0139    | OP_CONSTANT         5 '2.5'
+0141    | OP_CONSTANT         4 '1.5'
+0143    | OP_CALL             2
+0145    | OP_CALL             1
+0147    | OP_POP
+0148   60 OP_GET_GLOBAL       0 '@println'
+0150    | OP_GET_GLOBAL      17 'largest'
+0152    | OP_GET_GLOBAL       6 'Money'
+0154    | OP_CONSTANT         7 'cents'
+0156    | OP_CONSTANT         9 '5'
+0158    | OP_STRUCT_INIT      1
+0160    | OP_GET_GLOBAL       6 'Money'
+0162    | OP_CONSTANT         7 'cents'
+0164    | OP_CONSTANT        19 '9'
+0166    | OP_STRUCT_INIT      1
+0168    | OP_CALL             2
+0170    | OP_GET_PROPERTY     7 'cents'
+0172    | OP_CALL             1
+0174    | OP_POP
+0175   61 OP_GET_GLOBAL       0 '@println'
+0177    | OP_GET_GLOBAL      20 'in_range'
+0179    | OP_CONSTANT         9 '5'
+0181    | OP_CONSTANT         2 '1'
+0183    | OP_CONSTANT        14 '10'
+0185    | OP_CALL             3
+0187    | OP_CALL             1
+0189    | OP_POP
+0190   62 OP_GET_GLOBAL       0 '@println'
+0192    | OP_GET_GLOBAL      20 'in_range'
+0194    | OP_GET_GLOBAL       6 'Money'
+0196    | OP_CONSTANT         7 'cents'
+0198    | OP_CONSTANT        21 '50'
+0200    | OP_STRUCT_INIT      1
+0202    | OP_GET_GLOBAL       6 'Money'
+0204    | OP_CONSTANT         7 'cents'
+0206    | OP_CONSTANT         2 '1'
+0208    | OP_STRUCT_INIT      1
+0210    | OP_GET_GLOBAL       6 'Money'
+0212    | OP_CONSTANT         7 'cents'
+0214    | OP_CONSTANT        14 '10'
+0216    | OP_STRUCT_INIT      1
+0218    | OP_CALL             3
+0220    | OP_CALL             1
+0222    | OP_POP
+0223   63 OP_GET_GLOBAL       0 '@println'
+0225    | OP_GET_GLOBAL      22 'smaller'
+0227    | OP_CONSTANT         2 '1'
+0229    | OP_CONSTANT         3 '2'
+0231    | OP_CALL             2
+0233    | OP_CALL             1
+0235    | OP_POP
+0236   64 OP_GET_GLOBAL       0 '@println'
+0238    | OP_GET_GLOBAL      22 'smaller'
+0240    | OP_GET_GLOBAL       6 'Money'
+0242    | OP_CONSTANT         7 'cents'
+0244    | OP_CONSTANT         3 '2'
+0246    | OP_STRUCT_INIT      1
+0248    | OP_GET_GLOBAL       6 'Money'
+0250    | OP_CONSTANT         7 'cents'
+0252    | OP_CONSTANT         2 '1'
+0254    | OP_STRUCT_INIT      1
+0256    | OP_CALL             2
+0258    | OP_CALL             1
+0260    | OP_POP
+0261   65 OP_GET_GLOBAL       0 '@println'
+0263    | OP_GET_GLOBAL      23 'same'
+0265    | OP_CONSTANT        12 '3'
+0267    | OP_CONSTANT        12 '3'
+0269    | OP_CALL             2
+0271    | OP_CALL             1
+0273    | OP_POP
+0274   66 OP_GET_GLOBAL       0 '@println'
+0276    | OP_GET_GLOBAL      23 'same'
+0278    | OP_GET_GLOBAL       6 'Money'
+0280    | OP_CONSTANT         7 'cents'
+0282    | OP_CONSTANT        15 '4'
+0284    | OP_STRUCT_INIT      1
+0286    | OP_GET_GLOBAL       6 'Money'
+0288    | OP_CONSTANT         7 'cents'
+0290    | OP_CONSTANT        15 '4'
+0292    | OP_STRUCT_INIT      1
+0294    | OP_CALL             2
+0296    | OP_CALL             1
+0298    | OP_POP
+0299   67 OP_GET_GLOBAL       0 '@println'
+0301    | OP_GET_GLOBAL      24 'different'
+0303    | OP_GET_GLOBAL       6 'Money'
+0305    | OP_CONSTANT         7 'cents'
+0307    | OP_CONSTANT        15 '4'
+0309    | OP_STRUCT_INIT      1
+0311    | OP_GET_GLOBAL       6 'Money'
+0313    | OP_CONSTANT         7 'cents'
+0315    | OP_CONSTANT         9 '5'
+0317    | OP_STRUCT_INIT      1
+0319    | OP_CALL             2
+0321    | OP_CALL             1
+0323    | OP_POP
+0324   68 OP_GET_GLOBAL       0 '@println'
+0326    | OP_GET_GLOBAL      25 'same_through_ord'
+0328    | OP_GET_GLOBAL       6 'Money'
+0330    | OP_CONSTANT         7 'cents'
+0332    | OP_CONSTANT        15 '4'
+0334    | OP_STRUCT_INIT      1
+0336    | OP_GET_GLOBAL       6 'Money'
+0338    | OP_CONSTANT         7 'cents'
+0340    | OP_CONSTANT        15 '4'
+0342    | OP_STRUCT_INIT      1
+0344    | OP_CALL             2
+0346    | OP_CALL             1
+0348    | OP_POP
+0349   69 OP_NIL
+0350    | OP_RETURN
+== add ==
+0000    6 OP_GET_GLOBAL       0 'Money'
+0002    | OP_CONSTANT         1 'cents'
+0004    | OP_GET_LOCAL        0
+0006    | OP_GET_PROPERTY     1 'cents'
+0008    | OP_GET_LOCAL        1
+0010    | OP_GET_PROPERTY     1 'cents'
+0012    | OP_ADD
+0013    | OP_STRUCT_INIT      1
+0015    | OP_RETURN
+== neg ==
+0000   10 OP_GET_GLOBAL       0 'Money'
+0002    | OP_CONSTANT         1 'cents'
+0004    | OP_GET_LOCAL        0
+0006    | OP_GET_PROPERTY     1 'cents'
+0008    | OP_NEGATE
+0009    | OP_STRUCT_INIT      1
+0011    | OP_RETURN
+== equals ==
+0000   14 OP_GET_LOCAL        0
+0002    | OP_GET_PROPERTY     0 'cents'
+0004    | OP_GET_LOCAL        1
+0006    | OP_GET_PROPERTY     0 'cents'
+0008    | OP_EQUAL
+0009    | OP_RETURN
+== cmp ==
+0000   18 OP_GET_LOCAL        0
+0002    | OP_GET_PROPERTY     0 'cents'
+0004    | OP_GET_LOCAL        1
+0006    | OP_GET_PROPERTY     0 'cents'
+0008    | OP_SUBTRACT
+0009    | OP_RETURN

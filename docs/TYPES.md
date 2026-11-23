@@ -360,6 +360,11 @@ fun main(): unit {
 Both sides have to be the same struct. A struct without the trait is an error:
 `Money doesn't implement Add, required by '+'.`
 
+Numbers have these traits built in, so a number can fill a parameter bounded by
+one of them (see [Trait Bounds](#trait-bounds)), and `neg` is only for signed
+numbers. Number operators that don't go through a bound still compile to the
+built-in instructions, so plain number arithmetic costs nothing extra.
+
 #### `Self`
 
 `Self` is a special type/value only available in `impl` blocks and is an alias to the impl block's target struct.
@@ -396,7 +401,7 @@ trait Ord: Eq {
 #### Limitations
 
 - Traits can only be implemented for structs currently
-- Operators on a value of a generic parameter don't call trait methods yet, so `==` on one is still the built-in equality
+- Only numbers have the operator traits built in. `string` and `bool` can't implement `Eq` or `Ord` yet, because primitives can't implement traits
 - If a struct's impl block implements a method of the same name as a trait, the struct's impl method is what is called. A future change will allow `Trait.method(struct)` to be used to fully qualify the trait versions of the method.
 
 #### Known Bugs
@@ -448,7 +453,7 @@ parameter, so with `T: Cloneable`, `x.clone()` is a `T`.
 
 ```
 fun largest[T: Ord](a: T, b: T): T {
-    if (a.cmp(b) >= 0) {
+    if (a > b) {
         return a;
     }
 
@@ -504,12 +509,32 @@ An alias or function that passes its own parameter to a bounded struct needs the
 same bound: `type Plain[T] = Labeled[T];` is an error, but
 `type Plain[T: Display] = Labeled[T];` is fine.
 
+#### Operators
+
+A bounded value can use the operators of its traits. `T: Add` allows `a + b`,
+`T: Ord` allows `<`, `>`, `<=`, `>=`, `==` and `!=`, and so on, see
+[Operator traits](#operator-traits). The checker requires the bound:
+
+```
+fun sum[T: Add](a: T, b: T): T = a + b;
+
+fun same[T](a: T, b: T): bool = a == b;
+// error: T doesn't implement Eq, required by '=='.
+```
+
+A number can fill a parameter bounded by an operator trait, so `sum(1, 2)` and
+`sum(1.5, 2.5)` work, as does `sum(vec1, vec2)` for a struct with `impl Add`.
+Because the function is compiled once for every type, these operators call the
+trait method at runtime, which for a number is a built-in method (`add`, `sub`,
+`mul`, `div`, `mod`, `neg`, `equals` and `cmp`).
+
 #### Limitations
 
 - The trait has to exist, and a struct name isn't a trait:
   `Unknown trait 'Nope'.` A trait can be declared after the function that uses it.
-- A primitive can't implement a trait yet, so `i64`, `string` and the other
-  primitives can't fill a bounded parameter.
+- A primitive can't implement a trait yet, so `string`, `bool` and the other
+  primitives can't fill a bounded parameter. Numbers can fill a parameter
+  bounded by an operator trait only.
 - A static trait method can't be called through a bound. `T.default()` is an
   error: `Can't call a static method on type parameter 'T'.` This needs a
   separate copy of the function for each type, which is not implemented.
@@ -517,10 +542,6 @@ same bound: `type Plain[T] = Labeled[T];` is an error, but
 - A bounded generic function used as a value with no expected type, such as
   `let f = describe;`, has no type, so its bounds aren't checked. See
   [Generic Functions](#generic-functions).
-- `==` on a bounded value is still the built-in equality and doesn't call
-  `equals`. Call `a.equals(b)` to use the trait.
-- A bounded value can't use operators yet. Call the trait's method, such as
-  `a.add(b)`.
 
 ### Functions
 
@@ -636,19 +657,20 @@ none.
 | ----------------- | ------------------------------- | --------- |
 | `+`               | two of one number type          | that type |
 | `+`               | two `string`                    | `string`  |
-| `+` `-` `*` `/` `%` | two of one struct with `Add` `Sub` `Mul` `Div` `Mod` | that type |
+| `+` `-` `*` `/` `%` | two of one struct, or one bounded type, with `Add` `Sub` `Mul` `Div` `Mod` | that type |
 | `-` `*` `/` `%`   | two of one number type          | that type |
 | `<` `>` `<=` `>=` | two of one number type          | `bool`    |
-| `<` `>` `<=` `>=` | two of one struct with `Ord` | `bool` |
+| `<` `>` `<=` `>=` | two of one struct, or one bounded type, with `Ord` | `bool` |
 | `==` `!=`         | two of one type                 | `bool`    |
 | `and` `or`        | two `bool`                      | `bool`    |
 | `!`               | any                             | `bool`    |
 | `-` (negate)      | a signed number                 | that type |
-| `-` (negate)      | a struct with `Neg` | that type |
+| `-` (negate)      | a struct, or bounded type, with `Neg` | that type |
 
-`==`/`!=` between two structs requires `Eq`, and calls its `equals` method. A
-struct operator calls the trait method, so `a == b` and `a.equals(b)` always
-agree. See [Traits](#traits).
+`==`/`!=` between two structs, or two values of a generic parameter, requires
+`Eq`, and calls its `equals` method. A struct operator calls the trait method, so
+`a == b` and `a.equals(b)` always agree. See [Traits](#traits) and
+[Trait Bounds](#trait-bounds).
 
 # Types
 
@@ -1054,9 +1076,9 @@ trait Ord: Eq {
 
 - Some native functions have no signature yet, so calls to them aren't
   checked
-- A value of a generic type can't be added or indexed, and has methods only
-  through its bounds -- see [Trait Bounds](#trait-bounds)
+- A value of a generic type can't be indexed, and can only be added, compared
+  or called through a bound -- see [Trait Bounds](#trait-bounds)
 - A call can't be given type arguments (`parse[f64](s)`)
 - Lists have no type annotation syntax
-- `impl Trait for` a primitive type isn't supported yet, and operators on a
-  generic parameter don't dispatch to trait methods -- see [Traits](#traits)
+- `impl Trait for` a primitive type isn't supported yet -- see
+  [Traits](#traits)
