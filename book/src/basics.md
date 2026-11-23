@@ -469,3 +469,5 @@ fun main(): unit {
 ```
 
 A call with a type that doesn't implement the trait is an error: `Rock doesn't implement Area, required by T.` A parameter has one bound, and only functions and methods can have them for now.
+
+Calling a static trait method through a bound, like `T.default()`, isn't supported yet.

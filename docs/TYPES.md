@@ -439,6 +439,9 @@ needs `Ord` or `Eq`. It is an error when it doesn't, as when `T` has no bound:
   supported yet.`
 - A primitive can't implement a trait yet, so `i64`, `string` and the other
   primitives can't fill a bounded parameter.
+- A static trait method can't be called through a bound. `T.default()` is an
+  error: `Can't call a static method on type parameter 'T'.` This needs a
+  separate copy of the function for each type, which is not implemented.
 - `==` on a bounded value is still the built-in equality and doesn't call
   `equals`. Call `a.equals(b)` to use the trait.
 - A bounded generic function used as a value with no expected type, such as

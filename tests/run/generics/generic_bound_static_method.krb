@@ -1,0 +1,14 @@
+struct Box {
+    pub var value: f64;
+}
+
+impl Default for Box {
+    fun default(): Self = Box { value: 0 };
+}
+
+fun make[T: Default](): T = T.default();
+
+fun main(): unit {
+    let b: Box = make();
+    @println(b.value);
+}

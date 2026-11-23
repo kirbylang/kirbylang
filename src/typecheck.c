@@ -1961,6 +1961,15 @@ static Type *typchkInferGet(TypeEnv *env, AstNode *node) {
     bool shadowed = typchkTypeEnvLookup(env, *objIdentifier) != NULL ||
                     typchkTypeEnvLookupFunction(env, *objIdentifier) != NULL;
 
+    if (!shadowed &&
+        bindingArrayLookup(env->_genericParams, env->_genericParamCount,
+                           *objIdentifier) != NULL) {
+      typchkErrorAtTokenFmt(
+          objIdentifier, "Can't call a static method on type parameter '%.*s'.",
+          objIdentifier->length, objIdentifier->start);
+      return NULL;
+    }
+
     if (!shadowed) {
       bool isSelf = tokenTextEquals(objIdentifier, "Self");
       Type *structType = isSelf
