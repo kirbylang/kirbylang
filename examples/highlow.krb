@@ -1,0 +1,108 @@
+#!/usr/bin/env krb run
+
+struct Numbers {
+    pub let cpu: i64;
+    pub let player: i64;
+}
+
+fun main(): unit {
+    let numbers = pick_random_numbers();
+    let answer = if (numbers.cpu > numbers.player) "low" else "high";
+    
+    // Game starts here
+
+    print_game_header();
+
+    while (true) {
+        let guess = prompt_for_guess();
+
+        if (guess == "exit" or guess == "quit") {
+            break;
+        }
+
+        if (guess == "about") {
+            print_about();
+            continue;
+        }
+
+        if (guess == "help") {
+            print_help();
+            continue;
+        }
+
+        if (guess == "high" or guess == "low") {
+            @eprintln(if (guess == answer) "Correct!" else "Wrong!");
+            @eprintln($"CPU = {numbers.cpu} vs Player = {numbers.player}");
+            break;
+        }
+
+        print_help();
+    }
+}
+
+// Prompt user for their guess
+fun prompt_for_guess(): string = @strToLower(@prompt("high or low? "));
+
+// Pick a random word from the word list
+fun pick_random_numbers(): Numbers {
+    var tries: i64 = 0;
+    var numbers: Numbers = Numbers { cpu: 0, player: 0 };
+
+    while (true) {
+        tries = tries + 1;
+
+        let cpu: i64 = @randBetween(0, 10);
+        let player: i64 = @randBetween(0, 10);
+
+        if (tries > 10) {
+            @panic("Unable to pick two unique numbers");
+        }
+
+        if (cpu != player) {
+            continue;
+        }
+
+        numbers = Numbers {
+            cpu: cpu,
+            player: player,
+        };
+    }
+
+    numbers
+}
+
+fun print_game_header(): unit {
+    @eprintln("-------------------------------------------------------------------------------");
+    @eprintln("High/Low\n");
+    @eprintln("Enter a guess of 'high' or 'low'");
+    @eprintln("You can also try 'help', 'about', or 'exit'");
+    @eprintln("-------------------------------------------------------------------------------");
+}
+
+fun print_about(): unit {
+    @eprintln(@strTrim("
+-------------------------------------------------------------------------------
+ (c) 2026 Kylee Tilley <kyleetilley@gmail.com>
+-------------------------------------------------------------------------------
+"));
+}
+
+fun print_help(): unit {
+    @eprintln(@strTrim("
+-------------------------------------------------------------------------------
+ High/Low Help
+-------------------------------------------------------------------------------
+
+    Guess using either 'high' or 'low'
+
+    > low
+
+    You can also enter the following commands:
+
+    help  | Print this help text
+    about | Information about this game
+    exit  | Exit this game
+
+-------------------------------------------------------------------------------
+"));
+}
