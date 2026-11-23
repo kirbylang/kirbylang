@@ -151,6 +151,14 @@ static void sb_append_token(StrBuf *sb, Token t) {
   sb->data[sb->len] = '\0';
 }
 
+// Writes `:Display+Eq`, or nothing for a parameter without bounds.
+static void appendGenericBounds(StrBuf *sb, GenericBounds *bounds) {
+  for (int i = 0; i < bounds->count; i++) {
+    sb_append(sb, i == 0 ? ":" : "+");
+    sb_append_token(sb, bounds->traits[i]);
+  }
+}
+
 static void printNode(StrBuf *sb, AstNode *node) {
   if (node == NULL) {
     sb_append(sb, "<null>");
@@ -356,6 +364,8 @@ static void printNode(StrBuf *sb, AstNode *node) {
           if (i > 0)
             sb_append(sb, " ");
           sb_append_token(sb, node->as.function.genericParams[i]);
+
+          appendGenericBounds(sb, &node->as.function.genericBounds[i]);
         }
         sb_append(sb, "]");
       }
@@ -409,6 +419,7 @@ static void printNode(StrBuf *sb, AstNode *node) {
         if (i > 0)
           sb_append(sb, " ");
         sb_append_token(sb, node->as.struct_.genericParams[i]);
+        appendGenericBounds(sb, &node->as.struct_.genericBounds[i]);
       }
       sb_append(sb, "]");
     }
@@ -600,6 +611,7 @@ static void printNode(StrBuf *sb, AstNode *node) {
         if (i > 0)
           sb_append(sb, " ");
         sb_append_token(sb, node->as.typeAlias.genericParams[i]);
+        appendGenericBounds(sb, &node->as.typeAlias.genericBounds[i]);
       }
       sb_append(sb, "]");
     }

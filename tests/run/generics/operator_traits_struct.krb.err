@@ -1,0 +1,209 @@
+== <script> ==
+0000   32 OP_CLOSURE          1 <fn show>
+0002    | OP_DEFINE_GLOBAL    0 'show'
+0004   45 OP_CLOSURE          3 <fn main>
+0006    | OP_DEFINE_GLOBAL    2 'main'
+0008    1 OP_STRUCT           4 'Vec2'
+0010    | OP_DEFINE_GLOBAL    4 'Vec2'
+0012    | OP_GET_GLOBAL       4 'Vec2'
+0014    2 OP_NIL
+0015    | OP_FIELD            5 'x' public mutable
+0019    3 OP_NIL
+0020    | OP_FIELD            6 'y' public mutable
+0024    4 OP_POP
+0025    6 OP_GET_GLOBAL       4 'Vec2'
+0027    7 OP_CLOSURE          8 <fn add>
+0029    | OP_METHOD           7 'add'
+0031    8 OP_POP
+0032   10 OP_GET_GLOBAL       4 'Vec2'
+0034   11 OP_CLOSURE         10 <fn sub>
+0036    | OP_METHOD           9 'sub'
+0038   12 OP_POP
+0039   14 OP_GET_GLOBAL       4 'Vec2'
+0041   15 OP_CLOSURE         12 <fn mul>
+0043    | OP_METHOD          11 'mul'
+0045   16 OP_POP
+0046   18 OP_GET_GLOBAL       4 'Vec2'
+0048   19 OP_CLOSURE         14 <fn div>
+0050    | OP_METHOD          13 'div'
+0052   20 OP_POP
+0053   22 OP_GET_GLOBAL       4 'Vec2'
+0055   23 OP_CLOSURE         16 <fn mod>
+0057    | OP_METHOD          15 'mod'
+0059   24 OP_POP
+0060   26 OP_GET_GLOBAL       4 'Vec2'
+0062   27 OP_CLOSURE         18 <fn neg>
+0064    | OP_METHOD          17 'neg'
+0066   28 OP_POP
+0067   46 OP_NIL
+0068    | OP_RETURN
+== show ==
+0000   31 OP_GET_GLOBAL       0 '@println'
+0002    | OP_GET_GLOBAL       1 '@strConcat'
+0004    | OP_CONSTANT         2 '('
+0006    | OP_GET_GLOBAL       3 '@numberToString'
+0008    | OP_GET_LOCAL        1
+0010    | OP_GET_PROPERTY     4 'x'
+0012    | OP_CALL             1
+0014    | OP_CONSTANT         5 ', '
+0016    | OP_GET_GLOBAL       3 '@numberToString'
+0018    | OP_GET_LOCAL        1
+0020    | OP_GET_PROPERTY     6 'y'
+0022    | OP_CALL             1
+0024    | OP_CONSTANT         7 ')'
+0026    | OP_LIST             5
+0028    | OP_CALL             1
+0030    | OP_CALL             1
+0032    | OP_POP
+0033   32 OP_NIL
+0034    | OP_RETURN
+== main ==
+0000   35 OP_GET_GLOBAL       0 'Vec2'
+0002    | OP_CONSTANT         1 'x'
+0004    | OP_CONSTANT         2 '7'
+0006    | OP_CONSTANT         3 'y'
+0008    | OP_CONSTANT         4 '9'
+0010    | OP_STRUCT_INIT      2
+0012   36 OP_GET_GLOBAL       0 'Vec2'
+0014    | OP_CONSTANT         1 'x'
+0016    | OP_CONSTANT         5 '2'
+0018    | OP_CONSTANT         3 'y'
+0020    | OP_CONSTANT         6 '4'
+0022    | OP_STRUCT_INIT      2
+0024   38 OP_GET_GLOBAL       7 'show'
+0026    | OP_GET_LOCAL        1
+0028    | OP_GET_LOCAL        2
+0030    | OP_INVOKE        (1 args)    8 'add'
+0033    | OP_CALL             1
+0035    | OP_POP
+0036   39 OP_GET_GLOBAL       7 'show'
+0038    | OP_GET_LOCAL        1
+0040    | OP_GET_LOCAL        2
+0042    | OP_INVOKE        (1 args)    9 'sub'
+0045    | OP_CALL             1
+0047    | OP_POP
+0048   40 OP_GET_GLOBAL       7 'show'
+0050    | OP_GET_LOCAL        1
+0052    | OP_GET_LOCAL        2
+0054    | OP_INVOKE        (1 args)   10 'mul'
+0057    | OP_CALL             1
+0059    | OP_POP
+0060   41 OP_GET_GLOBAL       7 'show'
+0062    | OP_GET_LOCAL        1
+0064    | OP_GET_LOCAL        2
+0066    | OP_INVOKE        (1 args)   11 'div'
+0069    | OP_CALL             1
+0071    | OP_POP
+0072   42 OP_GET_GLOBAL       7 'show'
+0074    | OP_GET_LOCAL        1
+0076    | OP_GET_LOCAL        2
+0078    | OP_INVOKE        (1 args)   12 'mod'
+0081    | OP_CALL             1
+0083    | OP_POP
+0084   43 OP_GET_GLOBAL       7 'show'
+0086    | OP_GET_LOCAL        1
+0088    | OP_INVOKE        (0 args)   13 'neg'
+0091    | OP_CALL             1
+0093    | OP_POP
+0094   44 OP_GET_GLOBAL       7 'show'
+0096    | OP_GET_LOCAL        1
+0098    | OP_GET_LOCAL        2
+0100    | OP_GET_LOCAL        2
+0102    | OP_INVOKE        (1 args)   10 'mul'
+0105    | OP_INVOKE        (1 args)    8 'add'
+0108    | OP_CALL             1
+0110    | OP_POP
+0111   45 OP_NIL
+0112    | OP_RETURN
+== add ==
+0000    7 OP_GET_GLOBAL       0 'Vec2'
+0002    | OP_CONSTANT         1 'x'
+0004    | OP_GET_LOCAL        0
+0006    | OP_GET_PROPERTY     1 'x'
+0008    | OP_GET_LOCAL        1
+0010    | OP_GET_PROPERTY     1 'x'
+0012    | OP_ADD
+0013    | OP_CONSTANT         2 'y'
+0015    | OP_GET_LOCAL        0
+0017    | OP_GET_PROPERTY     2 'y'
+0019    | OP_GET_LOCAL        1
+0021    | OP_GET_PROPERTY     2 'y'
+0023    | OP_ADD
+0024    | OP_STRUCT_INIT      2
+0026    | OP_RETURN
+== sub ==
+0000   11 OP_GET_GLOBAL       0 'Vec2'
+0002    | OP_CONSTANT         1 'x'
+0004    | OP_GET_LOCAL        0
+0006    | OP_GET_PROPERTY     1 'x'
+0008    | OP_GET_LOCAL        1
+0010    | OP_GET_PROPERTY     1 'x'
+0012    | OP_SUBTRACT
+0013    | OP_CONSTANT         2 'y'
+0015    | OP_GET_LOCAL        0
+0017    | OP_GET_PROPERTY     2 'y'
+0019    | OP_GET_LOCAL        1
+0021    | OP_GET_PROPERTY     2 'y'
+0023    | OP_SUBTRACT
+0024    | OP_STRUCT_INIT      2
+0026    | OP_RETURN
+== mul ==
+0000   15 OP_GET_GLOBAL       0 'Vec2'
+0002    | OP_CONSTANT         1 'x'
+0004    | OP_GET_LOCAL        0
+0006    | OP_GET_PROPERTY     1 'x'
+0008    | OP_GET_LOCAL        1
+0010    | OP_GET_PROPERTY     1 'x'
+0012    | OP_MULTIPLY
+0013    | OP_CONSTANT         2 'y'
+0015    | OP_GET_LOCAL        0
+0017    | OP_GET_PROPERTY     2 'y'
+0019    | OP_GET_LOCAL        1
+0021    | OP_GET_PROPERTY     2 'y'
+0023    | OP_MULTIPLY
+0024    | OP_STRUCT_INIT      2
+0026    | OP_RETURN
+== div ==
+0000   19 OP_GET_GLOBAL       0 'Vec2'
+0002    | OP_CONSTANT         1 'x'
+0004    | OP_GET_LOCAL        0
+0006    | OP_GET_PROPERTY     1 'x'
+0008    | OP_GET_LOCAL        1
+0010    | OP_GET_PROPERTY     1 'x'
+0012    | OP_DIVIDE
+0013    | OP_CONSTANT         2 'y'
+0015    | OP_GET_LOCAL        0
+0017    | OP_GET_PROPERTY     2 'y'
+0019    | OP_GET_LOCAL        1
+0021    | OP_GET_PROPERTY     2 'y'
+0023    | OP_DIVIDE
+0024    | OP_STRUCT_INIT      2
+0026    | OP_RETURN
+== mod ==
+0000   23 OP_GET_GLOBAL       0 'Vec2'
+0002    | OP_CONSTANT         1 'x'
+0004    | OP_GET_LOCAL        0
+0006    | OP_GET_PROPERTY     1 'x'
+0008    | OP_GET_LOCAL        1
+0010    | OP_GET_PROPERTY     1 'x'
+0012    | OP_MODULO
+0013    | OP_CONSTANT         2 'y'
+0015    | OP_GET_LOCAL        0
+0017    | OP_GET_PROPERTY     2 'y'
+0019    | OP_GET_LOCAL        1
+0021    | OP_GET_PROPERTY     2 'y'
+0023    | OP_MODULO
+0024    | OP_STRUCT_INIT      2
+0026    | OP_RETURN
+== neg ==
+0000   27 OP_GET_GLOBAL       0 'Vec2'
+0002    | OP_CONSTANT         1 'x'
+0004    | OP_GET_LOCAL        0
+0006    | OP_GET_PROPERTY     1 'x'
+0008    | OP_NEGATE
+0009    | OP_CONSTANT         2 'y'
+0011    | OP_GET_LOCAL        0
+0013    | OP_GET_PROPERTY     2 'y'
+0015    | OP_NEGATE
+0016    | OP_STRUCT_INIT      2
+0018    | OP_RETURN

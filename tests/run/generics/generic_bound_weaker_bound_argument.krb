@@ -1,0 +1,5 @@
+fun ordered[T: Ord](a: T, b: T): i64 = a.cmp(b);
+
+fun outer[U: Eq](a: U, b: U): i64 = ordered(a, b);
+
+fun main(): unit {}

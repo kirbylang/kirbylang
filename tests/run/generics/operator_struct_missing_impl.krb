@@ -1,0 +1,10 @@
+struct Money {
+  pub var cents: i64;
+}
+
+fun main(): unit {
+  let a = Money { cents: 1 };
+  let b = Money { cents: 2 };
+
+  @println((a + b).cents);
+}

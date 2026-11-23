@@ -105,6 +105,11 @@ typedef struct {
 typedef struct {
 Token op;
 AstNode *operand;
+/**
+ * Set by the type checker when the operand is a struct or a generic
+ * parameter, so `-a` calls the operand's trait method. NULL for a number.
+ */
+const OperatorTrait *traitDispatch;
 } UnaryNode;
 
 typedef struct {
@@ -115,7 +120,22 @@ AstNode *right;
  * `+` on two strings. Set by the type checker.
  */
 bool isStringConcat;
+/**
+ * Set by the type checker when the operands are structs or generic
+ * parameters, so the operator calls the left operand's trait method. NULL
+ * for numbers and strings.
+ */
+const OperatorTrait *traitDispatch;
 } BinaryNode;
+
+/** One row of the operator table in `operator_traits.h`. */
+typedef struct {
+TokenType token;
+const char *trait;  // "Add"
+const char *method; // "add"
+bool isUnary;
+} OperatorTrait;
+
 ```
 
 ### Grouping Expression
@@ -234,6 +254,8 @@ typedef struct {
    */
   Token *genericParams;
   int genericParamCount;
+  /** The traits each parameter must implement. NULL when there are none. */
+  GenericBounds *genericBounds;
   /**
    * The type expression on the right of `=`.
    */
@@ -352,6 +374,23 @@ AstNode *value;
 } ReturnNode;
 ```
 
+### Generic Bounds
+
+```c
+/**
+ * The traits one generic parameter must implement, as written after the `:`
+ * in `T: Display + Eq`. `count` is 0 for a parameter with no bound.
+ */
+typedef struct {
+  Token *traits;
+  int count;
+} GenericBounds;
+```
+
+`krb parse` prints a bound after its parameter, as `T:Display+Eq`. Functions,
+structs and type aliases have bounds. An `impl` doesn't: it takes them from its
+struct.
+
 ### Functions
 
 ```c
@@ -390,6 +429,13 @@ typedef struct {
    */
   Token *genericParams;
   int genericParamCount;
+  /**
+   * The traits each generic parameter must implement, such as the `Display` in
+   * `fun show[T: Display](x: T)`. Has one entry per generic parameter, with a
+   * count of 0 for a parameter with no bound. NULL when `genericParamCount` is
+   * 0.
+   */
+  GenericBounds *genericBounds;
 } FunctionNode;
 ```
 
@@ -404,6 +450,8 @@ typedef struct {
    */
   Token *genericParams;
   int genericParamCount;
+  /** The traits each parameter must implement. NULL when there are none. */
+  GenericBounds *genericBounds;
   VarDeclNode *fields;
   int fieldCount;
   int endLine;

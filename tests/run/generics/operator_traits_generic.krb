@@ -1,0 +1,69 @@
+struct Money {
+  pub var cents: i64;
+}
+
+impl Add for Money {
+  fun add(self, other: Self): Self = Money { cents: self.cents + other.cents };
+}
+
+impl Neg for Money {
+  fun neg(self): Self = Money { cents: -self.cents };
+}
+
+impl Eq for Money {
+  fun equals(self, other: Self): bool = self.cents == other.cents;
+}
+
+impl Ord for Money {
+  fun cmp(self, other: Self): i64 = self.cents - other.cents;
+}
+
+fun add_twice[T: Add](a: T, b: T): T = a + b + b;
+
+fun negated[T: Neg](a: T): T = -a;
+
+fun scaled[T: Mul + Div](a: T, b: T): T = a * b / b;
+
+fun difference[T: Sub](a: T, b: T): T = a - b;
+
+fun remainder[T: Mod](a: T, b: T): T = a % b;
+
+fun largest[T: Ord](a: T, b: T): T {
+  if (a > b) {
+    return a;
+  }
+
+  return b;
+}
+
+fun in_range[T: Ord](x: T, low: T, high: T): bool = x >= low && x <= high;
+
+fun smaller[T: Ord](a: T, b: T): bool = a < b;
+
+fun same[T: Eq](a: T, b: T): bool = a == b;
+
+fun different[T: Eq](a: T, b: T): bool = a != b;
+
+fun same_through_ord[T: Ord](a: T, b: T): bool = a == b;
+
+fun main(): unit {
+  @println(add_twice(1, 2));
+  @println(add_twice(1.5, 2.5));
+  @println(add_twice(Money { cents: 1 }, Money { cents: 2 }).cents);
+  @println(negated(5));
+  @println(negated(Money { cents: 5 }).cents);
+  @println(scaled(6, 3));
+  @println(difference(10, 4));
+  @println(remainder(10, 4));
+  @println(largest(3, 8));
+  @println(largest(2.5, 1.5));
+  @println(largest(Money { cents: 5 }, Money { cents: 9 }).cents);
+  @println(in_range(5, 1, 10));
+  @println(in_range(Money { cents: 50 }, Money { cents: 1 }, Money { cents: 10 }));
+  @println(smaller(1, 2));
+  @println(smaller(Money { cents: 2 }, Money { cents: 1 }));
+  @println(same(3, 3));
+  @println(same(Money { cents: 4 }, Money { cents: 4 }));
+  @println(different(Money { cents: 4 }, Money { cents: 5 }));
+  @println(same_through_ord(Money { cents: 4 }, Money { cents: 4 }));
+}

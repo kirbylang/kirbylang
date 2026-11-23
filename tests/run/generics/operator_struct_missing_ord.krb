@@ -1,0 +1,11 @@
+struct Money {
+  pub var cents: i64;
+}
+
+impl Eq for Money {
+  fun equals(self, other: Self): bool = self.cents == other.cents;
+}
+
+fun main(): unit {
+  @println(Money { cents: 1 } < Money { cents: 2 });
+}

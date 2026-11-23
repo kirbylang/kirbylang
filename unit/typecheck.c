@@ -5,6 +5,7 @@
 
 #include "../src/ast.h"
 #include "../src/native_signatures.h"
+#include "../src/operator_traits.h"
 #include "../src/parser.h"
 #include "../src/token.h"
 #include "../src/typecheck.h"
@@ -1468,7 +1469,28 @@ test_program_self_as_static_method_receiver_outside_impl_fails(void) {
   assert(!ok);
 }
 
+// Every operator in the table must name a builtin trait that has the method
+// the operator calls, taking one argument, or none for a unary operator.
+static void test_operator_table_matches_builtin_traits(void) {
+  TypeEnv *env = typchkTypeEnvCreate();
+  int count = getOperatorTraitCount();
+
+  for (int i = 0; i < count; i++) {
+    const OperatorTrait *entry = &table[i];
+    Type *trait = typchkTypeEnvLookupTrait(env, tokenFromCString(entry->trait));
+    assert(trait != NULL);
+
+    Type *method =
+        typeTraitInstanceMethodLookup(trait, tokenFromCString(entry->method));
+    assert(method != NULL);
+    assert(method->as.function.paramCount == (entry->isUnary ? 0 : 1));
+  }
+
+  typchkTypeEnvDestroy(env);
+}
+
 int main(void) {
+  test_operator_table_matches_builtin_traits();
   test_scope_declare_and_lookup();
   test_scope_shadowing();
   test_struct_and_function_registries();

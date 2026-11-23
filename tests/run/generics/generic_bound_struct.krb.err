@@ -1,0 +1,105 @@
+== <script> ==
+0000   21 OP_CLOSURE          1 <fn wrap>
+0002    | OP_DEFINE_GLOBAL    0 'wrap'
+0004   31 OP_CLOSURE          3 <fn main>
+0006    | OP_DEFINE_GLOBAL    2 'main'
+0008    1 OP_STRUCT           4 'Money'
+0010    | OP_DEFINE_GLOBAL    4 'Money'
+0012    | OP_GET_GLOBAL       4 'Money'
+0014    2 OP_NIL
+0015    | OP_FIELD            5 'cents' public mutable
+0019    3 OP_POP
+0020    9 OP_STRUCT           6 'Labeled'
+0022    | OP_DEFINE_GLOBAL    6 'Labeled'
+0024    | OP_GET_GLOBAL       6 'Labeled'
+0026   10 OP_NIL
+0027    | OP_FIELD            7 'value' public mutable
+0031   11 OP_POP
+0032    5 OP_GET_GLOBAL       4 'Money'
+0034    6 OP_CLOSURE          9 <fn toString>
+0036    | OP_METHOD           8 'toString'
+0038    7 OP_POP
+0039   13 OP_GET_GLOBAL       6 'Labeled'
+0041   14 OP_CLOSURE         11 <fn new>
+0043    | OP_METHOD          10 'new'
+0045   16 OP_CLOSURE         13 <fn label>
+0047    | OP_METHOD          12 'label'
+0049   18 OP_CLOSURE         15 <fn shout>
+0051    | OP_METHOD          14 'shout'
+0053   19 OP_POP
+0054   32 OP_NIL
+0055    | OP_RETURN
+== wrap ==
+0000   21 OP_GET_GLOBAL       0 'Labeled'
+0002    | OP_CONSTANT         1 'value'
+0004    | OP_GET_LOCAL        1
+0006    | OP_STRUCT_INIT      1
+0008    | OP_RETURN
+== main ==
+0000   24 OP_GET_GLOBAL       0 'Labeled'
+0002    | OP_CONSTANT         1 'value'
+0004    | OP_GET_GLOBAL       2 'Money'
+0006    | OP_CONSTANT         3 'cents'
+0008    | OP_CONSTANT         4 '5'
+0010    | OP_STRUCT_INIT      1
+0012    | OP_STRUCT_INIT      1
+0014   25 OP_GET_GLOBAL       0 'Labeled'
+0016    | OP_GET_GLOBAL       2 'Money'
+0018    | OP_CONSTANT         3 'cents'
+0020    | OP_CONSTANT         6 '7'
+0022    | OP_STRUCT_INIT      1
+0024    | OP_INVOKE        (1 args)    5 'new'
+0027   26 OP_GET_GLOBAL       7 'wrap'
+0029    | OP_GET_GLOBAL       2 'Money'
+0031    | OP_CONSTANT         3 'cents'
+0033    | OP_CONSTANT         8 '9'
+0035    | OP_STRUCT_INIT      1
+0037    | OP_CALL             1
+0039   28 OP_GET_GLOBAL       9 '@println'
+0041    | OP_GET_LOCAL        1
+0043    | OP_INVOKE        (0 args)   10 'label'
+0046    | OP_CALL             1
+0048    | OP_POP
+0049   29 OP_GET_GLOBAL       9 '@println'
+0051    | OP_GET_LOCAL        2
+0053    | OP_INVOKE        (0 args)   11 'shout'
+0056    | OP_CALL             1
+0058    | OP_POP
+0059   30 OP_GET_GLOBAL       9 '@println'
+0061    | OP_GET_LOCAL        3
+0063    | OP_INVOKE        (0 args)   10 'label'
+0066    | OP_CALL             1
+0068    | OP_POP
+0069   31 OP_NIL
+0070    | OP_RETURN
+== toString ==
+0000    6 OP_GET_GLOBAL       0 '@strConcat'
+0002    | OP_CONSTANT         1 '$'
+0004    | OP_GET_GLOBAL       2 '@numberToString'
+0006    | OP_GET_LOCAL        0
+0008    | OP_GET_PROPERTY     3 'cents'
+0010    | OP_CALL             1
+0012    | OP_LIST             2
+0014    | OP_CALL             1
+0016    | OP_RETURN
+== new ==
+0000   14 OP_GET_GLOBAL       0 'Labeled'
+0002    | OP_CONSTANT         1 'value'
+0004    | OP_GET_LOCAL        1
+0006    | OP_STRUCT_INIT      1
+0008    | OP_RETURN
+== label ==
+0000   16 OP_GET_GLOBAL       0 '@strConcat'
+0002    | OP_CONSTANT         1 '<'
+0004    | OP_GET_LOCAL        0
+0006    | OP_GET_PROPERTY     2 'value'
+0008    | OP_INVOKE        (0 args)    3 'toString'
+0011    | OP_CONSTANT         4 '>'
+0013    | OP_LIST             3
+0015    | OP_CALL             1
+0017    | OP_RETURN
+== shout ==
+0000   18 OP_GET_LOCAL        0
+0002    | OP_GET_PROPERTY     0 'value'
+0004    | OP_INVOKE        (0 args)    1 'toString'
+0007    | OP_RETURN

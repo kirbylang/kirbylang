@@ -1,0 +1,31 @@
+struct Money {
+  pub var cents: i64;
+}
+
+impl Display for Money {
+  fun toString(self): string = $"${self.cents}";
+}
+
+impl Eq for Money {
+  fun equals(self, other: Self): bool = self.cents == other.cents;
+}
+
+struct Pair[T: Display + Eq] {
+  pub var left: T;
+  pub var right: T;
+}
+
+impl Pair[T] {
+  pub fun describe(self): string {
+    if (self.left.equals(self.right)) {
+      return $"{self.left} twice";
+    }
+
+    return $"{self.left} and {self.right}";
+  }
+}
+
+fun main(): unit {
+  let p = Pair { left: Money { cents: 1 }, right: Money { cents: 1 } };
+  @println(p.describe());
+}

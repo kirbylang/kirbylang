@@ -1,0 +1,28 @@
+struct Money {
+  pub var cents: i64;
+}
+
+impl Eq for Money {
+  fun equals(self, other: Self): bool = self.cents == other.cents;
+}
+
+impl Ord for Money {
+  fun cmp(self, other: Self): i64 = self.cents - other.cents;
+}
+
+fun largest[T: Ord](a: T, b: T): T {
+  if (a.cmp(b) >= 0) {
+    return a;
+  }
+
+  return b;
+}
+
+fun same[T: Ord](a: T, b: T): bool = a.equals(b);
+
+fun main(): unit {
+  let m = largest(Money { cents: 5 }, Money { cents: 9 });
+  @println(m.cents);
+  @println(same(Money { cents: 1 }, Money { cents: 1 }));
+  @println(same(Money { cents: 1 }, Money { cents: 2 }));
+}

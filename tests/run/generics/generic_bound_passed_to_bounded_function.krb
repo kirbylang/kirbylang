@@ -1,0 +1,28 @@
+struct Money {
+  pub var cents: i64;
+}
+
+impl Display for Money {
+  fun toString(self): string = $"{self.cents} cents";
+}
+
+impl Eq for Money {
+  fun equals(self, other: Self): bool = self.cents == other.cents;
+}
+
+impl Ord for Money {
+  fun cmp(self, other: Self): i64 = self.cents - other.cents;
+}
+
+fun show[T: Display](x: T): string = x.toString();
+
+fun showTwice[U: Display](x: U): string = show(x) + " " + show(x);
+
+fun same[T: Eq](a: T, b: T): bool = a.equals(b);
+
+fun sameWhenOrdered[T: Ord](a: T, b: T): bool = same(a, b);
+
+fun main(): unit {
+  @println(showTwice(Money { cents: 5 }));
+  @println(sameWhenOrdered(Money { cents: 5 }, Money { cents: 5 }));
+}

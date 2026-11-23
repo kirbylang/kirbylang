@@ -1,0 +1,9 @@
+struct Rock {
+  pub var weight: f64;
+}
+
+fun show[T: Display](x: T): string = x.toString();
+
+let f: fun (Rock) => string = show;
+
+fun main(): unit {}

@@ -1,0 +1,31 @@
+struct Money {
+  pub var cents: i64;
+}
+
+impl Display for Money {
+  fun toString(self): string = $"${self.cents}";
+}
+
+struct Labeled[T: Display] {
+  pub var value: T;
+}
+
+impl Labeled[T] {
+  pub fun new(value: T): Self[T] = Self { value: value };
+
+  pub fun label(self): string = $"<{self.value}>";
+
+  pub fun shout(self): string = self.value.toString();
+}
+
+fun wrap[T: Display](x: T): Labeled[T] = Labeled { value: x };
+
+fun main(): unit {
+  let a: Labeled[Money] = Labeled { value: Money { cents: 5 } };
+  let b = Labeled.new(Money { cents: 7 });
+  let c = wrap(Money { cents: 9 });
+
+  @println(a.label());
+  @println(b.shout());
+  @println(c.label());
+}

@@ -1,0 +1,24 @@
+struct Money {
+  pub var cents: i64;
+}
+
+impl Display for Money {
+  fun toString(self): string = $"${self.cents}";
+}
+
+impl Eq for Money {
+  fun equals(self, other: Self): bool = self.cents == other.cents;
+}
+
+fun describe[T: Display + Eq](a: T, b: T): string {
+  if (a.equals(b)) {
+    return $"{a} is the same as {b}";
+  }
+
+  return $"{a} differs from {b}";
+}
+
+fun main(): unit {
+  @println(describe(Money { cents: 5 }, Money { cents: 5 }));
+  @println(describe(Money { cents: 5 }, Money { cents: 9 }));
+}

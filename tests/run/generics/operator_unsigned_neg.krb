@@ -1,0 +1,5 @@
+fun negated[T: Neg](a: T): T = -a;
+
+fun main(): unit {
+  @println(negated(1u8));
+}

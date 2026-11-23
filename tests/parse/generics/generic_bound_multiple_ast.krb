@@ -1,0 +1,1 @@
+fun both[T: Display + Eq, U: Ord](a: T, b: U): bool = true;

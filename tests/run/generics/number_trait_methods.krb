@@ -1,0 +1,17 @@
+fun call_add[T: Add](a: T, b: T): T = a.add(b);
+
+fun call_neg[T: Neg](a: T): T = a.neg();
+
+fun call_equals[T: Eq](a: T, b: T): bool = a.equals(b);
+
+fun call_cmp[T: Ord](a: T, b: T): i64 = a.cmp(b);
+
+fun main(): unit {
+  @println(call_add(2, 3));
+  @println(call_neg(2.5));
+  @println(call_equals(4, 4));
+  @println(call_equals(4, 5));
+  @println(call_cmp(1, 2));
+  @println(call_cmp(2, 2));
+  @println(call_cmp(3, 2));
+}

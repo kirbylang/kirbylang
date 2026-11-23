@@ -1,0 +1,19 @@
+struct Dog {
+  pub var name: string;
+}
+
+impl Display for Dog {
+  fun toString(self): string = self.name;
+}
+
+fun label[T, U: Display](first: T, second: U): T {
+  @println(second.toString());
+  return first;
+}
+
+fun both[A: Display, B: Display](a: A, b: B): string = a.toString() + b.toString();
+
+fun main(): unit {
+  @println(label(42, Dog { name: "Rex" }));
+  @println(both(Dog { name: "Rex" }, Dog { name: "Fido" }));
+}

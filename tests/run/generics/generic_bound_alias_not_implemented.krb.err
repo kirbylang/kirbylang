@@ -1,0 +1,1 @@
+[line 8] Error at 'Showable': Rock doesn't implement Display, required by Showable.

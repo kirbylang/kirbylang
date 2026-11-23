@@ -1,0 +1,11 @@
+trait Named {
+  fun label(self): string;
+}
+
+trait Titled {
+  fun label(self): string;
+}
+
+fun show[T: Named + Titled](x: T): string = x.label();
+
+fun main(): unit {}

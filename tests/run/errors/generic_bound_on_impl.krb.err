@@ -1,0 +1,1 @@
+[line 5] Error at ':': An impl's type parameters take their bounds from the struct.

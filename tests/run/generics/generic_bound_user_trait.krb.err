@@ -1,0 +1,123 @@
+== <script> ==
+0000   25 OP_CLOSURE          1 <fn totalArea>
+0002    | OP_DEFINE_GLOBAL    0 'totalArea'
+0004   27 OP_CLOSURE          3 <fn scaled>
+0006    | OP_DEFINE_GLOBAL    2 'scaled'
+0008   33 OP_CLOSURE          5 <fn main>
+0010    | OP_DEFINE_GLOBAL    4 'main'
+0012    6 OP_STRUCT           6 'Square'
+0014    | OP_DEFINE_GLOBAL    6 'Square'
+0016    | OP_GET_GLOBAL       6 'Square'
+0018    7 OP_NIL
+0019    | OP_FIELD            7 'side' public mutable
+0023    8 OP_POP
+0024   10 OP_STRUCT           8 'Rect'
+0026    | OP_DEFINE_GLOBAL    8 'Rect'
+0028    | OP_GET_GLOBAL       8 'Rect'
+0030   11 OP_NIL
+0031    | OP_FIELD            9 'width' public mutable
+0035   12 OP_NIL
+0036    | OP_FIELD           10 'height' public mutable
+0040   13 OP_POP
+0041   15 OP_GET_GLOBAL       6 'Square'
+0043   16 OP_CLOSURE         12 <fn area>
+0045    | OP_METHOD          11 'area'
+0047   17 OP_CLOSURE         14 <fn scale>
+0049    | OP_METHOD          13 'scale'
+0051   18 OP_POP
+0052   20 OP_GET_GLOBAL       8 'Rect'
+0054   21 OP_CLOSURE         15 <fn area>
+0056    | OP_METHOD          11 'area'
+0058   22 OP_CLOSURE         16 <fn scale>
+0060    | OP_METHOD          13 'scale'
+0062   23 OP_POP
+0063   34 OP_NIL
+0064    | OP_RETURN
+== totalArea ==
+0000   25 OP_GET_LOCAL        1
+0002    | OP_INVOKE        (0 args)    0 'area'
+0005    | OP_GET_LOCAL        2
+0007    | OP_INVOKE        (0 args)    0 'area'
+0010    | OP_ADD
+0011    | OP_RETURN
+== scaled ==
+0000   27 OP_GET_LOCAL        1
+0002    | OP_CONSTANT         1 '2'
+0004    | OP_INVOKE        (1 args)    0 'scale'
+0007    | OP_RETURN
+== main ==
+0000   30 OP_GET_GLOBAL       0 '@println'
+0002    | OP_GET_GLOBAL       1 'totalArea'
+0004    | OP_GET_GLOBAL       2 'Square'
+0006    | OP_CONSTANT         3 'side'
+0008    | OP_CONSTANT         4 '2'
+0010    | OP_STRUCT_INIT      1
+0012    | OP_GET_GLOBAL       2 'Square'
+0014    | OP_CONSTANT         3 'side'
+0016    | OP_CONSTANT         5 '3'
+0018    | OP_STRUCT_INIT      1
+0020    | OP_CALL             2
+0022    | OP_CALL             1
+0024    | OP_POP
+0025   31 OP_GET_GLOBAL       0 '@println'
+0027    | OP_GET_GLOBAL       1 'totalArea'
+0029    | OP_GET_GLOBAL       6 'Rect'
+0031    | OP_CONSTANT         7 'width'
+0033    | OP_CONSTANT         4 '2'
+0035    | OP_CONSTANT         8 'height'
+0037    | OP_CONSTANT         9 '5'
+0039    | OP_STRUCT_INIT      2
+0041    | OP_GET_GLOBAL       6 'Rect'
+0043    | OP_CONSTANT         7 'width'
+0045    | OP_CONSTANT        10 '1'
+0047    | OP_CONSTANT         8 'height'
+0049    | OP_CONSTANT        10 '1'
+0051    | OP_STRUCT_INIT      2
+0053    | OP_CALL             2
+0055    | OP_CALL             1
+0057    | OP_POP
+0058   32 OP_GET_GLOBAL       0 '@println'
+0060    | OP_GET_GLOBAL      11 'scaled'
+0062    | OP_GET_GLOBAL       6 'Rect'
+0064    | OP_CONSTANT         7 'width'
+0066    | OP_CONSTANT         4 '2'
+0068    | OP_CONSTANT         8 'height'
+0070    | OP_CONSTANT         9 '5'
+0072    | OP_STRUCT_INIT      2
+0074    | OP_CALL             1
+0076    | OP_CALL             1
+0078    | OP_POP
+0079   33 OP_NIL
+0080    | OP_RETURN
+== area ==
+0000   16 OP_GET_LOCAL        0
+0002    | OP_GET_PROPERTY     0 'side'
+0004    | OP_GET_LOCAL        0
+0006    | OP_GET_PROPERTY     0 'side'
+0008    | OP_MULTIPLY
+0009    | OP_RETURN
+== scale ==
+0000   17 OP_GET_LOCAL        0
+0002    | OP_GET_PROPERTY     0 'side'
+0004    | OP_GET_LOCAL        0
+0006    | OP_GET_PROPERTY     0 'side'
+0008    | OP_MULTIPLY
+0009    | OP_GET_LOCAL        1
+0011    | OP_MULTIPLY
+0012    | OP_RETURN
+== area ==
+0000   21 OP_GET_LOCAL        0
+0002    | OP_GET_PROPERTY     0 'width'
+0004    | OP_GET_LOCAL        0
+0006    | OP_GET_PROPERTY     1 'height'
+0008    | OP_MULTIPLY
+0009    | OP_RETURN
+== scale ==
+0000   22 OP_GET_LOCAL        0
+0002    | OP_GET_PROPERTY     0 'width'
+0004    | OP_GET_LOCAL        0
+0006    | OP_GET_PROPERTY     1 'height'
+0008    | OP_MULTIPLY
+0009    | OP_GET_LOCAL        1
+0011    | OP_MULTIPLY
+0012    | OP_RETURN

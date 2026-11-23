@@ -1,0 +1,13 @@
+struct Money {
+  pub var cents: i64;
+}
+
+impl Display for Money {
+  fun toString(self): string = $"${self.cents}";
+}
+
+fun describe[T: Display + Eq](a: T, b: T): string = a.toString();
+
+fun main(): unit {
+  @println(describe(Money { cents: 5 }, Money { cents: 5 }));
+}

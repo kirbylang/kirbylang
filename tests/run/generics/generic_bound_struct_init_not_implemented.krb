@@ -1,0 +1,11 @@
+struct Rock {
+  pub var weight: f64;
+}
+
+struct Labeled[T: Display] {
+  pub var value: T;
+}
+
+fun main(): unit {
+  let x = Labeled { value: Rock { weight: 1 } };
+}

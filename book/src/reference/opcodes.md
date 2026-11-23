@@ -14,7 +14,7 @@
 |   `9` | `OP_NEGATE`           |                                    |      -1 +1 |                                                                                                 |
 |  `10` | `OP_PRINT`            |                                    |         -1 |                                                                                                 |
 |  `11` | `OP_RETURN`           |                                    |         -1 | Discards the call's frame, then pushes the value for the caller.                                |
-|  `12` | `OP_EQUAL`            |                                    |      -2 +1 |                                                                                                 |
+|  `12` | `OP_EQUAL`            |                                    |      -2 +1 | Built-in equality. `==` on structs and generic parameters is compiled to `OP_INVOKE` of `equals` instead. |
 |  `13` | `OP_NOT`              |                                    |      -1 +1 |                                                                                                 |
 |  `14` | `OP_POP`              |                                    |         -1 |                                                                                                 |
 |  `15` | `OP_CLOSE_UPVALUE`    |                                    |         -1 | Moves the captured value off the stack first.                                                   |
@@ -39,7 +39,7 @@
 |  `34` | `OP_GET_PROPERTY`     | `index`                            |      -1 +1 |                                                                                                 |
 |  `35` | `OP_SET_PROPERTY`     | `index`                            |      -2 +1 | Pops the object and value, then pushes the value.                                               |
 |  `36` | `OP_METHOD`           | `index`                            |         -1 | Pops the method; the struct stays.                                                              |
-|  `37` | `OP_INVOKE`           | `index`, `argCount`                |  -(n+1) +1 | Pops the receiver and its n arguments.                                                          |
+|  `12` | `OP_EQUAL`            |                                    |      -2 +1 | Built-in equality. `==` on structs and generic parameters is compiled to `OP_INVOKE` of `equals` instead. |
 |  `38` | `OP_LIST`             | `itemCount`                        |      -n +1 | Makes a list from the top n values.                                                             |
 |  `39` | `OP_GET_INDEX`        |                                    |      -2 +1 |                                                                                                 |
 |  `40` | `OP_SET_INDEX`        |                                    |      -3 +1 |                                                                                                 |

@@ -93,6 +93,16 @@
 - The `let` keyword on immutable struct fields is now optional `struct Box[T] { value: T; }`
 - Fix `@rand`, `@rand01` and `@randBetween` returning nearly the same value on every run on systems whose `rand()` changes little between close seeds, such as macOS. Random numbers now come from `arc4random` on macOS, and from `random` seeded with the time (with nanoseconds) and the process ID elsewhere
 - Change to require that the top level of a Kirby file must only be declarations. Any assigned values must be comptime values (literal values or references to already declared items e.g. function or let)
+- Trait Bounds
+  - Functions, structs, and type aliases can define traits a type parameter must implement
+    - `fun sum[T: Add](a, T, b: T): T = a + b;`
+    - `struct Addable[T: Add] { value: T }`
+    - `type Summable[T: Display] = [T];`
+  - Multiple bounds can be defined on a type parameter: `[T: Add + Eq]`
+  - New builtin traits: `Add`, `Sub`, `Mul`, `Div`, `Mod` and `Neg`
+  - Super trait methods are supported on bounded type parameters e.g. `[T: Ord]` can call `t.toString()`
+  - Calling a static trait method through a bound, such as `T.default()`, is now a compile error: `Can't call a static method on type parameter 'T'.` It was a runtime error, `Undefined variable 'T'.`
+  - **Breaking:** `==` and `!=` now require struct to implement the `Eq` trait. Comparing against identity is no longer available
 
 ## 0.4.0
 

@@ -1,0 +1,9 @@
+struct Rock {
+  pub var weight: f64;
+}
+
+type Showable[T: Display] = [T];
+
+fun main(): unit {
+  let items: Showable[Rock] = [];
+}

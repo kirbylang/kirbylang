@@ -1,0 +1,3 @@
+fun flip[T: Add](a: T): T = -a;
+
+fun main(): unit {}

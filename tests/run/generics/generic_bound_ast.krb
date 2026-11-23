@@ -1,0 +1,2 @@
+fun show[T: Display, U](x: T, y: U): string = x.toString();
+fun same[A: Eq](a: A, b: A): bool = a.equals(b);

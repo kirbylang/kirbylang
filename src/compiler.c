@@ -51,6 +51,7 @@ static void compileFunction(FunctionNode *fn, FunctionType type);
 static uint8_t makeConstant(CompiledConst value, Token *tok);
 static uint8_t stringConstant(const char *chars, int length, Token *tok);
 static void emitNumberConstant(NumberKind kind, NumberPayload payload);
+static void emitOperatorInvoke(const OperatorTrait *entry, int argCount);
 static void emitStringConstant(const char *chars, int length);
 static void emitByte(uint8_t byte);
 static void emitBytes(uint8_t byte1, uint8_t byte2);
@@ -857,6 +858,46 @@ static bool compileStringConcatChain(AstNode *node) {
   return true;
 }
 
+// Calls the trait method of an operator. The receiver and arguments are
+// already on the stack, and the result replaces them.
+static void emitOperatorInvoke(const OperatorTrait *entry, int argCount) {
+  Token method = tokenFromCString(entry->method);
+
+  emitBytes(OP_INVOKE, identifierConstant(&method));
+  emitByte((uint8_t)argCount);
+}
+
+// Compiles a binary operator on structs or generic parameters, with both
+// operands already pushed. `==` and `!=` call equals(). The ordering operators
+// call cmp() and compare its result with 0.
+static void compileTraitOperator(BinaryNode *b) {
+  emitOperatorInvoke(b->traitDispatch, /*argCount=*/1);
+
+  switch (b->op.type) {
+  case TOKEN_BANG_EQUAL:
+    emitByte(OP_NOT);
+    break;
+  case TOKEN_LESS:
+    emitNumberConstant(NUMBER_KIND_I64, (NumberPayload){.i64 = 0});
+    emitByte(OP_LESS);
+    break;
+  case TOKEN_GREATER:
+    emitNumberConstant(NUMBER_KIND_I64, (NumberPayload){.i64 = 0});
+    emitByte(OP_GREATER);
+    break;
+  case TOKEN_LESS_EQUAL:
+    emitNumberConstant(NUMBER_KIND_I64, (NumberPayload){.i64 = 0});
+    emitBytes(OP_GREATER, OP_NOT);
+    break;
+  case TOKEN_GREATER_EQUAL:
+    emitNumberConstant(NUMBER_KIND_I64, (NumberPayload){.i64 = 0});
+    emitBytes(OP_LESS, OP_NOT);
+    break;
+  default:
+    break;
+  }
+}
+
 // Replaces the value on top of the stack with the string its Display impl's
 // toString() returns.
 static void emitDisplayToString(void) {
@@ -918,7 +959,10 @@ static void compileExpr(AstNode *node) {
       emitByte(OP_NOT);
       break;
     case TOKEN_MINUS:
-      emitByte(OP_NEGATE);
+      if (u->traitDispatch != NULL)
+        emitOperatorInvoke(u->traitDispatch, /*argCount=*/0);
+      else
+        emitByte(OP_NEGATE);
       break;
     default:
       break; // unreachable
@@ -934,6 +978,12 @@ static void compileExpr(AstNode *node) {
 
     compileExpr(b->left);
     compileExpr(b->right);
+
+    if (b->traitDispatch != NULL) {
+      compileTraitOperator(b);
+      break;
+    }
+
     switch (b->op.type) {
     case TOKEN_BANG_EQUAL:
       emitBytes(OP_EQUAL, OP_NOT);

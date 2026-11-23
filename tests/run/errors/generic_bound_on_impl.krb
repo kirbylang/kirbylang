@@ -1,0 +1,7 @@
+struct Wrapper[T] {
+  pub var inner: T;
+}
+
+impl Wrapper[T: Display] {
+  pub fun get(self): T = self.inner;
+}

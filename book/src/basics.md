@@ -336,7 +336,7 @@ fun main(): unit {
 }
 ```
 
-Inside the function, nothing is known about `T`, so a `T` can be passed around, returned and stored, but not added or called. Every argument that uses the same `T` has to be the same type.
+Inside the function, nothing is known about `T`, so a `T` can be passed around, returned and stored, but not added, compared or called. Every argument that uses the same `T` has to be the same type. A [trait bound](#trait-bounds) lets the function call a trait's methods on a `T`.
 
 ### Builtin Functions
 
@@ -455,3 +455,68 @@ fun main(): unit {
     @println($"Rect: {rect.get_area()}");  // Rect: 50
 }
 ```
+
+### Trait Bounds
+
+A [generic function](#generic-functions) can say that its type has to implement a trait. Write the trait after a colon. The function can then call the trait's methods on that type.
+
+```
+fun double_area[T: Area](shape: T): f64 = shape.get_area() * 2;
+
+fun main(): unit {
+    @println(double_area(Rect { width: 5, height: 10 }));  // 100
+}
+```
+
+A call with a type that doesn't implement the trait is an error: `Rock doesn't implement Area, required by T.`
+
+Use `+` to ask for more than one trait.
+
+```
+fun describe[T: Display + Eq](a: T, b: T): string {
+    if (a.equals(b)) {
+        return $"{a} is the same as {b}";
+    }
+
+    return $"{a} differs from {b}";
+}
+```
+
+Structs and type aliases can have bounds too. An `impl` takes the bounds of its struct, so you don't write them again.
+
+```
+struct Labeled[T: Display] {
+    pub var value: T;
+}
+
+impl Labeled[T] {
+    pub fun label(self): string = $"<{self.value}>";
+}
+```
+
+#### Operators
+
+An operator on a struct calls a method of a trait: `a + b` calls `a.add(b)` from the `Add` trait. The traits are `Add`, `Sub`, `Mul`, `Div`, `Mod` (`+ - * / %`), `Neg` (unary `-`), `Eq` (`==` and `!=`) and `Ord` (`<`, `>`, `<=` and `>=`). A bound lets generic code use them, and numbers can be used with any of these bounds.
+
+```
+struct Vec2 {
+    pub var x: f64;
+    pub var y: f64;
+}
+
+impl Add for Vec2 {
+    fun add(self, other: Self): Self =
+        Vec2 { x: self.x + other.x, y: self.y + other.y };
+}
+
+fun sum[T: Add](a: T, b: T): T = a + b;
+
+fun main(): unit {
+    @println(sum(1, 2));                                   // 3
+    let v = sum(Vec2 { x: 1, y: 2 }, Vec2 { x: 3, y: 4 }); // Vec2 { x: 4, y: 6 }
+}
+```
+
+`==` on two structs calls their `equals`, so it follows the struct's `Eq` impl.
+
+Calling a static trait method through a bound, like `T.default()`, isn't supported yet.

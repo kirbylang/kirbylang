@@ -61,6 +61,9 @@ struct Type {
       int implementedTraitCount;
       // How many type parameters `struct Box[T]` declares. 0 if none.
       int genericParamCount;
+      // The declaration's parameter types, in order, which hold the bounds of
+      // `struct Box[T: Display]`. NULL until they are set.
+      Type **genericParams;
       // For an instance such as `Box[f64]`: the declaration it comes from and
       // the type arguments. An instance holds no members of its own. Looking
       // one up finds it on the declaration and substitutes the arguments.
@@ -99,6 +102,11 @@ struct Type {
       // A declared parameter as seen inside its own declaration: one unknown
       // type that is never filled in and is only equal to itself.
       bool isOpaque;
+      // The traits a type has to implement to fill this parameter, as in
+      // `T: Display + Eq`. Only the names are kept, because a trait is found
+      // through the type environment.
+      InternedName *boundTraits;
+      int boundCount;
     } genericParam;
     struct {
       InternedName name;
@@ -232,6 +240,10 @@ Type *typeGenericParam(int index);
 // declaration.
 Type *typeDeclaredGenericParam(Token name, int index, bool isOpaque);
 
+// Requires any type that fills `param` to implement the trait too. A trait
+// already required is ignored.
+void typeGenericParamAddBound(Type *param, InternedName traitName);
+
 // The first generic parameter with this index found inside `type`, or NULL.
 Type *typeFindGenericParam(Type *type, int index);
 
@@ -261,6 +273,9 @@ void typeStructSetGenericParamCount(Type *type, int count);
 // True for a struct declared with type parameters, such as `Box` in
 // `struct Box[T]`, and false for an instance such as `Box[f64]`.
 bool typeStructIsGeneric(Type *type);
+
+// Records the parameter types of a generic struct's declaration.
+void typeStructSetGenericParams(Type *type, Type **params);
 
 // `Box[f64]`: the declaration `base` with these type arguments.
 Type *typeStructInstance(Type *base, Type **typeArgs, int typeArgCount);
