@@ -423,7 +423,7 @@ fun main(): unit {
 
 Traits are a way to define an interface for shared behavior.
 
-```
+```krb
 trait Area {
     fun get_area(self): f64;
 }
@@ -453,6 +453,74 @@ fun main(): unit {
 
     @println($"Square: {square.get_area()}");  // Square: 100
     @println($"Rect: {rect.get_area()}");  // Rect: 50
+}
+```
+
+### Super Traits
+
+Super traits are a way to declare that if you implement one trait, you must implement another.
+
+```krb
+trait Super {
+    fun super(self): string;
+}
+
+trait Regular: Super {
+    fun regular(self): string;
+}
+
+struct Value {}
+
+impl Super for Value {
+    fun super(self): string = "Super!";
+}
+
+impl Regular for Value {
+    fun regular(self): string = "Regular!";
+}
+
+fun test[T: Regular](value: T): unit {
+    @eprintln(value.super());
+    @eprintln(value.regular());
+}
+
+fun main(): unit {
+    let value = Value {};
+
+    test(value);
+}
+```
+
+`Ord` has a super trait of `Eq`.
+
+```krb
+struct Money {
+  pub var cents: i64;
+}
+
+impl Eq for Money {
+  fun equals(self, other: Self): bool = self.cents == other.cents;
+}
+
+impl Ord for Money {
+  fun cmp(self, other: Self): i64 = self.cents - other.cents;
+}
+
+fun largest[T: Ord](a: T, b: T): T {
+  if (a.cmp(b) >= 0) {
+    return a;
+  }
+
+  return b;
+}
+
+fun same[T: Ord](a: T, b: T): bool = a.equals(b);
+
+fun main(): unit {
+  let m = largest(Money { cents: 5 }, Money { cents: 9 });
+  @println(m.cents);
+  @println(same(Money { cents: 1 }, Money { cents: 1 }));
+  @println(same(Money { cents: 1 }, Money { cents: 2 }));
 }
 ```
 
