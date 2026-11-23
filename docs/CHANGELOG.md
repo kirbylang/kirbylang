@@ -24,16 +24,6 @@
 
 ## Next
 
-- Trait Bounds
-  - Functions, structs, and type aliases can define traits a type parameter must implement
-    - `fun sum[T: Add](a, T, b: T): T = a + b;`
-    - `struct Addable[T: Add] { value: T }`
-    - `type Summable[T: Display] = [T];`
-  - Multiple bounds can be defined on a type parameter: `[T: Add + Eq]`
-  - New builtin traits: `Add`, `Sub`, `Mul`, `Div`, `Mod` and `Neg`
-  - Super trait methods are supported on bounded type parameters e.g. `[T: Ord]` can call `t.toString()`
-  - Calling a static trait method through a bound, such as `T.default()`, is now a compile error: `Can't call a static method on type parameter 'T'.` It was a runtime error, `Undefined variable 'T'.`
-  - **Breaking:** `==` and `!=` now require struct to implement the `Eq` trait. Comparing against identity is no longer available
 - Add natives for fixed size arrays: `@arrLen`, `@arrContains`, `@arrEqual`, `@arrCopy`, `@arrReverse`, `@arrJoin`, `@arrSlice`, `@arrConcat` and `@arrToList`. Their signatures name the array's length with the placeholders `N` and `M`, such as `fun ([T; N]) => [T; N]` for `@arrCopy`, which native signatures can use but user code can't. `@arrSlice`, `@arrConcat` and `@arrToList` return lists. There is no `@arrIsEmpty`, `@arrPush` or other function that changes an array's length, and a list native given an array (or the other way round) is a compile error
 - A literal such as `[1, 2, 3]` now makes a fixed size array `[i64; 3]` unless a list type is expected. An empty literal `[]` is an error unless a type is expected (`Can't tell the item type of an empty literal.`), so write `let xs: [i64] = [];`, and a literal given directly to a list parameter of a native, such as `@listLen([])`, is still a list. Arrays have their own heap object `ObjArray` and their own bytecode `OP_ARRAY` (43), and `OP_ARRAY` (38) is renamed `OP_LIST`. Indexing works on arrays, an array literal with the wrong number of items for its type is an error, and a number literal index past the end of an array is a compile error (`Index 2 is out of range for [i64; 2].`). **Breaking**: a list native such as `@listPush` no longer accepts an unannotated literal held in a variable, so write `let xs: [i64] = [1, 2, 3];`, and `var xs = [];` needs a type too
 - Parse and type check the fixed size array type `[T; n]`, such as `[i64; 3]`. The length is a whole number literal and is part of the type, so `[i64; 3]`, `[i64; 4]` and `[i64]` are all different types. New AST node `NODE_TYPE_ARRAY` (`TypeArrayNode`), and the message for an unclosed list type is now `Expect ']' after list element type.`
@@ -103,6 +93,16 @@
 - The `let` keyword on immutable struct fields is now optional `struct Box[T] { value: T; }`
 - Fix `@rand`, `@rand01` and `@randBetween` returning nearly the same value on every run on systems whose `rand()` changes little between close seeds, such as macOS. Random numbers now come from `arc4random` on macOS, and from `random` seeded with the time (with nanoseconds) and the process ID elsewhere
 - Change to require that the top level of a Kirby file must only be declarations. Any assigned values must be comptime values (literal values or references to already declared items e.g. function or let)
+- Trait Bounds
+  - Functions, structs, and type aliases can define traits a type parameter must implement
+    - `fun sum[T: Add](a, T, b: T): T = a + b;`
+    - `struct Addable[T: Add] { value: T }`
+    - `type Summable[T: Display] = [T];`
+  - Multiple bounds can be defined on a type parameter: `[T: Add + Eq]`
+  - New builtin traits: `Add`, `Sub`, `Mul`, `Div`, `Mod` and `Neg`
+  - Super trait methods are supported on bounded type parameters e.g. `[T: Ord]` can call `t.toString()`
+  - Calling a static trait method through a bound, such as `T.default()`, is now a compile error: `Can't call a static method on type parameter 'T'.` It was a runtime error, `Undefined variable 'T'.`
+  - **Breaking:** `==` and `!=` now require struct to implement the `Eq` trait. Comparing against identity is no longer available
 
 ## 0.4.0
 
