@@ -197,6 +197,26 @@ checked.
 
 A generic function is compiled once, and the same code runs for every type.
 
+### Methods On Primitive Types
+
+A primitive type has methods that are written in Kirby, in an `impl` block in
+the standard library:
+
+```
+impl string {
+    pub fun len(self): i64 = @strLen(self);
+}
+```
+
+`"abc".len()` calls it. Only the standard library can write these blocks, and
+for now only `impl string` is supported, with methods that take `self`. A
+method has to be called, so `let f = "abc".len;` is an error. A call to one is
+compiled as a plain function call with the value as the first argument.
+
+Inside the block, `Self` is the primitive type, so `other: Self` is a `string`
+in `impl string`. A primitive has no fields or static methods, so `Self { }`
+and `Self.name()` are errors.
+
 ### Traits
 
 A trait declares required methods for a struct to implement.

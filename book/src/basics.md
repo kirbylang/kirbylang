@@ -123,6 +123,16 @@ fun main(): unit {
 }
 ```
 
+#### String Methods
+
+`len` gives the length of a string in bytes.
+
+```kirby
+fun main(): unit {
+    @println("Hello".len()); // 5
+}
+```
+
 #### Multiline Strings
 
 Multiline strings are supported.

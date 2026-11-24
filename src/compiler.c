@@ -662,7 +662,43 @@ static int endCompiler(void) {
   return index;
 }
 
+// The global a primitive type's method is stored in, such as `string.len`.
+// A `.` can't appear in a user's name, so it can't collide with one.
+static uint8_t primitiveMethodConstant(const char *owner, int ownerLength,
+                                       const Token *method) {
+  int length = ownerLength + 1 + method->length;
+  char *name = (char *)malloc((size_t)length);
+  if (name == NULL) {
+    fprintf(stderr, "malloc failed in primitiveMethodConstant\n");
+    exit(1);
+  }
+
+  memcpy(name, owner, (size_t)ownerLength);
+  name[ownerLength] = '.';
+  memcpy(name + ownerLength + 1, method->start, (size_t)method->length);
+
+  uint8_t constant = stringConstant(name, length, NULL);
+  free(name);
+  return constant;
+}
+
 static void compileCall(CallNode *c) {
+  if (c->callee->kind == NODE_GET && c->callee->as.get.primitiveOwner != NULL) {
+    GetNode *g = &c->callee->as.get;
+    // The checker matched the count to the method, which has at most 254
+    // parameters plus the receiver
+    assert(c->argCount + 1 <= UINT8_MAX);
+    emitBytes(OP_GET_GLOBAL,
+              primitiveMethodConstant(
+                  g->primitiveOwner, (int)strlen(g->primitiveOwner), &g->name));
+    compileExpr(g->object);
+    for (int i = 0; i < c->argCount; i++) {
+      compileExpr(c->args[i]);
+    }
+    emitBytes(OP_CALL, (uint8_t)(c->argCount + 1));
+    return;
+  }
+
   // Compile method calls to OP_INVOKE instead of OP_GET_PROPERTY -> OP_CALL
   if (c->callee->kind == NODE_GET) {
     GetNode *g = &c->callee->as.get;
@@ -916,7 +952,7 @@ static void emitDisplayToString(void) {
  */
 static bool selfInScope(void) {
   for (FnCompiler *c = current; c != NULL; c = c->enclosing) {
-    if (c->type == TYPE_METHOD)
+    if (c->type == TYPE_METHOD || c->type == TYPE_PRIMITIVE_METHOD)
       return true;
   }
   return false;
@@ -1277,9 +1313,17 @@ static void compileFunction(FunctionNode *fn, FunctionType type) {
   current->fn->isPublic = fn->isPublic;
   beginScope();
 
-  current->fn->arity = fn->arity;
-  if (fn->arity > 255) {
+  int receiverCount = type == TYPE_PRIMITIVE_METHOD ? 1 : 0;
+
+  current->fn->arity = fn->arity + receiverCount;
+  if (current->fn->arity > 255) {
     compilerErrorAtToken(&fn->name, "Can't have more than 255 parameters.");
+  }
+  if (receiverCount == 1) {
+    Token self = tokenFromCString("self");
+    declareVariable(&self, /*isMutable=*/false);
+    markInitialized();
+    resetStackHeight(currentStackHeight() + 1);
   }
   for (int i = 0; i < fn->arity; i++) {
     declareVariable(&fn->params[i], /*isMutable=*/true);
@@ -1364,10 +1408,29 @@ static void compileStructDecl(AstNode *node) {
   emitByte(OP_POP);
 }
 
+// `impl string { ... }`: each method becomes a global function
+static void compilePrimitiveImplDecl(AstNode *node) {
+  ImplNode *impl = &node->as.impl;
+
+  for (int i = 0; i < impl->methodCount; i++) {
+    FunctionNode *method = impl->methods[i];
+
+    compileFunction(method, TYPE_PRIMITIVE_METHOD);
+    emitBytes(OP_DEFINE_GLOBAL,
+              primitiveMethodConstant(impl->targetName.start,
+                                      impl->targetName.length, &method->name));
+  }
+}
+
 static void compileImplDecl(AstNode *node) {
   ImplNode *impl = &node->as.impl;
 
   currentLine = impl->targetName.line;
+
+  if (!impl->hasTraitName && tokenIsPrimitiveTypeName(&impl->targetName)) {
+    compilePrimitiveImplDecl(node);
+    return;
+  }
 
   const Token *resolved = resolvedImplTargetsLookup(node);
   Token structName = resolved != NULL ? *resolved : impl->targetName;

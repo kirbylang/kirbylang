@@ -203,6 +203,12 @@ typedef struct {
 typedef struct {
   AstNode *object;
   Token name;
+  /**
+   * Set by the type checker when the call is to a method of a primitive type,
+   * such as "string". NULL for every other get. The compiler turns the call
+   * into a plain function call, because it has no types of its own.
+   */
+  const char *primitiveOwner;
 } GetNode;
 
 typedef struct {

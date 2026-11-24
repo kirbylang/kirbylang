@@ -125,7 +125,61 @@ static void test_traits_declared_by_the_stdlib_are_builtin(void) {
   typchkResetError();
 }
 
+static void test_only_the_stdlib_adds_methods_to_primitives(void) {
+  typchkResetError();
+  typchkSessionBegin();
+
+  assert(checkStdlibUnit("impl string {\n"
+                         "  pub fun twice(self): i64 = @strLen(self) * 2;\n"
+                         "}"));
+
+  // The method outlives the unit that declared it
+  assert(checkUnit("@println(\"ab\".twice());"));
+
+  typchkResetError();
+  assert(!checkUnit("impl string {\n"
+                    "  pub fun thrice(self): i64 = 3;\n"
+                    "}"));
+
+  typchkResetError();
+  assert(!checkUnit("@println(\"ab\".thrice());"));
+
+  typchkResetError();
+  assert(!checkStdlibUnit("impl f64 {\n"
+                          "  pub fun one(self): f64 = 1;\n"
+                          "}"));
+
+  typchkSessionEnd();
+  typchkResetError();
+}
+
+static void test_self_in_a_primitive_impl_is_the_primitive(void) {
+  typchkResetError();
+  typchkSessionBegin();
+
+  assert(checkStdlibUnit(
+      "impl string {\n"
+      "  pub fun same(self, other: Self): bool = @strLen(self) == "
+      "@strLen(other);\n"
+      "  pub fun me(self): Self {\n"
+      "    let copy: Self = self;\n"
+      "    copy\n"
+      "  }\n"
+      "}"));
+
+  assert(checkUnit("let s: string = \"ab\".me();\n"
+                   "@println(s.same(\"cd\"));"));
+
+  typchkResetError();
+  assert(!checkUnit("@println(\"ab\".same(1));"));
+
+  typchkSessionEnd();
+  typchkResetError();
+}
+
 int main(void) {
+  test_self_in_a_primitive_impl_is_the_primitive();
+  test_only_the_stdlib_adds_methods_to_primitives();
   test_traits_declared_by_the_stdlib_are_builtin();
   test_function_signatures_survive_the_unit_that_declared_them();
   test_struct_types_survive_the_unit_that_declared_them();

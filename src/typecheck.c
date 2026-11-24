@@ -93,6 +93,16 @@ typedef struct {
   int capacity;
 } TypeEnvScope;
 
+// A method declared with `impl string { ... }` in the standard library.
+// `owner` is the type's name, as the compiler spells it in the method's global
+// name.
+typedef struct {
+  const char *owner;
+  InternedName name;
+  Type *type;
+  bool isPublic;
+} PrimitiveMethod;
+
 struct TypeEnv {
   // State
 
@@ -116,6 +126,11 @@ struct TypeEnv {
   int traitCount;
   int traitCapacity;
 
+  // Methods of primitive types. Only the standard library declares them
+  PrimitiveMethod *primitiveMethods;
+  int primitiveMethodCount;
+  int primitiveMethodCapacity;
+
   // Generic type aliases such as `type Wrapper[T] = Box[T];`
   GenericAlias *genericAliases;
   int genericAliasCount;
@@ -128,6 +143,11 @@ struct TypeEnv {
                             // its return type didn't resolve.
   Type *_currentImplTargetType; // NULL when not checking an impl block
   bool _resolvingSignature;     // Allows the names only native signatures use
+  bool _isStdlib; // The unit being checked is the standard library
+  // Owner of the primitive impl block being checked, NULL outside one
+  const char *_currentPrimitiveOwner;
+  // The get expression being called, so `a.b` alone can be told from `a.b()`
+  AstNode *_calleeNode;
 
   // Generic parameters of the declarations being checked, innermost last
   TypeEnvBinding *_genericParams;
@@ -195,6 +215,7 @@ void typchkTypeEnvDestroy(TypeEnv *env) {
   free(env->aliases);
   free(env->traits);
   free(env->genericAliases);
+  free(env->primitiveMethods);
   free(env->_genericParams);
   free(env);
 }
@@ -539,6 +560,18 @@ static Type *typchkInstantiateGenericAlias(TypeEnv *env, TypeNode *t,
                                      t->genericArgCount);
 }
 
+// `Self` was used where a struct is needed. Inside a primitive's impl block
+// `Self` is the primitive, which has no fields or static methods.
+static void typchkErrorSelfIsNotAStruct(TypeEnv *env, Token *token) {
+  if (env->_currentPrimitiveOwner != NULL) {
+    typchkErrorAtTokenFmt(token, "'Self' is '%s' in this impl, not a struct.",
+                          env->_currentPrimitiveOwner);
+    return;
+  }
+
+  typchkErrorAtToken(token, "'Self' can only be used inside an impl block.");
+}
+
 // `Self[U]` inside the impl of a generic struct.
 static Type *typchkResolveGenericInstance(TypeEnv *env, TypeNode *t) {
   Type *declaration;
@@ -547,8 +580,7 @@ static Type *typchkResolveGenericInstance(TypeEnv *env, TypeNode *t) {
     declaration = env->_currentImplTargetType;
 
     if (declaration == NULL) {
-      typchkErrorAtToken(&t->name,
-                         "'Self' can only be used inside an impl block.");
+      typchkErrorSelfIsNotAStruct(env, &t->name);
       return NULL;
     }
   } else {
@@ -1906,7 +1938,9 @@ static Type *typchkInferCall(TypeEnv *env, AstNode *node) {
     return returnType;
   }
 
+  env->_calleeNode = c->callee;
   Type *calleeType = typchkInfer(env, c->callee);
+  env->_calleeNode = NULL;
 
   if (calleeType == NULL) {
     for (int i = 0; i < c->argCount; i++) {
@@ -2097,9 +2131,51 @@ static Type *typchkCheckCallAgainstFunctionType(TypeEnv *env, AstNode *node,
   return calleeType->as.function.returnType;
 }
 
+// The name primitive methods are grouped under, or NULL if the type can't have
+// methods yet
+static const char *typchkPrimitiveOwner(const Type *type) {
+  return type->kind == TYPE_STRING ? "string" : NULL;
+}
+
+static PrimitiveMethod *
+typchkPrimitiveMethodLookup(TypeEnv *env, const char *owner, Token name) {
+  InternedName interned = internTokenName(name);
+
+  for (int i = 0; i < env->primitiveMethodCount; i++) {
+    PrimitiveMethod *method = &env->primitiveMethods[i];
+
+    if (strcmp(method->owner, owner) == 0 &&
+        internedNamesEqual(method->name, interned))
+      return method;
+  }
+
+  return NULL;
+}
+
+static void typchkPrimitiveMethodAdd(TypeEnv *env, const char *owner,
+                                     Token name, Type *type, bool isPublic) {
+  if (env->primitiveMethodCount == env->primitiveMethodCapacity) {
+    env->primitiveMethodCapacity =
+        env->primitiveMethodCapacity < 8 ? 8 : env->primitiveMethodCapacity * 2;
+    env->primitiveMethods = (PrimitiveMethod *)realloc(
+        env->primitiveMethods,
+        sizeof(PrimitiveMethod) * (size_t)env->primitiveMethodCapacity);
+    if (env->primitiveMethods == NULL) {
+      fprintf(stderr, "realloc failed in typchkPrimitiveMethodAdd\n");
+      exit(1);
+    }
+  }
+
+  env->primitiveMethods[env->primitiveMethodCount++] =
+      (PrimitiveMethod){owner, internTokenName(name), type, isPublic};
+}
+
 // Infer the type of a get expression
 static Type *typchkInferGet(TypeEnv *env, AstNode *node) {
   GetNode *get = &node->as.get;
+
+  // Read before inferring the object, which may contain calls of its own
+  bool isCallee = env->_calleeNode == node;
 
   if (get->object->kind == NODE_VARIABLE) {
     Token *objIdentifier = &get->object->as.variable.name;
@@ -2123,8 +2199,7 @@ static Type *typchkInferGet(TypeEnv *env, AstNode *node) {
                              : typchkTypeEnvLookupStruct(env, *objIdentifier);
 
       if (structType == NULL && isSelf) {
-        typchkErrorAtTokenFmt(objIdentifier,
-                              "'Self' can only be used inside an impl block.");
+        typchkErrorSelfIsNotAStruct(env, objIdentifier);
         return NULL;
       }
 
@@ -2212,6 +2287,32 @@ static Type *typchkInferGet(TypeEnv *env, AstNode *node) {
     }
 
     return methodType;
+  }
+
+  const char *primitiveOwner = typchkPrimitiveOwner(objectType);
+
+  if (primitiveOwner != NULL) {
+    PrimitiveMethod *method =
+        typchkPrimitiveMethodLookup(env, primitiveOwner, get->name);
+
+    if (method != NULL) {
+      if (!method->isPublic && env->_currentPrimitiveOwner != primitiveOwner) {
+        typchkErrorAtTokenFmt(&get->name, "Method '%.*s' is private to '%s'.",
+                              get->name.length, get->name.start,
+                              primitiveOwner);
+        return NULL;
+      }
+
+      if (!isCallee) {
+        typchkErrorAtTokenFmt(
+            &get->name, "Method '%.*s' of '%s' has to be called.",
+            get->name.length, get->name.start, primitiveOwner);
+        return NULL;
+      }
+
+      get->primitiveOwner = primitiveOwner;
+      return method->type;
+    }
   }
 
   // The object's type isn't a struct
@@ -2499,8 +2600,7 @@ static Type *typchkInferStructInit(TypeEnv *env, AstNode *node) {
   if (tokenTextEquals(&si->name, "Self")) {
     structType = typchkTypeEnvGetImplTargetType(env);
     if (structType == NULL) {
-      typchkErrorAtTokenFmt(&si->name,
-                            "'Self' can only be used inside an impl block.");
+      typchkErrorSelfIsNotAStruct(env, &si->name);
       return NULL;
     }
   } else {
@@ -2896,7 +2996,8 @@ static void typchkCheckVarDecl(TypeEnv *env, AstNode *node) {
     Token declaredTypeIdentifier = varDecl->declaredType->as.type_.name;
     bool isSelf = tokenTextEquals(&declaredTypeIdentifier, "Self");
 
-    if (isSelf && typchkTypeEnvGetImplTargetType(env) == NULL) {
+    if (isSelf && typchkTypeEnvGetImplTargetType(env) == NULL &&
+        env->_currentImplSelfType == NULL) {
       typchkErrorAtTokenFmt(&declaredTypeIdentifier,
                             "'Self' can only be used inside an impl block.");
       return;
@@ -3661,6 +3762,59 @@ static void typchkCheckTraitSupertraitSatisfied(TypeEnv *env, AstNode *node) {
   }
 }
 
+// Registers the methods of `impl string { ... }`. Only the standard library
+// can add methods to a primitive type.
+static void typchkRegisterPrimitiveImplMethods(TypeEnv *env, AstNode *node) {
+  ImplNode *impl = &node->as.impl;
+  Token target = impl->targetName;
+
+  if (!env->_isStdlib) {
+    typchkErrorAtTokenFmt(
+        &target, "Only the standard library can add methods to '%.*s'.",
+        target.length, target.start);
+    return;
+  }
+
+  if (!tokenTextEquals(&target, "string")) {
+    typchkErrorAtTokenFmt(&target, "Methods on '%.*s' aren't supported yet.",
+                          target.length, target.start);
+    return;
+  }
+
+  const char *owner = "string";
+
+  env->_currentPrimitiveOwner = owner;
+  env->_currentImplSelfType = typeString();
+
+  for (int i = 0; i < impl->methodCount; i++) {
+    FunctionNode *method = impl->methods[i];
+
+    if (!method->hasSelf) {
+      typchkErrorAtTokenFmt(
+          &method->name, "Static methods on '%s' aren't supported yet.", owner);
+      continue;
+    }
+
+    Type *methodType = typchkResolveFunctionSignature(env, method);
+
+    if (methodType == NULL)
+      continue; // already reported
+
+    if (typchkPrimitiveMethodLookup(env, owner, method->name) != NULL) {
+      typchkErrorAtTokenFmt(&method->name,
+                            "'%.*s' is already declared on '%s'.",
+                            method->name.length, method->name.start, owner);
+      continue;
+    }
+
+    typchkPrimitiveMethodAdd(env, owner, method->name, methodType,
+                             method->isPublic);
+  }
+
+  env->_currentImplSelfType = NULL;
+  env->_currentPrimitiveOwner = NULL;
+}
+
 static void typchkRegisterImplMethods(TypeEnv *env, AstNode *node) {
   ImplNode *impl = &node->as.impl;
 
@@ -3673,9 +3827,7 @@ static void typchkRegisterImplMethods(TypeEnv *env, AstNode *node) {
 
   if (structType == NULL) {
     if (tokenIsPrimitiveTypeName(&impl->targetName)) {
-      typchkErrorAtTokenFmt(
-          &impl->targetName,
-          "Only trait implementations are allowed on primitive types.");
+      typchkRegisterPrimitiveImplMethods(env, node);
     } else {
       typchkErrorAtTokenFmt(&impl->targetName, "Unknown type '%.*s'.",
                             impl->targetName.length, impl->targetName.start);
@@ -3771,9 +3923,41 @@ static void typchkCheckTopLevelFunctionBody(TypeEnv *env, AstNode *node) {
   typchkCheckGenericFunctionBody(env, fn, fnType, NULL);
 }
 
+// Checks the bodies of a primitive type's methods. Methods that failed to
+// register were already reported.
+static void checkPrimitiveImplMethodBodies(TypeEnv *env, AstNode *node) {
+  ImplNode *impl = &node->as.impl;
+
+  if (!env->_isStdlib || !tokenTextEquals(&impl->targetName, "string"))
+    return;
+
+  env->_currentPrimitiveOwner = "string";
+  env->_currentImplSelfType = typeString();
+
+  for (int i = 0; i < impl->methodCount; i++) {
+    FunctionNode *method = impl->methods[i];
+    PrimitiveMethod *registered =
+        typchkPrimitiveMethodLookup(env, "string", method->name);
+
+    if (!method->hasSelf || registered == NULL)
+      continue;
+
+    typchkCheckGenericFunctionBody(env, method, registered->type, typeString());
+  }
+
+  env->_currentImplSelfType = NULL;
+  env->_currentPrimitiveOwner = NULL;
+}
+
 static void checkImplMethodBodies(TypeEnv *env, AstNode *node) {
   ImplNode *impl = &node->as.impl;
   Type *structType = typchkResolveImplTarget(env, impl->targetName);
+
+  if (structType == NULL && !impl->hasTraitName &&
+      tokenIsPrimitiveTypeName(&impl->targetName)) {
+    checkPrimitiveImplMethodBodies(env, node);
+    return;
+  }
 
   // Inside a generic impl, each parameter is one fixed type
   int declaredCount = structType != NULL && !impl->hasTraitName
@@ -3839,6 +4023,7 @@ static bool typchkCheckUnit(AstNode **program, int count, bool isStdlib) {
 
   bool ownsEnv = sessionEnv == NULL;
   TypeEnv *env = ownsEnv ? typchkTypeEnvCreate() : sessionEnv;
+  env->_isStdlib = isStdlib;
 
   if (ownsEnv)
     typchkTypeEnvBeginScope(env);

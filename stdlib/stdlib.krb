@@ -249,3 +249,8 @@ impl Ord for Date {
 impl Eq for Date {
     fun equals(self, other: Self): bool = self.timestamp == other.timestamp;
 }
+
+impl string {
+    // Length in bytes
+    pub fun len(self): i64 = @strLen(self);
+}

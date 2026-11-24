@@ -1,1 +1,1 @@
-[line 1] Error at 'f64': Only trait implementations are allowed on primitive types.
+[line 1] Error at 'f64': Only the standard library can add methods to 'f64'.

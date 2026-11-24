@@ -31,6 +31,9 @@ typedef enum {
   TYPE_FUNCTION,
   TYPE_METHOD,
   TYPE_STATIC_METHOD,
+  // A method of a primitive type. It is a plain function whose first
+  // parameter is `self`, so a call passes the receiver as the first argument
+  TYPE_PRIMITIVE_METHOD,
   TYPE_SCRIPT
 } FunctionType;
 

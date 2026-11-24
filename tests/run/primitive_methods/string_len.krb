@@ -1,0 +1,6 @@
+fun main(): unit {
+    let s = "hello";
+    @println(s.len());
+    @println("".len());
+    @println("Hello World".len() + 1);
+}
