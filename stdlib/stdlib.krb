@@ -1,3 +1,43 @@
+trait Display {
+    fun toString(self): string;
+}
+
+trait Eq {
+    fun equals(self, other: Self): bool;
+}
+
+trait Ord: Eq {
+    fun cmp(self, other: Self): i64;
+}
+
+trait Default {
+    fun default(): Self;
+}
+
+trait Add {
+    fun add(self, other: Self): Self;
+}
+
+trait Sub {
+    fun sub(self, other: Self): Self;
+}
+
+trait Mul {
+    fun mul(self, other: Self): Self;
+}
+
+trait Div {
+    fun div(self, other: Self): Self;
+}
+
+trait Mod {
+    fun mod(self, other: Self): Self;
+}
+
+trait Neg {
+    fun neg(self): Self;
+}
+
 // UTC Date Time
 struct Date {
     // Unix timestamp, in whole seconds

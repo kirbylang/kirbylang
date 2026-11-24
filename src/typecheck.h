@@ -16,6 +16,10 @@ void typchkErrorAtTokenFmt(Token *token, const char *fmt, ...);
 void typchkSessionBegin(void);
 void typchkSessionEnd(void);
 
+// The environment shared by the units of the current session, or NULL if there
+// is no session. It holds what the checked units declared.
+TypeEnv *typchkSessionEnv(void);
+
 TypeEnv *typchkTypeEnvCreate(void);
 void typchkTypeEnvDestroy(TypeEnv *env);
 
@@ -72,6 +76,10 @@ bool typchkCheck(TypeEnv *env, AstNode *node, Type *expected);
 void typchkCheckStmt(TypeEnv *env, AstNode *node);
 
 bool typchkCheckProgram(AstNode **program, int count);
+
+// Like typchkCheckProgram, for the standard library. The traits it declares
+// are builtin: no other unit can declare a trait with the same name.
+bool typchkCheckStdlib(AstNode **program, int count);
 
 bool typchkHadError(void);
 void typchkResetError(void);

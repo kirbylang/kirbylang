@@ -24,11 +24,13 @@
 #include "vm.h"
 
 /* What a piece of source is. An entry file is the program `krb run` starts, a
- * library file is loaded for what it declares (the standard library), and a
- * snippet is code from the REPL or `krb exec`. */
+ * library file is loaded for what it declares, the standard library is the
+ * library file that declares the builtin traits, and a snippet is code from
+ * the REPL or `krb exec`. */
 typedef enum {
   SOURCE_ENTRY_FILE,
   SOURCE_LIBRARY_FILE,
+  SOURCE_STDLIB,
   SOURCE_SNIPPET
 } SourceKind;
 
@@ -328,7 +330,7 @@ static int cmdCompile(int argc, char *argv[]) {
     return usageError();
 
   typchkSessionBegin();
-  compileCode(KIRBY_STDLIB, SOURCE_LIBRARY_FILE);
+  compileCode(KIRBY_STDLIB, SOURCE_STDLIB);
   compileFile(argv[2], SOURCE_LIBRARY_FILE);
   compilerSessionEnd();
   typchkSessionEnd();
@@ -391,7 +393,7 @@ static int cmdBuild(int argc, char *argv[]) {
   typchkSessionBegin();
 
   CompiledUnit *stdlib =
-      compileSource(KIRBY_STDLIB, SOURCE_LIBRARY_FILE, /*typecheck=*/true);
+      compileSource(KIRBY_STDLIB, SOURCE_STDLIB, /*typecheck=*/true);
 
   if (stdlib == NULL)
     exit(EXIT_CODE_COMPILER_ERR);
@@ -712,7 +714,9 @@ static CompiledUnit *compileSource(const char *source, SourceKind kind,
   }
 
   if (!hadError && typecheck) {
-    if (!typchkCheckProgram(ast, count)) {
+    bool checked = kind == SOURCE_STDLIB ? typchkCheckStdlib(ast, count)
+                                         : typchkCheckProgram(ast, count);
+    if (!checked) {
       hadError = true;
     }
   }
@@ -765,10 +769,9 @@ static void runFile(const char *path) {
     exit(EXIT_CODE_RUNTIME_ERR);
 }
 
-/* Compiles and runs library file source without printing its bytecode. */
+/* Compiles and runs the standard library without printing its bytecode. */
 static void loadFile(const char *source) {
-  CompiledUnit *unit =
-      compileSource(source, SOURCE_LIBRARY_FILE, /*typecheck=*/true);
+  CompiledUnit *unit = compileSource(source, SOURCE_STDLIB, /*typecheck=*/true);
 
   if (unit == NULL) {
     exit(EXIT_CODE_COMPILER_ERR);

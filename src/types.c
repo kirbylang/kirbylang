@@ -398,7 +398,7 @@ bool typeTraitHasUnresolvedMembers(Type *type) {
          type->as.trait_.hasUnresolvedMembers;
 }
 
-void typeTraitMarkBuiltin(Type *type) { type->as.trait_.isBuiltin = true; }
+void typeMarkTraitAsBuiltin(Type *type) { type->as.trait_.isBuiltin = true; }
 
 bool typeTraitIsBuiltin(Type *type) {
   return type != NULL && type->kind == TYPE_TRAIT && type->as.trait_.isBuiltin;

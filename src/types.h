@@ -226,7 +226,7 @@ void typeTraitSetSupertrait(Type *type, InternedName supertraitName);
 void typeTraitMarkUnresolvedMembers(Type *type);
 bool typeTraitHasUnresolvedMembers(Type *type);
 
-void typeTraitMarkBuiltin(Type *type);
+void typeMarkTraitAsBuiltin(Type *type);
 bool typeTraitIsBuiltin(Type *type);
 
 // Replaces every TYPE_SELF found inside `type` with a `concrete` type.
