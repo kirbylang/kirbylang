@@ -10,8 +10,6 @@
 
 static bool hadError = false;
 
-static void typchkTypeEnvDefineBuiltinTraits(TypeEnv *env);
-
 void typchkErrorAtToken(Token *token, const char *message) {
   hadError = true;
   fprintf(stderr, "[line %d] Error", token->line);
@@ -178,11 +176,12 @@ void typchkSessionEnd(void) {
   typesFreeAll();
 }
 
+TypeEnv *typchkSessionEnv(void) { return sessionEnv; }
+
 TypeEnv *typchkTypeEnvCreate(void) {
   TypeEnv *env = (TypeEnv *)malloc(sizeof(TypeEnv));
   memset(env, 0, sizeof(TypeEnv));
   defineAllNativeSignatures(env);
-  typchkTypeEnvDefineBuiltinTraits(env);
   return env;
 }
 
@@ -275,89 +274,6 @@ void typchkTypeEnvRegisterTrait(TypeEnv *env, Token name, Type *type) {
 
 Type *typchkTypeEnvLookupTrait(TypeEnv *env, Token name) {
   return bindingArrayLookup(env->traits, env->traitCount, name);
-}
-
-// Defines a builtin trait of one method that returns `Self`, as in
-// `fun add(self, other: Self): Self`. `takesOther` is false for `fun neg(self):
-// Self`.
-static void typchkDefineOperatorTrait(TypeEnv *env, const char *traitName,
-                                      const char *methodName, bool takesOther) {
-  Type **params = NULL;
-
-  if (takesOther) {
-    params = (Type **)typesAllocRaw(sizeof(Type *));
-    params[0] = typeSelfPlaceholder();
-  }
-
-  UninternedTypeMember members[] = {
-      {tokenFromCString(methodName),
-       typeFunction(params, takesOther ? 1 : 0, typeSelfPlaceholder())},
-  };
-  Type *trait = typeTrait(tokenFromCString(traitName), NULL, 0, members, 1);
-  typeTraitMarkBuiltin(trait);
-  typchkTypeEnvRegisterTrait(env, tokenFromCString(traitName), trait);
-}
-
-/**
- * Define the builtin traits
- *
- * Display, Eq, Ord (a supertrait of Eq), Default, and the operator traits
- * Add, Sub, Mul, Div, Mod and Neg
- */
-static void typchkTypeEnvDefineBuiltinTraits(TypeEnv *env) {
-  // Display
-
-  UninternedTypeMember displayInstance[] = {
-      {tokenFromCString("toString"), typeFunction(NULL, 0, typeString())},
-  };
-  Type *display =
-      typeTrait(tokenFromCString("Display"), NULL, 0, displayInstance, 1);
-  typeTraitMarkBuiltin(display);
-  typchkTypeEnvRegisterTrait(env, tokenFromCString("Display"), display);
-
-  // Eq
-
-  Type **equalsParams = (Type **)typesAllocRaw(sizeof(Type *));
-  equalsParams[0] = typeSelfPlaceholder();
-  UninternedTypeMember eqInstance[] = {
-      {tokenFromCString("equals"), typeFunction(equalsParams, 1, typeBool())},
-  };
-  Type *eq = typeTrait(tokenFromCString("Eq"), NULL, 0, eqInstance, 1);
-  typeTraitMarkBuiltin(eq);
-  typchkTypeEnvRegisterTrait(env, tokenFromCString("Eq"), eq);
-  Type **cmpParams = (Type **)typesAllocRaw(sizeof(Type *));
-  cmpParams[0] = typeSelfPlaceholder();
-  UninternedTypeMember ordInstance[] = {
-      {tokenFromCString("cmp"),
-       typeFunction(cmpParams, 1, typeNumber(NUMBER_KIND_I64))},
-  };
-
-  // Ord
-
-  Type *ord = typeTrait(tokenFromCString("Ord"), NULL, 0, ordInstance, 1);
-  typeTraitSetSupertrait(ord, eq->as.trait_.name);
-  typeTraitMarkBuiltin(ord);
-  typchkTypeEnvRegisterTrait(env, tokenFromCString("Ord"), ord);
-
-  // Add, Sub, Mul, Div, Mod and Neg
-
-  typchkDefineOperatorTrait(env, "Add", "add", /*takesOther=*/true);
-  typchkDefineOperatorTrait(env, "Sub", "sub", /*takesOther=*/true);
-  typchkDefineOperatorTrait(env, "Mul", "mul", /*takesOther=*/true);
-  typchkDefineOperatorTrait(env, "Div", "div", /*takesOther=*/true);
-  typchkDefineOperatorTrait(env, "Mod", "mod", /*takesOther=*/true);
-  typchkDefineOperatorTrait(env, "Neg", "neg", /*takesOther=*/false);
-
-  // Default
-
-  UninternedTypeMember defaultStatic[] = {
-      {tokenFromCString("default"),
-       typeFunction(NULL, 0, typeSelfPlaceholder())},
-  };
-  Type *default_ =
-      typeTrait(tokenFromCString("Default"), defaultStatic, 1, NULL, 0);
-  typeTraitMarkBuiltin(default_);
-  typchkTypeEnvRegisterTrait(env, tokenFromCString("Default"), default_);
 }
 
 void typchkTypeEnvSetSelfType(TypeEnv *env, Type *selfType) {
@@ -3915,7 +3831,9 @@ static void checkImplMethodBodies(TypeEnv *env, AstNode *node) {
   typchkLeaveGenericParams(env, previousGenericCount);
 }
 
-bool typchkCheckProgram(AstNode **program, int count) {
+// Checks one unit. The traits the standard library declares are builtin, so a
+// later unit can't declare one with the same name.
+static bool typchkCheckUnit(AstNode **program, int count, bool isStdlib) {
   // Diagnostics are per-unit/program
   typchkResetError();
 
@@ -3967,6 +3885,10 @@ bool typchkCheckProgram(AstNode **program, int count) {
       }
 
       Type *placeholder = typeTrait(trait_->name, NULL, 0, NULL, 0);
+
+      if (isStdlib)
+        typeMarkTraitAsBuiltin(placeholder);
+
       typchkTypeEnvRegisterTrait(env, trait_->name, placeholder);
     }
   }
@@ -4126,4 +4048,12 @@ bool typchkCheckProgram(AstNode **program, int count) {
   }
 
   return ok;
+}
+
+bool typchkCheckProgram(AstNode **program, int count) {
+  return typchkCheckUnit(program, count, /*isStdlib=*/false);
+}
+
+bool typchkCheckStdlib(AstNode **program, int count) {
+  return typchkCheckUnit(program, count, /*isStdlib=*/true);
 }

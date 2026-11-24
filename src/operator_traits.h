@@ -10,7 +10,7 @@
  * An operator that a type supports by implementing a trait, as in `a + b`
  * calling `a.add(b)`. The type checker and the compiler read this table to
  * find the trait and method for an operator. The traits themselves are defined
- * in `typchkTypeEnvDefineBuiltinTraits`, and a unit test checks that every row
+ * in `stdlib/stdlib.krb`, and a unit test checks that every row
  * here matches them.
  */
 typedef struct {

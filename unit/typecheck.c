@@ -7,6 +7,7 @@
 #include "../src/native_signatures.h"
 #include "../src/operator_traits.h"
 #include "../src/parser.h"
+#include "../src/stdlib_source.h"
 #include "../src/token.h"
 #include "../src/typecheck.h"
 #include "../src/types.h"
@@ -25,6 +26,19 @@ static AstNode *parseFirstVarType(const char *source) {
   AstNode *declaredType = ast[0]->as.varDecl.declaredType;
   assert(declaredType != NULL);
   return declaredType;
+}
+
+// Checks the standard library into the current session, which declares the
+// builtin traits.
+static void checkStdlibIntoSession(void) {
+  int count = 0;
+  bool hadParseError = false;
+  int endLine = 0;
+  AstNode **ast = parse(KIRBY_STDLIB, &count, &hadParseError, &endLine);
+  assert(!hadParseError);
+  assert(typchkCheckStdlib(ast, count));
+  astFreeAll();
+  free(ast);
 }
 
 static void test_scope_declare_and_lookup(void) {
@@ -910,12 +924,18 @@ static void test_nested_function_and_closure(void) {
 }
 
 static bool typecheckSource(const char *source) {
+  typchkSessionBegin();
+  checkStdlibIntoSession();
+
   int outCount = 0;
   bool hadParseError = false;
   int endLine = 0;
   AstNode **ast = parse(source, &outCount, &hadParseError, &endLine);
   assert(!hadParseError);
-  return typchkCheckProgram(ast, outCount);
+  bool ok = typchkCheckProgram(ast, outCount);
+
+  typchkSessionEnd();
+  return ok;
 }
 
 static void test_struct_private_instance_method_uncallable_from_outside(void) {
@@ -1470,9 +1490,13 @@ test_program_self_as_static_method_receiver_outside_impl_fails(void) {
 }
 
 // Every operator in the table must name a builtin trait that has the method
-// the operator calls, taking one argument, or none for a unary operator.
+// the operator calls, taking one argument, or none for a unary operator. The
+// builtin traits are declared by the standard library.
 static void test_operator_table_matches_builtin_traits(void) {
-  TypeEnv *env = typchkTypeEnvCreate();
+  typchkSessionBegin();
+  checkStdlibIntoSession();
+
+  TypeEnv *env = typchkSessionEnv();
   int count = getOperatorTraitCount();
 
   for (int i = 0; i < count; i++) {
@@ -1486,7 +1510,7 @@ static void test_operator_table_matches_builtin_traits(void) {
     assert(method->as.function.paramCount == (entry->isUnary ? 0 : 1));
   }
 
-  typchkTypeEnvDestroy(env);
+  typchkSessionEnd();
 }
 
 int main(void) {

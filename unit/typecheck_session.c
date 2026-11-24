@@ -5,13 +5,14 @@
 
 #include "../src/ast.h"
 #include "../src/parser.h"
+#include "../src/token.h"
 #include "../src/typecheck.h"
 #include "../src/types.h"
 
 // Checks a unit the way main.c does: the source buffer and the AST arena
 // are both released before the next unit is checked, so anything the
 // session kept has to have outlived them.
-static bool checkUnit(const char *source) {
+static bool checkUnitAs(const char *source, bool isStdlib) {
   size_t length = strlen(source);
   char *owned = (char *)malloc(length + 1);
   assert(owned != NULL);
@@ -23,13 +24,27 @@ static bool checkUnit(const char *source) {
   AstNode **ast = parse(owned, &count, &hadParseError, &endLine);
   assert(!hadParseError);
 
-  bool ok = typchkCheckProgram(ast, count);
+  bool ok =
+      isStdlib ? typchkCheckStdlib(ast, count) : typchkCheckProgram(ast, count);
 
   astFreeAll();
   free(ast);
   free(owned);
 
   return ok;
+}
+
+static bool checkUnit(const char *source) { return checkUnitAs(source, false); }
+
+static bool checkStdlibUnit(const char *source) {
+  return checkUnitAs(source, true);
+}
+
+static bool traitIsBuiltin(const char *name) {
+  Type *trait =
+      typchkTypeEnvLookupTrait(typchkSessionEnv(), tokenFromCString(name));
+  assert(trait != NULL);
+  return typeTraitIsBuiltin(trait);
 }
 
 static void test_function_signatures_survive_the_unit_that_declared_them(void) {
@@ -87,7 +102,31 @@ static void test_units_are_independent_without_a_session(void) {
   typchkResetError();
 }
 
+static void test_traits_declared_by_the_stdlib_are_builtin(void) {
+  typchkResetError();
+  typchkSessionBegin();
+
+  assert(checkStdlibUnit("trait Shape { fun area(self): f64; }"));
+  assert(checkUnit("trait Mine { fun area(self): f64; }"));
+
+  assert(traitIsBuiltin("Shape"));
+  assert(!traitIsBuiltin("Mine"));
+
+  // A later unit can use the stdlib's trait but not declare it again
+  assert(checkUnit("struct Square {}\n"
+                   "impl Shape for Square {\n"
+                   "  fun area(self): f64 = 1;\n"
+                   "}"));
+
+  typchkResetError();
+  assert(!checkUnit("trait Shape { fun area(self): f64; }"));
+
+  typchkSessionEnd();
+  typchkResetError();
+}
+
 int main(void) {
+  test_traits_declared_by_the_stdlib_are_builtin();
   test_function_signatures_survive_the_unit_that_declared_them();
   test_struct_types_survive_the_unit_that_declared_them();
   test_an_error_in_one_unit_doesnt_fail_the_next();
