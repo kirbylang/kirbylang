@@ -1,0 +1,3 @@
+impl [T; _] {
+    pub fun first(self): T = self[0];
+}

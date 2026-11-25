@@ -1,0 +1,137 @@
+== <script> ==
+0000   29 OP_CLOSURE          1 <fn main>
+0002    | OP_DEFINE_GLOBAL    0 'main'
+0004   30 OP_NIL
+0005    | OP_RETURN
+== main ==
+0000    2 OP_CONSTANT         0 '10'
+0002    | OP_CONSTANT         1 '20'
+0004    | OP_CONSTANT         2 '30'
+0006    | OP_LIST             3
+0008    4 OP_GET_GLOBAL       3 '@println'
+0010    | OP_GET_GLOBAL       4 'list.len'
+0012    | OP_GET_LOCAL        1
+0014    | OP_CALL             1
+0016    | OP_CALL             1
+0018    | OP_POP
+0019    5 OP_GET_GLOBAL       3 '@println'
+0021    | OP_GET_GLOBAL       5 'list.isEmpty'
+0023    | OP_GET_LOCAL        1
+0025    | OP_CALL             1
+0027    | OP_CALL             1
+0029    | OP_POP
+0030    7 OP_GET_GLOBAL       6 'list.push'
+0032    | OP_GET_LOCAL        1
+0034    | OP_CONSTANT         7 '40'
+0036    | OP_CALL             2
+0038    | OP_POP
+0039    8 OP_GET_GLOBAL       3 '@println'
+0041    | OP_GET_GLOBAL       4 'list.len'
+0043    | OP_GET_LOCAL        1
+0045    | OP_CALL             1
+0047    | OP_CALL             1
+0049    | OP_POP
+0050    9 OP_GET_GLOBAL       3 '@println'
+0052    | OP_GET_GLOBAL       8 'list.pop'
+0054    | OP_GET_LOCAL        1
+0056    | OP_CALL             1
+0058    | OP_CALL             1
+0060    | OP_POP
+0061   10 OP_GET_GLOBAL       3 '@println'
+0063    | OP_GET_GLOBAL       4 'list.len'
+0065    | OP_GET_LOCAL        1
+0067    | OP_CALL             1
+0069    | OP_CALL             1
+0071    | OP_POP
+0072   12 OP_GET_GLOBAL       9 'list.insert'
+0074    | OP_GET_LOCAL        1
+0076    | OP_CONSTANT        10 '1'
+0078    | OP_CONSTANT        11 '15'
+0080    | OP_CALL             3
+0082    | OP_POP
+0083   13 OP_GET_GLOBAL       3 '@println'
+0085    | OP_GET_GLOBAL      12 'list.remove'
+0087    | OP_GET_LOCAL        1
+0089    | OP_CONSTANT        13 '0'
+0091    | OP_CALL             2
+0093    | OP_CALL             1
+0095    | OP_POP
+0096   14 OP_GET_GLOBAL       3 '@println'
+0098    | OP_GET_GLOBAL      14 'list.contains'
+0100    | OP_GET_LOCAL        1
+0102    | OP_CONSTANT        11 '15'
+0104    | OP_CALL             2
+0106    | OP_CALL             1
+0108    | OP_POP
+0109   15 OP_GET_GLOBAL       3 '@println'
+0111    | OP_GET_GLOBAL      14 'list.contains'
+0113    | OP_GET_LOCAL        1
+0115    | OP_CONSTANT        15 '99'
+0117    | OP_CALL             2
+0119    | OP_CALL             1
+0121    | OP_POP
+0122   17 OP_GET_GLOBAL      16 'list.copy'
+0124    | OP_GET_LOCAL        1
+0126    | OP_CALL             1
+0128   18 OP_GET_GLOBAL       6 'list.push'
+0130    | OP_GET_LOCAL        2
+0132    | OP_CONSTANT        10 '1'
+0134    | OP_CALL             2
+0136    | OP_POP
+0137   19 OP_GET_GLOBAL       3 '@println'
+0139    | OP_GET_GLOBAL       4 'list.len'
+0141    | OP_GET_LOCAL        1
+0143    | OP_CALL             1
+0145    | OP_CALL             1
+0147    | OP_POP
+0148   20 OP_GET_GLOBAL       3 '@println'
+0150    | OP_GET_GLOBAL       4 'list.len'
+0152    | OP_GET_LOCAL        2
+0154    | OP_CALL             1
+0156    | OP_CALL             1
+0158    | OP_POP
+0159   22 OP_GET_GLOBAL       3 '@println'
+0161    | OP_GET_GLOBAL       4 'list.len'
+0163    | OP_GET_GLOBAL      17 'list.reverse'
+0165    | OP_GET_LOCAL        1
+0167    | OP_CALL             1
+0169    | OP_CALL             1
+0171    | OP_CALL             1
+0173    | OP_POP
+0174   23 OP_GET_GLOBAL       3 '@println'
+0176    | OP_GET_GLOBAL       4 'list.len'
+0178    | OP_GET_GLOBAL      18 'list.slice'
+0180    | OP_GET_LOCAL        1
+0182    | OP_CONSTANT        10 '1'
+0184    | OP_CONSTANT        19 '3'
+0186    | OP_CALL             3
+0188    | OP_CALL             1
+0190    | OP_CALL             1
+0192    | OP_POP
+0193   24 OP_GET_GLOBAL       3 '@println'
+0195    | OP_GET_GLOBAL       4 'list.len'
+0197    | OP_GET_GLOBAL      20 'list.concat'
+0199    | OP_GET_LOCAL        1
+0201    | OP_GET_LOCAL        2
+0203    | OP_CALL             2
+0205    | OP_CALL             1
+0207    | OP_CALL             1
+0209    | OP_POP
+0210   26 OP_GET_GLOBAL      21 'list.clear'
+0212    | OP_GET_LOCAL        1
+0214    | OP_CALL             1
+0216    | OP_POP
+0217   27 OP_GET_GLOBAL       3 '@println'
+0219    | OP_GET_GLOBAL       5 'list.isEmpty'
+0221    | OP_GET_LOCAL        1
+0223    | OP_CALL             1
+0225    | OP_CALL             1
+0227    | OP_POP
+0228   28 OP_GET_GLOBAL       3 '@println'
+0230    | OP_GET_GLOBAL       4 'list.len'
+0232    | OP_GET_LOCAL        1
+0234    | OP_CALL             1
+0236    | OP_CALL             1
+0238    | OP_POP
+0239   29 OP_NIL
+0240    | OP_RETURN

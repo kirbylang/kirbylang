@@ -704,7 +704,9 @@ static CompiledUnit *compileSource(const char *source, SourceKind kind,
   int count = 0;
   bool hadError = false;
   int endLine = 0;
-  AstNode **ast = parse(source, &count, &hadError, &endLine);
+  AstNode **ast = kind == SOURCE_STDLIB
+                      ? parseStdlib(source, &count, &hadError, &endLine)
+                      : parse(source, &count, &hadError, &endLine);
 
   // Only files are held to declarations. The type checker still runs after
   // a top-level error, so one run shows both kinds.

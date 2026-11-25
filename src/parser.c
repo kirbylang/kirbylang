@@ -1635,28 +1635,74 @@ static AstNode *structDeclaration(Parser *p) {
   return node;
 }
 
+// The `[T]` or `[T; N]` of `impl [T]` and `impl Trait for [T; N]`, after the
+// `[`. Writes the names it declares, and says which of the two it was.
+// `target` is the `[` token, and grows to cover the whole text up to `]`.
+static int parseImplListOrArrayTarget(Parser *p, Token *target, Token *names,
+                                      ImplTargetKind *kind) {
+  int count = 0;
+
+  consume(p, TOKEN_IDENTIFIER, "Expect the item type's name after '['.");
+  names[count++] = p->previous;
+  *kind = IMPL_TARGET_LIST;
+
+  if (match(p, TOKEN_SEMICOLON)) {
+    if (match(p, TOKEN_NUMBER)) {
+      parse_error(p, "An array impl names its length, as in 'impl [T; N]'. "
+                     "It doesn't take a number.");
+    } else {
+      consume(p, TOKEN_IDENTIFIER,
+              "Expect a name or '_' for the array's length.");
+    }
+
+    names[count++] = p->previous;
+    *kind = IMPL_TARGET_ARRAY;
+  }
+
+  consume(p, TOKEN_RIGHT_BRACKET, "Expect ']' after the type.");
+  target->length =
+      (int)(p->previous.start + p->previous.length - target->start);
+  return count;
+}
+
 static AstNode *implDeclaration(Parser *p) {
-  consume(p, TOKEN_IDENTIFIER, "Expect struct or trait name after 'impl'.");
-  Token name = p->previous;
-  int line = name.line;
-
+  Token name;
   Token genericParamBuf[256];
-  int genericParamCount = parseGenericParamList(
-      p, genericParamBuf, /*boundBuf=*/NULL,
-      "An impl's type parameters take their bounds from the struct.");
+  int genericParamCount = 0;
+  ImplTargetKind targetKind = IMPL_TARGET_NAME;
+  bool targetIsBracketed = match(p, TOKEN_LEFT_BRACKET);
 
+  if (targetIsBracketed) {
+    name = p->previous;
+    genericParamCount =
+        parseImplListOrArrayTarget(p, &name, genericParamBuf, &targetKind);
+  } else {
+    consume(p, TOKEN_IDENTIFIER, "Expect struct or trait name after 'impl'.");
+    name = p->previous;
+    genericParamCount = parseGenericParamList(
+        p, genericParamBuf, /*boundBuf=*/NULL,
+        "An impl's type parameters take their bounds from the struct.");
+  }
+
+  int line = name.line;
   bool hasTraitName = false;
   Token traitName = name;
   Token targetName = name;
 
-  if (match(p, TOKEN_FOR)) {
+  if (!targetIsBracketed && match(p, TOKEN_FOR)) {
     hasTraitName = true;
     traitName = name;
 
-    consume(p, TOKEN_IDENTIFIER,
-            "Expect struct or primitive type name after 'for'.");
+    if (match(p, TOKEN_LEFT_BRACKET)) {
+      targetName = p->previous;
+      genericParamCount = parseImplListOrArrayTarget(
+          p, &targetName, genericParamBuf, &targetKind);
+    } else {
+      consume(p, TOKEN_IDENTIFIER,
+              "Expect struct or primitive type name after 'for'.");
 
-    targetName = p->previous;
+      targetName = p->previous;
+    }
   }
 
   consume(p, TOKEN_LEFT_BRACE, "Expect '{' before impl body.");
@@ -1711,6 +1757,7 @@ static AstNode *implDeclaration(Parser *p) {
   free(methodBuf);
 
   AstNode *node = astAlloc(NODE_IMPL, line);
+  node->as.impl.targetKind = targetKind;
   node->as.impl.targetName = targetName;
   node->as.impl.hasTraitName = hasTraitName;
   node->as.impl.traitName = traitName;
@@ -1873,12 +1920,13 @@ static void initParser(Parser *parser, TokenStream *tokens) {
   advance(parser);
 }
 
-AstNode **parse(const char *source, int *outCount, bool *hadError,
-                int *outEndLine) {
+static AstNode **parseProgram(const char *source, bool allowLengthPlaceholders,
+                              int *outCount, bool *hadError, int *outEndLine) {
   TokenStream tokens = lex(source);
 
   Parser parser;
   initParser(&parser, &tokens);
+  parser.allowLengthPlaceholders = allowLengthPlaceholders;
 
   int capacity = 8;
   int count = 0;
@@ -1900,6 +1948,16 @@ AstNode **parse(const char *source, int *outCount, bool *hadError,
   *hadError = parser.hadError;
 
   return ast;
+}
+
+AstNode **parse(const char *source, int *outCount, bool *hadError,
+                int *outEndLine) {
+  return parseProgram(source, false, outCount, hadError, outEndLine);
+}
+
+AstNode **parseStdlib(const char *source, int *outCount, bool *hadError,
+                      int *outEndLine) {
+  return parseProgram(source, true, outCount, hadError, outEndLine);
 }
 
 AstNode *parseTypeText(const char *source, bool *hadError) {

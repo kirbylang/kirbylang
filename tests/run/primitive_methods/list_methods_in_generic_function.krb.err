@@ -1,0 +1,49 @@
+== <script> ==
+0000    3 OP_CLOSURE          1 <fn count>
+0002    | OP_DEFINE_GLOBAL    0 'count'
+0004    7 OP_CLOSURE          3 <fn last>
+0006    | OP_DEFINE_GLOBAL    2 'last'
+0008   16 OP_CLOSURE          5 <fn main>
+0010    | OP_DEFINE_GLOBAL    4 'main'
+0012   17 OP_NIL
+0013    | OP_RETURN
+== count ==
+0000    2 OP_GET_GLOBAL       0 'list.len'
+0002    | OP_GET_LOCAL        1
+0004    | OP_CALL             1
+0006    | OP_RETURN
+== last ==
+0000    6 OP_GET_GLOBAL       0 'list.pop'
+0002    | OP_GET_LOCAL        1
+0004    | OP_CALL             1
+0006    | OP_RETURN
+== main ==
+0000   10 OP_CONSTANT         0 '1'
+0002    | OP_CONSTANT         1 '2'
+0004    | OP_CONSTANT         2 '3'
+0006    | OP_LIST             3
+0008   11 OP_CONSTANT         3 'a'
+0010    | OP_LIST             1
+0012   12 OP_CONSTANT         4 '1.5'
+0014    | OP_CONSTANT         5 '2.5'
+0016    | OP_LIST             2
+0018   13 OP_GET_GLOBAL       6 '@println'
+0020    | OP_GET_GLOBAL       7 'count'
+0022    | OP_GET_LOCAL        1
+0024    | OP_CALL             1
+0026    | OP_CALL             1
+0028    | OP_POP
+0029   14 OP_GET_GLOBAL       6 '@println'
+0031    | OP_GET_GLOBAL       7 'count'
+0033    | OP_GET_LOCAL        2
+0035    | OP_CALL             1
+0037    | OP_CALL             1
+0039    | OP_POP
+0040   15 OP_GET_GLOBAL       6 '@println'
+0042    | OP_GET_GLOBAL       8 'last'
+0044    | OP_GET_LOCAL        3
+0046    | OP_CALL             1
+0048    | OP_CALL             1
+0050    | OP_POP
+0051   16 OP_NIL
+0052    | OP_RETURN

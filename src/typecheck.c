@@ -107,6 +107,11 @@ typedef struct {
   bool hasSelf;
   bool isTrait;
   InternedName trait;
+  // For a list or array impl: the receiver as the impl wrote it, such as
+  // `[T]`, and how many type parameters the impl declared. The method's own
+  // type parameters are numbered after them. NULL for other owners.
+  Type *receiver;
+  int implParamCount;
 } PrimitiveMethod;
 
 // Records that a primitive type implements a trait
@@ -175,6 +180,8 @@ struct TypeEnv {
   Type **_implGenericTypes;
   int _implGenericCount;
   Type *_currentImplSelfType;
+  // Inside an impl for a list or array, its receiver type, such as `[T]`
+  Type *_currentImplReceiver;
   // The type the call being checked is expected to return, passed along to the
   // call check. Read once and cleared.
   Type *_callExpected;
@@ -2199,6 +2206,10 @@ static const char *typchkPrimitiveOwner(const Type *type) {
     return "bool";
   case TYPE_UNIT:
     return "unit";
+  case TYPE_LIST:
+    return "list";
+  case TYPE_ARRAY:
+    return "array";
   case TYPE_NUMBER:
     return numberKindInfo(type->as.number.kind)->name;
   default:
@@ -2259,15 +2270,31 @@ static PrimitiveMethod *typchkPrimitiveMethodAppend(TypeEnv *env) {
 
 static void typchkPrimitiveMethodAdd(TypeEnv *env, const char *owner,
                                      Token name, Type *type, bool isPublic) {
-  *typchkPrimitiveMethodAppend(env) = (PrimitiveMethod){
-      owner, internTokenName(name), type, isPublic, true, false, {0}};
+  *typchkPrimitiveMethodAppend(env) =
+      (PrimitiveMethod){owner,
+                        internTokenName(name),
+                        type,
+                        isPublic,
+                        true,
+                        false,
+                        {0},
+                        env->_currentImplReceiver,
+                        env->_implGenericCount};
 }
 
 static void typchkPrimitiveTraitMethodAdd(TypeEnv *env, const char *owner,
                                           Token name, Type *type, bool hasSelf,
                                           InternedName trait) {
-  *typchkPrimitiveMethodAppend(env) = (PrimitiveMethod){
-      owner, internTokenName(name), type, true, hasSelf, true, trait};
+  *typchkPrimitiveMethodAppend(env) =
+      (PrimitiveMethod){owner,
+                        internTokenName(name),
+                        type,
+                        true,
+                        hasSelf,
+                        true,
+                        trait,
+                        env->_currentImplReceiver,
+                        env->_implGenericCount};
 }
 
 static bool typchkPrimitiveImplements(TypeEnv *env, const char *owner,
@@ -2300,6 +2327,25 @@ static void typchkPrimitiveImplementsAdd(TypeEnv *env, const char *owner,
 
   env->primitiveTraitImpls[env->primitiveTraitImplCount++] =
       (PrimitiveTraitImpl){owner, trait};
+}
+
+// Binding slots enough for the item type, the method's own type parameters,
+// and the array length placeholders
+#define PRIMITIVE_BINDING_SLOTS 8
+
+// The type of `method` called on a value of type `receiver`. For a list or
+// array impl, the impl's parameters take what the receiver has, so `first` of
+// `impl [T]` called on `[i64]` gives `i64`.
+static Type *typchkPrimitiveMethodType(const PrimitiveMethod *method,
+                                       Type *receiver) {
+  if (method->receiver == NULL)
+    return method->type;
+
+  Type *bindings[PRIMITIVE_BINDING_SLOTS] = {0};
+  typeBindGenericParams(method->receiver, receiver, bindings,
+                        PRIMITIVE_BINDING_SLOTS);
+  return typeSubstituteGenericParams(method->type, bindings,
+                                     PRIMITIVE_BINDING_SLOTS);
 }
 
 // Marks a call of a trait's method on a primitive for the compiler. The
@@ -2520,7 +2566,7 @@ static Type *typchkInferGet(TypeEnv *env, AstNode *node) {
       }
 
       get->primitiveOwner = primitiveOwner;
-      return method->type;
+      return typchkPrimitiveMethodType(method, objectType);
     }
 
     PrimitiveMethod *traitMethod =
@@ -2543,7 +2589,7 @@ static Type *typchkInferGet(TypeEnv *env, AstNode *node) {
       }
 
       typchkMarkPrimitiveTraitCall(get, primitiveOwner, traitMethod);
-      return traitMethod->type;
+      return typchkPrimitiveMethodType(traitMethod, objectType);
     }
   }
 
@@ -3937,6 +3983,9 @@ static bool typchkTraitImplHasAllMethods(ImplNode *impl, Type *traitType) {
   return ok;
 }
 
+static void typchkRegisterListOrArrayImpl(TypeEnv *env, AstNode *node,
+                                          Type *traitType);
+
 // `impl Trait for string { ... }`. Only the standard library can write one.
 static void typchkRegisterPrimitiveTraitImpl(TypeEnv *env, AstNode *node,
                                              Type *traitType, Type *primitive) {
@@ -4030,6 +4079,11 @@ static void typchkRegisterTraitImpl(TypeEnv *env, AstNode *node) {
 
   if (typeTraitHasUnresolvedMembers(traitType))
     return; // already reported once, at the trait's own declaration
+
+  if (impl->targetKind != IMPL_TARGET_NAME) {
+    typchkRegisterListOrArrayImpl(env, node, traitType);
+    return;
+  }
 
   Type *targetType = typchkResolveImplTarget(env, impl->targetName);
 
@@ -4131,6 +4185,11 @@ static void typchkCheckTraitSupertraitSatisfied(TypeEnv *env, AstNode *node) {
     const char *owner =
         primitive != NULL ? typchkPrimitiveOwner(primitive) : NULL;
 
+    if (impl->targetKind == IMPL_TARGET_LIST)
+      owner = "list";
+    else if (impl->targetKind == IMPL_TARGET_ARRAY)
+      owner = "array";
+
     // Anything else was already reported
     if (owner == NULL || !typchkPrimitiveImplements(env, owner, traitName))
       return;
@@ -4218,11 +4277,90 @@ static void typchkRegisterPrimitiveImplMethods(TypeEnv *env, AstNode *node,
   env->_currentPrimitiveOwner = NULL;
 }
 
+// Puts the type parameters of `impl [T]` or `impl [T; N]` in scope and returns
+// the receiver type, or NULL after an error. `T` is the item type. `N` is the
+// length, and `_` is a length that is not used. The length placeholders have
+// no spelling of their own, so `_` gets one that no signature can write.
+static Type *typchkEnterListOrArrayImpl(TypeEnv *env, ImplNode *impl,
+                                        bool isOpaque, int *previousCount) {
+  *previousCount = env->_genericParamCount;
+  Token *item = &impl->genericParams[0];
+  int length = 0;
+
+  if (!isOpaque && typchkPrimitiveTypeNamed(item) != NULL) {
+    typchkErrorAtTokenFmt(item,
+                          "'%.*s' is a type. An impl names the item type "
+                          "with a type parameter, as in 'impl [T]'.",
+                          item->length, item->start);
+    return NULL;
+  }
+
+  if (impl->targetKind == IMPL_TARGET_ARRAY) {
+    Token *lengthName = &impl->genericParams[1];
+
+    if (tokenTextEquals(lengthName, "N")) {
+      length = ARRAY_LENGTH_PLACEHOLDER(0);
+    } else if (tokenTextEquals(lengthName, "_")) {
+      length = ARRAY_LENGTH_PLACEHOLDER(2);
+    } else {
+      typchkErrorAtTokenFmt(lengthName,
+                            "An array impl names its length 'N', or '_' to "
+                            "leave it unnamed, not '%.*s'.",
+                            lengthName->length, lengthName->start);
+      return NULL;
+    }
+  }
+
+  Type **itemTypes = (Type **)typesAllocRaw(sizeof(Type *));
+  typchkEnterGenericParams(env, impl->genericParams, /*bounds=*/NULL, 1, 0,
+                           isOpaque, itemTypes);
+
+  Type *receiver = impl->targetKind == IMPL_TARGET_LIST
+                       ? typeList(itemTypes[0])
+                       : typeArray(itemTypes[0], length);
+
+  env->_implGenericTypes = itemTypes;
+  env->_implGenericCount = 1;
+  env->_currentImplReceiver = receiver;
+  return receiver;
+}
+
+static void typchkLeaveListOrArrayImpl(TypeEnv *env, int previousCount) {
+  env->_implGenericTypes = NULL;
+  env->_implGenericCount = 0;
+  env->_currentImplReceiver = NULL;
+  typchkLeaveGenericParams(env, previousCount);
+}
+
+// Registers `impl [T] { ... }`, `impl [T; N] { ... }`, or the same with a
+// trait when `traitType` isn't NULL.
+static void typchkRegisterListOrArrayImpl(TypeEnv *env, AstNode *node,
+                                          Type *traitType) {
+  ImplNode *impl = &node->as.impl;
+  int previousCount;
+  Type *receiver = typchkEnterListOrArrayImpl(env, impl, false, &previousCount);
+
+  if (receiver == NULL)
+    return;
+
+  if (traitType != NULL)
+    typchkRegisterPrimitiveTraitImpl(env, node, traitType, receiver);
+  else
+    typchkRegisterPrimitiveImplMethods(env, node, receiver);
+
+  typchkLeaveListOrArrayImpl(env, previousCount);
+}
+
 static void typchkRegisterImplMethods(TypeEnv *env, AstNode *node) {
   ImplNode *impl = &node->as.impl;
 
   if (impl->hasTraitName) {
     typchkRegisterTraitImpl(env, node);
+    return;
+  }
+
+  if (impl->targetKind != IMPL_TARGET_NAME) {
+    typchkRegisterListOrArrayImpl(env, node, NULL);
     return;
   }
 
@@ -4336,14 +4474,13 @@ static void typchkCheckTopLevelFunctionBody(TypeEnv *env, AstNode *node) {
 
 // Checks the bodies of a primitive type's methods. An impl that failed to
 // register was already reported and has no owner.
-static void checkPrimitiveImplMethodBodies(TypeEnv *env, AstNode *node) {
+static void checkPrimitiveImplMethodBodies(TypeEnv *env, AstNode *node,
+                                           Type *primitive) {
   ImplNode *impl = &node->as.impl;
   const char *owner = impl->primitiveOwner;
 
   if (owner == NULL)
     return;
-
-  Type *primitive = typchkPrimitiveTypeNamed(&impl->targetName);
 
   env->_currentPrimitiveOwner = owner;
   env->_currentImplSelfType = primitive;
@@ -4375,11 +4512,25 @@ static void checkPrimitiveImplMethodBodies(TypeEnv *env, AstNode *node) {
 
 static void checkImplMethodBodies(TypeEnv *env, AstNode *node) {
   ImplNode *impl = &node->as.impl;
+
+  if (impl->targetKind != IMPL_TARGET_NAME) {
+    if (impl->primitiveOwner == NULL)
+      return; // failed to register; already reported
+
+    int previousCount;
+    Type *receiver = typchkEnterListOrArrayImpl(env, impl, /*isOpaque=*/true,
+                                                &previousCount);
+    checkPrimitiveImplMethodBodies(env, node, receiver);
+    typchkLeaveListOrArrayImpl(env, previousCount);
+    return;
+  }
+
   Type *structType = typchkResolveImplTarget(env, impl->targetName);
 
   if (structType == NULL &&
       typchkPrimitiveTypeNamed(&impl->targetName) != NULL) {
-    checkPrimitiveImplMethodBodies(env, node);
+    checkPrimitiveImplMethodBodies(env, node,
+                                   typchkPrimitiveTypeNamed(&impl->targetName));
     return;
   }
 

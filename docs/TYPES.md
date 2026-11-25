@@ -210,7 +210,8 @@ impl string {
 
 `"abc".len()` calls it. Only the standard library can write these blocks. They
 work for `string`, `bool`, `unit` and every number kind (`i64`, `u8`, `f64` and
-the rest), with methods that take `self`. Lists and arrays have none yet. A method belongs to its own type, so a method of `f64` can't be called
+the rest), with methods that take `self`. Lists and arrays have them too, see
+[Methods On Lists And Arrays](#methods-on-lists-and-arrays). A method belongs to its own type, so a method of `f64` can't be called
 on an `i64`. A method has to be called, so `let f = "abc".len;` is an error. A
 call to one is compiled as a plain function call with the value as the first
 argument.
@@ -259,6 +260,45 @@ The standard library implements these traits:
 
 `string` has no `Ord` because there is no `<` on strings yet, and `bool` has no `Ord`. `cmp` returns `-1`, `0` or `1`.
 Trait impls on a primitive can't be used with a bounded type parameter yet.
+
+#### Methods On Lists And Arrays
+
+A list or an array has methods in the same way, with the item type as a type
+parameter. `impl [T]` is for every list and `impl [T; N]` for every array:
+
+```
+impl [T] {
+    pub fun len(self): i64 = @listLen(self);
+    pub fun copy(self): [T] = @listCopy(self);
+}
+
+impl [T; N] {
+    pub fun len(self): i64 = @arrLen(self);
+    pub fun copy(self): [T; N] = @arrCopy(self);
+}
+```
+
+`T` stands for the item type of the value the method is called on, so `first`
+of `[string]` gives a `string`. `N` stands for an array's length, so `copy` of a
+`[i64; 3]` gives a `[i64; 3]`. An impl that doesn't need the length writes `_`
+(`impl [T; _]`), and then no signature can mention it. The length is written
+as a name and never a number, and the name is `N` or `_`. Type parameters of
+the method itself come after `T`, as in `fun pick[U](self, extra: U): U`, and
+`Self` is the receiver's type. `impl [T]` and `impl [T; N]` are separate, so the
+same method name can be in both.
+
+A list gets `len`, `isEmpty`, `push`, `pop`, `insert`, `remove`, `clear`,
+`contains`, `copy`, `reverse`, `slice` and `concat`. An array gets `len`,
+`contains`, `copy`, `reverse`, `slice`, `concat` and `toList`. Each calls the
+native function of the same name. The ones that return a list (`slice`,
+`concat`, `toList` of an array) return a list and not an array.
+
+The same limits as the other primitives apply. Only the standard library can
+write these blocks, and a user file gets `Only the standard library can add
+methods to '[T]'.`. The item has to be a type parameter, so `impl [string]` is
+an error. There are no static methods, and a list or array can't fill a bounded
+type parameter yet. A trait impl, such as `impl Display for [T]`, gives every
+list the trait with no condition on `T`, because an impl can't have bounds.
 
 ### Traits
 
@@ -463,7 +503,7 @@ trait Ord: Eq {
 
 #### Limitations
 
-- Traits can be implemented for structs, and by the standard library for `string`, `bool` and the number kinds. Other code can't implement a trait for a primitive, and a primitive can't yet be used where a type parameter has a trait bound (except numbers and the operator traits)
+- Traits can be implemented for structs, and by the standard library for `string`, `bool`, `unit`, the number kinds, lists and arrays. Other code can't implement a trait for a primitive, and a primitive can't yet be used where a type parameter has a trait bound (except numbers and the operator traits)
 - Only numbers have the operator traits built in. `string` and `bool` implement `Eq` in the standard library, but can't be used where a type parameter has a bound yet. Neither has `Ord`
 - If a struct's impl block implements a method of the same name as a trait, the struct's impl method is what is called. A future change will allow `Trait.method(struct)` to be used to fully qualify the trait versions of the method.
 - Two traits can't both provide a method of the same name to one struct, and a name can't be both an instance method and a static method on one type. Both are compile errors.

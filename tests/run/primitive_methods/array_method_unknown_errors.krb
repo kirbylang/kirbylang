@@ -1,0 +1,4 @@
+fun main(): unit {
+    let xs = [1, 2];
+    xs.nope();
+}

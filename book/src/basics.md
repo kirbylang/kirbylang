@@ -277,6 +277,22 @@ fun main(): unit {
 }
 ```
 
+#### Array Methods
+
+An array has `len`, `contains`, `copy`, `reverse`, `slice`, `concat` and
+`toList`. `copy` and `reverse` give an array of the same length, and `slice`,
+`concat` and `toList` give a list.
+
+```kirby
+fun main(): unit {
+    let scores = [100, 53, 77];
+
+    @println(scores.len()); // 3
+    @println(scores.contains(53)); // true
+    @println(scores.reverse()[0]); // 77
+}
+```
+
 ### Lists
 
 Lists, `[T]`, are growable collections of homogenous types.
@@ -286,6 +302,22 @@ fun main(): unit {
     let scores: [i64] = [100, 53, 77, 41];
 
     @listPush(scores, 87);
+}
+```
+
+#### List Methods
+
+A list has `len`, `isEmpty`, `push`, `pop`, `insert`, `remove`, `clear`,
+`contains`, `copy`, `reverse`, `slice` and `concat`.
+
+```kirby
+fun main(): unit {
+    let scores: [i64] = [100, 53, 77, 41];
+
+    scores.push(87);
+    @println(scores.len()); // 5
+    @println(scores.pop()); // 87
+    @println(scores.contains(77)); // true
 }
 ```
 

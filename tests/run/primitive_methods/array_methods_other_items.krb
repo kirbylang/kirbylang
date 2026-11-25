@@ -1,0 +1,23 @@
+struct Point {
+    pub var x: i64;
+    pub var y: i64;
+}
+
+fun main(): unit {
+    let names = ["ann", "bo"];
+    @println(names.len());
+    @println(names.contains("bo"));
+    @println(names.reverse()[0]);
+
+    let grid = [[1, 2], [3, 4], [5, 6]];
+    @println(grid.len());
+    @println(grid[1].len());
+    @println(grid.copy()[2][1]);
+
+    let points = [Point { x: 1, y: 2 }, Point { x: 3, y: 4 }];
+    @println(points.len());
+    @println(points.reverse()[0].y);
+
+    let flags = [true, false];
+    @println(flags.contains(false));
+}

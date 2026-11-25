@@ -34,7 +34,7 @@ static void checkStdlibIntoSession(void) {
   int count = 0;
   bool hadParseError = false;
   int endLine = 0;
-  AstNode **ast = parse(KIRBY_STDLIB, &count, &hadParseError, &endLine);
+  AstNode **ast = parseStdlib(KIRBY_STDLIB, &count, &hadParseError, &endLine);
   assert(!hadParseError);
   assert(typchkCheckStdlib(ast, count));
   astFreeAll();

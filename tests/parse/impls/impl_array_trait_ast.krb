@@ -1,0 +1,3 @@
+impl Display for [T; N] {
+    fun toString(self): string = "array";
+}

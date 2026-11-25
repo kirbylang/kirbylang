@@ -471,9 +471,19 @@ static void printNode(StrBuf *sb, AstNode *node) {
       sb_append(sb, " for ");
     }
 
-    sb_append_token(sb, node->as.impl.targetName);
+    if (node->as.impl.targetKind == IMPL_TARGET_NAME) {
+      sb_append_token(sb, node->as.impl.targetName);
+    }
 
-    if (node->as.impl.genericParamCount > 0) {
+    if (node->as.impl.targetKind != IMPL_TARGET_NAME) {
+      sb_append(sb, "[");
+      for (int i = 0; i < node->as.impl.genericParamCount; i++) {
+        if (i > 0)
+          sb_append(sb, "; ");
+        sb_append_token(sb, node->as.impl.genericParams[i]);
+      }
+      sb_append(sb, "]");
+    } else if (node->as.impl.genericParamCount > 0) {
       sb_append(sb, "[");
       for (int i = 0; i < node->as.impl.genericParamCount; i++) {
         if (i > 0)

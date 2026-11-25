@@ -835,3 +835,60 @@ impl Ord for unit {
 impl Default for unit {
     fun default(): Self = ();
 }
+
+impl [T] {
+    // Number of items
+    pub fun len(self): i64 = @listLen(self);
+
+    pub fun isEmpty(self): bool = @listIsEmpty(self);
+
+    // Adds an item at the end
+    pub fun push(self, item: T): unit = @listPush(self, item);
+
+    // Removes and returns the last item
+    pub fun pop(self): T = @listPop(self);
+
+    // Puts an item at `index`, moving the items after it up
+    pub fun insert(self, index: i64, item: T): unit = @listInsert(self, index, item);
+
+    // Removes and returns the item at `index`
+    pub fun remove(self, index: i64): T = @listRemove(self, index);
+
+    pub fun clear(self): unit = @listClear(self);
+
+    pub fun contains(self, item: T): bool = @listContains(self, item);
+
+    // A new list with the same items
+    pub fun copy(self): [T] = @listCopy(self);
+
+    // A new list with the items in the opposite order
+    pub fun reverse(self): [T] = @listReverse(self);
+
+    // A new list with the items from `start` up to, not including, `end`
+    pub fun slice(self, start: i64, end: i64): [T] = @listSlice(self, start, end);
+
+    // A new list with the items of `self`, then the items of `other`
+    pub fun concat(self, other: [T]): [T] = @listConcat(self, other);
+}
+
+impl [T; N] {
+    // Number of items
+    pub fun len(self): i64 = @arrLen(self);
+
+    pub fun contains(self, item: T): bool = @arrContains(self, item);
+
+    // A new array with the same items
+    pub fun copy(self): [T; N] = @arrCopy(self);
+
+    // A new array with the items in the opposite order
+    pub fun reverse(self): [T; N] = @arrReverse(self);
+
+    // A list with the items from `start` up to, not including, `end`
+    pub fun slice(self, start: i64, end: i64): [T] = @arrSlice(self, start, end);
+
+    // A list with the items of `self`, then the items of `other`
+    pub fun concat(self, other: [T; M]): [T] = @arrConcat(self, other);
+
+    // A list with the same items
+    pub fun toList(self): [T] = @arrToList(self);
+}

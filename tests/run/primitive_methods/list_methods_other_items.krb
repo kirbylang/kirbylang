@@ -1,0 +1,24 @@
+struct Point {
+    pub var x: i64;
+    pub var y: i64;
+}
+
+fun main(): unit {
+    let names: [string] = ["ann", "bo"];
+    names.push("cy");
+    @println(names.len());
+    @println(names.pop());
+    @println(names.contains("bo"));
+
+    let grid: [[i64]] = [[1, 2], [3]];
+    @println(grid.len());
+    @println(grid.pop().len());
+
+    let points: [Point] = [Point { x: 1, y: 2 }];
+    points.push(Point { x: 3, y: 4 });
+    @println(points.len());
+    @println(points.remove(1).y);
+
+    let flags: [bool] = [true, false];
+    @println(flags.pop());
+}

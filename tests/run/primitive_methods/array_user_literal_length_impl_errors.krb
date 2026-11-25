@@ -1,0 +1,5 @@
+impl [T; 3] {
+    pub fun first(self): T = self[0];
+}
+
+fun main(): unit {}

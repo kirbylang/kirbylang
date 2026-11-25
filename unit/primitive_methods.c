@@ -36,7 +36,8 @@ static InterpretResult run(const char *source, bool isStdlib) {
   int count = 0;
   bool hadError = false;
   int endLine = 0;
-  AstNode **ast = parse(source, &count, &hadError, &endLine);
+  AstNode **ast = isStdlib ? parseStdlib(source, &count, &hadError, &endLine)
+                           : parse(source, &count, &hadError, &endLine);
   assert(!hadError);
 
   bool ok =
@@ -158,6 +159,8 @@ static void test_only_the_stdlib_adds_methods(void) {
 
   end();
 }
+
+static const char *labelTrait = "trait Label { fun label(self): string; }";
 
 static const char *tagTrait = "trait Tag {\n"
                               "  fun tag(self): string;\n"
@@ -451,6 +454,244 @@ static void test_self_calls_a_static_method_of_the_primitive(void) {
   end();
 }
 
+static void test_lists_can_have_methods_and_traits(void) {
+  begin();
+  expectOk(tagTrait, true);
+  expectOk("impl [T] {\n"
+           "  pub fun first(self): T = self[0];\n"
+           "  pub fun other(self, other: Self): Self = other;\n"
+           "  pub fun pick[U](self, extra: U): U = extra;\n"
+           "  pub fun both[U](self, extra: U): [U] = [extra, extra];\n"
+           "  fun hidden(self): T = self[0];\n"
+           "  pub fun shown(self): T = self.hidden();\n"
+           "}",
+           true);
+  expectOk("impl Tag for [T] {\n"
+           "  fun tag(self): string = \"list\";\n"
+           "  fun make(): Self = [];\n"
+           "}",
+           true);
+
+  expectOk("if (true) {\n"
+           "let xs: [i64] = [4, 5];\n"
+           "let names: [string] = [\"a\"];\n"
+           "@assert(xs.first() == 4, \"first\");\n"
+           "@assert(names.first() == \"a\", \"first of strings\");\n"
+           "@assert(xs.other(xs).first() == 4, \"self type\");\n"
+           "@assert(xs.pick(\"s\") == \"s\", \"own parameter\");\n"
+           "@assert(names.pick(7) == 7, \"own parameter again\");\n"
+           "@assert(xs.both(true)[1], \"own parameter in a list\");\n"
+           "@assert(xs.shown() == 4, \"private method\");\n"
+           "@assert(xs.tag() == \"list\", \"trait method\");\n"
+           "}",
+           false);
+
+  // The item type has to match
+  expectError("let xs: [i64] = [1];\n"
+              "let names: [string] = [\"a\"];\n"
+              "xs.other(names);",
+              false);
+  expectError("let xs: [i64] = [1];\n"
+              "let s: string = xs.first();",
+              false);
+
+  // A private method is private to the impl, and a method is called
+  expectError("let xs: [i64] = [1];\nxs.hidden();", false);
+  expectError("let xs: [i64] = [1];\nlet f = xs.first;", false);
+  expectError("let xs: [i64] = [1];\nxs.missing();", false);
+
+  end();
+}
+
+static void test_a_list_impl_is_checked(void) {
+  begin();
+  expectOk(tagTrait, true);
+  expectOk("impl [T] { pub fun first(self): T = self[0]; }", true);
+
+  // The item type is a parameter, not a type
+  char *errors = errorsOf("impl [string] { pub fun a(self): i64 = 1; }", true);
+  assert(strstr(errors, "'string' is a type. An impl names the item type with "
+                        "a type parameter, as in 'impl [T]'.") != NULL);
+  free(errors);
+
+  // A name is declared once, and a body only does what works for any T
+  errors = errorsOf("impl [T] { pub fun first(self): T = self[0]; }", true);
+  assert(strstr(errors, "'first' is already declared on 'list'.") != NULL);
+  free(errors);
+
+  errors = errorsOf("impl [T] { pub fun bad(self): i64 = self[0]; }", true);
+  assert(strstr(errors, "Expected i64, got T.") != NULL);
+  free(errors);
+
+  errors = errorsOf("impl [T] { pub fun make(): i64 = 1; }", true);
+  assert(strstr(errors, "Static methods on 'list' aren't supported yet.") !=
+         NULL);
+  free(errors);
+
+  // A trait is implemented once, and has to be complete
+  expectOk("impl Tag for [T] {\n"
+           "  fun tag(self): string = \"a\";\n"
+           "  fun make(): Self = [];\n"
+           "}",
+           true);
+  errors = errorsOf("impl Tag for [T] {\n"
+                    "  fun tag(self): string = \"b\";\n"
+                    "  fun make(): Self = [];\n"
+                    "}",
+                    true);
+  assert(strstr(errors, "'[T]' already implements 'Tag'.") != NULL);
+  free(errors);
+
+  errors = errorsOf("trait Half { fun a(self): i64; fun b(self): i64; }\n"
+                    "impl Half for [T] { fun a(self): i64 = 1; }",
+                    true);
+  assert(strstr(errors, "'b'") != NULL);
+  free(errors);
+
+  // Only the standard library writes them
+  expectError("impl [T] { pub fun other(self): T = self[0]; }", false);
+  expectError("impl Tag for [T] { fun tag(self): string = \"\";"
+              " fun make(): Self = []; }",
+              false);
+
+  // A list fills a bounded parameter no better than a string does
+  errors = errorsOf("fun show[T: Tag](x: T): string = x.tag();\n"
+                    "let xs: [i64] = [1];\n"
+                    "@println(show(xs));",
+                    false);
+  assert(strstr(errors, "[i64] implements Tag, but a primitive can't be used "
+                        "with a bound yet, required by T.") != NULL);
+  free(errors);
+
+  end();
+}
+
+static void test_a_list_impl_needs_its_trait(void) {
+  begin();
+  expectOk(tagTrait, true);
+  expectOk("trait Pair: Tag { fun pair(self): string; }", true);
+
+  char *errors =
+      errorsOf("impl Pair for [T] { fun pair(self): string = \"\"; }", true);
+  assert(strstr(errors, "also needs 'impl Tag for [T]'") != NULL);
+  free(errors);
+
+  end();
+}
+
+static void test_arrays_can_have_methods_and_traits(void) {
+  begin();
+  expectOk(labelTrait, true);
+  expectOk("impl [T; N] {\n"
+           "  pub fun first(self): T = self[0];\n"
+           "  pub fun same(self): [T; N] = self;\n"
+           "  pub fun pick[U](self, extra: U): U = extra;\n"
+           "  pub fun twin[U](self, other: [U; N]): [U; N] = other;\n"
+           "  pub fun join[U](self, other: [U; M]): [T] = @arrToList(self);\n"
+           "}",
+           true);
+  expectOk("impl Label for [T; N] {\n"
+           "  fun label(self): string = \"array\";\n"
+           "}",
+           true);
+
+  // A list and an array can each have a method of the same name
+  expectOk("impl [T] { pub fun first(self): T = self[0]; pub fun kind(self): "
+           "string = \"list\"; }",
+           true);
+
+  expectOk("if (true) {\n"
+           "let xs = [4, 5];\n"
+           "let names = [\"a\", \"b\", \"c\"];\n"
+           "let list: [i64] = [6];\n"
+           "@assert(xs.first() == 4, \"first\");\n"
+           "@assert(names.first() == \"a\", \"first of strings\");\n"
+           "@assert(list.first() == 6, \"first of a list\");\n"
+           "@assert(list.kind() == \"list\", \"list method\");\n"
+           "let same: [i64; 2] = xs.same();\n"
+           "let again: [string; 3] = names.same();\n"
+           "@assert(xs.pick(\"s\") == \"s\", \"own parameter\");\n"
+           "let twin: [string; 2] = xs.twin([\"s\", \"t\"]);\n"
+           "@assert(twin[1] == \"t\", \"own parameter and length\");\n"
+           "@assert(xs.join(names).first() == 4, \"other length\");\n"
+           "@assert(xs.label() == \"array\", \"trait method\");\n"
+           "}",
+           false);
+
+  // The length is kept, and the other kind doesn't get the method
+  expectError("let xs = [1, 2];\nlet wrong: [i64; 3] = xs.same();", false);
+  expectError(
+      "let xs = [1, 2];\nlet wrong: [string; 3] = xs.twin([\"s\", \"t\"]);",
+      false);
+  expectError("let xs = [1, 2];\nxs.twin([\"s\", \"t\", \"u\"]);", false);
+  expectError("let xs = [1, 2];\nxs.kind();", false);
+  expectError("let xs: [i64] = [1];\nxs.same();", false);
+
+  end();
+}
+
+static void test_an_array_impl_is_checked(void) {
+  begin();
+  expectOk(labelTrait, true);
+
+  // The length is `N`, or `_` when it isn't needed
+  expectOk("impl [T; _] { pub fun last(self): T = self[0]; }", true);
+
+  char *errors = errorsOf("impl [T; K] { pub fun a(self): i64 = 1; }", true);
+  assert(strstr(errors, "An array impl names its length 'N', or '_' to leave "
+                        "it unnamed, not 'K'.") != NULL);
+  free(errors);
+
+  errors = errorsOf("impl [string; N] { pub fun a(self): i64 = 1; }", true);
+  assert(strstr(errors, "'string' is a type.") != NULL);
+  free(errors);
+
+  expectOk("impl [T; N] { pub fun first(self): T = self[0]; }", true);
+  errors = errorsOf("impl [T; N] { pub fun first(self): T = self[0]; }", true);
+  assert(strstr(errors, "'first' is already declared on 'array'.") != NULL);
+  free(errors);
+
+  errors = errorsOf("impl [T; N] { pub fun bad(self): i64 = self[0]; }", true);
+  assert(strstr(errors, "Expected i64, got T.") != NULL);
+  free(errors);
+
+  // The same rules as a list for traits
+  expectOk("impl Label for [T; N] {\n"
+           "  fun label(self): string = \"a\";\n"
+           "}",
+           true);
+  errors = errorsOf("impl Label for [T; N] {\n"
+                    "  fun label(self): string = \"b\";\n"
+                    "}",
+                    true);
+  assert(strstr(errors, "'[T; N]' already implements 'Label'.") != NULL);
+  free(errors);
+
+  expectError("impl [T; N] { pub fun other(self): T = self[0]; }", false);
+
+  errors = errorsOf("fun show[T: Label](x: T): string = x.label();\n"
+                    "@println(show([1, 2]));",
+                    false);
+  assert(strstr(errors, "[i64; 2] implements Label, but a primitive can't be "
+                        "used with a bound yet, required by T.") != NULL);
+  free(errors);
+
+  end();
+}
+
+static void test_an_array_impl_needs_its_trait(void) {
+  begin();
+  expectOk(labelTrait, true);
+  expectOk("trait Pair: Label { fun pair(self): string; }", true);
+
+  char *errors =
+      errorsOf("impl Pair for [T; _] { fun pair(self): string = \"\"; }", true);
+  assert(strstr(errors, "also needs 'impl Label for [T; _]'") != NULL);
+  free(errors);
+
+  end();
+}
+
 // A run time error ends the process, so the source runs in a child process
 // that has the real standard library loaded. Returns the first line it wrote to
 // stderr, which the caller frees.
@@ -585,6 +826,12 @@ int main(void) {
   test_a_trait_method_belongs_to_its_kind();
   test_only_the_stdlib_implements_traits_for_primitives();
   test_a_primitive_can_not_fill_a_bound_yet();
+  test_lists_can_have_methods_and_traits();
+  test_a_list_impl_is_checked();
+  test_a_list_impl_needs_its_trait();
+  test_arrays_can_have_methods_and_traits();
+  test_an_array_impl_is_checked();
+  test_an_array_impl_needs_its_trait();
 
   printf("primitive method tests passed\n");
   return 0;
