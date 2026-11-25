@@ -247,6 +247,17 @@ The impl must give every method the trait asks for, with the trait's signature,
 and a type implements a trait once. A trait with a supertrait needs an impl of
 the supertrait too. A method of the type itself wins over a trait method of the
 same name. A static method of a trait can be written, but can't be called yet.
+
+The standard library implements these traits:
+
+| Type                          | Traits                                                  |
+| ----------------------------- | ------------------------------------------------------- |
+| every number type             | `Display`, `Eq`, `Ord`, `Default`, `Add`, `Sub`, `Mul`, `Div`, `Mod` |
+| signed integers, `f64`, `f32` | `Neg`                                                   |
+| `string`                      | `Display`, `Eq`, `Default`, `Add`                       |
+| `bool`                        | `Display`, `Eq`, `Default`                              |
+
+`string` has no `Ord` because there is no `<` on strings yet, and `bool` has no `Ord`. `cmp` returns `-1`, `0` or `1`.
 Trait impls on a primitive can't be used with a bounded type parameter yet.
 
 ### Traits

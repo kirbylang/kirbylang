@@ -235,6 +235,27 @@ fun main(): unit {
 
 The `abs` of the smallest integer, such as `-128` for an `i8`, is an overflow error, because the result doesn't fit.
 
+Numbers, strings and bools also have the methods of the standard traits, which can be called like any method:
+
+| Type                           | Methods                                                       |
+| ------------------------------ | ------------------------------------------------------------- |
+| every number type              | `toString`, `equals`, `cmp`, `add`, `sub`, `mul`, `div`, `mod` |
+| signed integers, `f64`, `f32`  | `neg`                                                         |
+| `string`                       | `toString`, `equals`, `add`                                   |
+| `bool`                         | `toString`, `equals`                                          |
+
+`cmp` gives `-1`, `0` or `1`.
+
+```kirby
+fun main(): unit {
+    let a: u8 = 7;
+    @println(a.toString()); // 7
+    @println(a.cmp(3)); // 1
+    @println(a.add(3)); // 10
+    @println("ab".add("cd")); // abcd
+}
+```
+
 ### Arrays
 
 Arrays, `[T; N]`, are fixed sized collections of homogenous types.

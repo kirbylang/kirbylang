@@ -1,0 +1,15 @@
+fun main(): unit {
+  let a: u64 = 7;
+  let b: u64 = 3;
+  @println(a.toString());
+  @println(a.equals(b));
+  @println(a.equals(7));
+  @println(a.cmp(b));
+  @println(b.cmp(a));
+  @println(a.cmp(7));
+  @println(a.add(b));
+  @println(a.sub(b));
+  @println(a.mul(b));
+  @println(a.div(b));
+  @println(a.mod(b));
+}

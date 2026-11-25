@@ -1,1 +1,1 @@
-[line 4] Error: i64 doesn't implement Display, required by T.
+[line 4] Error: i64 implements Display, but a primitive can't be used with a bound yet, required by T.

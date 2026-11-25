@@ -1422,24 +1422,77 @@ static void compileStructDecl(AstNode *node) {
   emitByte(OP_POP);
 }
 
-// `impl string { ... }` or `impl Trait for string { ... }`: each method
-// becomes a global function
-static void compilePrimitiveImplDecl(AstNode *node) {
-  ImplNode *impl = &node->as.impl;
+static bool isPrimitiveImpl(const AstNode *node) {
+  return node->kind == NODE_IMPL && node->as.impl.primitiveOwner != NULL;
+}
 
-  for (int i = 0; i < impl->methodCount; i++) {
-    FunctionNode *method = impl->methods[i];
+// The most constants a function can hold, with room kept for the two a method
+// takes in its installer: the closure and the global's name
+#define INSTALLER_CONSTANT_LIMIT (UINT8_MAX + 1 - 2)
 
-    // A static method has no receiver, so it is an ordinary function
-    compileFunction(method,
-                    method->hasSelf ? TYPE_PRIMITIVE_METHOD : TYPE_FUNCTION);
-    emitBytes(OP_DEFINE_GLOBAL,
-              primitiveMethodConstant(
-                  impl->primitiveOwner, (int)strlen(impl->primitiveOwner),
-                  impl->hasTraitName ? impl->traitName.start : NULL,
-                  impl->hasTraitName ? impl->traitName.length : 0,
-                  &method->name));
+// Starts a function that defines methods of primitive types as globals, and is
+// called once by the script
+static void beginMethodInstaller(FnCompiler *installer) {
+  // Named, so it doesn't take a number from the lambdas
+  Token name = tokenFromCString("installMethods");
+  initCompiler(installer, TYPE_FUNCTION, &name);
+  beginScope();
+}
+
+// Ends the installer, and has the script call it
+static void endMethodInstaller(void) {
+  int index = endCompiler();
+
+  CompiledConst k;
+  k.kind = CONST_FUNCTION;
+  k.as.functionIndex = index;
+  emitBytes(OP_CLOSURE, makeConstant(k, NULL));
+  emitBytes(OP_CALL, 0);
+  emitByte(OP_POP);
+}
+
+// `impl string { ... }` and `impl Trait for string { ... }`: each method
+// becomes a global function. The standard library has many of them, and a
+// function has room for only so many constants, so they are defined by
+// installer functions that each take as many as fit.
+static void compilePrimitiveImpls(AstNode **ast, int count) {
+  FnCompiler installer;
+  bool open = false;
+
+  for (int i = 0; i < count; i++) {
+    if (!isPrimitiveImpl(ast[i]))
+      continue;
+
+    ImplNode *impl = &ast[i]->as.impl;
+    currentLine = impl->targetName.line;
+
+    for (int j = 0; j < impl->methodCount; j++) {
+      FunctionNode *method = impl->methods[j];
+
+      if (open && current->fn->constantCount > INSTALLER_CONSTANT_LIMIT) {
+        endMethodInstaller();
+        open = false;
+      }
+
+      if (!open) {
+        beginMethodInstaller(&installer);
+        open = true;
+      }
+
+      // A static method has no receiver, so it is an ordinary function
+      compileFunction(method,
+                      method->hasSelf ? TYPE_PRIMITIVE_METHOD : TYPE_FUNCTION);
+      emitBytes(OP_DEFINE_GLOBAL,
+                primitiveMethodConstant(
+                    impl->primitiveOwner, (int)strlen(impl->primitiveOwner),
+                    impl->hasTraitName ? impl->traitName.start : NULL,
+                    impl->hasTraitName ? impl->traitName.length : 0,
+                    &method->name));
+    }
   }
+
+  if (open)
+    endMethodInstaller();
 }
 
 static void compileImplDecl(AstNode *node) {
@@ -1447,10 +1500,7 @@ static void compileImplDecl(AstNode *node) {
 
   currentLine = impl->targetName.line;
 
-  if (impl->primitiveOwner != NULL) {
-    compilePrimitiveImplDecl(node);
-    return;
-  }
+  assert(impl->primitiveOwner == NULL); // compilePrimitiveImpls handles those
 
   const Token *resolved = resolvedImplTargetsLookup(node);
   Token structName = resolved != NULL ? *resolved : impl->targetName;
@@ -1781,9 +1831,12 @@ CompiledUnit *compile(AstNode **ast, int count, int endLine) {
     }
   }
 
+  compilePrimitiveImpls(ast, count);
+
   // Hoist trait implementation blocks
   for (int i = 0; i < count; i++) {
-    if (ast[i]->kind == NODE_IMPL && ast[i]->as.impl.hasTraitName) {
+    if (ast[i]->kind == NODE_IMPL && ast[i]->as.impl.hasTraitName &&
+        !isPrimitiveImpl(ast[i])) {
       compileStmt(ast[i]);
     }
   }
@@ -1792,7 +1845,8 @@ CompiledUnit *compile(AstNode **ast, int count, int endLine) {
   for (int i = 0; i < count; i++) {
     bool alreadyCompiled =
         ast[i]->kind == NODE_FUNCTION || ast[i]->kind == NODE_STRUCT ||
-        (ast[i]->kind == NODE_IMPL && ast[i]->as.impl.hasTraitName);
+        (ast[i]->kind == NODE_IMPL && ast[i]->as.impl.hasTraitName) ||
+        isPrimitiveImpl(ast[i]);
 
     if (!alreadyCompiled)
       compileStmt(ast[i]);

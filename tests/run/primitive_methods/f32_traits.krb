@@ -1,0 +1,16 @@
+fun main(): unit {
+  let a: f32 = 7.5f32;
+  let b: f32 = 2.5f32;
+  @println(a.toString());
+  @println(a.equals(b));
+  @println(a.equals(7.5f32));
+  @println(a.cmp(b));
+  @println(b.cmp(a));
+  @println(a.cmp(7.5f32));
+  @println(a.add(b));
+  @println(a.sub(b));
+  @println(a.mul(b));
+  @println(a.div(b));
+  @println(a.mod(b));
+  @println(a.neg());
+}

@@ -395,3 +395,427 @@ impl f32 {
     // Without its fractional part, toward zero
     pub fun trunc(self): f32 = @trunc(self as f64) as f32;
 }
+
+// Traits for the primitive types
+
+impl Display for i8 {
+    fun toString(self): string = @numberToString(self);
+}
+
+impl Eq for i8 {
+    fun equals(self, other: Self): bool = self == other;
+}
+
+impl Ord for i8 {
+    fun cmp(self, other: Self): i64 =
+        if (self < other) -1 else if (self > other) 1 else 0;
+}
+
+impl Default for i8 {
+    fun default(): Self = 0;
+}
+
+impl Add for i8 {
+    fun add(self, other: Self): Self = self + other;
+}
+
+impl Sub for i8 {
+    fun sub(self, other: Self): Self = self - other;
+}
+
+impl Mul for i8 {
+    fun mul(self, other: Self): Self = self * other;
+}
+
+impl Div for i8 {
+    fun div(self, other: Self): Self = self / other;
+}
+
+impl Mod for i8 {
+    fun mod(self, other: Self): Self = self % other;
+}
+
+impl Neg for i8 {
+    fun neg(self): Self = -self;
+}
+
+impl Display for i16 {
+    fun toString(self): string = @numberToString(self);
+}
+
+impl Eq for i16 {
+    fun equals(self, other: Self): bool = self == other;
+}
+
+impl Ord for i16 {
+    fun cmp(self, other: Self): i64 =
+        if (self < other) -1 else if (self > other) 1 else 0;
+}
+
+impl Default for i16 {
+    fun default(): Self = 0;
+}
+
+impl Add for i16 {
+    fun add(self, other: Self): Self = self + other;
+}
+
+impl Sub for i16 {
+    fun sub(self, other: Self): Self = self - other;
+}
+
+impl Mul for i16 {
+    fun mul(self, other: Self): Self = self * other;
+}
+
+impl Div for i16 {
+    fun div(self, other: Self): Self = self / other;
+}
+
+impl Mod for i16 {
+    fun mod(self, other: Self): Self = self % other;
+}
+
+impl Neg for i16 {
+    fun neg(self): Self = -self;
+}
+
+impl Display for i32 {
+    fun toString(self): string = @numberToString(self);
+}
+
+impl Eq for i32 {
+    fun equals(self, other: Self): bool = self == other;
+}
+
+impl Ord for i32 {
+    fun cmp(self, other: Self): i64 =
+        if (self < other) -1 else if (self > other) 1 else 0;
+}
+
+impl Default for i32 {
+    fun default(): Self = 0;
+}
+
+impl Add for i32 {
+    fun add(self, other: Self): Self = self + other;
+}
+
+impl Sub for i32 {
+    fun sub(self, other: Self): Self = self - other;
+}
+
+impl Mul for i32 {
+    fun mul(self, other: Self): Self = self * other;
+}
+
+impl Div for i32 {
+    fun div(self, other: Self): Self = self / other;
+}
+
+impl Mod for i32 {
+    fun mod(self, other: Self): Self = self % other;
+}
+
+impl Neg for i32 {
+    fun neg(self): Self = -self;
+}
+
+impl Display for i64 {
+    fun toString(self): string = @numberToString(self);
+}
+
+impl Eq for i64 {
+    fun equals(self, other: Self): bool = self == other;
+}
+
+impl Ord for i64 {
+    fun cmp(self, other: Self): i64 =
+        if (self < other) -1 else if (self > other) 1 else 0;
+}
+
+impl Default for i64 {
+    fun default(): Self = 0;
+}
+
+impl Add for i64 {
+    fun add(self, other: Self): Self = self + other;
+}
+
+impl Sub for i64 {
+    fun sub(self, other: Self): Self = self - other;
+}
+
+impl Mul for i64 {
+    fun mul(self, other: Self): Self = self * other;
+}
+
+impl Div for i64 {
+    fun div(self, other: Self): Self = self / other;
+}
+
+impl Mod for i64 {
+    fun mod(self, other: Self): Self = self % other;
+}
+
+impl Neg for i64 {
+    fun neg(self): Self = -self;
+}
+
+impl Display for u8 {
+    fun toString(self): string = @numberToString(self);
+}
+
+impl Eq for u8 {
+    fun equals(self, other: Self): bool = self == other;
+}
+
+impl Ord for u8 {
+    fun cmp(self, other: Self): i64 =
+        if (self < other) -1 else if (self > other) 1 else 0;
+}
+
+impl Default for u8 {
+    fun default(): Self = 0;
+}
+
+impl Add for u8 {
+    fun add(self, other: Self): Self = self + other;
+}
+
+impl Sub for u8 {
+    fun sub(self, other: Self): Self = self - other;
+}
+
+impl Mul for u8 {
+    fun mul(self, other: Self): Self = self * other;
+}
+
+impl Div for u8 {
+    fun div(self, other: Self): Self = self / other;
+}
+
+impl Mod for u8 {
+    fun mod(self, other: Self): Self = self % other;
+}
+
+impl Display for u16 {
+    fun toString(self): string = @numberToString(self);
+}
+
+impl Eq for u16 {
+    fun equals(self, other: Self): bool = self == other;
+}
+
+impl Ord for u16 {
+    fun cmp(self, other: Self): i64 =
+        if (self < other) -1 else if (self > other) 1 else 0;
+}
+
+impl Default for u16 {
+    fun default(): Self = 0;
+}
+
+impl Add for u16 {
+    fun add(self, other: Self): Self = self + other;
+}
+
+impl Sub for u16 {
+    fun sub(self, other: Self): Self = self - other;
+}
+
+impl Mul for u16 {
+    fun mul(self, other: Self): Self = self * other;
+}
+
+impl Div for u16 {
+    fun div(self, other: Self): Self = self / other;
+}
+
+impl Mod for u16 {
+    fun mod(self, other: Self): Self = self % other;
+}
+
+impl Display for u32 {
+    fun toString(self): string = @numberToString(self);
+}
+
+impl Eq for u32 {
+    fun equals(self, other: Self): bool = self == other;
+}
+
+impl Ord for u32 {
+    fun cmp(self, other: Self): i64 =
+        if (self < other) -1 else if (self > other) 1 else 0;
+}
+
+impl Default for u32 {
+    fun default(): Self = 0;
+}
+
+impl Add for u32 {
+    fun add(self, other: Self): Self = self + other;
+}
+
+impl Sub for u32 {
+    fun sub(self, other: Self): Self = self - other;
+}
+
+impl Mul for u32 {
+    fun mul(self, other: Self): Self = self * other;
+}
+
+impl Div for u32 {
+    fun div(self, other: Self): Self = self / other;
+}
+
+impl Mod for u32 {
+    fun mod(self, other: Self): Self = self % other;
+}
+
+impl Display for u64 {
+    fun toString(self): string = @numberToString(self);
+}
+
+impl Eq for u64 {
+    fun equals(self, other: Self): bool = self == other;
+}
+
+impl Ord for u64 {
+    fun cmp(self, other: Self): i64 =
+        if (self < other) -1 else if (self > other) 1 else 0;
+}
+
+impl Default for u64 {
+    fun default(): Self = 0;
+}
+
+impl Add for u64 {
+    fun add(self, other: Self): Self = self + other;
+}
+
+impl Sub for u64 {
+    fun sub(self, other: Self): Self = self - other;
+}
+
+impl Mul for u64 {
+    fun mul(self, other: Self): Self = self * other;
+}
+
+impl Div for u64 {
+    fun div(self, other: Self): Self = self / other;
+}
+
+impl Mod for u64 {
+    fun mod(self, other: Self): Self = self % other;
+}
+
+impl Display for f32 {
+    fun toString(self): string = @numberToString(self);
+}
+
+impl Eq for f32 {
+    fun equals(self, other: Self): bool = self == other;
+}
+
+impl Ord for f32 {
+    fun cmp(self, other: Self): i64 =
+        if (self < other) -1 else if (self > other) 1 else 0;
+}
+
+impl Default for f32 {
+    fun default(): Self = 0.0f32;
+}
+
+impl Add for f32 {
+    fun add(self, other: Self): Self = self + other;
+}
+
+impl Sub for f32 {
+    fun sub(self, other: Self): Self = self - other;
+}
+
+impl Mul for f32 {
+    fun mul(self, other: Self): Self = self * other;
+}
+
+impl Div for f32 {
+    fun div(self, other: Self): Self = self / other;
+}
+
+impl Mod for f32 {
+    fun mod(self, other: Self): Self = self % other;
+}
+
+impl Neg for f32 {
+    fun neg(self): Self = -self;
+}
+
+impl Display for f64 {
+    fun toString(self): string = @numberToString(self);
+}
+
+impl Eq for f64 {
+    fun equals(self, other: Self): bool = self == other;
+}
+
+impl Ord for f64 {
+    fun cmp(self, other: Self): i64 =
+        if (self < other) -1 else if (self > other) 1 else 0;
+}
+
+impl Default for f64 {
+    fun default(): Self = 0.0;
+}
+
+impl Add for f64 {
+    fun add(self, other: Self): Self = self + other;
+}
+
+impl Sub for f64 {
+    fun sub(self, other: Self): Self = self - other;
+}
+
+impl Mul for f64 {
+    fun mul(self, other: Self): Self = self * other;
+}
+
+impl Div for f64 {
+    fun div(self, other: Self): Self = self / other;
+}
+
+impl Mod for f64 {
+    fun mod(self, other: Self): Self = self % other;
+}
+
+impl Neg for f64 {
+    fun neg(self): Self = -self;
+}
+
+impl Display for string {
+    fun toString(self): string = self;
+}
+
+impl Eq for string {
+    fun equals(self, other: Self): bool = self == other;
+}
+
+impl Default for string {
+    fun default(): Self = "";
+}
+
+impl Add for string {
+    fun add(self, other: Self): Self = self + other;
+}
+
+impl Display for bool {
+    fun toString(self): string = @boolToString(self);
+}
+
+impl Eq for bool {
+    fun equals(self, other: Self): bool = self == other;
+}
+
+impl Default for bool {
+    fun default(): Self = false;
+}

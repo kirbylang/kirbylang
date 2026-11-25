@@ -1,0 +1,35 @@
+== <script> ==
+0000    7 OP_CLOSURE          1 <fn main>
+0002    | OP_DEFINE_GLOBAL    0 'main'
+0004    8 OP_NIL
+0005    | OP_RETURN
+== main ==
+0000    2 OP_TRUE
+0001    3 OP_GET_GLOBAL       0 '@println'
+0003    | OP_GET_GLOBAL       1 'bool.Display.toString'
+0005    | OP_GET_LOCAL        1
+0007    | OP_CALL             1
+0009    | OP_CALL             1
+0011    | OP_POP
+0012    4 OP_GET_GLOBAL       0 '@println'
+0014    | OP_GET_GLOBAL       1 'bool.Display.toString'
+0016    | OP_FALSE
+0017    | OP_CALL             1
+0019    | OP_CALL             1
+0021    | OP_POP
+0022    5 OP_GET_GLOBAL       0 '@println'
+0024    | OP_GET_GLOBAL       2 'bool.Eq.equals'
+0026    | OP_GET_LOCAL        1
+0028    | OP_TRUE
+0029    | OP_CALL             2
+0031    | OP_CALL             1
+0033    | OP_POP
+0034    6 OP_GET_GLOBAL       0 '@println'
+0036    | OP_GET_GLOBAL       2 'bool.Eq.equals'
+0038    | OP_GET_LOCAL        1
+0040    | OP_FALSE
+0041    | OP_CALL             2
+0043    | OP_CALL             1
+0045    | OP_POP
+0046    7 OP_NIL
+0047    | OP_RETURN

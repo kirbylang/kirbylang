@@ -1,0 +1,16 @@
+fun main(): unit {
+  let a: f64 = 7.5;
+  let b: f64 = 2.5;
+  @println(a.toString());
+  @println(a.equals(b));
+  @println(a.equals(7.5));
+  @println(a.cmp(b));
+  @println(b.cmp(a));
+  @println(a.cmp(7.5));
+  @println(a.add(b));
+  @println(a.sub(b));
+  @println(a.mul(b));
+  @println(a.div(b));
+  @println(a.mod(b));
+  @println(a.neg());
+}

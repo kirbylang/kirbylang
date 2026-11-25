@@ -1,0 +1,7 @@
+fun main(): unit {
+  let a = true;
+  @println(a.toString());
+  @println(false.toString());
+  @println(a.equals(true));
+  @println(a.equals(false));
+}
