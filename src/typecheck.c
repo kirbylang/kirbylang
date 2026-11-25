@@ -1683,6 +1683,29 @@ static bool typchkFirstUnmetBound(TypeEnv *env, Type *param, Type *arg,
   return false;
 }
 
+static const char *typchkPrimitiveOwner(const Type *type);
+static bool typchkPrimitiveImplements(TypeEnv *env, const char *owner,
+                                      InternedName trait);
+
+// Writes the start of an unmet-bound message into `out`. A primitive whose
+// standard library impl exists is told apart, because the impl isn't the
+// problem: bounds can't be filled by a primitive yet.
+static void typchkUnmetBoundText(TypeEnv *env, Type *arg, InternedName bound,
+                                 char *out, size_t size) {
+  const char *owner = typchkPrimitiveOwner(arg);
+
+  if (owner != NULL && typchkPrimitiveImplements(env, owner, bound)) {
+    snprintf(out, size,
+             "%s implements %.*s, but a primitive can't be used with a bound "
+             "yet",
+             typeToString(arg), bound.length, internedNameChars(bound));
+    return;
+  }
+
+  snprintf(out, size, "%s doesn't implement %.*s", typeToString(arg),
+           bound.length, internedNameChars(bound));
+}
+
 // Checks the type arguments of the generic struct or alias `owner` against the
 // bounds of its parameters. An argument that doesn't meet one is reported at
 // `token`, or at `node` when `token` is NULL.
@@ -1698,15 +1721,16 @@ static bool typchkTypeArgsMeetBounds(TypeEnv *env, InternedName owner,
     if (!typchkFirstUnmetBound(env, params[i], args[i], &bound))
       continue;
 
-    const char *format = "%s doesn't implement %.*s, required by %.*s.";
+    char text[256];
+    typchkUnmetBoundText(env, args[i], bound, text, sizeof(text));
+
+    const char *format = "%s, required by %.*s.";
 
     if (token != NULL)
-      typchkErrorAtTokenFmt(token, format, typeToString(args[i]), bound.length,
-                            internedNameChars(bound), owner.length,
+      typchkErrorAtTokenFmt(token, format, text, owner.length,
                             internedNameChars(owner));
     else
-      typchkErrorAtNodeFmt(node, format, typeToString(args[i]), bound.length,
-                           internedNameChars(bound), owner.length,
+      typchkErrorAtNodeFmt(node, format, text, owner.length,
                            internedNameChars(owner));
 
     return false;
@@ -1732,15 +1756,16 @@ static int typchkUnmetBoundIndex(TypeEnv *env, Type *genericType,
   return -1;
 }
 
-static void typchkErrorUnmetBound(AstNode *node, Type *genericType,
-                                  Type **bindings, int index,
+static void typchkErrorUnmetBound(TypeEnv *env, AstNode *node,
+                                  Type *genericType, Type **bindings, int index,
                                   InternedName bound) {
   Type *param = typeFindGenericParam(genericType, index);
   InternedName name = param->as.genericParam.name;
 
-  typchkErrorAtNodeFmt(node, "%s doesn't implement %.*s, required by %.*s.",
-                       typeToString(bindings[index]), bound.length,
-                       internedNameChars(bound), name.length,
+  char text[256];
+  typchkUnmetBoundText(env, bindings[index], bound, text, sizeof(text));
+
+  typchkErrorAtNodeFmt(node, "%s, required by %.*s.", text, name.length,
                        internedNameChars(name));
 }
 
@@ -1770,7 +1795,7 @@ static Type *typchkFillGenericFunctionValue(TypeEnv *env, AstNode *node,
       typchkUnmetBoundIndex(env, genericType, bindings, count, &unmetTrait);
 
   if (unmet >= 0) {
-    typchkErrorUnmetBound(node, genericType, bindings, unmet, unmetTrait);
+    typchkErrorUnmetBound(env, node, genericType, bindings, unmet, unmetTrait);
     return NULL;
   }
 
@@ -2103,7 +2128,7 @@ static Type *typchkCheckGenericCall(TypeEnv *env, AstNode *node,
                                     &unmetTrait);
 
   if (unmet >= 0) {
-    typchkErrorUnmetBound(typchkArgumentOfParam(node, calleeType, unmet),
+    typchkErrorUnmetBound(env, typchkArgumentOfParam(node, calleeType, unmet),
                           calleeType, bindings, unmet, unmetTrait);
     return NULL;
   }

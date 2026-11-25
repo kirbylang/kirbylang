@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <unistd.h>
 
 #include "../src/ast.h"
 #include "../src/compiler.h"
@@ -149,6 +150,29 @@ static const char *tagTrait = "trait Tag {\n"
                               "  fun tag(self): string;\n"
                               "  fun make(): Self;\n"
                               "}";
+
+// Runs the source and returns what it printed to stderr, which the caller frees
+static char *errorsOf(const char *source, bool isStdlib) {
+  fflush(stderr);
+  int saved = dup(STDERR_FILENO);
+  FILE *capture = tmpfile();
+  assert(saved >= 0 && capture != NULL);
+  dup2(fileno(capture), STDERR_FILENO);
+
+  run(source, isStdlib);
+
+  fflush(stderr);
+  dup2(saved, STDERR_FILENO);
+  close(saved);
+
+  long size = ftell(capture);
+  char *text = (char *)calloc((size_t)size + 1, 1);
+  rewind(capture);
+  size_t got = fread(text, 1, (size_t)size, capture);
+  assert((long)got == size);
+  fclose(capture);
+  return text;
+}
 
 static void expectOk(const char *source, bool isStdlib) {
   assert(run(source, isStdlib) == INTERPRET_OK);
@@ -368,9 +392,21 @@ static void test_a_primitive_can_not_fill_a_bound_yet(void) {
            "}",
            true);
 
-  expectError("fun show[T: Tag](x: T): string = x.tag();\n"
-              "@println(show(\"a\"));",
-              false);
+  char *errors = errorsOf("fun show[T: Tag](x: T): string = x.tag();\n"
+                          "@println(show(\"a\"));",
+                          false);
+  assert(strstr(errors, "string implements Tag, but a primitive can't be used "
+                        "with a bound yet, required by T.") != NULL);
+  free(errors);
+
+  // A string without the impl keeps the usual message
+  errors = errorsOf("trait Other { fun other(self): string; }\n"
+                    "fun show[T: Other](x: T): string = x.other();\n"
+                    "@println(show(\"a\"));",
+                    false);
+  assert(strstr(errors, "string doesn't implement Other, required by T.") !=
+         NULL);
+  free(errors);
 
   end();
 }
