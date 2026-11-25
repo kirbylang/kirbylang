@@ -464,7 +464,7 @@ trait Ord: Eq {
 #### Limitations
 
 - Traits can be implemented for structs, and by the standard library for `string`, `bool` and the number kinds. Other code can't implement a trait for a primitive, and a primitive can't yet be used where a type parameter has a trait bound (except numbers and the operator traits)
-- Only numbers have the operator traits built in. `string` and `bool` can't implement `Eq` or `Ord` yet, because primitives can't implement traits
+- Only numbers have the operator traits built in. `string` and `bool` implement `Eq` in the standard library, but can't be used where a type parameter has a bound yet. Neither has `Ord`
 - If a struct's impl block implements a method of the same name as a trait, the struct's impl method is what is called. A future change will allow `Trait.method(struct)` to be used to fully qualify the trait versions of the method.
 - Two traits can't both provide a method of the same name to one struct, and a name can't be both an instance method and a static method on one type. Both are compile errors.
 
@@ -596,9 +596,10 @@ trait method at runtime, which for a number is a built-in method (`add`, `sub`,
 
 - The trait has to exist, and a struct name isn't a trait:
   `Unknown trait 'Nope'.` A trait can be declared after the function that uses it.
-- A primitive can't implement a trait yet, so `string`, `bool` and the other
-  primitives can't fill a bounded parameter. Numbers can fill a parameter
-  bounded by an operator trait only.
+- A primitive can't fill a bounded parameter yet, even though the standard
+  library implements traits for `string`, `bool` and every number kind
+  (`string implements Display, but a primitive can't be used with a bound
+  yet`). Numbers can fill a parameter bounded by an operator trait only.
 - A static trait method can't be called through a bound. `T.default()` is an
   error: `Can't call a static method on type parameter 'T'.` This needs a
   separate copy of the function for each type, which is not implemented.
