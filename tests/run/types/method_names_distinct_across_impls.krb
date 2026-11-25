@@ -1,0 +1,36 @@
+trait A {
+    fun foo(self): string;
+}
+
+trait B {
+    fun bar(self): string;
+}
+
+struct S {
+    pub x: i64;
+}
+
+impl S {
+    pub fun baz(self): string = "inherent";
+}
+
+impl A for S {
+    fun foo(self): string = "A";
+}
+
+impl B for S {
+    fun bar(self): string = "B";
+}
+
+fun viaA[T: A](v: T): string = v.foo();
+fun viaB[T: B](v: T): string = v.bar();
+
+fun main(): unit {
+    let s = S { x: 1 };
+
+    @println(s.baz());
+    @println(s.foo());
+    @println(s.bar());
+    @println(viaA(s));
+    @println(viaB(s));
+}

@@ -3604,6 +3604,35 @@ static Type *typchkResolveImplTarget(TypeEnv *env, Token name) {
              : NULL;
 }
 
+// True if a trait implemented for the struct already provides a method with
+// this name, instance or static
+static bool typchkStructTraitProvides(Type *structType, Token name) {
+  return typeStructTraitInstanceMethodLookup(structType, name) != NULL ||
+         typeStructTraitStaticMethodLookup(structType, name) != NULL;
+}
+
+// True if the struct has a method of this name, from any impl, in the
+// category opposite to `hasSelf`. An instance method and a static method
+// share one namespace at run time, so a name can't be both
+static bool typchkStructHasOtherCategory(Type *structType, Token name,
+                                         bool hasSelf) {
+  if (hasSelf) {
+    return typeStructStaticMethodLookup(structType, name) != NULL ||
+           typeStructTraitStaticMethodLookup(structType, name) != NULL;
+  }
+
+  return typeStructInstanceMethodLookup(structType, name) != NULL ||
+         typeStructTraitInstanceMethodLookup(structType, name) != NULL;
+}
+
+static void typchkErrorInstanceAndStatic(Token *name, Token *typeName) {
+  typchkErrorAtTokenFmt(name,
+                        "'%.*s' can't be both an instance method and a static "
+                        "method on '%.*s'.",
+                        name->length, name->start, typeName->length,
+                        typeName->start);
+}
+
 static void typchkRegisterTraitImpl(TypeEnv *env, AstNode *node) {
   ImplNode *impl = &node->as.impl;
 
@@ -3704,6 +3733,23 @@ static void typchkRegisterTraitImpl(TypeEnv *env, AstNode *node) {
           method->name.length, method->name.start, impl->traitName.length,
           impl->traitName.start, typeToString(concreteRequiredType),
           typeToString(concreteMethodType));
+      ok = false;
+      continue;
+    }
+
+    if (typchkStructTraitProvides(targetType, method->name)) {
+      typchkErrorAtTokenFmt(&method->name,
+                            "'%.*s' is already provided to '%.*s' by another "
+                            "trait.",
+                            method->name.length, method->name.start,
+                            impl->targetName.length, impl->targetName.start);
+      ok = false;
+      continue;
+    }
+
+    if (typchkStructHasOtherCategory(targetType, method->name,
+                                     method->hasSelf)) {
+      typchkErrorInstanceAndStatic(&method->name, &impl->targetName);
       ok = false;
       continue;
     }
@@ -3917,6 +3963,12 @@ static void typchkRegisterImplMethods(TypeEnv *env, AstNode *node) {
                             "'%.*s' is already declared on '%.*s'.",
                             method->name.length, method->name.start,
                             impl->targetName.length, impl->targetName.start);
+      continue;
+    }
+
+    if (typchkStructHasOtherCategory(structType, method->name,
+                                     method->hasSelf)) {
+      typchkErrorInstanceAndStatic(&method->name, &impl->targetName);
       continue;
     }
 

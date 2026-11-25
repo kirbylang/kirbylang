@@ -1,0 +1,17 @@
+trait A {
+    fun foo(): string;
+}
+
+struct S {
+    pub x: i64;
+}
+
+impl S {
+    pub fun foo(self): string = "instance";
+}
+
+impl A for S {
+    fun foo(): string = "static";
+}
+
+fun main(): unit {}

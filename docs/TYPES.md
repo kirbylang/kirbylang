@@ -440,6 +440,7 @@ trait Ord: Eq {
 - Traits can only be implemented for structs currently
 - Only numbers have the operator traits built in. `string` and `bool` can't implement `Eq` or `Ord` yet, because primitives can't implement traits
 - If a struct's impl block implements a method of the same name as a trait, the struct's impl method is what is called. A future change will allow `Trait.method(struct)` to be used to fully qualify the trait versions of the method.
+- Two traits can't both provide a method of the same name to one struct, and a name can't be both an instance method and a static method on one type. Both are compile errors.
 
 #### Known Bugs
 

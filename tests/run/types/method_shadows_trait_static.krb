@@ -1,0 +1,19 @@
+trait A {
+    fun make(): string;
+}
+
+struct S {
+    pub x: i64;
+}
+
+impl A for S {
+    fun make(): string = "trait";
+}
+
+impl S {
+    pub fun make(): string = "inherent";
+}
+
+fun main(): unit {
+    @println(S.make());
+}

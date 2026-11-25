@@ -1,0 +1,1 @@
+[line 14] Error at 'foo': 'foo' can't be both an instance method and a static method on 'S'.

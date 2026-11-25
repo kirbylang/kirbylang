@@ -1,0 +1,21 @@
+trait A {
+    fun make(): Self;
+}
+
+trait B {
+    fun make(): Self;
+}
+
+struct S {
+    pub x: i64;
+}
+
+impl A for S {
+    fun make(): Self = S { x: 1 };
+}
+
+impl B for S {
+    fun make(): Self = S { x: 2 };
+}
+
+fun main(): unit {}

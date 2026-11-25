@@ -1,0 +1,78 @@
+== <script> ==
+0000   25 OP_CLOSURE          1 <fn viaA>
+0002    | OP_DEFINE_GLOBAL    0 'viaA'
+0004   26 OP_CLOSURE          3 <fn viaB>
+0006    | OP_DEFINE_GLOBAL    2 'viaB'
+0008   36 OP_CLOSURE          5 <fn main>
+0010    | OP_DEFINE_GLOBAL    4 'main'
+0012    9 OP_STRUCT           6 'S'
+0014    | OP_DEFINE_GLOBAL    6 'S'
+0016    | OP_GET_GLOBAL       6 'S'
+0018   10 OP_NIL
+0019    | OP_FIELD            7 'x' public immutable
+0023   11 OP_POP
+0024   17 OP_GET_GLOBAL       6 'S'
+0026   18 OP_CLOSURE          9 <fn foo>
+0028    | OP_METHOD           8 'foo'
+0030   19 OP_POP
+0031   21 OP_GET_GLOBAL       6 'S'
+0033   22 OP_CLOSURE         11 <fn bar>
+0035    | OP_METHOD          10 'bar'
+0037   23 OP_POP
+0038   13 OP_GET_GLOBAL       6 'S'
+0040   14 OP_CLOSURE         13 <fn baz>
+0042    | OP_METHOD          12 'baz'
+0044   15 OP_POP
+0045   37 OP_NIL
+0046    | OP_RETURN
+== viaA ==
+0000   25 OP_GET_LOCAL        1
+0002    | OP_INVOKE        (0 args)    0 'foo'
+0005    | OP_RETURN
+== viaB ==
+0000   26 OP_GET_LOCAL        1
+0002    | OP_INVOKE        (0 args)    0 'bar'
+0005    | OP_RETURN
+== main ==
+0000   29 OP_GET_GLOBAL       0 'S'
+0002    | OP_CONSTANT         1 'x'
+0004    | OP_CONSTANT         2 '1'
+0006    | OP_STRUCT_INIT      1
+0008   31 OP_GET_GLOBAL       3 '@println'
+0010    | OP_GET_LOCAL        1
+0012    | OP_INVOKE        (0 args)    4 'baz'
+0015    | OP_CALL             1
+0017    | OP_POP
+0018   32 OP_GET_GLOBAL       3 '@println'
+0020    | OP_GET_LOCAL        1
+0022    | OP_INVOKE        (0 args)    5 'foo'
+0025    | OP_CALL             1
+0027    | OP_POP
+0028   33 OP_GET_GLOBAL       3 '@println'
+0030    | OP_GET_LOCAL        1
+0032    | OP_INVOKE        (0 args)    6 'bar'
+0035    | OP_CALL             1
+0037    | OP_POP
+0038   34 OP_GET_GLOBAL       3 '@println'
+0040    | OP_GET_GLOBAL       7 'viaA'
+0042    | OP_GET_LOCAL        1
+0044    | OP_CALL             1
+0046    | OP_CALL             1
+0048    | OP_POP
+0049   35 OP_GET_GLOBAL       3 '@println'
+0051    | OP_GET_GLOBAL       8 'viaB'
+0053    | OP_GET_LOCAL        1
+0055    | OP_CALL             1
+0057    | OP_CALL             1
+0059    | OP_POP
+0060   36 OP_NIL
+0061    | OP_RETURN
+== foo ==
+0000   18 OP_CONSTANT         0 'A'
+0002    | OP_RETURN
+== bar ==
+0000   22 OP_CONSTANT         0 'B'
+0002    | OP_RETURN
+== baz ==
+0000   14 OP_CONSTANT         0 'inherent'
+0002    | OP_RETURN
