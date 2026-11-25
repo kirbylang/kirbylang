@@ -1,0 +1,3 @@
+(struct Point (pub-field x : i64))
+(impl Point (pub-method get))
+(impl Display for Point (pub-method toString))

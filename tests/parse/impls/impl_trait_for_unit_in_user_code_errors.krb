@@ -1,0 +1,3 @@
+impl Display for unit {
+    fun toString(self): string = "unit";
+}

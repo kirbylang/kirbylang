@@ -1,1 +1,1 @@
-[line 1] Error at 'f64': Only the standard library can add methods to 'f64'.
+[line 1] Error at 'f64': You can't write an impl for a primitive type in user code.

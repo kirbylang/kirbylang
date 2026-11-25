@@ -29,7 +29,8 @@ static const Kind kinds[] = {
 static const int kindCount = (int)(sizeof(kinds) / sizeof(kinds[0]));
 
 // Parses, checks, compiles and runs one unit the way the command line does.
-// The standard library's checks are the ones that allow primitive impls.
+// The standard library's parser and checks are the ones that allow primitive
+// impls. A unit that doesn't parse is a compile error.
 static InterpretResult run(const char *source, bool isStdlib) {
   typchkResetError();
 
@@ -38,7 +39,12 @@ static InterpretResult run(const char *source, bool isStdlib) {
   int endLine = 0;
   AstNode **ast = isStdlib ? parseStdlib(source, &count, &hadError, &endLine)
                            : parse(source, &count, &hadError, &endLine);
-  assert(!hadError);
+
+  if (hadError) {
+    astFreeAll();
+    free(ast);
+    return INTERPRET_COMPILE_ERROR;
+  }
 
   bool ok =
       isStdlib ? typchkCheckStdlib(ast, count) : typchkCheckProgram(ast, count);
@@ -682,6 +688,11 @@ static void test_an_array_impl_is_checked(void) {
   char *errors = errorsOf("impl [T; K] { pub fun a(self): i64 = 1; }", true);
   assert(strstr(errors, "An array impl names its length 'N', or '_' to leave "
                         "it unnamed, not 'K'.") != NULL);
+  free(errors);
+
+  errors = errorsOf("impl [T; 3] { pub fun a(self): i64 = 1; }", true);
+  assert(strstr(errors, "An array impl names its length 'N', or '_' to leave "
+                        "it unnamed, not '3'.") != NULL);
   free(errors);
 
   errors = errorsOf("impl [string; N] { pub fun a(self): i64 = 1; }", true);

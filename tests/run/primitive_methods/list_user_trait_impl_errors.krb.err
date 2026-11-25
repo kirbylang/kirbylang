@@ -1,1 +1,1 @@
-[line 1] Error at '[T]': Only the standard library can implement traits for '[T]'.
+[line 1] Error at '[': You can't write an impl for a primitive type in user code.

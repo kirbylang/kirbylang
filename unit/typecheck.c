@@ -923,19 +923,34 @@ static void test_nested_function_and_closure(void) {
   typchkTypeEnvDestroy(env);
 }
 
-static bool typecheckSource(const char *source) {
+static bool typecheckSourceParsedAs(const char *source, bool parsedAsStdlib) {
   typchkSessionBegin();
   checkStdlibIntoSession();
 
   int outCount = 0;
   bool hadParseError = false;
   int endLine = 0;
-  AstNode **ast = parse(source, &outCount, &hadParseError, &endLine);
+  AstNode **ast = parsedAsStdlib
+                      ? parseStdlib(source, &outCount, &hadParseError, &endLine)
+                      : parse(source, &outCount, &hadParseError, &endLine);
   assert(!hadParseError);
   bool ok = typchkCheckProgram(ast, outCount);
 
   typchkSessionEnd();
   return ok;
+}
+
+static bool typecheckSource(const char *source) {
+  return typecheckSourceParsedAs(source, false);
+}
+
+// True when the user-code parser refuses the source
+static bool userParseFails(const char *source) {
+  int outCount = 0;
+  bool hadParseError = false;
+  int endLine = 0;
+  parse(source, &outCount, &hadParseError, &endLine);
+  return hadParseError;
 }
 
 static void test_struct_private_instance_method_uncallable_from_outside(void) {
@@ -1337,17 +1352,26 @@ static void test_program_equality_between_primitives_unaffected(void) {
 
 static void test_program_trait_impl_on_primitive_deferred_fails(void) {
   typchkResetError();
-  bool ok = typecheckSource("impl Display for f64 {\n"
-                            "  pub fun toString(self): string = \"n\";\n"
-                            "}\n");
+  assert(userParseFails("impl Display for f64 {\n"
+                        "  pub fun toString(self): string = \"n\";\n"
+                        "}\n"));
+  bool ok =
+      typecheckSourceParsedAs("impl Display for f64 {\n"
+                              "  pub fun toString(self): string = \"n\";\n"
+                              "}\n",
+                              true);
   assert(!ok);
 }
 
 static void test_program_plain_impl_on_primitive_fails(void) {
   typchkResetError();
-  bool ok = typecheckSource("impl f64 {\n"
-                            "  pub fun double(self): f64 = self * 2;\n"
-                            "}\n");
+  assert(userParseFails("impl f64 {\n"
+                        "  pub fun double(self): f64 = self * 2;\n"
+                        "}\n"));
+  bool ok = typecheckSourceParsedAs("impl f64 {\n"
+                                    "  pub fun double(self): f64 = self * 2;\n"
+                                    "}\n",
+                                    true);
   assert(!ok);
 }
 

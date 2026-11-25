@@ -1,1 +1,1 @@
-[line 1] Error at '3': An array impl names its length, as in 'impl [T; N]'. It doesn't take a number.
+[line 1] Error at '[': You can't write an impl for a primitive type in user code.

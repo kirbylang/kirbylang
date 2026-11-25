@@ -1,0 +1,3 @@
+impl unit {
+    pub fun same(self): unit = self;
+}

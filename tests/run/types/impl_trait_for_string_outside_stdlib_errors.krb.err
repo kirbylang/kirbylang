@@ -1,1 +1,1 @@
-[line 5] Error at 'string': Only the standard library can implement traits for 'string'.
+[line 5] Error at 'string': You can't write an impl for a primitive type in user code.

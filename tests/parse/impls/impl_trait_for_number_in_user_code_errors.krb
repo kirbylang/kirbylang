@@ -1,0 +1,3 @@
+impl Display for u8 {
+    fun toString(self): string = "u8";
+}

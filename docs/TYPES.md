@@ -208,7 +208,9 @@ impl string {
 }
 ```
 
-`"abc".len()` calls it. Only the standard library can write these blocks. They
+`"abc".len()` calls it. Only the standard library can write these blocks, and
+the parser rejects them in a user file with `You can't write an impl for a
+primitive type in user code.`. They
 work for `string`, `bool`, `unit` and every number kind (`i64`, `u8`, `f64` and
 the rest), with methods that take `self`. Lists and arrays have them too, see
 [Methods On Lists And Arrays](#methods-on-lists-and-arrays). A method belongs to its own type, so a method of `f64` can't be called
@@ -294,8 +296,8 @@ native function of the same name. The ones that return a list (`slice`,
 `concat`, `toList` of an array) return a list and not an array.
 
 The same limits as the other primitives apply. Only the standard library can
-write these blocks, and a user file gets `Only the standard library can add
-methods to '[T]'.`. The item has to be a type parameter, so `impl [string]` is
+write these blocks, and a user file gets `You can't write an impl for a
+primitive type in user code.`. The item has to be a type parameter, so `impl [string]` is
 an error. There are no static methods, and a list or array can't fill a bounded
 type parameter yet. A trait impl, such as `impl Display for [T]`, gives every
 list the trait with no condition on `T`, because an impl can't have bounds.

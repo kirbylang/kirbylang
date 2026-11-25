@@ -1,1 +1,1 @@
-[line 1] Error at 'string': Only the standard library can add methods to 'string'.
+[line 1] Error at 'string': You can't write an impl for a primitive type in user code.
