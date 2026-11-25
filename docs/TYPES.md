@@ -234,6 +234,21 @@ Inside the block, `Self` is the primitive type, so `other: Self` is a `u8`
 in `impl u8`. A primitive has no fields or static methods, so `Self { }`
 and `Self.name()` are errors.
 
+The standard library can also implement a trait for these types:
+
+```
+impl Display for string {
+    fun toString(self): string = self;
+}
+```
+
+`"abc".toString()` is a plain call of the function `string.Display.toString`.
+The impl must give every method the trait asks for, with the trait's signature,
+and a type implements a trait once. A trait with a supertrait needs an impl of
+the supertrait too. A method of the type itself wins over a trait method of the
+same name. A static method of a trait can be written, but can't be called yet.
+Trait impls on a primitive can't be used with a bounded type parameter yet.
+
 ### Traits
 
 A trait declares required methods for a struct to implement.
@@ -437,7 +452,7 @@ trait Ord: Eq {
 
 #### Limitations
 
-- Traits can only be implemented for structs currently
+- Traits can be implemented for structs, and by the standard library for `string`, `bool` and the number kinds. Other code can't implement a trait for a primitive, and a primitive can't yet be used where a type parameter has a trait bound (except numbers and the operator traits)
 - Only numbers have the operator traits built in. `string` and `bool` can't implement `Eq` or `Ord` yet, because primitives can't implement traits
 - If a struct's impl block implements a method of the same name as a trait, the struct's impl method is what is called. A future change will allow `Trait.method(struct)` to be used to fully qualify the trait versions of the method.
 - Two traits can't both provide a method of the same name to one struct, and a name can't be both an instance method and a static method on one type. Both are compile errors.

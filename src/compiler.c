@@ -662,20 +662,30 @@ static int endCompiler(void) {
   return index;
 }
 
-// The global a primitive type's method is stored in, such as `string.len`.
-// A `.` can't appear in a user's name, so it can't collide with one.
+// The global a primitive type's method is stored in, such as `string.len`, or
+// `string.Display.show` for a method of a trait. A `.` can't appear in a user's
+// name, so it can't collide with one.
 static uint8_t primitiveMethodConstant(const char *owner, int ownerLength,
+                                       const char *trait, int traitLength,
                                        const Token *method) {
-  int length = ownerLength + 1 + method->length;
+  int length =
+      ownerLength + 1 + method->length + (trait != NULL ? traitLength + 1 : 0);
   char *name = (char *)malloc((size_t)length);
   if (name == NULL) {
     fprintf(stderr, "malloc failed in primitiveMethodConstant\n");
     exit(1);
   }
 
+  int at = 0;
   memcpy(name, owner, (size_t)ownerLength);
-  name[ownerLength] = '.';
-  memcpy(name + ownerLength + 1, method->start, (size_t)method->length);
+  at += ownerLength;
+  name[at++] = '.';
+  if (trait != NULL) {
+    memcpy(name + at, trait, (size_t)traitLength);
+    at += traitLength;
+    name[at++] = '.';
+  }
+  memcpy(name + at, method->start, (size_t)method->length);
 
   uint8_t constant = stringConstant(name, length, NULL);
   free(name);
@@ -688,9 +698,13 @@ static void compileCall(CallNode *c) {
     // The checker matched the count to the method, which has at most 254
     // parameters plus the receiver
     assert(c->argCount + 1 <= UINT8_MAX);
-    emitBytes(OP_GET_GLOBAL,
-              primitiveMethodConstant(
-                  g->primitiveOwner, (int)strlen(g->primitiveOwner), &g->name));
+    emitBytes(
+        OP_GET_GLOBAL,
+        primitiveMethodConstant(
+            g->primitiveOwner, (int)strlen(g->primitiveOwner),
+            g->primitiveTrait,
+            g->primitiveTrait != NULL ? (int)strlen(g->primitiveTrait) : 0,
+            &g->name));
     compileExpr(g->object);
     for (int i = 0; i < c->argCount; i++) {
       compileExpr(c->args[i]);
@@ -1408,18 +1422,23 @@ static void compileStructDecl(AstNode *node) {
   emitByte(OP_POP);
 }
 
-// `impl string { ... }`: each method becomes a global function
+// `impl string { ... }` or `impl Trait for string { ... }`: each method
+// becomes a global function
 static void compilePrimitiveImplDecl(AstNode *node) {
   ImplNode *impl = &node->as.impl;
 
   for (int i = 0; i < impl->methodCount; i++) {
     FunctionNode *method = impl->methods[i];
 
-    compileFunction(method, TYPE_PRIMITIVE_METHOD);
+    // A static method has no receiver, so it is an ordinary function
+    compileFunction(method,
+                    method->hasSelf ? TYPE_PRIMITIVE_METHOD : TYPE_FUNCTION);
     emitBytes(OP_DEFINE_GLOBAL,
-              primitiveMethodConstant(impl->primitiveOwner,
-                                      (int)strlen(impl->primitiveOwner),
-                                      &method->name));
+              primitiveMethodConstant(
+                  impl->primitiveOwner, (int)strlen(impl->primitiveOwner),
+                  impl->hasTraitName ? impl->traitName.start : NULL,
+                  impl->hasTraitName ? impl->traitName.length : 0,
+                  &method->name));
   }
 }
 

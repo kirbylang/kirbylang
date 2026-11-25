@@ -25,6 +25,8 @@ static const int kindCount = (int)(sizeof(kinds) / sizeof(kinds[0]));
 // Parses, checks, compiles and runs one unit the way the command line does.
 // The standard library's checks are the ones that allow primitive impls.
 static InterpretResult run(const char *source, bool isStdlib) {
+  typchkResetError();
+
   int count = 0;
   bool hadError = false;
   int endLine = 0;
@@ -143,11 +145,251 @@ static void test_unit_has_no_methods(void) {
   end();
 }
 
+static const char *tagTrait = "trait Tag {\n"
+                              "  fun tag(self): string;\n"
+                              "  fun make(): Self;\n"
+                              "}";
+
+static void expectOk(const char *source, bool isStdlib) {
+  assert(run(source, isStdlib) == INTERPRET_OK);
+}
+
+static void expectError(const char *source, bool isStdlib) {
+  assert(run(source, isStdlib) == INTERPRET_COMPILE_ERROR);
+}
+
+static void test_every_kind_can_implement_a_trait(void) {
+  begin();
+  expectOk(tagTrait, true);
+
+  for (int i = 0; i < kindCount; i++) {
+    char *impl = format("impl Tag for %1$s {\n"
+                        "  fun tag(self): string = \"%1$s\";\n"
+                        "  fun make(): Self = %2$s;\n"
+                        "}",
+                        kinds[i].type, kinds[i].value);
+    expectOk(impl, true);
+    free(impl);
+  }
+
+  for (int i = 0; i < kindCount; i++) {
+    char *program = format("if (true) {\n"
+                           "let v: %1$s = %2$s;\n"
+                           "@assert(v.tag() == \"%1$s\", \"tag\");\n"
+                           "}",
+                           kinds[i].type, kinds[i].value);
+    expectOk(program, false);
+    free(program);
+  }
+
+  end();
+}
+
+static void test_a_trait_impl_must_match_its_trait(void) {
+  begin();
+  expectOk(tagTrait, true);
+
+  // A trait method is missing
+  expectError("impl Tag for u8 { fun tag(self): string = \"u8\"; }", true);
+
+  // A method the trait doesn't have
+  expectError("impl Tag for u8 {\n"
+              "  fun tag(self): string = \"u8\";\n"
+              "  fun make(): Self = 1;\n"
+              "  fun extra(self): u8 = self;\n"
+              "}",
+              true);
+
+  // The wrong signature
+  expectError("impl Tag for u8 {\n"
+              "  fun tag(self): u8 = self;\n"
+              "  fun make(): Self = 1;\n"
+              "}",
+              true);
+
+  // An instance method written as a static one
+  expectError("impl Tag for u8 {\n"
+              "  fun tag(): string = \"u8\";\n"
+              "  fun make(): Self = 1;\n"
+              "}",
+              true);
+
+  // Nothing above registered the trait
+  expectOk("impl Tag for u8 {\n"
+           "  fun tag(self): string = \"u8\";\n"
+           "  fun make(): Self = 1;\n"
+           "}",
+           true);
+
+  end();
+}
+
+static void test_a_kind_implements_a_trait_once(void) {
+  begin();
+  expectOk(tagTrait, true);
+  expectOk("impl Tag for string {\n"
+           "  fun tag(self): string = \"a\";\n"
+           "  fun make(): Self = \"\";\n"
+           "}",
+           true);
+  expectError("impl Tag for string {\n"
+              "  fun tag(self): string = \"b\";\n"
+              "  fun make(): Self = \"\";\n"
+              "}",
+              true);
+  end();
+}
+
+static void test_a_supertrait_needs_its_own_impl(void) {
+  begin();
+  expectOk(tagTrait, true);
+  expectOk("trait Pair: Tag { fun pair(self): string; }", true);
+
+  expectError("impl Pair for u8 { fun pair(self): string = \"u8\"; }", true);
+
+  // The order inside a unit doesn't matter
+  expectOk("impl Pair for i8 { fun pair(self): string = \"i8\"; }\n"
+           "impl Tag for i8 {\n"
+           "  fun tag(self): string = \"i8\";\n"
+           "  fun make(): Self = 1;\n"
+           "}",
+           true);
+
+  end();
+}
+
+static void test_an_inherent_method_shadows_a_trait_method(void) {
+  begin();
+  expectOk(tagTrait, true);
+
+  expectOk("impl u8 { pub fun tag(self): string = \"inherent\"; }\n"
+           "impl Tag for u8 {\n"
+           "  fun tag(self): string = \"trait\";\n"
+           "  fun make(): Self = 1;\n"
+           "}",
+           true);
+  expectOk("impl Tag for u16 {\n"
+           "  fun tag(self): string = \"trait\";\n"
+           "  fun make(): Self = 1;\n"
+           "}\n"
+           "impl u16 { pub fun tag(self): string = \"inherent\"; }",
+           true);
+
+  expectOk("if (true) {\n"
+           "let a: u8 = 1;\n"
+           "let b: u16 = 1;\n"
+           "@assert(a.tag() == \"inherent\", \"u8\");\n"
+           "@assert(b.tag() == \"inherent\", \"u16\");\n"
+           "}",
+           false);
+
+  end();
+}
+
+static void test_method_names_can_only_clash_by_shadowing(void) {
+  begin();
+  expectOk(tagTrait, true);
+  expectOk("trait Other { fun tag(self): string; }", true);
+  expectOk("trait Maker { fun tag(): Self; }", true);
+
+  expectOk("impl Tag for u8 {\n"
+           "  fun tag(self): string = \"u8\";\n"
+           "  fun make(): Self = 1;\n"
+           "}",
+           true);
+
+  // Two traits with the same method name
+  expectError("impl Other for u8 { fun tag(self): string = \"other\"; }", true);
+
+  // An instance method and a static method with one name
+  expectError("impl Maker for u8 { fun tag(): Self = 1; }", true);
+  expectError("impl u8 { pub fun make(self): u8 = self; }", true);
+
+  end();
+}
+
+static void test_a_trait_method_must_be_called(void) {
+  begin();
+  expectOk(tagTrait, true);
+  expectOk("impl Tag for u8 {\n"
+           "  fun tag(self): string = \"u8\";\n"
+           "  fun make(): Self = 1;\n"
+           "}",
+           true);
+
+  expectError("let v: u8 = 1;\nlet f = v.tag;", false);
+
+  end();
+}
+
+static void test_a_trait_method_belongs_to_its_kind(void) {
+  begin();
+  expectOk(tagTrait, true);
+  expectOk("impl Tag for u8 {\n"
+           "  fun tag(self): string = \"u8\";\n"
+           "  fun make(): Self = 1;\n"
+           "}",
+           true);
+
+  expectError("let v: i64 = 1;\n@println(v.tag());", false);
+
+  end();
+}
+
+static void test_only_the_stdlib_implements_traits_for_primitives(void) {
+  begin();
+  expectOk(tagTrait, true);
+
+  for (int i = 0; i < kindCount; i++) {
+    char *program = format("impl Tag for %1$s {\n"
+                           "  fun tag(self): string = \"x\";\n"
+                           "  fun make(): Self = %2$s;\n"
+                           "}",
+                           kinds[i].type, kinds[i].value);
+    expectError(program, false);
+    free(program);
+  }
+
+  expectError("impl Tag for unit {\n"
+              "  fun tag(self): string = \"x\";\n"
+              "  fun make(): Self = ();\n"
+              "}",
+              true);
+
+  end();
+}
+
+static void test_a_primitive_can_not_fill_a_bound_yet(void) {
+  begin();
+  expectOk(tagTrait, true);
+  expectOk("impl Tag for string {\n"
+           "  fun tag(self): string = \"string\";\n"
+           "  fun make(): Self = \"\";\n"
+           "}",
+           true);
+
+  expectError("fun show[T: Tag](x: T): string = x.tag();\n"
+              "@println(show(\"a\"));",
+              false);
+
+  end();
+}
+
 int main(void) {
   test_every_kind_can_have_methods();
   test_a_method_belongs_to_one_kind();
   test_only_the_stdlib_adds_methods();
   test_unit_has_no_methods();
+  test_every_kind_can_implement_a_trait();
+  test_a_trait_impl_must_match_its_trait();
+  test_a_kind_implements_a_trait_once();
+  test_a_supertrait_needs_its_own_impl();
+  test_an_inherent_method_shadows_a_trait_method();
+  test_method_names_can_only_clash_by_shadowing();
+  test_a_trait_method_must_be_called();
+  test_a_trait_method_belongs_to_its_kind();
+  test_only_the_stdlib_implements_traits_for_primitives();
+  test_a_primitive_can_not_fill_a_bound_yet();
 
   printf("primitive method tests passed\n");
   return 0;

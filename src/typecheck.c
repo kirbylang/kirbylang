@@ -96,12 +96,23 @@ typedef struct {
 // A method declared with `impl string { ... }` in the standard library.
 // `owner` is the type's name, as the compiler spells it in the method's global
 // name.
+// A method that came from `impl Trait for string` has `isTrait` set and names
+// its trait in `trait`.
 typedef struct {
   const char *owner;
   InternedName name;
   Type *type;
   bool isPublic;
+  bool hasSelf;
+  bool isTrait;
+  InternedName trait;
 } PrimitiveMethod;
+
+// Records that a primitive type implements a trait
+typedef struct {
+  const char *owner;
+  InternedName trait;
+} PrimitiveTraitImpl;
 
 struct TypeEnv {
   // State
@@ -130,6 +141,9 @@ struct TypeEnv {
   PrimitiveMethod *primitiveMethods;
   int primitiveMethodCount;
   int primitiveMethodCapacity;
+  PrimitiveTraitImpl *primitiveTraitImpls;
+  int primitiveTraitImplCount;
+  int primitiveTraitImplCapacity;
 
   // Generic type aliases such as `type Wrapper[T] = Box[T];`
   GenericAlias *genericAliases;
@@ -216,6 +230,7 @@ void typchkTypeEnvDestroy(TypeEnv *env) {
   free(env->traits);
   free(env->genericAliases);
   free(env->primitiveMethods);
+  free(env->primitiveTraitImpls);
   free(env->_genericParams);
   free(env);
 }
@@ -2163,6 +2178,7 @@ static const char *typchkPrimitiveOwner(const Type *type) {
   }
 }
 
+// The method an `impl string { ... }` block declared, not one from a trait
 static PrimitiveMethod *
 typchkPrimitiveMethodLookup(TypeEnv *env, const char *owner, Token name) {
   InternedName interned = internTokenName(name);
@@ -2170,7 +2186,7 @@ typchkPrimitiveMethodLookup(TypeEnv *env, const char *owner, Token name) {
   for (int i = 0; i < env->primitiveMethodCount; i++) {
     PrimitiveMethod *method = &env->primitiveMethods[i];
 
-    if (strcmp(method->owner, owner) == 0 &&
+    if (!method->isTrait && strcmp(method->owner, owner) == 0 &&
         internedNamesEqual(method->name, interned))
       return method;
   }
@@ -2178,8 +2194,26 @@ typchkPrimitiveMethodLookup(TypeEnv *env, const char *owner, Token name) {
   return NULL;
 }
 
-static void typchkPrimitiveMethodAdd(TypeEnv *env, const char *owner,
-                                     Token name, Type *type, bool isPublic) {
+// The method a trait gave the type. With a `trait`, only that trait's method
+// counts. At most one trait can provide a given name to one type.
+static PrimitiveMethod *
+typchkPrimitiveTraitMethodLookup(TypeEnv *env, const char *owner, Token name,
+                                 const InternedName *trait) {
+  InternedName interned = internTokenName(name);
+
+  for (int i = 0; i < env->primitiveMethodCount; i++) {
+    PrimitiveMethod *method = &env->primitiveMethods[i];
+
+    if (method->isTrait && strcmp(method->owner, owner) == 0 &&
+        internedNamesEqual(method->name, interned) &&
+        (trait == NULL || internedNamesEqual(method->trait, *trait)))
+      return method;
+  }
+
+  return NULL;
+}
+
+static PrimitiveMethod *typchkPrimitiveMethodAppend(TypeEnv *env) {
   if (env->primitiveMethodCount == env->primitiveMethodCapacity) {
     env->primitiveMethodCapacity =
         env->primitiveMethodCapacity < 8 ? 8 : env->primitiveMethodCapacity * 2;
@@ -2187,13 +2221,57 @@ static void typchkPrimitiveMethodAdd(TypeEnv *env, const char *owner,
         env->primitiveMethods,
         sizeof(PrimitiveMethod) * (size_t)env->primitiveMethodCapacity);
     if (env->primitiveMethods == NULL) {
-      fprintf(stderr, "realloc failed in typchkPrimitiveMethodAdd\n");
+      fprintf(stderr, "realloc failed in typchkPrimitiveMethodAppend\n");
       exit(1);
     }
   }
 
-  env->primitiveMethods[env->primitiveMethodCount++] =
-      (PrimitiveMethod){owner, internTokenName(name), type, isPublic};
+  return &env->primitiveMethods[env->primitiveMethodCount++];
+}
+
+static void typchkPrimitiveMethodAdd(TypeEnv *env, const char *owner,
+                                     Token name, Type *type, bool isPublic) {
+  *typchkPrimitiveMethodAppend(env) = (PrimitiveMethod){
+      owner, internTokenName(name), type, isPublic, true, false, {0}};
+}
+
+static void typchkPrimitiveTraitMethodAdd(TypeEnv *env, const char *owner,
+                                          Token name, Type *type, bool hasSelf,
+                                          InternedName trait) {
+  *typchkPrimitiveMethodAppend(env) = (PrimitiveMethod){
+      owner, internTokenName(name), type, true, hasSelf, true, trait};
+}
+
+static bool typchkPrimitiveImplements(TypeEnv *env, const char *owner,
+                                      InternedName trait) {
+  for (int i = 0; i < env->primitiveTraitImplCount; i++) {
+    PrimitiveTraitImpl *impl = &env->primitiveTraitImpls[i];
+
+    if (strcmp(impl->owner, owner) == 0 &&
+        internedNamesEqual(impl->trait, trait))
+      return true;
+  }
+
+  return false;
+}
+
+static void typchkPrimitiveImplementsAdd(TypeEnv *env, const char *owner,
+                                         InternedName trait) {
+  if (env->primitiveTraitImplCount == env->primitiveTraitImplCapacity) {
+    env->primitiveTraitImplCapacity = env->primitiveTraitImplCapacity < 8
+                                          ? 8
+                                          : env->primitiveTraitImplCapacity * 2;
+    env->primitiveTraitImpls = (PrimitiveTraitImpl *)realloc(
+        env->primitiveTraitImpls,
+        sizeof(PrimitiveTraitImpl) * (size_t)env->primitiveTraitImplCapacity);
+    if (env->primitiveTraitImpls == NULL) {
+      fprintf(stderr, "realloc failed in typchkPrimitiveImplementsAdd\n");
+      exit(1);
+    }
+  }
+
+  env->primitiveTraitImpls[env->primitiveTraitImplCount++] =
+      (PrimitiveTraitImpl){owner, trait};
 }
 
 // Infer the type of a get expression
@@ -2338,6 +2416,36 @@ static Type *typchkInferGet(TypeEnv *env, AstNode *node) {
 
       get->primitiveOwner = primitiveOwner;
       return method->type;
+    }
+
+    PrimitiveMethod *traitMethod =
+        typchkPrimitiveTraitMethodLookup(env, primitiveOwner, get->name, NULL);
+
+    if (traitMethod != NULL && !traitMethod->hasSelf) {
+      typchkErrorAtTokenFmt(&get->name,
+                            "'%.*s' is a static method. Access it on '%s' "
+                            "instead of a value.",
+                            get->name.length, get->name.start, primitiveOwner);
+      return NULL;
+    }
+
+    if (traitMethod != NULL) {
+      if (!isCallee) {
+        typchkErrorAtTokenFmt(
+            &get->name, "Method '%.*s' of '%s' has to be called.",
+            get->name.length, get->name.start, primitiveOwner);
+        return NULL;
+      }
+
+      // The compiler outlives the checker's name storage, so it gets a copy
+      int length = traitMethod->trait.length;
+      char *trait = (char *)astAllocRaw((size_t)length + 1);
+      memcpy(trait, internedNameChars(traitMethod->trait), (size_t)length);
+      trait[length] = '\0';
+
+      get->primitiveOwner = primitiveOwner;
+      get->primitiveTrait = trait;
+      return traitMethod->type;
     }
   }
 
@@ -3633,132 +3741,63 @@ static void typchkErrorInstanceAndStatic(Token *name, Token *typeName) {
                         typeName->start);
 }
 
-static void typchkRegisterTraitImpl(TypeEnv *env, AstNode *node) {
-  ImplNode *impl = &node->as.impl;
+// Checks one method of `impl Trait for X` against the trait. Returns the
+// method's type with `Self` replaced by the target, or NULL after reporting
+// why the method doesn't fit.
+static Type *typchkCheckTraitImplMethod(TypeEnv *env, ImplNode *impl,
+                                        Type *traitType, FunctionNode *method,
+                                        Type *targetType) {
+  Type *requiredType =
+      method->hasSelf ? typeTraitInstanceMethodLookup(traitType, method->name)
+                      : typeTraitStaticMethodLookup(traitType, method->name);
 
-  Type *traitType = typchkTypeEnvLookupTrait(env, impl->traitName);
+  if (requiredType == NULL) {
+    Type *otherCategory =
+        method->hasSelf
+            ? typeTraitStaticMethodLookup(traitType, method->name)
+            : typeTraitInstanceMethodLookup(traitType, method->name);
 
-  if (traitType == NULL) {
-    typchkErrorAtTokenFmt(&impl->traitName, "Unknown trait '%.*s'.",
-                          impl->traitName.length, impl->traitName.start);
-    return;
-  }
-
-  if (typeTraitHasUnresolvedMembers(traitType))
-    return; // already reported once, at the trait's own declaration
-
-  Type *targetType = typchkResolveImplTarget(env, impl->targetName);
-
-  if (targetType == NULL) {
-    if (typchkPrimitiveTypeNamed(&impl->targetName) != NULL) {
-      typchkErrorAtTokenFmt(
-          &impl->targetName,
-          "Primitive trait implementations aren't supported yet.");
-    } else {
-      typchkErrorAtTokenFmt(&impl->targetName, "Unknown type '%.*s'.",
-                            impl->targetName.length, impl->targetName.start);
-    }
-
-    return;
-  }
-
-  resolvedImplTargetsRecord(node, targetType->as.struct_.name);
-
-  if (typeStructIsGeneric(targetType)) {
-    typchkErrorAtTokenFmt(
-        &impl->targetName,
-        "Trait implementations on generic structs aren't supported yet.");
-    return;
-  }
-
-  InternedName traitName = internTokenName(impl->traitName);
-
-  if (typeStructImplementsTrait(targetType, traitName)) {
-    typchkErrorAtTokenFmt(&impl->traitName, "'%.*s' already implements '%.*s'.",
-                          impl->targetName.length, impl->targetName.start,
-                          impl->traitName.length, impl->traitName.start);
-    return;
-  }
-
-  bool ok = true;
-
-  // Register the impl's target type e.g. struct for `Self`
-  typchkTypeEnvSetImplTargetType(env, targetType);
-
-  for (int i = 0; i < impl->methodCount; i++) {
-    FunctionNode *method = impl->methods[i];
-
-    Type *requiredType =
-        method->hasSelf ? typeTraitInstanceMethodLookup(traitType, method->name)
-                        : typeTraitStaticMethodLookup(traitType, method->name);
-
-    if (requiredType == NULL) {
-      Type *otherCategory =
-          method->hasSelf
-              ? typeTraitStaticMethodLookup(traitType, method->name)
-              : typeTraitInstanceMethodLookup(traitType, method->name);
-
-      if (otherCategory != NULL) {
-        typchkErrorAtTokenFmt(
-            &method->name,
-            method->hasSelf
-                ? "'%.*s' is a static method on trait '%.*s' -- drop 'self'."
-                : "'%.*s' is an instance method on trait '%.*s' -- add "
-                  "'self'.",
-            method->name.length, method->name.start, impl->traitName.length,
-            impl->traitName.start);
-      } else {
-        typchkErrorAtTokenFmt(&method->name,
-                              "'%.*s' isn't a method defined by trait '%.*s'.",
-                              method->name.length, method->name.start,
-                              impl->traitName.length, impl->traitName.start);
-      }
-      ok = false;
-      continue;
-    }
-
-    Type *methodType = typchkResolveFunctionSignature(env, method);
-    if (methodType == NULL) {
-      ok = false;
-      continue;
-    }
-
-    Type *concreteMethodType = typeSubstituteSelf(methodType, targetType);
-    Type *concreteRequiredType = typeSubstituteSelf(requiredType, targetType);
-
-    if (!typesEqual(concreteMethodType, concreteRequiredType)) {
+    if (otherCategory != NULL) {
       typchkErrorAtTokenFmt(
           &method->name,
-          "'%.*s' doesn't match trait '%.*s': expected %s, got %s.",
+          method->hasSelf
+              ? "'%.*s' is a static method on trait '%.*s' -- drop 'self'."
+              : "'%.*s' is an instance method on trait '%.*s' -- add 'self'.",
           method->name.length, method->name.start, impl->traitName.length,
-          impl->traitName.start, typeToString(concreteRequiredType),
-          typeToString(concreteMethodType));
-      ok = false;
-      continue;
-    }
-
-    if (typchkStructTraitProvides(targetType, method->name)) {
+          impl->traitName.start);
+    } else {
       typchkErrorAtTokenFmt(&method->name,
-                            "'%.*s' is already provided to '%.*s' by another "
-                            "trait.",
+                            "'%.*s' isn't a method defined by trait '%.*s'.",
                             method->name.length, method->name.start,
-                            impl->targetName.length, impl->targetName.start);
-      ok = false;
-      continue;
+                            impl->traitName.length, impl->traitName.start);
     }
-
-    if (typchkStructHasOtherCategory(targetType, method->name,
-                                     method->hasSelf)) {
-      typchkErrorInstanceAndStatic(&method->name, &impl->targetName);
-      ok = false;
-      continue;
-    }
-
-    typeStructAddTraitMethod(targetType, method->name, concreteMethodType,
-                             method->hasSelf);
+    return NULL;
   }
 
-  typchkTypeEnvSetImplTargetType(env, NULL);
+  Type *methodType = typchkResolveFunctionSignature(env, method);
+  if (methodType == NULL)
+    return NULL;
+
+  Type *concreteMethodType = typeSubstituteSelf(methodType, targetType);
+  Type *concreteRequiredType = typeSubstituteSelf(requiredType, targetType);
+
+  if (!typesEqual(concreteMethodType, concreteRequiredType)) {
+    typchkErrorAtTokenFmt(
+        &method->name,
+        "'%.*s' doesn't match trait '%.*s': expected %s, got %s.",
+        method->name.length, method->name.start, impl->traitName.length,
+        impl->traitName.start, typeToString(concreteRequiredType),
+        typeToString(concreteMethodType));
+    return NULL;
+  }
+
+  return concreteMethodType;
+}
+
+// Reports each method the trait requires that the impl block leaves out.
+// Returns false if any is missing.
+static bool typchkTraitImplHasAllMethods(ImplNode *impl, Type *traitType) {
+  bool ok = true;
 
   for (int i = 0; i < typeTraitInstanceMethodCount(traitType); i++) {
     TypeMember required = typeTraitInstanceMethodAt(traitType, i);
@@ -3797,6 +3836,183 @@ static void typchkRegisterTraitImpl(TypeEnv *env, AstNode *node) {
     }
   }
 
+  return ok;
+}
+
+// `impl Trait for string { ... }`. Only the standard library can write one.
+static void typchkRegisterPrimitiveTraitImpl(TypeEnv *env, AstNode *node,
+                                             Type *traitType, Type *primitive) {
+  ImplNode *impl = &node->as.impl;
+  Token target = impl->targetName;
+
+  if (!env->_isStdlib) {
+    typchkErrorAtTokenFmt(
+        &target, "Only the standard library can implement traits for '%.*s'.",
+        target.length, target.start);
+    return;
+  }
+
+  const char *owner = typchkPrimitiveOwner(primitive);
+
+  if (owner == NULL) {
+    typchkErrorAtTokenFmt(&target, "Traits on '%.*s' aren't supported yet.",
+                          target.length, target.start);
+    return;
+  }
+
+  InternedName traitName = internTokenName(impl->traitName);
+
+  if (typchkPrimitiveImplements(env, owner, traitName)) {
+    typchkErrorAtTokenFmt(&impl->traitName, "'%.*s' already implements '%.*s'.",
+                          target.length, target.start, impl->traitName.length,
+                          impl->traitName.start);
+    return;
+  }
+
+  impl->primitiveOwner = owner;
+
+  bool ok = true;
+  int methodCountBefore = env->primitiveMethodCount;
+
+  env->_currentPrimitiveOwner = owner;
+  env->_currentImplSelfType = primitive;
+
+  for (int i = 0; i < impl->methodCount; i++) {
+    FunctionNode *method = impl->methods[i];
+
+    Type *concreteMethodType =
+        typchkCheckTraitImplMethod(env, impl, traitType, method, primitive);
+
+    if (concreteMethodType == NULL) {
+      ok = false;
+      continue;
+    }
+
+    if (typchkPrimitiveTraitMethodLookup(env, owner, method->name, NULL) !=
+        NULL) {
+      typchkErrorAtTokenFmt(&method->name,
+                            "'%.*s' is already provided to '%.*s' by another "
+                            "trait.",
+                            method->name.length, method->name.start,
+                            target.length, target.start);
+      ok = false;
+      continue;
+    }
+
+    // Inherent methods on a primitive are all instance methods
+    if (!method->hasSelf &&
+        typchkPrimitiveMethodLookup(env, owner, method->name) != NULL) {
+      typchkErrorInstanceAndStatic(&method->name, &target);
+      ok = false;
+      continue;
+    }
+
+    typchkPrimitiveTraitMethodAdd(env, owner, method->name, concreteMethodType,
+                                  method->hasSelf, traitName);
+  }
+
+  env->_currentImplSelfType = NULL;
+  env->_currentPrimitiveOwner = NULL;
+
+  if (!typchkTraitImplHasAllMethods(impl, traitType))
+    ok = false;
+
+  // A block that fails registers nothing
+  if (ok)
+    typchkPrimitiveImplementsAdd(env, owner, traitName);
+  else
+    env->primitiveMethodCount = methodCountBefore;
+}
+
+static void typchkRegisterTraitImpl(TypeEnv *env, AstNode *node) {
+  ImplNode *impl = &node->as.impl;
+
+  Type *traitType = typchkTypeEnvLookupTrait(env, impl->traitName);
+
+  if (traitType == NULL) {
+    typchkErrorAtTokenFmt(&impl->traitName, "Unknown trait '%.*s'.",
+                          impl->traitName.length, impl->traitName.start);
+    return;
+  }
+
+  if (typeTraitHasUnresolvedMembers(traitType))
+    return; // already reported once, at the trait's own declaration
+
+  Type *targetType = typchkResolveImplTarget(env, impl->targetName);
+
+  if (targetType == NULL) {
+    Type *primitive = typchkPrimitiveTypeNamed(&impl->targetName);
+
+    if (primitive != NULL) {
+      typchkRegisterPrimitiveTraitImpl(env, node, traitType, primitive);
+    } else {
+      typchkErrorAtTokenFmt(&impl->targetName, "Unknown type '%.*s'.",
+                            impl->targetName.length, impl->targetName.start);
+    }
+
+    return;
+  }
+
+  resolvedImplTargetsRecord(node, targetType->as.struct_.name);
+
+  if (typeStructIsGeneric(targetType)) {
+    typchkErrorAtTokenFmt(
+        &impl->targetName,
+        "Trait implementations on generic structs aren't supported yet.");
+    return;
+  }
+
+  InternedName traitName = internTokenName(impl->traitName);
+
+  if (typeStructImplementsTrait(targetType, traitName)) {
+    typchkErrorAtTokenFmt(&impl->traitName, "'%.*s' already implements '%.*s'.",
+                          impl->targetName.length, impl->targetName.start,
+                          impl->traitName.length, impl->traitName.start);
+    return;
+  }
+
+  bool ok = true;
+
+  // Register the impl's target type e.g. struct for `Self`
+  typchkTypeEnvSetImplTargetType(env, targetType);
+
+  for (int i = 0; i < impl->methodCount; i++) {
+    FunctionNode *method = impl->methods[i];
+
+    Type *concreteMethodType =
+        typchkCheckTraitImplMethod(env, impl, traitType, method, targetType);
+
+    if (concreteMethodType == NULL) {
+      ok = false;
+      continue;
+    }
+
+    if (typchkStructTraitProvides(targetType, method->name)) {
+      typchkErrorAtTokenFmt(&method->name,
+                            "'%.*s' is already provided to '%.*s' by another "
+                            "trait.",
+                            method->name.length, method->name.start,
+                            impl->targetName.length, impl->targetName.start);
+      ok = false;
+      continue;
+    }
+
+    if (typchkStructHasOtherCategory(targetType, method->name,
+                                     method->hasSelf)) {
+      typchkErrorInstanceAndStatic(&method->name, &impl->targetName);
+      ok = false;
+      continue;
+    }
+
+    typeStructAddTraitMethod(targetType, method->name, concreteMethodType,
+                             method->hasSelf);
+  }
+
+  typchkTypeEnvSetImplTargetType(env, NULL);
+
+  if (!typchkTraitImplHasAllMethods(impl, traitType))
+    ok = false;
+
   if (!ok)
     return;
 
@@ -3813,16 +4029,30 @@ static void typchkCheckTraitSupertraitSatisfied(TypeEnv *env, AstNode *node) {
     return;
 
   Type *targetType = typchkResolveImplTarget(env, impl->targetName);
-  if (targetType == NULL)
-    return; // already reported, or a (currently unsupported) primitive
-
   InternedName traitName = internTokenName(impl->traitName);
+  InternedName supertraitName = traitType->as.trait_.supertraitName;
+  bool implementsSupertrait;
 
-  if (!typeStructImplementsTrait(targetType, traitName))
-    return;
+  if (targetType == NULL) {
+    Type *primitive = typchkPrimitiveTypeNamed(&impl->targetName);
+    const char *owner =
+        primitive != NULL ? typchkPrimitiveOwner(primitive) : NULL;
 
-  if (!typeStructImplementsTrait(targetType,
-                                 traitType->as.trait_.supertraitName)) {
+    // Anything else was already reported
+    if (owner == NULL || !typchkPrimitiveImplements(env, owner, traitName))
+      return;
+
+    implementsSupertrait =
+        typchkPrimitiveImplements(env, owner, supertraitName);
+  } else {
+    if (!typeStructImplementsTrait(targetType, traitName))
+      return;
+
+    implementsSupertrait =
+        typeStructImplementsTrait(targetType, supertraitName);
+  }
+
+  if (!implementsSupertrait) {
     typchkErrorAtTokenFmt(
         &impl->traitName,
         "'%.*s' also needs 'impl %.*s for %.*s' -- '%.*s' requires it.",
@@ -3879,6 +4109,16 @@ static void typchkRegisterPrimitiveImplMethods(TypeEnv *env, AstNode *node,
       typchkErrorAtTokenFmt(&method->name,
                             "'%.*s' is already declared on '%s'.",
                             method->name.length, method->name.start, owner);
+      continue;
+    }
+
+    // A trait's instance method of this name is shadowed, which is fine. A
+    // static one would share the name at run time
+    PrimitiveMethod *traitMethod =
+        typchkPrimitiveTraitMethodLookup(env, owner, method->name, NULL);
+
+    if (traitMethod != NULL && !traitMethod->hasSelf) {
+      typchkErrorInstanceAndStatic(&method->name, &target);
       continue;
     }
 
@@ -4022,13 +4262,23 @@ static void checkPrimitiveImplMethodBodies(TypeEnv *env, AstNode *node) {
 
   for (int i = 0; i < impl->methodCount; i++) {
     FunctionNode *method = impl->methods[i];
-    PrimitiveMethod *registered =
-        typchkPrimitiveMethodLookup(env, owner, method->name);
+    InternedName trait = {0};
+    PrimitiveMethod *registered;
 
-    if (!method->hasSelf || registered == NULL)
+    if (impl->hasTraitName) {
+      trait = internTokenName(impl->traitName);
+      registered =
+          typchkPrimitiveTraitMethodLookup(env, owner, method->name, &trait);
+    } else {
+      registered = typchkPrimitiveMethodLookup(env, owner, method->name);
+    }
+
+    // A method that failed to register was already reported
+    if (registered == NULL || (!impl->hasTraitName && !method->hasSelf))
       continue;
 
-    typchkCheckGenericFunctionBody(env, method, registered->type, primitive);
+    typchkCheckGenericFunctionBody(env, method, registered->type,
+                                   method->hasSelf ? primitive : NULL);
   }
 
   env->_currentImplSelfType = NULL;
@@ -4039,7 +4289,7 @@ static void checkImplMethodBodies(TypeEnv *env, AstNode *node) {
   ImplNode *impl = &node->as.impl;
   Type *structType = typchkResolveImplTarget(env, impl->targetName);
 
-  if (structType == NULL && !impl->hasTraitName &&
+  if (structType == NULL &&
       typchkPrimitiveTypeNamed(&impl->targetName) != NULL) {
     checkPrimitiveImplMethodBodies(env, node);
     return;

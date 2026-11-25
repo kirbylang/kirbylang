@@ -209,6 +209,9 @@ typedef struct {
    * into a plain function call, because it has no types of its own.
    */
   const char *primitiveOwner;
+  // For such a call, the name of the trait the method came from. NULL when it
+  // is a method of the type itself.
+  const char *primitiveTrait;
 } GetNode;
 
 typedef struct {
@@ -432,7 +435,8 @@ typedef struct {
   int endLine;
   /**
    * Set by the type checker when the block adds methods to a primitive type,
-   * such as "string" or "u8". NULL for every other impl.
+   * such as "string" or "u8", or implements a trait for one. NULL for every
+   * other impl.
    */
   const char *primitiveOwner;
 } ImplNode;
