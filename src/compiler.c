@@ -692,6 +692,28 @@ static uint8_t primitiveMethodConstant(const char *owner, int ownerLength,
   return constant;
 }
 
+// The name a trait's method is stored under in a struct, such as
+// `Display.show`, next to its plain name. A call that has to run the trait's
+// version uses it, so a method of the struct with the plain name can't hide it.
+// A `.` can't appear in a user's name.
+static uint8_t traitMethodConstant(const char *trait, int traitLength,
+                                   const char *method, int methodLength) {
+  int length = traitLength + 1 + methodLength;
+  char *name = (char *)malloc((size_t)length);
+  if (name == NULL) {
+    fprintf(stderr, "malloc failed in traitMethodConstant\n");
+    exit(1);
+  }
+
+  memcpy(name, trait, (size_t)traitLength);
+  name[traitLength] = '.';
+  memcpy(name + traitLength + 1, method, (size_t)methodLength);
+
+  uint8_t constant = stringConstant(name, length, NULL);
+  free(name);
+  return constant;
+}
+
 static void compileCall(CallNode *c) {
   if (c->callee->kind == NODE_GET && c->callee->as.get.primitiveOwner != NULL) {
     GetNode *g = &c->callee->as.get;
@@ -720,7 +742,11 @@ static void compileCall(CallNode *c) {
   if (c->callee->kind == NODE_GET) {
     GetNode *g = &c->callee->as.get;
     compileExpr(g->object);
-    uint8_t name = identifierConstant(&g->name);
+    uint8_t name =
+        g->viaTrait != NULL
+            ? traitMethodConstant(g->viaTrait, (int)strlen(g->viaTrait),
+                                  g->name.start, g->name.length)
+            : identifierConstant(&g->name);
     for (int i = 0; i < c->argCount; i++) {
       compileExpr(c->args[i]);
     }
@@ -914,9 +940,9 @@ static bool compileStringConcatChain(AstNode *node) {
 // Calls the trait method of an operator. The receiver and arguments are
 // already on the stack, and the result replaces them.
 static void emitOperatorInvoke(const OperatorTrait *entry, int argCount) {
-  Token method = tokenFromCString(entry->method);
-
-  emitBytes(OP_INVOKE, identifierConstant(&method));
+  emitBytes(OP_INVOKE,
+            traitMethodConstant(entry->trait, (int)strlen(entry->trait),
+                                entry->method, (int)strlen(entry->method)));
   emitByte((uint8_t)argCount);
 }
 
@@ -954,9 +980,7 @@ static void compileTraitOperator(BinaryNode *b) {
 // Replaces the value on top of the stack with the string its Display impl's
 // toString() returns.
 static void emitDisplayToString(void) {
-  Token toString = tokenFromCString("toString");
-
-  emitBytes(OP_INVOKE, identifierConstant(&toString));
+  emitBytes(OP_INVOKE, traitMethodConstant("Display", 7, "toString", 8));
   emitByte(0);
 }
 
@@ -1524,7 +1548,17 @@ static void compileImplDecl(AstNode *node) {
     FunctionType type = method->hasSelf ? TYPE_METHOD : TYPE_STATIC_METHOD;
 
     compileFunction(method, type);
-    emitBytes(OP_METHOD, constant);
+
+    if (impl->hasTraitName) {
+      // Also stored under the trait's name, which no method of the struct
+      // can take
+      emitBytes(OP_TRAIT_METHOD, constant);
+      emitByte(traitMethodConstant(impl->traitName.start,
+                                   impl->traitName.length, method->name.start,
+                                   method->name.length));
+    } else {
+      emitBytes(OP_METHOD, constant);
+    }
   }
 
   currentImplTargetName = previousImplTargetName;

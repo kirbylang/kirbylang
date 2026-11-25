@@ -13,25 +13,25 @@
 0023   11 OP_POP
 0024   17 OP_GET_GLOBAL       6 'S'
 0026   18 OP_CLOSURE          9 <fn foo>
-0028    | OP_METHOD           8 'foo'
-0030   19 OP_POP
-0031   21 OP_GET_GLOBAL       6 'S'
-0033   22 OP_CLOSURE         11 <fn bar>
-0035    | OP_METHOD          10 'bar'
-0037   23 OP_POP
-0038   13 OP_GET_GLOBAL       6 'S'
-0040   14 OP_CLOSURE         13 <fn baz>
-0042    | OP_METHOD          12 'baz'
-0044   15 OP_POP
-0045   37 OP_NIL
-0046    | OP_RETURN
+0028    | OP_TRAIT_METHOD     8 'foo'   10 'A.foo'
+0031   19 OP_POP
+0032   21 OP_GET_GLOBAL       6 'S'
+0034   22 OP_CLOSURE         12 <fn bar>
+0036    | OP_TRAIT_METHOD    11 'bar'   13 'B.bar'
+0039   23 OP_POP
+0040   13 OP_GET_GLOBAL       6 'S'
+0042   14 OP_CLOSURE         15 <fn baz>
+0044    | OP_METHOD          14 'baz'
+0046   15 OP_POP
+0047   37 OP_NIL
+0048    | OP_RETURN
 == viaA ==
 0000   25 OP_GET_LOCAL        1
-0002    | OP_INVOKE        (0 args)    0 'foo'
+0002    | OP_INVOKE        (0 args)    0 'A.foo'
 0005    | OP_RETURN
 == viaB ==
 0000   26 OP_GET_LOCAL        1
-0002    | OP_INVOKE        (0 args)    0 'bar'
+0002    | OP_INVOKE        (0 args)    0 'B.bar'
 0005    | OP_RETURN
 == main ==
 0000   29 OP_GET_GLOBAL       0 'S'

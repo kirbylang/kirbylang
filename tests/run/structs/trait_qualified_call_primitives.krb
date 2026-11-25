@@ -1,0 +1,15 @@
+fun main(): unit {
+    @println(Display.toString(7));
+    @println(Display.toString(2.5));
+    @println(Display.toString("text"));
+    @println(Display.toString(true));
+    @println(Display.toString(()));
+    @println(Eq.equals(3, 3));
+    @println(Eq.equals("a", "b"));
+    @println(Ord.cmp(1, 2));
+    @println(Ord.cmp(2.5, 2.5));
+    @println(Add.add(1, 2));
+    @println(Add.add("ab", "cd"));
+    @println(Neg.neg(4));
+    @println(Mul.mul(3, 4));
+}

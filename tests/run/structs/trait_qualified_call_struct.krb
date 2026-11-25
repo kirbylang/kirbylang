@@ -1,0 +1,33 @@
+trait Greet {
+    fun hello(self): string;
+}
+
+struct Plain {
+    pub var n: i64;
+}
+
+struct Shadowed {
+    pub var n: i64;
+}
+
+impl Greet for Plain {
+    fun hello(self): string = "plain trait";
+}
+
+impl Shadowed {
+    pub fun hello(self): string = "own";
+}
+
+impl Greet for Shadowed {
+    fun hello(self): string = "trait";
+}
+
+fun main(): unit {
+    let plain = Plain { n: 1 };
+    let shadowed = Shadowed { n: 2 };
+
+    @println(plain.hello());
+    @println(Greet.hello(plain));
+    @println(shadowed.hello());
+    @println(Greet.hello(shadowed));
+}

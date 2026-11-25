@@ -1,0 +1,29 @@
+trait Scale {
+    fun scale(self, by: i64): Self;
+    fun total(self, other: Self): i64;
+}
+
+struct Money {
+    pub var cents: i64;
+}
+
+impl Money {
+    pub fun scale(self, by: i64): Money = Money { cents: 0 };
+    pub fun total(self, other: Money): i64 = 0;
+}
+
+impl Scale for Money {
+    fun scale(self, by: i64): Self = Money { cents: self.cents * by };
+    fun total(self, other: Self): i64 = self.cents + other.cents;
+}
+
+fun main(): unit {
+    let a = Money { cents: 5 };
+    let b = Money { cents: 7 };
+
+    @println(a.scale(3).cents);
+    @println(Scale.scale(a, 3).cents);
+    @println(Scale.scale(Scale.scale(a, 2), 2).cents);
+    @println(a.total(b));
+    @println(Scale.total(a, b));
+}

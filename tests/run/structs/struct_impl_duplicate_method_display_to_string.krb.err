@@ -7,14 +7,14 @@
 0010    | OP_POP
 0011    3 OP_GET_GLOBAL       2 'Struct'
 0013    4 OP_CLOSURE          4 <fn toString>
-0015    | OP_METHOD           3 'toString'
-0017    5 OP_POP
-0018    7 OP_GET_GLOBAL       2 'Struct'
-0020    8 OP_CLOSURE          5 <fn toString>
-0022    | OP_METHOD           3 'toString'
-0024    9 OP_POP
-0025   12 OP_NIL
-0026    | OP_RETURN
+0015    | OP_TRAIT_METHOD     3 'toString'    5 'Display.toString'
+0018    5 OP_POP
+0019    7 OP_GET_GLOBAL       2 'Struct'
+0021    8 OP_CLOSURE          6 <fn toString>
+0023    | OP_METHOD           3 'toString'
+0025    9 OP_POP
+0026   12 OP_NIL
+0027    | OP_RETURN
 == main ==
 0000   11 OP_NIL
 0001    | OP_RETURN

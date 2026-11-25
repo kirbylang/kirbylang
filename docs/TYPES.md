@@ -323,6 +323,51 @@ fun main(): unit {
 }
 ```
 
+#### Calling A Trait's Method By Name
+
+When a type has a method of its own with the same name as a trait's method, the
+type's own method wins, so `point.toString()` calls it. `Trait.method(value)`
+calls the trait's version instead:
+
+```
+struct Point {
+    pub var x: f64;
+    pub var y: f64;
+}
+
+impl Point {
+    pub fun toString(self): string = "own";
+}
+
+impl Display for Point {
+    fun toString(self): string = "trait";
+}
+
+fun main(): unit {
+    let p = Point { x: 1, y: 2 };
+
+    @println(p.toString());           // own
+    @println(Display.toString(p));    // trait
+}
+```
+
+The value is the first argument, and the others follow it, so
+`Scale.scale(a, 3)` is the trait's `scale` called on `a` with `3`. It works for
+a struct, for a primitive that implements the trait (`Display.toString(7)`), and
+for a value of a type parameter whose bound includes the trait. It is an error
+when the value's type doesn't implement the trait (`i64 doesn't implement
+Greet.`), when the trait has no such method, and for a static method of the
+trait, which is called on a type. A trait's method has to be called, so
+`let f = Greet.hello;` is an error.
+
+Code that is written for a trait always runs the trait's version. A call
+through a type parameter's bound (`x.toString()` with `T: Display`), an
+operator (`a + b` runs `Add`'s `add`, `==` runs `Eq`'s `equals`) and printing
+(`@println(point)` and `$"{point}"` run `Display`'s `toString`) all do, even
+when the type has its own method with the same name. At run time a struct keeps
+each trait method under its plain name and also under the trait's name, such as
+`Display.toString`, and these calls use the second.
+
 #### Builtin traits
 
 The builtin, always in scope, traits are `Display`, `Eq`, `Ord`, `Default`, and the operator traits `Add`, `Sub`, `Mul`, `Div`, `Mod` and `Neg`.
@@ -505,7 +550,7 @@ trait Ord: Eq {
 
 - Traits can be implemented for structs, and by the standard library for `string`, `bool`, `unit`, the number kinds, lists and arrays. Other code can't implement a trait for a primitive, and a primitive can't yet be used where a type parameter has a trait bound (except numbers and the operator traits)
 - Only numbers have the operator traits built in. `string` and `bool` implement `Eq` in the standard library, but can't be used where a type parameter has a bound yet. Neither has `Ord`
-- If a struct's impl block implements a method of the same name as a trait, the struct's impl method is what is called. A future change will allow `Trait.method(struct)` to be used to fully qualify the trait versions of the method.
+- If a struct's impl block implements a method of the same name as a trait, `value.method()` calls the struct's own method. Use `Trait.method(value)` to call the trait's version, see [Calling A Trait's Method By Name](#calling-a-traits-method-by-name).
 - Two traits can't both provide a method of the same name to one struct, and a name can't be both an instance method and a static method on one type. Both are compile errors.
 
 #### Known Bugs

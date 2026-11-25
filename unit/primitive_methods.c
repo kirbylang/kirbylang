@@ -320,8 +320,48 @@ static void test_an_inherent_method_shadows_a_trait_method(void) {
            "let b: u16 = 1;\n"
            "@assert(a.tag() == \"inherent\", \"u8\");\n"
            "@assert(b.tag() == \"inherent\", \"u16\");\n"
+           "@assert(Tag.tag(a) == \"trait\", \"u8 through the trait\");\n"
+           "@assert(Tag.tag(b) == \"trait\", \"u16 through the trait\");\n"
            "}",
            false);
+
+  end();
+}
+
+static void test_a_trait_names_its_method_on_every_kind(void) {
+  begin();
+  expectOk(tagTrait, true);
+
+  for (int i = 0; i < kindCount; i++) {
+    char *impl = format("impl %1$s { pub fun tag(self): string = \"own\"; }\n"
+                        "impl Tag for %1$s {\n"
+                        "  fun tag(self): string = \"%1$s\";\n"
+                        "  fun make(): Self = %2$s;\n"
+                        "}",
+                        kinds[i].type, kinds[i].value);
+    expectOk(impl, true);
+    free(impl);
+
+    char *program = format("if (true) {\n"
+                           "let v: %1$s = %2$s;\n"
+                           "@assert(v.tag() == \"own\", \"own\");\n"
+                           "@assert(Tag.tag(v) == \"%1$s\", \"trait\");\n"
+                           "}",
+                           kinds[i].type, kinds[i].value);
+    expectOk(program, false);
+    free(program);
+  }
+
+  // A trait the kind doesn't implement, and a static method
+  expectOk("trait Other { fun other(self): string; }", true);
+  char *errors =
+      errorsOf("if (true) { let v: u8 = 1; Other.other(v); }", false);
+  assert(strstr(errors, "u8 doesn't implement Other.") != NULL);
+  free(errors);
+
+  errors = errorsOf("if (true) { let v: u8 = 1; Tag.make(v); }", false);
+  assert(strstr(errors, "'make' is a static method of 'Tag'.") != NULL);
+  free(errors);
 
   end();
 }
@@ -483,6 +523,7 @@ static void test_lists_can_have_methods_and_traits(void) {
            "@assert(xs.both(true)[1], \"own parameter in a list\");\n"
            "@assert(xs.shown() == 4, \"private method\");\n"
            "@assert(xs.tag() == \"list\", \"trait method\");\n"
+           "@assert(Tag.tag(xs) == \"list\", \"trait method by name\");\n"
            "}",
            false);
 
@@ -615,6 +656,7 @@ static void test_arrays_can_have_methods_and_traits(void) {
            "@assert(twin[1] == \"t\", \"own parameter and length\");\n"
            "@assert(xs.join(names).first() == 4, \"other length\");\n"
            "@assert(xs.label() == \"array\", \"trait method\");\n"
+           "@assert(Label.label(xs) == \"array\", \"trait method by name\");\n"
            "}",
            false);
 
@@ -821,6 +863,7 @@ int main(void) {
   test_a_kind_implements_a_trait_once();
   test_a_supertrait_needs_its_own_impl();
   test_an_inherent_method_shadows_a_trait_method();
+  test_a_trait_names_its_method_on_every_kind();
   test_method_names_can_only_clash_by_shadowing();
   test_a_trait_method_must_be_called();
   test_a_trait_method_belongs_to_its_kind();

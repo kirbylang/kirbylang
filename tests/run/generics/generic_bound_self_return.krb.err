@@ -13,14 +13,14 @@
 0024    8 OP_POP
 0025   10 OP_GET_GLOBAL       4 'Point'
 0027   11 OP_CLOSURE          8 <fn clone>
-0029    | OP_METHOD           7 'clone'
-0031   12 OP_POP
-0032   21 OP_NIL
-0033    | OP_RETURN
+0029    | OP_TRAIT_METHOD     7 'clone'    9 'Cloneable.clone'
+0032   12 OP_POP
+0033   21 OP_NIL
+0034    | OP_RETURN
 == twice ==
 0000   14 OP_GET_LOCAL        1
-0002    | OP_INVOKE        (0 args)    0 'clone'
-0005    | OP_INVOKE        (0 args)    0 'clone'
+0002    | OP_INVOKE        (0 args)    0 'Cloneable.clone'
+0005    | OP_INVOKE        (0 args)    0 'Cloneable.clone'
 0008    | OP_RETURN
 == main ==
 0000   17 OP_GET_GLOBAL       0 'twice'

@@ -9,24 +9,24 @@
 0015    3 OP_POP
 0016    5 OP_GET_GLOBAL       2 'Money'
 0018    6 OP_CLOSURE          5 <fn equals>
-0020    | OP_METHOD           4 'equals'
-0022    7 OP_POP
-0023    9 OP_GET_GLOBAL       2 'Money'
-0025   10 OP_CLOSURE          7 <fn cmp>
-0027    | OP_METHOD           6 'cmp'
-0029   11 OP_POP
-0030   13 OP_GET_GLOBAL       2 'Money'
-0032    | OP_CONSTANT         3 'cents'
-0034    | OP_CONSTANT         9 '500'
-0036    | OP_STRUCT_INIT      1
-0038    | OP_DEFINE_GLOBAL    8 'a'
-0040   14 OP_GET_GLOBAL       2 'Money'
-0042    | OP_CONSTANT         3 'cents'
-0044    | OP_CONSTANT        11 '300'
-0046    | OP_STRUCT_INIT      1
-0048    | OP_DEFINE_GLOBAL   10 'b'
-0050   19 OP_NIL
-0051    | OP_RETURN
+0020    | OP_TRAIT_METHOD     4 'equals'    6 'Eq.equals'
+0023    7 OP_POP
+0024    9 OP_GET_GLOBAL       2 'Money'
+0026   10 OP_CLOSURE          8 <fn cmp>
+0028    | OP_TRAIT_METHOD     7 'cmp'    9 'Ord.cmp'
+0031   11 OP_POP
+0032   13 OP_GET_GLOBAL       2 'Money'
+0034    | OP_CONSTANT         3 'cents'
+0036    | OP_CONSTANT        11 '500'
+0038    | OP_STRUCT_INIT      1
+0040    | OP_DEFINE_GLOBAL   10 'a'
+0042   14 OP_GET_GLOBAL       2 'Money'
+0044    | OP_CONSTANT         3 'cents'
+0046    | OP_CONSTANT        13 '300'
+0048    | OP_STRUCT_INIT      1
+0050    | OP_DEFINE_GLOBAL   12 'b'
+0052   19 OP_NIL
+0053    | OP_RETURN
 == main ==
 0000   16 OP_GET_GLOBAL       0 '@println'
 0002    | OP_GET_GLOBAL       1 'a'

@@ -1,0 +1,11 @@
+struct S {
+    pub var n: i64;
+}
+
+impl S {
+    pub fun hello(self): string = "own";
+}
+
+fun main(): unit {
+    @println(S.hello(S { n: 1 }));
+}

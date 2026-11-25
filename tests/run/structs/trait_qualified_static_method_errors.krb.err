@@ -1,0 +1,1 @@
+[line 12] Error at 'make': 'make' is a static method of 'Make'. Call it on a type instead.

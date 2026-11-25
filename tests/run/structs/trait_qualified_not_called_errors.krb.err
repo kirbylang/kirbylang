@@ -1,0 +1,1 @@
+[line 12] Error at 'hello': 'Greet' is a trait. Call its method as 'Greet.hello(value)'.

@@ -215,6 +215,17 @@ typedef struct {
   // For such a call, true when the method is static, so the call has no
   // receiver value, as in `f64.default()`
   bool primitiveIsStatic;
+  /**
+   * Set by the type checker on a call of a trait's method that must run that
+   * trait's version, even when the receiver has a method of its own with the
+   * same name: a call through a type parameter's bound, and `Trait.method(x)`.
+   * The name of the trait. NULL for every other get.
+   */
+  const char *viaTrait;
+  // `Trait.method(x)` is written as the call `x.method()`, with the trait's
+  // name kept here. `isTraitQualified` is false for every other get.
+  bool isTraitQualified;
+  Token traitQualifier;
 } GetNode;
 
 typedef struct {

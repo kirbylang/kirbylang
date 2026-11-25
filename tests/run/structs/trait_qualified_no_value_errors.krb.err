@@ -1,0 +1,1 @@
+[line 6] Error at 'hello': 'Greet.hello' needs the value to call it on, as in 'Greet.hello(value)'.

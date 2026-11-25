@@ -13,18 +13,18 @@
 0023    3 OP_POP
 0024    5 OP_GET_GLOBAL       6 'Money'
 0026    6 OP_CLOSURE          9 <fn equals>
-0028    | OP_METHOD           8 'equals'
-0030    7 OP_POP
-0031    9 OP_GET_GLOBAL       6 'Money'
-0033   10 OP_CLOSURE         11 <fn cmp>
-0035    | OP_METHOD          10 'cmp'
-0037   11 OP_POP
-0038   29 OP_NIL
-0039    | OP_RETURN
+0028    | OP_TRAIT_METHOD     8 'equals'   10 'Eq.equals'
+0031    7 OP_POP
+0032    9 OP_GET_GLOBAL       6 'Money'
+0034   10 OP_CLOSURE         12 <fn cmp>
+0036    | OP_TRAIT_METHOD    11 'cmp'   13 'Ord.cmp'
+0039   11 OP_POP
+0040   29 OP_NIL
+0041    | OP_RETURN
 == largest ==
 0000   14 OP_GET_LOCAL        1
 0002    | OP_GET_LOCAL        2
-0004    | OP_INVOKE        (1 args)    0 'cmp'
+0004    | OP_INVOKE        (1 args)    0 'Ord.cmp'
 0007    | OP_CONSTANT         1 '0'
 0009    | OP_LESS
 0010    | OP_NOT
@@ -39,7 +39,7 @@
 == same ==
 0000   21 OP_GET_LOCAL        1
 0002    | OP_GET_LOCAL        2
-0004    | OP_INVOKE        (1 args)    0 'equals'
+0004    | OP_INVOKE        (1 args)    0 'Eq.equals'
 0007    | OP_RETURN
 == main ==
 0000   24 OP_GET_GLOBAL       0 'largest'

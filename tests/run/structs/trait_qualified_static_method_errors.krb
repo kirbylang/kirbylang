@@ -1,0 +1,13 @@
+trait Make {
+    fun make(): Self;
+}
+
+struct S {}
+
+impl Make for S {
+    fun make(): Self = S {};
+}
+
+fun main(): unit {
+    Make.make(S {});
+}

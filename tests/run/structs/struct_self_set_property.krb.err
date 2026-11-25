@@ -9,16 +9,16 @@
 0015    3 OP_POP
 0016   13 OP_GET_GLOBAL       2 'Struct'
 0018   14 OP_CLOSURE          5 <fn default>
-0020    | OP_METHOD           4 'default'
-0022   15 OP_POP
-0023    5 OP_GET_GLOBAL       2 'Struct'
-0025    8 OP_CLOSURE          7 <fn set>
-0027    | OP_METHOD           6 'set'
-0029   10 OP_CLOSURE          9 <fn get>
-0031    | OP_METHOD           8 'get'
-0033   11 OP_POP
-0034   26 OP_NIL
-0035    | OP_RETURN
+0020    | OP_TRAIT_METHOD     4 'default'    6 'Default.default'
+0023   15 OP_POP
+0024    5 OP_GET_GLOBAL       2 'Struct'
+0026    8 OP_CLOSURE          8 <fn set>
+0028    | OP_METHOD           7 'set'
+0030   10 OP_CLOSURE         10 <fn get>
+0032    | OP_METHOD           9 'get'
+0034   11 OP_POP
+0035   26 OP_NIL
+0036    | OP_RETURN
 == main ==
 0000   17 OP_GET_GLOBAL       0 'Struct'
 0002    | OP_INVOKE        (0 args)    1 'default'

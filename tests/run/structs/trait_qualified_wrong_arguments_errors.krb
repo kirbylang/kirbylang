@@ -1,0 +1,15 @@
+trait Scale {
+    fun scale(self, by: i64): i64;
+}
+
+struct S {}
+
+impl Scale for S {
+    fun scale(self, by: i64): i64 = by;
+}
+
+fun main(): unit {
+    Scale.scale(S {});
+    Scale.scale(S {}, "two");
+    Scale.scale(S {}, 1, 2);
+}

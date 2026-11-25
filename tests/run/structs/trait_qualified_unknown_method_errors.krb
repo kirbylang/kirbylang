@@ -1,0 +1,13 @@
+trait Greet {
+    fun hello(self): string;
+}
+
+struct S {}
+
+impl Greet for S {
+    fun hello(self): string = "hi";
+}
+
+fun main(): unit {
+    Greet.nope(S {});
+}

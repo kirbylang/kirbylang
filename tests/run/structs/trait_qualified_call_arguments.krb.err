@@ -1,0 +1,94 @@
+== <script> ==
+0000   29 OP_CLOSURE          1 <fn main>
+0002    | OP_DEFINE_GLOBAL    0 'main'
+0004    6 OP_STRUCT           2 'Money'
+0006    | OP_DEFINE_GLOBAL    2 'Money'
+0008    | OP_GET_GLOBAL       2 'Money'
+0010    7 OP_NIL
+0011    | OP_FIELD            3 'cents' public mutable
+0015    8 OP_POP
+0016   15 OP_GET_GLOBAL       2 'Money'
+0018   16 OP_CLOSURE          5 <fn scale>
+0020    | OP_TRAIT_METHOD     4 'scale'    6 'Scale.scale'
+0023   17 OP_CLOSURE          8 <fn total>
+0025    | OP_TRAIT_METHOD     7 'total'    9 'Scale.total'
+0028   18 OP_POP
+0029   10 OP_GET_GLOBAL       2 'Money'
+0031   11 OP_CLOSURE         10 <fn scale>
+0033    | OP_METHOD           4 'scale'
+0035   12 OP_CLOSURE         11 <fn total>
+0037    | OP_METHOD           7 'total'
+0039   13 OP_POP
+0040   30 OP_NIL
+0041    | OP_RETURN
+== main ==
+0000   21 OP_GET_GLOBAL       0 'Money'
+0002    | OP_CONSTANT         1 'cents'
+0004    | OP_CONSTANT         2 '5'
+0006    | OP_STRUCT_INIT      1
+0008   22 OP_GET_GLOBAL       0 'Money'
+0010    | OP_CONSTANT         1 'cents'
+0012    | OP_CONSTANT         3 '7'
+0014    | OP_STRUCT_INIT      1
+0016   24 OP_GET_GLOBAL       4 '@println'
+0018    | OP_GET_LOCAL        1
+0020    | OP_CONSTANT         6 '3'
+0022    | OP_INVOKE        (1 args)    5 'scale'
+0025    | OP_GET_PROPERTY     1 'cents'
+0027    | OP_CALL             1
+0029    | OP_POP
+0030   25 OP_GET_GLOBAL       4 '@println'
+0032    | OP_GET_LOCAL        1
+0034    | OP_CONSTANT         6 '3'
+0036    | OP_INVOKE        (1 args)    7 'Scale.scale'
+0039    | OP_GET_PROPERTY     1 'cents'
+0041    | OP_CALL             1
+0043    | OP_POP
+0044   26 OP_GET_GLOBAL       4 '@println'
+0046    | OP_GET_LOCAL        1
+0048    | OP_CONSTANT         8 '2'
+0050    | OP_INVOKE        (1 args)    7 'Scale.scale'
+0053    | OP_CONSTANT         8 '2'
+0055    | OP_INVOKE        (1 args)    7 'Scale.scale'
+0058    | OP_GET_PROPERTY     1 'cents'
+0060    | OP_CALL             1
+0062    | OP_POP
+0063   27 OP_GET_GLOBAL       4 '@println'
+0065    | OP_GET_LOCAL        1
+0067    | OP_GET_LOCAL        2
+0069    | OP_INVOKE        (1 args)    9 'total'
+0072    | OP_CALL             1
+0074    | OP_POP
+0075   28 OP_GET_GLOBAL       4 '@println'
+0077    | OP_GET_LOCAL        1
+0079    | OP_GET_LOCAL        2
+0081    | OP_INVOKE        (1 args)   10 'Scale.total'
+0084    | OP_CALL             1
+0086    | OP_POP
+0087   29 OP_NIL
+0088    | OP_RETURN
+== scale ==
+0000   16 OP_GET_GLOBAL       0 'Money'
+0002    | OP_CONSTANT         1 'cents'
+0004    | OP_GET_LOCAL        0
+0006    | OP_GET_PROPERTY     1 'cents'
+0008    | OP_GET_LOCAL        1
+0010    | OP_MULTIPLY
+0011    | OP_STRUCT_INIT      1
+0013    | OP_RETURN
+== total ==
+0000   17 OP_GET_LOCAL        0
+0002    | OP_GET_PROPERTY     0 'cents'
+0004    | OP_GET_LOCAL        1
+0006    | OP_GET_PROPERTY     0 'cents'
+0008    | OP_ADD
+0009    | OP_RETURN
+== scale ==
+0000   11 OP_GET_GLOBAL       0 'Money'
+0002    | OP_CONSTANT         1 'cents'
+0004    | OP_CONSTANT         2 '0'
+0006    | OP_STRUCT_INIT      1
+0008    | OP_RETURN
+== total ==
+0000   12 OP_CONSTANT         0 '0'
+0002    | OP_RETURN

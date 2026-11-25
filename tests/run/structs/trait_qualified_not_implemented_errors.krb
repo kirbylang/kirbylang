@@ -1,0 +1,10 @@
+trait Greet {
+    fun hello(self): string;
+}
+
+struct S {}
+
+fun main(): unit {
+    Greet.hello(S {});
+    Greet.hello(5);
+}

@@ -9,31 +9,31 @@
 0015    3 OP_POP
 0016    5 OP_GET_GLOBAL       2 'Box'
 0018    6 OP_CLOSURE          5 <fn toString>
-0020    | OP_METHOD           4 'toString'
-0022    7 OP_POP
-0023    9 OP_GET_GLOBAL       2 'Box'
-0025    | OP_CONSTANT         3 'value'
-0027    | OP_CONSTANT         7 '123'
-0029    | OP_STRUCT_INIT      1
-0031    | OP_DEFINE_GLOBAL    6 'box'
-0033   10 OP_GET_GLOBAL       2 'Box'
-0035    | OP_CONSTANT         3 'value'
-0037    | OP_CONSTANT         9 '1'
-0039    | OP_STRUCT_INIT      1
-0041    | OP_GET_GLOBAL       2 'Box'
-0043    | OP_CONSTANT         3 'value'
-0045    | OP_CONSTANT        10 '2'
-0047    | OP_STRUCT_INIT      1
-0049    | OP_ARRAY            2
-0051    | OP_DEFINE_GLOBAL    8 'boxes'
-0053   15 OP_NIL
-0054    | OP_RETURN
+0020    | OP_TRAIT_METHOD     4 'toString'    6 'Display.toString'
+0023    7 OP_POP
+0024    9 OP_GET_GLOBAL       2 'Box'
+0026    | OP_CONSTANT         3 'value'
+0028    | OP_CONSTANT         8 '123'
+0030    | OP_STRUCT_INIT      1
+0032    | OP_DEFINE_GLOBAL    7 'box'
+0034   10 OP_GET_GLOBAL       2 'Box'
+0036    | OP_CONSTANT         3 'value'
+0038    | OP_CONSTANT        10 '1'
+0040    | OP_STRUCT_INIT      1
+0042    | OP_GET_GLOBAL       2 'Box'
+0044    | OP_CONSTANT         3 'value'
+0046    | OP_CONSTANT        11 '2'
+0048    | OP_STRUCT_INIT      1
+0050    | OP_ARRAY            2
+0052    | OP_DEFINE_GLOBAL    9 'boxes'
+0054   15 OP_NIL
+0055    | OP_RETURN
 == main ==
 0000   12 OP_GET_GLOBAL       0 '@println'
 0002    | OP_GET_GLOBAL       1 '@strConcat'
 0004    | OP_CONSTANT         2 'one: '
 0006    | OP_GET_GLOBAL       3 'box'
-0008    | OP_INVOKE        (0 args)    4 'toString'
+0008    | OP_INVOKE        (0 args)    4 'Display.toString'
 0011    | OP_LIST             2
 0013    | OP_CALL             1
 0015    | OP_CALL             1
@@ -44,19 +44,19 @@
 0024    | OP_GET_GLOBAL       6 'boxes'
 0026    | OP_CONSTANT         7 '0'
 0028    | OP_GET_INDEX
-0029    | OP_INVOKE        (0 args)    4 'toString'
+0029    | OP_INVOKE        (0 args)    4 'Display.toString'
 0032    | OP_CONSTANT         8 ' and '
 0034    | OP_GET_GLOBAL       6 'boxes'
 0036    | OP_CONSTANT         9 '1'
 0038    | OP_GET_INDEX
-0039    | OP_INVOKE        (0 args)    4 'toString'
+0039    | OP_INVOKE        (0 args)    4 'Display.toString'
 0042    | OP_LIST             4
 0044    | OP_CALL             1
 0046    | OP_CALL             1
 0048    | OP_POP
 0049   14 OP_GET_GLOBAL       0 '@println'
 0051    | OP_GET_GLOBAL       3 'box'
-0053    | OP_INVOKE        (0 args)    4 'toString'
+0053    | OP_INVOKE        (0 args)    4 'Display.toString'
 0056    | OP_CALL             1
 0058    | OP_POP
 0059    | OP_NIL

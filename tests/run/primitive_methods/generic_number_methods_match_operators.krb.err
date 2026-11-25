@@ -20,36 +20,36 @@
 == add ==
 0000    1 OP_GET_LOCAL        1
 0002    | OP_GET_LOCAL        2
-0004    | OP_INVOKE        (1 args)    0 'add'
+0004    | OP_INVOKE        (1 args)    0 'Add.add'
 0007    | OP_RETURN
 == sub ==
 0000    2 OP_GET_LOCAL        1
 0002    | OP_GET_LOCAL        2
-0004    | OP_INVOKE        (1 args)    0 'sub'
+0004    | OP_INVOKE        (1 args)    0 'Sub.sub'
 0007    | OP_RETURN
 == mul ==
 0000    3 OP_GET_LOCAL        1
 0002    | OP_GET_LOCAL        2
-0004    | OP_INVOKE        (1 args)    0 'mul'
+0004    | OP_INVOKE        (1 args)    0 'Mul.mul'
 0007    | OP_RETURN
 == div ==
 0000    4 OP_GET_LOCAL        1
 0002    | OP_GET_LOCAL        2
-0004    | OP_INVOKE        (1 args)    0 'div'
+0004    | OP_INVOKE        (1 args)    0 'Div.div'
 0007    | OP_RETURN
 == mod ==
 0000    5 OP_GET_LOCAL        1
 0002    | OP_GET_LOCAL        2
-0004    | OP_INVOKE        (1 args)    0 'mod'
+0004    | OP_INVOKE        (1 args)    0 'Mod.mod'
 0007    | OP_RETURN
 == neg ==
 0000    6 OP_GET_LOCAL        1
-0002    | OP_INVOKE        (0 args)    0 'neg'
+0002    | OP_INVOKE        (0 args)    0 'Neg.neg'
 0005    | OP_RETURN
 == cmp ==
 0000    7 OP_GET_LOCAL        1
 0002    | OP_GET_LOCAL        2
-0004    | OP_INVOKE        (1 args)    0 'cmp'
+0004    | OP_INVOKE        (1 args)    0 'Ord.cmp'
 0007    | OP_RETURN
 == main ==
 0000   10 OP_CONSTANT         0 '7'

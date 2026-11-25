@@ -1,0 +1,93 @@
+== <script> ==
+0000   15 OP_CLOSURE          1 <fn main>
+0002    | OP_DEFINE_GLOBAL    0 'main'
+0004   16 OP_NIL
+0005    | OP_RETURN
+== main ==
+0000    2 OP_GET_GLOBAL       0 '@println'
+0002    | OP_GET_GLOBAL       1 'i64.Display.toString'
+0004    | OP_CONSTANT         2 '7'
+0006    | OP_CALL             1
+0008    | OP_CALL             1
+0010    | OP_POP
+0011    3 OP_GET_GLOBAL       0 '@println'
+0013    | OP_GET_GLOBAL       3 'f64.Display.toString'
+0015    | OP_CONSTANT         4 '2.5'
+0017    | OP_CALL             1
+0019    | OP_CALL             1
+0021    | OP_POP
+0022    4 OP_GET_GLOBAL       0 '@println'
+0024    | OP_GET_GLOBAL       5 'string.Display.toString'
+0026    | OP_CONSTANT         6 'text'
+0028    | OP_CALL             1
+0030    | OP_CALL             1
+0032    | OP_POP
+0033    5 OP_GET_GLOBAL       0 '@println'
+0035    | OP_GET_GLOBAL       7 'bool.Display.toString'
+0037    | OP_TRUE
+0038    | OP_CALL             1
+0040    | OP_CALL             1
+0042    | OP_POP
+0043    6 OP_GET_GLOBAL       0 '@println'
+0045    | OP_GET_GLOBAL       8 'unit.Display.toString'
+0047    | OP_NIL
+0048    | OP_CALL             1
+0050    | OP_CALL             1
+0052    | OP_POP
+0053    7 OP_GET_GLOBAL       0 '@println'
+0055    | OP_GET_GLOBAL       9 'i64.Eq.equals'
+0057    | OP_CONSTANT        10 '3'
+0059    | OP_CONSTANT        10 '3'
+0061    | OP_CALL             2
+0063    | OP_CALL             1
+0065    | OP_POP
+0066    8 OP_GET_GLOBAL       0 '@println'
+0068    | OP_GET_GLOBAL      11 'string.Eq.equals'
+0070    | OP_CONSTANT        12 'a'
+0072    | OP_CONSTANT        13 'b'
+0074    | OP_CALL             2
+0076    | OP_CALL             1
+0078    | OP_POP
+0079    9 OP_GET_GLOBAL       0 '@println'
+0081    | OP_GET_GLOBAL      14 'i64.Ord.cmp'
+0083    | OP_CONSTANT        15 '1'
+0085    | OP_CONSTANT        16 '2'
+0087    | OP_CALL             2
+0089    | OP_CALL             1
+0091    | OP_POP
+0092   10 OP_GET_GLOBAL       0 '@println'
+0094    | OP_GET_GLOBAL      17 'f64.Ord.cmp'
+0096    | OP_CONSTANT         4 '2.5'
+0098    | OP_CONSTANT         4 '2.5'
+0100    | OP_CALL             2
+0102    | OP_CALL             1
+0104    | OP_POP
+0105   11 OP_GET_GLOBAL       0 '@println'
+0107    | OP_GET_GLOBAL      18 'i64.Add.add'
+0109    | OP_CONSTANT        15 '1'
+0111    | OP_CONSTANT        16 '2'
+0113    | OP_CALL             2
+0115    | OP_CALL             1
+0117    | OP_POP
+0118   12 OP_GET_GLOBAL       0 '@println'
+0120    | OP_GET_GLOBAL      19 'string.Add.add'
+0122    | OP_CONSTANT        20 'ab'
+0124    | OP_CONSTANT        21 'cd'
+0126    | OP_CALL             2
+0128    | OP_CALL             1
+0130    | OP_POP
+0131   13 OP_GET_GLOBAL       0 '@println'
+0133    | OP_GET_GLOBAL      22 'i64.Neg.neg'
+0135    | OP_CONSTANT        23 '4'
+0137    | OP_CALL             1
+0139    | OP_CALL             1
+0141    | OP_POP
+0142   14 OP_GET_GLOBAL       0 '@println'
+0144    | OP_GET_GLOBAL      24 'i64.Mul.mul'
+0146    | OP_CONSTANT        10 '3'
+0148    | OP_CONSTANT        23 '4'
+0150    | OP_CALL             2
+0152    | OP_CALL             1
+0154    | OP_POP
+0155   15 OP_NIL
+0156    | OP_RETURN

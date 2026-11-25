@@ -31,54 +31,54 @@
 0059    3 OP_POP
 0060    5 OP_GET_GLOBAL      24 'Money'
 0062    6 OP_CLOSURE         27 <fn add>
-0064    | OP_METHOD          26 'add'
-0066    7 OP_POP
-0067    9 OP_GET_GLOBAL      24 'Money'
-0069   10 OP_CLOSURE         29 <fn neg>
-0071    | OP_METHOD          28 'neg'
-0073   11 OP_POP
-0074   13 OP_GET_GLOBAL      24 'Money'
-0076   14 OP_CLOSURE         31 <fn equals>
-0078    | OP_METHOD          30 'equals'
-0080   15 OP_POP
-0081   17 OP_GET_GLOBAL      24 'Money'
-0083   18 OP_CLOSURE         33 <fn cmp>
-0085    | OP_METHOD          32 'cmp'
-0087   19 OP_POP
-0088   70 OP_NIL
-0089    | OP_RETURN
+0064    | OP_TRAIT_METHOD    26 'add'   28 'Add.add'
+0067    7 OP_POP
+0068    9 OP_GET_GLOBAL      24 'Money'
+0070   10 OP_CLOSURE         30 <fn neg>
+0072    | OP_TRAIT_METHOD    29 'neg'   31 'Neg.neg'
+0075   11 OP_POP
+0076   13 OP_GET_GLOBAL      24 'Money'
+0078   14 OP_CLOSURE         33 <fn equals>
+0080    | OP_TRAIT_METHOD    32 'equals'   34 'Eq.equals'
+0083   15 OP_POP
+0084   17 OP_GET_GLOBAL      24 'Money'
+0086   18 OP_CLOSURE         36 <fn cmp>
+0088    | OP_TRAIT_METHOD    35 'cmp'   37 'Ord.cmp'
+0091   19 OP_POP
+0092   70 OP_NIL
+0093    | OP_RETURN
 == add_twice ==
 0000   21 OP_GET_LOCAL        1
 0002    | OP_GET_LOCAL        2
-0004    | OP_INVOKE        (1 args)    0 'add'
+0004    | OP_INVOKE        (1 args)    0 'Add.add'
 0007    | OP_GET_LOCAL        2
-0009    | OP_INVOKE        (1 args)    0 'add'
+0009    | OP_INVOKE        (1 args)    0 'Add.add'
 0012    | OP_RETURN
 == negated ==
 0000   23 OP_GET_LOCAL        1
-0002    | OP_INVOKE        (0 args)    0 'neg'
+0002    | OP_INVOKE        (0 args)    0 'Neg.neg'
 0005    | OP_RETURN
 == scaled ==
 0000   25 OP_GET_LOCAL        1
 0002    | OP_GET_LOCAL        2
-0004    | OP_INVOKE        (1 args)    0 'mul'
+0004    | OP_INVOKE        (1 args)    0 'Mul.mul'
 0007    | OP_GET_LOCAL        2
-0009    | OP_INVOKE        (1 args)    1 'div'
+0009    | OP_INVOKE        (1 args)    1 'Div.div'
 0012    | OP_RETURN
 == difference ==
 0000   27 OP_GET_LOCAL        1
 0002    | OP_GET_LOCAL        2
-0004    | OP_INVOKE        (1 args)    0 'sub'
+0004    | OP_INVOKE        (1 args)    0 'Sub.sub'
 0007    | OP_RETURN
 == remainder ==
 0000   29 OP_GET_LOCAL        1
 0002    | OP_GET_LOCAL        2
-0004    | OP_INVOKE        (1 args)    0 'mod'
+0004    | OP_INVOKE        (1 args)    0 'Mod.mod'
 0007    | OP_RETURN
 == largest ==
 0000   32 OP_GET_LOCAL        1
 0002    | OP_GET_LOCAL        2
-0004    | OP_INVOKE        (1 args)    0 'cmp'
+0004    | OP_INVOKE        (1 args)    0 'Ord.cmp'
 0007    | OP_CONSTANT         1 '0'
 0009    | OP_GREATER
 0010    | OP_JUMP_IF_FALSE   10 -> 20
@@ -92,7 +92,7 @@
 == in_range ==
 0000   39 OP_GET_LOCAL        1
 0002    | OP_GET_LOCAL        2
-0004    | OP_INVOKE        (1 args)    0 'cmp'
+0004    | OP_INVOKE        (1 args)    0 'Ord.cmp'
 0007    | OP_CONSTANT         1 '0'
 0009    | OP_LESS
 0010    | OP_NOT
@@ -100,7 +100,7 @@
 0014    | OP_POP
 0015    | OP_GET_LOCAL        1
 0017    | OP_GET_LOCAL        3
-0019    | OP_INVOKE        (1 args)    0 'cmp'
+0019    | OP_INVOKE        (1 args)    0 'Ord.cmp'
 0022    | OP_CONSTANT         1 '0'
 0024    | OP_GREATER
 0025    | OP_NOT
@@ -108,25 +108,25 @@
 == smaller ==
 0000   41 OP_GET_LOCAL        1
 0002    | OP_GET_LOCAL        2
-0004    | OP_INVOKE        (1 args)    0 'cmp'
+0004    | OP_INVOKE        (1 args)    0 'Ord.cmp'
 0007    | OP_CONSTANT         1 '0'
 0009    | OP_LESS
 0010    | OP_RETURN
 == same ==
 0000   43 OP_GET_LOCAL        1
 0002    | OP_GET_LOCAL        2
-0004    | OP_INVOKE        (1 args)    0 'equals'
+0004    | OP_INVOKE        (1 args)    0 'Eq.equals'
 0007    | OP_RETURN
 == different ==
 0000   45 OP_GET_LOCAL        1
 0002    | OP_GET_LOCAL        2
-0004    | OP_INVOKE        (1 args)    0 'equals'
+0004    | OP_INVOKE        (1 args)    0 'Eq.equals'
 0007    | OP_NOT
 0008    | OP_RETURN
 == same_through_ord ==
 0000   47 OP_GET_LOCAL        1
 0002    | OP_GET_LOCAL        2
-0004    | OP_INVOKE        (1 args)    0 'equals'
+0004    | OP_INVOKE        (1 args)    0 'Eq.equals'
 0007    | OP_RETURN
 == main ==
 0000   50 OP_GET_GLOBAL       0 '@println'

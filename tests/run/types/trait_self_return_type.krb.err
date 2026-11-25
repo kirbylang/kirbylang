@@ -11,17 +11,17 @@
 0020    8 OP_POP
 0021   10 OP_GET_GLOBAL       2 'Point'
 0023   11 OP_CLOSURE          6 <fn clone>
-0025    | OP_METHOD           5 'clone'
-0027   12 OP_POP
-0028   14 OP_GET_GLOBAL       2 'Point'
-0030    | OP_CONSTANT         3 'x'
-0032    | OP_CONSTANT         8 '3'
-0034    | OP_CONSTANT         4 'y'
-0036    | OP_CONSTANT         9 '4'
-0038    | OP_STRUCT_INIT      2
-0040    | OP_DEFINE_GLOBAL    7 'p'
-0042   18 OP_NIL
-0043    | OP_RETURN
+0025    | OP_TRAIT_METHOD     5 'clone'    7 'Cloneable.clone'
+0028   12 OP_POP
+0029   14 OP_GET_GLOBAL       2 'Point'
+0031    | OP_CONSTANT         3 'x'
+0033    | OP_CONSTANT         9 '3'
+0035    | OP_CONSTANT         4 'y'
+0037    | OP_CONSTANT        10 '4'
+0039    | OP_STRUCT_INIT      2
+0041    | OP_DEFINE_GLOBAL    8 'p'
+0043   18 OP_NIL
+0044    | OP_RETURN
 == main ==
 0000   15 OP_GET_GLOBAL       0 'p'
 0002    | OP_INVOKE        (0 args)    1 'clone'

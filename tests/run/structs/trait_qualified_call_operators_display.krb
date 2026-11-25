@@ -1,0 +1,52 @@
+struct Num {
+    pub var n: i64;
+}
+
+impl Num {
+    pub fun add(self, other: Num): Num = Num { n: 0 };
+}
+
+impl Add for Num {
+    fun add(self, other: Self): Self = Num { n: self.n + other.n };
+}
+
+struct Label {
+    pub var text: string;
+}
+
+impl Label {
+    pub fun toString(self): string = "own";
+}
+
+impl Display for Label {
+    fun toString(self): string = self.text;
+}
+
+struct Key {
+    pub var id: i64;
+}
+
+impl Key {
+    pub fun equals(self, other: Key): bool = false;
+}
+
+impl Eq for Key {
+    fun equals(self, other: Self): bool = self.id == other.id;
+}
+
+fun main(): unit {
+    let a = Num { n: 2 };
+    let b = Num { n: 3 };
+
+    @println((a + b).n);
+
+    let label = Label { text: "shown" };
+    @println(label);
+    @println($"{label}");
+    @println(label.toString());
+    @println(Display.toString(label));
+
+    let k = Key { id: 1 };
+    @println(k == Key { id: 1 });
+    @println(k.equals(Key { id: 1 }));
+}

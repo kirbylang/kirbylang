@@ -558,6 +558,33 @@ fun main(): unit {
 }
 ```
 
+#### Calling A Trait's Method By Name
+
+A type's own method wins over a trait's method with the same name.
+`Trait.method(value)` calls the trait's version.
+
+```kirby
+struct Point {
+    pub var x: f64;
+    pub var y: f64;
+}
+
+impl Point {
+    pub fun toString(self): string = "own";
+}
+
+impl Display for Point {
+    fun toString(self): string = "trait";
+}
+
+fun main(): unit {
+    let p = Point { x: 1, y: 2 };
+
+    @println(p.toString()); // own
+    @println(Display.toString(p)); // trait
+}
+```
+
 ### Super Traits
 
 Super traits are a way to declare that if you implement one trait, you must implement another.

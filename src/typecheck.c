@@ -1949,10 +1949,78 @@ static bool isPrintNative(Token *name) {
   return false;
 }
 
+// `Trait.method(value, ...)` runs the trait's method on `value`, even when
+// the value's type has a method of its own with that name. It is checked as
+// the call `value.method(...)`, with the trait kept on the get. Returns true
+// when the call was one of these, and false when the call can't go on.
+static bool typchkRewriteTraitQualifiedCall(TypeEnv *env, AstNode *node,
+                                            bool *canGoOn) {
+  CallNode *c = &node->as.call;
+  GetNode *get = &c->callee->as.get;
+  *canGoOn = false;
+
+  if (get->isTraitQualified || get->object->kind != NODE_VARIABLE)
+    return false;
+
+  Token *name = &get->object->as.variable.name;
+
+  if (typchkTypeEnvLookup(env, *name) != NULL ||
+      typchkTypeEnvLookupFunction(env, *name) != NULL ||
+      bindingArrayLookup(env->_genericParams, env->_genericParamCount, *name) !=
+          NULL)
+    return false;
+
+  Type *trait = typchkTypeEnvLookupTrait(env, *name);
+
+  if (trait == NULL)
+    return false;
+
+  if (typeTraitHasUnresolvedMembers(trait)) {
+    // already reported once, at the trait's own declaration
+  } else if (typeTraitStaticMethodLookup(trait, get->name) != NULL) {
+    typchkErrorAtTokenFmt(&get->name,
+                          "'%.*s' is a static method of '%.*s'. Call it on a "
+                          "type instead.",
+                          get->name.length, get->name.start, name->length,
+                          name->start);
+  } else if (typeTraitInstanceMethodLookup(trait, get->name) == NULL) {
+    typchkErrorAtTokenFmt(&get->name, "Trait '%.*s' has no method '%.*s'.",
+                          name->length, name->start, get->name.length,
+                          get->name.start);
+  } else if (c->argCount == 0) {
+    typchkErrorAtTokenFmt(&get->name,
+                          "'%.*s.%.*s' needs the value to call it on, as in "
+                          "'%.*s.%.*s(value)'.",
+                          name->length, name->start, get->name.length,
+                          get->name.start, name->length, name->start,
+                          get->name.length, get->name.start);
+  } else {
+    get->traitQualifier = *name;
+    get->isTraitQualified = true;
+    get->object = c->args[0];
+    c->args++;
+    c->argCount--;
+    *canGoOn = true;
+    return true;
+  }
+
+  for (int i = 0; i < c->argCount; i++)
+    typchkInfer(env, c->args[i]);
+
+  return true;
+}
+
 static Type *typchkInferCall(TypeEnv *env, AstNode *node) {
   CallNode *c = &node->as.call;
   Type *expected = env->_callExpected;
   env->_callExpected = NULL;
+
+  if (c->callee->kind == NODE_GET) {
+    bool canGoOn;
+
+    if (typchkRewriteTraitQualifiedCall(env, node, &canGoOn) && !canGoOn)
+      return NULL;
+  }
 
   if (c->callee->kind == NODE_VARIABLE) {
     Token *name = &c->callee->as.variable.name;
@@ -2417,6 +2485,75 @@ static bool typchkInferPrimitiveStaticGet(TypeEnv *env, GetNode *get,
   return true;
 }
 
+// Makes the compiler run `trait`'s version of the method the get names. The
+// compiler outlives the checker's name storage, so it gets a copy.
+static void typchkMarkViaTrait(GetNode *get, InternedName trait) {
+  char *name = (char *)astAllocRaw((size_t)trait.length + 1);
+  memcpy(name, internedNameChars(trait), (size_t)trait.length);
+  name[trait.length] = '\0';
+
+  get->viaTrait = name;
+}
+
+// The method of `Trait.method(value)`, for the value's type `objectType`.
+// Returns the method's type, or NULL after reporting an error.
+static Type *typchkInferTraitQualifiedGet(TypeEnv *env, GetNode *get,
+                                          Type *objectType) {
+  Token traitToken = get->traitQualifier;
+  Type *trait = typchkTypeEnvLookupTrait(env, traitToken);
+  InternedName traitName = trait->as.trait_.name;
+  Type *declared = typeTraitInstanceMethodLookup(trait, get->name);
+
+  if (objectType->kind == TYPE_GENERIC_PARAM) {
+    bool hasBound = false;
+
+    for (int i = 0; i < objectType->as.genericParam.boundCount; i++) {
+      hasBound =
+          hasBound ||
+          typchkTraitChainHas(env, objectType->as.genericParam.boundTraits[i],
+                              traitName);
+    }
+
+    if (!hasBound) {
+      typchkErrorAtTokenFmt(&traitToken, "%s doesn't have the bound '%.*s'.",
+                            typeToString(objectType), traitToken.length,
+                            traitToken.start);
+      return NULL;
+    }
+
+    typchkMarkViaTrait(get, traitName);
+    return typeSubstituteSelf(declared, objectType);
+  }
+
+  const char *owner = typchkPrimitiveOwner(objectType);
+
+  if (owner != NULL) {
+    PrimitiveMethod *method =
+        typchkPrimitiveTraitMethodLookup(env, owner, get->name, &traitName);
+
+    if (method == NULL) {
+      typchkErrorAtTokenFmt(&traitToken, "%s doesn't implement %.*s.",
+                            typeToString(objectType), traitToken.length,
+                            traitToken.start);
+      return NULL;
+    }
+
+    typchkMarkPrimitiveTraitCall(get, owner, method);
+    return typchkPrimitiveMethodType(method, objectType);
+  }
+
+  if (objectType->kind == TYPE_STRUCT &&
+      typeStructImplementsTrait(objectType, traitName)) {
+    typchkMarkViaTrait(get, traitName);
+    return typeStructTraitInstanceMethodLookup(objectType, get->name);
+  }
+
+  typchkErrorAtTokenFmt(&traitToken, "%s doesn't implement %.*s.",
+                        typeToString(objectType), traitToken.length,
+                        traitToken.start);
+  return NULL;
+}
+
 // Infer the type of a get expression
 static Type *typchkInferGet(TypeEnv *env, AstNode *node) {
   GetNode *get = &node->as.get;
@@ -2436,6 +2573,16 @@ static Type *typchkInferGet(TypeEnv *env, AstNode *node) {
       typchkErrorAtTokenFmt(
           objIdentifier, "Can't call a static method on type parameter '%.*s'.",
           objIdentifier->length, objIdentifier->start);
+      return NULL;
+    }
+
+    if (!shadowed && !get->isTraitQualified &&
+        typchkTypeEnvLookupTrait(env, *objIdentifier) != NULL) {
+      typchkErrorAtTokenFmt(
+          &get->name,
+          "'%.*s' is a trait. Call its method as '%.*s.%.*s(value)'.",
+          objIdentifier->length, objIdentifier->start, objIdentifier->length,
+          objIdentifier->start, get->name.length, get->name.start);
       return NULL;
     }
 
@@ -2501,6 +2648,9 @@ static Type *typchkInferGet(TypeEnv *env, AstNode *node) {
   if (objectType == NULL)
     return NULL;
 
+  if (get->isTraitQualified)
+    return typchkInferTraitQualifiedGet(env, get, objectType);
+
   // A generic parameter has the methods of its bounds, and nothing else
   if (objectType->kind == TYPE_GENERIC_PARAM &&
       objectType->as.genericParam.boundCount > 0) {
@@ -2516,6 +2666,9 @@ static Type *typchkInferGet(TypeEnv *env, AstNode *node) {
           internedNameChars(first), second.length, internedNameChars(second));
       return NULL;
     }
+
+    if (result == BOUND_METHOD_FOUND)
+      typchkMarkViaTrait(get, first);
 
     if (result == BOUND_METHOD_MISSING) {
       char names[256] = "";
