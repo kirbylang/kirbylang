@@ -1,0 +1,5 @@
+fun main(): unit {
+  let d: bool = bool.default();
+  @println(d);
+  @println(bool.default() == d);
+}

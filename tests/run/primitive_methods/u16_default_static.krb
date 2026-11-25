@@ -1,0 +1,5 @@
+fun main(): unit {
+  let d: u16 = u16.default();
+  @println(d);
+  @println(u16.default() == d);
+}

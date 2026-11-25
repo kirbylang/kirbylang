@@ -256,6 +256,15 @@ fun main(): unit {
 }
 ```
 
+The `Default` trait's static method is called on the type's name.
+
+```kirby
+fun main(): unit {
+    @println(f64.default()); // 0
+    @println(bool.default()); // false
+}
+```
+
 ### Arrays
 
 Arrays, `[T; N]`, are fixed sized collections of homogenous types.

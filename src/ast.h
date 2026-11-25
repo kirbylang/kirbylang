@@ -212,6 +212,9 @@ typedef struct {
   // For such a call, the name of the trait the method came from. NULL when it
   // is a method of the type itself.
   const char *primitiveTrait;
+  // For such a call, true when the method is static, so the call has no
+  // receiver value, as in `f64.default()`
+  bool primitiveIsStatic;
 } GetNode;
 
 typedef struct {

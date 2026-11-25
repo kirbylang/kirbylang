@@ -1,0 +1,1 @@
+[line 3] Error at 'default': 'default' is a static method. Access it on 'i64' instead of a value.

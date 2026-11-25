@@ -2299,6 +2299,80 @@ static void typchkPrimitiveImplementsAdd(TypeEnv *env, const char *owner,
       (PrimitiveTraitImpl){owner, trait};
 }
 
+// Marks a call of a trait's method on a primitive for the compiler. The
+// compiler outlives the checker's name storage, so it gets a copy of the trait
+// name.
+static void typchkMarkPrimitiveTraitCall(GetNode *get, const char *owner,
+                                         const PrimitiveMethod *method) {
+  int length = method->trait.length;
+  char *trait = (char *)astAllocRaw((size_t)length + 1);
+  memcpy(trait, internedNameChars(method->trait), (size_t)length);
+  trait[length] = '\0';
+
+  get->primitiveOwner = owner;
+  get->primitiveTrait = trait;
+  get->primitiveIsStatic = !method->hasSelf;
+}
+
+// `f64.default()`, or `Self.default()` inside an impl for a primitive.
+// Returns false when `name` doesn't name a primitive, and true when it did,
+// with `*result` the method's type or NULL after an error.
+static bool typchkInferPrimitiveStaticGet(TypeEnv *env, GetNode *get,
+                                          Token *name, bool isCallee,
+                                          Type **result) {
+  Type *primitive = NULL;
+
+  if (tokenTextEquals(name, "Self")) {
+    if (env->_currentPrimitiveOwner != NULL)
+      primitive = env->_currentImplSelfType;
+  } else {
+    primitive = typchkPrimitiveTypeNamed(name);
+  }
+
+  if (primitive == NULL)
+    return false;
+
+  *result = NULL;
+
+  const char *owner = typchkPrimitiveOwner(primitive);
+
+  if (owner == NULL) {
+    typchkErrorAtTokenFmt(&get->name, "'%.*s' has no static methods.",
+                          name->length, name->start);
+    return true;
+  }
+
+  PrimitiveMethod *method =
+      typchkPrimitiveTraitMethodLookup(env, owner, get->name, NULL);
+
+  if (method == NULL || method->hasSelf) {
+    bool isInstanceMethod =
+        (method != NULL && method->hasSelf) ||
+        typchkPrimitiveMethodLookup(env, owner, get->name) != NULL;
+
+    if (isInstanceMethod) {
+      typchkErrorAtTokenFmt(&get->name,
+                            "'%.*s' is an instance method. Call it on a "
+                            "value of '%s'.",
+                            get->name.length, get->name.start, owner);
+    } else {
+      typchkErrorAtTokenFmt(&get->name, "%s has no static method '%.*s'.",
+                            owner, get->name.length, get->name.start);
+    }
+    return true;
+  }
+
+  if (!isCallee) {
+    typchkErrorAtTokenFmt(&get->name, "Method '%.*s' of '%s' has to be called.",
+                          get->name.length, get->name.start, owner);
+    return true;
+  }
+
+  typchkMarkPrimitiveTraitCall(get, owner, method);
+  *result = method->type;
+  return true;
+}
+
 // Infer the type of a get expression
 static Type *typchkInferGet(TypeEnv *env, AstNode *node) {
   GetNode *get = &node->as.get;
@@ -2326,6 +2400,14 @@ static Type *typchkInferGet(TypeEnv *env, AstNode *node) {
       Type *structType = isSelf
                              ? typchkTypeEnvGetImplTargetType(env)
                              : typchkTypeEnvLookupStruct(env, *objIdentifier);
+
+      if (structType == NULL) {
+        Type *staticResult;
+
+        if (typchkInferPrimitiveStaticGet(env, get, objIdentifier, isCallee,
+                                          &staticResult))
+          return staticResult;
+      }
 
       if (structType == NULL && isSelf) {
         typchkErrorSelfIsNotAStruct(env, objIdentifier);
@@ -2462,14 +2544,7 @@ static Type *typchkInferGet(TypeEnv *env, AstNode *node) {
         return NULL;
       }
 
-      // The compiler outlives the checker's name storage, so it gets a copy
-      int length = traitMethod->trait.length;
-      char *trait = (char *)astAllocRaw((size_t)length + 1);
-      memcpy(trait, internedNameChars(traitMethod->trait), (size_t)length);
-      trait[length] = '\0';
-
-      get->primitiveOwner = primitiveOwner;
-      get->primitiveTrait = trait;
+      typchkMarkPrimitiveTraitCall(get, primitiveOwner, traitMethod);
       return traitMethod->type;
     }
   }

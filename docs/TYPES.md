@@ -246,7 +246,7 @@ impl Display for string {
 The impl must give every method the trait asks for, with the trait's signature,
 and a type implements a trait once. A trait with a supertrait needs an impl of
 the supertrait too. A method of the type itself wins over a trait method of the
-same name. A static method of a trait can be written, but can't be called yet.
+same name. A static method of a trait is called on the type's name: `f64.default()` is `0`. Inside the impl, `Self.default()` does the same. A variable with the same name as the type wins over the type name.
 
 The standard library implements these traits:
 

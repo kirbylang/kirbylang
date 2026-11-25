@@ -705,11 +705,14 @@ static void compileCall(CallNode *c) {
             g->primitiveTrait,
             g->primitiveTrait != NULL ? (int)strlen(g->primitiveTrait) : 0,
             &g->name));
-    compileExpr(g->object);
+    // A static method has no receiver value
+    int receiverCount = g->primitiveIsStatic ? 0 : 1;
+    if (receiverCount == 1)
+      compileExpr(g->object);
     for (int i = 0; i < c->argCount; i++) {
       compileExpr(c->args[i]);
     }
-    emitBytes(OP_CALL, (uint8_t)(c->argCount + 1));
+    emitBytes(OP_CALL, (uint8_t)(c->argCount + receiverCount));
     return;
   }
 

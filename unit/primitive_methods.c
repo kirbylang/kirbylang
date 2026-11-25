@@ -413,12 +413,46 @@ static void test_a_primitive_can_not_fill_a_bound_yet(void) {
   end();
 }
 
+static void test_self_calls_a_static_method_of_the_primitive(void) {
+  begin();
+  expectOk("trait Pair {\n"
+           "  fun one(): Self;\n"
+           "  fun two(): Self;\n"
+           "}",
+           true);
+
+  for (int i = 0; i < kindCount; i++) {
+    char *impl = format("impl Pair for %1$s {\n"
+                        "  fun one(): Self = %2$s;\n"
+                        "  fun two(): Self = Self.one();\n"
+                        "}",
+                        kinds[i].type, kinds[i].value);
+    expectOk(impl, true);
+    free(impl);
+
+    char *program = format("if (true) {\n"
+                           "let a: %1$s = %2$s;\n"
+                           "@assert(%1$s.two() == a, \"two\");\n"
+                           "}",
+                           kinds[i].type, kinds[i].value);
+    expectOk(program, false);
+    free(program);
+  }
+
+  // A user file can't use `Self` this way, and an unknown name is an error
+  expectError("fun main(): unit { @println(Self.one()); }", false);
+  expectError("fun main(): unit { @println(u8.three()); }", false);
+
+  end();
+}
+
 int main(void) {
   test_every_kind_can_have_methods();
   test_a_method_belongs_to_one_kind();
   test_only_the_stdlib_adds_methods();
   test_unit_has_no_methods();
   test_every_kind_can_implement_a_trait();
+  test_self_calls_a_static_method_of_the_primitive();
   test_a_trait_impl_must_match_its_trait();
   test_a_kind_implements_a_trait_once();
   test_a_supertrait_needs_its_own_impl();

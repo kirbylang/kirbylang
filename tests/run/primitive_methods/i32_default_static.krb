@@ -1,0 +1,5 @@
+fun main(): unit {
+  let d: i32 = i32.default();
+  @println(d);
+  @println(i32.default() == d);
+}

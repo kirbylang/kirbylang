@@ -1,0 +1,1 @@
+[line 2] Error at 'abs': 'abs' is an instance method. Call it on a value of 'f64'.
