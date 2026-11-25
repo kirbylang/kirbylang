@@ -1,0 +1,7 @@
+fun half(n: f64): f64 = n / 2;
+
+fun main(): unit {
+    @println(half(-9).abs().sqrt());
+    @println($"{(16.0).sqrt()} is the root");
+    @println((2.0).pow(3).max(7).min(100));
+}

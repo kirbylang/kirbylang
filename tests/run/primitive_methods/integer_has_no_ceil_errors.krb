@@ -1,0 +1,4 @@
+fun main(): unit {
+    let a: i64 = 3;
+    @println(a.ceil());
+}

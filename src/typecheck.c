@@ -2131,10 +2131,36 @@ static Type *typchkCheckCallAgainstFunctionType(TypeEnv *env, AstNode *node,
   return calleeType->as.function.returnType;
 }
 
+// The primitive type a name refers to, or NULL if it isn't one
+static Type *typchkPrimitiveTypeNamed(const Token *name) {
+  if (tokenTextEquals(name, "unit"))
+    return typeUnit();
+  if (tokenTextEquals(name, "bool"))
+    return typeBool();
+  if (tokenTextEquals(name, "string"))
+    return typeString();
+
+  NumberKind kind;
+  if (numberKindFromName(name->start, name->length, &kind))
+    return typeNumber(kind);
+
+  return NULL;
+}
+
 // The name primitive methods are grouped under, or NULL if the type can't have
-// methods yet
+// methods. The name is the type's own spelling, such as "string" or "u8", and
+// lives for the whole program
 static const char *typchkPrimitiveOwner(const Type *type) {
-  return type->kind == TYPE_STRING ? "string" : NULL;
+  switch (type->kind) {
+  case TYPE_STRING:
+    return "string";
+  case TYPE_BOOL:
+    return "bool";
+  case TYPE_NUMBER:
+    return numberKindInfo(type->as.number.kind)->name;
+  default:
+    return NULL;
+  }
 }
 
 static PrimitiveMethod *
@@ -3595,7 +3621,7 @@ static void typchkRegisterTraitImpl(TypeEnv *env, AstNode *node) {
   Type *targetType = typchkResolveImplTarget(env, impl->targetName);
 
   if (targetType == NULL) {
-    if (tokenIsPrimitiveTypeName(&impl->targetName)) {
+    if (typchkPrimitiveTypeNamed(&impl->targetName) != NULL) {
       typchkErrorAtTokenFmt(
           &impl->targetName,
           "Primitive trait implementations aren't supported yet.");
@@ -3762,9 +3788,10 @@ static void typchkCheckTraitSupertraitSatisfied(TypeEnv *env, AstNode *node) {
   }
 }
 
-// Registers the methods of `impl string { ... }`. Only the standard library
-// can add methods to a primitive type.
-static void typchkRegisterPrimitiveImplMethods(TypeEnv *env, AstNode *node) {
+// Registers the methods of an impl block on a primitive type, such as
+// `impl string { ... }`. Only the standard library can add methods to one.
+static void typchkRegisterPrimitiveImplMethods(TypeEnv *env, AstNode *node,
+                                               Type *primitive) {
   ImplNode *impl = &node->as.impl;
   Token target = impl->targetName;
 
@@ -3775,16 +3802,18 @@ static void typchkRegisterPrimitiveImplMethods(TypeEnv *env, AstNode *node) {
     return;
   }
 
-  if (!tokenTextEquals(&target, "string")) {
+  const char *owner = typchkPrimitiveOwner(primitive);
+
+  if (owner == NULL) {
     typchkErrorAtTokenFmt(&target, "Methods on '%.*s' aren't supported yet.",
                           target.length, target.start);
     return;
   }
 
-  const char *owner = "string";
+  impl->primitiveOwner = owner;
 
   env->_currentPrimitiveOwner = owner;
-  env->_currentImplSelfType = typeString();
+  env->_currentImplSelfType = primitive;
 
   for (int i = 0; i < impl->methodCount; i++) {
     FunctionNode *method = impl->methods[i];
@@ -3826,8 +3855,10 @@ static void typchkRegisterImplMethods(TypeEnv *env, AstNode *node) {
   Type *structType = typchkResolveImplTarget(env, impl->targetName);
 
   if (structType == NULL) {
-    if (tokenIsPrimitiveTypeName(&impl->targetName)) {
-      typchkRegisterPrimitiveImplMethods(env, node);
+    Type *primitive = typchkPrimitiveTypeNamed(&impl->targetName);
+
+    if (primitive != NULL) {
+      typchkRegisterPrimitiveImplMethods(env, node, primitive);
     } else {
       typchkErrorAtTokenFmt(&impl->targetName, "Unknown type '%.*s'.",
                             impl->targetName.length, impl->targetName.start);
@@ -3923,26 +3954,29 @@ static void typchkCheckTopLevelFunctionBody(TypeEnv *env, AstNode *node) {
   typchkCheckGenericFunctionBody(env, fn, fnType, NULL);
 }
 
-// Checks the bodies of a primitive type's methods. Methods that failed to
-// register were already reported.
+// Checks the bodies of a primitive type's methods. An impl that failed to
+// register was already reported and has no owner.
 static void checkPrimitiveImplMethodBodies(TypeEnv *env, AstNode *node) {
   ImplNode *impl = &node->as.impl;
+  const char *owner = impl->primitiveOwner;
 
-  if (!env->_isStdlib || !tokenTextEquals(&impl->targetName, "string"))
+  if (owner == NULL)
     return;
 
-  env->_currentPrimitiveOwner = "string";
-  env->_currentImplSelfType = typeString();
+  Type *primitive = typchkPrimitiveTypeNamed(&impl->targetName);
+
+  env->_currentPrimitiveOwner = owner;
+  env->_currentImplSelfType = primitive;
 
   for (int i = 0; i < impl->methodCount; i++) {
     FunctionNode *method = impl->methods[i];
     PrimitiveMethod *registered =
-        typchkPrimitiveMethodLookup(env, "string", method->name);
+        typchkPrimitiveMethodLookup(env, owner, method->name);
 
     if (!method->hasSelf || registered == NULL)
       continue;
 
-    typchkCheckGenericFunctionBody(env, method, registered->type, typeString());
+    typchkCheckGenericFunctionBody(env, method, registered->type, primitive);
   }
 
   env->_currentImplSelfType = NULL;
@@ -3954,7 +3988,7 @@ static void checkImplMethodBodies(TypeEnv *env, AstNode *node) {
   Type *structType = typchkResolveImplTarget(env, impl->targetName);
 
   if (structType == NULL && !impl->hasTraitName &&
-      tokenIsPrimitiveTypeName(&impl->targetName)) {
+      typchkPrimitiveTypeNamed(&impl->targetName) != NULL) {
     checkPrimitiveImplMethodBodies(env, node);
     return;
   }

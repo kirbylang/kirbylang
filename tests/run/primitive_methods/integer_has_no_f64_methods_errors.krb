@@ -1,0 +1,4 @@
+fun main(): unit {
+    let n: i64 = 4;
+    @println(n.sqrt());
+}

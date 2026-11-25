@@ -1,0 +1,5 @@
+fun main(): unit {
+    let a: i32 = 3;
+    let b: i64 = 4;
+    @println(a.max(b));
+}

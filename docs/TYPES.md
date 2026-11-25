@@ -208,13 +208,30 @@ impl string {
 }
 ```
 
-`"abc".len()` calls it. Only the standard library can write these blocks, and
-for now only `impl string` is supported, with methods that take `self`. A
-method has to be called, so `let f = "abc".len;` is an error. A call to one is
-compiled as a plain function call with the value as the first argument.
+`"abc".len()` calls it. Only the standard library can write these blocks. They
+work for `string`, `bool` and every number kind (`i64`, `u8`, `f64` and the
+rest), with methods that take `self`. `unit` has none, and neither do lists and
+arrays. A method belongs to its own type, so a method of `f64` can't be called
+on an `i64`. A method has to be called, so `let f = "abc".len;` is an error. A
+call to one is compiled as a plain function call with the value as the first
+argument.
 
-Inside the block, `Self` is the primitive type, so `other: Self` is a `string`
-in `impl string`. A primitive has no fields or static methods, so `Self { }`
+The number types have these methods:
+
+| Type                       | Methods                                                              |
+| -------------------------- | -------------------------------------------------------------------- |
+| `f64`                      | `abs`, `ceil`, `floor`, `max`, `min`, `pow`, `round`, `sqrt`, `trunc` |
+| `f32`                      | the same as `f64`                                                    |
+| `i8`, `i16`, `i32`, `i64`  | `abs`, `max`, `min`                                                  |
+| `u8`, `u16`, `u32`, `u64`  | `max`, `min`                                                         |
+
+The `f64` methods do what the native functions of the same name do. An `f32`
+method does its math as an `f64` and converts the result back, so a result that
+doesn't fit in an `f32` is an error. An integer `abs` of the smallest value, such
+as `-128` for an `i8`, is an overflow error. `bool` has no methods yet.
+
+Inside the block, `Self` is the primitive type, so `other: Self` is a `u8`
+in `impl u8`. A primitive has no fields or static methods, so `Self { }`
 and `Self.name()` are errors.
 
 ### Traits

@@ -1,0 +1,18 @@
+fun main(): unit {
+    let x: f32 = -3.5f32;
+
+    @println(x.abs());
+    @println(x.ceil());
+    @println(x.floor());
+    @println(x.round());
+    @println(x.trunc());
+    @println(x.max(2.0f32));
+    @println(x.min(2.0f32));
+    @println((2.25f32).sqrt());
+    @println((2.0f32).pow(10.0f32));
+    @println((9.0f32).pow(0.5f32));
+    @println((2.5f32).round());
+    @println((-2.5f32).round());
+    @println((-16.0f32).abs().sqrt());
+    @println($"{(16.0f32).sqrt()} is the root");
+}

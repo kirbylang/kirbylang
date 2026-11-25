@@ -779,6 +779,23 @@ if(BUILD_TESTS)
         COMMAND kirby-vm-interpret-main-unit-test
     )
 
+    add_executable(kirby-primitive-methods-unit-test
+        unit/primitive_methods.c
+    )
+
+    target_link_libraries(kirby-primitive-methods-unit-test
+        PRIVATE
+            kirby_core_debug
+    )
+
+    configure_kirby_target(kirby-primitive-methods-unit-test)
+    enable_coverage(kirby-primitive-methods-unit-test)
+
+    add_test(
+        NAME kirby-primitive-methods-unit-test
+        COMMAND kirby-primitive-methods-unit-test
+    )
+
     add_executable(kirby-vm-repl-immutability-unit-test
         unit/vm_repl_immutability.c
     )

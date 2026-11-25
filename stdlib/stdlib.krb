@@ -254,3 +254,144 @@ impl string {
     // Length in bytes
     pub fun len(self): i64 = @strLen(self);
 }
+
+impl f64 {
+    // Without its sign
+    pub fun abs(self): f64 = @abs(self);
+
+    // Rounded up to a whole number
+    pub fun ceil(self): f64 = @ceil(self);
+
+    // Rounded down to a whole number
+    pub fun floor(self): f64 = @floor(self);
+
+    // The larger of the two
+    pub fun max(self, other: f64): f64 = @max(self, other);
+
+    // The smaller of the two
+    pub fun min(self, other: f64): f64 = @min(self, other);
+
+    // Raised to a power
+    pub fun pow(self, exponent: f64): f64 = @pow(self, exponent);
+
+    // Rounded to the nearest whole number, halves away from zero
+    pub fun round(self): f64 = @round(self);
+
+    // The square root. A negative number is an error
+    pub fun sqrt(self): f64 = @sqrt(self);
+
+    // Without its fractional part, toward zero
+    pub fun trunc(self): f64 = @trunc(self);
+}
+
+impl i8 {
+    // Without its sign. The smallest value has no positive twin, so it is an
+    // error
+    pub fun abs(self): i8 = if (self < 0) -self else self;
+
+    // The larger of the two
+    pub fun max(self, other: i8): i8 = if (self > other) self else other;
+
+    // The smaller of the two
+    pub fun min(self, other: i8): i8 = if (self < other) self else other;
+}
+
+impl i16 {
+    // Without its sign. The smallest value has no positive twin, so it is an
+    // error
+    pub fun abs(self): i16 = if (self < 0) -self else self;
+
+    // The larger of the two
+    pub fun max(self, other: i16): i16 = if (self > other) self else other;
+
+    // The smaller of the two
+    pub fun min(self, other: i16): i16 = if (self < other) self else other;
+}
+
+impl i32 {
+    // Without its sign. The smallest value has no positive twin, so it is an
+    // error
+    pub fun abs(self): i32 = if (self < 0) -self else self;
+
+    // The larger of the two
+    pub fun max(self, other: i32): i32 = if (self > other) self else other;
+
+    // The smaller of the two
+    pub fun min(self, other: i32): i32 = if (self < other) self else other;
+}
+
+impl i64 {
+    // Without its sign. The smallest value has no positive twin, so it is an
+    // error
+    pub fun abs(self): i64 = if (self < 0) -self else self;
+
+    // The larger of the two
+    pub fun max(self, other: i64): i64 = if (self > other) self else other;
+
+    // The smaller of the two
+    pub fun min(self, other: i64): i64 = if (self < other) self else other;
+}
+
+impl u8 {
+    // The larger of the two
+    pub fun max(self, other: u8): u8 = if (self > other) self else other;
+
+    // The smaller of the two
+    pub fun min(self, other: u8): u8 = if (self < other) self else other;
+}
+
+impl u16 {
+    // The larger of the two
+    pub fun max(self, other: u16): u16 = if (self > other) self else other;
+
+    // The smaller of the two
+    pub fun min(self, other: u16): u16 = if (self < other) self else other;
+}
+
+impl u32 {
+    // The larger of the two
+    pub fun max(self, other: u32): u32 = if (self > other) self else other;
+
+    // The smaller of the two
+    pub fun min(self, other: u32): u32 = if (self < other) self else other;
+}
+
+impl u64 {
+    // The larger of the two
+    pub fun max(self, other: u64): u64 = if (self > other) self else other;
+
+    // The smaller of the two
+    pub fun min(self, other: u64): u64 = if (self < other) self else other;
+}
+
+// The math is done as f64 and converted back, so a result too big for an f32
+// is an error
+impl f32 {
+    // Without its sign
+    pub fun abs(self): f32 = @abs(self as f64) as f32;
+
+    // Rounded up to a whole number
+    pub fun ceil(self): f32 = @ceil(self as f64) as f32;
+
+    // Rounded down to a whole number
+    pub fun floor(self): f32 = @floor(self as f64) as f32;
+
+    // The larger of the two
+    pub fun max(self, other: f32): f32 = @max(self as f64, other as f64) as f32;
+
+    // The smaller of the two
+    pub fun min(self, other: f32): f32 = @min(self as f64, other as f64) as f32;
+
+    // Raised to a power
+    pub fun pow(self, exponent: f32): f32 =
+        @pow(self as f64, exponent as f64) as f32;
+
+    // Rounded to the nearest whole number, halves away from zero
+    pub fun round(self): f32 = @round(self as f64) as f32;
+
+    // The square root. A negative number is an error
+    pub fun sqrt(self): f32 = @sqrt(self as f64) as f32;
+
+    // Without its fractional part, toward zero
+    pub fun trunc(self): f32 = @trunc(self as f64) as f32;
+}

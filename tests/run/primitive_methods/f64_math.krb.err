@@ -1,0 +1,87 @@
+== <script> ==
+0000   16 OP_CLOSURE          1 <fn main>
+0002    | OP_DEFINE_GLOBAL    0 'main'
+0004   17 OP_NIL
+0005    | OP_RETURN
+== main ==
+0000    2 OP_CONSTANT         0 '3.5'
+0002    | OP_NEGATE
+0003    4 OP_GET_GLOBAL       1 '@println'
+0005    | OP_GET_GLOBAL       2 'f64.abs'
+0007    | OP_GET_LOCAL        1
+0009    | OP_CALL             1
+0011    | OP_CALL             1
+0013    | OP_POP
+0014    5 OP_GET_GLOBAL       1 '@println'
+0016    | OP_GET_GLOBAL       3 'f64.ceil'
+0018    | OP_GET_LOCAL        1
+0020    | OP_CALL             1
+0022    | OP_CALL             1
+0024    | OP_POP
+0025    6 OP_GET_GLOBAL       1 '@println'
+0027    | OP_GET_GLOBAL       4 'f64.floor'
+0029    | OP_GET_LOCAL        1
+0031    | OP_CALL             1
+0033    | OP_CALL             1
+0035    | OP_POP
+0036    7 OP_GET_GLOBAL       1 '@println'
+0038    | OP_GET_GLOBAL       5 'f64.round'
+0040    | OP_GET_LOCAL        1
+0042    | OP_CALL             1
+0044    | OP_CALL             1
+0046    | OP_POP
+0047    8 OP_GET_GLOBAL       1 '@println'
+0049    | OP_GET_GLOBAL       6 'f64.trunc'
+0051    | OP_GET_LOCAL        1
+0053    | OP_CALL             1
+0055    | OP_CALL             1
+0057    | OP_POP
+0058    9 OP_GET_GLOBAL       1 '@println'
+0060    | OP_GET_GLOBAL       7 'f64.max'
+0062    | OP_GET_LOCAL        1
+0064    | OP_CONSTANT         8 '2'
+0066    | OP_CALL             2
+0068    | OP_CALL             1
+0070    | OP_POP
+0071   10 OP_GET_GLOBAL       1 '@println'
+0073    | OP_GET_GLOBAL       9 'f64.min'
+0075    | OP_GET_LOCAL        1
+0077    | OP_CONSTANT         8 '2'
+0079    | OP_CALL             2
+0081    | OP_CALL             1
+0083    | OP_POP
+0084   11 OP_GET_GLOBAL       1 '@println'
+0086    | OP_GET_GLOBAL      10 'f64.sqrt'
+0088    | OP_CONSTANT        11 '2.25'
+0090    | OP_CALL             1
+0092    | OP_CALL             1
+0094    | OP_POP
+0095   12 OP_GET_GLOBAL       1 '@println'
+0097    | OP_GET_GLOBAL      12 'f64.pow'
+0099    | OP_CONSTANT         8 '2'
+0101    | OP_CONSTANT        13 '10'
+0103    | OP_CALL             2
+0105    | OP_CALL             1
+0107    | OP_POP
+0108   13 OP_GET_GLOBAL       1 '@println'
+0110    | OP_GET_GLOBAL      12 'f64.pow'
+0112    | OP_CONSTANT        14 '9'
+0114    | OP_CONSTANT        15 '0.5'
+0116    | OP_CALL             2
+0118    | OP_CALL             1
+0120    | OP_POP
+0121   14 OP_GET_GLOBAL       1 '@println'
+0123    | OP_GET_GLOBAL       5 'f64.round'
+0125    | OP_CONSTANT        16 '2.5'
+0127    | OP_CALL             1
+0129    | OP_CALL             1
+0131    | OP_POP
+0132   15 OP_GET_GLOBAL       1 '@println'
+0134    | OP_GET_GLOBAL       5 'f64.round'
+0136    | OP_CONSTANT        16 '2.5'
+0138    | OP_NEGATE
+0139    | OP_CALL             1
+0141    | OP_CALL             1
+0143    | OP_POP
+0144   16 OP_NIL
+0145    | OP_RETURN

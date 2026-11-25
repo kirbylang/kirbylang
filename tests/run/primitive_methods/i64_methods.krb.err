@@ -1,0 +1,91 @@
+== <script> ==
+0000   16 OP_CLOSURE          1 <fn main>
+0002    | OP_DEFINE_GLOBAL    0 'main'
+0004   17 OP_NIL
+0005    | OP_RETURN
+== main ==
+0000    2 OP_CONSTANT         0 '-9223372036854775807'
+0002    | OP_CONSTANT         1 '1'
+0004    | OP_SUBTRACT
+0005    3 OP_CONSTANT         2 '9223372036854775807'
+0007    4 OP_CONSTANT         3 '-5'
+0009    6 OP_GET_GLOBAL       4 '@println'
+0011    | OP_GET_GLOBAL       5 'i64.abs'
+0013    | OP_GET_LOCAL        3
+0015    | OP_CALL             1
+0017    | OP_CALL             1
+0019    | OP_POP
+0020    7 OP_GET_GLOBAL       4 '@println'
+0022    | OP_GET_GLOBAL       5 'i64.abs'
+0024    | OP_GET_LOCAL        2
+0026    | OP_CALL             1
+0028    | OP_CALL             1
+0030    | OP_POP
+0031    8 OP_GET_GLOBAL       4 '@println'
+0033    | OP_GET_GLOBAL       5 'i64.abs'
+0035    | OP_GET_LOCAL        2
+0037    | OP_NEGATE
+0038    | OP_CALL             1
+0040    | OP_CALL             1
+0042    | OP_POP
+0043    9 OP_GET_GLOBAL       4 '@println'
+0045    | OP_GET_GLOBAL       6 'i64.max'
+0047    | OP_GET_LOCAL        1
+0049    | OP_GET_LOCAL        2
+0051    | OP_CALL             2
+0053    | OP_CALL             1
+0055    | OP_POP
+0056   10 OP_GET_GLOBAL       4 '@println'
+0058    | OP_GET_GLOBAL       7 'i64.min'
+0060    | OP_GET_LOCAL        1
+0062    | OP_GET_LOCAL        2
+0064    | OP_CALL             2
+0066    | OP_CALL             1
+0068    | OP_POP
+0069   11 OP_GET_GLOBAL       4 '@println'
+0071    | OP_GET_GLOBAL       6 'i64.max'
+0073    | OP_GET_LOCAL        2
+0075    | OP_GET_LOCAL        2
+0077    | OP_CALL             2
+0079    | OP_CALL             1
+0081    | OP_POP
+0082   12 OP_GET_GLOBAL       4 '@println'
+0084    | OP_GET_GLOBAL       6 'i64.max'
+0086    | OP_GET_LOCAL        3
+0088    | OP_CONSTANT         8 '3'
+0090    | OP_CALL             2
+0092    | OP_CALL             1
+0094    | OP_POP
+0095   13 OP_GET_GLOBAL       4 '@println'
+0097    | OP_GET_GLOBAL       7 'i64.min'
+0099    | OP_GET_LOCAL        3
+0101    | OP_CONSTANT         8 '3'
+0103    | OP_CALL             2
+0105    | OP_CALL             1
+0107    | OP_POP
+0108   14 OP_GET_GLOBAL       4 '@println'
+0110    | OP_GET_GLOBAL       7 'i64.min'
+0112    | OP_GET_GLOBAL       6 'i64.max'
+0114    | OP_GET_GLOBAL       5 'i64.abs'
+0116    | OP_GET_LOCAL        3
+0118    | OP_CALL             1
+0120    | OP_CONSTANT         9 '2'
+0122    | OP_CALL             2
+0124    | OP_CONSTANT        10 '100'
+0126    | OP_CALL             2
+0128    | OP_CALL             1
+0130    | OP_POP
+0131   15 OP_GET_GLOBAL       4 '@println'
+0133    | OP_GET_GLOBAL      11 '@strConcat'
+0135    | OP_GET_GLOBAL      12 '@numberToString'
+0137    | OP_GET_GLOBAL       5 'i64.abs'
+0139    | OP_GET_LOCAL        3
+0141    | OP_CALL             1
+0143    | OP_CALL             1
+0145    | OP_CONSTANT        13 ' is the size'
+0147    | OP_LIST             2
+0149    | OP_CALL             1
+0151    | OP_CALL             1
+0153    | OP_POP
+0154   16 OP_NIL
+0155    | OP_RETURN

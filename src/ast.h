@@ -430,6 +430,11 @@ typedef struct {
   FunctionNode **methods;
   int methodCount;
   int endLine;
+  /**
+   * Set by the type checker when the block adds methods to a primitive type,
+   * such as "string" or "u8". NULL for every other impl.
+   */
+  const char *primitiveOwner;
 } ImplNode;
 
 typedef struct {

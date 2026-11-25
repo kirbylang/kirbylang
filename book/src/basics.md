@@ -205,6 +205,36 @@ Number literals are digits + an optional decimal point and suffix indicating the
 - `146.48290f32`
 - `105725.278123567f64`
 
+#### Number Methods
+
+Numbers have methods.
+
+| Type                      | Methods                                                               |
+| ------------------------- | --------------------------------------------------------------------- |
+| `f64`, `f32`              | `abs`, `ceil`, `floor`, `max`, `min`, `pow`, `round`, `sqrt`, `trunc` |
+| `i8`, `i16`, `i32`, `i64` | `abs`, `max`, `min`                                                   |
+| `u8`, `u16`, `u32`, `u64` | `max`, `min`                                                          |
+
+The float methods do what the builtin functions of the same name do.
+
+```kirby
+fun main(): unit {
+    let x: f64 = -2.5;
+    @println(x.abs()); // 2.5
+    @println(x.round()); // -3
+    @println((16.0).sqrt()); // 4
+
+    let n: i32 = -7;
+    @println(n.abs()); // 7
+    @println(n.max(3)); // 3
+
+    let byte: u8 = 200;
+    @println(byte.min(100)); // 100
+}
+```
+
+The `abs` of the smallest integer, such as `-128` for an `i8`, is an overflow error, because the result doesn't fit.
+
 ### Arrays
 
 Arrays, `[T; N]`, are fixed sized collections of homogenous types.

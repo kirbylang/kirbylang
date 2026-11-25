@@ -1417,8 +1417,9 @@ static void compilePrimitiveImplDecl(AstNode *node) {
 
     compileFunction(method, TYPE_PRIMITIVE_METHOD);
     emitBytes(OP_DEFINE_GLOBAL,
-              primitiveMethodConstant(impl->targetName.start,
-                                      impl->targetName.length, &method->name));
+              primitiveMethodConstant(impl->primitiveOwner,
+                                      (int)strlen(impl->primitiveOwner),
+                                      &method->name));
   }
 }
 
@@ -1427,7 +1428,7 @@ static void compileImplDecl(AstNode *node) {
 
   currentLine = impl->targetName.line;
 
-  if (!impl->hasTraitName && tokenIsPrimitiveTypeName(&impl->targetName)) {
+  if (impl->primitiveOwner != NULL) {
     compilePrimitiveImplDecl(node);
     return;
   }
