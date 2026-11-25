@@ -144,7 +144,7 @@ static void test_only_the_stdlib_adds_methods_to_primitives(void) {
   typchkResetError();
   assert(!checkUnit("@println(\"ab\".thrice());"));
 
-  // Every primitive but `unit` can have methods
+  // Every primitive can have methods
   typchkResetError();
   assert(checkStdlibUnit("impl f64 {\n"
                          "  pub fun one(self): f64 = 1;\n"
@@ -156,10 +156,14 @@ static void test_only_the_stdlib_adds_methods_to_primitives(void) {
                          "  pub fun yes(self): bool = true;\n"
                          "}"));
 
+  assert(checkStdlibUnit("impl unit {\n"
+                         "  pub fun nothing(self): unit {}\n"
+                         "}"));
+
   typchkResetError();
-  assert(!checkStdlibUnit("impl unit {\n"
-                          "  pub fun nothing(self): unit {}\n"
-                          "}"));
+  assert(!checkUnit("impl unit {\n"
+                    "  pub fun nothing(self): unit {}\n"
+                    "}"));
 
   typchkSessionEnd();
   typchkResetError();

@@ -209,9 +209,8 @@ impl string {
 ```
 
 `"abc".len()` calls it. Only the standard library can write these blocks. They
-work for `string`, `bool` and every number kind (`i64`, `u8`, `f64` and the
-rest), with methods that take `self`. `unit` has none, and neither do lists and
-arrays. A method belongs to its own type, so a method of `f64` can't be called
+work for `string`, `bool`, `unit` and every number kind (`i64`, `u8`, `f64` and
+the rest), with methods that take `self`. Lists and arrays have none yet. A method belongs to its own type, so a method of `f64` can't be called
 on an `i64`. A method has to be called, so `let f = "abc".len;` is an error. A
 call to one is compiled as a plain function call with the value as the first
 argument.
@@ -256,6 +255,7 @@ The standard library implements these traits:
 | signed integers, `f64`, `f32` | `Neg`                                                   |
 | `string`                      | `Display`, `Eq`, `Default`, `Add`                       |
 | `bool`                        | `Display`, `Eq`, `Default`                              |
+| `unit`                        | `Display` (`nil`), `Eq`, `Ord`, `Default`               |
 
 `string` has no `Ord` because there is no `<` on strings yet, and `bool` has no `Ord`. `cmp` returns `-1`, `0` or `1`.
 Trait impls on a primitive can't be used with a bounded type parameter yet.

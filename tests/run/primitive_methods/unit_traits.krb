@@ -1,0 +1,7 @@
+fun main(): unit {
+  let u: unit = ();
+  @println(u.toString());
+  @println(u.equals(()));
+  @println(u.cmp(()));
+  @println(unit.default() == u);
+}

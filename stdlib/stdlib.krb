@@ -819,3 +819,19 @@ impl Eq for bool {
 impl Default for bool {
     fun default(): Self = false;
 }
+
+impl Display for unit {
+    fun toString(self): string = "nil";
+}
+
+impl Eq for unit {
+    fun equals(self, other: Self): bool = true;
+}
+
+impl Ord for unit {
+    fun cmp(self, other: Self): i64 = 0;
+}
+
+impl Default for unit {
+    fun default(): Self = ();
+}

@@ -1,3 +1,4 @@
+#include <assert.h>
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -2196,6 +2197,8 @@ static const char *typchkPrimitiveOwner(const Type *type) {
     return "string";
   case TYPE_BOOL:
     return "bool";
+  case TYPE_UNIT:
+    return "unit";
   case TYPE_NUMBER:
     return numberKindInfo(type->as.number.kind)->name;
   default:
@@ -2335,12 +2338,7 @@ static bool typchkInferPrimitiveStaticGet(TypeEnv *env, GetNode *get,
   *result = NULL;
 
   const char *owner = typchkPrimitiveOwner(primitive);
-
-  if (owner == NULL) {
-    typchkErrorAtTokenFmt(&get->name, "'%.*s' has no static methods.",
-                          name->length, name->start);
-    return true;
-  }
+  assert(owner != NULL);
 
   PrimitiveMethod *method =
       typchkPrimitiveTraitMethodLookup(env, owner, get->name, NULL);
@@ -3953,12 +3951,7 @@ static void typchkRegisterPrimitiveTraitImpl(TypeEnv *env, AstNode *node,
   }
 
   const char *owner = typchkPrimitiveOwner(primitive);
-
-  if (owner == NULL) {
-    typchkErrorAtTokenFmt(&target, "Traits on '%.*s' aren't supported yet.",
-                          target.length, target.start);
-    return;
-  }
+  assert(owner != NULL);
 
   InternedName traitName = internTokenName(impl->traitName);
 
@@ -4179,12 +4172,7 @@ static void typchkRegisterPrimitiveImplMethods(TypeEnv *env, AstNode *node,
   }
 
   const char *owner = typchkPrimitiveOwner(primitive);
-
-  if (owner == NULL) {
-    typchkErrorAtTokenFmt(&target, "Methods on '%.*s' aren't supported yet.",
-                          target.length, target.start);
-    return;
-  }
+  assert(owner != NULL);
 
   impl->primitiveOwner = owner;
 

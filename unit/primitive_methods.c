@@ -23,6 +23,7 @@ static const Kind kinds[] = {
     {"bool", "true"}, {"string", "\"hi\""}, {"i64", "7"}, {"i32", "7"},
     {"i16", "7"},     {"i8", "7"},          {"u64", "7"}, {"u32", "7"},
     {"u16", "7"},     {"u8", "7"},          {"f64", "7"}, {"f32", "7"},
+    {"unit", "()"},
 };
 
 static const int kindCount = (int)(sizeof(kinds) / sizeof(kinds[0]));
@@ -154,16 +155,6 @@ static void test_only_the_stdlib_adds_methods(void) {
     assert(run(program, false) == INTERPRET_COMPILE_ERROR);
     free(program);
   }
-
-  end();
-}
-
-static void test_unit_has_no_methods(void) {
-  begin();
-
-  typchkResetError();
-  assert(run("impl unit { pub fun nope(self): unit {} }", true) ==
-         INTERPRET_COMPILE_ERROR);
 
   end();
 }
@@ -396,12 +387,6 @@ static void test_only_the_stdlib_implements_traits_for_primitives(void) {
     free(program);
   }
 
-  expectError("impl Tag for unit {\n"
-              "  fun tag(self): string = \"x\";\n"
-              "  fun make(): Self = ();\n"
-              "}",
-              true);
-
   end();
 }
 
@@ -588,7 +573,6 @@ int main(void) {
   test_every_kind_can_have_methods();
   test_a_method_belongs_to_one_kind();
   test_only_the_stdlib_adds_methods();
-  test_unit_has_no_methods();
   test_every_kind_can_implement_a_trait();
   test_methods_fail_like_their_operators();
   test_self_calls_a_static_method_of_the_primitive();
