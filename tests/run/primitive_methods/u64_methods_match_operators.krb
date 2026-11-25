@@ -1,0 +1,14 @@
+fun main(): unit {
+  let a: u64 = 7;
+  let b: u64 = 3;
+  @println(a.add(b) == a + b);
+  @println(a.sub(b) == a - b);
+  @println(a.mul(b) == a * b);
+  @println(a.div(b) == a / b);
+  @println(a.mod(b) == a % b);
+  @println(a.equals(b) == (a == b));
+  @println(a.equals(a) == (a == a));
+  @println((a.cmp(b) == 1) == (a > b));
+  @println((b.cmp(a) == -1) == (b < a));
+  @println((a.cmp(a) == 0) == (a == a));
+}

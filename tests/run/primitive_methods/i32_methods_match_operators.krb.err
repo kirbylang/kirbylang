@@ -1,0 +1,136 @@
+== <script> ==
+0000   15 OP_CLOSURE          1 <fn main>
+0002    | OP_DEFINE_GLOBAL    0 'main'
+0004   16 OP_NIL
+0005    | OP_RETURN
+== main ==
+0000    2 OP_CONSTANT         0 '7'
+0002    3 OP_CONSTANT         1 '3'
+0004    4 OP_GET_GLOBAL       2 '@println'
+0006    | OP_GET_GLOBAL       3 'i32.Add.add'
+0008    | OP_GET_LOCAL        1
+0010    | OP_GET_LOCAL        2
+0012    | OP_CALL             2
+0014    | OP_GET_LOCAL        1
+0016    | OP_GET_LOCAL        2
+0018    | OP_ADD
+0019    | OP_EQUAL
+0020    | OP_CALL             1
+0022    | OP_POP
+0023    5 OP_GET_GLOBAL       2 '@println'
+0025    | OP_GET_GLOBAL       4 'i32.Sub.sub'
+0027    | OP_GET_LOCAL        1
+0029    | OP_GET_LOCAL        2
+0031    | OP_CALL             2
+0033    | OP_GET_LOCAL        1
+0035    | OP_GET_LOCAL        2
+0037    | OP_SUBTRACT
+0038    | OP_EQUAL
+0039    | OP_CALL             1
+0041    | OP_POP
+0042    6 OP_GET_GLOBAL       2 '@println'
+0044    | OP_GET_GLOBAL       5 'i32.Mul.mul'
+0046    | OP_GET_LOCAL        1
+0048    | OP_GET_LOCAL        2
+0050    | OP_CALL             2
+0052    | OP_GET_LOCAL        1
+0054    | OP_GET_LOCAL        2
+0056    | OP_MULTIPLY
+0057    | OP_EQUAL
+0058    | OP_CALL             1
+0060    | OP_POP
+0061    7 OP_GET_GLOBAL       2 '@println'
+0063    | OP_GET_GLOBAL       6 'i32.Div.div'
+0065    | OP_GET_LOCAL        1
+0067    | OP_GET_LOCAL        2
+0069    | OP_CALL             2
+0071    | OP_GET_LOCAL        1
+0073    | OP_GET_LOCAL        2
+0075    | OP_DIVIDE
+0076    | OP_EQUAL
+0077    | OP_CALL             1
+0079    | OP_POP
+0080    8 OP_GET_GLOBAL       2 '@println'
+0082    | OP_GET_GLOBAL       7 'i32.Mod.mod'
+0084    | OP_GET_LOCAL        1
+0086    | OP_GET_LOCAL        2
+0088    | OP_CALL             2
+0090    | OP_GET_LOCAL        1
+0092    | OP_GET_LOCAL        2
+0094    | OP_MODULO
+0095    | OP_EQUAL
+0096    | OP_CALL             1
+0098    | OP_POP
+0099    9 OP_GET_GLOBAL       2 '@println'
+0101    | OP_GET_GLOBAL       8 'i32.Eq.equals'
+0103    | OP_GET_LOCAL        1
+0105    | OP_GET_LOCAL        2
+0107    | OP_CALL             2
+0109    | OP_GET_LOCAL        1
+0111    | OP_GET_LOCAL        2
+0113    | OP_EQUAL
+0114    | OP_EQUAL
+0115    | OP_CALL             1
+0117    | OP_POP
+0118   10 OP_GET_GLOBAL       2 '@println'
+0120    | OP_GET_GLOBAL       8 'i32.Eq.equals'
+0122    | OP_GET_LOCAL        1
+0124    | OP_GET_LOCAL        1
+0126    | OP_CALL             2
+0128    | OP_GET_LOCAL        1
+0130    | OP_GET_LOCAL        1
+0132    | OP_EQUAL
+0133    | OP_EQUAL
+0134    | OP_CALL             1
+0136    | OP_POP
+0137   11 OP_GET_GLOBAL       2 '@println'
+0139    | OP_GET_GLOBAL       9 'i32.Ord.cmp'
+0141    | OP_GET_LOCAL        1
+0143    | OP_GET_LOCAL        2
+0145    | OP_CALL             2
+0147    | OP_CONSTANT        10 '1'
+0149    | OP_EQUAL
+0150    | OP_GET_LOCAL        1
+0152    | OP_GET_LOCAL        2
+0154    | OP_GREATER
+0155    | OP_EQUAL
+0156    | OP_CALL             1
+0158    | OP_POP
+0159   12 OP_GET_GLOBAL       2 '@println'
+0161    | OP_GET_GLOBAL       9 'i32.Ord.cmp'
+0163    | OP_GET_LOCAL        2
+0165    | OP_GET_LOCAL        1
+0167    | OP_CALL             2
+0169    | OP_CONSTANT        10 '1'
+0171    | OP_NEGATE
+0172    | OP_EQUAL
+0173    | OP_GET_LOCAL        2
+0175    | OP_GET_LOCAL        1
+0177    | OP_LESS
+0178    | OP_EQUAL
+0179    | OP_CALL             1
+0181    | OP_POP
+0182   13 OP_GET_GLOBAL       2 '@println'
+0184    | OP_GET_GLOBAL       9 'i32.Ord.cmp'
+0186    | OP_GET_LOCAL        1
+0188    | OP_GET_LOCAL        1
+0190    | OP_CALL             2
+0192    | OP_CONSTANT        11 '0'
+0194    | OP_EQUAL
+0195    | OP_GET_LOCAL        1
+0197    | OP_GET_LOCAL        1
+0199    | OP_EQUAL
+0200    | OP_EQUAL
+0201    | OP_CALL             1
+0203    | OP_POP
+0204   14 OP_GET_GLOBAL       2 '@println'
+0206    | OP_GET_GLOBAL      12 'i32.Neg.neg'
+0208    | OP_GET_LOCAL        1
+0210    | OP_CALL             1
+0212    | OP_GET_LOCAL        1
+0214    | OP_NEGATE
+0215    | OP_EQUAL
+0216    | OP_CALL             1
+0218    | OP_POP
+0219   15 OP_NIL
+0220    | OP_RETURN

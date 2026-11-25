@@ -4,11 +4,13 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/wait.h>
 #include <unistd.h>
 
 #include "../src/ast.h"
 #include "../src/compiler.h"
 #include "../src/parser.h"
+#include "../src/stdlib_source.h"
 #include "../src/typecheck.h"
 #include "../src/vm.h"
 
@@ -57,6 +59,19 @@ static char *format(const char *pattern, const char *type, const char *value) {
   return out;
 }
 
+// Starts a session that has the real standard library loaded
+static void beginWithStdlib(void);
+
+// Like `format`, with up to four values as `%1$s` to `%4$s`
+static char *formatMany(const char *pattern, const char *first,
+                        const char *second, const char *third,
+                        const char *fourth) {
+  char *out = (char *)malloc(1024);
+  assert(out != NULL);
+  snprintf(out, 1024, pattern, first, second, third, fourth);
+  return out;
+}
+
 static void begin(void) {
   initVM(0, NULL);
   typchkResetError();
@@ -68,6 +83,11 @@ static void end(void) {
   typchkResetError();
   compilerSessionEnd();
   freeVM();
+}
+
+static void beginWithStdlib(void) {
+  begin();
+  assert(run(KIRBY_STDLIB, true) == INTERPRET_OK);
 }
 
 static void test_every_kind_can_have_methods(void) {
@@ -446,12 +466,131 @@ static void test_self_calls_a_static_method_of_the_primitive(void) {
   end();
 }
 
+// A run time error ends the process, so the source runs in a child process
+// that has the real standard library loaded. Returns the first line it wrote to
+// stderr, which the caller frees.
+static char *firstErrorLine(const char *source) {
+  fflush(stderr);
+  FILE *capture = tmpfile();
+  assert(capture != NULL);
+
+  pid_t child = fork();
+  assert(child >= 0);
+
+  if (child == 0) {
+    dup2(fileno(capture), STDERR_FILENO);
+    beginWithStdlib();
+    run(source, false);
+    fflush(stderr);
+    _exit(0);
+  }
+
+  int status = 0;
+  waitpid(child, &status, 0);
+
+  fseek(capture, 0, SEEK_END);
+  long size = ftell(capture);
+  char *text = (char *)calloc((size_t)size + 1, 1);
+  rewind(capture);
+  size_t got = fread(text, 1, (size_t)size, capture);
+  assert((long)got == size);
+  fclose(capture);
+
+  char *end = strchr(text, '\n');
+  if (end != NULL)
+    *end = '\0';
+  return text;
+}
+
+typedef struct {
+  const char *type;
+  const char *min;
+  const char *max;
+  bool isSigned;
+} IntegerKind;
+
+static const IntegerKind integerKinds[] = {
+    {"i8", "-128", "127", true},
+    {"i16", "-32768", "32767", true},
+    {"i32", "-2147483648", "2147483647", true},
+    {"i64", "-9223372036854775807 - 1", "9223372036854775807", true},
+    {"u8", "0", "255", false},
+    {"u16", "0", "65535", false},
+    {"u32", "0", "4294967295", false},
+    {"u64", "0", "18446744073709551615", false},
+};
+
+// A method and its operator must fail with the same message
+static void expectSameError(const char *type, const char *left,
+                            const char *right, const char *method,
+                            const char *op) {
+  char *viaMethod = formatMany("if (true) {\n"
+                               "let a: %1$s = %2$s;\n"
+                               "let b: %1$s = %3$s;\n"
+                               "@println(a.%4$s(b));\n"
+                               "}",
+                               type, left, right, method);
+  char *viaOperator = formatMany("if (true) {\n"
+                                 "let a: %1$s = %2$s;\n"
+                                 "let b: %1$s = %3$s;\n"
+                                 "@println(a %4$s b);\n"
+                                 "}",
+                                 type, left, right, op);
+
+  char *fromMethod = firstErrorLine(viaMethod);
+  char *fromOperator = firstErrorLine(viaOperator);
+
+  assert(fromMethod[0] != '\0');
+  assert(strcmp(fromMethod, fromOperator) == 0);
+
+  free(viaMethod);
+  free(viaOperator);
+  free(fromMethod);
+  free(fromOperator);
+}
+
+static void test_methods_fail_like_their_operators(void) {
+  for (size_t i = 0; i < sizeof(integerKinds) / sizeof(integerKinds[0]); i++) {
+    const IntegerKind *kind = &integerKinds[i];
+
+    expectSameError(kind->type, kind->max, "1", "add", "+");
+    expectSameError(kind->type, kind->min, "1", "sub", "-");
+    expectSameError(kind->type, kind->max, "2", "mul", "*");
+    expectSameError(kind->type, "1", "0", "div", "/");
+    expectSameError(kind->type, "1", "0", "mod", "%");
+
+    if (kind->isSigned) {
+      char *viaMethod = format("if (true) {\n"
+                               "let a: %1$s = %2$s;\n"
+                               "@println(a.neg());\n"
+                               "}",
+                               kind->type, kind->min);
+      char *viaOperator = format("if (true) {\n"
+                                 "let a: %1$s = %2$s;\n"
+                                 "@println(-a);\n"
+                                 "}",
+                                 kind->type, kind->min);
+      char *fromMethod = firstErrorLine(viaMethod);
+      char *fromOperator = firstErrorLine(viaOperator);
+
+      assert(fromMethod[0] != '\0');
+      assert(strcmp(fromMethod, fromOperator) == 0);
+
+      free(viaMethod);
+      free(viaOperator);
+      free(fromMethod);
+      free(fromOperator);
+    }
+  }
+}
+
 int main(void) {
   test_every_kind_can_have_methods();
   test_a_method_belongs_to_one_kind();
   test_only_the_stdlib_adds_methods();
   test_unit_has_no_methods();
   test_every_kind_can_implement_a_trait();
+  test_methods_fail_like_their_operators();
   test_self_calls_a_static_method_of_the_primitive();
   test_a_trait_impl_must_match_its_trait();
   test_a_kind_implements_a_trait_once();
