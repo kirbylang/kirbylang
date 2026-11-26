@@ -1,0 +1,6 @@
+fun join[T](a: [T; 2], b: [T; 2]): [T] = a.concat(b);
+
+fun main(): unit {
+    @println(join([1, 2], [3, 4]));
+    @println(join(["a", "b"], ["c", "d"]));
+}
