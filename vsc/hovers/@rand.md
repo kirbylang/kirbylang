@@ -7,7 +7,7 @@ Get a random number.
 ## Usage
 
 ```kirby
-@println(@rand()); // 1145892349
+@println(@rand()); // for example, 1145892349
 ```
 
 ## Reference

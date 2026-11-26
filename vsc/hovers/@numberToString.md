@@ -7,8 +7,8 @@ Convert a number of any type to a string.
 ## Usage
 
 ```kirby
-@println(@numberToString(123)); // "123"
-@println(@numberToString(255u8)); // "255"
+@println(@numberToString(123)); // 123
+@println(@numberToString(255u8)); // 255
 ```
 
 ## Reference

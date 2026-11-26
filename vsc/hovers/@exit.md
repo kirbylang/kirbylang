@@ -2,7 +2,7 @@
 native fun @exit(code: i64): unit;
 ```
 
-Exit with an exit code.
+Exit with an exit code, from `0` to `255`.
 
 ## Usage
 

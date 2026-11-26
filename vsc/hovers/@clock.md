@@ -2,7 +2,7 @@
 native fun @clock(): f64;
 ```
 
-Get the number of seconds that have passed since the program started.
+Get the processor time the program has used, in seconds. Time spent waiting, such as for input, isn't counted.
 
 ## Usage
 

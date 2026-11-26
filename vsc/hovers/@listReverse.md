@@ -2,7 +2,7 @@
 native fun @listReverse[T](list: [T]): [T];
 ```
 
-Get a new list with the items in the opposite order.
+Get a new list with the items in the opposite order. The original list isn't changed.
 
 ## Usage
 

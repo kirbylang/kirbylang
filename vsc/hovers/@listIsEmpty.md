@@ -7,8 +7,8 @@ Returns if a list is empty or not.
 ## Usage
 
 ```kirby
-@println(@listIsEmpty([]));
-@println(@listIsEmpty([1, 2, 3]));
+@println(@listIsEmpty([])); // true
+@println(@listIsEmpty([1, 2, 3])); // false
 ```
 
 ## Reference

@@ -7,7 +7,7 @@ Get a random number from 0 to 1.
 ## Usage
 
 ```kirby
-@println(@rand01()); // 0.22301528985752506
+@println(@rand01()); // for example, 0.22301528985752506
 ```
 
 ## Reference

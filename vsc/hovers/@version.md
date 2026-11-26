@@ -7,7 +7,7 @@ Get the current version of the kirby language.
 ## Usage
 
 ```kirby
-@println(@version());
+@println(@version()); // for example, 0.4.0
 ```
 
 ## Reference

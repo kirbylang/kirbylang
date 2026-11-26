@@ -2,7 +2,7 @@
 native fun @strToBytes(text: string): [u8];
 ```
 
-Convert a string to an array of `u8` bytes, one element per byte, in order. The elements are `u8`, so bytes 128..255 are preserved.
+Convert a string to a list of `u8` bytes, one element per byte, in order. The elements are `u8`, so bytes 128..255 are preserved.
 
 ## Usage
 

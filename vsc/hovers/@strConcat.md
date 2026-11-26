@@ -2,12 +2,13 @@
 native fun @strConcat(parts: [string]): string;
 ```
 
-Concatenate an array of strings into one string. Every element must already be a string.
+Concatenate a list of strings into one string. Every element must already be a string.
 
 ## Usage
 
 ```kirby
 @println(@strConcat(["Hello", ", ", "World"])); // Hello, World
+@println(@strConcat([])); // an empty string
 ```
 
 ## Reference

@@ -2,7 +2,7 @@
 native fun @listSlice[T](list: [T], start: integer, end: integer): [T];
 ```
 
-Copy the items from `start` up to, not including, `end` into a new list.
+Copy the items from `start` up to, but not including, `end` into a new list. `start` must be before `end`.
 
 ## Usage
 

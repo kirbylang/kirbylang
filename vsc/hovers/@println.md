@@ -1,4 +1,4 @@
-Write a value to stdout, the way `print` does, followed by a newline. A struct that implements `Display` is written with its `toString()`.
+Write a value to stdout, followed by a newline. A struct that implements `Display` is written with its `toString()`.
 
 ## Usage
 

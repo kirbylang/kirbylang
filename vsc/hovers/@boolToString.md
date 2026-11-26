@@ -7,7 +7,7 @@ Convert a boolean to a string.
 ## Usage
 
 ```kirby
-@println(@boolToString(true)); // "true"
+@println(@boolToString(true)); // true
 ```
 
 ## Reference

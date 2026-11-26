@@ -7,7 +7,7 @@ Get a random whole number from min to max, as an `i64`.
 ## Usage
 
 ```kirby
-@println(@randBetween(1, 10)); // 3
+@println(@randBetween(1, 10)); // for example, 3
 ```
 
 ## Reference

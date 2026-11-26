@@ -2,7 +2,7 @@
 native fun @listEqual[T](a: [T], b: [T]): bool;
 ```
 
-Shallow compares two lists' values for equality.
+Shallow compares two lists' values for equality. A list or struct held inside is only equal to itself, not to a copy with the same contents.
 
 ## Usage
 
@@ -14,6 +14,10 @@ var c = @listCopy(a);
 @println(@listEqual(a, b)); // true
 @println(@listEqual(b, c)); // true
 @println(@listEqual(a, c)); // true
+
+c[0] = 100;
+
+@println(@listEqual(a, c)); // false
 ```
 
 ## Reference

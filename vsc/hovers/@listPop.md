@@ -2,7 +2,7 @@
 native fun @listPop[T](list: [T]): T;
 ```
 
-Remove and return the last value in a list.
+Remove and return the last value in a list. It is an error if the list is empty.
 
 ## Usage
 
