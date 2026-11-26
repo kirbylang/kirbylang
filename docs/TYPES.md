@@ -197,6 +197,111 @@ checked.
 
 A generic function is compiled once, and the same code runs for every type.
 
+### Methods On Primitive Types
+
+A primitive type has methods that are written in Kirby, in an `impl` block in
+the standard library:
+
+```
+impl string {
+    pub fun len(self): i64 = @strLen(self);
+}
+```
+
+`"abc".len()` calls it. Only the standard library can write these blocks, and
+the parser rejects them in a user file with `You can't write an impl for a
+primitive type in user code.`. They
+work for `string`, `bool`, `unit` and every number kind (`i64`, `u8`, `f64` and
+the rest), with methods that take `self`. Lists and arrays have them too, see
+[Methods On Lists And Arrays](#methods-on-lists-and-arrays). A method belongs to its own type, so a method of `f64` can't be called
+on an `i64`. A method has to be called, so `let f = "abc".len;` is an error. A
+call to one is compiled as a plain function call with the value as the first
+argument.
+
+The number types have these methods:
+
+| Type                       | Methods                                                              |
+| -------------------------- | -------------------------------------------------------------------- |
+| `f64`                      | `abs`, `ceil`, `floor`, `max`, `min`, `pow`, `round`, `sqrt`, `trunc` |
+| `f32`                      | the same as `f64`                                                    |
+| `i8`, `i16`, `i32`, `i64`  | `abs`, `max`, `min`                                                  |
+| `u8`, `u16`, `u32`, `u64`  | `max`, `min`                                                         |
+
+The `f64` methods do what the native functions of the same name do. An `f32`
+method does its math as an `f64` and converts the result back, so a result that
+doesn't fit in an `f32` is an error. An integer `abs` of the smallest value, such
+as `-128` for an `i8`, is an overflow error. `bool` has no methods yet.
+
+Inside the block, `Self` is the primitive type, so `other: Self` is a `u8`
+in `impl u8`. A primitive has no fields or static methods, so `Self { }`
+and `Self.name()` are errors.
+
+The standard library can also implement a trait for these types:
+
+```
+impl Display for string {
+    fun toString(self): string = self;
+}
+```
+
+`"abc".toString()` is a plain call of the function `string.Display.toString`.
+The impl must give every method the trait asks for, with the trait's signature,
+and a type implements a trait once. A trait with a supertrait needs an impl of
+the supertrait too. A method of the type itself wins over a trait method of the
+same name. A static method of a trait is called on the type's name: `f64.default()` is `0`. Inside the impl, `Self.default()` does the same. A variable with the same name as the type wins over the type name.
+
+The standard library implements these traits:
+
+| Type                          | Traits                                                  |
+| ----------------------------- | ------------------------------------------------------- |
+| every number type             | `Display`, `Eq`, `Ord`, `Default`, `Add`, `Sub`, `Mul`, `Div`, `Mod` |
+| signed integers, `f64`, `f32` | `Neg`                                                   |
+| `string`                      | `Display`, `Eq`, `Default`, `Add`                       |
+| `bool`                        | `Display`, `Eq`, `Default`                              |
+| `unit`                        | `Display` (`nil`), `Eq`, `Ord`, `Default`               |
+
+`string` has no `Ord` because there is no `<` on strings yet, and `bool` has no `Ord`. `cmp` returns `-1`, `0` or `1`.
+Trait impls on a primitive can't be used with a bounded type parameter yet.
+
+#### Methods On Lists And Arrays
+
+A list or an array has methods in the same way, with the item type as a type
+parameter. `impl [T]` is for every list and `impl [T; N]` for every array:
+
+```
+impl [T] {
+    pub fun len(self): i64 = @listLen(self);
+    pub fun copy(self): [T] = @listCopy(self);
+}
+
+impl [T; N] {
+    pub fun len(self): i64 = @arrLen(self);
+    pub fun copy(self): [T; N] = @arrCopy(self);
+}
+```
+
+`T` stands for the item type of the value the method is called on, so `first`
+of `[string]` gives a `string`. `N` stands for an array's length, so `copy` of a
+`[i64; 3]` gives a `[i64; 3]`. An impl that doesn't need the length writes `_`
+(`impl [T; _]`), and then no signature can mention it. The length is written
+as a name and never a number, and the name is `N` or `_`. Type parameters of
+the method itself come after `T`, as in `fun pick[U](self, extra: U): U`, and
+`Self` is the receiver's type. `impl [T]` and `impl [T; N]` are separate, so the
+same method name can be in both.
+
+A list gets `len`, `isEmpty`, `push`, `pop`, `insert`, `remove`, `clear`,
+`contains`, `copy`, `reverse`, `slice` and `concat`. An array gets `len`,
+`contains`, `copy`, `reverse`, `slice`, `concat` and `toList`. Each calls the
+native function of the same name. The ones that return a list (`slice`,
+`concat`, `toList` of an array) return a list and not an array.
+
+The same limits as the other primitives apply. Only the standard library can
+write these blocks, and a user file gets `You can't write an impl for a
+primitive type in user code.`. The item has to be a type parameter, so `impl [string]` is
+an error. There are no static methods, and a list or array can't fill a bounded
+type parameter yet. A trait impl, such as `impl Display for [T]`, gives every
+list the trait with no condition on `T`, because an impl can't have bounds.
+
 ### Traits
 
 A trait declares required methods for a struct to implement.
@@ -219,6 +324,51 @@ fun main(): unit {
     @println((Point { x: 1, y: 2 }).toString());
 }
 ```
+
+#### Calling A Trait's Method By Name
+
+When a type has a method of its own with the same name as a trait's method, the
+type's own method wins, so `point.toString()` calls it. `Trait.method(value)`
+calls the trait's version instead:
+
+```
+struct Point {
+    pub var x: f64;
+    pub var y: f64;
+}
+
+impl Point {
+    pub fun toString(self): string = "own";
+}
+
+impl Display for Point {
+    fun toString(self): string = "trait";
+}
+
+fun main(): unit {
+    let p = Point { x: 1, y: 2 };
+
+    @println(p.toString());           // own
+    @println(Display.toString(p));    // trait
+}
+```
+
+The value is the first argument, and the others follow it, so
+`Scale.scale(a, 3)` is the trait's `scale` called on `a` with `3`. It works for
+a struct, for a primitive that implements the trait (`Display.toString(7)`), and
+for a value of a type parameter whose bound includes the trait. It is an error
+when the value's type doesn't implement the trait (`i64 doesn't implement
+Greet.`), when the trait has no such method, and for a static method of the
+trait, which is called on a type. A trait's method has to be called, so
+`let f = Greet.hello;` is an error.
+
+Code that is written for a trait always runs the trait's version. A call
+through a type parameter's bound (`x.toString()` with `T: Display`), an
+operator (`a + b` runs `Add`'s `add`, `==` runs `Eq`'s `equals`) and printing
+(`@println(point)` and `$"{point}"` run `Display`'s `toString`) all do, even
+when the type has its own method with the same name. At run time a struct keeps
+each trait method under its plain name and also under the trait's name, such as
+`Display.toString`, and these calls use the second.
 
 #### Builtin traits
 
@@ -400,9 +550,10 @@ trait Ord: Eq {
 
 #### Limitations
 
-- Traits can only be implemented for structs currently
-- Only numbers have the operator traits built in. `string` and `bool` can't implement `Eq` or `Ord` yet, because primitives can't implement traits
-- If a struct's impl block implements a method of the same name as a trait, the struct's impl method is what is called. A future change will allow `Trait.method(struct)` to be used to fully qualify the trait versions of the method.
+- Traits can be implemented for structs, and by the standard library for `string`, `bool`, `unit`, the number kinds, lists and arrays. Other code can't implement a trait for a primitive, and a primitive can't yet be used where a type parameter has a trait bound (except numbers and the operator traits)
+- Only numbers have the operator traits built in. `string` and `bool` implement `Eq` in the standard library, but can't be used where a type parameter has a bound yet. Neither has `Ord`
+- If a struct's impl block implements a method of the same name as a trait, `value.method()` calls the struct's own method. Use `Trait.method(value)` to call the trait's version, see [Calling A Trait's Method By Name](#calling-a-traits-method-by-name).
+- Two traits can't both provide a method of the same name to one struct, and a name can't be both an instance method and a static method on one type. Both are compile errors.
 
 #### Known Bugs
 
@@ -532,9 +683,10 @@ trait method at runtime, which for a number is a built-in method (`add`, `sub`,
 
 - The trait has to exist, and a struct name isn't a trait:
   `Unknown trait 'Nope'.` A trait can be declared after the function that uses it.
-- A primitive can't implement a trait yet, so `string`, `bool` and the other
-  primitives can't fill a bounded parameter. Numbers can fill a parameter
-  bounded by an operator trait only.
+- A primitive can't fill a bounded parameter yet, even though the standard
+  library implements traits for `string`, `bool` and every number kind
+  (`string implements Display, but a primitive can't be used with a bound
+  yet`). Numbers can fill a parameter bounded by an operator trait only.
 - A static trait method can't be called through a bound. `T.default()` is an
   error: `Can't call a static method on type parameter 'T'.` This needs a
   separate copy of the function for each type, which is not implemented.

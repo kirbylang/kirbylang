@@ -1,0 +1,4 @@
+fun main(): unit {
+    let a: u8 = 3;
+    @println(a.min());
+}

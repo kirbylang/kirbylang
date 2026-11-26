@@ -9,14 +9,14 @@
 0015    3 OP_POP
 0016    5 OP_GET_GLOBAL       2 'Box'
 0018    6 OP_CLOSURE          5 <fn default>
-0020    | OP_METHOD           4 'default'
-0022    7 OP_POP
-0023    9 OP_GET_GLOBAL       2 'Box'
-0025   10 OP_CLOSURE          7 <fn equals>
-0027    | OP_METHOD           6 'equals'
-0029   11 OP_POP
-0030   24 OP_NIL
-0031    | OP_RETURN
+0020    | OP_TRAIT_METHOD     4 'default'    6 'Default.default'
+0023    7 OP_POP
+0024    9 OP_GET_GLOBAL       2 'Box'
+0026   10 OP_CLOSURE          8 <fn equals>
+0028    | OP_TRAIT_METHOD     7 'equals'    9 'Eq.equals'
+0031   11 OP_POP
+0032   24 OP_NIL
+0033    | OP_RETURN
 == main ==
 0000   13 OP_GET_GLOBAL       0 'Box'
 0002    | OP_INVOKE        (0 args)    1 'default'
@@ -25,37 +25,37 @@
 0010   16 OP_GET_GLOBAL       2 '@println'
 0012    | OP_GET_LOCAL        1
 0014    | OP_GET_LOCAL        1
-0016    | OP_INVOKE        (1 args)    3 'equals'
+0016    | OP_INVOKE        (1 args)    3 'Eq.equals'
 0019    | OP_CALL             1
 0021    | OP_POP
 0022   17 OP_GET_GLOBAL       2 '@println'
 0024    | OP_GET_LOCAL        1
 0026    | OP_GET_LOCAL        1
-0028    | OP_INVOKE        (1 args)    3 'equals'
+0028    | OP_INVOKE        (1 args)    4 'equals'
 0031    | OP_CALL             1
 0033    | OP_POP
 0034   19 OP_GET_GLOBAL       2 '@println'
 0036    | OP_GET_LOCAL        2
 0038    | OP_GET_LOCAL        2
-0040    | OP_INVOKE        (1 args)    3 'equals'
+0040    | OP_INVOKE        (1 args)    3 'Eq.equals'
 0043    | OP_CALL             1
 0045    | OP_POP
 0046   20 OP_GET_GLOBAL       2 '@println'
 0048    | OP_GET_LOCAL        2
 0050    | OP_GET_LOCAL        2
-0052    | OP_INVOKE        (1 args)    3 'equals'
+0052    | OP_INVOKE        (1 args)    4 'equals'
 0055    | OP_CALL             1
 0057    | OP_POP
 0058   22 OP_GET_GLOBAL       2 '@println'
 0060    | OP_GET_LOCAL        1
 0062    | OP_GET_LOCAL        2
-0064    | OP_INVOKE        (1 args)    3 'equals'
+0064    | OP_INVOKE        (1 args)    3 'Eq.equals'
 0067    | OP_CALL             1
 0069    | OP_POP
 0070   23 OP_GET_GLOBAL       2 '@println'
 0072    | OP_GET_LOCAL        1
 0074    | OP_GET_LOCAL        2
-0076    | OP_INVOKE        (1 args)    3 'equals'
+0076    | OP_INVOKE        (1 args)    4 'equals'
 0079    | OP_CALL             1
 0081    | OP_POP
 0082    | OP_NIL

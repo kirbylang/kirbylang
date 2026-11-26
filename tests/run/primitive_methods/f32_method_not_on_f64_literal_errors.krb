@@ -1,0 +1,4 @@
+fun main(): unit {
+    let a: f32 = 2.0f32;
+    @println(a.max(2.0));
+}

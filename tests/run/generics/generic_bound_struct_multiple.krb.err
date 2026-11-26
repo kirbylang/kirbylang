@@ -17,18 +17,18 @@
 0032   16 OP_POP
 0033    5 OP_GET_GLOBAL       2 'Money'
 0035    6 OP_CLOSURE          8 <fn toString>
-0037    | OP_METHOD           7 'toString'
-0039    7 OP_POP
-0040    9 OP_GET_GLOBAL       2 'Money'
-0042   10 OP_CLOSURE         10 <fn equals>
-0044    | OP_METHOD           9 'equals'
-0046   11 OP_POP
-0047   18 OP_GET_GLOBAL       4 'Pair'
-0049   25 OP_CLOSURE         12 <fn describe>
-0051    | OP_METHOD          11 'describe'
-0053   26 OP_POP
-0054   32 OP_NIL
-0055    | OP_RETURN
+0037    | OP_TRAIT_METHOD     7 'toString'    9 'Display.toString'
+0040    7 OP_POP
+0041    9 OP_GET_GLOBAL       2 'Money'
+0043   10 OP_CLOSURE         11 <fn equals>
+0045    | OP_TRAIT_METHOD    10 'equals'   12 'Eq.equals'
+0048   11 OP_POP
+0049   18 OP_GET_GLOBAL       4 'Pair'
+0051   25 OP_CLOSURE         14 <fn describe>
+0053    | OP_METHOD          13 'describe'
+0055   26 OP_POP
+0056   32 OP_NIL
+0057    | OP_RETURN
 == main ==
 0000   29 OP_GET_GLOBAL       0 'Pair'
 0002    | OP_CONSTANT         1 'left'
@@ -71,13 +71,13 @@
 0002    | OP_GET_PROPERTY     0 'left'
 0004    | OP_GET_LOCAL        0
 0006    | OP_GET_PROPERTY     2 'right'
-0008    | OP_INVOKE        (1 args)    1 'equals'
+0008    | OP_INVOKE        (1 args)    1 'Eq.equals'
 0011    | OP_JUMP_IF_FALSE   11 -> 34
 0014    | OP_POP
 0015   21 OP_GET_GLOBAL       3 '@strConcat'
 0017    | OP_GET_LOCAL        0
 0019    | OP_GET_PROPERTY     0 'left'
-0021    | OP_INVOKE        (0 args)    4 'toString'
+0021    | OP_INVOKE        (0 args)    4 'Display.toString'
 0024    | OP_CONSTANT         5 ' twice'
 0026    | OP_LIST             2
 0028    | OP_CALL             1
@@ -87,11 +87,11 @@
 0035   24 OP_GET_GLOBAL       3 '@strConcat'
 0037    | OP_GET_LOCAL        0
 0039    | OP_GET_PROPERTY     0 'left'
-0041    | OP_INVOKE        (0 args)    4 'toString'
+0041    | OP_INVOKE        (0 args)    4 'Display.toString'
 0044    | OP_CONSTANT         6 ' and '
 0046    | OP_GET_LOCAL        0
 0048    | OP_GET_PROPERTY     2 'right'
-0050    | OP_INVOKE        (0 args)    4 'toString'
+0050    | OP_INVOKE        (0 args)    4 'Display.toString'
 0053    | OP_LIST             3
 0055    | OP_CALL             1
 0057    | OP_RETURN

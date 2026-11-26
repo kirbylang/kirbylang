@@ -1,0 +1,4 @@
+fun main(): unit {
+    let lo: i64 = -9223372036854775807 - 1;
+    @println(lo.abs());
+}

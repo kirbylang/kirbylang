@@ -11,28 +11,28 @@
 0020    4 OP_POP
 0021    6 OP_GET_GLOBAL       2 'Point'
 0023    7 OP_CLOSURE          6 <fn equals>
-0025    | OP_METHOD           5 'equals'
-0027    8 OP_POP
-0028   10 OP_GET_GLOBAL       2 'Point'
-0030    | OP_CONSTANT         3 'x'
-0032    | OP_CONSTANT         8 '1'
-0034    | OP_CONSTANT         4 'y'
-0036    | OP_CONSTANT         9 '2'
-0038    | OP_STRUCT_INIT      2
-0040    | OP_DEFINE_GLOBAL    7 'a'
-0042   14 OP_NIL
-0043    | OP_RETURN
+0025    | OP_TRAIT_METHOD     5 'equals'    7 'Eq.equals'
+0028    8 OP_POP
+0029   10 OP_GET_GLOBAL       2 'Point'
+0031    | OP_CONSTANT         3 'x'
+0033    | OP_CONSTANT         9 '1'
+0035    | OP_CONSTANT         4 'y'
+0037    | OP_CONSTANT        10 '2'
+0039    | OP_STRUCT_INIT      2
+0041    | OP_DEFINE_GLOBAL    8 'a'
+0043   14 OP_NIL
+0044    | OP_RETURN
 == main ==
 0000   12 OP_GET_GLOBAL       0 '@println'
 0002    | OP_GET_GLOBAL       1 'a'
 0004    | OP_GET_GLOBAL       1 'a'
-0006    | OP_INVOKE        (1 args)    2 'equals'
+0006    | OP_INVOKE        (1 args)    2 'Eq.equals'
 0009    | OP_CALL             1
 0011    | OP_POP
 0012   13 OP_GET_GLOBAL       0 '@println'
 0014    | OP_GET_GLOBAL       1 'a'
 0016    | OP_GET_GLOBAL       1 'a'
-0018    | OP_INVOKE        (1 args)    2 'equals'
+0018    | OP_INVOKE        (1 args)    3 'equals'
 0021    | OP_CALL             1
 0023    | OP_POP
 0024    | OP_NIL

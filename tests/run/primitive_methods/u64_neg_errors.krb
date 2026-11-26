@@ -1,0 +1,4 @@
+fun main(): unit {
+  let a: u64 = 7;
+  @println(a.neg());
+}

@@ -1,0 +1,20 @@
+== <script> ==
+0000    4 OP_CLOSURE          1 <fn main>
+0002    | OP_DEFINE_GLOBAL    0 'main'
+0004    5 OP_NIL
+0005    | OP_RETURN
+== main ==
+0000    2 OP_CONSTANT         0 '-32767'
+0002    | OP_CONSTANT         1 '1'
+0004    | OP_SUBTRACT
+0005    3 OP_GET_GLOBAL       2 '@println'
+0007    | OP_GET_GLOBAL       3 'i16.abs'
+0009    | OP_GET_LOCAL        1
+0011    | OP_CALL             1
+0013    | OP_CALL             1
+0015    | OP_POP
+0016    4 OP_NIL
+0017    | OP_RETURN
+Integer overflow: -(-32768) doesn't fit in i16, which holds -32768 to 32767.
+[line 302] in abs()
+[line 3] in main()

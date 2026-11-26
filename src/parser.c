@@ -31,10 +31,12 @@ typedef struct {
    */
   int blockDepth;
   /**
-   * Whether an array type may name its length with a placeholder such as
-   * `[T; N]`. Only native function signatures do.
+   * Whether the source is the language's own: the standard library and the
+   * native function signatures. Only they can name an array's length with a
+   * placeholder such as `[T; N]`, and only they can write an impl for a
+   * primitive type.
    */
-  bool allowLengthPlaceholders;
+  bool isStdlib;
 } Parser;
 
 typedef enum {
@@ -1245,7 +1247,7 @@ static AstNode *parseType(Parser *p) {
     if (match(p, TOKEN_SEMICOLON)) {
       int length;
 
-      if (p->allowLengthPlaceholders && match(p, TOKEN_IDENTIFIER)) {
+      if (p->isStdlib && match(p, TOKEN_IDENTIFIER)) {
         length = parseArrayLengthPlaceholder(p);
       } else {
         consume(p, TOKEN_NUMBER, "Expect array length after ';'.");
@@ -1635,28 +1637,135 @@ static AstNode *structDeclaration(Parser *p) {
   return node;
 }
 
+// Whether `token` names a type the language defines, such as `string` or `u8`.
+static bool isPrimitiveImplTarget(const Token *token) {
+  NumberKind kind;
+
+  return tokenIsPrimitiveTypeName(token) ||
+         numberKindFromName(token->start, token->length, &kind);
+}
+
+// Only the standard library writes impls for the types the language defines.
+// Reported before the rest of the target is read. Returns true after reporting
+// it, and then the caller returns the result of skipRejectedImpl().
+static bool rejectPrimitiveImplInUserCode(Parser *p, Token *target) {
+  if (p->isStdlib)
+    return false;
+
+  parse_error_at(p, target,
+                 "You can't write an impl for a primitive type in user "
+                 "code.");
+  return true;
+}
+
+// Skips what is left of an impl that was rejected, up to its closing brace, so
+// the user sees no other error about it. Its node has no methods.
+static AstNode *skipRejectedImpl(Parser *p, Token target) {
+  while (!check(p, TOKEN_LEFT_BRACE) && !is_at_end(p))
+    advance(p);
+
+  int depth = 0;
+
+  while (!is_at_end(p)) {
+    if (check(p, TOKEN_LEFT_BRACE))
+      depth++;
+    else if (check(p, TOKEN_RIGHT_BRACE))
+      depth--;
+
+    advance(p);
+
+    if (depth == 0)
+      break;
+  }
+
+  AstNode *node = astAlloc(NODE_IMPL, target.line);
+  node->as.impl.targetName = target;
+  node->as.impl.endLine = p->previous.line;
+  return node;
+}
+
+// The `[T]` or `[T; N]` of `impl [T]` and `impl Trait for [T; N]`, after the
+// `[`. Writes the names it declares, and says which of the two it was.
+// `target` is the `[` token, and grows to cover the whole text up to `]`.
+static int parseImplListOrArrayTarget(Parser *p, Token *target, Token *names,
+                                      ImplTargetKind *kind) {
+  int count = 0;
+
+  consume(p, TOKEN_IDENTIFIER, "Expect the item type's name after '['.");
+  names[count++] = p->previous;
+  *kind = IMPL_TARGET_LIST;
+
+  if (match(p, TOKEN_SEMICOLON)) {
+    // A number is read here and reported by the type checker
+    if (!match(p, TOKEN_NUMBER)) {
+      consume(p, TOKEN_IDENTIFIER,
+              "Expect a name or '_' for the array's length.");
+    }
+
+    names[count++] = p->previous;
+    *kind = IMPL_TARGET_ARRAY;
+  }
+
+  consume(p, TOKEN_RIGHT_BRACKET, "Expect ']' after the type.");
+  target->length =
+      (int)(p->previous.start + p->previous.length - target->start);
+  return count;
+}
+
 static AstNode *implDeclaration(Parser *p) {
-  consume(p, TOKEN_IDENTIFIER, "Expect struct or trait name after 'impl'.");
-  Token name = p->previous;
-  int line = name.line;
-
+  Token name;
   Token genericParamBuf[256];
-  int genericParamCount = parseGenericParamList(
-      p, genericParamBuf, /*boundBuf=*/NULL,
-      "An impl's type parameters take their bounds from the struct.");
+  int genericParamCount = 0;
+  ImplTargetKind targetKind = IMPL_TARGET_NAME;
+  bool targetIsBracketed = match(p, TOKEN_LEFT_BRACKET);
 
+  if (targetIsBracketed) {
+    name = p->previous;
+
+    if (rejectPrimitiveImplInUserCode(p, &name))
+      return skipRejectedImpl(p, name);
+
+    genericParamCount =
+        parseImplListOrArrayTarget(p, &name, genericParamBuf, &targetKind);
+  } else {
+    consume(p, TOKEN_IDENTIFIER, "Expect struct or trait name after 'impl'.");
+    name = p->previous;
+
+    if (isPrimitiveImplTarget(&name) && rejectPrimitiveImplInUserCode(p, &name))
+      return skipRejectedImpl(p, name);
+
+    genericParamCount = parseGenericParamList(
+        p, genericParamBuf, /*boundBuf=*/NULL,
+        "An impl's type parameters take their bounds from the struct.");
+  }
+
+  int line = name.line;
   bool hasTraitName = false;
   Token traitName = name;
   Token targetName = name;
 
-  if (match(p, TOKEN_FOR)) {
+  if (!targetIsBracketed && match(p, TOKEN_FOR)) {
     hasTraitName = true;
     traitName = name;
 
-    consume(p, TOKEN_IDENTIFIER,
-            "Expect struct or primitive type name after 'for'.");
+    if (match(p, TOKEN_LEFT_BRACKET)) {
+      targetName = p->previous;
 
-    targetName = p->previous;
+      if (rejectPrimitiveImplInUserCode(p, &targetName))
+        return skipRejectedImpl(p, targetName);
+
+      genericParamCount = parseImplListOrArrayTarget(
+          p, &targetName, genericParamBuf, &targetKind);
+    } else {
+      consume(p, TOKEN_IDENTIFIER,
+              "Expect struct or primitive type name after 'for'.");
+
+      targetName = p->previous;
+
+      if (isPrimitiveImplTarget(&targetName) &&
+          rejectPrimitiveImplInUserCode(p, &targetName))
+        return skipRejectedImpl(p, targetName);
+    }
   }
 
   consume(p, TOKEN_LEFT_BRACE, "Expect '{' before impl body.");
@@ -1711,6 +1820,7 @@ static AstNode *implDeclaration(Parser *p) {
   free(methodBuf);
 
   AstNode *node = astAlloc(NODE_IMPL, line);
+  node->as.impl.targetKind = targetKind;
   node->as.impl.targetName = targetName;
   node->as.impl.hasTraitName = hasTraitName;
   node->as.impl.traitName = traitName;
@@ -1869,16 +1979,17 @@ static void initParser(Parser *parser, TokenStream *tokens) {
   parser->hadError = false;
   parser->panicMode = false;
   parser->blockDepth = 0;
-  parser->allowLengthPlaceholders = false;
+  parser->isStdlib = false;
   advance(parser);
 }
 
-AstNode **parse(const char *source, int *outCount, bool *hadError,
-                int *outEndLine) {
+static AstNode **parseProgram(const char *source, bool isStdlib, int *outCount,
+                              bool *hadError, int *outEndLine) {
   TokenStream tokens = lex(source);
 
   Parser parser;
   initParser(&parser, &tokens);
+  parser.isStdlib = isStdlib;
 
   int capacity = 8;
   int count = 0;
@@ -1902,13 +2013,23 @@ AstNode **parse(const char *source, int *outCount, bool *hadError,
   return ast;
 }
 
+AstNode **parse(const char *source, int *outCount, bool *hadError,
+                int *outEndLine) {
+  return parseProgram(source, false, outCount, hadError, outEndLine);
+}
+
+AstNode **parseStdlib(const char *source, int *outCount, bool *hadError,
+                      int *outEndLine) {
+  return parseProgram(source, true, outCount, hadError, outEndLine);
+}
+
 AstNode *parseTypeText(const char *source, bool *hadError) {
   TokenStream tokens = lex(source);
 
   Parser parser;
   initParser(&parser, &tokens);
 
-  parser.allowLengthPlaceholders = true;
+  parser.isStdlib = true;
 
   AstNode *type = parseType(&parser);
   consume(&parser, TOKEN_EOF, "Expect end of type.");

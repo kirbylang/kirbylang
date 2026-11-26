@@ -17,21 +17,21 @@
 0031    3 OP_POP
 0032    5 OP_GET_GLOBAL      10 'Money'
 0034    6 OP_CLOSURE         13 <fn toString>
-0036    | OP_METHOD          12 'toString'
-0038    7 OP_POP
-0039    9 OP_GET_GLOBAL      10 'Money'
-0041   10 OP_CLOSURE         15 <fn equals>
-0043    | OP_METHOD          14 'equals'
-0045   11 OP_POP
-0046   13 OP_GET_GLOBAL      10 'Money'
-0048   14 OP_CLOSURE         17 <fn cmp>
-0050    | OP_METHOD          16 'cmp'
-0052   15 OP_POP
-0053   29 OP_NIL
-0054    | OP_RETURN
+0036    | OP_TRAIT_METHOD    12 'toString'   14 'Display.toString'
+0039    7 OP_POP
+0040    9 OP_GET_GLOBAL      10 'Money'
+0042   10 OP_CLOSURE         16 <fn equals>
+0044    | OP_TRAIT_METHOD    15 'equals'   17 'Eq.equals'
+0047   11 OP_POP
+0048   13 OP_GET_GLOBAL      10 'Money'
+0050   14 OP_CLOSURE         19 <fn cmp>
+0052    | OP_TRAIT_METHOD    18 'cmp'   20 'Ord.cmp'
+0055   15 OP_POP
+0056   29 OP_NIL
+0057    | OP_RETURN
 == show ==
 0000   17 OP_GET_LOCAL        1
-0002    | OP_INVOKE        (0 args)    0 'toString'
+0002    | OP_INVOKE        (0 args)    0 'Display.toString'
 0005    | OP_RETURN
 == showTwice ==
 0000   19 OP_GET_GLOBAL       0 '@strConcat'
@@ -48,7 +48,7 @@
 == same ==
 0000   21 OP_GET_LOCAL        1
 0002    | OP_GET_LOCAL        2
-0004    | OP_INVOKE        (1 args)    0 'equals'
+0004    | OP_INVOKE        (1 args)    0 'Eq.equals'
 0007    | OP_RETURN
 == sameWhenOrdered ==
 0000   23 OP_GET_GLOBAL       0 'same'

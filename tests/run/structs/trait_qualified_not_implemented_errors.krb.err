@@ -1,0 +1,2 @@
+[line 8] Error at 'Greet': S doesn't implement Greet.
+[line 9] Error at 'Greet': i64 doesn't implement Greet.

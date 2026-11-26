@@ -103,6 +103,17 @@
   - Super trait methods are supported on bounded type parameters e.g. `[T: Ord]` can call `t.toString()`
   - Calling a static trait method through a bound, such as `T.default()`, is now a compile error: `Can't call a static method on type parameter 'T'.` It was a runtime error, `Undefined variable 'T'.`
   - **Breaking:** `==` and `!=` now require struct to implement the `Eq` trait. Comparing against identity is no longer available
+- Primitive Impls
+  - Add methods on primitive types: `"abc".len()`, `2.5.floor()`, `xs.push(1)`
+    - Works on `string`, `bool`, `unit`, every number type, lists and arrays
+    - You can't write your own: `impl f64 { ... }` is an error
+  - Add `Display`, `Eq`, `Ord`, `Default` and the operator traits to primitive types, so `7.toString()` and `a.cmp(b)` work
+  - Allow calling a static trait method on a primitive's type name: `f64.default()`
+  - Add `Trait.method(value)` to call a trait's method by name: `Display.toString(point)`
+    - Runs the trait's method even when the type has its own method with the same name
+  - Fix a type's own method running instead of the trait's method of the same name, through a type parameter's bound, an operator, or printing a struct
+  - Add a compile error when two traits give a struct the same method name, or a method is both an instance and a static method
+  - Change the error for a primitive passed to a bounded type parameter to say why: `string implements Display, but a primitive can't be used with a bound yet, required by T.` It used to say `string doesn't implement Display`
 
 ## 0.4.0
 

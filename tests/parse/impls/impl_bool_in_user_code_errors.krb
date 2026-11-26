@@ -1,0 +1,3 @@
+impl bool {
+    pub fun flip(self): bool = !self;
+}

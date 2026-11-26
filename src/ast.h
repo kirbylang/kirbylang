@@ -198,11 +198,35 @@ typedef struct {
    * checker, because the compiler has no types.
    */
   bool argUsesDisplay;
+  /**
+   * `Trait.method(value, ...)`: the callee's object names the trait, and the
+   * first argument is the value the method runs on. Set by the type checker.
+   */
+  bool isTraitCall;
 } CallNode;
 
 typedef struct {
   AstNode *object;
   Token name;
+  /**
+   * Set by the type checker when the call is to a method of a primitive type,
+   * such as "string". NULL for every other get. The compiler turns the call
+   * into a plain function call, because it has no types of its own.
+   */
+  const char *primitiveOwner;
+  // For such a call, the name of the trait the method came from. NULL when it
+  // is a method of the type itself.
+  const char *primitiveTrait;
+  // For such a call, true when the method is static, so the call has no
+  // receiver value, as in `f64.default()`
+  bool primitiveIsStatic;
+  /**
+   * Set by the type checker on a call of a trait's method that must run that
+   * trait's version, even when the receiver has a method of its own with the
+   * same name: a call through a type parameter's bound, and `Trait.method(x)`.
+   * The name of the trait. NULL for every other get.
+   */
+  const char *viaTrait;
 } GetNode;
 
 typedef struct {
@@ -409,12 +433,25 @@ typedef struct {
   int endLine;
 } StructInitNode;
 
+// What an impl block is for
+typedef enum {
+  IMPL_TARGET_NAME,  // `impl Box[T]`, `impl string`
+  IMPL_TARGET_LIST,  // `impl [T]`
+  IMPL_TARGET_ARRAY, // `impl [T; N]`
+} ImplTargetKind;
+
 typedef struct {
+  ImplTargetKind targetKind;
+  /**
+   * The type's name, or the `[` token for a list or array target.
+   */
   Token targetName;
   /**
    * arena-allocated array of bare generic parameter name tokens, e.g. the
    * `T` in `impl Box[T]`. There must be as many as the struct declares. They
    * stand for the struct's parameters in order, and the names can differ.
+   * For a list target it is the item type's name, and for an array target the
+   * item type's name and then the length's name, which can be `_`.
    */
   Token *genericParams;
   int genericParamCount;
@@ -424,6 +461,12 @@ typedef struct {
   FunctionNode **methods;
   int methodCount;
   int endLine;
+  /**
+   * Set by the type checker when the block adds methods to a primitive type,
+   * such as "string" or "u8", or implements a trait for one. NULL for every
+   * other impl.
+   */
+  const char *primitiveOwner;
 } ImplNode;
 
 typedef struct {

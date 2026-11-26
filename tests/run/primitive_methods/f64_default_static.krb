@@ -1,0 +1,5 @@
+fun main(): unit {
+  let d: f64 = f64.default();
+  @println(d);
+  @println(f64.default() == d);
+}

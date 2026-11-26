@@ -12,7 +12,8 @@
 // Checks a unit the way main.c does: the source buffer and the AST arena
 // are both released before the next unit is checked, so anything the
 // session kept has to have outlived them.
-static bool checkUnitAs(const char *source, bool isStdlib) {
+static bool checkUnitParsedAs(const char *source, bool parsedAsStdlib,
+                              bool isStdlib) {
   size_t length = strlen(source);
   char *owned = (char *)malloc(length + 1);
   assert(owned != NULL);
@@ -21,7 +22,9 @@ static bool checkUnitAs(const char *source, bool isStdlib) {
   int count = 0;
   bool hadParseError = false;
   int endLine = 0;
-  AstNode **ast = parse(owned, &count, &hadParseError, &endLine);
+  AstNode **ast = parsedAsStdlib
+                      ? parseStdlib(owned, &count, &hadParseError, &endLine)
+                      : parse(owned, &count, &hadParseError, &endLine);
   assert(!hadParseError);
 
   bool ok =
@@ -34,10 +37,27 @@ static bool checkUnitAs(const char *source, bool isStdlib) {
   return ok;
 }
 
-static bool checkUnit(const char *source) { return checkUnitAs(source, false); }
+static bool checkUnit(const char *source) {
+  return checkUnitParsedAs(source, false, false);
+}
 
 static bool checkStdlibUnit(const char *source) {
-  return checkUnitAs(source, true);
+  return checkUnitParsedAs(source, true, true);
+}
+
+// A unit the parser allowed to write a primitive impl, checked as user code
+static bool checkStdlibParsedUnitAsUser(const char *source) {
+  return checkUnitParsedAs(source, true, false);
+}
+
+static bool userParseFails(const char *source) {
+  int count = 0;
+  bool hadParseError = false;
+  int endLine = 0;
+  AstNode **ast = parse(source, &count, &hadParseError, &endLine);
+  astFreeAll();
+  free(ast);
+  return hadParseError;
 }
 
 static bool traitIsBuiltin(const char *name) {
@@ -125,7 +145,84 @@ static void test_traits_declared_by_the_stdlib_are_builtin(void) {
   typchkResetError();
 }
 
+static void test_only_the_stdlib_adds_methods_to_primitives(void) {
+  typchkResetError();
+  typchkSessionBegin();
+
+  assert(checkStdlibUnit("impl string {\n"
+                         "  pub fun twice(self): i64 = @strLen(self) * 2;\n"
+                         "}"));
+
+  // The method outlives the unit that declared it
+  assert(checkUnit("@println(\"ab\".twice());"));
+
+  // The parser refuses it for user code, and so does the checker
+  typchkResetError();
+  assert(userParseFails("impl string {\n"
+                        "  pub fun thrice(self): i64 = 3;\n"
+                        "}"));
+  assert(!checkStdlibParsedUnitAsUser("impl string {\n"
+                                      "  pub fun thrice(self): i64 = 3;\n"
+                                      "}"));
+
+  typchkResetError();
+  assert(!checkUnit("@println(\"ab\".thrice());"));
+
+  // Every primitive can have methods
+  typchkResetError();
+  assert(checkStdlibUnit("impl f64 {\n"
+                         "  pub fun one(self): f64 = 1;\n"
+                         "}"));
+  assert(checkStdlibUnit("impl u8 {\n"
+                         "  pub fun one(self): u8 = 1;\n"
+                         "}"));
+  assert(checkStdlibUnit("impl bool {\n"
+                         "  pub fun yes(self): bool = true;\n"
+                         "}"));
+
+  assert(checkStdlibUnit("impl unit {\n"
+                         "  pub fun nothing(self): unit {}\n"
+                         "}"));
+
+  typchkResetError();
+  assert(userParseFails("impl unit {\n"
+                        "  pub fun nothing(self): unit {}\n"
+                        "}"));
+  assert(!checkStdlibParsedUnitAsUser("impl unit {\n"
+                                      "  pub fun nothing(self): unit {}\n"
+                                      "}"));
+
+  typchkSessionEnd();
+  typchkResetError();
+}
+
+static void test_self_in_a_primitive_impl_is_the_primitive(void) {
+  typchkResetError();
+  typchkSessionBegin();
+
+  assert(checkStdlibUnit(
+      "impl string {\n"
+      "  pub fun same(self, other: Self): bool = @strLen(self) == "
+      "@strLen(other);\n"
+      "  pub fun me(self): Self {\n"
+      "    let copy: Self = self;\n"
+      "    copy\n"
+      "  }\n"
+      "}"));
+
+  assert(checkUnit("let s: string = \"ab\".me();\n"
+                   "@println(s.same(\"cd\"));"));
+
+  typchkResetError();
+  assert(!checkUnit("@println(\"ab\".same(1));"));
+
+  typchkSessionEnd();
+  typchkResetError();
+}
+
 int main(void) {
+  test_self_in_a_primitive_impl_is_the_primitive();
+  test_only_the_stdlib_adds_methods_to_primitives();
   test_traits_declared_by_the_stdlib_are_builtin();
   test_function_signatures_survive_the_unit_that_declared_them();
   test_struct_types_survive_the_unit_that_declared_them();

@@ -1,0 +1,5 @@
+impl unit {
+    pub fun nothing(self): unit {}
+}
+
+fun main(): unit {}

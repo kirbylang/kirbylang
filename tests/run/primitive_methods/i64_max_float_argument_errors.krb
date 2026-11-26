@@ -1,0 +1,4 @@
+fun main(): unit {
+    let x: i64 = 3;
+    @println(x.max(2.5));
+}

@@ -1,0 +1,11 @@
+trait Greet {
+    fun hello(self): string;
+}
+
+trait Other {
+    fun other(self): string;
+}
+
+fun f[T: Other](x: T): string = Greet.hello(x);
+
+fun main(): unit {}

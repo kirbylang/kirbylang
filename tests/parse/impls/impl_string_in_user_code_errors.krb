@@ -1,0 +1,3 @@
+impl string {
+    pub fun twice(self): string = self;
+}

@@ -1,0 +1,7 @@
+fun greeting(): string = "Hello";
+
+fun main(): unit {
+    @println((greeting() + " World").len());
+    @println($"{greeting().len()} letters");
+    @println(greeting().len() == 5);
+}

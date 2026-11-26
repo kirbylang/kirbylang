@@ -15,16 +15,16 @@
 0027   11 OP_POP
 0028    5 OP_GET_GLOBAL       2 'Dog'
 0030    6 OP_CLOSURE          7 <fn toString>
-0032    | OP_METHOD           6 'toString'
-0034    7 OP_POP
-0035   13 OP_GET_GLOBAL       4 'Box'
-0037   14 OP_CLOSURE          9 <fn describe>
-0039    | OP_METHOD           8 'describe'
-0041   16 OP_CLOSURE         11 <fn label>
-0043    | OP_METHOD          10 'label'
-0045   17 OP_POP
-0046   24 OP_NIL
-0047    | OP_RETURN
+0032    | OP_TRAIT_METHOD     6 'toString'    8 'Display.toString'
+0035    7 OP_POP
+0036   13 OP_GET_GLOBAL       4 'Box'
+0038   14 OP_CLOSURE         10 <fn describe>
+0040    | OP_METHOD           9 'describe'
+0042   16 OP_CLOSURE         12 <fn label>
+0044    | OP_METHOD          11 'label'
+0046   17 OP_POP
+0047   24 OP_NIL
+0048    | OP_RETURN
 == main ==
 0000   20 OP_GET_GLOBAL       0 'Box'
 0002    | OP_CONSTANT         1 'value'
@@ -56,9 +56,9 @@
 0004    | OP_RETURN
 == describe ==
 0000   14 OP_GET_LOCAL        1
-0002    | OP_INVOKE        (0 args)    0 'toString'
+0002    | OP_INVOKE        (0 args)    0 'Display.toString'
 0005    | OP_RETURN
 == label ==
 0000   16 OP_GET_LOCAL        1
-0002    | OP_INVOKE        (0 args)    0 'toString'
+0002    | OP_INVOKE        (0 args)    0 'Display.toString'
 0005    | OP_RETURN

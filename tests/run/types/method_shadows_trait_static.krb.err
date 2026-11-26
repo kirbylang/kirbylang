@@ -1,0 +1,33 @@
+== <script> ==
+0000   19 OP_CLOSURE          1 <fn main>
+0002    | OP_DEFINE_GLOBAL    0 'main'
+0004    5 OP_STRUCT           2 'S'
+0006    | OP_DEFINE_GLOBAL    2 'S'
+0008    | OP_GET_GLOBAL       2 'S'
+0010    6 OP_NIL
+0011    | OP_FIELD            3 'x' public immutable
+0015    7 OP_POP
+0016    9 OP_GET_GLOBAL       2 'S'
+0018   10 OP_CLOSURE          5 <fn make>
+0020    | OP_TRAIT_METHOD     4 'make'    6 'A.make'
+0023   11 OP_POP
+0024   13 OP_GET_GLOBAL       2 'S'
+0026   14 OP_CLOSURE          7 <fn make>
+0028    | OP_METHOD           4 'make'
+0030   15 OP_POP
+0031   20 OP_NIL
+0032    | OP_RETURN
+== main ==
+0000   18 OP_GET_GLOBAL       0 '@println'
+0002    | OP_GET_GLOBAL       1 'S'
+0004    | OP_INVOKE        (0 args)    2 'make'
+0007    | OP_CALL             1
+0009    | OP_POP
+0010   19 OP_NIL
+0011    | OP_RETURN
+== make ==
+0000   10 OP_CONSTANT         0 'trait'
+0002    | OP_RETURN
+== make ==
+0000   14 OP_CONSTANT         0 'inherent'
+0002    | OP_RETURN

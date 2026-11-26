@@ -34,7 +34,7 @@ static void checkStdlibIntoSession(void) {
   int count = 0;
   bool hadParseError = false;
   int endLine = 0;
-  AstNode **ast = parse(KIRBY_STDLIB, &count, &hadParseError, &endLine);
+  AstNode **ast = parseStdlib(KIRBY_STDLIB, &count, &hadParseError, &endLine);
   assert(!hadParseError);
   assert(typchkCheckStdlib(ast, count));
   astFreeAll();
@@ -923,19 +923,34 @@ static void test_nested_function_and_closure(void) {
   typchkTypeEnvDestroy(env);
 }
 
-static bool typecheckSource(const char *source) {
+static bool typecheckSourceParsedAs(const char *source, bool parsedAsStdlib) {
   typchkSessionBegin();
   checkStdlibIntoSession();
 
   int outCount = 0;
   bool hadParseError = false;
   int endLine = 0;
-  AstNode **ast = parse(source, &outCount, &hadParseError, &endLine);
+  AstNode **ast = parsedAsStdlib
+                      ? parseStdlib(source, &outCount, &hadParseError, &endLine)
+                      : parse(source, &outCount, &hadParseError, &endLine);
   assert(!hadParseError);
   bool ok = typchkCheckProgram(ast, outCount);
 
   typchkSessionEnd();
   return ok;
+}
+
+static bool typecheckSource(const char *source) {
+  return typecheckSourceParsedAs(source, false);
+}
+
+// True when the user-code parser refuses the source
+static bool userParseFails(const char *source) {
+  int outCount = 0;
+  bool hadParseError = false;
+  int endLine = 0;
+  parse(source, &outCount, &hadParseError, &endLine);
+  return hadParseError;
 }
 
 static void test_struct_private_instance_method_uncallable_from_outside(void) {
@@ -1337,18 +1352,59 @@ static void test_program_equality_between_primitives_unaffected(void) {
 
 static void test_program_trait_impl_on_primitive_deferred_fails(void) {
   typchkResetError();
-  bool ok = typecheckSource("impl Display for f64 {\n"
-                            "  pub fun toString(self): string = \"n\";\n"
-                            "}\n");
+  assert(userParseFails("impl Display for f64 {\n"
+                        "  pub fun toString(self): string = \"n\";\n"
+                        "}\n"));
+  bool ok =
+      typecheckSourceParsedAs("impl Display for f64 {\n"
+                              "  pub fun toString(self): string = \"n\";\n"
+                              "}\n",
+                              true);
   assert(!ok);
 }
 
 static void test_program_plain_impl_on_primitive_fails(void) {
   typchkResetError();
-  bool ok = typecheckSource("impl f64 {\n"
-                            "  pub fun double(self): f64 = self * 2;\n"
-                            "}\n");
+  assert(userParseFails("impl f64 {\n"
+                        "  pub fun double(self): f64 = self * 2;\n"
+                        "}\n"));
+  bool ok = typecheckSourceParsedAs("impl f64 {\n"
+                                    "  pub fun double(self): f64 = self * 2;\n"
+                                    "}\n",
+                                    true);
   assert(!ok);
+}
+
+// `Trait.method(value, x)` stays the call that was written. The checker only
+// records what it resolved.
+static void test_trait_qualified_call_keeps_the_written_tree(void) {
+  typchkResetError();
+  typchkSessionBegin();
+  checkStdlibIntoSession();
+
+  int outCount = 0;
+  bool hadParseError = false;
+  int endLine = 0;
+  AstNode **ast = parse("trait Scale { fun scale(self, by: i64): i64; }\n"
+                        "struct Box { pub var n: i64; }\n"
+                        "impl Scale for Box {\n"
+                        "  fun scale(self, by: i64): i64 = self.n * by;\n"
+                        "}\n"
+                        "let b = Box { n: 2 };\n"
+                        "let r = Scale.scale(b, 3);\n",
+                        &outCount, &hadParseError, &endLine);
+  assert(!hadParseError);
+  assert(typchkCheckProgram(ast, outCount));
+
+  CallNode *call = &ast[outCount - 1]->as.varDecl.initializer->as.call;
+  assert(call->argCount == 2);
+  assert(call->callee->kind == NODE_GET);
+  assert(call->callee->as.get.object->kind == NODE_VARIABLE);
+  assert(call->args[0]->kind == NODE_VARIABLE);
+  assert(call->isTraitCall);
+
+  typchkSessionEnd();
+  typchkResetError();
 }
 
 static void test_program_trait_alongside_plain_impl(void) {
@@ -1627,6 +1683,7 @@ int main(void) {
   test_program_equality_between_primitives_unaffected();
   test_program_trait_impl_on_primitive_deferred_fails();
   test_program_plain_impl_on_primitive_fails();
+  test_trait_qualified_call_keeps_the_written_tree();
   test_program_trait_alongside_plain_impl();
   test_program_trait_method_without_pub_is_callable();
   test_program_self_return_type_in_plain_impl();

@@ -1,0 +1,1 @@
+[line 1] Error at 'u8': You can't write an impl for a primitive type in user code.

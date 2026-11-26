@@ -1,0 +1,9 @@
+trait Doubled {
+    fun doubled(self): Self;
+}
+
+impl Doubled for u8 {
+    fun doubled(self): Self = self * 2;
+}
+
+fun main(): unit {}

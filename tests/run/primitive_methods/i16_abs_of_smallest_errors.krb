@@ -1,0 +1,4 @@
+fun main(): unit {
+    let lo: i16 = -32767 - 1;
+    @println(lo.abs());
+}

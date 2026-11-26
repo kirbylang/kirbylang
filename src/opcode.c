@@ -45,6 +45,8 @@ static const OpInfo opInfos[OP_COUNT] = {
     [OP_GET_PROPERTY] = {true, 1, 0, -1, 0},
     [OP_SET_PROPERTY] = {true, 1, -1, -1, 0},
     [OP_METHOD] = {true, 1, -1, -1, 0},
+    // Pops the method, like OP_METHOD, and has a second name operand.
+    [OP_TRAIT_METHOD] = {true, 2, -1, -1, 0},
     // The receiver and its arguments become the result.
     [OP_INVOKE] = {true, 2, 0, 1, -1},
     [OP_LIST] = {true, 1, 1, 0, -1},

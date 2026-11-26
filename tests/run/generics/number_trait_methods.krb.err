@@ -14,21 +14,21 @@
 == call_add ==
 0000    1 OP_GET_LOCAL        1
 0002    | OP_GET_LOCAL        2
-0004    | OP_INVOKE        (1 args)    0 'add'
+0004    | OP_INVOKE        (1 args)    0 'Add.add'
 0007    | OP_RETURN
 == call_neg ==
 0000    3 OP_GET_LOCAL        1
-0002    | OP_INVOKE        (0 args)    0 'neg'
+0002    | OP_INVOKE        (0 args)    0 'Neg.neg'
 0005    | OP_RETURN
 == call_equals ==
 0000    5 OP_GET_LOCAL        1
 0002    | OP_GET_LOCAL        2
-0004    | OP_INVOKE        (1 args)    0 'equals'
+0004    | OP_INVOKE        (1 args)    0 'Eq.equals'
 0007    | OP_RETURN
 == call_cmp ==
 0000    7 OP_GET_LOCAL        1
 0002    | OP_GET_LOCAL        2
-0004    | OP_INVOKE        (1 args)    0 'cmp'
+0004    | OP_INVOKE        (1 args)    0 'Ord.cmp'
 0007    | OP_RETURN
 == main ==
 0000   10 OP_GET_GLOBAL       0 '@println'

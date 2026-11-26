@@ -1,0 +1,30 @@
+trait Greet {
+    fun hello(self): string;
+}
+
+struct Shadowed {
+    pub var n: i64;
+}
+
+impl Shadowed {
+    pub fun hello(self): string = "own";
+}
+
+impl Greet for Shadowed {
+    fun hello(self): string = "trait";
+}
+
+fun viaMethod[T: Greet](x: T): string = x.hello();
+
+fun viaTrait[T: Greet](x: T): string = Greet.hello(x);
+
+fun twice[T: Greet](x: T): string = $"{viaMethod(x)} {viaTrait(x)}";
+
+fun main(): unit {
+    let s = Shadowed { n: 1 };
+
+    @println(s.hello());
+    @println(viaMethod(s));
+    @println(viaTrait(s));
+    @println(twice(s));
+}

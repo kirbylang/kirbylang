@@ -1,0 +1,112 @@
+== <script> ==
+0000   23 OP_CLOSURE          1 <fn main>
+0002    | OP_DEFINE_GLOBAL    0 'main'
+0004    1 OP_STRUCT           2 'Point'
+0006    | OP_DEFINE_GLOBAL    2 'Point'
+0008    | OP_GET_GLOBAL       2 'Point'
+0010    2 OP_NIL
+0011    | OP_FIELD            3 'x' public mutable
+0015    3 OP_NIL
+0016    | OP_FIELD            4 'y' public mutable
+0020    4 OP_POP
+0021   24 OP_NIL
+0022    | OP_RETURN
+== main ==
+0000    7 OP_CONSTANT         0 'ann'
+0002    | OP_CONSTANT         1 'bo'
+0004    | OP_ARRAY            2
+0006    8 OP_GET_GLOBAL       2 '@println'
+0008    | OP_GET_GLOBAL       3 'array.len'
+0010    | OP_GET_LOCAL        1
+0012    | OP_CALL             1
+0014    | OP_CALL             1
+0016    | OP_POP
+0017    9 OP_GET_GLOBAL       2 '@println'
+0019    | OP_GET_GLOBAL       4 'array.contains'
+0021    | OP_GET_LOCAL        1
+0023    | OP_CONSTANT         1 'bo'
+0025    | OP_CALL             2
+0027    | OP_CALL             1
+0029    | OP_POP
+0030   10 OP_GET_GLOBAL       2 '@println'
+0032    | OP_GET_GLOBAL       5 'array.reverse'
+0034    | OP_GET_LOCAL        1
+0036    | OP_CALL             1
+0038    | OP_CONSTANT         6 '0'
+0040    | OP_GET_INDEX
+0041    | OP_CALL             1
+0043    | OP_POP
+0044   12 OP_CONSTANT         7 '1'
+0046    | OP_CONSTANT         8 '2'
+0048    | OP_ARRAY            2
+0050    | OP_CONSTANT         9 '3'
+0052    | OP_CONSTANT        10 '4'
+0054    | OP_ARRAY            2
+0056    | OP_CONSTANT        11 '5'
+0058    | OP_CONSTANT        12 '6'
+0060    | OP_ARRAY            2
+0062    | OP_ARRAY            3
+0064   13 OP_GET_GLOBAL       2 '@println'
+0066    | OP_GET_GLOBAL       3 'array.len'
+0068    | OP_GET_LOCAL        2
+0070    | OP_CALL             1
+0072    | OP_CALL             1
+0074    | OP_POP
+0075   14 OP_GET_GLOBAL       2 '@println'
+0077    | OP_GET_GLOBAL       3 'array.len'
+0079    | OP_GET_LOCAL        2
+0081    | OP_CONSTANT         7 '1'
+0083    | OP_GET_INDEX
+0084    | OP_CALL             1
+0086    | OP_CALL             1
+0088    | OP_POP
+0089   15 OP_GET_GLOBAL       2 '@println'
+0091    | OP_GET_GLOBAL      13 'array.copy'
+0093    | OP_GET_LOCAL        2
+0095    | OP_CALL             1
+0097    | OP_CONSTANT         8 '2'
+0099    | OP_GET_INDEX
+0100    | OP_CONSTANT         7 '1'
+0102    | OP_GET_INDEX
+0103    | OP_CALL             1
+0105    | OP_POP
+0106   17 OP_GET_GLOBAL      14 'Point'
+0108    | OP_CONSTANT        15 'x'
+0110    | OP_CONSTANT         7 '1'
+0112    | OP_CONSTANT        16 'y'
+0114    | OP_CONSTANT         8 '2'
+0116    | OP_STRUCT_INIT      2
+0118    | OP_GET_GLOBAL      14 'Point'
+0120    | OP_CONSTANT        15 'x'
+0122    | OP_CONSTANT         9 '3'
+0124    | OP_CONSTANT        16 'y'
+0126    | OP_CONSTANT        10 '4'
+0128    | OP_STRUCT_INIT      2
+0130    | OP_ARRAY            2
+0132   18 OP_GET_GLOBAL       2 '@println'
+0134    | OP_GET_GLOBAL       3 'array.len'
+0136    | OP_GET_LOCAL        3
+0138    | OP_CALL             1
+0140    | OP_CALL             1
+0142    | OP_POP
+0143   19 OP_GET_GLOBAL       2 '@println'
+0145    | OP_GET_GLOBAL       5 'array.reverse'
+0147    | OP_GET_LOCAL        3
+0149    | OP_CALL             1
+0151    | OP_CONSTANT         6 '0'
+0153    | OP_GET_INDEX
+0154    | OP_GET_PROPERTY    16 'y'
+0156    | OP_CALL             1
+0158    | OP_POP
+0159   21 OP_TRUE
+0160    | OP_FALSE
+0161    | OP_ARRAY            2
+0163   22 OP_GET_GLOBAL       2 '@println'
+0165    | OP_GET_GLOBAL       4 'array.contains'
+0167    | OP_GET_LOCAL        4
+0169    | OP_FALSE
+0170    | OP_CALL             2
+0172    | OP_CALL             1
+0174    | OP_POP
+0175   23 OP_NIL
+0176    | OP_RETURN

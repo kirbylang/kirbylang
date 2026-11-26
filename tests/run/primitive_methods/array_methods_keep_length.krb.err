@@ -1,0 +1,49 @@
+== <script> ==
+0000    8 OP_CLOSURE          1 <fn main>
+0002    | OP_DEFINE_GLOBAL    0 'main'
+0004    9 OP_NIL
+0005    | OP_RETURN
+== main ==
+0000    2 OP_CONSTANT         0 '1'
+0002    | OP_CONSTANT         1 '2'
+0004    | OP_CONSTANT         2 '3'
+0006    | OP_ARRAY            3
+0008    3 OP_GET_GLOBAL       3 'array.copy'
+0010    | OP_GET_LOCAL        1
+0012    | OP_CALL             1
+0014    4 OP_GET_GLOBAL       4 'array.reverse'
+0016    | OP_GET_LOCAL        1
+0018    | OP_CALL             1
+0020    5 OP_GET_GLOBAL       3 'array.copy'
+0022    | OP_GET_GLOBAL       4 'array.reverse'
+0024    | OP_GET_GLOBAL       3 'array.copy'
+0026    | OP_GET_LOCAL        1
+0028    | OP_CALL             1
+0030    | OP_CALL             1
+0032    | OP_CALL             1
+0034    6 OP_GET_GLOBAL       5 '@println'
+0036    | OP_GET_GLOBAL       6 'array.len'
+0038    | OP_GET_LOCAL        2
+0040    | OP_CALL             1
+0042    | OP_GET_GLOBAL       6 'array.len'
+0044    | OP_GET_LOCAL        3
+0046    | OP_CALL             1
+0048    | OP_ADD
+0049    | OP_GET_GLOBAL       6 'array.len'
+0051    | OP_GET_LOCAL        4
+0053    | OP_CALL             1
+0055    | OP_ADD
+0056    | OP_CALL             1
+0058    | OP_POP
+0059    7 OP_GET_GLOBAL       5 '@println'
+0061    | OP_GET_GLOBAL       4 'array.reverse'
+0063    | OP_GET_GLOBAL       3 'array.copy'
+0065    | OP_GET_LOCAL        1
+0067    | OP_CALL             1
+0069    | OP_CALL             1
+0071    | OP_CONSTANT         7 '0'
+0073    | OP_GET_INDEX
+0074    | OP_CALL             1
+0076    | OP_POP
+0077    8 OP_NIL
+0078    | OP_RETURN

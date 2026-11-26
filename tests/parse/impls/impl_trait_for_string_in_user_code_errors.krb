@@ -1,0 +1,3 @@
+impl Display for string {
+    fun toString(self): string = self;
+}

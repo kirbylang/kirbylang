@@ -1,0 +1,4 @@
+fun main(): unit {
+  let u8: i64 = 5;
+  @println(u8.default());
+}

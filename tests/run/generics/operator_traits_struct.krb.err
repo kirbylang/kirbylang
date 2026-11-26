@@ -13,30 +13,30 @@
 0024    4 OP_POP
 0025    6 OP_GET_GLOBAL       4 'Vec2'
 0027    7 OP_CLOSURE          8 <fn add>
-0029    | OP_METHOD           7 'add'
-0031    8 OP_POP
-0032   10 OP_GET_GLOBAL       4 'Vec2'
-0034   11 OP_CLOSURE         10 <fn sub>
-0036    | OP_METHOD           9 'sub'
-0038   12 OP_POP
-0039   14 OP_GET_GLOBAL       4 'Vec2'
-0041   15 OP_CLOSURE         12 <fn mul>
-0043    | OP_METHOD          11 'mul'
-0045   16 OP_POP
-0046   18 OP_GET_GLOBAL       4 'Vec2'
-0048   19 OP_CLOSURE         14 <fn div>
-0050    | OP_METHOD          13 'div'
-0052   20 OP_POP
-0053   22 OP_GET_GLOBAL       4 'Vec2'
-0055   23 OP_CLOSURE         16 <fn mod>
-0057    | OP_METHOD          15 'mod'
-0059   24 OP_POP
-0060   26 OP_GET_GLOBAL       4 'Vec2'
-0062   27 OP_CLOSURE         18 <fn neg>
-0064    | OP_METHOD          17 'neg'
-0066   28 OP_POP
-0067   46 OP_NIL
-0068    | OP_RETURN
+0029    | OP_TRAIT_METHOD     7 'add'    9 'Add.add'
+0032    8 OP_POP
+0033   10 OP_GET_GLOBAL       4 'Vec2'
+0035   11 OP_CLOSURE         11 <fn sub>
+0037    | OP_TRAIT_METHOD    10 'sub'   12 'Sub.sub'
+0040   12 OP_POP
+0041   14 OP_GET_GLOBAL       4 'Vec2'
+0043   15 OP_CLOSURE         14 <fn mul>
+0045    | OP_TRAIT_METHOD    13 'mul'   15 'Mul.mul'
+0048   16 OP_POP
+0049   18 OP_GET_GLOBAL       4 'Vec2'
+0051   19 OP_CLOSURE         17 <fn div>
+0053    | OP_TRAIT_METHOD    16 'div'   18 'Div.div'
+0056   20 OP_POP
+0057   22 OP_GET_GLOBAL       4 'Vec2'
+0059   23 OP_CLOSURE         20 <fn mod>
+0061    | OP_TRAIT_METHOD    19 'mod'   21 'Mod.mod'
+0064   24 OP_POP
+0065   26 OP_GET_GLOBAL       4 'Vec2'
+0067   27 OP_CLOSURE         23 <fn neg>
+0069    | OP_TRAIT_METHOD    22 'neg'   24 'Neg.neg'
+0072   28 OP_POP
+0073   46 OP_NIL
+0074    | OP_RETURN
 == show ==
 0000   31 OP_GET_GLOBAL       0 '@println'
 0002    | OP_GET_GLOBAL       1 '@strConcat'
@@ -73,44 +73,44 @@
 0024   38 OP_GET_GLOBAL       7 'show'
 0026    | OP_GET_LOCAL        1
 0028    | OP_GET_LOCAL        2
-0030    | OP_INVOKE        (1 args)    8 'add'
+0030    | OP_INVOKE        (1 args)    8 'Add.add'
 0033    | OP_CALL             1
 0035    | OP_POP
 0036   39 OP_GET_GLOBAL       7 'show'
 0038    | OP_GET_LOCAL        1
 0040    | OP_GET_LOCAL        2
-0042    | OP_INVOKE        (1 args)    9 'sub'
+0042    | OP_INVOKE        (1 args)    9 'Sub.sub'
 0045    | OP_CALL             1
 0047    | OP_POP
 0048   40 OP_GET_GLOBAL       7 'show'
 0050    | OP_GET_LOCAL        1
 0052    | OP_GET_LOCAL        2
-0054    | OP_INVOKE        (1 args)   10 'mul'
+0054    | OP_INVOKE        (1 args)   10 'Mul.mul'
 0057    | OP_CALL             1
 0059    | OP_POP
 0060   41 OP_GET_GLOBAL       7 'show'
 0062    | OP_GET_LOCAL        1
 0064    | OP_GET_LOCAL        2
-0066    | OP_INVOKE        (1 args)   11 'div'
+0066    | OP_INVOKE        (1 args)   11 'Div.div'
 0069    | OP_CALL             1
 0071    | OP_POP
 0072   42 OP_GET_GLOBAL       7 'show'
 0074    | OP_GET_LOCAL        1
 0076    | OP_GET_LOCAL        2
-0078    | OP_INVOKE        (1 args)   12 'mod'
+0078    | OP_INVOKE        (1 args)   12 'Mod.mod'
 0081    | OP_CALL             1
 0083    | OP_POP
 0084   43 OP_GET_GLOBAL       7 'show'
 0086    | OP_GET_LOCAL        1
-0088    | OP_INVOKE        (0 args)   13 'neg'
+0088    | OP_INVOKE        (0 args)   13 'Neg.neg'
 0091    | OP_CALL             1
 0093    | OP_POP
 0094   44 OP_GET_GLOBAL       7 'show'
 0096    | OP_GET_LOCAL        1
 0098    | OP_GET_LOCAL        2
 0100    | OP_GET_LOCAL        2
-0102    | OP_INVOKE        (1 args)   10 'mul'
-0105    | OP_INVOKE        (1 args)    8 'add'
+0102    | OP_INVOKE        (1 args)   10 'Mul.mul'
+0105    | OP_INVOKE        (1 args)    8 'Add.add'
 0108    | OP_CALL             1
 0110    | OP_POP
 0111   45 OP_NIL

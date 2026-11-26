@@ -1,0 +1,10 @@
+struct S {
+    pub x: i64;
+}
+
+impl S {
+    pub fun foo(self): string = "instance";
+    pub fun foo(): string = "static";
+}
+
+fun main(): unit {}

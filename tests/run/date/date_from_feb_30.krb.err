@@ -9,7 +9,7 @@
 0004    | OP_INVOKE        (1 args)    1 'from'
 0007    5 OP_GET_GLOBAL       3 '@println'
 0009    | OP_GET_LOCAL        1
-0011    | OP_INVOKE        (0 args)    4 'toString'
+0011    | OP_INVOKE        (0 args)    4 'Display.toString'
 0014    | OP_CALL             1
 0016    | OP_POP
 0017    | OP_NIL

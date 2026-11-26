@@ -1,7 +1,10 @@
+#define _POSIX_C_SOURCE 200809L
+
 #include <assert.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <string.h>
+#include <unistd.h>
 
 #include "../src/ast.h"
 #include "../src/gc.h"
@@ -67,7 +70,198 @@ void assert_ast(const char *path, const char *expected) {
   free(ast);
 }
 
+// Parses `source` as the standard library or as a user file. Returns the
+// syntax tree as text and the errors it printed, which the caller frees.
+typedef struct {
+  char *ast;
+  char *errors;
+  bool hadError;
+} ParseResult;
+
+static ParseResult parseText(const char *source, bool isStdlib) {
+  fflush(stderr);
+  int saved = dup(STDERR_FILENO);
+  FILE *capture = tmpfile();
+  assert(saved >= 0 && capture != NULL);
+  dup2(fileno(capture), STDERR_FILENO);
+
+  int count = 0;
+  bool hadError = false;
+  int endLine = 0;
+  AstNode **ast = isStdlib ? parseStdlib(source, &count, &hadError, &endLine)
+                           : parse(source, &count, &hadError, &endLine);
+
+  fflush(stderr);
+  dup2(saved, STDERR_FILENO);
+  close(saved);
+
+  StrBuf text;
+  sb_init(&text);
+
+  for (int i = 0; i < count; i++) {
+    StrBuf node;
+    sb_init(&node);
+    print_ast(&node, ast[i]);
+    sb_appendf(&text, "%s\n", node.data);
+    sb_free(&node);
+  }
+
+  long size = ftell(capture);
+  char *errors = (char *)calloc((size_t)size + 1, 1);
+  rewind(capture);
+  size_t got = fread(errors, 1, (size_t)size, capture);
+  assert((long)got == size);
+  fclose(capture);
+
+  ParseResult result = {strdup(text.data), errors, hadError};
+  sb_free(&text);
+  astFreeAll();
+  free(ast);
+  return result;
+}
+
+static void freeResult(ParseResult *result) {
+  free(result->ast);
+  free(result->errors);
+}
+
+static void expectStdlibAst(const char *source, const char *expected) {
+  ParseResult result = parseText(source, true);
+  assert(!result.hadError);
+
+  if (strcmp(result.ast, expected) != 0)
+    fprintf(stderr, "Expected:\n%s\nActual:\n%s\n", expected, result.ast);
+
+  assert(strcmp(result.ast, expected) == 0);
+  freeResult(&result);
+}
+
+static void expectStdlibError(const char *source, const char *message) {
+  ParseResult result = parseText(source, true);
+  assert(result.hadError);
+
+  if (strstr(result.errors, message) == NULL)
+    fprintf(stderr, "Wanted '%s' in:\n%s\n", message, result.errors);
+
+  assert(strstr(result.errors, message) != NULL);
+  freeResult(&result);
+}
+
+static const char *primitiveImplMessage =
+    "You can't write an impl for a primitive type in user code.";
+
+// The only error a user gets for a primitive impl, however the rest of the
+// block reads
+static void expectUserPrimitiveError(const char *source) {
+  ParseResult result = parseText(source, false);
+  assert(result.hadError);
+
+  if (strstr(result.errors, primitiveImplMessage) == NULL)
+    fprintf(stderr, "Wanted the primitive error in:\n%s\n", result.errors);
+
+  assert(strstr(result.errors, primitiveImplMessage) != NULL);
+  freeResult(&result);
+}
+
+static void test_the_stdlib_can_impl_lists_and_arrays(void) {
+  expectStdlibAst("impl [T] { pub fun first(self): T = self[0]; }",
+                  "(impl [T] (pub-method first))\n");
+  expectStdlibAst("impl Display for [T] { fun toString(self): string = \"\"; }",
+                  "(impl Display for [T] (pub-method toString))\n");
+  expectStdlibAst("impl [T; N] { pub fun first(self): T = self[0]; }",
+                  "(impl [T; N] (pub-method first))\n");
+  expectStdlibAst("impl [T; _] { pub fun first(self): T = self[0]; }",
+                  "(impl [T; _] (pub-method first))\n");
+  expectStdlibAst(
+      "impl Display for [T; N] { fun toString(self): string = \"\"; }",
+      "(impl Display for [T; N] (pub-method toString))\n");
+
+  // A number is read, and the checker rejects it
+  expectStdlibAst("impl [T; 3] { pub fun first(self): T = self[0]; }",
+                  "(impl [T; 3] (pub-method first))\n");
+
+  // The standard library's types can name a length
+  expectStdlibAst("impl [T; N] { pub fun copy(self): [T; N] = self; }",
+                  "(impl [T; N] (pub-method copy))\n");
+}
+
+static void test_a_list_or_array_impl_has_to_be_well_formed(void) {
+  expectStdlibError("impl [] { }", "Expect the item type's name after '['.");
+  expectStdlibError("impl [T {\n}", "Expect ']' after the type.");
+  expectStdlibError("impl [T, U] { }", "Expect ']' after the type.");
+  expectStdlibError("impl [T; ] { }",
+                    "Expect a name or '_' for the array's length.");
+  expectStdlibError("impl Display for [] { }",
+                    "Expect the item type's name after '['.");
+}
+
+static const char *primitiveNames[] = {"unit", "bool", "string", "f64", "f32",
+                                       "i64",  "i32",  "i16",    "i8",  "u64",
+                                       "u32",  "u16",  "u8"};
+
+static void test_user_code_can_not_impl_a_primitive(void) {
+  int count = (int)(sizeof(primitiveNames) / sizeof(primitiveNames[0]));
+  char source[256];
+
+  for (int i = 0; i < count; i++) {
+    snprintf(source, sizeof(source), "impl %s { pub fun a(self): %s = self; }",
+             primitiveNames[i], primitiveNames[i]);
+    expectUserPrimitiveError(source);
+
+    snprintf(source, sizeof(source),
+             "impl Display for %s { fun toString(self): string = \"\"; }",
+             primitiveNames[i]);
+    expectUserPrimitiveError(source);
+
+    // The standard library can
+    snprintf(source, sizeof(source), "impl %s { pub fun a(self): %s = self; }",
+             primitiveNames[i], primitiveNames[i]);
+    ParseResult result = parseText(source, true);
+    assert(!result.hadError);
+    freeResult(&result);
+  }
+
+  const char *others[] = {
+      "impl [T] { }",
+      "impl [T; N] { }",
+      "impl [T; _] { }",
+      "impl Display for [T] { }",
+      "impl Display for [T; N] { }",
+      // However the target is spelled, the user sees this error alone
+      "impl [T; 3] { }",
+      "impl [T, U] { }",
+      "impl [] { }",
+      "impl [T; ] { }",
+      "impl [T {\n}",
+  };
+
+  for (size_t i = 0; i < sizeof(others) / sizeof(others[0]); i++) {
+    expectUserPrimitiveError(others[i]);
+
+    ParseResult result = parseText(others[i], false);
+    assert(strstr(result.errors, "Expect") == NULL);
+    assert(strstr(result.errors, "array impl") == NULL);
+    freeResult(&result);
+  }
+}
+
+static void test_user_code_can_impl_structs(void) {
+  ParseResult result =
+      parseText("struct Box { pub var value: i64; }\n"
+                "impl Box { pub fun get(self): i64 = self.value; }\n"
+                "impl Display for Box { fun toString(self): string = \"\"; }\n",
+                false);
+  assert(!result.hadError);
+  assert(strcmp(result.errors, "") == 0);
+  freeResult(&result);
+}
+
 int main(void) {
+  test_the_stdlib_can_impl_lists_and_arrays();
+  test_a_list_or_array_impl_has_to_be_well_formed();
+  test_user_code_can_not_impl_a_primitive();
+  test_user_code_can_impl_structs();
+
   assert_ast("../tests/run/empty.krb", "(fun main () : unit (block))\n");
 
   assert_ast("../tests/run/lists/array_empty.krb",

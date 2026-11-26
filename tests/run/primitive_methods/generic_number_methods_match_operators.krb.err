@@ -1,0 +1,800 @@
+== <script> ==
+0000    1 OP_CLOSURE          1 <fn add>
+0002    | OP_DEFINE_GLOBAL    0 'add'
+0004    2 OP_CLOSURE          3 <fn sub>
+0006    | OP_DEFINE_GLOBAL    2 'sub'
+0008    3 OP_CLOSURE          5 <fn mul>
+0010    | OP_DEFINE_GLOBAL    4 'mul'
+0012    4 OP_CLOSURE          7 <fn div>
+0014    | OP_DEFINE_GLOBAL    6 'div'
+0016    5 OP_CLOSURE          9 <fn mod>
+0018    | OP_DEFINE_GLOBAL    8 'mod'
+0020    6 OP_CLOSURE         11 <fn neg>
+0022    | OP_DEFINE_GLOBAL   10 'neg'
+0024    7 OP_CLOSURE         13 <fn cmp>
+0026    | OP_DEFINE_GLOBAL   12 'cmp'
+0028   96 OP_CLOSURE         15 <fn main>
+0030    | OP_DEFINE_GLOBAL   14 'main'
+0032   97 OP_NIL
+0033    | OP_RETURN
+== add ==
+0000    1 OP_GET_LOCAL        1
+0002    | OP_GET_LOCAL        2
+0004    | OP_INVOKE        (1 args)    0 'Add.add'
+0007    | OP_RETURN
+== sub ==
+0000    2 OP_GET_LOCAL        1
+0002    | OP_GET_LOCAL        2
+0004    | OP_INVOKE        (1 args)    0 'Sub.sub'
+0007    | OP_RETURN
+== mul ==
+0000    3 OP_GET_LOCAL        1
+0002    | OP_GET_LOCAL        2
+0004    | OP_INVOKE        (1 args)    0 'Mul.mul'
+0007    | OP_RETURN
+== div ==
+0000    4 OP_GET_LOCAL        1
+0002    | OP_GET_LOCAL        2
+0004    | OP_INVOKE        (1 args)    0 'Div.div'
+0007    | OP_RETURN
+== mod ==
+0000    5 OP_GET_LOCAL        1
+0002    | OP_GET_LOCAL        2
+0004    | OP_INVOKE        (1 args)    0 'Mod.mod'
+0007    | OP_RETURN
+== neg ==
+0000    6 OP_GET_LOCAL        1
+0002    | OP_INVOKE        (0 args)    0 'Neg.neg'
+0005    | OP_RETURN
+== cmp ==
+0000    7 OP_GET_LOCAL        1
+0002    | OP_GET_LOCAL        2
+0004    | OP_INVOKE        (1 args)    0 'Ord.cmp'
+0007    | OP_RETURN
+== main ==
+0000   10 OP_CONSTANT         0 '7'
+0002   11 OP_CONSTANT         1 '3'
+0004   12 OP_GET_GLOBAL       2 '@println'
+0006    | OP_GET_GLOBAL       3 'add'
+0008    | OP_GET_LOCAL        1
+0010    | OP_GET_LOCAL        2
+0012    | OP_CALL             2
+0014    | OP_GET_LOCAL        1
+0016    | OP_GET_LOCAL        2
+0018    | OP_ADD
+0019    | OP_EQUAL
+0020    | OP_CALL             1
+0022    | OP_POP
+0023   13 OP_GET_GLOBAL       2 '@println'
+0025    | OP_GET_GLOBAL       4 'sub'
+0027    | OP_GET_LOCAL        1
+0029    | OP_GET_LOCAL        2
+0031    | OP_CALL             2
+0033    | OP_GET_LOCAL        1
+0035    | OP_GET_LOCAL        2
+0037    | OP_SUBTRACT
+0038    | OP_EQUAL
+0039    | OP_CALL             1
+0041    | OP_POP
+0042   14 OP_GET_GLOBAL       2 '@println'
+0044    | OP_GET_GLOBAL       5 'mul'
+0046    | OP_GET_LOCAL        1
+0048    | OP_GET_LOCAL        2
+0050    | OP_CALL             2
+0052    | OP_GET_LOCAL        1
+0054    | OP_GET_LOCAL        2
+0056    | OP_MULTIPLY
+0057    | OP_EQUAL
+0058    | OP_CALL             1
+0060    | OP_POP
+0061   15 OP_GET_GLOBAL       2 '@println'
+0063    | OP_GET_GLOBAL       6 'div'
+0065    | OP_GET_LOCAL        1
+0067    | OP_GET_LOCAL        2
+0069    | OP_CALL             2
+0071    | OP_GET_LOCAL        1
+0073    | OP_GET_LOCAL        2
+0075    | OP_DIVIDE
+0076    | OP_EQUAL
+0077    | OP_CALL             1
+0079    | OP_POP
+0080   16 OP_GET_GLOBAL       2 '@println'
+0082    | OP_GET_GLOBAL       7 'mod'
+0084    | OP_GET_LOCAL        1
+0086    | OP_GET_LOCAL        2
+0088    | OP_CALL             2
+0090    | OP_GET_LOCAL        1
+0092    | OP_GET_LOCAL        2
+0094    | OP_MODULO
+0095    | OP_EQUAL
+0096    | OP_CALL             1
+0098    | OP_POP
+0099   17 OP_GET_GLOBAL       2 '@println'
+0101    | OP_GET_GLOBAL       8 'neg'
+0103    | OP_GET_LOCAL        1
+0105    | OP_CALL             1
+0107    | OP_GET_LOCAL        1
+0109    | OP_NEGATE
+0110    | OP_EQUAL
+0111    | OP_CALL             1
+0113    | OP_POP
+0114   18 OP_GET_GLOBAL       2 '@println'
+0116    | OP_GET_GLOBAL       9 'cmp'
+0118    | OP_GET_LOCAL        1
+0120    | OP_GET_LOCAL        2
+0122    | OP_CALL             2
+0124    | OP_GET_GLOBAL      10 'i8.Ord.cmp'
+0126    | OP_GET_LOCAL        1
+0128    | OP_GET_LOCAL        2
+0130    | OP_CALL             2
+0132    | OP_EQUAL
+0133    | OP_CALL             1
+0135    | OP_POP
+0136   19 OP_CONSTANT        11 '7'
+0138   20 OP_CONSTANT        12 '3'
+0140   21 OP_GET_GLOBAL       2 '@println'
+0142    | OP_GET_GLOBAL       3 'add'
+0144    | OP_GET_LOCAL        3
+0146    | OP_GET_LOCAL        4
+0148    | OP_CALL             2
+0150    | OP_GET_LOCAL        3
+0152    | OP_GET_LOCAL        4
+0154    | OP_ADD
+0155    | OP_EQUAL
+0156    | OP_CALL             1
+0158    | OP_POP
+0159   22 OP_GET_GLOBAL       2 '@println'
+0161    | OP_GET_GLOBAL       4 'sub'
+0163    | OP_GET_LOCAL        3
+0165    | OP_GET_LOCAL        4
+0167    | OP_CALL             2
+0169    | OP_GET_LOCAL        3
+0171    | OP_GET_LOCAL        4
+0173    | OP_SUBTRACT
+0174    | OP_EQUAL
+0175    | OP_CALL             1
+0177    | OP_POP
+0178   23 OP_GET_GLOBAL       2 '@println'
+0180    | OP_GET_GLOBAL       5 'mul'
+0182    | OP_GET_LOCAL        3
+0184    | OP_GET_LOCAL        4
+0186    | OP_CALL             2
+0188    | OP_GET_LOCAL        3
+0190    | OP_GET_LOCAL        4
+0192    | OP_MULTIPLY
+0193    | OP_EQUAL
+0194    | OP_CALL             1
+0196    | OP_POP
+0197   24 OP_GET_GLOBAL       2 '@println'
+0199    | OP_GET_GLOBAL       6 'div'
+0201    | OP_GET_LOCAL        3
+0203    | OP_GET_LOCAL        4
+0205    | OP_CALL             2
+0207    | OP_GET_LOCAL        3
+0209    | OP_GET_LOCAL        4
+0211    | OP_DIVIDE
+0212    | OP_EQUAL
+0213    | OP_CALL             1
+0215    | OP_POP
+0216   25 OP_GET_GLOBAL       2 '@println'
+0218    | OP_GET_GLOBAL       7 'mod'
+0220    | OP_GET_LOCAL        3
+0222    | OP_GET_LOCAL        4
+0224    | OP_CALL             2
+0226    | OP_GET_LOCAL        3
+0228    | OP_GET_LOCAL        4
+0230    | OP_MODULO
+0231    | OP_EQUAL
+0232    | OP_CALL             1
+0234    | OP_POP
+0235   26 OP_GET_GLOBAL       2 '@println'
+0237    | OP_GET_GLOBAL       8 'neg'
+0239    | OP_GET_LOCAL        3
+0241    | OP_CALL             1
+0243    | OP_GET_LOCAL        3
+0245    | OP_NEGATE
+0246    | OP_EQUAL
+0247    | OP_CALL             1
+0249    | OP_POP
+0250   27 OP_GET_GLOBAL       2 '@println'
+0252    | OP_GET_GLOBAL       9 'cmp'
+0254    | OP_GET_LOCAL        3
+0256    | OP_GET_LOCAL        4
+0258    | OP_CALL             2
+0260    | OP_GET_GLOBAL      13 'i16.Ord.cmp'
+0262    | OP_GET_LOCAL        3
+0264    | OP_GET_LOCAL        4
+0266    | OP_CALL             2
+0268    | OP_EQUAL
+0269    | OP_CALL             1
+0271    | OP_POP
+0272   28 OP_CONSTANT        14 '7'
+0274   29 OP_CONSTANT        15 '3'
+0276   30 OP_GET_GLOBAL       2 '@println'
+0278    | OP_GET_GLOBAL       3 'add'
+0280    | OP_GET_LOCAL        5
+0282    | OP_GET_LOCAL        6
+0284    | OP_CALL             2
+0286    | OP_GET_LOCAL        5
+0288    | OP_GET_LOCAL        6
+0290    | OP_ADD
+0291    | OP_EQUAL
+0292    | OP_CALL             1
+0294    | OP_POP
+0295   31 OP_GET_GLOBAL       2 '@println'
+0297    | OP_GET_GLOBAL       4 'sub'
+0299    | OP_GET_LOCAL        5
+0301    | OP_GET_LOCAL        6
+0303    | OP_CALL             2
+0305    | OP_GET_LOCAL        5
+0307    | OP_GET_LOCAL        6
+0309    | OP_SUBTRACT
+0310    | OP_EQUAL
+0311    | OP_CALL             1
+0313    | OP_POP
+0314   32 OP_GET_GLOBAL       2 '@println'
+0316    | OP_GET_GLOBAL       5 'mul'
+0318    | OP_GET_LOCAL        5
+0320    | OP_GET_LOCAL        6
+0322    | OP_CALL             2
+0324    | OP_GET_LOCAL        5
+0326    | OP_GET_LOCAL        6
+0328    | OP_MULTIPLY
+0329    | OP_EQUAL
+0330    | OP_CALL             1
+0332    | OP_POP
+0333   33 OP_GET_GLOBAL       2 '@println'
+0335    | OP_GET_GLOBAL       6 'div'
+0337    | OP_GET_LOCAL        5
+0339    | OP_GET_LOCAL        6
+0341    | OP_CALL             2
+0343    | OP_GET_LOCAL        5
+0345    | OP_GET_LOCAL        6
+0347    | OP_DIVIDE
+0348    | OP_EQUAL
+0349    | OP_CALL             1
+0351    | OP_POP
+0352   34 OP_GET_GLOBAL       2 '@println'
+0354    | OP_GET_GLOBAL       7 'mod'
+0356    | OP_GET_LOCAL        5
+0358    | OP_GET_LOCAL        6
+0360    | OP_CALL             2
+0362    | OP_GET_LOCAL        5
+0364    | OP_GET_LOCAL        6
+0366    | OP_MODULO
+0367    | OP_EQUAL
+0368    | OP_CALL             1
+0370    | OP_POP
+0371   35 OP_GET_GLOBAL       2 '@println'
+0373    | OP_GET_GLOBAL       8 'neg'
+0375    | OP_GET_LOCAL        5
+0377    | OP_CALL             1
+0379    | OP_GET_LOCAL        5
+0381    | OP_NEGATE
+0382    | OP_EQUAL
+0383    | OP_CALL             1
+0385    | OP_POP
+0386   36 OP_GET_GLOBAL       2 '@println'
+0388    | OP_GET_GLOBAL       9 'cmp'
+0390    | OP_GET_LOCAL        5
+0392    | OP_GET_LOCAL        6
+0394    | OP_CALL             2
+0396    | OP_GET_GLOBAL      16 'i32.Ord.cmp'
+0398    | OP_GET_LOCAL        5
+0400    | OP_GET_LOCAL        6
+0402    | OP_CALL             2
+0404    | OP_EQUAL
+0405    | OP_CALL             1
+0407    | OP_POP
+0408   37 OP_CONSTANT        17 '7'
+0410   38 OP_CONSTANT        18 '3'
+0412   39 OP_GET_GLOBAL       2 '@println'
+0414    | OP_GET_GLOBAL       3 'add'
+0416    | OP_GET_LOCAL        7
+0418    | OP_GET_LOCAL        8
+0420    | OP_CALL             2
+0422    | OP_GET_LOCAL        7
+0424    | OP_GET_LOCAL        8
+0426    | OP_ADD
+0427    | OP_EQUAL
+0428    | OP_CALL             1
+0430    | OP_POP
+0431   40 OP_GET_GLOBAL       2 '@println'
+0433    | OP_GET_GLOBAL       4 'sub'
+0435    | OP_GET_LOCAL        7
+0437    | OP_GET_LOCAL        8
+0439    | OP_CALL             2
+0441    | OP_GET_LOCAL        7
+0443    | OP_GET_LOCAL        8
+0445    | OP_SUBTRACT
+0446    | OP_EQUAL
+0447    | OP_CALL             1
+0449    | OP_POP
+0450   41 OP_GET_GLOBAL       2 '@println'
+0452    | OP_GET_GLOBAL       5 'mul'
+0454    | OP_GET_LOCAL        7
+0456    | OP_GET_LOCAL        8
+0458    | OP_CALL             2
+0460    | OP_GET_LOCAL        7
+0462    | OP_GET_LOCAL        8
+0464    | OP_MULTIPLY
+0465    | OP_EQUAL
+0466    | OP_CALL             1
+0468    | OP_POP
+0469   42 OP_GET_GLOBAL       2 '@println'
+0471    | OP_GET_GLOBAL       6 'div'
+0473    | OP_GET_LOCAL        7
+0475    | OP_GET_LOCAL        8
+0477    | OP_CALL             2
+0479    | OP_GET_LOCAL        7
+0481    | OP_GET_LOCAL        8
+0483    | OP_DIVIDE
+0484    | OP_EQUAL
+0485    | OP_CALL             1
+0487    | OP_POP
+0488   43 OP_GET_GLOBAL       2 '@println'
+0490    | OP_GET_GLOBAL       7 'mod'
+0492    | OP_GET_LOCAL        7
+0494    | OP_GET_LOCAL        8
+0496    | OP_CALL             2
+0498    | OP_GET_LOCAL        7
+0500    | OP_GET_LOCAL        8
+0502    | OP_MODULO
+0503    | OP_EQUAL
+0504    | OP_CALL             1
+0506    | OP_POP
+0507   44 OP_GET_GLOBAL       2 '@println'
+0509    | OP_GET_GLOBAL       8 'neg'
+0511    | OP_GET_LOCAL        7
+0513    | OP_CALL             1
+0515    | OP_GET_LOCAL        7
+0517    | OP_NEGATE
+0518    | OP_EQUAL
+0519    | OP_CALL             1
+0521    | OP_POP
+0522   45 OP_GET_GLOBAL       2 '@println'
+0524    | OP_GET_GLOBAL       9 'cmp'
+0526    | OP_GET_LOCAL        7
+0528    | OP_GET_LOCAL        8
+0530    | OP_CALL             2
+0532    | OP_GET_GLOBAL      19 'i64.Ord.cmp'
+0534    | OP_GET_LOCAL        7
+0536    | OP_GET_LOCAL        8
+0538    | OP_CALL             2
+0540    | OP_EQUAL
+0541    | OP_CALL             1
+0543    | OP_POP
+0544   46 OP_CONSTANT        20 '7'
+0546   47 OP_CONSTANT        21 '3'
+0548   48 OP_GET_GLOBAL       2 '@println'
+0550    | OP_GET_GLOBAL       3 'add'
+0552    | OP_GET_LOCAL        9
+0554    | OP_GET_LOCAL       10
+0556    | OP_CALL             2
+0558    | OP_GET_LOCAL        9
+0560    | OP_GET_LOCAL       10
+0562    | OP_ADD
+0563    | OP_EQUAL
+0564    | OP_CALL             1
+0566    | OP_POP
+0567   49 OP_GET_GLOBAL       2 '@println'
+0569    | OP_GET_GLOBAL       4 'sub'
+0571    | OP_GET_LOCAL        9
+0573    | OP_GET_LOCAL       10
+0575    | OP_CALL             2
+0577    | OP_GET_LOCAL        9
+0579    | OP_GET_LOCAL       10
+0581    | OP_SUBTRACT
+0582    | OP_EQUAL
+0583    | OP_CALL             1
+0585    | OP_POP
+0586   50 OP_GET_GLOBAL       2 '@println'
+0588    | OP_GET_GLOBAL       5 'mul'
+0590    | OP_GET_LOCAL        9
+0592    | OP_GET_LOCAL       10
+0594    | OP_CALL             2
+0596    | OP_GET_LOCAL        9
+0598    | OP_GET_LOCAL       10
+0600    | OP_MULTIPLY
+0601    | OP_EQUAL
+0602    | OP_CALL             1
+0604    | OP_POP
+0605   51 OP_GET_GLOBAL       2 '@println'
+0607    | OP_GET_GLOBAL       6 'div'
+0609    | OP_GET_LOCAL        9
+0611    | OP_GET_LOCAL       10
+0613    | OP_CALL             2
+0615    | OP_GET_LOCAL        9
+0617    | OP_GET_LOCAL       10
+0619    | OP_DIVIDE
+0620    | OP_EQUAL
+0621    | OP_CALL             1
+0623    | OP_POP
+0624   52 OP_GET_GLOBAL       2 '@println'
+0626    | OP_GET_GLOBAL       7 'mod'
+0628    | OP_GET_LOCAL        9
+0630    | OP_GET_LOCAL       10
+0632    | OP_CALL             2
+0634    | OP_GET_LOCAL        9
+0636    | OP_GET_LOCAL       10
+0638    | OP_MODULO
+0639    | OP_EQUAL
+0640    | OP_CALL             1
+0642    | OP_POP
+0643   53 OP_GET_GLOBAL       2 '@println'
+0645    | OP_GET_GLOBAL       9 'cmp'
+0647    | OP_GET_LOCAL        9
+0649    | OP_GET_LOCAL       10
+0651    | OP_CALL             2
+0653    | OP_GET_GLOBAL      22 'u8.Ord.cmp'
+0655    | OP_GET_LOCAL        9
+0657    | OP_GET_LOCAL       10
+0659    | OP_CALL             2
+0661    | OP_EQUAL
+0662    | OP_CALL             1
+0664    | OP_POP
+0665   54 OP_CONSTANT        23 '7'
+0667   55 OP_CONSTANT        24 '3'
+0669   56 OP_GET_GLOBAL       2 '@println'
+0671    | OP_GET_GLOBAL       3 'add'
+0673    | OP_GET_LOCAL       11
+0675    | OP_GET_LOCAL       12
+0677    | OP_CALL             2
+0679    | OP_GET_LOCAL       11
+0681    | OP_GET_LOCAL       12
+0683    | OP_ADD
+0684    | OP_EQUAL
+0685    | OP_CALL             1
+0687    | OP_POP
+0688   57 OP_GET_GLOBAL       2 '@println'
+0690    | OP_GET_GLOBAL       4 'sub'
+0692    | OP_GET_LOCAL       11
+0694    | OP_GET_LOCAL       12
+0696    | OP_CALL             2
+0698    | OP_GET_LOCAL       11
+0700    | OP_GET_LOCAL       12
+0702    | OP_SUBTRACT
+0703    | OP_EQUAL
+0704    | OP_CALL             1
+0706    | OP_POP
+0707   58 OP_GET_GLOBAL       2 '@println'
+0709    | OP_GET_GLOBAL       5 'mul'
+0711    | OP_GET_LOCAL       11
+0713    | OP_GET_LOCAL       12
+0715    | OP_CALL             2
+0717    | OP_GET_LOCAL       11
+0719    | OP_GET_LOCAL       12
+0721    | OP_MULTIPLY
+0722    | OP_EQUAL
+0723    | OP_CALL             1
+0725    | OP_POP
+0726   59 OP_GET_GLOBAL       2 '@println'
+0728    | OP_GET_GLOBAL       6 'div'
+0730    | OP_GET_LOCAL       11
+0732    | OP_GET_LOCAL       12
+0734    | OP_CALL             2
+0736    | OP_GET_LOCAL       11
+0738    | OP_GET_LOCAL       12
+0740    | OP_DIVIDE
+0741    | OP_EQUAL
+0742    | OP_CALL             1
+0744    | OP_POP
+0745   60 OP_GET_GLOBAL       2 '@println'
+0747    | OP_GET_GLOBAL       7 'mod'
+0749    | OP_GET_LOCAL       11
+0751    | OP_GET_LOCAL       12
+0753    | OP_CALL             2
+0755    | OP_GET_LOCAL       11
+0757    | OP_GET_LOCAL       12
+0759    | OP_MODULO
+0760    | OP_EQUAL
+0761    | OP_CALL             1
+0763    | OP_POP
+0764   61 OP_GET_GLOBAL       2 '@println'
+0766    | OP_GET_GLOBAL       9 'cmp'
+0768    | OP_GET_LOCAL       11
+0770    | OP_GET_LOCAL       12
+0772    | OP_CALL             2
+0774    | OP_GET_GLOBAL      25 'u16.Ord.cmp'
+0776    | OP_GET_LOCAL       11
+0778    | OP_GET_LOCAL       12
+0780    | OP_CALL             2
+0782    | OP_EQUAL
+0783    | OP_CALL             1
+0785    | OP_POP
+0786   62 OP_CONSTANT        26 '7'
+0788   63 OP_CONSTANT        27 '3'
+0790   64 OP_GET_GLOBAL       2 '@println'
+0792    | OP_GET_GLOBAL       3 'add'
+0794    | OP_GET_LOCAL       13
+0796    | OP_GET_LOCAL       14
+0798    | OP_CALL             2
+0800    | OP_GET_LOCAL       13
+0802    | OP_GET_LOCAL       14
+0804    | OP_ADD
+0805    | OP_EQUAL
+0806    | OP_CALL             1
+0808    | OP_POP
+0809   65 OP_GET_GLOBAL       2 '@println'
+0811    | OP_GET_GLOBAL       4 'sub'
+0813    | OP_GET_LOCAL       13
+0815    | OP_GET_LOCAL       14
+0817    | OP_CALL             2
+0819    | OP_GET_LOCAL       13
+0821    | OP_GET_LOCAL       14
+0823    | OP_SUBTRACT
+0824    | OP_EQUAL
+0825    | OP_CALL             1
+0827    | OP_POP
+0828   66 OP_GET_GLOBAL       2 '@println'
+0830    | OP_GET_GLOBAL       5 'mul'
+0832    | OP_GET_LOCAL       13
+0834    | OP_GET_LOCAL       14
+0836    | OP_CALL             2
+0838    | OP_GET_LOCAL       13
+0840    | OP_GET_LOCAL       14
+0842    | OP_MULTIPLY
+0843    | OP_EQUAL
+0844    | OP_CALL             1
+0846    | OP_POP
+0847   67 OP_GET_GLOBAL       2 '@println'
+0849    | OP_GET_GLOBAL       6 'div'
+0851    | OP_GET_LOCAL       13
+0853    | OP_GET_LOCAL       14
+0855    | OP_CALL             2
+0857    | OP_GET_LOCAL       13
+0859    | OP_GET_LOCAL       14
+0861    | OP_DIVIDE
+0862    | OP_EQUAL
+0863    | OP_CALL             1
+0865    | OP_POP
+0866   68 OP_GET_GLOBAL       2 '@println'
+0868    | OP_GET_GLOBAL       7 'mod'
+0870    | OP_GET_LOCAL       13
+0872    | OP_GET_LOCAL       14
+0874    | OP_CALL             2
+0876    | OP_GET_LOCAL       13
+0878    | OP_GET_LOCAL       14
+0880    | OP_MODULO
+0881    | OP_EQUAL
+0882    | OP_CALL             1
+0884    | OP_POP
+0885   69 OP_GET_GLOBAL       2 '@println'
+0887    | OP_GET_GLOBAL       9 'cmp'
+0889    | OP_GET_LOCAL       13
+0891    | OP_GET_LOCAL       14
+0893    | OP_CALL             2
+0895    | OP_GET_GLOBAL      28 'u32.Ord.cmp'
+0897    | OP_GET_LOCAL       13
+0899    | OP_GET_LOCAL       14
+0901    | OP_CALL             2
+0903    | OP_EQUAL
+0904    | OP_CALL             1
+0906    | OP_POP
+0907   70 OP_CONSTANT        29 '7'
+0909   71 OP_CONSTANT        30 '3'
+0911   72 OP_GET_GLOBAL       2 '@println'
+0913    | OP_GET_GLOBAL       3 'add'
+0915    | OP_GET_LOCAL       15
+0917    | OP_GET_LOCAL       16
+0919    | OP_CALL             2
+0921    | OP_GET_LOCAL       15
+0923    | OP_GET_LOCAL       16
+0925    | OP_ADD
+0926    | OP_EQUAL
+0927    | OP_CALL             1
+0929    | OP_POP
+0930   73 OP_GET_GLOBAL       2 '@println'
+0932    | OP_GET_GLOBAL       4 'sub'
+0934    | OP_GET_LOCAL       15
+0936    | OP_GET_LOCAL       16
+0938    | OP_CALL             2
+0940    | OP_GET_LOCAL       15
+0942    | OP_GET_LOCAL       16
+0944    | OP_SUBTRACT
+0945    | OP_EQUAL
+0946    | OP_CALL             1
+0948    | OP_POP
+0949   74 OP_GET_GLOBAL       2 '@println'
+0951    | OP_GET_GLOBAL       5 'mul'
+0953    | OP_GET_LOCAL       15
+0955    | OP_GET_LOCAL       16
+0957    | OP_CALL             2
+0959    | OP_GET_LOCAL       15
+0961    | OP_GET_LOCAL       16
+0963    | OP_MULTIPLY
+0964    | OP_EQUAL
+0965    | OP_CALL             1
+0967    | OP_POP
+0968   75 OP_GET_GLOBAL       2 '@println'
+0970    | OP_GET_GLOBAL       6 'div'
+0972    | OP_GET_LOCAL       15
+0974    | OP_GET_LOCAL       16
+0976    | OP_CALL             2
+0978    | OP_GET_LOCAL       15
+0980    | OP_GET_LOCAL       16
+0982    | OP_DIVIDE
+0983    | OP_EQUAL
+0984    | OP_CALL             1
+0986    | OP_POP
+0987   76 OP_GET_GLOBAL       2 '@println'
+0989    | OP_GET_GLOBAL       7 'mod'
+0991    | OP_GET_LOCAL       15
+0993    | OP_GET_LOCAL       16
+0995    | OP_CALL             2
+0997    | OP_GET_LOCAL       15
+0999    | OP_GET_LOCAL       16
+1001    | OP_MODULO
+1002    | OP_EQUAL
+1003    | OP_CALL             1
+1005    | OP_POP
+1006   77 OP_GET_GLOBAL       2 '@println'
+1008    | OP_GET_GLOBAL       9 'cmp'
+1010    | OP_GET_LOCAL       15
+1012    | OP_GET_LOCAL       16
+1014    | OP_CALL             2
+1016    | OP_GET_GLOBAL      31 'u64.Ord.cmp'
+1018    | OP_GET_LOCAL       15
+1020    | OP_GET_LOCAL       16
+1022    | OP_CALL             2
+1024    | OP_EQUAL
+1025    | OP_CALL             1
+1027    | OP_POP
+1028   78 OP_CONSTANT        32 '7.5'
+1030   79 OP_CONSTANT        33 '2.5'
+1032   80 OP_GET_GLOBAL       2 '@println'
+1034    | OP_GET_GLOBAL       3 'add'
+1036    | OP_GET_LOCAL       17
+1038    | OP_GET_LOCAL       18
+1040    | OP_CALL             2
+1042    | OP_GET_LOCAL       17
+1044    | OP_GET_LOCAL       18
+1046    | OP_ADD
+1047    | OP_EQUAL
+1048    | OP_CALL             1
+1050    | OP_POP
+1051   81 OP_GET_GLOBAL       2 '@println'
+1053    | OP_GET_GLOBAL       4 'sub'
+1055    | OP_GET_LOCAL       17
+1057    | OP_GET_LOCAL       18
+1059    | OP_CALL             2
+1061    | OP_GET_LOCAL       17
+1063    | OP_GET_LOCAL       18
+1065    | OP_SUBTRACT
+1066    | OP_EQUAL
+1067    | OP_CALL             1
+1069    | OP_POP
+1070   82 OP_GET_GLOBAL       2 '@println'
+1072    | OP_GET_GLOBAL       5 'mul'
+1074    | OP_GET_LOCAL       17
+1076    | OP_GET_LOCAL       18
+1078    | OP_CALL             2
+1080    | OP_GET_LOCAL       17
+1082    | OP_GET_LOCAL       18
+1084    | OP_MULTIPLY
+1085    | OP_EQUAL
+1086    | OP_CALL             1
+1088    | OP_POP
+1089   83 OP_GET_GLOBAL       2 '@println'
+1091    | OP_GET_GLOBAL       6 'div'
+1093    | OP_GET_LOCAL       17
+1095    | OP_GET_LOCAL       18
+1097    | OP_CALL             2
+1099    | OP_GET_LOCAL       17
+1101    | OP_GET_LOCAL       18
+1103    | OP_DIVIDE
+1104    | OP_EQUAL
+1105    | OP_CALL             1
+1107    | OP_POP
+1108   84 OP_GET_GLOBAL       2 '@println'
+1110    | OP_GET_GLOBAL       7 'mod'
+1112    | OP_GET_LOCAL       17
+1114    | OP_GET_LOCAL       18
+1116    | OP_CALL             2
+1118    | OP_GET_LOCAL       17
+1120    | OP_GET_LOCAL       18
+1122    | OP_MODULO
+1123    | OP_EQUAL
+1124    | OP_CALL             1
+1126    | OP_POP
+1127   85 OP_GET_GLOBAL       2 '@println'
+1129    | OP_GET_GLOBAL       8 'neg'
+1131    | OP_GET_LOCAL       17
+1133    | OP_CALL             1
+1135    | OP_GET_LOCAL       17
+1137    | OP_NEGATE
+1138    | OP_EQUAL
+1139    | OP_CALL             1
+1141    | OP_POP
+1142   86 OP_GET_GLOBAL       2 '@println'
+1144    | OP_GET_GLOBAL       9 'cmp'
+1146    | OP_GET_LOCAL       17
+1148    | OP_GET_LOCAL       18
+1150    | OP_CALL             2
+1152    | OP_GET_GLOBAL      34 'f32.Ord.cmp'
+1154    | OP_GET_LOCAL       17
+1156    | OP_GET_LOCAL       18
+1158    | OP_CALL             2
+1160    | OP_EQUAL
+1161    | OP_CALL             1
+1163    | OP_POP
+1164   87 OP_CONSTANT        35 '7.5'
+1166   88 OP_CONSTANT        36 '2.5'
+1168   89 OP_GET_GLOBAL       2 '@println'
+1170    | OP_GET_GLOBAL       3 'add'
+1172    | OP_GET_LOCAL       19
+1174    | OP_GET_LOCAL       20
+1176    | OP_CALL             2
+1178    | OP_GET_LOCAL       19
+1180    | OP_GET_LOCAL       20
+1182    | OP_ADD
+1183    | OP_EQUAL
+1184    | OP_CALL             1
+1186    | OP_POP
+1187   90 OP_GET_GLOBAL       2 '@println'
+1189    | OP_GET_GLOBAL       4 'sub'
+1191    | OP_GET_LOCAL       19
+1193    | OP_GET_LOCAL       20
+1195    | OP_CALL             2
+1197    | OP_GET_LOCAL       19
+1199    | OP_GET_LOCAL       20
+1201    | OP_SUBTRACT
+1202    | OP_EQUAL
+1203    | OP_CALL             1
+1205    | OP_POP
+1206   91 OP_GET_GLOBAL       2 '@println'
+1208    | OP_GET_GLOBAL       5 'mul'
+1210    | OP_GET_LOCAL       19
+1212    | OP_GET_LOCAL       20
+1214    | OP_CALL             2
+1216    | OP_GET_LOCAL       19
+1218    | OP_GET_LOCAL       20
+1220    | OP_MULTIPLY
+1221    | OP_EQUAL
+1222    | OP_CALL             1
+1224    | OP_POP
+1225   92 OP_GET_GLOBAL       2 '@println'
+1227    | OP_GET_GLOBAL       6 'div'
+1229    | OP_GET_LOCAL       19
+1231    | OP_GET_LOCAL       20
+1233    | OP_CALL             2
+1235    | OP_GET_LOCAL       19
+1237    | OP_GET_LOCAL       20
+1239    | OP_DIVIDE
+1240    | OP_EQUAL
+1241    | OP_CALL             1
+1243    | OP_POP
+1244   93 OP_GET_GLOBAL       2 '@println'
+1246    | OP_GET_GLOBAL       7 'mod'
+1248    | OP_GET_LOCAL       19
+1250    | OP_GET_LOCAL       20
+1252    | OP_CALL             2
+1254    | OP_GET_LOCAL       19
+1256    | OP_GET_LOCAL       20
+1258    | OP_MODULO
+1259    | OP_EQUAL
+1260    | OP_CALL             1
+1262    | OP_POP
+1263   94 OP_GET_GLOBAL       2 '@println'
+1265    | OP_GET_GLOBAL       8 'neg'
+1267    | OP_GET_LOCAL       19
+1269    | OP_CALL             1
+1271    | OP_GET_LOCAL       19
+1273    | OP_NEGATE
+1274    | OP_EQUAL
+1275    | OP_CALL             1
+1277    | OP_POP
+1278   95 OP_GET_GLOBAL       2 '@println'
+1280    | OP_GET_GLOBAL       9 'cmp'
+1282    | OP_GET_LOCAL       19
+1284    | OP_GET_LOCAL       20
+1286    | OP_CALL             2
+1288    | OP_GET_GLOBAL      37 'f64.Ord.cmp'
+1290    | OP_GET_LOCAL       19
+1292    | OP_GET_LOCAL       20
+1294    | OP_CALL             2
+1296    | OP_EQUAL
+1297    | OP_CALL             1
+1299    | OP_POP
+1300   96 OP_NIL
+1301    | OP_RETURN

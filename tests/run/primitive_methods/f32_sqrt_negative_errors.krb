@@ -1,0 +1,4 @@
+fun main(): unit {
+    let x: f32 = -4.0f32;
+    @println(x.sqrt());
+}

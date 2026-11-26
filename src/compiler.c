@@ -662,17 +662,113 @@ static int endCompiler(void) {
   return index;
 }
 
+// The global a primitive type's method is stored in, such as `string.len`, or
+// `string.Display.show` for a method of a trait. A `.` can't appear in a user's
+// name, so it can't collide with one.
+static uint8_t primitiveMethodConstant(const char *owner, int ownerLength,
+                                       const char *trait, int traitLength,
+                                       const Token *method) {
+  int length =
+      ownerLength + 1 + method->length + (trait != NULL ? traitLength + 1 : 0);
+  char *name = (char *)malloc((size_t)length);
+  if (name == NULL) {
+    fprintf(stderr, "malloc failed in primitiveMethodConstant\n");
+    exit(1);
+  }
+
+  int at = 0;
+  memcpy(name, owner, (size_t)ownerLength);
+  at += ownerLength;
+  name[at++] = '.';
+  if (trait != NULL) {
+    memcpy(name + at, trait, (size_t)traitLength);
+    at += traitLength;
+    name[at++] = '.';
+  }
+  memcpy(name + at, method->start, (size_t)method->length);
+
+  uint8_t constant = stringConstant(name, length, NULL);
+  free(name);
+  return constant;
+}
+
+// The name a trait's method is stored under in a struct, such as
+// `Display.show`, next to its plain name. A call that has to run the trait's
+// version uses it, so a method of the struct with the plain name can't hide it.
+// A `.` can't appear in a user's name.
+static uint8_t traitMethodConstant(const char *trait, int traitLength,
+                                   const char *method, int methodLength) {
+  int length = traitLength + 1 + methodLength;
+  char *name = (char *)malloc((size_t)length);
+  if (name == NULL) {
+    fprintf(stderr, "malloc failed in traitMethodConstant\n");
+    exit(1);
+  }
+
+  memcpy(name, trait, (size_t)traitLength);
+  name[traitLength] = '.';
+  memcpy(name + traitLength + 1, method, (size_t)methodLength);
+
+  uint8_t constant = stringConstant(name, length, NULL);
+  free(name);
+  return constant;
+}
+
 static void compileCall(CallNode *c) {
+  // The value a method runs on, and the arguments after it. `Trait.method(x)`
+  // has the value as its first argument, and any other method call has it as
+  // the callee's object.
+  AstNode *receiver = NULL;
+  AstNode **args = c->args;
+  int argCount = c->argCount;
+
+  if (c->callee->kind == NODE_GET) {
+    receiver = c->callee->as.get.object;
+
+    if (c->isTraitCall) {
+      receiver = args[0];
+      args++;
+      argCount--;
+    }
+  }
+
+  if (c->callee->kind == NODE_GET && c->callee->as.get.primitiveOwner != NULL) {
+    GetNode *g = &c->callee->as.get;
+    // The checker matched the count to the method, which has at most 254
+    // parameters plus the receiver
+    assert(argCount + 1 <= UINT8_MAX);
+    emitBytes(
+        OP_GET_GLOBAL,
+        primitiveMethodConstant(
+            g->primitiveOwner, (int)strlen(g->primitiveOwner),
+            g->primitiveTrait,
+            g->primitiveTrait != NULL ? (int)strlen(g->primitiveTrait) : 0,
+            &g->name));
+    // A static method has no receiver value
+    int receiverCount = g->primitiveIsStatic ? 0 : 1;
+    if (receiverCount == 1)
+      compileExpr(receiver);
+    for (int i = 0; i < argCount; i++) {
+      compileExpr(args[i]);
+    }
+    emitBytes(OP_CALL, (uint8_t)(argCount + receiverCount));
+    return;
+  }
+
   // Compile method calls to OP_INVOKE instead of OP_GET_PROPERTY -> OP_CALL
   if (c->callee->kind == NODE_GET) {
     GetNode *g = &c->callee->as.get;
-    compileExpr(g->object);
-    uint8_t name = identifierConstant(&g->name);
-    for (int i = 0; i < c->argCount; i++) {
-      compileExpr(c->args[i]);
+    compileExpr(receiver);
+    uint8_t name =
+        g->viaTrait != NULL
+            ? traitMethodConstant(g->viaTrait, (int)strlen(g->viaTrait),
+                                  g->name.start, g->name.length)
+            : identifierConstant(&g->name);
+    for (int i = 0; i < argCount; i++) {
+      compileExpr(args[i]);
     }
     emitBytes(OP_INVOKE, name);
-    emitByte((uint8_t)c->argCount);
+    emitByte((uint8_t)argCount);
     return;
   }
 
@@ -861,9 +957,9 @@ static bool compileStringConcatChain(AstNode *node) {
 // Calls the trait method of an operator. The receiver and arguments are
 // already on the stack, and the result replaces them.
 static void emitOperatorInvoke(const OperatorTrait *entry, int argCount) {
-  Token method = tokenFromCString(entry->method);
-
-  emitBytes(OP_INVOKE, identifierConstant(&method));
+  emitBytes(OP_INVOKE,
+            traitMethodConstant(entry->trait, (int)strlen(entry->trait),
+                                entry->method, (int)strlen(entry->method)));
   emitByte((uint8_t)argCount);
 }
 
@@ -901,9 +997,7 @@ static void compileTraitOperator(BinaryNode *b) {
 // Replaces the value on top of the stack with the string its Display impl's
 // toString() returns.
 static void emitDisplayToString(void) {
-  Token toString = tokenFromCString("toString");
-
-  emitBytes(OP_INVOKE, identifierConstant(&toString));
+  emitBytes(OP_INVOKE, traitMethodConstant("Display", 7, "toString", 8));
   emitByte(0);
 }
 
@@ -916,7 +1010,7 @@ static void emitDisplayToString(void) {
  */
 static bool selfInScope(void) {
   for (FnCompiler *c = current; c != NULL; c = c->enclosing) {
-    if (c->type == TYPE_METHOD)
+    if (c->type == TYPE_METHOD || c->type == TYPE_PRIMITIVE_METHOD)
       return true;
   }
   return false;
@@ -1277,9 +1371,17 @@ static void compileFunction(FunctionNode *fn, FunctionType type) {
   current->fn->isPublic = fn->isPublic;
   beginScope();
 
-  current->fn->arity = fn->arity;
-  if (fn->arity > 255) {
+  int receiverCount = type == TYPE_PRIMITIVE_METHOD ? 1 : 0;
+
+  current->fn->arity = fn->arity + receiverCount;
+  if (current->fn->arity > 255) {
     compilerErrorAtToken(&fn->name, "Can't have more than 255 parameters.");
+  }
+  if (receiverCount == 1) {
+    Token self = tokenFromCString("self");
+    declareVariable(&self, /*isMutable=*/false);
+    markInitialized();
+    resetStackHeight(currentStackHeight() + 1);
   }
   for (int i = 0; i < fn->arity; i++) {
     declareVariable(&fn->params[i], /*isMutable=*/true);
@@ -1364,10 +1466,85 @@ static void compileStructDecl(AstNode *node) {
   emitByte(OP_POP);
 }
 
+static bool isPrimitiveImpl(const AstNode *node) {
+  return node->kind == NODE_IMPL && node->as.impl.primitiveOwner != NULL;
+}
+
+// The most constants a function can hold, with room kept for the two a method
+// takes in its installer: the closure and the global's name
+#define INSTALLER_CONSTANT_LIMIT (UINT8_MAX + 1 - 2)
+
+// Starts a function that defines methods of primitive types as globals, and is
+// called once by the script
+static void beginMethodInstaller(FnCompiler *installer) {
+  // Named, so it doesn't take a number from the lambdas
+  Token name = tokenFromCString("installMethods");
+  initCompiler(installer, TYPE_FUNCTION, &name);
+  beginScope();
+}
+
+// Ends the installer, and has the script call it
+static void endMethodInstaller(void) {
+  int index = endCompiler();
+
+  CompiledConst k;
+  k.kind = CONST_FUNCTION;
+  k.as.functionIndex = index;
+  emitBytes(OP_CLOSURE, makeConstant(k, NULL));
+  emitBytes(OP_CALL, 0);
+  emitByte(OP_POP);
+}
+
+// `impl string { ... }` and `impl Trait for string { ... }`: each method
+// becomes a global function. The standard library has many of them, and a
+// function has room for only so many constants, so they are defined by
+// installer functions that each take as many as fit.
+static void compilePrimitiveImpls(AstNode **ast, int count) {
+  FnCompiler installer;
+  bool open = false;
+
+  for (int i = 0; i < count; i++) {
+    if (!isPrimitiveImpl(ast[i]))
+      continue;
+
+    ImplNode *impl = &ast[i]->as.impl;
+    currentLine = impl->targetName.line;
+
+    for (int j = 0; j < impl->methodCount; j++) {
+      FunctionNode *method = impl->methods[j];
+
+      if (open && current->fn->constantCount > INSTALLER_CONSTANT_LIMIT) {
+        endMethodInstaller();
+        open = false;
+      }
+
+      if (!open) {
+        beginMethodInstaller(&installer);
+        open = true;
+      }
+
+      // A static method has no receiver, so it is an ordinary function
+      compileFunction(method,
+                      method->hasSelf ? TYPE_PRIMITIVE_METHOD : TYPE_FUNCTION);
+      emitBytes(OP_DEFINE_GLOBAL,
+                primitiveMethodConstant(
+                    impl->primitiveOwner, (int)strlen(impl->primitiveOwner),
+                    impl->hasTraitName ? impl->traitName.start : NULL,
+                    impl->hasTraitName ? impl->traitName.length : 0,
+                    &method->name));
+    }
+  }
+
+  if (open)
+    endMethodInstaller();
+}
+
 static void compileImplDecl(AstNode *node) {
   ImplNode *impl = &node->as.impl;
 
   currentLine = impl->targetName.line;
+
+  assert(impl->primitiveOwner == NULL); // compilePrimitiveImpls handles those
 
   const Token *resolved = resolvedImplTargetsLookup(node);
   Token structName = resolved != NULL ? *resolved : impl->targetName;
@@ -1388,7 +1565,17 @@ static void compileImplDecl(AstNode *node) {
     FunctionType type = method->hasSelf ? TYPE_METHOD : TYPE_STATIC_METHOD;
 
     compileFunction(method, type);
-    emitBytes(OP_METHOD, constant);
+
+    if (impl->hasTraitName) {
+      // Also stored under the trait's name, which no method of the struct
+      // can take
+      emitBytes(OP_TRAIT_METHOD, constant);
+      emitByte(traitMethodConstant(impl->traitName.start,
+                                   impl->traitName.length, method->name.start,
+                                   method->name.length));
+    } else {
+      emitBytes(OP_METHOD, constant);
+    }
   }
 
   currentImplTargetName = previousImplTargetName;
@@ -1698,9 +1885,12 @@ CompiledUnit *compile(AstNode **ast, int count, int endLine) {
     }
   }
 
+  compilePrimitiveImpls(ast, count);
+
   // Hoist trait implementation blocks
   for (int i = 0; i < count; i++) {
-    if (ast[i]->kind == NODE_IMPL && ast[i]->as.impl.hasTraitName) {
+    if (ast[i]->kind == NODE_IMPL && ast[i]->as.impl.hasTraitName &&
+        !isPrimitiveImpl(ast[i])) {
       compileStmt(ast[i]);
     }
   }
@@ -1709,7 +1899,8 @@ CompiledUnit *compile(AstNode **ast, int count, int endLine) {
   for (int i = 0; i < count; i++) {
     bool alreadyCompiled =
         ast[i]->kind == NODE_FUNCTION || ast[i]->kind == NODE_STRUCT ||
-        (ast[i]->kind == NODE_IMPL && ast[i]->as.impl.hasTraitName);
+        (ast[i]->kind == NODE_IMPL && ast[i]->as.impl.hasTraitName) ||
+        isPrimitiveImpl(ast[i]);
 
     if (!alreadyCompiled)
       compileStmt(ast[i]);

@@ -53,6 +53,17 @@ static int fieldInstruction(const char *name, Chunk *chunk, int offset) {
   return offset + 4;
 }
 
+static int traitMethodInstruction(Chunk *chunk, int offset) {
+  uint8_t name = chunk->code[offset + 1];
+  uint8_t qualified = chunk->code[offset + 2];
+  fprintf(stderr, "%-16s %4d '", "OP_TRAIT_METHOD", name);
+  printValueToErr(chunk->constants.values[name]);
+  fprintf(stderr, "' %4d '", qualified);
+  printValueToErr(chunk->constants.values[qualified]);
+  fprintf(stderr, "'\n");
+  return offset + 3;
+}
+
 static int invokeInstruction(const char *name, Chunk *chunk, int offset) {
   uint8_t constant = chunk->code[offset + 1];
   uint8_t argCount = chunk->code[offset + 2];
@@ -164,6 +175,8 @@ int disassembleInstruction(Chunk *chunk, int offset) {
     return fieldInstruction("OP_FIELD", chunk, offset);
   case OP_METHOD:
     return constantInstruction("OP_METHOD", chunk, offset);
+  case OP_TRAIT_METHOD:
+    return traitMethodInstruction(chunk, offset);
   case OP_INVOKE:
     return invokeInstruction("OP_INVOKE", chunk, offset);
   case OP_LIST:

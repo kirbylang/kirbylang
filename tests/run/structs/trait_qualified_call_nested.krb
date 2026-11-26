@@ -1,0 +1,35 @@
+trait Scale {
+    fun scale(self, by: i64): i64;
+}
+
+struct Box {
+    pub var n: i64;
+}
+
+impl Scale for Box {
+    fun scale(self, by: i64): i64 = self.n * by;
+}
+
+impl Display for Box {
+    fun toString(self): string = "Box";
+}
+
+fun trace(label: string, value: i64): i64 {
+    @println(label);
+    return value;
+}
+
+fun makeBox(n: i64): Box {
+    @println("value");
+    return Box { n: n };
+}
+
+fun twice[T: Scale](x: T): i64 = Scale.scale(x, Scale.scale(x, 1));
+
+fun main(): unit {
+    let b = Box { n: 2 };
+    @println(Scale.scale(b, Scale.scale(b, 3)));
+    @println(Display.toString(b).len());
+    @println(twice(b));
+    @println(Scale.scale(makeBox(5), trace("argument", 2)));
+}

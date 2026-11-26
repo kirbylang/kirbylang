@@ -1,0 +1,4 @@
+fun main(): unit {
+    let x: u64 = 3;
+    @println(x.abs());
+}

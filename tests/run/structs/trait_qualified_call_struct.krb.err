@@ -1,0 +1,69 @@
+== <script> ==
+0000   33 OP_CLOSURE          1 <fn main>
+0002    | OP_DEFINE_GLOBAL    0 'main'
+0004    5 OP_STRUCT           2 'Plain'
+0006    | OP_DEFINE_GLOBAL    2 'Plain'
+0008    | OP_GET_GLOBAL       2 'Plain'
+0010    6 OP_NIL
+0011    | OP_FIELD            3 'n' public mutable
+0015    7 OP_POP
+0016    9 OP_STRUCT           4 'Shadowed'
+0018    | OP_DEFINE_GLOBAL    4 'Shadowed'
+0020    | OP_GET_GLOBAL       4 'Shadowed'
+0022   10 OP_NIL
+0023    | OP_FIELD            3 'n' public mutable
+0027   11 OP_POP
+0028   13 OP_GET_GLOBAL       2 'Plain'
+0030   14 OP_CLOSURE          6 <fn hello>
+0032    | OP_TRAIT_METHOD     5 'hello'    7 'Greet.hello'
+0035   15 OP_POP
+0036   21 OP_GET_GLOBAL       4 'Shadowed'
+0038   22 OP_CLOSURE          8 <fn hello>
+0040    | OP_TRAIT_METHOD     5 'hello'    7 'Greet.hello'
+0043   23 OP_POP
+0044   17 OP_GET_GLOBAL       4 'Shadowed'
+0046   18 OP_CLOSURE          9 <fn hello>
+0048    | OP_METHOD           5 'hello'
+0050   19 OP_POP
+0051   34 OP_NIL
+0052    | OP_RETURN
+== main ==
+0000   26 OP_GET_GLOBAL       0 'Plain'
+0002    | OP_CONSTANT         1 'n'
+0004    | OP_CONSTANT         2 '1'
+0006    | OP_STRUCT_INIT      1
+0008   27 OP_GET_GLOBAL       3 'Shadowed'
+0010    | OP_CONSTANT         1 'n'
+0012    | OP_CONSTANT         4 '2'
+0014    | OP_STRUCT_INIT      1
+0016   29 OP_GET_GLOBAL       5 '@println'
+0018    | OP_GET_LOCAL        1
+0020    | OP_INVOKE        (0 args)    6 'hello'
+0023    | OP_CALL             1
+0025    | OP_POP
+0026   30 OP_GET_GLOBAL       5 '@println'
+0028    | OP_GET_LOCAL        1
+0030    | OP_INVOKE        (0 args)    7 'Greet.hello'
+0033    | OP_CALL             1
+0035    | OP_POP
+0036   31 OP_GET_GLOBAL       5 '@println'
+0038    | OP_GET_LOCAL        2
+0040    | OP_INVOKE        (0 args)    6 'hello'
+0043    | OP_CALL             1
+0045    | OP_POP
+0046   32 OP_GET_GLOBAL       5 '@println'
+0048    | OP_GET_LOCAL        2
+0050    | OP_INVOKE        (0 args)    7 'Greet.hello'
+0053    | OP_CALL             1
+0055    | OP_POP
+0056   33 OP_NIL
+0057    | OP_RETURN
+== hello ==
+0000   14 OP_CONSTANT         0 'plain trait'
+0002    | OP_RETURN
+== hello ==
+0000   22 OP_CONSTANT         0 'trait'
+0002    | OP_RETURN
+== hello ==
+0000   18 OP_CONSTANT         0 'own'
+0002    | OP_RETURN

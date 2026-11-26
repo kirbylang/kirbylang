@@ -123,6 +123,16 @@ fun main(): unit {
 }
 ```
 
+#### String Methods
+
+`len` gives the length of a string in bytes.
+
+```kirby
+fun main(): unit {
+    @println("Hello".len()); // 5
+}
+```
+
 #### Multiline Strings
 
 Multiline strings are supported.
@@ -195,6 +205,66 @@ Number literals are digits + an optional decimal point and suffix indicating the
 - `146.48290f32`
 - `105725.278123567f64`
 
+#### Number Methods
+
+Numbers have methods.
+
+| Type                      | Methods                                                               |
+| ------------------------- | --------------------------------------------------------------------- |
+| `f64`, `f32`              | `abs`, `ceil`, `floor`, `max`, `min`, `pow`, `round`, `sqrt`, `trunc` |
+| `i8`, `i16`, `i32`, `i64` | `abs`, `max`, `min`                                                   |
+| `u8`, `u16`, `u32`, `u64` | `max`, `min`                                                          |
+
+The float methods do what the builtin functions of the same name do.
+
+```kirby
+fun main(): unit {
+    let x: f64 = -2.5;
+    @println(x.abs()); // 2.5
+    @println(x.round()); // -3
+    @println((16.0).sqrt()); // 4
+
+    let n: i32 = -7;
+    @println(n.abs()); // 7
+    @println(n.max(3)); // 3
+
+    let byte: u8 = 200;
+    @println(byte.min(100)); // 100
+}
+```
+
+The `abs` of the smallest integer, such as `-128` for an `i8`, is an overflow error, because the result doesn't fit.
+
+Numbers, strings and bools also have the methods of the standard traits, which can be called like any method:
+
+| Type                           | Methods                                                       |
+| ------------------------------ | ------------------------------------------------------------- |
+| every number type              | `toString`, `equals`, `cmp`, `add`, `sub`, `mul`, `div`, `mod` |
+| signed integers, `f64`, `f32`  | `neg`                                                         |
+| `string`                       | `toString`, `equals`, `add`                                   |
+| `bool`                         | `toString`, `equals`                                          |
+
+`cmp` gives `-1`, `0` or `1`.
+
+```kirby
+fun main(): unit {
+    let a: u8 = 7;
+    @println(a.toString()); // 7
+    @println(a.cmp(3)); // 1
+    @println(a.add(3)); // 10
+    @println("ab".add("cd")); // abcd
+}
+```
+
+The `Default` trait's static method is called on the type's name.
+
+```kirby
+fun main(): unit {
+    @println(f64.default()); // 0
+    @println(bool.default()); // false
+}
+```
+
 ### Arrays
 
 Arrays, `[T; N]`, are fixed sized collections of homogenous types.
@@ -207,6 +277,22 @@ fun main(): unit {
 }
 ```
 
+#### Array Methods
+
+An array has `len`, `contains`, `copy`, `reverse`, `slice`, `concat` and
+`toList`. `copy` and `reverse` give an array of the same length, and `slice`,
+`concat` and `toList` give a list.
+
+```kirby
+fun main(): unit {
+    let scores = [100, 53, 77];
+
+    @println(scores.len()); // 3
+    @println(scores.contains(53)); // true
+    @println(scores.reverse()[0]); // 77
+}
+```
+
 ### Lists
 
 Lists, `[T]`, are growable collections of homogenous types.
@@ -216,6 +302,22 @@ fun main(): unit {
     let scores: [i64] = [100, 53, 77, 41];
 
     @listPush(scores, 87);
+}
+```
+
+#### List Methods
+
+A list has `len`, `isEmpty`, `push`, `pop`, `insert`, `remove`, `clear`,
+`contains`, `copy`, `reverse`, `slice` and `concat`.
+
+```kirby
+fun main(): unit {
+    let scores: [i64] = [100, 53, 77, 41];
+
+    scores.push(87);
+    @println(scores.len()); // 5
+    @println(scores.pop()); // 87
+    @println(scores.contains(77)); // true
 }
 ```
 
@@ -453,6 +555,33 @@ fun main(): unit {
 
     @println($"Square: {square.get_area()}");  // Square: 100
     @println($"Rect: {rect.get_area()}");  // Rect: 50
+}
+```
+
+#### Calling A Trait's Method By Name
+
+A type's own method wins over a trait's method with the same name.
+`Trait.method(value)` calls the trait's version.
+
+```kirby
+struct Point {
+    pub var x: f64;
+    pub var y: f64;
+}
+
+impl Point {
+    pub fun toString(self): string = "own";
+}
+
+impl Display for Point {
+    fun toString(self): string = "trait";
+}
+
+fun main(): unit {
+    let p = Point { x: 1, y: 2 };
+
+    @println(p.toString()); // own
+    @println(Display.toString(p)); // trait
 }
 ```
 

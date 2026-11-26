@@ -1,0 +1,6 @@
+fun main(): unit {
+    let xs: [i64] = [3, 2, 1];
+    @println(xs.copy().reverse().slice(1, 3).len() + 1);
+    @println(xs.concat(xs).len());
+    @println(xs.copy().pop() + 1);
+}

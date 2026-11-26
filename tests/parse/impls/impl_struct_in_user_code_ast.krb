@@ -1,0 +1,11 @@
+struct Point {
+    pub var x: i64;
+}
+
+impl Point {
+    pub fun get(self): i64 = self.x;
+}
+
+impl Display for Point {
+    fun toString(self): string = "Point";
+}

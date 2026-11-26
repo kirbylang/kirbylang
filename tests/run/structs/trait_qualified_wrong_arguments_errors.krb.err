@@ -1,0 +1,3 @@
+[line 12] Error at ')': Expected 1 argument(s), got 0.
+[line 13] Error: Expected i64, got string.
+[line 14] Error at ')': Expected 1 argument(s), got 2.

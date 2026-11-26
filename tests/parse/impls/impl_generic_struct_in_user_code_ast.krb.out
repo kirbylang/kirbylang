@@ -1,0 +1,2 @@
+(struct Box[T] (pub-field value : T))
+(impl Box[T] (pub-method get))

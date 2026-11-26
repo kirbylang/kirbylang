@@ -297,15 +297,16 @@ static bool numberThreeWayCompare(void);
 
 // The methods a number has for the operator traits (Add, Sub, Mul, Div, Mod,
 // Neg, Eq and Ord), so generic code that calls them works when the type
-// argument is a number.
+// argument is a number. They are called by their trait-qualified names, such
+// as `Add.add`.
 static bool invokeNumber(ObjString *name, int argCount) {
   static const struct {
     const char *name;
     NumberOp op;
   } arithmetic[] = {
-      {"add", NUMBER_OP_ADD},      {"sub", NUMBER_OP_SUBTRACT},
-      {"mul", NUMBER_OP_MULTIPLY}, {"div", NUMBER_OP_DIVIDE},
-      {"mod", NUMBER_OP_MODULO},
+      {"Add.add", NUMBER_OP_ADD},      {"Sub.sub", NUMBER_OP_SUBTRACT},
+      {"Mul.mul", NUMBER_OP_MULTIPLY}, {"Div.div", NUMBER_OP_DIVIDE},
+      {"Mod.mod", NUMBER_OP_MODULO},
   };
 
   for (size_t i = 0; i < sizeof(arithmetic) / sizeof(arithmetic[0]); i++) {
@@ -313,17 +314,17 @@ static bool invokeNumber(ObjString *name, int argCount) {
       return numberBinary(arithmetic[i].op, NUMBERS_OF_SAME_TYPE);
   }
 
-  if (strcmp(name->chars, "neg") == 0 && argCount == 0)
+  if (strcmp(name->chars, "Neg.neg") == 0 && argCount == 0)
     return numberNegate();
 
-  if (strcmp(name->chars, "equals") == 0 && argCount == 1) {
+  if (strcmp(name->chars, "Eq.equals") == 0 && argCount == 1) {
     Value b = popFromStack();
     Value a = popFromStack();
     pushOnStack(BOOL_VAL(valuesEqual(a, b)));
     return true;
   }
 
-  if (strcmp(name->chars, "cmp") == 0 && argCount == 1)
+  if (strcmp(name->chars, "Ord.cmp") == 0 && argCount == 1)
     return numberThreeWayCompare();
 
   runtimeError(&vm, "Only instances have methods.");
@@ -449,7 +450,9 @@ static void closeUpvalues(Value *last) {
   }
 }
 
-static bool defineMethod(ObjString *name) {
+// Binds the closure on top of the stack to the struct below it as `name`, and
+// also as `qualifiedName` when that isn't NULL.
+static bool defineMethod(ObjString *name, ObjString *qualifiedName) {
   Value method = peekStack(0);
   Value target = peekStack(1);
 
@@ -466,6 +469,10 @@ static bool defineMethod(ObjString *name) {
   AS_CLOSURE(method)->owner = struct_;
 
   tableSet(vm.gc, &struct_->methods, name, method);
+
+  if (qualifiedName != NULL)
+    tableSet(vm.gc, &struct_->methods, qualifiedName, method);
+
   popFromStack();
   return true;
 }
@@ -1177,7 +1184,17 @@ static InterpretResult run(void) {
       // Read constant value as a string
       ObjString *method_name = READ_STRING();
 
-      if (!defineMethod(method_name)) {
+      if (!defineMethod(method_name, NULL)) {
+        return INTERPRET_RUNTIME_ERROR;
+      }
+
+      break;
+    }
+    case OP_TRAIT_METHOD: {
+      ObjString *method_name = READ_STRING();
+      ObjString *qualified_name = READ_STRING();
+
+      if (!defineMethod(method_name, qualified_name)) {
         return INTERPRET_RUNTIME_ERROR;
       }
 

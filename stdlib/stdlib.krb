@@ -249,3 +249,646 @@ impl Ord for Date {
 impl Eq for Date {
     fun equals(self, other: Self): bool = self.timestamp == other.timestamp;
 }
+
+impl string {
+    // Length in bytes
+    pub fun len(self): i64 = @strLen(self);
+}
+
+impl f64 {
+    // Without its sign
+    pub fun abs(self): f64 = @abs(self);
+
+    // Rounded up to a whole number
+    pub fun ceil(self): f64 = @ceil(self);
+
+    // Rounded down to a whole number
+    pub fun floor(self): f64 = @floor(self);
+
+    // The larger of the two
+    pub fun max(self, other: f64): f64 = @max(self, other);
+
+    // The smaller of the two
+    pub fun min(self, other: f64): f64 = @min(self, other);
+
+    // Raised to a power
+    pub fun pow(self, exponent: f64): f64 = @pow(self, exponent);
+
+    // Rounded to the nearest whole number, halves away from zero
+    pub fun round(self): f64 = @round(self);
+
+    // The square root. A negative number is an error
+    pub fun sqrt(self): f64 = @sqrt(self);
+
+    // Without its fractional part, toward zero
+    pub fun trunc(self): f64 = @trunc(self);
+}
+
+impl i8 {
+    // Without its sign. The smallest value has no positive twin, so it is an
+    // error
+    pub fun abs(self): i8 = if (self < 0) -self else self;
+
+    // The larger of the two
+    pub fun max(self, other: i8): i8 = if (self > other) self else other;
+
+    // The smaller of the two
+    pub fun min(self, other: i8): i8 = if (self < other) self else other;
+}
+
+impl i16 {
+    // Without its sign. The smallest value has no positive twin, so it is an
+    // error
+    pub fun abs(self): i16 = if (self < 0) -self else self;
+
+    // The larger of the two
+    pub fun max(self, other: i16): i16 = if (self > other) self else other;
+
+    // The smaller of the two
+    pub fun min(self, other: i16): i16 = if (self < other) self else other;
+}
+
+impl i32 {
+    // Without its sign. The smallest value has no positive twin, so it is an
+    // error
+    pub fun abs(self): i32 = if (self < 0) -self else self;
+
+    // The larger of the two
+    pub fun max(self, other: i32): i32 = if (self > other) self else other;
+
+    // The smaller of the two
+    pub fun min(self, other: i32): i32 = if (self < other) self else other;
+}
+
+impl i64 {
+    // Without its sign. The smallest value has no positive twin, so it is an
+    // error
+    pub fun abs(self): i64 = if (self < 0) -self else self;
+
+    // The larger of the two
+    pub fun max(self, other: i64): i64 = if (self > other) self else other;
+
+    // The smaller of the two
+    pub fun min(self, other: i64): i64 = if (self < other) self else other;
+}
+
+impl u8 {
+    // The larger of the two
+    pub fun max(self, other: u8): u8 = if (self > other) self else other;
+
+    // The smaller of the two
+    pub fun min(self, other: u8): u8 = if (self < other) self else other;
+}
+
+impl u16 {
+    // The larger of the two
+    pub fun max(self, other: u16): u16 = if (self > other) self else other;
+
+    // The smaller of the two
+    pub fun min(self, other: u16): u16 = if (self < other) self else other;
+}
+
+impl u32 {
+    // The larger of the two
+    pub fun max(self, other: u32): u32 = if (self > other) self else other;
+
+    // The smaller of the two
+    pub fun min(self, other: u32): u32 = if (self < other) self else other;
+}
+
+impl u64 {
+    // The larger of the two
+    pub fun max(self, other: u64): u64 = if (self > other) self else other;
+
+    // The smaller of the two
+    pub fun min(self, other: u64): u64 = if (self < other) self else other;
+}
+
+// The math is done as f64 and converted back, so a result too big for an f32
+// is an error
+impl f32 {
+    // Without its sign
+    pub fun abs(self): f32 = @abs(self as f64) as f32;
+
+    // Rounded up to a whole number
+    pub fun ceil(self): f32 = @ceil(self as f64) as f32;
+
+    // Rounded down to a whole number
+    pub fun floor(self): f32 = @floor(self as f64) as f32;
+
+    // The larger of the two
+    pub fun max(self, other: f32): f32 = @max(self as f64, other as f64) as f32;
+
+    // The smaller of the two
+    pub fun min(self, other: f32): f32 = @min(self as f64, other as f64) as f32;
+
+    // Raised to a power
+    pub fun pow(self, exponent: f32): f32 =
+        @pow(self as f64, exponent as f64) as f32;
+
+    // Rounded to the nearest whole number, halves away from zero
+    pub fun round(self): f32 = @round(self as f64) as f32;
+
+    // The square root. A negative number is an error
+    pub fun sqrt(self): f32 = @sqrt(self as f64) as f32;
+
+    // Without its fractional part, toward zero
+    pub fun trunc(self): f32 = @trunc(self as f64) as f32;
+}
+
+// Traits for the primitive types
+
+impl Display for i8 {
+    fun toString(self): string = @numberToString(self);
+}
+
+impl Eq for i8 {
+    fun equals(self, other: Self): bool = self == other;
+}
+
+impl Ord for i8 {
+    fun cmp(self, other: Self): i64 =
+        if (self < other) -1 else if (self > other) 1 else 0;
+}
+
+impl Default for i8 {
+    fun default(): Self = 0;
+}
+
+impl Add for i8 {
+    fun add(self, other: Self): Self = self + other;
+}
+
+impl Sub for i8 {
+    fun sub(self, other: Self): Self = self - other;
+}
+
+impl Mul for i8 {
+    fun mul(self, other: Self): Self = self * other;
+}
+
+impl Div for i8 {
+    fun div(self, other: Self): Self = self / other;
+}
+
+impl Mod for i8 {
+    fun mod(self, other: Self): Self = self % other;
+}
+
+impl Neg for i8 {
+    fun neg(self): Self = -self;
+}
+
+impl Display for i16 {
+    fun toString(self): string = @numberToString(self);
+}
+
+impl Eq for i16 {
+    fun equals(self, other: Self): bool = self == other;
+}
+
+impl Ord for i16 {
+    fun cmp(self, other: Self): i64 =
+        if (self < other) -1 else if (self > other) 1 else 0;
+}
+
+impl Default for i16 {
+    fun default(): Self = 0;
+}
+
+impl Add for i16 {
+    fun add(self, other: Self): Self = self + other;
+}
+
+impl Sub for i16 {
+    fun sub(self, other: Self): Self = self - other;
+}
+
+impl Mul for i16 {
+    fun mul(self, other: Self): Self = self * other;
+}
+
+impl Div for i16 {
+    fun div(self, other: Self): Self = self / other;
+}
+
+impl Mod for i16 {
+    fun mod(self, other: Self): Self = self % other;
+}
+
+impl Neg for i16 {
+    fun neg(self): Self = -self;
+}
+
+impl Display for i32 {
+    fun toString(self): string = @numberToString(self);
+}
+
+impl Eq for i32 {
+    fun equals(self, other: Self): bool = self == other;
+}
+
+impl Ord for i32 {
+    fun cmp(self, other: Self): i64 =
+        if (self < other) -1 else if (self > other) 1 else 0;
+}
+
+impl Default for i32 {
+    fun default(): Self = 0;
+}
+
+impl Add for i32 {
+    fun add(self, other: Self): Self = self + other;
+}
+
+impl Sub for i32 {
+    fun sub(self, other: Self): Self = self - other;
+}
+
+impl Mul for i32 {
+    fun mul(self, other: Self): Self = self * other;
+}
+
+impl Div for i32 {
+    fun div(self, other: Self): Self = self / other;
+}
+
+impl Mod for i32 {
+    fun mod(self, other: Self): Self = self % other;
+}
+
+impl Neg for i32 {
+    fun neg(self): Self = -self;
+}
+
+impl Display for i64 {
+    fun toString(self): string = @numberToString(self);
+}
+
+impl Eq for i64 {
+    fun equals(self, other: Self): bool = self == other;
+}
+
+impl Ord for i64 {
+    fun cmp(self, other: Self): i64 =
+        if (self < other) -1 else if (self > other) 1 else 0;
+}
+
+impl Default for i64 {
+    fun default(): Self = 0;
+}
+
+impl Add for i64 {
+    fun add(self, other: Self): Self = self + other;
+}
+
+impl Sub for i64 {
+    fun sub(self, other: Self): Self = self - other;
+}
+
+impl Mul for i64 {
+    fun mul(self, other: Self): Self = self * other;
+}
+
+impl Div for i64 {
+    fun div(self, other: Self): Self = self / other;
+}
+
+impl Mod for i64 {
+    fun mod(self, other: Self): Self = self % other;
+}
+
+impl Neg for i64 {
+    fun neg(self): Self = -self;
+}
+
+impl Display for u8 {
+    fun toString(self): string = @numberToString(self);
+}
+
+impl Eq for u8 {
+    fun equals(self, other: Self): bool = self == other;
+}
+
+impl Ord for u8 {
+    fun cmp(self, other: Self): i64 =
+        if (self < other) -1 else if (self > other) 1 else 0;
+}
+
+impl Default for u8 {
+    fun default(): Self = 0;
+}
+
+impl Add for u8 {
+    fun add(self, other: Self): Self = self + other;
+}
+
+impl Sub for u8 {
+    fun sub(self, other: Self): Self = self - other;
+}
+
+impl Mul for u8 {
+    fun mul(self, other: Self): Self = self * other;
+}
+
+impl Div for u8 {
+    fun div(self, other: Self): Self = self / other;
+}
+
+impl Mod for u8 {
+    fun mod(self, other: Self): Self = self % other;
+}
+
+impl Display for u16 {
+    fun toString(self): string = @numberToString(self);
+}
+
+impl Eq for u16 {
+    fun equals(self, other: Self): bool = self == other;
+}
+
+impl Ord for u16 {
+    fun cmp(self, other: Self): i64 =
+        if (self < other) -1 else if (self > other) 1 else 0;
+}
+
+impl Default for u16 {
+    fun default(): Self = 0;
+}
+
+impl Add for u16 {
+    fun add(self, other: Self): Self = self + other;
+}
+
+impl Sub for u16 {
+    fun sub(self, other: Self): Self = self - other;
+}
+
+impl Mul for u16 {
+    fun mul(self, other: Self): Self = self * other;
+}
+
+impl Div for u16 {
+    fun div(self, other: Self): Self = self / other;
+}
+
+impl Mod for u16 {
+    fun mod(self, other: Self): Self = self % other;
+}
+
+impl Display for u32 {
+    fun toString(self): string = @numberToString(self);
+}
+
+impl Eq for u32 {
+    fun equals(self, other: Self): bool = self == other;
+}
+
+impl Ord for u32 {
+    fun cmp(self, other: Self): i64 =
+        if (self < other) -1 else if (self > other) 1 else 0;
+}
+
+impl Default for u32 {
+    fun default(): Self = 0;
+}
+
+impl Add for u32 {
+    fun add(self, other: Self): Self = self + other;
+}
+
+impl Sub for u32 {
+    fun sub(self, other: Self): Self = self - other;
+}
+
+impl Mul for u32 {
+    fun mul(self, other: Self): Self = self * other;
+}
+
+impl Div for u32 {
+    fun div(self, other: Self): Self = self / other;
+}
+
+impl Mod for u32 {
+    fun mod(self, other: Self): Self = self % other;
+}
+
+impl Display for u64 {
+    fun toString(self): string = @numberToString(self);
+}
+
+impl Eq for u64 {
+    fun equals(self, other: Self): bool = self == other;
+}
+
+impl Ord for u64 {
+    fun cmp(self, other: Self): i64 =
+        if (self < other) -1 else if (self > other) 1 else 0;
+}
+
+impl Default for u64 {
+    fun default(): Self = 0;
+}
+
+impl Add for u64 {
+    fun add(self, other: Self): Self = self + other;
+}
+
+impl Sub for u64 {
+    fun sub(self, other: Self): Self = self - other;
+}
+
+impl Mul for u64 {
+    fun mul(self, other: Self): Self = self * other;
+}
+
+impl Div for u64 {
+    fun div(self, other: Self): Self = self / other;
+}
+
+impl Mod for u64 {
+    fun mod(self, other: Self): Self = self % other;
+}
+
+impl Display for f32 {
+    fun toString(self): string = @numberToString(self);
+}
+
+impl Eq for f32 {
+    fun equals(self, other: Self): bool = self == other;
+}
+
+impl Ord for f32 {
+    fun cmp(self, other: Self): i64 =
+        if (self < other) -1 else if (self > other) 1 else 0;
+}
+
+impl Default for f32 {
+    fun default(): Self = 0.0f32;
+}
+
+impl Add for f32 {
+    fun add(self, other: Self): Self = self + other;
+}
+
+impl Sub for f32 {
+    fun sub(self, other: Self): Self = self - other;
+}
+
+impl Mul for f32 {
+    fun mul(self, other: Self): Self = self * other;
+}
+
+impl Div for f32 {
+    fun div(self, other: Self): Self = self / other;
+}
+
+impl Mod for f32 {
+    fun mod(self, other: Self): Self = self % other;
+}
+
+impl Neg for f32 {
+    fun neg(self): Self = -self;
+}
+
+impl Display for f64 {
+    fun toString(self): string = @numberToString(self);
+}
+
+impl Eq for f64 {
+    fun equals(self, other: Self): bool = self == other;
+}
+
+impl Ord for f64 {
+    fun cmp(self, other: Self): i64 =
+        if (self < other) -1 else if (self > other) 1 else 0;
+}
+
+impl Default for f64 {
+    fun default(): Self = 0.0;
+}
+
+impl Add for f64 {
+    fun add(self, other: Self): Self = self + other;
+}
+
+impl Sub for f64 {
+    fun sub(self, other: Self): Self = self - other;
+}
+
+impl Mul for f64 {
+    fun mul(self, other: Self): Self = self * other;
+}
+
+impl Div for f64 {
+    fun div(self, other: Self): Self = self / other;
+}
+
+impl Mod for f64 {
+    fun mod(self, other: Self): Self = self % other;
+}
+
+impl Neg for f64 {
+    fun neg(self): Self = -self;
+}
+
+impl Display for string {
+    fun toString(self): string = self;
+}
+
+impl Eq for string {
+    fun equals(self, other: Self): bool = self == other;
+}
+
+impl Default for string {
+    fun default(): Self = "";
+}
+
+impl Add for string {
+    fun add(self, other: Self): Self = self + other;
+}
+
+impl Display for bool {
+    fun toString(self): string = @boolToString(self);
+}
+
+impl Eq for bool {
+    fun equals(self, other: Self): bool = self == other;
+}
+
+impl Default for bool {
+    fun default(): Self = false;
+}
+
+impl Display for unit {
+    fun toString(self): string = "nil";
+}
+
+impl Eq for unit {
+    fun equals(self, other: Self): bool = true;
+}
+
+impl Ord for unit {
+    fun cmp(self, other: Self): i64 = 0;
+}
+
+impl Default for unit {
+    fun default(): Self = ();
+}
+
+impl [T] {
+    // Number of items
+    pub fun len(self): i64 = @listLen(self);
+
+    pub fun isEmpty(self): bool = @listIsEmpty(self);
+
+    // Adds an item at the end
+    pub fun push(self, item: T): unit = @listPush(self, item);
+
+    // Removes and returns the last item
+    pub fun pop(self): T = @listPop(self);
+
+    // Puts an item at `index`, moving the items after it up
+    pub fun insert(self, index: i64, item: T): unit = @listInsert(self, index, item);
+
+    // Removes and returns the item at `index`
+    pub fun remove(self, index: i64): T = @listRemove(self, index);
+
+    pub fun clear(self): unit = @listClear(self);
+
+    pub fun contains(self, item: T): bool = @listContains(self, item);
+
+    // A new list with the same items
+    pub fun copy(self): [T] = @listCopy(self);
+
+    // A new list with the items in the opposite order
+    pub fun reverse(self): [T] = @listReverse(self);
+
+    // A new list with the items from `start` up to, not including, `end`
+    pub fun slice(self, start: i64, end: i64): [T] = @listSlice(self, start, end);
+
+    // A new list with the items of `self`, then the items of `other`
+    pub fun concat(self, other: [T]): [T] = @listConcat(self, other);
+}
+
+impl [T; N] {
+    // Number of items
+    pub fun len(self): i64 = @arrLen(self);
+
+    pub fun contains(self, item: T): bool = @arrContains(self, item);
+
+    // A new array with the same items
+    pub fun copy(self): [T; N] = @arrCopy(self);
+
+    // A new array with the items in the opposite order
+    pub fun reverse(self): [T; N] = @arrReverse(self);
+
+    // A list with the items from `start` up to, not including, `end`
+    pub fun slice(self, start: i64, end: i64): [T] = @arrSlice(self, start, end);
+
+    // A list with the items of `self`, then the items of `other`
+    pub fun concat(self, other: [T; M]): [T] = @arrConcat(self, other);
+
+    // A list with the same items
+    pub fun toList(self): [T] = @arrToList(self);
+}

@@ -1,0 +1,4 @@
+fun main(): unit {
+    let xs: [i64] = [1, 2];
+    xs.nope();
+}

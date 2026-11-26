@@ -7,16 +7,16 @@
 0010    | OP_POP
 0011    7 OP_GET_GLOBAL       2 'Struct'
 0013    8 OP_CLOSURE          4 <fn test>
-0015    | OP_METHOD           3 'test'
-0017    9 OP_POP
-0018   11 OP_GET_GLOBAL       2 'Struct'
-0020   12 OP_CLOSURE          6 <fn toString>
-0022    | OP_METHOD           5 'toString'
-0024   13 OP_CLOSURE          7 <fn test>
-0026    | OP_METHOD           3 'test'
-0028   14 OP_POP
-0029   17 OP_NIL
-0030    | OP_RETURN
+0015    | OP_TRAIT_METHOD     3 'test'    5 'Test.test'
+0018    9 OP_POP
+0019   11 OP_GET_GLOBAL       2 'Struct'
+0021   12 OP_CLOSURE          7 <fn toString>
+0023    | OP_METHOD           6 'toString'
+0025   13 OP_CLOSURE          8 <fn test>
+0027    | OP_METHOD           3 'test'
+0029   14 OP_POP
+0030   17 OP_NIL
+0031    | OP_RETURN
 == main ==
 0000   16 OP_NIL
 0001    | OP_RETURN

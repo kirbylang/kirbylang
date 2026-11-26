@@ -1,0 +1,16 @@
+fun main(): unit {
+    let x: f64 = -3.5;
+
+    @println(x.abs());
+    @println(x.ceil());
+    @println(x.floor());
+    @println(x.round());
+    @println(x.trunc());
+    @println(x.max(2));
+    @println(x.min(2));
+    @println((2.25).sqrt());
+    @println((2.0).pow(10));
+    @println((9.0).pow(0.5));
+    @println((2.5).round());
+    @println((-2.5).round());
+}

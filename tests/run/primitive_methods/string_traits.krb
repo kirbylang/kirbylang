@@ -1,0 +1,7 @@
+fun main(): unit {
+  let a = "abc";
+  @println(a.toString());
+  @println(a.equals("abc"));
+  @println(a.equals("abd"));
+  @println(a.add("def"));
+}

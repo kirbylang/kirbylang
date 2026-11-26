@@ -1,0 +1,13 @@
+fun count[T](items: [T; 3]): i64 {
+    return items.len();
+}
+
+fun flipped[T](items: [T; 2]): T {
+    return items.reverse()[0];
+}
+
+fun main(): unit {
+    @println(count([1, 2, 3]));
+    @println(count(["a", "b", "c"]));
+    @println(flipped([1.5, 2.5]));
+}

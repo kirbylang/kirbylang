@@ -1,0 +1,16 @@
+fun main(): unit {
+    let lo: i16 = -32767 - 1;
+    let hi: i16 = 32767;
+    let neg: i16 = -5;
+
+    @println(neg.abs());
+    @println(hi.abs());
+    @println((-hi).abs());
+    @println(lo.max(hi));
+    @println(lo.min(hi));
+    @println(hi.max(hi));
+    @println(neg.max(3));
+    @println(neg.min(3));
+    @println(neg.abs().max(2).min(100));
+    @println($"{neg.abs()} is the size");
+}

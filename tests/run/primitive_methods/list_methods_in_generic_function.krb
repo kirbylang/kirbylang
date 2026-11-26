@@ -1,0 +1,16 @@
+fun count[T](items: [T]): i64 {
+    return items.len();
+}
+
+fun last[T](items: [T]): T {
+    return items.pop();
+}
+
+fun main(): unit {
+    let numbers: [i64] = [1, 2, 3];
+    let names: [string] = ["a"];
+    let decimals: [f64] = [1.5, 2.5];
+    @println(count(numbers));
+    @println(count(names));
+    @println(last(decimals));
+}

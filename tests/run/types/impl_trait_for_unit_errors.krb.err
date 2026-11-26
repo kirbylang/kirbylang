@@ -1,0 +1,1 @@
+[line 5] Error at 'unit': You can't write an impl for a primitive type in user code.

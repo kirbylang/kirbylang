@@ -1,0 +1,97 @@
+== <script> ==
+0000   20 OP_CLOSURE          1 <fn trace>
+0002    | OP_DEFINE_GLOBAL    0 'trace'
+0004   25 OP_CLOSURE          3 <fn makeBox>
+0006    | OP_DEFINE_GLOBAL    2 'makeBox'
+0008   27 OP_CLOSURE          5 <fn twice>
+0010    | OP_DEFINE_GLOBAL    4 'twice'
+0012   35 OP_CLOSURE          7 <fn main>
+0014    | OP_DEFINE_GLOBAL    6 'main'
+0016    5 OP_STRUCT           8 'Box'
+0018    | OP_DEFINE_GLOBAL    8 'Box'
+0020    | OP_GET_GLOBAL       8 'Box'
+0022    6 OP_NIL
+0023    | OP_FIELD            9 'n' public mutable
+0027    7 OP_POP
+0028    9 OP_GET_GLOBAL       8 'Box'
+0030   10 OP_CLOSURE         11 <fn scale>
+0032    | OP_TRAIT_METHOD    10 'scale'   12 'Scale.scale'
+0035   11 OP_POP
+0036   13 OP_GET_GLOBAL       8 'Box'
+0038   14 OP_CLOSURE         14 <fn toString>
+0040    | OP_TRAIT_METHOD    13 'toString'   15 'Display.toString'
+0043   15 OP_POP
+0044   36 OP_NIL
+0045    | OP_RETURN
+== trace ==
+0000   18 OP_GET_GLOBAL       0 '@println'
+0002    | OP_GET_LOCAL        1
+0004    | OP_CALL             1
+0006    | OP_POP
+0007   19 OP_GET_LOCAL        2
+0009    | OP_RETURN
+== makeBox ==
+0000   23 OP_GET_GLOBAL       0 '@println'
+0002    | OP_CONSTANT         1 'value'
+0004    | OP_CALL             1
+0006    | OP_POP
+0007   24 OP_GET_GLOBAL       2 'Box'
+0009    | OP_CONSTANT         3 'n'
+0011    | OP_GET_LOCAL        1
+0013    | OP_STRUCT_INIT      1
+0015    | OP_RETURN
+== twice ==
+0000   27 OP_GET_LOCAL        1
+0002    | OP_GET_LOCAL        1
+0004    | OP_CONSTANT         1 '1'
+0006    | OP_INVOKE        (1 args)    0 'Scale.scale'
+0009    | OP_INVOKE        (1 args)    0 'Scale.scale'
+0012    | OP_RETURN
+== main ==
+0000   30 OP_GET_GLOBAL       0 'Box'
+0002    | OP_CONSTANT         1 'n'
+0004    | OP_CONSTANT         2 '2'
+0006    | OP_STRUCT_INIT      1
+0008   31 OP_GET_GLOBAL       3 '@println'
+0010    | OP_GET_LOCAL        1
+0012    | OP_GET_LOCAL        1
+0014    | OP_CONSTANT         5 '3'
+0016    | OP_INVOKE        (1 args)    4 'Scale.scale'
+0019    | OP_INVOKE        (1 args)    4 'Scale.scale'
+0022    | OP_CALL             1
+0024    | OP_POP
+0025   32 OP_GET_GLOBAL       3 '@println'
+0027    | OP_GET_GLOBAL       6 'string.len'
+0029    | OP_GET_LOCAL        1
+0031    | OP_INVOKE        (0 args)    7 'Display.toString'
+0034    | OP_CALL             1
+0036    | OP_CALL             1
+0038    | OP_POP
+0039   33 OP_GET_GLOBAL       3 '@println'
+0041    | OP_GET_GLOBAL       8 'twice'
+0043    | OP_GET_LOCAL        1
+0045    | OP_CALL             1
+0047    | OP_CALL             1
+0049    | OP_POP
+0050   34 OP_GET_GLOBAL       3 '@println'
+0052    | OP_GET_GLOBAL       9 'makeBox'
+0054    | OP_CONSTANT        10 '5'
+0056    | OP_CALL             1
+0058    | OP_GET_GLOBAL      11 'trace'
+0060    | OP_CONSTANT        12 'argument'
+0062    | OP_CONSTANT         2 '2'
+0064    | OP_CALL             2
+0066    | OP_INVOKE        (1 args)    4 'Scale.scale'
+0069    | OP_CALL             1
+0071    | OP_POP
+0072   35 OP_NIL
+0073    | OP_RETURN
+== scale ==
+0000   10 OP_GET_LOCAL        0
+0002    | OP_GET_PROPERTY     0 'n'
+0004    | OP_GET_LOCAL        1
+0006    | OP_MULTIPLY
+0007    | OP_RETURN
+== toString ==
+0000   14 OP_CONSTANT         0 'Box'
+0002    | OP_RETURN

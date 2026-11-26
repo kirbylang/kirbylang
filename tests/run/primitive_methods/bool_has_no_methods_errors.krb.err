@@ -1,0 +1,1 @@
+[line 2] Error at 'len': Can't access '.len' on a bool.

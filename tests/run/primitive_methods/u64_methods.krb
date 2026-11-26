@@ -1,0 +1,13 @@
+fun main(): unit {
+    let lo: u64 = 0;
+    let hi: u64 = 18446744073709551615;
+    let mid: u64 = 7;
+
+    @println(lo.max(hi));
+    @println(lo.min(hi));
+    @println(hi.max(hi));
+    @println(mid.max(3));
+    @println(mid.min(3));
+    @println(mid.max(hi).min(100));
+    @println($"{mid.max(hi).min(100)} is the cap");
+}

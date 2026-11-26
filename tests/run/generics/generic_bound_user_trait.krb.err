@@ -21,29 +21,29 @@
 0040   13 OP_POP
 0041   15 OP_GET_GLOBAL       6 'Square'
 0043   16 OP_CLOSURE         12 <fn area>
-0045    | OP_METHOD          11 'area'
-0047   17 OP_CLOSURE         14 <fn scale>
-0049    | OP_METHOD          13 'scale'
-0051   18 OP_POP
-0052   20 OP_GET_GLOBAL       8 'Rect'
-0054   21 OP_CLOSURE         15 <fn area>
-0056    | OP_METHOD          11 'area'
-0058   22 OP_CLOSURE         16 <fn scale>
-0060    | OP_METHOD          13 'scale'
-0062   23 OP_POP
-0063   34 OP_NIL
-0064    | OP_RETURN
+0045    | OP_TRAIT_METHOD    11 'area'   13 'Shape.area'
+0048   17 OP_CLOSURE         15 <fn scale>
+0050    | OP_TRAIT_METHOD    14 'scale'   16 'Shape.scale'
+0053   18 OP_POP
+0054   20 OP_GET_GLOBAL       8 'Rect'
+0056   21 OP_CLOSURE         17 <fn area>
+0058    | OP_TRAIT_METHOD    11 'area'   13 'Shape.area'
+0061   22 OP_CLOSURE         18 <fn scale>
+0063    | OP_TRAIT_METHOD    14 'scale'   16 'Shape.scale'
+0066   23 OP_POP
+0067   34 OP_NIL
+0068    | OP_RETURN
 == totalArea ==
 0000   25 OP_GET_LOCAL        1
-0002    | OP_INVOKE        (0 args)    0 'area'
+0002    | OP_INVOKE        (0 args)    0 'Shape.area'
 0005    | OP_GET_LOCAL        2
-0007    | OP_INVOKE        (0 args)    0 'area'
+0007    | OP_INVOKE        (0 args)    0 'Shape.area'
 0010    | OP_ADD
 0011    | OP_RETURN
 == scaled ==
 0000   27 OP_GET_LOCAL        1
 0002    | OP_CONSTANT         1 '2'
-0004    | OP_INVOKE        (1 args)    0 'scale'
+0004    | OP_INVOKE        (1 args)    0 'Shape.scale'
 0007    | OP_RETURN
 == main ==
 0000   30 OP_GET_GLOBAL       0 '@println'

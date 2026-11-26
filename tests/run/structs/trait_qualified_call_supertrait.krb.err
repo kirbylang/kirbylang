@@ -1,0 +1,98 @@
+== <script> ==
+0000   13 OP_CLOSURE          1 <fn same>
+0002    | OP_DEFINE_GLOBAL    0 'same'
+0004   15 OP_CLOSURE          3 <fn order>
+0006    | OP_DEFINE_GLOBAL    2 'order'
+0008   27 OP_CLOSURE          5 <fn main>
+0010    | OP_DEFINE_GLOBAL    4 'main'
+0012    1 OP_STRUCT           6 'Rank'
+0014    | OP_DEFINE_GLOBAL    6 'Rank'
+0016    | OP_GET_GLOBAL       6 'Rank'
+0018    2 OP_NIL
+0019    | OP_FIELD            7 'n' public mutable
+0023    3 OP_POP
+0024    5 OP_GET_GLOBAL       6 'Rank'
+0026    6 OP_CLOSURE          9 <fn equals>
+0028    | OP_TRAIT_METHOD     8 'equals'   10 'Eq.equals'
+0031    7 OP_POP
+0032    9 OP_GET_GLOBAL       6 'Rank'
+0034   10 OP_CLOSURE         12 <fn cmp>
+0036    | OP_TRAIT_METHOD    11 'cmp'   13 'Ord.cmp'
+0039   11 OP_POP
+0040   28 OP_NIL
+0041    | OP_RETURN
+== same ==
+0000   13 OP_GET_LOCAL        1
+0002    | OP_GET_LOCAL        2
+0004    | OP_INVOKE        (1 args)    0 'Eq.equals'
+0007    | OP_RETURN
+== order ==
+0000   15 OP_GET_LOCAL        1
+0002    | OP_GET_LOCAL        2
+0004    | OP_INVOKE        (1 args)    0 'Ord.cmp'
+0007    | OP_RETURN
+== main ==
+0000   18 OP_GET_GLOBAL       0 'Rank'
+0002    | OP_CONSTANT         1 'n'
+0004    | OP_CONSTANT         2 '1'
+0006    | OP_STRUCT_INIT      1
+0008   19 OP_GET_GLOBAL       0 'Rank'
+0010    | OP_CONSTANT         1 'n'
+0012    | OP_CONSTANT         3 '5'
+0014    | OP_STRUCT_INIT      1
+0016   21 OP_GET_GLOBAL       4 '@println'
+0018    | OP_GET_LOCAL        1
+0020    | OP_GET_LOCAL        1
+0022    | OP_INVOKE        (1 args)    5 'Eq.equals'
+0025    | OP_CALL             1
+0027    | OP_POP
+0028   22 OP_GET_GLOBAL       4 '@println'
+0030    | OP_GET_LOCAL        1
+0032    | OP_GET_LOCAL        2
+0034    | OP_INVOKE        (1 args)    6 'Ord.cmp'
+0037    | OP_CALL             1
+0039    | OP_POP
+0040   23 OP_GET_GLOBAL       4 '@println'
+0042    | OP_GET_GLOBAL       7 'same'
+0044    | OP_GET_LOCAL        1
+0046    | OP_GET_LOCAL        2
+0048    | OP_CALL             2
+0050    | OP_CALL             1
+0052    | OP_POP
+0053   24 OP_GET_GLOBAL       4 '@println'
+0055    | OP_GET_GLOBAL       8 'order'
+0057    | OP_GET_LOCAL        2
+0059    | OP_GET_LOCAL        1
+0061    | OP_CALL             2
+0063    | OP_CALL             1
+0065    | OP_POP
+0066   25 OP_GET_GLOBAL       4 '@println'
+0068    | OP_GET_GLOBAL       7 'same'
+0070    | OP_CONSTANT         9 '3'
+0072    | OP_CONSTANT         9 '3'
+0074    | OP_CALL             2
+0076    | OP_CALL             1
+0078    | OP_POP
+0079   26 OP_GET_GLOBAL       4 '@println'
+0081    | OP_GET_GLOBAL       8 'order'
+0083    | OP_CONSTANT         2 '1'
+0085    | OP_CONSTANT        10 '2'
+0087    | OP_CALL             2
+0089    | OP_CALL             1
+0091    | OP_POP
+0092   27 OP_NIL
+0093    | OP_RETURN
+== equals ==
+0000    6 OP_GET_LOCAL        0
+0002    | OP_GET_PROPERTY     0 'n'
+0004    | OP_GET_LOCAL        1
+0006    | OP_GET_PROPERTY     0 'n'
+0008    | OP_EQUAL
+0009    | OP_RETURN
+== cmp ==
+0000   10 OP_GET_LOCAL        0
+0002    | OP_GET_PROPERTY     0 'n'
+0004    | OP_GET_LOCAL        1
+0006    | OP_GET_PROPERTY     0 'n'
+0008    | OP_SUBTRACT
+0009    | OP_RETURN

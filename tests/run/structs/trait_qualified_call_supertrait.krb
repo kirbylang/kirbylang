@@ -1,0 +1,27 @@
+struct Rank {
+    pub var n: i64;
+}
+
+impl Eq for Rank {
+    fun equals(self, other: Self): bool = self.n == other.n;
+}
+
+impl Ord for Rank {
+    fun cmp(self, other: Self): i64 = self.n - other.n;
+}
+
+fun same[T: Ord](a: T, b: T): bool = Eq.equals(a, b);
+
+fun order[T: Ord](a: T, b: T): i64 = Ord.cmp(a, b);
+
+fun main(): unit {
+    let low = Rank { n: 1 };
+    let high = Rank { n: 5 };
+
+    @println(Eq.equals(low, low));
+    @println(Ord.cmp(low, high));
+    @println(same(low, high));
+    @println(order(high, low));
+    @println(same(3, 3));
+    @println(order(1, 2));
+}

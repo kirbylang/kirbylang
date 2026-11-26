@@ -1,0 +1,47 @@
+== <script> ==
+0000    6 OP_CLOSURE          1 <fn main>
+0002    | OP_DEFINE_GLOBAL    0 'main'
+0004    7 OP_NIL
+0005    | OP_RETURN
+== main ==
+0000    2 OP_CONSTANT         0 '3'
+0002    | OP_CONSTANT         1 '2'
+0004    | OP_CONSTANT         2 '1'
+0006    | OP_LIST             3
+0008    3 OP_GET_GLOBAL       3 '@println'
+0010    | OP_GET_GLOBAL       4 'list.len'
+0012    | OP_GET_GLOBAL       5 'list.slice'
+0014    | OP_GET_GLOBAL       6 'list.reverse'
+0016    | OP_GET_GLOBAL       7 'list.copy'
+0018    | OP_GET_LOCAL        1
+0020    | OP_CALL             1
+0022    | OP_CALL             1
+0024    | OP_CONSTANT         2 '1'
+0026    | OP_CONSTANT         0 '3'
+0028    | OP_CALL             3
+0030    | OP_CALL             1
+0032    | OP_CONSTANT         2 '1'
+0034    | OP_ADD
+0035    | OP_CALL             1
+0037    | OP_POP
+0038    4 OP_GET_GLOBAL       3 '@println'
+0040    | OP_GET_GLOBAL       4 'list.len'
+0042    | OP_GET_GLOBAL       8 'list.concat'
+0044    | OP_GET_LOCAL        1
+0046    | OP_GET_LOCAL        1
+0048    | OP_CALL             2
+0050    | OP_CALL             1
+0052    | OP_CALL             1
+0054    | OP_POP
+0055    5 OP_GET_GLOBAL       3 '@println'
+0057    | OP_GET_GLOBAL       9 'list.pop'
+0059    | OP_GET_GLOBAL       7 'list.copy'
+0061    | OP_GET_LOCAL        1
+0063    | OP_CALL             1
+0065    | OP_CALL             1
+0067    | OP_CONSTANT         2 '1'
+0069    | OP_ADD
+0070    | OP_CALL             1
+0072    | OP_POP
+0073    6 OP_NIL
+0074    | OP_RETURN

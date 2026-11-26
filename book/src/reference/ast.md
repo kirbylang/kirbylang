@@ -477,12 +477,24 @@ typedef struct {
 ### Traits
 
 ```c
+typedef enum {
+  IMPL_TARGET_NAME,  // `impl Box[T]`, `impl string`
+  IMPL_TARGET_LIST,  // `impl [T]`
+  IMPL_TARGET_ARRAY, // `impl [T; N]`
+} ImplTargetKind;
+
 typedef struct {
+  ImplTargetKind targetKind;
+  /**
+   * The type's name, or the whole `[T; N]` text for a list or array.
+   */
   Token targetName;
   /**
    * arena-allocated array of bare generic parameter name tokens, e.g. the
    * `T` in `impl Box[T]`. There must be as many as the struct declares. They
    * stand for the struct's parameters in order, and the names can differ.
+   * For a list target it is the item type's name, and for an array target the
+   * item type's name and then the length's name, which can be `_`.
    */
   Token *genericParams;
   int genericParamCount;
