@@ -37,6 +37,9 @@ typedef struct {
    * primitive type.
    */
   bool isStdlib;
+  // Set while reading the parameters after `impl`, where a `;` means the array
+  // target was written without them
+  bool inImplParams;
 } Parser;
 
 typedef enum {
@@ -1190,21 +1193,6 @@ static int parseArrayLength(Parser *p) {
   return (int)value;
 }
 
-// Reads a length placeholder, `N` or `M`, from the identifier just consumed.
-static int parseArrayLengthPlaceholder(Parser *p) {
-  static const char names[] = "NM";
-
-  if (p->previous.length == 1) {
-    for (int i = 0; names[i] != '\0'; i++) {
-      if (p->previous.start[0] == names[i])
-        return ARRAY_LENGTH_PLACEHOLDER(i);
-    }
-  }
-
-  parse_error(p, "Expect a length placeholder, N or M.");
-  return 0;
-}
-
 static AstNode *parseType(Parser *p) {
   if (match(p, TOKEN_FUN)) {
     int line = p->previous.line;
@@ -1248,10 +1236,12 @@ static AstNode *parseType(Parser *p) {
     AstNode *elementType = parseType(p);
 
     if (match(p, TOKEN_SEMICOLON)) {
-      int length;
+      int length = 0;
+      Token lengthName = {0};
+      bool hasLengthName = p->isStdlib && match(p, TOKEN_IDENTIFIER);
 
-      if (p->isStdlib && match(p, TOKEN_IDENTIFIER)) {
-        length = parseArrayLengthPlaceholder(p);
+      if (hasLengthName) {
+        lengthName = p->previous;
       } else {
         consume(p, TOKEN_NUMBER, "Expect array length after ';'.");
         length = parseArrayLength(p);
@@ -1262,6 +1252,8 @@ static AstNode *parseType(Parser *p) {
       AstNode *node = astAlloc(NODE_TYPE_ARRAY, line);
       node->as.typeArray.elementType = elementType;
       node->as.typeArray.length = length;
+      node->as.typeArray.hasLengthName = hasLengthName;
+      node->as.typeArray.lengthName = lengthName;
       return node;
     }
 
@@ -1422,6 +1414,7 @@ static AstNode *functionTail(Parser *p, Token name, int line, bool isMethod,
   node->as.function.bodyEndLine = line;
   node->as.function.genericParams = NULL;
   node->as.function.genericParamCount = 0;
+  node->as.function.genericIsConst = NULL;
 
   if (bodyKind != BODY_REQUIRED) {
     consume(p, TOKEN_SEMICOLON,
@@ -1456,10 +1449,13 @@ static AstNode *functionTail(Parser *p, Token name, int line, bool isMethod,
  * `boundBuf` receives the traits after each `:`, separated by `+`, and a count
  * of 0 for a parameter without any. It is NULL where bounds aren't supported,
  * and a `:` is then an error with `noBoundsMessage`.
+ *
+ * `constBuf` receives which parameters are lengths, as in `[T, const N]`. It is
+ * NULL where lengths can't be declared.
  */
 static int parseGenericParamList(Parser *p, Token *paramBuf,
                                  GenericBounds *boundBuf,
-                                 const char *noBoundsMessage) {
+                                 const char *noBoundsMessage, bool *constBuf) {
   int count = 0;
 
   if (match(p, TOKEN_LEFT_BRACKET)) {
@@ -1467,10 +1463,21 @@ static int parseGenericParamList(Parser *p, Token *paramBuf,
       if (count >= 255) {
         error_at_current(p, "Can't have more than 255 generic parameters.");
       }
+      bool isConst = match(p, TOKEN_CONST);
+      if (isConst && !p->isStdlib)
+        parse_error(p, "'const' parameters are only allowed in the standard "
+                       "library.");
+      else if (isConst && constBuf == NULL)
+        parse_error(p, "Only functions and list or array impls can declare "
+                       "const parameters.");
+
       consumeDeclarationIdentifier(p, "Expect generic parameter name.");
       Token name = p->previous;
       GenericBounds bounds;
       memset(&bounds, 0, sizeof(GenericBounds));
+
+      if (isConst && check(p, TOKEN_COLON))
+        error_at_current(p, "A const parameter can't have bounds.");
 
       if (match(p, TOKEN_COLON)) {
         if (boundBuf == NULL)
@@ -1501,14 +1508,30 @@ static int parseGenericParamList(Parser *p, Token *paramBuf,
 
       if (count < 255) {
         paramBuf[count] = name;
+        if (constBuf != NULL)
+          constBuf[count] = isConst;
         if (boundBuf != NULL)
           boundBuf[count] = bounds;
         count++;
       }
     } while (match(p, TOKEN_COMMA));
+    if (p->inImplParams && check(p, TOKEN_SEMICOLON)) {
+      error_at_current(p, "Declare the parameters after 'impl', as in "
+                          "'impl[T, const N] [T; N]'.");
+    }
+
     consume(p, TOKEN_RIGHT_BRACKET, "Expect ']' after generic parameters.");
   }
   return count;
+}
+
+static bool *copyGenericIsConst(const bool *buf, int count) {
+  if (count == 0)
+    return NULL;
+
+  bool *isConst = (bool *)astAllocRaw(count * sizeof(bool));
+  memcpy(isConst, buf, count * sizeof(bool));
+  return isConst;
 }
 
 static GenericBounds *copyGenericBounds(GenericBounds *buf, int count) {
@@ -1529,8 +1552,10 @@ static AstNode *namedFunction(Parser *p, bool isMethod,
 
   Token genericParamBuf[256];
   GenericBounds genericBoundBuf[256];
-  int genericParamCount = parseGenericParamList(
-      p, genericParamBuf, genericBoundBuf, /*noBoundsMessage=*/NULL);
+  bool genericConstBuf[256];
+  int genericParamCount =
+      parseGenericParamList(p, genericParamBuf, genericBoundBuf,
+                            /*noBoundsMessage=*/NULL, genericConstBuf);
 
   AstNode *node =
       functionTail(p, name, line, isMethod, /*isLambda=*/false, bodyKind);
@@ -1543,7 +1568,10 @@ static AstNode *namedFunction(Parser *p, bool isMethod,
 
     node->as.function.genericBounds =
         copyGenericBounds(genericBoundBuf, genericParamCount);
+    node->as.function.genericIsConst =
+        copyGenericIsConst(genericConstBuf, genericParamCount);
   } else {
+    node->as.function.genericIsConst = NULL;
     node->as.function.genericParams = NULL;
     node->as.function.genericBounds = NULL;
   }
@@ -1591,7 +1619,8 @@ static AstNode *structDeclaration(Parser *p) {
   Token genericParamBuf[256];
   GenericBounds genericBoundBuf[256];
   int genericParamCount = parseGenericParamList(
-      p, genericParamBuf, genericBoundBuf, /*noBoundsMessage=*/NULL);
+      p, genericParamBuf, genericBoundBuf, /*noBoundsMessage=*/NULL,
+      /*constBuf=*/NULL);
 
   consume(p, TOKEN_LEFT_BRACE, "Expect '{' before struct body.");
 
@@ -1727,15 +1756,12 @@ static AstNode *skipRejectedImpl(Parser *p, Token target) {
   return node;
 }
 
-// The `[T]` or `[T; N]` of `impl [T]` and `impl Trait for [T; N]`, after the
-// `[`. Writes the names it declares, and says which of the two it was.
-// `target` is the `[` token, and grows to cover the whole text up to `]`.
-static int parseImplListOrArrayTarget(Parser *p, Token *target, Token *names,
-                                      ImplTargetKind *kind) {
-  int count = 0;
-
+// The `[T]` or `[T; N]` an impl is for, after the `[`. `target` is that `[`
+// token, and grows to cover the whole text up to `]`.
+static void parseImplListOrArrayTarget(Parser *p, Token *target, Token *item,
+                                       Token *length, ImplTargetKind *kind) {
   consume(p, TOKEN_IDENTIFIER, "Expect the item type's name after '['.");
-  names[count++] = p->previous;
+  *item = p->previous;
   *kind = IMPL_TARGET_LIST;
 
   if (match(p, TOKEN_SEMICOLON)) {
@@ -1745,61 +1771,128 @@ static int parseImplListOrArrayTarget(Parser *p, Token *target, Token *names,
               "Expect a name or '_' for the array's length.");
     }
 
-    names[count++] = p->previous;
+    *length = p->previous;
     *kind = IMPL_TARGET_ARRAY;
   }
 
   consume(p, TOKEN_RIGHT_BRACKET, "Expect ']' after the type.");
   target->length =
       (int)(p->previous.start + p->previous.length - target->start);
-  return count;
 }
+
+// Moves past a `[...]` list, whatever it holds, after its `[`.
+static void skipBracketed(Parser *p) {
+  int depth = 1;
+
+  while (depth > 0 && !check(p, TOKEN_LEFT_BRACE) && !is_at_end(p)) {
+    if (check(p, TOKEN_LEFT_BRACKET))
+      depth++;
+    else if (check(p, TOKEN_RIGHT_BRACKET))
+      depth--;
+
+    advance(p);
+  }
+}
+
+static const char *structImplParamsMessage =
+    "A struct's impl takes its type parameters from the struct, as in "
+    "'impl Box[T]'.";
 
 static AstNode *implDeclaration(Parser *p) {
   Token name;
   Token genericParamBuf[256];
+  bool genericConstBuf[256];
   int genericParamCount = 0;
   ImplTargetKind targetKind = IMPL_TARGET_NAME;
-  bool targetIsBracketed = match(p, TOKEN_LEFT_BRACKET);
+  Token itemName = {0};
+  Token lengthName = {0};
+  bool hasTraitName = false;
+  Token traitName = {0};
+  Token targetName = {0};
 
-  if (targetIsBracketed) {
-    name = p->previous;
+  if (check(p, TOKEN_LEFT_BRACKET)) {
+    // `impl[T] [T]`: only lists and arrays declare parameters here
+    Token bracket = p->current;
 
-    if (rejectPrimitiveImplInUserCode(p, &name))
-      return skipRejectedImpl(p, name);
+    if (!p->isStdlib) {
+      advance(p);
+      skipBracketed(p);
 
-    genericParamCount =
-        parseImplListOrArrayTarget(p, &name, genericParamBuf, &targetKind);
+      // Naming a struct after the brackets is a different mistake
+      if (match(p, TOKEN_IDENTIFIER) &&
+          (!match(p, TOKEN_FOR) || (check(p, TOKEN_IDENTIFIER) &&
+                                    !isPrimitiveImplTarget(&p->current)))) {
+        parse_error_at(p, &bracket, structImplParamsMessage);
+        return skipRejectedImpl(p, bracket);
+      }
+
+      rejectPrimitiveImplInUserCode(p, &bracket);
+      return skipRejectedImpl(p, bracket);
+    }
+
+    p->inImplParams = true;
+    genericParamCount = parseGenericParamList(
+        p, genericParamBuf, /*boundBuf=*/NULL,
+        "A list or array impl's parameters can't have bounds.",
+        genericConstBuf);
+    p->inImplParams = false;
+
+    if (p->panicMode)
+      return skipRejectedImpl(p, bracket);
+
+    // `impl [T] {`, with the parameters left out
+    if (check(p, TOKEN_LEFT_BRACE)) {
+      parse_error_at(p, &bracket,
+                     "Declare the type parameter after 'impl', as in "
+                     "'impl[T] [T]'.");
+      return skipRejectedImpl(p, bracket);
+    }
+
+    if (match(p, TOKEN_IDENTIFIER)) {
+      traitName = p->previous;
+      hasTraitName = true;
+
+      if (!match(p, TOKEN_FOR) || !check(p, TOKEN_LEFT_BRACKET)) {
+        parse_error_at(p, &bracket, structImplParamsMessage);
+        return skipRejectedImpl(p, bracket);
+      }
+    }
+
+    consume(p, TOKEN_LEFT_BRACKET,
+            "Expect a list or array type, such as '[T]', after the impl's "
+            "parameters.");
+    targetName = p->previous;
+    parseImplListOrArrayTarget(p, &targetName, &itemName, &lengthName,
+                               &targetKind);
   } else {
     consume(p, TOKEN_IDENTIFIER, "Expect struct or trait name after 'impl'.");
     name = p->previous;
+    targetName = name;
+    traitName = name;
 
     if (isPrimitiveImplTarget(&name) && rejectPrimitiveImplInUserCode(p, &name))
       return skipRejectedImpl(p, name);
 
     genericParamCount = parseGenericParamList(
         p, genericParamBuf, /*boundBuf=*/NULL,
-        "An impl's type parameters take their bounds from the struct.");
-  }
+        "An impl's type parameters take their bounds from the struct.",
+        /*constBuf=*/NULL);
 
-  int line = name.line;
-  bool hasTraitName = false;
-  Token traitName = name;
-  Token targetName = name;
+    if (match(p, TOKEN_FOR)) {
+      hasTraitName = true;
 
-  if (!targetIsBracketed && match(p, TOKEN_FOR)) {
-    hasTraitName = true;
-    traitName = name;
+      if (match(p, TOKEN_LEFT_BRACKET)) {
+        targetName = p->previous;
 
-    if (match(p, TOKEN_LEFT_BRACKET)) {
-      targetName = p->previous;
+        if (!rejectPrimitiveImplInUserCode(p, &targetName)) {
+          parse_error_at(p, &targetName,
+                         "Declare the type parameter after 'impl', as in "
+                         "'impl[T] Display for [T]'.");
+        }
 
-      if (rejectPrimitiveImplInUserCode(p, &targetName))
         return skipRejectedImpl(p, targetName);
+      }
 
-      genericParamCount = parseImplListOrArrayTarget(
-          p, &targetName, genericParamBuf, &targetKind);
-    } else {
       consume(p, TOKEN_IDENTIFIER,
               "Expect struct or primitive type name after 'for'.");
 
@@ -1810,6 +1903,8 @@ static AstNode *implDeclaration(Parser *p) {
         return skipRejectedImpl(p, targetName);
     }
   }
+
+  int line = targetName.line;
 
   consume(p, TOKEN_LEFT_BRACE, "Expect '{' before impl body.");
 
@@ -1877,6 +1972,12 @@ static AstNode *implDeclaration(Parser *p) {
     node->as.impl.genericParams = NULL;
   }
   node->as.impl.genericParamCount = genericParamCount;
+  node->as.impl.genericIsConst =
+      targetKind == IMPL_TARGET_NAME
+          ? NULL
+          : copyGenericIsConst(genericConstBuf, genericParamCount);
+  node->as.impl.itemName = itemName;
+  node->as.impl.lengthName = lengthName;
 
   node->as.impl.methods = methods;
   node->as.impl.methodCount = methodCount;
@@ -1954,8 +2055,8 @@ static AstNode *typeAliasDeclaration(Parser *p) {
 
   Token paramBuf[256];
   GenericBounds boundBuf[256];
-  int paramCount =
-      parseGenericParamList(p, paramBuf, boundBuf, /*noBoundsMessage=*/NULL);
+  int paramCount = parseGenericParamList(
+      p, paramBuf, boundBuf, /*noBoundsMessage=*/NULL, /*constBuf=*/NULL);
 
   consume(p, TOKEN_EQUAL, "Expect '=' after type alias name.");
   AstNode *target = parseType(p);
@@ -2025,6 +2126,7 @@ static void initParser(Parser *parser, TokenStream *tokens) {
   parser->panicMode = false;
   parser->blockDepth = 0;
   parser->isStdlib = false;
+  parser->inImplParams = false;
   advance(parser);
 }
 

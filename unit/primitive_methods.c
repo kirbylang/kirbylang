@@ -503,7 +503,7 @@ static void test_self_calls_a_static_method_of_the_primitive(void) {
 static void test_lists_can_have_methods_and_traits(void) {
   begin();
   expectOk(tagTrait, true);
-  expectOk("impl [T] {\n"
+  expectOk("impl[T] [T] {\n"
            "  pub fun first(self): T = self[0];\n"
            "  pub fun other(self, other: Self): Self = other;\n"
            "  pub fun pick[U](self, extra: U): U = extra;\n"
@@ -512,7 +512,7 @@ static void test_lists_can_have_methods_and_traits(void) {
            "  pub fun shown(self): T = self.hidden();\n"
            "}",
            true);
-  expectOk("impl Tag for [T] {\n"
+  expectOk("impl[T] Tag for [T] {\n"
            "  fun tag(self): string = \"list\";\n"
            "  fun make(): Self = [];\n"
            "}",
@@ -553,35 +553,36 @@ static void test_lists_can_have_methods_and_traits(void) {
 static void test_a_list_impl_is_checked(void) {
   begin();
   expectOk(tagTrait, true);
-  expectOk("impl [T] { pub fun first(self): T = self[0]; }", true);
+  expectOk("impl[T] [T] { pub fun first(self): T = self[0]; }", true);
 
   // The item type is a parameter, not a type
-  char *errors = errorsOf("impl [string] { pub fun a(self): i64 = 1; }", true);
+  char *errors =
+      errorsOf("impl[T] [string] { pub fun a(self): i64 = 1; }", true);
   assert(strstr(errors, "'string' is a type. An impl names the item type with "
-                        "a type parameter, as in 'impl [T]'.") != NULL);
+                        "a type parameter, as in 'impl[T] [T]'.") != NULL);
   free(errors);
 
   // A name is declared once, and a body only does what works for any T
-  errors = errorsOf("impl [T] { pub fun first(self): T = self[0]; }", true);
+  errors = errorsOf("impl[T] [T] { pub fun first(self): T = self[0]; }", true);
   assert(strstr(errors, "'first' is already declared on 'list'.") != NULL);
   free(errors);
 
-  errors = errorsOf("impl [T] { pub fun bad(self): i64 = self[0]; }", true);
+  errors = errorsOf("impl[T] [T] { pub fun bad(self): i64 = self[0]; }", true);
   assert(strstr(errors, "Expected i64, got T.") != NULL);
   free(errors);
 
-  errors = errorsOf("impl [T] { pub fun make(): i64 = 1; }", true);
+  errors = errorsOf("impl[T] [T] { pub fun make(): i64 = 1; }", true);
   assert(strstr(errors, "Static methods on 'list' aren't supported yet.") !=
          NULL);
   free(errors);
 
   // A trait is implemented once, and has to be complete
-  expectOk("impl Tag for [T] {\n"
+  expectOk("impl[T] Tag for [T] {\n"
            "  fun tag(self): string = \"a\";\n"
            "  fun make(): Self = [];\n"
            "}",
            true);
-  errors = errorsOf("impl Tag for [T] {\n"
+  errors = errorsOf("impl[T] Tag for [T] {\n"
                     "  fun tag(self): string = \"b\";\n"
                     "  fun make(): Self = [];\n"
                     "}",
@@ -590,14 +591,14 @@ static void test_a_list_impl_is_checked(void) {
   free(errors);
 
   errors = errorsOf("trait Half { fun a(self): i64; fun b(self): i64; }\n"
-                    "impl Half for [T] { fun a(self): i64 = 1; }",
+                    "impl[T] Half for [T] { fun a(self): i64 = 1; }",
                     true);
   assert(strstr(errors, "'b'") != NULL);
   free(errors);
 
   // Only the standard library writes them
-  expectError("impl [T] { pub fun other(self): T = self[0]; }", false);
-  expectError("impl Tag for [T] { fun tag(self): string = \"\";"
+  expectError("impl[T] [T] { pub fun other(self): T = self[0]; }", false);
+  expectError("impl[T] Tag for [T] { fun tag(self): string = \"\";"
               " fun make(): Self = []; }",
               false);
 
@@ -619,7 +620,7 @@ static void test_a_list_impl_needs_its_trait(void) {
   expectOk("trait Pair: Tag { fun pair(self): string; }", true);
 
   char *errors =
-      errorsOf("impl Pair for [T] { fun pair(self): string = \"\"; }", true);
+      errorsOf("impl[T] Pair for [T] { fun pair(self): string = \"\"; }", true);
   assert(strstr(errors, "also needs 'impl Tag for [T]'") != NULL);
   free(errors);
 
@@ -629,23 +630,25 @@ static void test_a_list_impl_needs_its_trait(void) {
 static void test_arrays_can_have_methods_and_traits(void) {
   begin();
   expectOk(labelTrait, true);
-  expectOk("impl [T; N] {\n"
+  expectOk("impl[T, const N] [T; N] {\n"
            "  pub fun first(self): T = self[0];\n"
            "  pub fun same(self): [T; N] = self;\n"
            "  pub fun pick[U](self, extra: U): U = extra;\n"
            "  pub fun twin[U](self, other: [U; N]): [U; N] = other;\n"
-           "  pub fun join[U](self, other: [U; M]): [T] = @arrToList(self);\n"
+           "  pub fun join[U, const M](self, other: [U; M]): [T] = "
+           "@arrToList(self);\n"
            "}",
            true);
-  expectOk("impl Label for [T; N] {\n"
+  expectOk("impl[T, const N] Label for [T; N] {\n"
            "  fun label(self): string = \"array\";\n"
            "}",
            true);
 
   // A list and an array can each have a method of the same name
-  expectOk("impl [T] { pub fun first(self): T = self[0]; pub fun kind(self): "
-           "string = \"list\"; }",
-           true);
+  expectOk(
+      "impl[T] [T] { pub fun first(self): T = self[0]; pub fun kind(self): "
+      "string = \"list\"; }",
+      true);
 
   expectOk("if (true) {\n"
            "let xs = [4, 5];\n"
@@ -682,45 +685,45 @@ static void test_an_array_impl_is_checked(void) {
   begin();
   expectOk(labelTrait, true);
 
-  // The length is `N`, or `_` when it isn't needed
-  expectOk("impl [T; _] { pub fun last(self): T = self[0]; }", true);
+  // `_` is a length that is not used
+  expectOk("impl[T] [T; _] { pub fun last(self): T = self[0]; }", true);
 
-  char *errors = errorsOf("impl [T; K] { pub fun a(self): i64 = 1; }", true);
-  assert(strstr(errors, "An array impl names its length 'N', or '_' to leave "
-                        "it unnamed, not 'K'.") != NULL);
+  char *errors = errorsOf("impl[T] [T; 3] { pub fun a(self): i64 = 1; }", true);
+  assert(strstr(errors, "An array impl can't be for one length yet. Declare "
+                        "it, as in 'impl[T, const N] [T; N]'.") != NULL);
   free(errors);
 
-  errors = errorsOf("impl [T; 3] { pub fun a(self): i64 = 1; }", true);
-  assert(strstr(errors, "An array impl names its length 'N', or '_' to leave "
-                        "it unnamed, not '3'.") != NULL);
-  free(errors);
-
-  errors = errorsOf("impl [string; N] { pub fun a(self): i64 = 1; }", true);
+  errors =
+      errorsOf("impl[const N] [string; N] { pub fun a(self): i64 = 1; }", true);
   assert(strstr(errors, "'string' is a type.") != NULL);
   free(errors);
 
-  expectOk("impl [T; N] { pub fun first(self): T = self[0]; }", true);
-  errors = errorsOf("impl [T; N] { pub fun first(self): T = self[0]; }", true);
+  expectOk("impl[T, const N] [T; N] { pub fun first(self): T = self[0]; }",
+           true);
+  errors = errorsOf(
+      "impl[T, const N] [T; N] { pub fun first(self): T = self[0]; }", true);
   assert(strstr(errors, "'first' is already declared on 'array'.") != NULL);
   free(errors);
 
-  errors = errorsOf("impl [T; N] { pub fun bad(self): i64 = self[0]; }", true);
+  errors = errorsOf(
+      "impl[T, const N] [T; N] { pub fun bad(self): i64 = self[0]; }", true);
   assert(strstr(errors, "Expected i64, got T.") != NULL);
   free(errors);
 
   // The same rules as a list for traits
-  expectOk("impl Label for [T; N] {\n"
+  expectOk("impl[T, const N] Label for [T; N] {\n"
            "  fun label(self): string = \"a\";\n"
            "}",
            true);
-  errors = errorsOf("impl Label for [T; N] {\n"
+  errors = errorsOf("impl[T, const N] Label for [T; N] {\n"
                     "  fun label(self): string = \"b\";\n"
                     "}",
                     true);
   assert(strstr(errors, "'[T; N]' already implements 'Label'.") != NULL);
   free(errors);
 
-  expectError("impl [T; N] { pub fun other(self): T = self[0]; }", false);
+  expectError("impl[T, const N] [T; N] { pub fun other(self): T = self[0]; }",
+              false);
 
   errors = errorsOf("fun show[T: Label](x: T): string = x.label();\n"
                     "@println(show([1, 2]));",
@@ -732,13 +735,126 @@ static void test_an_array_impl_is_checked(void) {
   end();
 }
 
+// Checks one standard library unit and expects `message` among its errors
+static void expectStdlibMessage(const char *source, const char *message) {
+  begin();
+  char *errors = errorsOf(source, true);
+
+  if (strstr(errors, message) == NULL)
+    fprintf(stderr, "Wanted '%s' for:\n%s\nin:\n%s\n", message, source, errors);
+
+  assert(strstr(errors, message) != NULL);
+  free(errors);
+  end();
+}
+
+static void test_an_impl_declares_what_its_target_names(void) {
+  expectStdlibMessage("impl[T] [U] { }",
+                      "'U' isn't declared. Declare it after 'impl', as in "
+                      "'impl[T] [T]'.");
+  expectStdlibMessage("impl[T] [T; N] { }",
+                      "'N' isn't declared. Declare it after 'impl', as in "
+                      "'impl[T, const N] [T; N]'.");
+  expectStdlibMessage("impl[T, N] [T; N] { }",
+                      "'N' is a type parameter, not a length. Declare it as "
+                      "'const N'.");
+  expectStdlibMessage("impl[T, const N] [N; N] { }",
+                      "'N' is a length, not a type.");
+  expectStdlibMessage("impl[T, U] [T] { }",
+                      "'U' isn't used by the type the impl is for.");
+  expectStdlibMessage("impl[T, const N] [T] { }",
+                      "'N' isn't used by the type the impl is for.");
+  expectStdlibMessage("impl[T, T] [T] { }",
+                      "Generic parameter 'T' is already declared.");
+}
+
+static void test_a_length_has_to_be_declared(void) {
+  expectStdlibMessage("fun f[T](a: [T; M]): unit {}",
+                      "Unknown length 'M'. Declare it as 'const M'.");
+  expectStdlibMessage("fun f[T](a: [T; T]): unit {}",
+                      "'T' is a type, not a length.");
+  expectStdlibMessage("fun f[const M](a: M): unit {}",
+                      "'M' is a length, not a type.");
+  expectStdlibMessage("impl[T] [T; _] { pub fun a(self): [T; _] = self; }",
+                      "Unknown length '_'.");
+}
+
+static void test_a_method_can_not_reuse_an_impls_name(void) {
+  expectStdlibMessage("impl[T] [T] { pub fun f[T](self, x: T): T = x; }",
+                      "Generic parameter 'T' is already declared.");
+  expectStdlibMessage("impl[T, const N] [T; N] {\n"
+                      "  pub fun f[const N](self, x: [T; N]): unit {}\n"
+                      "}",
+                      "Generic parameter 'N' is already declared.");
+  expectStdlibMessage("struct Box[T] { pub value: T; }\n"
+                      "impl Box[T] { pub fun f[T](self, x: T): T = x; }",
+                      "Generic parameter 'T' is already declared.");
+}
+
+static void test_two_lengths_are_different(void) {
+  const char *message = "Expected [T; N], got [T; M].";
+
+  expectStdlibMessage("impl[T, const N] [T; N] {\n"
+                      "  pub fun f[const M](self, o: [T; M]): [T; N] = o;\n"
+                      "}",
+                      message);
+  expectStdlibMessage("fun f[T, const N, const M](a: [T; N], b: [T; M]): "
+                      "[T; N] = b;",
+                      message);
+  expectStdlibMessage("struct Wrap[T] { pub value: T; }\n"
+                      "fun f[T, const N, const M](b: Wrap[[T; M]]): "
+                      "Wrap[[T; N]] = b;",
+                      "Expected Wrap[[T; N]], got Wrap[[T; M]].");
+  expectStdlibMessage("fun same[T, const N](a: [T; N], b: [T; N]): bool = "
+                      "true;\n"
+                      "fun f[T, const N, const M](a: [T; N], b: [T; M]): "
+                      "bool = same(a, b);",
+                      message);
+  expectStdlibMessage("fun f[const N](a: [i64; N]): [i64; 2] = a;",
+                      "Expected [i64; 2], got [i64; N].");
+  expectStdlibMessage("fun f[const N](a: [i64; N]): [i64; N] = [1, 2];",
+                      "Expected [i64; N], got an array literal with 2 items.");
+}
+
+static void test_const_parameters_work_with_type_parameters(void) {
+  begin();
+  expectOk("struct Wrap[T] { pub value: T; }\n"
+           "fun wrap[T, const N](a: [T; N]): Wrap[[T; N]] = "
+           "Wrap { value: a };\n"
+           "fun pass[const N, T](a: [T; N]): [T; N] = wrap(a).value;\n"
+           "impl[const N, T] [T; N] {\n"
+           "  pub fun four[A, B, C, D](self, a: A, b: B, c: C, d: D): "
+           "[T; N] = self;\n"
+           "  pub fun at(self): T = self[5];\n"
+           "  pub fun joined[const M](self, other: [T; M]): [T] = "
+           "@arrConcat(self, other);\n"
+           "  pub fun again(self): [T; N] = pass(self.four(1, \"a\", true, "
+           "()));\n"
+           "}",
+           true);
+  expectOk("if (true) {\n"
+           "let xs = [4, 5];\n"
+           "let four: [i64; 2] = xs.four(1, \"a\", true, ());\n"
+           "let again: [i64; 2] = xs.again();\n"
+           "let wrapped: Wrap[[i64; 2]] = wrap(xs);\n"
+           "@assert(xs.joined([6, 7, 8])[4] == 8, \"two lengths\");\n"
+           "}",
+           false);
+  expectError("let xs = [4, 5];\nlet w: Wrap[[i64; 3]] = wrap(xs);", false);
+  end();
+
+  expectStdlibMessage("fun f[const N](): [i64; N] = f();\n"
+                      "fun g(): unit { let x = f(); }",
+                      "Can't tell what 'N' is from the arguments.");
+}
+
 static void test_an_array_impl_needs_its_trait(void) {
   begin();
   expectOk(labelTrait, true);
   expectOk("trait Pair: Label { fun pair(self): string; }", true);
 
-  char *errors =
-      errorsOf("impl Pair for [T; _] { fun pair(self): string = \"\"; }", true);
+  char *errors = errorsOf(
+      "impl[T] Pair for [T; _] { fun pair(self): string = \"\"; }", true);
   assert(strstr(errors, "also needs 'impl Label for [T; _]'") != NULL);
   free(errors);
 
@@ -886,6 +1002,11 @@ int main(void) {
   test_arrays_can_have_methods_and_traits();
   test_an_array_impl_is_checked();
   test_an_array_impl_needs_its_trait();
+  test_an_impl_declares_what_its_target_names();
+  test_a_length_has_to_be_declared();
+  test_a_method_can_not_reuse_an_impls_name();
+  test_two_lengths_are_different();
+  test_const_parameters_work_with_type_parameters();
 
   printf("primitive method tests passed\n");
   return 0;

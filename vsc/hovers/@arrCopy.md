@@ -1,5 +1,5 @@
 ```kirby
-native fun @arrCopy[T](array: [T; N]): [T; N];
+native fun @arrCopy[T, const N](array: [T; N]): [T; N];
 ```
 
 Copy an array to a new array of the same length.

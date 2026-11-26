@@ -1,0 +1,9 @@
+struct Box[T] {
+    pub value: T;
+}
+
+impl Box[T] {
+    pub fun with[T](self, other: T): T = other;
+}
+
+fun main(): unit {}

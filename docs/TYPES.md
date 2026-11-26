@@ -265,29 +265,35 @@ Trait impls on a primitive can't be used with a bounded type parameter yet.
 
 #### Methods On Lists And Arrays
 
-A list or an array has methods in the same way, with the item type as a type
-parameter. `impl [T]` is for every list and `impl [T; N]` for every array:
+A list or an array has methods in the same way. The impl declares its
+parameters right after `impl`, then names the type it is for. `impl[T] [T]` is
+for every list and `impl[T, const N] [T; N]` for every array:
 
 ```
-impl [T] {
+impl[T] [T] {
     pub fun len(self): i64 = @listLen(self);
     pub fun copy(self): [T] = @listCopy(self);
 }
 
-impl [T; N] {
+impl[T, const N] [T; N] {
     pub fun len(self): i64 = @arrLen(self);
     pub fun copy(self): [T; N] = @arrCopy(self);
+    pub fun concat[const M](self, other: [T; M]): [T] = @arrConcat(self, other);
 }
 ```
 
 `T` stands for the item type of the value the method is called on, so `first`
-of `[string]` gives a `string`. `N` stands for an array's length, so `copy` of a
-`[i64; 3]` gives a `[i64; 3]`. An impl that doesn't need the length writes `_`
-(`impl [T; _]`), and then no signature can mention it. The length is written
-as a name and never a number, and the name is `N` or `_`. Type parameters of
-the method itself come after `T`, as in `fun pick[U](self, extra: U): U`, and
-`Self` is the receiver's type. `impl [T]` and `impl [T; N]` are separate, so the
-same method name can be in both.
+of `[string]` gives a `string`. `const N` declares a parameter that is an array
+length instead of a type, so `copy` of a `[i64; 3]` gives a `[i64; 3]`. An
+impl that doesn't need the length writes `_` (`impl[T] [T; _]`), and then no
+signature can mention it. An array impl can't be for one length, such as
+`[T; 3]`. Every parameter the impl declares has to be used by its type, and the
+names are free to choose.
+
+A method declares its own parameters after its name, as in
+`fun pick[U](self, extra: U): U`, and can't reuse a name of its impl. `Self` is
+the receiver's type. `impl[T] [T]` and `impl[T, const N] [T; N]` are separate,
+so the same method name can be in both.
 
 A list gets `len`, `isEmpty`, `push`, `pop`, `insert`, `remove`, `clear`,
 `contains`, `copy`, `reverse`, `slice` and `concat`. An array gets `len`,
@@ -297,10 +303,11 @@ native function of the same name. The ones that return a list (`slice`,
 
 The same limits as the other primitives apply. Only the standard library can
 write these blocks, and a user file gets `You can't write an impl for a
-primitive type in user code.`. The item has to be a type parameter, so `impl [string]` is
-an error. There are no static methods, and a list or array can't fill a bounded
-type parameter yet. A trait impl, such as `impl Display for [T]`, gives every
-list the trait with no condition on `T`, because an impl can't have bounds.
+primitive type in user code.`. The item has to be a type parameter, so
+`impl[T] [string]` is an error. There are no static methods, and a list or array
+can't fill a bounded type parameter yet. A trait impl, such as
+`impl[T] Display for [T]`, gives every list the trait with no condition on `T`,
+because these parameters can't have bounds.
 
 ### Traits
 
@@ -768,13 +775,22 @@ let last = @listPop(words);   // string
 @listPush(words, 1);          // Error: Expected string, got i64.
 ```
 
-Array natives, such as `@arrLen` and `@arrCopy`, also name the array's length
-in their signatures with the placeholders `N` and `M`. `@arrCopy` is
-`fun ([T; N]) => [T; N]`, so copying a `[i64; 3]` gives a `[i64; 3]`.
-`@arrEqual` is `fun ([T; N], [T; N]) => bool`, so comparing arrays of different
+Array natives, such as `@arrLen` and `@arrCopy`, also take the array's length
+as a parameter, declared with `const`:
+
+```
+native fun @arrCopy[T, const N](array: [T; N]): [T; N];
+native fun @arrEqual[T, const N](a: [T; N], b: [T; N]): bool;
+native fun @arrConcat[T, const N, const M](a: [T; N], b: [T; M]): [T];
+```
+
+Copying a `[i64; 3]` gives a `[i64; 3]`, and comparing arrays of different
 lengths is an error. `@arrSlice` and `@arrConcat` give a list, because the
-length of the result isn't known until the program runs. Only the standard
-library can use `N` and `M`.
+length of the result isn't a length the type system can work out.
+
+Inside the body of a function or method, a `const` parameter is one fixed
+length that only equals itself, so a `[T; M]` can't be returned as a `[T; N]`.
+Only the standard library can declare `const` parameters.
 
 A native whose type can't be spelled yet has no declaration, and calls to it
 are checked at runtime instead. That covers `@typeof`, `@instanceOf`, the

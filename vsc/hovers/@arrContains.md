@@ -1,5 +1,5 @@
 ```kirby
-native fun @arrContains[T](array: [T; N], item: T): bool;
+native fun @arrContains[T, const N](array: [T; N], item: T): bool;
 ```
 
 Returns if an array contains a value.

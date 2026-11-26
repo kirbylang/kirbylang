@@ -1,5 +1,5 @@
 ```kirby
-native fun @arrSlice[T](array: [T; N], start: integer, end: integer): [T];
+native fun @arrSlice[T, const N](array: [T; N], start: integer, end: integer): [T];
 ```
 
 Copies the items from a start index up to an end index of an array into a new list. The result is a list because its length isn't known when the program is compiled. `start` must be before `end`.

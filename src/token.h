@@ -66,6 +66,7 @@ typedef enum {
   TOKEN_CONTINUE,
   TOKEN_AS,
   TOKEN_NATIVE,
+  TOKEN_CONST,
 
   TOKEN_ERROR,
   TOKEN_EOF,

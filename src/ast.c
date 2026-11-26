@@ -366,6 +366,8 @@ static void printNode(StrBuf *sb, AstNode *node) {
         for (int i = 0; i < node->as.function.genericParamCount; i++) {
           if (i > 0)
             sb_append(sb, " ");
+          if (node->as.function.genericIsConst[i])
+            sb_append(sb, "const ");
           sb_append_token(sb, node->as.function.genericParams[i]);
 
           appendGenericBounds(sb, &node->as.function.genericBounds[i]);
@@ -469,33 +471,54 @@ static void printNode(StrBuf *sb, AstNode *node) {
     break;
 
   case NODE_IMPL:
-    sb_append(sb, "(impl ");
+    sb_append(sb, "(impl");
+
+    // A list or array impl's own parameters, such as `[T const N]`
+    if (node->as.impl.targetKind != IMPL_TARGET_NAME &&
+        node->as.impl.genericParamCount > 0) {
+      sb_append(sb, "[");
+      for (int i = 0; i < node->as.impl.genericParamCount; i++) {
+        if (i > 0)
+          sb_append(sb, " ");
+        if (node->as.impl.genericIsConst[i])
+          sb_append(sb, "const ");
+        sb_append_token(sb, node->as.impl.genericParams[i]);
+      }
+      sb_append(sb, "]");
+    }
+
+    sb_append(sb, " ");
 
     if (node->as.impl.hasTraitName) {
       sb_append_token(sb, node->as.impl.traitName);
       sb_append(sb, " for ");
     }
 
-    if (node->as.impl.targetKind == IMPL_TARGET_NAME) {
-      sb_append_token(sb, node->as.impl.targetName);
-    }
-
     if (node->as.impl.targetKind != IMPL_TARGET_NAME) {
-      sb_append(sb, "[");
-      for (int i = 0; i < node->as.impl.genericParamCount; i++) {
-        if (i > 0)
+      // A rejected impl has no names to print
+      if (node->as.impl.itemName.length == 0) {
+        sb_append_token(sb, node->as.impl.targetName);
+      } else {
+        sb_append(sb, "[");
+        sb_append_token(sb, node->as.impl.itemName);
+        if (node->as.impl.targetKind == IMPL_TARGET_ARRAY) {
           sb_append(sb, "; ");
-        sb_append_token(sb, node->as.impl.genericParams[i]);
+          sb_append_token(sb, node->as.impl.lengthName);
+        }
+        sb_append(sb, "]");
       }
-      sb_append(sb, "]");
-    } else if (node->as.impl.genericParamCount > 0) {
-      sb_append(sb, "[");
-      for (int i = 0; i < node->as.impl.genericParamCount; i++) {
-        if (i > 0)
-          sb_append(sb, " ");
-        sb_append_token(sb, node->as.impl.genericParams[i]);
+    } else {
+      sb_append_token(sb, node->as.impl.targetName);
+
+      if (node->as.impl.genericParamCount > 0) {
+        sb_append(sb, "[");
+        for (int i = 0; i < node->as.impl.genericParamCount; i++) {
+          if (i > 0)
+            sb_append(sb, " ");
+          sb_append_token(sb, node->as.impl.genericParams[i]);
+        }
+        sb_append(sb, "]");
       }
-      sb_append(sb, "]");
     }
 
     for (int i = 0; i < node->as.impl.methodCount; i++) {
@@ -655,16 +678,16 @@ static void printNode(StrBuf *sb, AstNode *node) {
     break;
 
   case NODE_TYPE_ARRAY: {
-    char length[16];
-    if (node->as.typeArray.length < 0)
-      snprintf(length, sizeof(length), "%c",
-               "NM"[-1 - node->as.typeArray.length]);
-    else
-      snprintf(length, sizeof(length), "%d", node->as.typeArray.length);
     sb_append(sb, "[");
     printNode(sb, node->as.typeArray.elementType);
     sb_append(sb, "; ");
-    sb_append(sb, length);
+    if (node->as.typeArray.hasLengthName) {
+      sb_append_token(sb, node->as.typeArray.lengthName);
+    } else {
+      char length[16];
+      snprintf(length, sizeof(length), "%d", node->as.typeArray.length);
+      sb_append(sb, length);
+    }
     sb_append(sb, "]");
     break;
   }

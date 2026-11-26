@@ -158,6 +158,12 @@ static void test_list_to_string(void) {
   assert(strcmp(typeToString(typeList(NULL)), "[<unknown>]") == 0);
 }
 
+static Type *lengthParam(const char *name, int index, bool isOpaque) {
+  Type *param = typeGenericParam(tokenFromCString(name), index, isOpaque);
+  param->as.genericParam.isLength = true;
+  return param;
+}
+
 static void test_fixed_array_equality_needs_same_length(void) {
   Type *three = typeArray(typeF64(), 3);
   Type *threeAgain = typeArray(typeF64(), 3);
@@ -175,48 +181,67 @@ static void test_fixed_array_equality_needs_same_length(void) {
 }
 
 static void test_fixed_array_to_string(void) {
+  Type *n = lengthParam("N", 0, false);
+
   assert(strcmp(typeToString(typeArray(typeF64(), 3)), "[f64; 3]") == 0);
   assert(strcmp(typeToString(typeArray(typeArray(typeF64(), 2), 0)),
                 "[[f64; 2]; 0]") == 0);
-  assert(strcmp(typeToString(typeArray(typeF64(), ARRAY_LENGTH_PLACEHOLDER(0))),
-                "[f64; N]") == 0);
-  assert(strcmp(typeToString(typeArray(typeF64(), ARRAY_LENGTH_PLACEHOLDER(1))),
-                "[f64; M]") == 0);
+  assert(strcmp(typeToString(typeArrayOfParam(typeF64(), n)), "[f64; N]") == 0);
 }
 
-static void test_length_placeholders_are_filled_from_arguments(void) {
-  Type *n = typeArray(typeGenericParam(tokenFromCString("T"), 0, false),
-                      ARRAY_LENGTH_PLACEHOLDER(0));
-  Type *m = typeArray(typeGenericParam(tokenFromCString("T"), 0, false),
-                      ARRAY_LENGTH_PLACEHOLDER(1));
+static void test_length_parameters_are_filled_from_arguments(void) {
+  Type *t = typeGenericParam(tokenFromCString("T"), 0, false);
+  Type *n = typeArrayOfParam(t, lengthParam("N", 1, false));
+  Type *m = typeArrayOfParam(t, lengthParam("M", 5, false));
 
-  assert(typeGenericParamCount(n) == ARRAY_LENGTH_SLOT(-1) + 1);
-  assert(typeGenericParamCount(m) == ARRAY_LENGTH_SLOT(-2) + 1);
+  assert(typeGenericParamCount(n) == 2);
+  assert(typeGenericParamCount(m) == 6);
 
-  Type *bindings[GENERIC_TYPE_PARAM_SLOTS + 2] = {0};
-  int count = GENERIC_TYPE_PARAM_SLOTS + 2;
+  Type *bindings[6] = {0};
 
-  typeBindGenericParams(n, typeArray(typeF64(), 3), bindings, count);
-  typeBindGenericParams(m, typeArray(typeF64(), 5), bindings, count);
+  typeBindGenericParams(n, typeArray(typeF64(), 3), bindings, 6);
+  typeBindGenericParams(m, typeArray(typeF64(), 5), bindings, 6);
 
-  Type *filledN = typeSubstituteGenericParams(n, bindings, count);
-  Type *filledM = typeSubstituteGenericParams(m, bindings, count);
-  assert(typesEqual(filledN, typeArray(typeF64(), 3)));
-  assert(typesEqual(filledM, typeArray(typeF64(), 5)));
+  assert(typesEqual(typeSubstituteGenericParams(n, bindings, 6),
+                    typeArray(typeF64(), 3)));
+  assert(typesEqual(typeSubstituteGenericParams(m, bindings, 6),
+                    typeArray(typeF64(), 5)));
 
-  // The first argument that fills a placeholder wins
-  typeBindGenericParams(n, typeArray(typeF64(), 9), bindings, count);
-  assert(typesEqual(typeSubstituteGenericParams(n, bindings, count),
+  // The first argument that fills a length wins
+  typeBindGenericParams(n, typeArray(typeF64(), 9), bindings, 6);
+  assert(typesEqual(typeSubstituteGenericParams(n, bindings, 6),
                     typeArray(typeF64(), 3)));
 }
 
-static void test_length_placeholder_accepts_any_length(void) {
-  Type *anyLength = typeArray(typeF64(), ARRAY_LENGTH_PLACEHOLDER(0));
+static void test_an_unfilled_length_accepts_any_length(void) {
+  Type *anyLength = typeArrayOfParam(typeF64(), lengthParam("N", 0, false));
 
   assert(typeAccepts(anyLength, typeArray(typeF64(), 0)));
   assert(typeAccepts(anyLength, typeArray(typeF64(), 7)));
   assert(!typeAccepts(anyLength, typeList(typeF64())));
   assert(!typeAccepts(anyLength, typeArray(typeString(), 7)));
+}
+
+static void test_a_fixed_length_parameter_only_matches_itself(void) {
+  Type *n = lengthParam("N", 0, true);
+  Type *m = lengthParam("M", 1, true);
+  Type *ofN = typeArrayOfParam(typeF64(), n);
+  Type *ofM = typeArrayOfParam(typeF64(), m);
+
+  assert(typesEqual(ofN, typeArrayOfParam(typeF64(), n)));
+  assert(typeAccepts(ofN, typeArrayOfParam(typeF64(), n)));
+  assert(!typesEqual(ofN, ofM));
+  assert(!typeAccepts(ofN, ofM));
+  assert(!typeAccepts(ofN, typeArray(typeF64(), 0)));
+  assert(!typeAccepts(typeArray(typeF64(), 0), ofN));
+  assert(typeGenericParamCount(ofN) == 0);
+
+  // A callee's length can be filled with the caller's
+  Type *callee = typeArrayOfParam(typeF64(), lengthParam("K", 0, false));
+  Type *bindings[1] = {0};
+
+  typeBindGenericParams(callee, ofM, bindings, 1);
+  assert(typesEqual(typeSubstituteGenericParams(callee, bindings, 1), ofM));
 }
 
 static void test_struct_method_lookup(void) {
@@ -510,8 +535,9 @@ int main(void) {
   test_incremental_struct_methods_across_multiple_calls();
   test_fixed_array_equality_needs_same_length();
   test_fixed_array_to_string();
-  test_length_placeholders_are_filled_from_arguments();
-  test_length_placeholder_accepts_any_length();
+  test_length_parameters_are_filled_from_arguments();
+  test_an_unfilled_length_accepts_any_length();
+  test_a_fixed_length_parameter_only_matches_itself();
   test_type_to_string();
   test_list_equality_is_structural();
   test_list_to_string();

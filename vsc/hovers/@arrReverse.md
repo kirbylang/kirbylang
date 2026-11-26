@@ -1,5 +1,5 @@
 ```kirby
-native fun @arrReverse[T](array: [T; N]): [T; N];
+native fun @arrReverse[T, const N](array: [T; N]): [T; N];
 ```
 
 Returns a new array with the items of an array in reverse order, with the same length.

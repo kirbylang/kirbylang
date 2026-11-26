@@ -92,7 +92,10 @@ struct Type {
     } list;
     struct {
       Type *elementType;
-      int length; // Negative values are length placeholders, see below
+      int length; // 0 when `lengthParam` stands for it
+      // The `const N` parameter that stands for the length, as in `[T; N]`.
+      // NULL for a length that is a number.
+      Type *lengthParam;
     } array;
     struct {
       int index; // Its position among the parameters in scope
@@ -100,6 +103,7 @@ struct Type {
       // A declared parameter as seen inside its own declaration: one unknown
       // type that is never filled in and is only equal to itself.
       bool isOpaque;
+      bool isLength; // Declared as `const N`, so it stands for an array length
       // The traits a type has to implement to fill this parameter, as in
       // `T: Display + Eq`. Only the names are kept, because a trait is found
       // through the type environment.
@@ -179,17 +183,11 @@ Type *typeFunction(Type **paramTypes, int paramCount, Type *returnType);
 Type *typeList(Type *elementType);
 
 // Allocates a new fixed size array type, such as `[i64; 3]`
-// A `length` of -1 is the placeholder `N`, -2 is `M`, and so on.
 // Returns pointer to the new type in the types arena
 Type *typeArray(Type *elementType, int length);
 
-#define ARRAY_LENGTH_PLACEHOLDER(index) (-1 - (index))
-#define ARRAY_LENGTH_IS_PLACEHOLDER(length) ((length) < 0)
-
-// Length placeholders share the binding slots of the generic parameters. `T`
-// to `W` take the first four, then `N` takes the next, and so on.
-#define GENERIC_TYPE_PARAM_SLOTS 4
-#define ARRAY_LENGTH_SLOT(length) (GENERIC_TYPE_PARAM_SLOTS - 1 - (length))
+// An array whose length is a `const` parameter, such as `[T; N]`
+Type *typeArrayOfParam(Type *elementType, Type *lengthParam);
 
 // Allocates a new trait type.
 // Returns pointer to the new type in the types arena
@@ -239,6 +237,7 @@ Type *typeGenericParam(Token name, int index, bool isOpaque);
 void typeGenericParamAddBound(Type *param, InternedName traitName);
 
 // The first generic parameter with this index found inside `type`, or NULL.
+// Opaque parameters don't count.
 Type *typeFindGenericParam(Type *type, int index);
 
 // One more than the largest generic parameter index inside `type`, so 0 when
@@ -247,7 +246,8 @@ int typeGenericParamCount(Type *type);
 
 // Fills empty `bindings` slots by lining `pattern` up with `actual`: where
 // `pattern` has generic parameter i and slot i is empty, slot i becomes the
-// matching part of `actual`. Looks inside arrays and functions.
+// matching part of `actual`. Looks inside lists, arrays, struct type arguments
+// and functions. A length's slot holds an array type with no item type.
 void typeBindGenericParams(Type *pattern, Type *actual, Type **bindings,
                            int count);
 

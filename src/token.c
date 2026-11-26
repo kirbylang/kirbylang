@@ -62,6 +62,8 @@ const char *tokenTypeToString(TokenType type) {
     return "TOKEN_AS";
   case TOKEN_NATIVE:
     return "TOKEN_NATIVE";
+  case TOKEN_CONST:
+    return "TOKEN_CONST";
   case TOKEN_INTERP_STRING:
     return "TOKEN_INTERP_STRING";
   case TOKEN_INTERP_START:
