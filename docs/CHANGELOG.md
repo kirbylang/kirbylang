@@ -35,6 +35,7 @@
 - CMake finds readline with `find_library` and uses `-DCMAKE_PREFIX_PATH`. On
   macOS it prefers Homebrew's readline to the system `libedit`, which shows no
   prompt or echo for piped input
+- Fix a trait implemented for a standard library struct, such as `Date`, replacing the struct's own method of the same name, including a private one. The struct's own method now wins, and `Trait.method(value)` calls the trait's
 - Add `krb init` to intialize a new Kirby project
 - Add `krb config` to view the project's `kirby.project.toml` configuration
   - `krb config bin` Prints the `bin` value

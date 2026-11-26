@@ -1,0 +1,27 @@
+== <script> ==
+0000   12 OP_CLOSURE          1 <fn main>
+0002    | OP_DEFINE_GLOBAL    0 'main'
+0004    6 OP_GET_GLOBAL       2 'Date'
+0006    7 OP_CLOSURE          4 <fn pad_zeros>
+0008    | OP_TRAIT_METHOD     3 'pad_zeros'    5 'Pad.pad_zeros'
+0011    8 OP_POP
+0012   13 OP_NIL
+0013    | OP_RETURN
+== main ==
+0000   11 OP_GET_GLOBAL       0 '@println'
+0002    | OP_GET_GLOBAL       1 'Date'
+0004    | OP_CONSTANT         3 '2020'
+0006    | OP_CONSTANT         4 '1'
+0008    | OP_CONSTANT         5 '2'
+0010    | OP_CONSTANT         6 '3'
+0012    | OP_CONSTANT         7 '4'
+0014    | OP_CONSTANT         8 '5'
+0016    | OP_INVOKE        (6 args)    2 'from_parts'
+0019    | OP_INVOKE        (0 args)    9 'Display.toString'
+0022    | OP_CALL             1
+0024    | OP_POP
+0025   12 OP_NIL
+0026    | OP_RETURN
+== pad_zeros ==
+0000    7 OP_CONSTANT         0 'replaced'
+0002    | OP_RETURN
