@@ -9,10 +9,12 @@
     { "include": "#struct-declaration" },
     { "include": "#impl-declaration" },
     { "include": "#trait-declaration" },
+    { "include": "#native-declaration" },
     { "include": "#function-declaration" },
     { "include": "#keywords" },
     { "include": "#constants" },
     { "include": "#natives" },
+    { "include": "#primitive-types" },
     { "include": "#struct-initializer" },
     { "include": "#field-name" },
     { "include": "#method-call" },
@@ -93,7 +95,7 @@
     },
     "numbers": {
       "name": "constant.numeric.krb",
-      "match": "\\b\\d+(\\.\\d+)?([fF]64|[uU]8)?\\b"
+      "match": "\\b\\d+(\\.\\d+)?([fF](32|64)|[iIuU](8|16|32|64))?\\b"
     },
     "struct-declaration": {
       "match": "\\b(struct)\\s+([A-Za-z_][A-Za-z0-9_]*)",
@@ -105,6 +107,15 @@
     "impl-declaration": {
       "patterns": [
         {
+          "match": "\\b(impl)\\s+([A-Za-z_][A-Za-z0-9_]*)\\s+(for)\\s+(string|bool|unit|[iu](?:8|16|32|64)|f(?:32|64))\\b",
+          "captures": {
+            "1": { "name": "keyword.declaration.impl.krb" },
+            "2": { "name": "entity.name.type.trait.krb" },
+            "3": { "name": "keyword.other.for.krb" },
+            "4": { "name": "support.type.primitive.krb" }
+          }
+        },
+        {
           "match": "\\b(impl)\\s+([A-Za-z_][A-Za-z0-9_]*)\\s+(for)\\s+([A-Za-z_][A-Za-z0-9_]*)",
           "captures": {
             "1": { "name": "keyword.declaration.impl.krb" },
@@ -114,10 +125,31 @@
           }
         },
         {
+          "match": "\\b(impl)\\s+([A-Za-z_][A-Za-z0-9_]*)\\s+(for)(?=\\s*\\[)",
+          "captures": {
+            "1": { "name": "keyword.declaration.impl.krb" },
+            "2": { "name": "entity.name.type.trait.krb" },
+            "3": { "name": "keyword.other.for.krb" }
+          }
+        },
+        {
+          "match": "\\b(impl)\\s+(string|bool|unit|[iu](?:8|16|32|64)|f(?:32|64))\\b",
+          "captures": {
+            "1": { "name": "keyword.declaration.impl.krb" },
+            "2": { "name": "support.type.primitive.krb" }
+          }
+        },
+        {
           "match": "\\b(impl)\\s+([A-Za-z_][A-Za-z0-9_]*)",
           "captures": {
             "1": { "name": "keyword.declaration.impl.krb" },
             "2": { "name": "entity.name.type.struct.krb" }
+          }
+        },
+        {
+          "match": "\\b(impl)(?=\\s*\\[)",
+          "captures": {
+            "1": { "name": "keyword.declaration.impl.krb" }
           }
         }
       ]
@@ -135,6 +167,33 @@
         "1": { "name": "keyword.declaration.function.krb" },
         "2": { "name": "entity.name.function.krb" }
       }
+    },
+    "native-declaration": {
+      "begin": "\\b(native)\\s+(fun)\\b",
+      "beginCaptures": {
+        "1": { "name": "keyword.declaration.krb" },
+        "2": { "name": "keyword.declaration.krb" }
+      },
+      "end": ";",
+      "patterns": [{ "include": "#native-signature" }]
+    },
+    "native-signature": {
+      "patterns": [
+        {
+          "begin": "\\[",
+          "end": "\\]",
+          "patterns": [{ "include": "#native-signature" }]
+        },
+        {
+          "name": "support.type.primitive.krb",
+          "match": "(?<!@)\\b(number|integer)\\b(?!\\s*:)"
+        },
+        { "include": "$self" }
+      ]
+    },
+    "primitive-types": {
+      "name": "support.type.primitive.krb",
+      "match": "(?<![.@])\\b(string|bool|unit|[iu](8|16|32|64)|f(32|64))\\b(?!\\s*[:(])"
     },
     "keywords": {
       "patterns": [
@@ -188,7 +247,7 @@
     },
     "method-call": {
       "name": "entity.name.function.method.krb",
-      "match": "(?<=[A-Za-z_][A-Za-z0-9_]*\\s*\\.\\s*)\\b[A-Za-z_][A-Za-z0-9_]*\\b(?=\\s*\\()"
+      "match": "(?<=[A-Za-z0-9_\\]\\)\"}]\\s*\\.\\s*)\\b[A-Za-z_][A-Za-z0-9_]*\\b(?=\\s*\\()"
     },
     "property": {
       "name": "variable.name.property.krb",

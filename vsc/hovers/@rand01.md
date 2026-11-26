@@ -1,7 +1,15 @@
-Randomly get 0 or 1.
+```kirby
+native fun @rand01(): f64;
+```
+
+Get a random number from 0 to 1.
+
+## Usage
 
 ```kirby
-@println(@rand01()); // 0
+@println(@rand01()); // 0.22301528985752506
 ```
+
+## Reference
 
 https://kirbylang.github.io/kirbylang/reference/builtin-functions.html#rand01

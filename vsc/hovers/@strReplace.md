@@ -1,7 +1,15 @@
+```kirby
+native fun @strReplace(text: string, part: string, replacement: string): string;
+```
+
 Replace the first place a string appears in another string. Returns the string unchanged if it does not appear, or if the string to replace is empty.
+
+## Usage
 
 ```kirby
 @println(@strReplace("a-b-c", "-", "+")); // a+b-c
 ```
+
+## Reference
 
 https://kirbylang.github.io/kirbylang/reference/builtin-functions.html#strreplace

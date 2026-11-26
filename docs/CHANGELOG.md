@@ -24,6 +24,7 @@
 
 ## Next
 
+- VS Code extension: highlight `impl` blocks for primitives, lists and arrays, `native` declarations, built-in type names, every number suffix and method calls on literals, and add snippets for them, a `native` hover and an `@strToBytes` snippet
 - **Breaking**: `native` is a reserved word. The standard library declares the types of natives with it, such as `native fun @listPop[T](list: [T]): T;`
 - Fix a false `Can't tell what 'T' is from the arguments.` error when a generic function calls an array method such as `concat` on its own `[T; n]`
 - Fix the compiler crashing on a function with many more than 255 parameters or generic parameters, or a call with many more than 255 arguments. It now reports the existing limit error

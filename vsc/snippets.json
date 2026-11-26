@@ -116,6 +116,58 @@
     ],
     "description": "Implement a trait for a struct"
   },
+  "Impl for a primitive": {
+    "prefix": [
+      "impl",
+      "implprim"
+    ],
+    "body": [
+      "impl ${1|string,bool,unit,i8,i16,i32,i64,u8,u16,u32,u64,f32,f64|} {",
+      "\tpub fun ${2:name}(self): ${3:unit} {",
+      "\t\t$0",
+      "\t}",
+      "}"
+    ],
+    "description": "Add methods to a primitive type (standard library only)"
+  },
+  "Impl for a list": {
+    "prefix": [
+      "impl",
+      "impllist"
+    ],
+    "body": [
+      "impl [${1:T}] {",
+      "\tpub fun ${2:name}(self): ${3:unit} {",
+      "\t\t$0",
+      "\t}",
+      "}"
+    ],
+    "description": "Add methods to every list (standard library only)"
+  },
+  "Impl for an array": {
+    "prefix": [
+      "impl",
+      "implarray"
+    ],
+    "body": [
+      "impl [${1:T}; ${2|N,_|}] {",
+      "\tpub fun ${3:name}(self): ${4:unit} {",
+      "\t\t$0",
+      "\t}",
+      "}"
+    ],
+    "description": "Add methods to every array (standard library only)"
+  },
+  "Native declaration": {
+    "prefix": [
+      "native",
+      "nativefun"
+    ],
+    "body": [
+      "native fun @${1:name}(${2:value}: ${3:string}): ${4:unit};$0"
+    ],
+    "description": "Declare a function written in C (standard library only)"
+  },
   "Instance method": {
     "prefix": [
       "fun",
@@ -748,6 +800,13 @@
       "@strSplit(${1:string}, ${2:separator})$0"
     ],
     "description": "Split a string into a list of strings"
+  },
+  "Native: @strToBytes": {
+    "prefix": "@strToBytes",
+    "body": [
+      "@strToBytes(${1:string})$0"
+    ],
+    "description": "Convert a string to a list of its bytes"
   },
   "Native: @strIndexOf": {
     "prefix": "@strIndexOf",
