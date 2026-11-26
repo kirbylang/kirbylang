@@ -1,0 +1,7 @@
+fun use_it(): i64 = LIMIT;
+
+fun main(): unit {
+  @println(use_it());
+}
+
+let LIMIT: Missing = 2;

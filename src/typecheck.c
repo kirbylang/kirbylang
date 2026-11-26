@@ -788,6 +788,8 @@ static Type *typchkCheckBlockContents(TypeEnv *env, BlockNode *block,
 static Type *typchkCheckOrInferLambda(TypeEnv *env, AstNode *node,
                                       Type *expected);
 static void typchkCheckVarDecl(TypeEnv *env, AstNode *node);
+static void typchkCheckVarDeclWithType(TypeEnv *env, AstNode *node,
+                                       Type *declaredType);
 static void typchkCheckFunctionDecl(TypeEnv *env, AstNode *node);
 static bool typchkStructMembersUnreliable(Type *type);
 static Type *typchkLookupVariableType(TypeEnv *env, Token *name);
@@ -3431,9 +3433,19 @@ static Type *typchkCheckOrInferLambda(
 
 static void typchkCheckVarDecl(TypeEnv *env, AstNode *node) {
   VarDeclNode *varDecl = &node->as.varDecl;
+  Type *declaredType = varDecl->declaredType != NULL
+                           ? typchkResolveType(env, varDecl->declaredType)
+                           : NULL;
+
+  typchkCheckVarDeclWithType(env, node, declaredType);
+}
+
+// Checks a declaration whose annotation was already resolved, or is missing.
+// `declaredType` is NULL when there is no annotation or it didn't resolve.
+static void typchkCheckVarDeclWithType(TypeEnv *env, AstNode *node,
+                                       Type *declaredType) {
+  VarDeclNode *varDecl = &node->as.varDecl;
   bool hasExpectedType = varDecl->declaredType != NULL;
-  Type *declaredType =
-      hasExpectedType ? typchkResolveType(env, varDecl->declaredType) : NULL;
 
   if (hasExpectedType && varDecl->declaredType->kind == NODE_TYPE) {
     Token declaredTypeIdentifier = varDecl->declaredType->as.type_.name;
@@ -4936,6 +4948,28 @@ static bool typchkCheckUnit(AstNode **program, int count, bool isStdlib) {
     }
   }
 
+  // Hoisted Globals
+  //
+  // A global with a type annotation has that type in every function body, even
+  // one written above it. The annotation is resolved here, once, and the
+  // declaration is checked later against that result. Without an annotation
+  // the type is only known once the declaration itself is checked.
+
+  Type **hoistedGlobalTypes =
+      count > 0 ? (Type **)calloc((size_t)count, sizeof(Type *)) : NULL;
+
+  for (int i = 0; i < count; i++) {
+    if (program[i]->kind == NODE_VAR_DECL &&
+        program[i]->as.varDecl.declaredType != NULL) {
+      VarDeclNode *varDecl = &program[i]->as.varDecl;
+
+      hoistedGlobalTypes[i] = typchkResolveType(env, varDecl->declaredType);
+
+      if (hoistedGlobalTypes[i] != NULL)
+        typchkTypeEnvDeclare(env, varDecl->name, hoistedGlobalTypes[i]);
+    }
+  }
+
   // Definite Assignment Analysis
 
   DaaSet topLevelDaa;
@@ -4953,6 +4987,13 @@ static bool typchkCheckUnit(AstNode **program, int count, bool isStdlib) {
       checkImplMethodBodies(env, node);
       break;
 
+    case NODE_VAR_DECL:
+      if (node->as.varDecl.declaredType != NULL)
+        typchkCheckVarDeclWithType(env, node, hoistedGlobalTypes[i]);
+      else
+        typchkCheckStmt(env, node);
+      break;
+
     default:
       typchkCheckStmt(env, node);
       break;
@@ -4964,6 +5005,8 @@ static bool typchkCheckUnit(AstNode **program, int count, bool isStdlib) {
   daaSetFree(&topLevelDaa);
 
   // Clean Up
+
+  free(hoistedGlobalTypes);
 
   bool ok = !typchkHadError();
 
