@@ -468,7 +468,11 @@ static bool defineMethod(ObjString *name, ObjString *qualifiedName) {
   // pairs with the closures created alongside it.
   AS_CLOSURE(method)->owner = struct_;
 
-  tableSet(vm.gc, &struct_->methods, name, method);
+  Value existing;
+
+  // A trait method takes the plain name only if no other method has it
+  if (qualifiedName == NULL || !tableGet(&struct_->methods, name, &existing))
+    tableSet(vm.gc, &struct_->methods, name, method);
 
   if (qualifiedName != NULL)
     tableSet(vm.gc, &struct_->methods, qualifiedName, method);

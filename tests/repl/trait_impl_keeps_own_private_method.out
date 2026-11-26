@@ -1,0 +1,10 @@
+> struct Dog {}
+> trait SameName { fun speak(self): string; }
+> impl Dog { fun speak(self): string = "own"; }
+> impl Dog { pub fun greet(self): string = self.speak(); }
+> impl SameName for Dog { fun speak(self): string = "from SameName"; }
+> @println(Dog {}.greet()); // own
+own
+> @println(SameName.speak(Dog {})); // from SameName
+from SameName
+> 

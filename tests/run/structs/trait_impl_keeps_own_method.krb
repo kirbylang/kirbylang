@@ -1,0 +1,21 @@
+// A struct's own method keeps its name when a trait impl loaded later has a
+// method with the same name.
+//
+// Date is used because in a run program, a struct's own impl has to be loaded
+// before the program to show this. Date comes from the standard library, which
+// is loaded first. A struct declared in this file would always keep its own
+// method, as a file's trait impls are loaded before its other impls.
+trait SameName {
+    fun get_year(self): string;
+}
+
+impl SameName for Date {
+    fun get_year(self): string = "from SameName";
+}
+
+fun main(): unit {
+    let date = Date.from_parts(2020, 1, 2, 3, 4, 5);
+
+    @println(date.get_year()); // 2020
+    @println(SameName.get_year(date)); // from SameName
+}
