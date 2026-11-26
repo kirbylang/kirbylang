@@ -1,0 +1,18 @@
+// A struct's private method keeps its name when a trait impl loaded later has a
+// method with the same name.
+//
+// Date is used because in a run program, a struct's own impl has to be loaded
+// before the program to show this. Date comes from the standard library, which
+// is loaded first. It has a private pad_zeros method, which printing a date
+// calls.
+trait SameName {
+    fun pad_zeros(num: i64, length: i64): string;
+}
+
+impl SameName for Date {
+    fun pad_zeros(num: i64, length: i64): string = "from SameName";
+}
+
+fun main(): unit {
+    @println(Date.from_parts(2020, 1, 2, 3, 4, 5)); // 2020-01-02 03:04:05
+}

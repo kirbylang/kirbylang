@@ -1,0 +1,65 @@
+================================================================================
+kirby <version>
+================================================================================
+
+Enter some code or type 'help' for help or 'exit' to quit.
+
+== <script> ==
+0000    1 OP_STRUCT           0 'Dog'
+0002    | OP_DEFINE_GLOBAL    0 'Dog'
+0004    | OP_GET_GLOBAL       0 'Dog'
+0006    | OP_POP
+0007    | OP_NIL
+0008    | OP_RETURN
+== <script> ==
+0000    1 OP_NIL
+0001    | OP_RETURN
+== <script> ==
+0000    1 OP_GET_GLOBAL       0 'Dog'
+0002    | OP_CLOSURE          2 <fn speak>
+0004    | OP_METHOD           1 'speak'
+0006    | OP_POP
+0007    | OP_NIL
+0008    | OP_RETURN
+== speak ==
+0000    1 OP_CONSTANT         0 'own'
+0002    | OP_RETURN
+== <script> ==
+0000    1 OP_GET_GLOBAL       0 'Dog'
+0002    | OP_CLOSURE          2 <fn greet>
+0004    | OP_METHOD           1 'greet'
+0006    | OP_POP
+0007    | OP_NIL
+0008    | OP_RETURN
+== greet ==
+0000    1 OP_GET_LOCAL        0
+0002    | OP_INVOKE        (0 args)    0 'speak'
+0005    | OP_RETURN
+== <script> ==
+0000    1 OP_GET_GLOBAL       0 'Dog'
+0002    | OP_CLOSURE          2 <fn speak>
+0004    | OP_TRAIT_METHOD     1 'speak'    3 'SameName.speak'
+0007    | OP_POP
+0008    | OP_NIL
+0009    | OP_RETURN
+== speak ==
+0000    1 OP_CONSTANT         0 'from SameName'
+0002    | OP_RETURN
+== <script> ==
+0000    1 OP_GET_GLOBAL       0 '@println'
+0002    | OP_GET_GLOBAL       1 'Dog'
+0004    | OP_STRUCT_INIT      0
+0006    | OP_INVOKE        (0 args)    2 'greet'
+0009    | OP_CALL             1
+0011    | OP_POP
+0012    | OP_NIL
+0013    | OP_RETURN
+== <script> ==
+0000    1 OP_GET_GLOBAL       0 '@println'
+0002    | OP_GET_GLOBAL       1 'Dog'
+0004    | OP_STRUCT_INIT      0
+0006    | OP_INVOKE        (0 args)    2 'SameName.speak'
+0009    | OP_CALL             1
+0011    | OP_POP
+0012    | OP_NIL
+0013    | OP_RETURN

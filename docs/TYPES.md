@@ -369,8 +369,8 @@ operator (`a + b` runs `Add`'s `add`, `==` runs `Eq`'s `equals`) and printing
 when the type has its own method with the same name. At run time a struct keeps
 each trait method under the trait's name, such as `Display.toString`, and these
 calls use it. The method is also stored under its plain name, unless the type has
-its own method of that name. This includes a trait implemented for a struct of
-the standard library, such as `Date`.
+its own method of that name, so `p.toString()` above runs the type's own method
+no matter which impl was loaded first.
 
 #### Builtin traits
 

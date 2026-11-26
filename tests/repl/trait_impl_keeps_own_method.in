@@ -1,0 +1,6 @@
+struct Dog {}
+trait SameName { fun speak(self): string; }
+impl Dog { pub fun speak(self): string = "own"; }
+impl SameName for Dog { fun speak(self): string = "from SameName"; }
+@println(Dog {}.speak()); // own
+@println(SameName.speak(Dog {})); // from SameName
