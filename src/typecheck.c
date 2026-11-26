@@ -2197,13 +2197,14 @@ static Type *typchkCheckGenericCall(TypeEnv *env, AstNode *node,
   }
 
   // A parameter the program declared has to be filled in by the arguments. A
-  // native's stays unknown. An argument that already failed to check explains
-  // a missing one, so it isn't reported again.
+  // native's stays unknown, and an opaque one is already a fixed type. An
+  // argument that already failed to check explains a missing one, so it isn't
+  // reported again.
   for (int i = 0; i < genericCount && !sawUnknownArg; i++) {
     Type *param = typeFindGenericParam(calleeType, i);
 
     if (bindings[i] == NULL && param != NULL &&
-        param->as.genericParam.hasName) {
+        !param->as.genericParam.isOpaque && param->as.genericParam.hasName) {
       typchkErrorAtTokenFmt(&c->paren,
                             "Can't tell what '%.*s' is from the arguments.",
                             param->as.genericParam.name.length,
