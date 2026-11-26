@@ -140,18 +140,6 @@ void assertNonZeroNumber(VM *vm, const char *function, Value number,
   exit(EXIT_CODE_RUNTIME_ERR);
 }
 
-void assertPositiveNumber(VM *vm, const char *function, double value,
-                          int argIndex) {
-  if (value <= 0) {
-    runtimeError(
-        vm,
-        "function %s expects argument %d to be a positive number but got %g.",
-        function, argIndex, value);
-
-    exit(EXIT_CODE_RUNTIME_ERR);
-  }
-}
-
 void assertGtEq(VM *vm, const char *function, double value, double comparison,
                 int argIndex) {
   if (!(value >= comparison)) {

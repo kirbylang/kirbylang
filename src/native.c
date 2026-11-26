@@ -587,12 +587,12 @@ static Value listSliceNative(VM *vm, int argCount, Value *args) {
   ObjList *list = AS_LIST(args[0]);
 
   double start = numberArg(args[1]);
-  assertPositiveNumber(vm, "@listSlice", start, 1);
+  assertNonNegativeNumber(vm, "@listSlice", start, 1);
   assertWholeNumber(vm, "@listSlice", start, 1);
   assertIsInListBounds(vm, list, start);
 
   double end = numberArg(args[2]);
-  assertPositiveNumber(vm, "@listSlice", end, 2);
+  assertNonNegativeNumber(vm, "@listSlice", end, 2);
   assertWholeNumber(vm, "@listSlice", end, 2);
   assertIsInListBounds(vm, list, end);
 
@@ -837,12 +837,12 @@ static Value arrSliceNative(VM *vm, int argCount, Value *args) {
   ObjArray *array = AS_ARRAY(args[0]);
 
   double start = numberArg(args[1]);
-  assertPositiveNumber(vm, "@arrSlice", start, 1);
+  assertNonNegativeNumber(vm, "@arrSlice", start, 1);
   assertWholeNumber(vm, "@arrSlice", start, 1);
   assertIsInArrayBounds(vm, array, start);
 
   double end = numberArg(args[2]);
-  assertPositiveNumber(vm, "@arrSlice", end, 2);
+  assertNonNegativeNumber(vm, "@arrSlice", end, 2);
   assertWholeNumber(vm, "@arrSlice", end, 2);
   assertIsInArrayBounds(vm, array, end);
 

@@ -1,0 +1,7 @@
+fun main(): unit {
+    let list: [i64] = [10, 20, 30];
+
+    @println(@listSlice(list, 0, 2));
+    @println(@listSlice(list, 0, 3));
+    @println(list.slice(0, 1));
+}

@@ -1,0 +1,36 @@
+== <script> ==
+0000    7 OP_CLOSURE          1 <fn main>
+0002    | OP_DEFINE_GLOBAL    0 'main'
+0004    8 OP_NIL
+0005    | OP_RETURN
+== main ==
+0000    2 OP_CONSTANT         0 '10'
+0002    | OP_CONSTANT         1 '20'
+0004    | OP_CONSTANT         2 '30'
+0006    | OP_ARRAY            3
+0008    4 OP_GET_GLOBAL       3 '@println'
+0010    | OP_GET_GLOBAL       4 '@arrSlice'
+0012    | OP_GET_LOCAL        1
+0014    | OP_CONSTANT         5 '0'
+0016    | OP_CONSTANT         6 '2'
+0018    | OP_CALL             3
+0020    | OP_CALL             1
+0022    | OP_POP
+0023    5 OP_GET_GLOBAL       3 '@println'
+0025    | OP_GET_GLOBAL       4 '@arrSlice'
+0027    | OP_GET_LOCAL        1
+0029    | OP_CONSTANT         5 '0'
+0031    | OP_CONSTANT         7 '3'
+0033    | OP_CALL             3
+0035    | OP_CALL             1
+0037    | OP_POP
+0038    6 OP_GET_GLOBAL       3 '@println'
+0040    | OP_GET_GLOBAL       8 'array.slice'
+0042    | OP_GET_LOCAL        1
+0044    | OP_CONSTANT         5 '0'
+0046    | OP_CONSTANT         9 '1'
+0048    | OP_CALL             3
+0050    | OP_CALL             1
+0052    | OP_POP
+0053    7 OP_NIL
+0054    | OP_RETURN

@@ -19,5 +19,5 @@
 0009    | OP_CALL             3
 0011    | OP_NIL
 0012    | OP_RETURN
-function @listSlice expects argument 2 to be a positive number but got -4.
+function @listSlice expects argument 3 to be a non-negative number but got -4.
 [line 3] in main()

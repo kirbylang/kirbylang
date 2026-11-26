@@ -1,0 +1,7 @@
+fun main(): unit {
+    let array = [10, 20, 30];
+
+    @println(@arrSlice(array, 0, 2));
+    @println(@arrSlice(array, 0, 3));
+    @println(array.slice(0, 1));
+}

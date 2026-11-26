@@ -118,6 +118,7 @@
   - Fix a type's own method running instead of the trait's method of the same name, through a type parameter's bound, an operator, or printing a struct
   - Add a compile error when two traits give a struct the same method name, or a method is both an instance and a static method
   - Change the error for a primitive passed to a bounded type parameter to say why: `string implements Display, but a primitive can't be used with a bound yet, required by T.` It used to say `string doesn't implement Display`
+  - Fix `@listSlice`, `@arrSlice` and the `slice` method rejecting a `start` of `0`. Their errors for a negative position now name the right argument
 
 ## 0.4.0
 
