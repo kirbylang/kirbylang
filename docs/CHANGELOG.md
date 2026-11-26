@@ -58,6 +58,7 @@
 - Fix `if`/`else` and lambdas failing as an implicit return, and a nested
   block's last expression wrongly returning from the whole function. Blocks
   and `if` now have one parser each, and only a function body returns its value
+- Fix `@randBetween` almost never returning `min`, and losing precision with very large numbers
 - Add immutable struct fields `struct Box { let value: f64 }`
 - Add new native function `@now()` that returns the current unix timestamp
 - Add `Date` struct to `stdlib.krb`

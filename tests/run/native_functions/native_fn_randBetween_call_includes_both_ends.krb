@@ -1,0 +1,31 @@
+// Counts how many different results in `min..max` appear over many calls.
+fun seen(min: i64, max: i64): i64 {
+    var found: [i64] = [];
+
+    for (var i = 0; i < 1000; i = i + 1) {
+        let n = @randBetween(min, max);
+
+        @assert(n >= min and n <= max, "out of range");
+
+        if (!found.contains(n)) {
+            found.push(n);
+        }
+    }
+
+    found.len()
+}
+
+fun main(): unit {
+    @println(seen(1, 3)); // 3
+    @println(seen(-2, -1)); // 2
+    @println(seen(-1, 1)); // 3
+    @println(seen(7, 7)); // 1
+
+    // The widest range there is.
+    let max = 9223372036854775807;
+    let min = -max - 1;
+
+    @println(seen(min, max) > 990); // true
+    @println(@randBetween(max, max) == max); // true
+    @println(@randBetween(min, min) == min); // true
+}

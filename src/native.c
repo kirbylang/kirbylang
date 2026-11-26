@@ -138,18 +138,18 @@ static Value randBetweenNative(VM *vm, int argCount, Value *args) {
   assertArgIsNumber(vm, "@randBetween", args, 0);
   assertArgIsNumber(vm, "@randBetween", args, 1);
 
-  double min = numberArg(args[0]);
-  double max = numberArg(args[1]);
+  int64_t min = args[0].as.number.as.i64;
+  int64_t max = args[1].as.number.as.i64;
 
   if (min > max) {
     raiseError(vm, "function @randBetween expects argument 1 to be less than "
                    "or equal to argument 2.");
   }
 
-  double r = (double)randomNext() / (double)RANDOM_MAX; // [0, 1]
-  double result = min + r * (max - min);        // [min, max)
+  // Unsigned arithmetic, since `max - min` can be too large for an i64.
+  uint64_t offset = randomUpTo((uint64_t)max - (uint64_t)min);
 
-  return NUMBER_I64_VAL((int64_t)ceil(result));
+  return NUMBER_I64_VAL((int64_t)((uint64_t)min + offset));
 }
 
 static Value ceilNative(VM *vm, int argCount, Value *args) {

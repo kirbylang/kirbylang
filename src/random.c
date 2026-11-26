@@ -50,3 +50,27 @@ void randomInit(void) {
 long randomNext(void) { return random(); }
 
 #endif
+
+// 64 random bits. One `randomNext` gives 31, so it takes three.
+static uint64_t randomBits64(void) {
+  uint64_t high = (uint64_t)randomNext();
+  uint64_t middle = (uint64_t)randomNext();
+  uint64_t low = (uint64_t)randomNext();
+
+  return (high << 33) ^ (middle << 2) ^ (low & 3);
+}
+
+uint64_t randomUpTo(uint64_t max) {
+  if (max == UINT64_MAX)
+    return randomBits64();
+
+  uint64_t count = max + 1;
+  // Values at or above `limit` would make the low results more likely.
+  uint64_t limit = UINT64_MAX - UINT64_MAX % count;
+  uint64_t bits = randomBits64();
+
+  while (bits >= limit)
+    bits = randomBits64();
+
+  return bits % count;
+}

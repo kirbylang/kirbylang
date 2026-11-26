@@ -16,4 +16,7 @@ void randomInit(void);
 // A random number from 0 to `RANDOM_MAX`, both included.
 long randomNext(void);
 
+// A random number from 0 to `max`, both included, each equally likely.
+uint64_t randomUpTo(uint64_t max);
+
 #endif

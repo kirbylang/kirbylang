@@ -713,7 +713,7 @@ fun main(): unit {
 
 ### `@randBetween`
 
-Get a random whole number from min to max, as an `i64`. `min` itself is currently almost never returned.
+Get a random whole number from min to max, as an `i64`. Both `min` and `max` can be returned, and every number in the range is equally likely.
 
 ```kirby
 fun main(): unit {

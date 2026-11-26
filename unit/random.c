@@ -59,9 +59,35 @@ static void testNext(void) {
   assert(highest > RANDOM_MAX / 2);
 }
 
+static void testUpTo(void) {
+  randomInit();
+
+  assert(randomUpTo(0) == 0);
+
+  int seen[3] = {0};
+
+  for (int i = 0; i < 1000; i++) {
+    uint64_t n = randomUpTo(2);
+
+    assert(n <= 2);
+    seen[n] = 1;
+  }
+
+  assert(seen[0] && seen[1] && seen[2]);
+
+  // The widest ranges use all 64 bits.
+  uint64_t anyBit = 0;
+
+  for (int i = 0; i < 1000; i++)
+    anyBit |= randomUpTo(UINT64_MAX);
+
+  assert(anyBit == UINT64_MAX);
+}
+
 int main(void) {
   testSeedMix();
   testNext();
+  testUpTo();
 
   return 0;
 }
