@@ -453,16 +453,10 @@ Type *typeSubstituteSelf(Type *type, Type *concrete) {
   }
 }
 
-Type *typeGenericParam(int index) {
+Type *typeGenericParam(Token name, int index, bool isOpaque) {
   Type *type = allocType(TYPE_GENERIC_PARAM);
   type->as.genericParam.index = index;
-  return type;
-}
-
-Type *typeDeclaredGenericParam(Token name, int index, bool isOpaque) {
-  Type *type = typeGenericParam(index);
   type->as.genericParam.name = internTokenName(name);
-  type->as.genericParam.hasName = true;
   type->as.genericParam.isOpaque = isOpaque;
   return type;
 }
@@ -1107,19 +1101,10 @@ static void appendTypeName(StrBuf *sb, Type *type) {
     appendArrayLength(sb, type->as.array.length);
     sb_append(sb, "]");
     break;
-  case TYPE_GENERIC_PARAM: {
-    static const char names[] = "TUVW";
-    int index = type->as.genericParam.index;
-
-    if (type->as.genericParam.hasName)
-      sb_appendf(sb, "%.*s", type->as.genericParam.name.length,
-                 internedNameChars(type->as.genericParam.name));
-    else if (index < (int)sizeof(names) - 1)
-      sb_appendf(sb, "%c", names[index]);
-    else
-      sb_appendf(sb, "T%d", index);
+  case TYPE_GENERIC_PARAM:
+    sb_appendf(sb, "%.*s", type->as.genericParam.name.length,
+               internedNameChars(type->as.genericParam.name));
     break;
-  }
   }
 }
 

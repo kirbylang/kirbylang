@@ -1823,7 +1823,9 @@ static void compileStmt(AstNode *node) {
   }
 
   case NODE_FUNCTION:
-    compileFunctionDeclStmt(node);
+    // The VM defines natives itself
+    if (!node->as.function.isNative)
+      compileFunctionDeclStmt(node);
     break;
 
   case NODE_STRUCT:

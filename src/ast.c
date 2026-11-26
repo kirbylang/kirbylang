@@ -353,7 +353,10 @@ static void printNode(StrBuf *sb, AstNode *node) {
     break;
 
   case NODE_FUNCTION:
-    sb_append(sb, node->as.function.isLambda ? "(lambda (" : "(fun ");
+    if (node->as.function.isNative)
+      sb_append(sb, "(native-fun ");
+    else
+      sb_append(sb, node->as.function.isLambda ? "(lambda (" : "(fun ");
 
     if (!node->as.function.isLambda) {
       sb_append_token(sb, node->as.function.name);
@@ -398,12 +401,14 @@ static void printNode(StrBuf *sb, AstNode *node) {
       printNode(sb, node->as.function.returnType);
     }
 
-    sb_append(sb, " ");
+    if (!node->as.function.isNative) {
+      sb_append(sb, " ");
 
-    if (node->as.function.exprBody != NULL) {
-      printNode(sb, node->as.function.exprBody);
-    } else {
-      printBlock(sb, &node->as.function.body);
+      if (node->as.function.exprBody != NULL) {
+        printNode(sb, node->as.function.exprBody);
+      } else {
+        printBlock(sb, &node->as.function.body);
+      }
     }
 
     sb_append(sb, ")");

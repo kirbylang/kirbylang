@@ -144,7 +144,7 @@
         },
         {
           "name": "keyword.declaration.krb",
-          "match": "\\b(var|let|pub|fun|struct|impl|type)\\b"
+          "match": "\\b(var|let|pub|fun|struct|impl|type|native)\\b"
         },
         {
           "name": "keyword.operator.logical.krb",

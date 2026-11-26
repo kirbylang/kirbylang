@@ -199,6 +199,25 @@ static const char *primitiveNames[] = {"unit", "bool", "string", "f64", "f32",
                                        "i64",  "i32",  "i16",    "i8",  "u64",
                                        "u32",  "u16",  "u8"};
 
+static void test_the_stdlib_can_declare_natives(void) {
+  expectStdlibAst("native fun @listPop[T](list: [T]): T;",
+                  "(native-fun @listPop[T] (list : [T]) : T)\n");
+}
+
+static void test_a_native_declaration_has_to_be_well_formed(void) {
+  expectStdlibError("native fun len(): i64;",
+                    "A native's name starts with '@'.");
+  expectStdlibError("native fun @x(): unit {}",
+                    "Expect ';' after native declaration.");
+  expectStdlibError("native fun @x(): unit = nil;",
+                    "Expect ';' after native declaration.");
+  expectStdlibError("native let @x = 1;", "Expect 'fun' after 'native'.");
+  expectStdlibError("fun @x(): unit {}", "'@' is a reserved character.");
+  expectStdlibError("fun f(): unit;", "Expect '{' before function body.");
+  expectStdlibError("fun f(): unit { native fun @x(): unit; }",
+                    "'native' declarations can only appear at the top level.");
+}
+
 static void test_user_code_can_not_impl_a_primitive(void) {
   int count = (int)(sizeof(primitiveNames) / sizeof(primitiveNames[0]));
   char source[256];
@@ -257,6 +276,8 @@ static void test_user_code_can_impl_structs(void) {
 }
 
 int main(void) {
+  test_the_stdlib_can_declare_natives();
+  test_a_native_declaration_has_to_be_well_formed();
   test_the_stdlib_can_impl_lists_and_arrays();
   test_a_list_or_array_impl_has_to_be_well_formed();
   test_user_code_can_not_impl_a_primitive();

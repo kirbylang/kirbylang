@@ -97,5 +97,6 @@ typedef struct {
 |  52 | `TOKEN_BREAK`             |         `break` |
 |  53 | `TOKEN_CONTINUE`          |      `continue` |
 |  54 | `TOKEN_AS`                |            `as` |
-|  55 | `TOKEN_ERROR`             |             n/a |
+|  55 | `TOKEN_NATIVE`            |        `native` |
+|  56 | `TOKEN_ERROR`             |             n/a |
 |  56 | `TOKEN_EOF`               |             n/a |

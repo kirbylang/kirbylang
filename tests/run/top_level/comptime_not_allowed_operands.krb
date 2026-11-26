@@ -12,7 +12,7 @@ var both_left = f() == 1 and true;
 var both_right = true and f() == 1;
 var inline_if = if (true) 1 else 2;
 var inline_block = { 1 };
-var native = @println;
+var builtin = @println;
 let copied = count;
 var item = [1, f()];
 var field = Point { x: f() };

@@ -24,6 +24,7 @@
 
 ## Next
 
+- **Breaking**: `native` is a reserved word. The standard library declares the types of natives with it, such as `native fun @listPop[T](list: [T]): T;`
 - Fix a false `Can't tell what 'T' is from the arguments.` error when a generic function calls an array method such as `concat` on its own `[T; n]`
 - Fix the compiler crashing on a function with many more than 255 parameters or generic parameters, or a call with many more than 255 arguments. It now reports the existing limit error
 - Add natives for fixed size arrays: `@arrLen`, `@arrContains`, `@arrEqual`, `@arrCopy`, `@arrReverse`, `@arrJoin`, `@arrSlice`, `@arrConcat` and `@arrToList`. Their signatures name the array's length with the placeholders `N` and `M`, such as `fun ([T; N]) => [T; N]` for `@arrCopy`, which native signatures can use but user code can't. `@arrSlice`, `@arrConcat` and `@arrToList` return lists. There is no `@arrIsEmpty`, `@arrPush` or other function that changes an array's length, and a list native given an array (or the other way round) is a compile error

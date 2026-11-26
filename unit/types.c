@@ -185,8 +185,10 @@ static void test_fixed_array_to_string(void) {
 }
 
 static void test_length_placeholders_are_filled_from_arguments(void) {
-  Type *n = typeArray(typeGenericParam(0), ARRAY_LENGTH_PLACEHOLDER(0));
-  Type *m = typeArray(typeGenericParam(0), ARRAY_LENGTH_PLACEHOLDER(1));
+  Type *n = typeArray(typeGenericParam(tokenFromCString("T"), 0, false),
+                      ARRAY_LENGTH_PLACEHOLDER(0));
+  Type *m = typeArray(typeGenericParam(tokenFromCString("T"), 0, false),
+                      ARRAY_LENGTH_PLACEHOLDER(1));
 
   assert(typeGenericParamCount(n) == ARRAY_LENGTH_SLOT(-1) + 1);
   assert(typeGenericParamCount(m) == ARRAY_LENGTH_SLOT(-2) + 1);
