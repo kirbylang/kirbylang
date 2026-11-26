@@ -389,6 +389,7 @@ typedef struct {
   bool isPublic;
   // Is this a fun declaration in a trait? e.g. no body
   bool isTraitSignature;
+  bool isNative; // A standard library declaration of a function written in C
   /**
    * arena-allocated array of bare generic parameter name tokens, e.g. the
    * `T` in `fun sum[T](a: T, b: T): T`. NULL/0 for a non-generic function.

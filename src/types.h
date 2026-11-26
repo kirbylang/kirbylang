@@ -82,6 +82,7 @@ struct Type {
       Type **paramTypes;
       int paramCount;
       Type *returnType;
+      bool isNative; // Declared with `native`
     } function;
     struct {
       NumberKind kind;
@@ -94,11 +95,8 @@ struct Type {
       int length; // Negative values are length placeholders, see below
     } array;
     struct {
-      // 0 is T, 1 is U, 2 is V, and so on
-      int index;
-      // The name the program gave it. Native signatures have none.
+      int index; // Its position among the parameters in scope
       InternedName name;
-      bool hasName;
       // A declared parameter as seen inside its own declaration: one unknown
       // type that is never filled in and is only equal to itself.
       bool isOpaque;
@@ -232,13 +230,9 @@ bool typeTraitIsBuiltin(Type *type);
 // Replaces every TYPE_SELF found inside `type` with a `concrete` type.
 Type *typeSubstituteSelf(Type *type, Type *concrete);
 
-// A generic parameter. 0 is T, 1 is U, and so on.
-Type *typeGenericParam(int index);
-
-// A generic parameter a program declared, such as the `T` in `fun id[T]`.
-// Callers fill it in unless `isOpaque`, which is the form it has inside its own
-// declaration.
-Type *typeDeclaredGenericParam(Token name, int index, bool isOpaque);
+// A generic parameter, such as the `T` in `fun id[T]`. Callers fill it in
+// unless `isOpaque`, which is the form it has inside its own declaration.
+Type *typeGenericParam(Token name, int index, bool isOpaque);
 
 // Requires any type that fills `param` to implement the trait too. A trait
 // already required is ignored.

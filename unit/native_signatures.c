@@ -1,10 +1,12 @@
 #include <assert.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 
 #include "../src/ast.h"
 #include "../src/native.h"
-#include "../src/native_signatures.h"
+#include "../src/parser.h"
+#include "../src/stdlib_source.h"
 #include "../src/typecheck.h"
 #include "../src/types.h"
 
@@ -41,12 +43,33 @@ static bool isDeferred(const char *name) {
          listContains(awaitingOptionType, optionCount, name);
 }
 
-static bool hasSignature(const char *name) {
-  for (int i = 0; i < nativeSignatureCount; i++) {
-    if (strcmp(nativeSignatures[i].name, name) == 0)
-      return true;
+// The names the standard library declares with `native`
+static const char *declared[256];
+static int declaredCount = 0;
+
+static void readDeclaredNatives(void) {
+  int count = 0;
+  bool hadError = false;
+  int endLine = 0;
+  AstNode **ast = parseStdlib(KIRBY_STDLIB, &count, &hadError, &endLine);
+  assert(!hadError);
+
+  for (int i = 0; i < count; i++) {
+    if (ast[i]->kind != NODE_FUNCTION || !ast[i]->as.function.isNative)
+      continue;
+
+    Token name = ast[i]->as.function.name;
+    assert(declaredCount < 256);
+    char *copy = (char *)calloc((size_t)name.length + 1, 1);
+    memcpy(copy, name.start, (size_t)name.length);
+    declared[declaredCount++] = copy;
   }
-  return false;
+
+  free(ast);
+}
+
+static bool isDeclared(const char *name) {
+  return listContains(declared, declaredCount, name);
 }
 
 static bool isDefinedNative(const char *name) {
@@ -57,111 +80,73 @@ static bool isDefinedNative(const char *name) {
   return false;
 }
 
-// A native with neither a signature nor a place on a deferred list is an
+// A native with neither a declaration nor a place on a deferred list is an
 // undecided native. Failing here is the prompt to decide.
-static void test_every_native_is_signed_or_deliberately_deferred(void) {
+static void test_every_native_is_declared_or_deliberately_deferred(void) {
   for (int i = 0; i < nativeDefinitionCount; i++) {
     const char *name = nativeDefinitions[i].name;
 
-    if (hasSignature(name) == isDeferred(name)) {
-      fprintf(stderr, "native '%s' needs a signature or a deferred list\n",
+    if (isDeclared(name) == isDeferred(name)) {
+      fprintf(stderr, "native '%s' needs a declaration or a deferred list\n",
               name);
       assert(false);
     }
   }
 }
 
-// A signature for a name the VM never defines would type-check calls to a
+// A declaration for a name the VM never defines would type-check calls to a
 // global that doesn't exist.
-static void test_every_signature_names_a_real_native(void) {
-  for (int i = 0; i < nativeSignatureCount; i++) {
-    const char *name = nativeSignatures[i].name;
-
-    if (!isDefinedNative(name)) {
-      fprintf(stderr, "signature '%s' has no matching native\n", name);
+static void test_every_declaration_names_a_real_native_once(void) {
+  for (int i = 0; i < declaredCount; i++) {
+    if (!isDefinedNative(declared[i]) ||
+        listContains(declared, i, declared[i])) {
+      fprintf(stderr, "declaration '%s' has no matching native, or repeats\n",
+              declared[i]);
       assert(false);
     }
   }
 }
 
-// Every signature reads as a function type, and prints back as exactly the
-// same text, so the table is written the way types appear in error messages.
-static void test_every_signature_is_a_valid_function_type(void) {
-  TypeEnv *env = typchkTypeEnvCreate();
+static void checkStdlibIntoSession(void) {
+  int count = 0;
+  bool hadError = false;
+  int endLine = 0;
+  AstNode **ast = parseStdlib(KIRBY_STDLIB, &count, &hadError, &endLine);
+  assert(!hadError);
+  assert(typchkCheckStdlib(ast, count));
+  free(ast);
+}
 
-  for (int i = 0; i < nativeSignatureCount; i++) {
-    const NativeSignature *signature = &nativeSignatures[i];
-    Type *type = parseNativeSignature(env, signature->signature);
+static void expectNativeType(const char *name, const char *expected) {
+  Type *type =
+      typchkTypeEnvLookupFunction(typchkSessionEnv(), tokenFromCString(name));
+  assert(type != NULL && type->kind == TYPE_FN);
+  assert(type->as.function.isNative);
 
-    if (type == NULL || type->kind != TYPE_FN ||
-        strcmp(typeToString(type), signature->signature) != 0) {
-      fprintf(stderr, "signature of '%s' is not a valid function type: %s\n",
-              signature->name, signature->signature);
-      assert(false);
-    }
+  if (strcmp(typeToString(type), expected) != 0) {
+    fprintf(stderr, "type of '%s' is %s\n", name, typeToString(type));
+    assert(false);
   }
-
-  typchkTypeEnvDestroy(env);
 }
 
-static void test_an_invalid_signature_is_rejected(void) {
-  TypeEnv *env = typchkTypeEnvCreate();
+static void test_declared_natives_have_their_types(void) {
+  typchkSessionBegin();
+  checkStdlibIntoSession();
 
-  assert(parseNativeSignature(env, "fun (stirng) => unit") == NULL);
-  assert(parseNativeSignature(env, "fun ([T) => T") == NULL);
-  assert(parseNativeSignature(env, "fun (T) => T extra") == NULL);
-  assert(parseNativeSignature(env, "") == NULL);
+  expectNativeType("@ceil", "fun (f64) => f64");
+  expectNativeType("@clock", "fun () => f64");
+  expectNativeType("@strLen", "fun (string) => i64");
+  expectNativeType("@listLen", "fun ([T]) => i64");
+  expectNativeType("@listPop", "fun ([T]) => T");
+  expectNativeType("@strSlice", "fun (string, integer, integer) => string");
+  expectNativeType("@arrConcat", "fun ([T; N], [T; M]) => [T]");
 
-  typchkResetError();
-  typchkTypeEnvDestroy(env);
-}
+  assert(typchkTypeEnvLookupFunction(typchkSessionEnv(),
+                                     tokenFromCString("@len")) == NULL);
+  assert(typchkTypeEnvLookupFunction(typchkSessionEnv(),
+                                     tokenFromCString("@typeof")) == NULL);
 
-static void test_signed_natives_resolve_in_a_new_env(void) {
-  TypeEnv *env = typchkTypeEnvCreate();
-
-  Type *ceil = typchkTypeEnvLookupFunction(env, tokenFromCString("@ceil"));
-  assert(ceil != NULL);
-  assert(ceil->kind == TYPE_FN);
-  assert(ceil->as.function.paramCount == 1);
-  assert(ceil->as.function.paramTypes[0] == typeF64());
-  assert(ceil->as.function.returnType == typeF64());
-
-  Type *clock = typchkTypeEnvLookupFunction(env, tokenFromCString("@clock"));
-  assert(clock != NULL);
-  assert(clock->as.function.paramCount == 0);
-  assert(clock->as.function.returnType == typeF64());
-
-  Type *strLen = typchkTypeEnvLookupFunction(env, tokenFromCString("@strLen"));
-  assert(strLen != NULL);
-  assert(strLen->as.function.paramCount == 1);
-  assert(strLen->as.function.paramTypes[0] == typeString());
-  assert(strLen->as.function.returnType == typeNumber(NUMBER_KIND_I64));
-
-  Type *arrLen = typchkTypeEnvLookupFunction(env, tokenFromCString("@listLen"));
-  assert(arrLen != NULL);
-  assert(arrLen->as.function.paramCount == 1);
-  assert(strcmp(typeToString(arrLen), "fun ([T]) => i64") == 0);
-
-  Type *indexOf =
-      typchkTypeEnvLookupFunction(env, tokenFromCString("@strIndexOf"));
-  assert(indexOf != NULL);
-  assert(indexOf->as.function.paramCount == 2);
-  assert(indexOf->as.function.returnType == typeNumber(NUMBER_KIND_I64));
-
-  assert(typchkTypeEnvLookupFunction(env, tokenFromCString("@len")) == NULL);
-  Type *arrPop = typchkTypeEnvLookupFunction(env, tokenFromCString("@listPop"));
-  assert(arrPop != NULL);
-  assert(strcmp(typeToString(arrPop), "fun ([T]) => T") == 0);
-
-  Type *strSlice =
-      typchkTypeEnvLookupFunction(env, tokenFromCString("@strSlice"));
-  assert(strSlice != NULL);
-  assert(strcmp(typeToString(strSlice),
-                "fun (string, integer, integer) => string") == 0);
-
-  assert(typchkTypeEnvLookupFunction(env, tokenFromCString("@typeof")) == NULL);
-
-  typchkTypeEnvDestroy(env);
+  typchkSessionEnd();
 }
 
 // A user function named "ceil" (no '@') is a completely different global
@@ -169,7 +154,9 @@ static void test_signed_natives_resolve_in_a_new_env(void) {
 // declares, so the two can never collide. Registering one leaves the
 // other's type untouched.
 static void test_a_user_function_does_not_collide_with_a_native(void) {
-  TypeEnv *env = typchkTypeEnvCreate();
+  typchkSessionBegin();
+  checkStdlibIntoSession();
+  TypeEnv *env = typchkSessionEnv();
 
   Type *userCeil = typeFunction(NULL, 0, typeString());
   typchkTypeEnvRegisterFunction(env, tokenFromCString("ceil"), userCeil);
@@ -185,15 +172,15 @@ static void test_a_user_function_does_not_collide_with_a_native(void) {
   assert(nativeCeil->as.function.paramTypes[0] == typeF64());
   assert(nativeCeil->as.function.returnType == typeF64());
 
-  typchkTypeEnvDestroy(env);
+  typchkSessionEnd();
 }
 
 int main(void) {
-  test_every_native_is_signed_or_deliberately_deferred();
-  test_every_signature_names_a_real_native();
-  test_every_signature_is_a_valid_function_type();
-  test_an_invalid_signature_is_rejected();
-  test_signed_natives_resolve_in_a_new_env();
+  readDeclaredNatives();
+
+  test_every_native_is_declared_or_deliberately_deferred();
+  test_every_declaration_names_a_real_native_once();
+  test_declared_natives_have_their_types();
   test_a_user_function_does_not_collide_with_a_native();
 
   typesFreeAll();

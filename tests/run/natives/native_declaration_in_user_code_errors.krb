@@ -1,0 +1,3 @@
+native fun @listLen[T](list: [T]): i64;
+
+fun main(): unit {}

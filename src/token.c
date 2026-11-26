@@ -60,6 +60,8 @@ const char *tokenTypeToString(TokenType type) {
     return "TOKEN_NUMBER_SUFFIXED";
   case TOKEN_AS:
     return "TOKEN_AS";
+  case TOKEN_NATIVE:
+    return "TOKEN_NATIVE";
   case TOKEN_INTERP_STRING:
     return "TOKEN_INTERP_STRING";
   case TOKEN_INTERP_START:

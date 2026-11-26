@@ -122,7 +122,7 @@ static void test_token_to_cstring(void) {
 }
 
 int main(void) {
-  assert(NumberOfDefinedTokens == 57);
+  assert(NumberOfDefinedTokens == 58);
   test_token_to_cstring();
   test_tokens_equal();
   test_token_text_equals();

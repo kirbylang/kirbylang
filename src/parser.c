@@ -1334,12 +1334,17 @@ static AstNode *varDeclaration(Parser *p, bool isMutable) {
   return node;
 }
 
+// What follows a function's return type
+typedef enum {
+  BODY_REQUIRED,
+  BODY_NONE_TRAIT_METHOD,
+  BODY_NONE_NATIVE,
+} FunctionBodyKind;
+
 // Parses the "(params) { body }" or "(params) = expr;" tail shared by
 // functions, methods, and lambdas.
 static AstNode *functionTail(Parser *p, Token name, int line, bool isMethod,
-                             bool isLambda,
-                             // Used for trait method signatures
-                             bool signatureOnly) {
+                             bool isLambda, FunctionBodyKind bodyKind) {
   consume(p, TOKEN_LEFT_PAREN, "Expect '(' after function name.");
 
   Token paramBuf[256];
@@ -1406,7 +1411,8 @@ static AstNode *functionTail(Parser *p, Token name, int line, bool isMethod,
   node->as.function.hasSelf = hasSelf;
   node->as.function.isLambda = isLambda;
   node->as.function.isPublic = false; // set by implDeclaration when `pub`
-  node->as.function.isTraitSignature = signatureOnly;
+  node->as.function.isTraitSignature = bodyKind == BODY_NONE_TRAIT_METHOD;
+  node->as.function.isNative = bodyKind == BODY_NONE_NATIVE;
   node->as.function.exprBody = NULL;
   node->as.function.returnType = returnType;
   node->as.function.body.stmts = NULL;
@@ -1417,8 +1423,11 @@ static AstNode *functionTail(Parser *p, Token name, int line, bool isMethod,
   node->as.function.genericParams = NULL;
   node->as.function.genericParamCount = 0;
 
-  if (signatureOnly) {
-    consume(p, TOKEN_SEMICOLON, "Expect ';' after trait method signature.");
+  if (bodyKind != BODY_REQUIRED) {
+    consume(p, TOKEN_SEMICOLON,
+            bodyKind == BODY_NONE_NATIVE
+                ? "Expect ';' after native declaration."
+                : "Expect ';' after trait method signature.");
     node->as.function.bodyEndLine = p->previous.line;
     return node;
   }
@@ -1512,9 +1521,9 @@ static GenericBounds *copyGenericBounds(GenericBounds *buf, int count) {
   return bounds;
 }
 
-static AstNode *functionDeclaration(Parser *p, bool isMethod) {
-  if (!isMethod)
-    consumeDeclarationIdentifier(p, "Expect function name.");
+// Reads a function from its generic parameters on. The name has been read.
+static AstNode *namedFunction(Parser *p, bool isMethod,
+                              FunctionBodyKind bodyKind) {
   Token name = p->previous;
   int line = name.line;
 
@@ -1523,8 +1532,8 @@ static AstNode *functionDeclaration(Parser *p, bool isMethod) {
   int genericParamCount = parseGenericParamList(
       p, genericParamBuf, genericBoundBuf, /*noBoundsMessage=*/NULL);
 
-  AstNode *node = functionTail(p, name, line, isMethod, /*isLambda=*/false,
-                               /*signatureOnly=*/false);
+  AstNode *node =
+      functionTail(p, name, line, isMethod, /*isLambda=*/false, bodyKind);
 
   if (genericParamCount > 0) {
     Token *genericParams =
@@ -1543,11 +1552,35 @@ static AstNode *functionDeclaration(Parser *p, bool isMethod) {
   return node;
 }
 
+static AstNode *functionDeclaration(Parser *p, bool isMethod) {
+  if (!isMethod)
+    consumeDeclarationIdentifier(p, "Expect function name.");
+
+  return namedFunction(p, isMethod, BODY_REQUIRED);
+}
+
+// Only the standard library declares natives. User code is read the same way,
+// so the one error is the only one reported.
+static AstNode *nativeDeclaration(Parser *p) {
+  if (!p->isStdlib)
+    parse_error(p, "'native' is only allowed in the standard library.");
+  else if (p->blockDepth > 0)
+    parse_error(p, "'native' declarations can only appear at the top level.");
+
+  consume(p, TOKEN_FUN, "Expect 'fun' after 'native'.");
+  consume(p, TOKEN_IDENTIFIER, "Expect native name.");
+
+  if (p->previous.start[0] != '@')
+    parse_error(p, "A native's name starts with '@'.");
+
+  return namedFunction(p, /*isMethod=*/false, BODY_NONE_NATIVE);
+}
+
 static AstNode *lambda(Parser *p, bool canAssign) {
   (void)canAssign;
   Token funKeyword = p->previous;
   return functionTail(p, funKeyword, funKeyword.line, /*isMethod=*/false,
-                      /*isLambda=*/true, /*signatureOnly=*/false);
+                      /*isLambda=*/true, BODY_REQUIRED);
 }
 
 static AstNode *structDeclaration(Parser *p) {
@@ -1885,7 +1918,7 @@ static AstNode *traitDeclaration(Parser *p) {
 
     AstNode *method =
         functionTail(p, methodName, methodName.line, /*isMethod=*/true,
-                     /*isLambda=*/false, /*signatureOnly=*/true);
+                     /*isLambda=*/false, BODY_NONE_TRAIT_METHOD);
     methodBuf[methodCount++] = &method->as.function;
 
     recoverInBraceBody(p);
@@ -1966,6 +1999,8 @@ static AstNode *declaration(Parser *p) {
     node = traitDeclaration(p);
   } else if (match(p, TOKEN_TYPE)) {
     node = typeAliasDeclaration(p);
+  } else if (match(p, TOKEN_NATIVE)) {
+    node = nativeDeclaration(p);
   } else if (check(p, TOKEN_FUN) &&
              tsPeek(p->tokens).type != TOKEN_LEFT_PAREN &&
              match(p, TOKEN_FUN)) {

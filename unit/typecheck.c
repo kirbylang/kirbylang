@@ -4,7 +4,6 @@
 #include <string.h>
 
 #include "../src/ast.h"
-#include "../src/native_signatures.h"
 #include "../src/operator_traits.h"
 #include "../src/parser.h"
 #include "../src/stdlib_source.h"
@@ -350,12 +349,39 @@ static void test_function_call_wrong_arity_errors(void) {
   typchkResetError();
 }
 
+// Checks `declarations` as the standard library, then `source` as a program,
+// in one session. The caller ends the session.
+static TypeEnv *checkProgramWithNatives(const char *declarations,
+                                        const char *source) {
+  int count = 0;
+  bool hadParseError = false;
+  int endLine = 0;
+
+  typchkSessionBegin();
+  AstNode **natives =
+      parseStdlib(declarations, &count, &hadParseError, &endLine);
+  assert(!hadParseError);
+  assert(typchkCheckStdlib(natives, count));
+  free(natives);
+
+  AstNode **ast = parse(source, &count, &hadParseError, &endLine);
+  assert(!hadParseError);
+
+  TypeEnv *env = typchkSessionEnv();
+  for (int i = 0; i < count; i++) {
+    typchkCheckStmt(env, ast[i]);
+  }
+  free(ast);
+  return env;
+}
+
 static void test_native_call_with_a_signature_is_checked(void) {
   typchkResetError();
-  TypeEnv *env = checkProgram("var x = @clock();");
+  TypeEnv *env =
+      checkProgramWithNatives("native fun @clock(): f64;", "var x = @clock();");
   assert(!typchkHadError());
   assert(typchkTypeEnvLookup(env, tokenFromCString("x")) == typeF64());
-  typchkTypeEnvDestroy(env);
+  typchkSessionEnd();
 }
 
 static void test_native_call_without_a_signature_is_unchecked(void) {
@@ -369,103 +395,74 @@ static void test_native_call_without_a_signature_is_unchecked(void) {
 }
 
 static void test_generic_array_param_accepts_every_array(void) {
+  const char *listLen = "native fun @listLen[T](list: [T]): i64;";
+
   typchkResetError();
-  TypeEnv *env = checkProgram("var a = @listLen([1, 2]); var b = @listLen([]); "
-                              "var c = @listLen([\"x\"]);");
+  TypeEnv *env = checkProgramWithNatives(
+      listLen, "var a = @listLen([1, 2]); var b = @listLen([]); "
+               "var c = @listLen([\"x\"]);");
   assert(!typchkHadError());
   assert(typchkTypeEnvLookup(env, tokenFromCString("a")) ==
          typeNumber(NUMBER_KIND_I64));
-  typchkTypeEnvDestroy(env);
+  typchkSessionEnd();
 
   typchkResetError();
-  env = checkProgram("var d = @listLen(\"abc\");");
+  checkProgramWithNatives(listLen, "var d = @listLen(\"abc\");");
   assert(typchkHadError());
-  typchkTypeEnvDestroy(env);
+  typchkSessionEnd();
+  typchkResetError();
 }
 
-// Like checkProgram, with one more function registered before checking.
-static TypeEnv *checkProgramWithFunction(const char *name, Type *type,
-                                         const char *source) {
-  int outCount = 0;
-  bool hadParseError = false;
-  int endLine = 0;
-  AstNode **ast = parse(source, &outCount, &hadParseError, &endLine);
-  assert(!hadParseError);
-
-  TypeEnv *env = typchkTypeEnvCreate();
-  typchkTypeEnvRegisterFunction(env, tokenFromCString(name), type);
-  typchkTypeEnvBeginScope(env);
-  for (int i = 0; i < outCount; i++) {
-    typchkCheckStmt(env, ast[i]);
-  }
-  free(ast);
-  return env;
-}
-
-static Type *mapType(void) {
-  TypeEnv *env = typchkTypeEnvCreate();
-  Type *type = parseNativeSignature(env, "fun ([T], fun (T) => U) => [U]");
-  typchkTypeEnvDestroy(env);
-  assert(type != NULL);
-  return type;
-}
+#define TEST_MAP "native fun @testMap[T, U](list: [T], f: fun (T) => U): [U];"
 
 static void test_generic_call_fills_params_from_a_lambda(void) {
   typchkResetError();
-  TypeEnv *env = checkProgramWithFunction(
-      "@testMap", mapType(),
-      "var names = @testMap([1, 2], fun (n) { @numberToString(n) });");
+  TypeEnv *env = checkProgramWithNatives(
+      TEST_MAP "native fun @text(value: number): string;",
+      "var names = @testMap([1, 2], fun (n) { @text(n) });");
   assert(!typchkHadError());
   Type *names = typchkTypeEnvLookup(env, tokenFromCString("names"));
   assert(names != NULL && names->kind == TYPE_LIST);
   assert(names->as.list.elementType == typeString());
-  typchkTypeEnvDestroy(env);
+  typchkSessionEnd();
 }
 
 static void test_generic_call_fills_three_params(void) {
   typchkResetError();
-  TypeEnv *signatureEnv = typchkTypeEnvCreate();
-  Type *combine =
-      parseNativeSignature(signatureEnv, "fun (T, U, fun (T, U) => V) => V");
-  typchkTypeEnvDestroy(signatureEnv);
-  assert(combine != NULL);
-
-  TypeEnv *env = checkProgramWithFunction(
-      "@testCombine", combine,
-      "var joined = @testCombine(1, \"a\", fun (n, s) { s + "
-      "@numberToString(n) });");
+  TypeEnv *env = checkProgramWithNatives(
+      "native fun @testCombine[T, U, V](a: T, b: U, f: fun (T, U) => V): V;"
+      "native fun @text(value: number): string;",
+      "var joined = @testCombine(1, \"a\", fun (n, s) { s + @text(n) });");
   assert(!typchkHadError());
   assert(typchkTypeEnvLookup(env, tokenFromCString("joined")) == typeString());
-  typchkTypeEnvDestroy(env);
+  typchkSessionEnd();
 }
 
 static void test_generic_call_reports_a_mismatch(void) {
   typchkResetError();
-  TypeEnv *env = checkProgramWithFunction(
-      "@testMap", mapType(), "@testMap([1], fun (n: string) { n });");
+  checkProgramWithNatives(TEST_MAP, "@testMap([1], fun (n: string) { n });");
   assert(typchkHadError());
-  typchkTypeEnvDestroy(env);
+  typchkSessionEnd();
 }
 
 static void test_generic_call_leaves_unfilled_params_unknown(void) {
   typchkResetError();
-  TypeEnv *env = checkProgramWithFunction(
-      "@testMap", mapType(), "var mapped = @testMap([], fun (n) { n });");
+  TypeEnv *env = checkProgramWithNatives(
+      TEST_MAP, "var mapped = @testMap([], fun (n) { n });");
   assert(!typchkHadError());
   Type *mapped = typchkTypeEnvLookup(env, tokenFromCString("mapped"));
   assert(mapped != NULL && mapped->kind == TYPE_LIST);
   assert(mapped->as.list.elementType == NULL);
-  typchkTypeEnvDestroy(env);
+  typchkSessionEnd();
 }
 
 // A generic function used as a value has no single type to give it.
 static void test_generic_function_as_a_value_is_unknown(void) {
   typchkResetError();
-  TypeEnv *env =
-      checkProgramWithFunction("@testMap", mapType(), "var map = @testMap;");
+  TypeEnv *env = checkProgramWithNatives(TEST_MAP, "var map = @testMap;");
   assert(!typchkHadError());
   assert(typchkTypeEnvLookup(env, tokenFromCString("map")) == NULL);
-  typchkTypeEnvDestroy(env);
+  typchkSessionEnd();
 }
 
 static void test_struct_instance_field_and_method_access(void) {

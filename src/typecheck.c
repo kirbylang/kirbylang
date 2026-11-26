@@ -162,7 +162,7 @@ struct TypeEnv {
   Type *_currentReturnType; // NULL when not checking a function/method body, or
                             // its return type didn't resolve.
   Type *_currentImplTargetType; // NULL when not checking an impl block
-  bool _resolvingSignature;     // Allows the names only native signatures use
+  bool _resolvingNative;        // Allows `number` and `integer`
   bool _isStdlib; // The unit being checked is the standard library
   // Owner of the primitive impl block being checked, NULL outside one
   const char *_currentPrimitiveOwner;
@@ -223,7 +223,6 @@ TypeEnv *typchkSessionEnv(void) { return sessionEnv; }
 TypeEnv *typchkTypeEnvCreate(void) {
   TypeEnv *env = (TypeEnv *)malloc(sizeof(TypeEnv));
   memset(env, 0, sizeof(TypeEnv));
-  defineAllNativeSignatures(env);
   return env;
 }
 
@@ -369,7 +368,7 @@ static int typchkEnterGenericParams(TypeEnv *env, Token *names,
       }
     }
 
-    types[i] = typeDeclaredGenericParam(names[i], firstIndex + i, isOpaque);
+    types[i] = typeGenericParam(names[i], firstIndex + i, isOpaque);
 
     for (int j = 0; bounds != NULL && j < bounds[i].count; j++) {
       Token *traitName = &bounds[i].traits[j];
@@ -519,30 +518,15 @@ static BoundMethodResult typchkBoundMethodLookup(TypeEnv *env, Type *param,
   return *found != NULL ? BOUND_METHOD_FOUND : BOUND_METHOD_MISSING;
 }
 
-// Names that only native signatures can use: generic parameters T, U, V and
-// W, and `number` and `integer`, which accept any number or integer kind.
-static Type *typchkResolveSignatureName(Token *name) {
-  static const char genericNames[] = "TUVW";
-
-  if (name->length == 1) {
-    const char *found = strchr(genericNames, name->start[0]);
-    if (found != NULL)
-      return typeGenericParam((int)(found - genericNames));
-  }
-
+// `number` and `integer`, which only a native's declaration can use. They
+// accept any number or integer kind.
+static Type *typchkResolveNativeTypeName(Token *name) {
   if (tokenTextEquals(name, "number"))
     return typeAnyNumber();
   if (tokenTextEquals(name, "integer"))
     return typeAnyInteger();
 
   return NULL;
-}
-
-Type *typchkResolveSignatureType(TypeEnv *env, AstNode *typeAnnotation) {
-  env->_resolvingSignature = true;
-  Type *type = typchkResolveType(env, typeAnnotation);
-  env->_resolvingSignature = false;
-  return type;
 }
 
 static bool typchkTypeArgsMeetBounds(TypeEnv *env, InternedName owner,
@@ -696,10 +680,10 @@ Type *typchkResolveType(TypeEnv *env, AstNode *typeAnnotation) {
 
   TypeNode *t = &typeAnnotation->as.type_;
 
-  if (env->_resolvingSignature && t->genericArgCount == 0) {
-    Type *signatureType = typchkResolveSignatureName(&t->name);
-    if (signatureType != NULL)
-      return signatureType;
+  if (env->_resolvingNative && t->genericArgCount == 0) {
+    Type *nativeType = typchkResolveNativeTypeName(&t->name);
+    if (nativeType != NULL)
+      return nativeType;
   }
 
   if (t->genericArgCount > 0)
@@ -791,7 +775,7 @@ static void typchkCheckVarDecl(TypeEnv *env, AstNode *node);
 static void typchkCheckFunctionDecl(TypeEnv *env, AstNode *node);
 static bool typchkStructMembersUnreliable(Type *type);
 static Type *typchkLookupVariableType(TypeEnv *env, Token *name);
-static bool typchkHasDeclaredGenericParams(Type *type);
+static bool typchkIsGenericNonNative(Type *type);
 static bool typchkCheckGenericFunctionValue(TypeEnv *env, AstNode *node,
                                             Type *genericType, Type *expected);
 static Type *typchkFillGenericFunctionValue(TypeEnv *env, AstNode *node,
@@ -1227,7 +1211,7 @@ static bool typchkCheckInto(TypeEnv *env, AstNode *node, Type *expected,
     Type *named = typchkLookupVariableType(env, &node->as.variable.name);
 
     if (named != NULL && named->kind == TYPE_FN &&
-        typchkHasDeclaredGenericParams(named))
+        typchkIsGenericNonNative(named))
       return typchkCheckGenericFunctionValue(env, node, named, expected);
   }
 
@@ -1253,7 +1237,7 @@ static bool typchkCheckInto(TypeEnv *env, AstNode *node, Type *expected,
     return true;
 
   if (expected->kind == TYPE_FN && actual->kind == TYPE_FN &&
-      typchkHasDeclaredGenericParams(actual))
+      typchkIsGenericNonNative(actual))
     return typchkCheckGenericFunctionValue(env, node, actual, expected);
 
   if (!typeAccepts(expected, actual)) {
@@ -1660,13 +1644,15 @@ static Type *typchkLookupVariableType(TypeEnv *env, Token *name) {
   return type;
 }
 
-// True if the type holds a generic parameter that a program declared, as
-// opposed to the placeholders in a native's signature
-static bool typchkHasDeclaredGenericParams(Type *type) {
+// True if the function type has generic parameters and isn't a native's
+static bool typchkIsGenericNonNative(Type *type) {
+  if (type->as.function.isNative)
+    return false;
+
   for (int i = 0; i < typeGenericParamCount(type); i++) {
     Type *param = typeFindGenericParam(type, i);
 
-    if (param != NULL && param->as.genericParam.hasName)
+    if (param != NULL)
       return true;
   }
 
@@ -2118,7 +2104,7 @@ static bool typchkUnifyValue(TypeEnv *env, AstNode *arg, Type *pattern,
 
     if (actual != NULL && actual->kind == TYPE_FN && known->kind == TYPE_FN &&
         actual->as.function.paramCount == known->as.function.paramCount &&
-        typchkHasDeclaredGenericParams(actual)) {
+        typchkIsGenericNonNative(actual)) {
       Type *filled = typchkFillGenericFunctionValue(env, arg, actual, known);
 
       if (filled == NULL)
@@ -2196,15 +2182,16 @@ static Type *typchkCheckGenericCall(TypeEnv *env, AstNode *node,
                           bindings, genericCount);
   }
 
-  // A parameter the program declared has to be filled in by the arguments. A
-  // native's stays unknown, and an opaque one is already a fixed type. An
-  // argument that already failed to check explains a missing one, so it isn't
-  // reported again.
-  for (int i = 0; i < genericCount && !sawUnknownArg; i++) {
+  // The arguments have to fill every parameter, except a native's, which can
+  // stay unknown. An opaque one is already a fixed type. An argument that
+  // already failed to check explains a missing one, so it isn't reported again.
+  bool mustFill = !calleeType->as.function.isNative && !sawUnknownArg;
+
+  for (int i = 0; i < genericCount && mustFill; i++) {
     Type *param = typeFindGenericParam(calleeType, i);
 
     if (bindings[i] == NULL && param != NULL &&
-        !param->as.genericParam.isOpaque && param->as.genericParam.hasName) {
+        !param->as.genericParam.isOpaque) {
       typchkErrorAtTokenFmt(&c->paren,
                             "Can't tell what '%.*s' is from the arguments.",
                             param->as.genericParam.name.length,
@@ -4623,15 +4610,22 @@ static void typchkRegisterImplMethods(TypeEnv *env, AstNode *node) {
 static void typchkRegisterTopLevelFunctionSignature(TypeEnv *env,
                                                     AstNode *node) {
   FunctionNode *fn = &node->as.function;
+
+  env->_resolvingNative = fn->isNative;
   Type *fnType = typchkResolveFunctionSignature(env, fn);
+  env->_resolvingNative = false;
 
   if (fnType != NULL) {
+    fnType->as.function.isNative = fn->isNative;
     typchkTypeEnvRegisterFunction(env, fn->name, fnType);
   }
 }
 
 static void typchkCheckTopLevelFunctionBody(TypeEnv *env, AstNode *node) {
   FunctionNode *fn = &node->as.function;
+  if (fn->isNative)
+    return; // no body
+
   Type *fnType = typchkTypeEnvLookupFunction(env, fn->name);
   if (fnType == NULL)
     return; // signature failed to resolve in Pass D; already reported

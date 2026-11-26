@@ -745,6 +745,15 @@ fun main(): unit {
 }
 ```
 
+The standard library declares each native's type with `native`, which is a
+function declaration with no body, for a function written in C:
+
+```
+native fun @listPop[T](list: [T]): T;
+```
+
+Only the standard library can use `native`, and the name starts with `@`.
+
 List natives are typed by their element type, written `T` in their
 signatures. `@listPop` is `fun ([T]) => T`, so popping from a list of `i64`
 gives an `i64`, and `@listPush(numbers, 2.5)` is an error when `numbers` holds
@@ -762,10 +771,10 @@ in their signatures with the placeholders `N` and `M`. `@arrCopy` is
 `fun ([T; N]) => [T; N]`, so copying a `[i64; 3]` gives a `[i64; 3]`.
 `@arrEqual` is `fun ([T; N], [T; N]) => bool`, so comparing arrays of different
 lengths is an error. `@arrSlice` and `@arrConcat` give a list, because the
-length of the result isn't known until the program runs. Only native signatures
-can use `N` and `M`.
+length of the result isn't known until the program runs. Only the standard
+library can use `N` and `M`.
 
-A native whose type can't be spelled yet has no signature, and calls to it
+A native whose type can't be spelled yet has no declaration, and calls to it
 are checked at runtime instead. That covers `@typeof`, `@instanceOf`, the
 `@is*` family and the print natives, which take a value of any type, and
 `@argv`, `@prompt` and `@stdin`, which return nothing on some paths and so
