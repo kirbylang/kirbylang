@@ -2,7 +2,7 @@
 
 Kirby has several builtin functions (native functions) available.
 
-Builtin functions are prefixed, making them easy to identifier vs user code functions. e.g. `@strLen`, `@getenv`
+Builtin functions are prefixed, which makes them easy to tell apart from user functions. e.g. `@strLen`, `@getenv`
 
 This also makes `@` a reserved character in identifiers.
 
@@ -80,7 +80,11 @@ fun main(): unit {
     var c = @listCopy(a);
 
     @println(@listEqual(a, b)); // true
-    @println(@listEqual(b, c)); // false
+    @println(@listEqual(b, c)); // true
+    @println(@listEqual(a, c)); // true
+
+    c[0] = 100;
+
     @println(@listEqual(a, c)); // false
 }
 ```
@@ -106,8 +110,8 @@ Returns if a list is empty or not.
 
 ```kirby
 fun main(): unit {
-    @println(@listIsEmpty([]));
-    @println(@listIsEmpty([1, 2, 3]));
+    @println(@listIsEmpty([])); // true
+    @println(@listIsEmpty([1, 2, 3])); // false
 }
 ```
 
@@ -138,7 +142,7 @@ fun main(): unit {
 
 ### `@listPop`
 
-Pop a value onto the end of a list and return it.
+Remove and return the last value in a list. It is an error if the list is empty.
 
 ```kirby
 fun main(): unit {
@@ -167,42 +171,42 @@ fun main(): unit {
 
 ### `@listRemove`
 
-Insert a value into a list at a specific index.
+Remove and return the value at a specific index. It is an error if the index is outside the list.
 
 ```kirby
 fun main(): unit {
     var list: [i64] = [1, 2, 3];
-
-    @listRemove(list, 0);
+    var removed = @listRemove(list, 0);
 
     @println(list); // [2, 3]
+    @println(removed); // 1
 }
 ```
 
 ### `@listReverse`
 
-Reverse a list in place.
+Get a new list with the items in the opposite order. The original list isn't changed.
 
 ```kirby
 fun main(): unit {
     var list: [i64] = [1, 2, 3];
+    let reversed = @listReverse(list);
 
-    @listReverse(list);
-
-    @println(list); // [3, 2, 1]
+    @println(reversed); // [3, 2, 1]
+    @println(list); // [1, 2, 3]
 }
 ```
 
 ### `@listSlice`
 
-Pop a value onto the end of a list and return it.
+Copy the items from `start` up to, but not including, `end` into a new list. `start` must be before `end`. A `start` of `0` is currently an error.
 
 ```kirby
 fun main(): unit {
     var list: [i64] = [10, 20, 30, 40, 50];
     var slice = @listSlice(list, 1, 4);
 
-    @println(@listEqual([20, 30, 40], slice));
+    @println(slice); // [20, 30, 40]
 }
 ```
 
@@ -290,7 +294,7 @@ fun main(): unit {
 
 ### `@arrSlice`
 
-Copies the items from a start index up to an end index of an array into a new list. The result is a list because its length isn't known when the program is compiled.
+Copies the items from a start index up to an end index of an array into a new list. The result is a list because its length isn't known when the program is compiled. `start` must be before `end`. A `start` of `0` is currently an error.
 
 ```kirby
 fun main(): unit {
@@ -333,7 +337,7 @@ fun main(): unit {
 
 ### `@clock`
 
-Get the number of seconds that have passed since the program started.
+Get the processor time the program has used, in seconds. Time spent waiting, such as for input, isn't counted.
 
 ```kirby
 fun main(): unit {
@@ -357,7 +361,7 @@ fun main(): unit {
 
 ### `@getenv`
 
-Get an environment variable's value.
+Get an environment variable's value. It is an error if the variable isn't set.
 
 ```kirby
 fun main(): unit {
@@ -365,7 +369,7 @@ fun main(): unit {
 }
 ```
 
-### `@setEnv`
+### `@setenv`
 
 Set an environment variable to a string value.
 
@@ -428,7 +432,7 @@ fun main(): unit {
 
 #### `@print`
 
-Write a value to stdout, the way `print` does, without a newline. A struct that implements `Display` is written with its `toString()`.
+Write a value to stdout without a newline. A struct that implements `Display` is written with its `toString()`.
 
 ```kirby
 fun main(): unit {
@@ -439,7 +443,7 @@ fun main(): unit {
 
 #### `@println`
 
-Write a value to stdout, the way `print` does, followed by a newline. A struct that implements `Display` is written with its `toString()`.
+Write a value to stdout, followed by a newline. A struct that implements `Display` is written with its `toString()`.
 
 ```kirby
 fun main(): unit {
@@ -486,7 +490,7 @@ fun main(): unit {
 
 #### `@stdin`
 
-Read in text from \`stdin\` until end of file (EOF) is encountered.
+Read in text from `stdin` until end of file (EOF) is encountered.
 
 ```kirby
 fun main(): unit {
@@ -557,7 +561,7 @@ fun main(): unit {
 
 Round a number up.
 
-```
+```kirby
 fun main(): unit {
     @println(@ceil(1.6)); // 2
 }
@@ -657,8 +661,8 @@ Convert a number of any type to a string.
 
 ```kirby
 fun main(): unit {
-    @println(@numberToString(123)); // "123"
-    @println(@numberToString(255u8)); // "255"
+    @println(@numberToString(123)); // 123
+    @println(@numberToString(255u8)); // 255
 }
 ```
 
@@ -693,27 +697,27 @@ Get a random number.
 
 ```kirby
 fun main(): unit {
-    @println(@rand()); // 1145892349
+    @println(@rand()); // for example, 1145892349
 }
 ```
 
 ### `@rand01`
 
-Randomly get 0 or 1.
+Get a random number from 0 to 1.
 
 ```kirby
 fun main(): unit {
-    @println(@rand01()); // 0
+    @println(@rand01()); // for example, 0.22301528985752506
 }
 ```
 
 ### `@randBetween`
 
-Get a random whole number from min to max, as an `i64`.
+Get a random whole number from min to max, as an `i64`. `min` itself is currently almost never returned.
 
 ```kirby
 fun main(): unit {
-    @println(@randBetween(1, 10)); // 3
+    @println(@randBetween(1, 10)); // for example, 3
 }
 ```
 
@@ -725,7 +729,7 @@ Convert a boolean to a string.
 
 ```kirby
 fun main(): unit {
-    @println(@boolToString(true)); // "true"
+    @println(@boolToString(true)); // true
 }
 ```
 
@@ -917,15 +921,23 @@ fun main(): unit {
 
 #### Valid Exit Codes
 
-Exit codes must be `>= 0`.
+Exit codes must be from `0` to `255`.
+
+A number written directly in the call is checked before the program runs.
 
 ```kirby
 fun main(): unit {
-    @exit(-1); // Compile time error
+    @exit(-1); // Error: function @exit expects argument 1 to be a non-negative number but got -1.
+}
+```
 
-    let exit_code = -1;
+A number held in a variable is checked while the program runs.
 
-    @exit(exit_code); // Runtime error
+```kirby
+fun main(): unit {
+    let exitCode = -1;
+
+    @exit(exitCode); // function @exit expects argument 1 to be greater than or equal to 0 but got -1.
 }
 ```
 
@@ -935,7 +947,7 @@ Get the current version of the kirby language.
 
 ```kirby
 fun main(): unit {
-    @println(@version()); // 0.0.0
+    @println(@version()); // for example, 0.4.0
 }
 ```
 
@@ -949,7 +961,7 @@ Returns if a value is an instance of a struct.
 struct Food {}
 
 fun main(): unit {
-    let food = Food();
+    let food = Food {};
 
     @println(@instanceOf(food, Food)); // true
 }
@@ -957,20 +969,23 @@ fun main(): unit {
 
 ### `@typeof`
 
-Get a value's type.
+Get the name of a value's type, as a string. A number gives its number type, such as `i64`, `u8` or `f64`.
 
 ```kirby
-
 struct Food {}
 
 fun main(): unit {
-    @println(@typeof(true)); // "bool"
-    @println(@typeof(123)); // "number"
-    @println(@typeof("Hello World")); // "string"
-    let items: [i64] = [1, 2];
-    @println(@typeof(items)); // "list"
-    @println(@typeof([1, 2])); // "array"
+    @println(@typeof(true)); // bool
+    @println(@typeof(123)); // i64
+    @println(@typeof(1.5)); // f64
+    @println(@typeof("Hello World")); // string
+    @println(@typeof(nil)); // nil
 
+    let items: [i64] = [1, 2];
+    @println(@typeof(items)); // list
+    @println(@typeof([1, 2])); // array
+
+    @println(@typeof(main)); // function
     @println(@typeof(Food)); // struct
 
     let food = Food {};
@@ -983,12 +998,12 @@ fun main(): unit {
 
 Returns whether a value is of the named type.
 
-The second argument is one of `"bool"`, `"string"`, `"number"`, `"function"` or `"nil"`.
+The second argument is a name that `@typeof` returns, such as `"bool"`, `"string"`, `"i64"`, `"function"` or `"nil"`. There is no name that matches every number type, so use `@isNumber` for that.
 
 ```kirby
 fun main(): unit {
     @println(@is(true, "bool")); // true
-
+    @println(@is(12345, "i64")); // true
     @println(@is(12345, "string")); // false
 }
 ```
@@ -1010,7 +1025,7 @@ fun main(): unit {
 Returns if value is a function or not.
 
 ```kirby
-fun sum(a, b) = a + b;
+fun sum(a: i64, b: i64): i64 = a + b;
 
 fun main(): unit {
     @println(@isFunction(@ceil)); // true
