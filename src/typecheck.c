@@ -766,8 +766,11 @@ static Type *typchkInferLogical(TypeEnv *env, AstNode *node);
 static Type *typchkInferNullish(TypeEnv *env, AstNode *node);
 static Type *typchkInferCall(TypeEnv *env, AstNode *node);
 static Type *typchkCheckCallAgainstFunctionType(TypeEnv *env, AstNode *node,
-                                                Type *calleeType);
+                                                Type *calleeType,
+                                                AstNode **args, int argCount);
 static Type *typchkInferGet(TypeEnv *env, AstNode *node);
+static Type *typchkInferTraitMethod(TypeEnv *env, GetNode *get,
+                                    Token traitToken, Type *objectType);
 static Type *typchkInferSet(TypeEnv *env, AstNode *node);
 static Type *typchkInferSelf(TypeEnv *env, AstNode *node);
 static Type *typchkInferIndexGet(TypeEnv *env, AstNode *node);
@@ -1950,16 +1953,17 @@ static bool isPrintNative(Token *name) {
 }
 
 // `Trait.method(value, ...)` runs the trait's method on `value`, even when
-// the value's type has a method of its own with that name. It is checked as
-// the call `value.method(...)`, with the trait kept on the get. Returns true
-// when the call was one of these, and false when the call can't go on.
-static bool typchkRewriteTraitQualifiedCall(TypeEnv *env, AstNode *node,
-                                            bool *canGoOn) {
+// the value's type has a method of its own with that name. The first argument
+// is the value, and the rest are checked against the method's parameters.
+// Returns false when the call isn't one of these. Otherwise `result` is the
+// call's type, or NULL after reporting an error.
+static bool typchkInferTraitCall(TypeEnv *env, AstNode *node, Type *expected,
+                                 Type **result) {
   CallNode *c = &node->as.call;
   GetNode *get = &c->callee->as.get;
-  *canGoOn = false;
+  *result = NULL;
 
-  if (get->isTraitQualified || get->object->kind != NODE_VARIABLE)
+  if (get->object->kind != NODE_VARIABLE)
     return false;
 
   Token *name = &get->object->as.variable.name;
@@ -1974,6 +1978,9 @@ static bool typchkRewriteTraitQualifiedCall(TypeEnv *env, AstNode *node,
 
   if (trait == NULL)
     return false;
+
+  c->isTraitCall = true;
+  int inferred = 0;
 
   if (typeTraitHasUnresolvedMembers(trait)) {
     // already reported once, at the trait's own declaration
@@ -1995,16 +2002,23 @@ static bool typchkRewriteTraitQualifiedCall(TypeEnv *env, AstNode *node,
                           get->name.start, name->length, name->start,
                           get->name.length, get->name.start);
   } else {
-    get->traitQualifier = *name;
-    get->isTraitQualified = true;
-    get->object = c->args[0];
-    c->args++;
-    c->argCount--;
-    *canGoOn = true;
-    return true;
+    Type *valueType = typchkInfer(env, c->args[0]);
+    inferred = 1;
+
+    Type *method = valueType == NULL
+                       ? NULL
+                       : typchkInferTraitMethod(env, get, *name, valueType);
+
+    if (method != NULL) {
+      env->_callExpected = expected;
+      *result = typchkCheckCallAgainstFunctionType(
+          env, node, method, c->args + 1, c->argCount - 1);
+      return true;
+    }
   }
 
-  for (int i = 0; i < c->argCount; i++)
+  // Check the arguments anyway, to report any errors they contain
+  for (int i = inferred; i < c->argCount; i++)
     typchkInfer(env, c->args[i]);
 
   return true;
@@ -2016,10 +2030,10 @@ static Type *typchkInferCall(TypeEnv *env, AstNode *node) {
   env->_callExpected = NULL;
 
   if (c->callee->kind == NODE_GET) {
-    bool canGoOn;
+    Type *traitCallType;
 
-    if (typchkRewriteTraitQualifiedCall(env, node, &canGoOn) && !canGoOn)
-      return NULL;
+    if (typchkInferTraitCall(env, node, expected, &traitCallType))
+      return traitCallType;
   }
 
   if (c->callee->kind == NODE_VARIABLE) {
@@ -2044,8 +2058,8 @@ static Type *typchkInferCall(TypeEnv *env, AstNode *node) {
     }
 
     env->_callExpected = expected;
-    Type *returnType =
-        typchkCheckCallAgainstFunctionType(env, node, calleeType);
+    Type *returnType = typchkCheckCallAgainstFunctionType(env, node, calleeType,
+                                                          c->args, c->argCount);
 
     if (returnType != NULL)
       // Used to validate args passed native functions like `@sqrt`
@@ -2069,7 +2083,8 @@ static Type *typchkInferCall(TypeEnv *env, AstNode *node) {
   }
 
   env->_callExpected = expected;
-  return typchkCheckCallAgainstFunctionType(env, node, calleeType);
+  return typchkCheckCallAgainstFunctionType(env, node, calleeType, c->args,
+                                            c->argCount);
 }
 
 // Checks one argument, or one field of a struct literal, against a type that
@@ -2136,17 +2151,16 @@ static bool typchkUnifyValue(TypeEnv *env, AstNode *arg, Type *pattern,
   return true;
 }
 
-// The first argument of a call whose parameter type mentions generic parameter
+// The first of `args` whose parameter type mentions generic parameter
 // `index`, to point an error at. The call itself when none does, as when only
 // the type the call is expected to return filled it.
-static AstNode *typchkArgumentOfParam(AstNode *call, Type *calleeType,
+static AstNode *typchkArgumentOfParam(AstNode *call, AstNode **args,
+                                      int argCount, Type *calleeType,
                                       int index) {
-  CallNode *c = &call->as.call;
-
-  for (int i = 0; i < c->argCount; i++) {
+  for (int i = 0; i < argCount; i++) {
     if (typeFindGenericParam(calleeType->as.function.paramTypes[i], index) !=
         NULL)
-      return c->args[i];
+      return args[i];
   }
 
   return call;
@@ -2157,7 +2171,8 @@ static AstNode *typchkArgumentOfParam(AstNode *call, Type *calleeType,
 // once. Generic parameters that are never filled are unknown for a native.
 static Type *typchkCheckGenericCall(TypeEnv *env, AstNode *node,
                                     Type *calleeType, int genericCount,
-                                    Type *expected) {
+                                    Type *expected, AstNode **args,
+                                    int argCount) {
   CallNode *c = &node->as.call;
   Type **bindings =
       (Type **)typesAllocRaw((size_t)genericCount * sizeof(Type *));
@@ -2165,10 +2180,9 @@ static Type *typchkCheckGenericCall(TypeEnv *env, AstNode *node,
   bool ok = true;
   bool sawUnknownArg = false;
 
-  for (int i = 0; i < c->argCount; i++) {
-    if (!typchkUnifyValue(env, c->args[i],
-                          calleeType->as.function.paramTypes[i], bindings,
-                          genericCount, &sawUnknownArg))
+  for (int i = 0; i < argCount; i++) {
+    if (!typchkUnifyValue(env, args[i], calleeType->as.function.paramTypes[i],
+                          bindings, genericCount, &sawUnknownArg))
       ok = false;
   }
 
@@ -2204,8 +2218,9 @@ static Type *typchkCheckGenericCall(TypeEnv *env, AstNode *node,
                                     &unmetTrait);
 
   if (unmet >= 0) {
-    typchkErrorUnmetBound(env, typchkArgumentOfParam(node, calleeType, unmet),
-                          calleeType, bindings, unmet, unmetTrait);
+    typchkErrorUnmetBound(
+        env, typchkArgumentOfParam(node, args, argCount, calleeType, unmet),
+        calleeType, bindings, unmet, unmetTrait);
     return NULL;
   }
 
@@ -2214,7 +2229,8 @@ static Type *typchkCheckGenericCall(TypeEnv *env, AstNode *node,
 }
 
 static Type *typchkCheckCallAgainstFunctionType(TypeEnv *env, AstNode *node,
-                                                Type *calleeType) {
+                                                Type *calleeType,
+                                                AstNode **args, int argCount) {
   CallNode *c = &node->as.call;
   Type *expected = env->_callExpected;
   env->_callExpected = NULL;
@@ -2224,21 +2240,21 @@ static Type *typchkCheckCallAgainstFunctionType(TypeEnv *env, AstNode *node,
                           typeToString(calleeType));
     return NULL;
   }
-  if (c->argCount != calleeType->as.function.paramCount) {
+  if (argCount != calleeType->as.function.paramCount) {
     typchkErrorAtTokenFmt(&c->paren, "Expected %d argument(s), got %d.",
-                          calleeType->as.function.paramCount, c->argCount);
+                          calleeType->as.function.paramCount, argCount);
     return NULL;
   }
 
   int genericCount = typeGenericParamCount(calleeType);
 
   if (genericCount > 0)
-    return typchkCheckGenericCall(env, node, calleeType, genericCount,
-                                  expected);
+    return typchkCheckGenericCall(env, node, calleeType, genericCount, expected,
+                                  args, argCount);
 
   bool ok = true;
-  for (int i = 0; i < c->argCount; i++) {
-    if (!typchkCheck(env, c->args[i], calleeType->as.function.paramTypes[i]))
+  for (int i = 0; i < argCount; i++) {
+    if (!typchkCheck(env, args[i], calleeType->as.function.paramTypes[i]))
       ok = false;
   }
   if (!ok)
@@ -2496,10 +2512,10 @@ static void typchkMarkViaTrait(GetNode *get, InternedName trait) {
 }
 
 // The method of `Trait.method(value)`, for the value's type `objectType`.
-// Returns the method's type, or NULL after reporting an error.
-static Type *typchkInferTraitQualifiedGet(TypeEnv *env, GetNode *get,
-                                          Type *objectType) {
-  Token traitToken = get->traitQualifier;
+// Marks the callee `get` so the compiler runs the trait's version. Returns the
+// method's type, or NULL after reporting an error.
+static Type *typchkInferTraitMethod(TypeEnv *env, GetNode *get,
+                                    Token traitToken, Type *objectType) {
   Type *trait = typchkTypeEnvLookupTrait(env, traitToken);
   InternedName traitName = trait->as.trait_.name;
   Type *declared = typeTraitInstanceMethodLookup(trait, get->name);
@@ -2576,8 +2592,7 @@ static Type *typchkInferGet(TypeEnv *env, AstNode *node) {
       return NULL;
     }
 
-    if (!shadowed && !get->isTraitQualified &&
-        typchkTypeEnvLookupTrait(env, *objIdentifier) != NULL) {
+    if (!shadowed && typchkTypeEnvLookupTrait(env, *objIdentifier) != NULL) {
       typchkErrorAtTokenFmt(
           &get->name,
           "'%.*s' is a trait. Call its method as '%.*s.%.*s(value)'.",
@@ -2647,9 +2662,6 @@ static Type *typchkInferGet(TypeEnv *env, AstNode *node) {
   // No type found, bail
   if (objectType == NULL)
     return NULL;
-
-  if (get->isTraitQualified)
-    return typchkInferTraitQualifiedGet(env, get, objectType);
 
   // A generic parameter has the methods of its bounds, and nothing else
   if (objectType->kind == TYPE_GENERIC_PARAM &&

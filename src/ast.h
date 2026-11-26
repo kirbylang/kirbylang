@@ -198,6 +198,11 @@ typedef struct {
    * checker, because the compiler has no types.
    */
   bool argUsesDisplay;
+  /**
+   * `Trait.method(value, ...)`: the callee's object names the trait, and the
+   * first argument is the value the method runs on. Set by the type checker.
+   */
+  bool isTraitCall;
 } CallNode;
 
 typedef struct {
@@ -222,10 +227,6 @@ typedef struct {
    * The name of the trait. NULL for every other get.
    */
   const char *viaTrait;
-  // `Trait.method(x)` is written as the call `x.method()`, with the trait's
-  // name kept here. `isTraitQualified` is false for every other get.
-  bool isTraitQualified;
-  Token traitQualifier;
 } GetNode;
 
 typedef struct {

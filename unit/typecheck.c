@@ -1375,6 +1375,38 @@ static void test_program_plain_impl_on_primitive_fails(void) {
   assert(!ok);
 }
 
+// `Trait.method(value, x)` stays the call that was written. The checker only
+// records what it resolved.
+static void test_trait_qualified_call_keeps_the_written_tree(void) {
+  typchkResetError();
+  typchkSessionBegin();
+  checkStdlibIntoSession();
+
+  int outCount = 0;
+  bool hadParseError = false;
+  int endLine = 0;
+  AstNode **ast = parse("trait Scale { fun scale(self, by: i64): i64; }\n"
+                        "struct Box { pub var n: i64; }\n"
+                        "impl Scale for Box {\n"
+                        "  fun scale(self, by: i64): i64 = self.n * by;\n"
+                        "}\n"
+                        "let b = Box { n: 2 };\n"
+                        "let r = Scale.scale(b, 3);\n",
+                        &outCount, &hadParseError, &endLine);
+  assert(!hadParseError);
+  assert(typchkCheckProgram(ast, outCount));
+
+  CallNode *call = &ast[outCount - 1]->as.varDecl.initializer->as.call;
+  assert(call->argCount == 2);
+  assert(call->callee->kind == NODE_GET);
+  assert(call->callee->as.get.object->kind == NODE_VARIABLE);
+  assert(call->args[0]->kind == NODE_VARIABLE);
+  assert(call->isTraitCall);
+
+  typchkSessionEnd();
+  typchkResetError();
+}
+
 static void test_program_trait_alongside_plain_impl(void) {
   typchkResetError();
   bool ok = typecheckSource(
@@ -1651,6 +1683,7 @@ int main(void) {
   test_program_equality_between_primitives_unaffected();
   test_program_trait_impl_on_primitive_deferred_fails();
   test_program_plain_impl_on_primitive_fails();
+  test_trait_qualified_call_keeps_the_written_tree();
   test_program_trait_alongside_plain_impl();
   test_program_trait_method_without_pub_is_callable();
   test_program_self_return_type_in_plain_impl();

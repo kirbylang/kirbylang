@@ -715,11 +715,28 @@ static uint8_t traitMethodConstant(const char *trait, int traitLength,
 }
 
 static void compileCall(CallNode *c) {
+  // The value a method runs on, and the arguments after it. `Trait.method(x)`
+  // has the value as its first argument, and any other method call has it as
+  // the callee's object.
+  AstNode *receiver = NULL;
+  AstNode **args = c->args;
+  int argCount = c->argCount;
+
+  if (c->callee->kind == NODE_GET) {
+    receiver = c->callee->as.get.object;
+
+    if (c->isTraitCall) {
+      receiver = args[0];
+      args++;
+      argCount--;
+    }
+  }
+
   if (c->callee->kind == NODE_GET && c->callee->as.get.primitiveOwner != NULL) {
     GetNode *g = &c->callee->as.get;
     // The checker matched the count to the method, which has at most 254
     // parameters plus the receiver
-    assert(c->argCount + 1 <= UINT8_MAX);
+    assert(argCount + 1 <= UINT8_MAX);
     emitBytes(
         OP_GET_GLOBAL,
         primitiveMethodConstant(
@@ -730,28 +747,28 @@ static void compileCall(CallNode *c) {
     // A static method has no receiver value
     int receiverCount = g->primitiveIsStatic ? 0 : 1;
     if (receiverCount == 1)
-      compileExpr(g->object);
-    for (int i = 0; i < c->argCount; i++) {
-      compileExpr(c->args[i]);
+      compileExpr(receiver);
+    for (int i = 0; i < argCount; i++) {
+      compileExpr(args[i]);
     }
-    emitBytes(OP_CALL, (uint8_t)(c->argCount + receiverCount));
+    emitBytes(OP_CALL, (uint8_t)(argCount + receiverCount));
     return;
   }
 
   // Compile method calls to OP_INVOKE instead of OP_GET_PROPERTY -> OP_CALL
   if (c->callee->kind == NODE_GET) {
     GetNode *g = &c->callee->as.get;
-    compileExpr(g->object);
+    compileExpr(receiver);
     uint8_t name =
         g->viaTrait != NULL
             ? traitMethodConstant(g->viaTrait, (int)strlen(g->viaTrait),
                                   g->name.start, g->name.length)
             : identifierConstant(&g->name);
-    for (int i = 0; i < c->argCount; i++) {
-      compileExpr(c->args[i]);
+    for (int i = 0; i < argCount; i++) {
+      compileExpr(args[i]);
     }
     emitBytes(OP_INVOKE, name);
-    emitByte((uint8_t)c->argCount);
+    emitByte((uint8_t)argCount);
     return;
   }
 
