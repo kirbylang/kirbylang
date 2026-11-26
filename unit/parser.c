@@ -164,35 +164,64 @@ static void expectUserPrimitiveError(const char *source) {
 }
 
 static void test_the_stdlib_can_impl_lists_and_arrays(void) {
-  expectStdlibAst("impl [T] { pub fun first(self): T = self[0]; }",
-                  "(impl [T] (pub-method first))\n");
-  expectStdlibAst("impl Display for [T] { fun toString(self): string = \"\"; }",
-                  "(impl Display for [T] (pub-method toString))\n");
-  expectStdlibAst("impl [T; N] { pub fun first(self): T = self[0]; }",
-                  "(impl [T; N] (pub-method first))\n");
-  expectStdlibAst("impl [T; _] { pub fun first(self): T = self[0]; }",
-                  "(impl [T; _] (pub-method first))\n");
+  expectStdlibAst("impl[T] [T] { pub fun first(self): T = self[0]; }",
+                  "(impl[T] [T] (pub-method first))\n");
   expectStdlibAst(
-      "impl Display for [T; N] { fun toString(self): string = \"\"; }",
-      "(impl Display for [T; N] (pub-method toString))\n");
+      "impl[T] Display for [T] { fun toString(self): string = \"\"; }",
+      "(impl[T] Display for [T] (pub-method toString))\n");
+  expectStdlibAst(
+      "impl[T, const N] [T; N] { pub fun first(self): T = self[0]; }",
+      "(impl[T const N] [T; N] (pub-method first))\n");
+  expectStdlibAst("impl[T] [T; _] { pub fun first(self): T = self[0]; }",
+                  "(impl[T] [T; _] (pub-method first))\n");
+  expectStdlibAst("impl[const N, T] Display for [T; N] { fun toString(self): "
+                  "string = \"\"; }",
+                  "(impl[const N T] Display for [T; N] (pub-method "
+                  "toString))\n");
 
   // A number is read, and the checker rejects it
-  expectStdlibAst("impl [T; 3] { pub fun first(self): T = self[0]; }",
-                  "(impl [T; 3] (pub-method first))\n");
-
-  // The standard library's types can name a length
-  expectStdlibAst("impl [T; N] { pub fun copy(self): [T; N] = self; }",
-                  "(impl [T; N] (pub-method copy))\n");
+  expectStdlibAst("impl[T] [T; 3] { pub fun first(self): T = self[0]; }",
+                  "(impl[T] [T; 3] (pub-method first))\n");
 }
 
 static void test_a_list_or_array_impl_has_to_be_well_formed(void) {
-  expectStdlibError("impl [] { }", "Expect the item type's name after '['.");
-  expectStdlibError("impl [T {\n}", "Expect ']' after the type.");
-  expectStdlibError("impl [T, U] { }", "Expect ']' after the type.");
-  expectStdlibError("impl [T; ] { }",
+  expectStdlibError("impl [T] { }", "Declare the type parameter after 'impl', "
+                                    "as in 'impl[T] [T]'.");
+  expectStdlibError("impl [T; N] { }",
+                    "Declare the parameters after 'impl', as in "
+                    "'impl[T, const N] [T; N]'.");
+  expectStdlibError("impl Display for [T] { }",
+                    "Declare the type parameter after 'impl', as in "
+                    "'impl[T] Display for [T]'.");
+  expectStdlibError("impl[T] [] { }", "Expect the item type's name after '['.");
+  expectStdlibError("impl[T] [T {\n}", "Expect ']' after the type.");
+  expectStdlibError("impl[T] [T, U] { }", "Expect ']' after the type.");
+  expectStdlibError("impl[T] [T; ] { }",
                     "Expect a name or '_' for the array's length.");
-  expectStdlibError("impl Display for [] { }",
-                    "Expect the item type's name after '['.");
+  expectStdlibError("impl[T: Display] [T] { }",
+                    "A list or array impl's parameters can't have bounds.");
+  expectStdlibError("impl[T] Box[T] { }",
+                    "A struct's impl takes its type parameters from the "
+                    "struct, as in 'impl Box[T]'.");
+}
+
+static void test_functions_can_declare_const_parameters(void) {
+  expectStdlibAst("native fun @x[T, const N](a: [T; N]): [T; N];",
+                  "(native-fun @x[T const N] (a : [T; N]) : [T; N])\n");
+
+  expectStdlibError("fun f[const N: Display](): unit {}",
+                    "A const parameter can't have bounds.");
+  expectStdlibError("fun f[const](): unit {}",
+                    "Expect generic parameter name.");
+  expectStdlibError("struct S[const N] {}",
+                    "Only functions and list or array impls can declare const "
+                    "parameters.");
+  expectStdlibError("type A[const N] = i64;",
+                    "Only functions and list or array impls can declare const "
+                    "parameters.");
+  expectStdlibError("struct S {}\nimpl S[const N] { }",
+                    "Only functions and list or array impls can declare const "
+                    "parameters.");
 }
 
 static const char *primitiveNames[] = {"unit", "bool", "string", "f64", "f32",
@@ -246,6 +275,9 @@ static void test_user_code_can_not_impl_a_primitive(void) {
       "impl [T; _] { }",
       "impl Display for [T] { }",
       "impl Display for [T; N] { }",
+      "impl[T] [T] { }",
+      "impl[T, const N] [T; N] { }",
+      "impl[T] Display for [T] { }",
       // However the target is spelled, the user sees this error alone
       "impl [T; 3] { }",
       "impl [T, U] { }",
@@ -260,6 +292,19 @@ static void test_user_code_can_not_impl_a_primitive(void) {
     ParseResult result = parseText(others[i], false);
     assert(strstr(result.errors, "Expect") == NULL);
     assert(strstr(result.errors, "array impl") == NULL);
+    freeResult(&result);
+  }
+
+  // Parameters declared after `impl` for a struct are a different mistake
+  const char *structs[] = {
+      "impl[T] Box[T] { }",
+      "impl[T] Display for Box[T] { }",
+  };
+
+  for (size_t i = 0; i < sizeof(structs) / sizeof(structs[0]); i++) {
+    ParseResult result = parseText(structs[i], false);
+    assert(strstr(result.errors, "A struct's impl takes its type parameters "
+                                 "from the struct") != NULL);
     freeResult(&result);
   }
 }
@@ -280,6 +325,7 @@ int main(void) {
   test_a_native_declaration_has_to_be_well_formed();
   test_the_stdlib_can_impl_lists_and_arrays();
   test_a_list_or_array_impl_has_to_be_well_formed();
+  test_functions_can_declare_const_parameters();
   test_user_code_can_not_impl_a_primitive();
   test_user_code_can_impl_structs();
 

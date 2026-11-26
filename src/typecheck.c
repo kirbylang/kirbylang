@@ -348,10 +348,11 @@ Type *typchkTypeEnvGetImplTargetType(TypeEnv *env) {
 // `isOpaque` is false, and the fixed type the declaration's own body sees when
 // it is true. `bounds` has the traits each parameter must implement, or is
 // NULL where a declaration has no bounds. An unknown trait is reported once,
-// for the form callers fill in.
+// for the form callers fill in. `isLength` says which are lengths, declared as
+// `const N`, and is NULL where none can be.
 static int typchkEnterGenericParams(TypeEnv *env, Token *names,
-                                    GenericBounds *bounds, int count,
-                                    int firstIndex, bool isOpaque,
+                                    GenericBounds *bounds, const bool *isLength,
+                                    int count, int firstIndex, bool isOpaque,
                                     Type **types) {
   int previousCount = env->_genericParamCount;
 
@@ -369,6 +370,7 @@ static int typchkEnterGenericParams(TypeEnv *env, Token *names,
     }
 
     types[i] = typeGenericParam(names[i], firstIndex + i, isOpaque);
+    types[i]->as.genericParam.isLength = isLength != NULL && isLength[i];
 
     for (int j = 0; bounds != NULL && j < bounds[i].count; j++) {
       Token *traitName = &bounds[i].traits[j];
@@ -642,6 +644,34 @@ static Type *typchkResolveGenericInstance(TypeEnv *env, TypeNode *t) {
   return typeStructInstance(declaration, typeArgs, t->genericArgCount);
 }
 
+// The `const` parameter named as an array's length, such as the `N` of
+// `[T; N]`, or NULL after reporting that there is none.
+static Type *typchkResolveLength(TypeEnv *env, Token *name) {
+  Type *param =
+      bindingArrayLookup(env->_genericParams, env->_genericParamCount, *name);
+
+  if (param == NULL) {
+    if (tokenTextEquals(name, "_")) {
+      typchkErrorAtToken(name, "Unknown length '_'.");
+    } else {
+      typchkErrorAtTokenFmt(name,
+                            "Unknown length '%.*s'. Declare it as 'const "
+                            "%.*s'.",
+                            name->length, name->start, name->length,
+                            name->start);
+    }
+    return NULL;
+  }
+
+  if (!param->as.genericParam.isLength) {
+    typchkErrorAtTokenFmt(name, "'%.*s' is a type, not a length.", name->length,
+                          name->start);
+    return NULL;
+  }
+
+  return param;
+}
+
 Type *typchkResolveType(TypeEnv *env, AstNode *typeAnnotation) {
   if (typeAnnotation->kind == NODE_TYPE_FUNCTION) {
     TypeFunctionNode *fn = &typeAnnotation->as.typeFunction;
@@ -673,9 +703,16 @@ Type *typchkResolveType(TypeEnv *env, AstNode *typeAnnotation) {
   if (typeAnnotation->kind == NODE_TYPE_ARRAY) {
     Type *elementType =
         typchkResolveType(env, typeAnnotation->as.typeArray.elementType);
-    return elementType == NULL
+    TypeArrayNode *array = &typeAnnotation->as.typeArray;
+
+    if (!array->hasLengthName)
+      return elementType == NULL ? NULL : typeArray(elementType, array->length);
+
+    Type *length = typchkResolveLength(env, &array->lengthName);
+
+    return elementType == NULL || length == NULL
                ? NULL
-               : typeArray(elementType, typeAnnotation->as.typeArray.length);
+               : typeArrayOfParam(elementType, length);
   }
 
   TypeNode *t = &typeAnnotation->as.type_;
@@ -710,8 +747,14 @@ Type *typchkResolveType(TypeEnv *env, AstNode *typeAnnotation) {
   // same name inside its declaration
   Type *genericParam =
       bindingArrayLookup(env->_genericParams, env->_genericParamCount, t->name);
-  if (genericParam != NULL)
+  if (genericParam != NULL) {
+    if (genericParam->as.genericParam.isLength) {
+      typchkErrorAtTokenFmt(&t->name, "'%.*s' is a length, not a type.",
+                            t->name.length, t->name.start);
+      return NULL;
+    }
     return genericParam;
+  }
 
   Type *structType = typchkTypeEnvLookupStruct(env, t->name);
   if (structType != NULL) {
@@ -1189,7 +1232,14 @@ static bool typchkCheckInto(TypeEnv *env, AstNode *node, Type *expected,
 
     bool ok = true;
 
-    if (isArray && a->count != expected->as.array.length) {
+    // A length that callers still have to fill takes a literal of any size. A
+    // fixed `const` length takes none, because the size isn't known
+    Type *lengthParam = isArray ? expected->as.array.lengthParam : NULL;
+    bool lengthIsOpen =
+        lengthParam != NULL && !lengthParam->as.genericParam.isOpaque;
+
+    if (isArray && !lengthIsOpen &&
+        (lengthParam != NULL || a->count != expected->as.array.length)) {
       typchkErrorAtNodeFmt(
           node, "Expected %s, got an array literal with %d %s.",
           typeToString(expected), a->count, a->count == 1 ? "item" : "items");
@@ -2401,10 +2451,6 @@ static void typchkPrimitiveImplementsAdd(TypeEnv *env, const char *owner,
       (PrimitiveTraitImpl){owner, trait};
 }
 
-// Binding slots enough for the item type, the method's own type parameters,
-// and the array length placeholders
-#define PRIMITIVE_BINDING_SLOTS 8
-
 // The type of `method` called on a value of type `receiver`. For a list or
 // array impl, the impl's parameters take what the receiver has, so `first` of
 // `impl [T]` called on `[i64]` gives `i64`.
@@ -2413,11 +2459,15 @@ static Type *typchkPrimitiveMethodType(const PrimitiveMethod *method,
   if (method->receiver == NULL)
     return method->type;
 
-  Type *bindings[PRIMITIVE_BINDING_SLOTS] = {0};
-  typeBindGenericParams(method->receiver, receiver, bindings,
-                        PRIMITIVE_BINDING_SLOTS);
-  return typeSubstituteGenericParams(method->type, bindings,
-                                     PRIMITIVE_BINDING_SLOTS);
+  int count = typeGenericParamCount(method->receiver);
+
+  if (count == 0)
+    return method->type;
+
+  Type **bindings = (Type **)typesAllocRaw((size_t)count * sizeof(Type *));
+  memset(bindings, 0, (size_t)count * sizeof(Type *));
+  typeBindGenericParams(method->receiver, receiver, bindings, count);
+  return typeSubstituteGenericParams(method->type, bindings, count);
 }
 
 // Marks a call of a trait's method on a primitive for the compiler. The
@@ -2862,7 +2912,8 @@ static Type *typchkInferSelf(TypeEnv *env, AstNode *node) {
 
 // Reports an index that is a number literal past the end of an array.
 static bool typchkCheckLiteralIndexInRange(AstNode *index, Type *arrayType) {
-  if (arrayType->kind != TYPE_ARRAY || index->kind != NODE_LITERAL ||
+  if (arrayType->kind != TYPE_ARRAY ||
+      arrayType->as.array.lengthParam != NULL || index->kind != NODE_LITERAL ||
       index->as.literal.kind != LITERAL_NUMBER)
     return true;
 
@@ -3520,9 +3571,9 @@ static void typchkCheckGenericFunctionBody(TypeEnv *env, FunctionNode *fn,
   for (int i = 0; i < implCount; i++)
     fixed[i] = env->_implGenericTypes[i];
 
-  int previousCount =
-      typchkEnterGenericParams(env, fn->genericParams, fn->genericBounds, count,
-                               implCount, true, fixed + implCount);
+  int previousCount = typchkEnterGenericParams(
+      env, fn->genericParams, fn->genericBounds, fn->genericIsConst, count,
+      implCount, true, fixed + implCount);
 
   Type **paramTypes =
       fn->arity > 0 ? (Type **)typesAllocRaw(fn->arity * sizeof(Type *)) : NULL;
@@ -3551,8 +3602,8 @@ static void typchkCheckFunctionDecl(TypeEnv *env, AstNode *node) {
           ? (Type **)typesAllocRaw((size_t)genericCount * sizeof(Type *))
           : NULL;
   int previousCount = typchkEnterGenericParams(
-      env, fn->genericParams, fn->genericBounds, genericCount,
-      env->_implGenericCount, false, placeholders);
+      env, fn->genericParams, fn->genericBounds, fn->genericIsConst,
+      genericCount, env->_implGenericCount, false, placeholders);
 
   for (int i = 0; i < fn->arity; i++) {
     paramTypes[i] = (fn->paramTypes != NULL && fn->paramTypes[i] != NULL)
@@ -3650,6 +3701,24 @@ void typchkCheckStmt(TypeEnv *env, AstNode *node) {
   }
 }
 
+// A method can't declare a parameter its impl already declared.
+static void typchkCheckImplNamesNotReused(TypeEnv *env, FunctionNode *fn) {
+  for (int i = 0; i < fn->genericParamCount; i++) {
+    InternedName name = internTokenName(fn->genericParams[i]);
+
+    for (int j = 0; j < env->_implGenericCount; j++) {
+      if (internedNamesEqual(env->_implGenericTypes[j]->as.genericParam.name,
+                             name)) {
+        typchkErrorAtTokenFmt(&fn->genericParams[i],
+                              "Generic parameter '%.*s' is already declared.",
+                              fn->genericParams[i].length,
+                              fn->genericParams[i].start);
+        break;
+      }
+    }
+  }
+}
+
 // Resolves a function/method signature, requiring every param + the
 // return type to have an annotation. self is excluded -- its type is
 // always just "this struct," bound separately via selfType.
@@ -3663,9 +3732,11 @@ static Type *typchkResolveFunctionSignature(TypeEnv *env, FunctionNode *fn) {
           ? (Type **)typesAllocRaw((size_t)fn->genericParamCount *
                                    sizeof(Type *))
           : NULL;
+  typchkCheckImplNamesNotReused(env, fn);
+
   int previousCount = typchkEnterGenericParams(
-      env, fn->genericParams, fn->genericBounds, fn->genericParamCount,
-      env->_implGenericCount, false, placeholders);
+      env, fn->genericParams, fn->genericBounds, fn->genericIsConst,
+      fn->genericParamCount, env->_implGenericCount, false, placeholders);
 
   for (int i = 0; i < fn->arity; i++) {
     if (fn->paramTypes == NULL || fn->paramTypes[i] == NULL) {
@@ -3800,8 +3871,8 @@ static void typchkResolvePendingAlias(TypeEnv *env,
     Type **placeholders = (Type **)typesAllocRaw(
         (size_t)decl->genericParamCount * sizeof(Type *));
     int previousCount = typchkEnterGenericParams(
-        env, decl->genericParams, decl->genericBounds, decl->genericParamCount,
-        0, false, placeholders);
+        env, decl->genericParams, decl->genericBounds, /*isLength=*/NULL,
+        decl->genericParamCount, 0, false, placeholders);
     Type *target = typchkResolveType(env, decl->target);
     typchkLeaveGenericParams(env, previousCount);
 
@@ -3833,7 +3904,8 @@ static void typchkResolveStructFields(TypeEnv *env, AstNode *node) {
       params = (Type **)typesAllocRaw((size_t)struct_->genericParamCount *
                                       sizeof(Type *));
       typchkEnterGenericParams(env, struct_->genericParams, /*bounds=*/NULL,
-                               struct_->genericParamCount, 0, false, params);
+                               /*isLength=*/NULL, struct_->genericParamCount, 0,
+                               false, params);
     } else {
       for (int i = 0; i < struct_->genericParamCount; i++) {
         bindingArrayWrite(&env->_genericParams, &env->_genericParamCount,
@@ -4430,50 +4502,139 @@ static void typchkRegisterPrimitiveImplMethods(TypeEnv *env, AstNode *node,
   env->_currentPrimitiveOwner = NULL;
 }
 
-// Puts the type parameters of `impl [T]` or `impl [T; N]` in scope and returns
-// the receiver type, or NULL after an error. `T` is the item type. `N` is the
-// length, and `_` is a length that is not used. The length placeholders have
-// no spelling of their own, so `_` gets one that no signature can write.
-static Type *typchkEnterListOrArrayImpl(TypeEnv *env, ImplNode *impl,
-                                        bool isOpaque, int *previousCount) {
-  *previousCount = env->_genericParamCount;
-  Token *item = &impl->genericParams[0];
-  int length = 0;
-
-  if (!isOpaque && typchkPrimitiveTypeNamed(item) != NULL) {
-    typchkErrorAtTokenFmt(item,
-                          "'%.*s' is a type. An impl names the item type "
-                          "with a type parameter, as in 'impl [T]'.",
-                          item->length, item->start);
-    return NULL;
+// The index of `name` among the parameters a list or array impl declares, or
+// -1.
+static int typchkImplParamNamed(const ImplNode *impl, const Token *name) {
+  for (int i = 0; i < impl->genericParamCount; i++) {
+    if (impl->genericParams[i].length == name->length &&
+        memcmp(impl->genericParams[i].start, name->start,
+               (size_t)name->length) == 0)
+      return i;
   }
 
-  if (impl->targetKind == IMPL_TARGET_ARRAY) {
-    Token *lengthName = &impl->genericParams[1];
+  return -1;
+}
 
-    if (tokenTextEquals(lengthName, "N")) {
-      length = ARRAY_LENGTH_PLACEHOLDER(0);
-    } else if (tokenTextEquals(lengthName, "_")) {
-      length = ARRAY_LENGTH_PLACEHOLDER(2);
-    } else {
-      typchkErrorAtTokenFmt(lengthName,
-                            "An array impl names its length 'N', or '_' to "
-                            "leave it unnamed, not '%.*s'.",
-                            lengthName->length, lengthName->start);
-      return NULL;
+// How the impl would be written with its parameters declared
+static const char *typchkImplExample(const ImplNode *impl) {
+  return impl->targetKind == IMPL_TARGET_LIST ? "impl[T] [T]"
+                                              : "impl[T, const N] [T; N]";
+}
+
+// Checks that a list or array impl declares the names its target uses, as the
+// right kind of parameter, and uses every name it declares.
+static bool typchkCheckListOrArrayImplNames(ImplNode *impl) {
+  Token *item = &impl->itemName;
+
+  if (typchkPrimitiveTypeNamed(item) != NULL) {
+    typchkErrorAtTokenFmt(item,
+                          "'%.*s' is a type. An impl names the item type "
+                          "with a type parameter, as in 'impl[T] [T]'.",
+                          item->length, item->start);
+    return false;
+  }
+
+  int itemIndex = typchkImplParamNamed(impl, item);
+
+  if (itemIndex < 0) {
+    typchkErrorAtTokenFmt(item,
+                          "'%.*s' isn't declared. Declare it after 'impl', as "
+                          "in '%s'.",
+                          item->length, item->start, typchkImplExample(impl));
+    return false;
+  }
+
+  if (impl->genericIsConst[itemIndex]) {
+    typchkErrorAtTokenFmt(item, "'%.*s' is a length, not a type.", item->length,
+                          item->start);
+    return false;
+  }
+
+  int lengthIndex = -1;
+  Token *length = &impl->lengthName;
+
+  if (impl->targetKind == IMPL_TARGET_ARRAY && !tokenTextEquals(length, "_")) {
+    if (length->type == TOKEN_NUMBER) {
+      typchkErrorAtToken(length,
+                         "An array impl can't be for one length yet. Declare "
+                         "it, as in 'impl[T, const N] [T; N]'.");
+      return false;
+    }
+
+    lengthIndex = typchkImplParamNamed(impl, length);
+
+    if (lengthIndex < 0) {
+      typchkErrorAtTokenFmt(length,
+                            "'%.*s' isn't declared. Declare it after 'impl', "
+                            "as in '%s'.",
+                            length->length, length->start,
+                            typchkImplExample(impl));
+      return false;
+    }
+
+    if (!impl->genericIsConst[lengthIndex]) {
+      typchkErrorAtTokenFmt(length,
+                            "'%.*s' is a type parameter, not a length. Declare "
+                            "it as 'const %.*s'.",
+                            length->length, length->start, length->length,
+                            length->start);
+      return false;
     }
   }
 
-  Type **itemTypes = (Type **)typesAllocRaw(sizeof(Type *));
-  typchkEnterGenericParams(env, impl->genericParams, /*bounds=*/NULL, 1, 0,
-                           isOpaque, itemTypes);
+  for (int i = 0; i < impl->genericParamCount; i++) {
+    Token *name = &impl->genericParams[i];
+    int first = typchkImplParamNamed(impl, name);
 
-  Type *receiver = impl->targetKind == IMPL_TARGET_LIST
-                       ? typeList(itemTypes[0])
-                       : typeArray(itemTypes[0], length);
+    // A name declared twice is reported as that
+    if (first != i || i == itemIndex || i == lengthIndex)
+      continue;
 
-  env->_implGenericTypes = itemTypes;
-  env->_implGenericCount = 1;
+    typchkErrorAtTokenFmt(name,
+                          "'%.*s' isn't used by the type the impl is for.",
+                          name->length, name->start);
+    return false;
+  }
+
+  return true;
+}
+
+// Puts the parameters of a list or array impl, such as `impl[T] [T]` or
+// `impl[T, const N] [T; N]`, in scope and returns the receiver type, or NULL
+// after an error. A length written `_` is a parameter with no name in scope.
+static Type *typchkEnterListOrArrayImpl(TypeEnv *env, ImplNode *impl,
+                                        bool isOpaque, int *previousCount) {
+  *previousCount = env->_genericParamCount;
+
+  if (!isOpaque && !typchkCheckListOrArrayImplNames(impl))
+    return NULL;
+
+  int declared = impl->genericParamCount;
+  bool unnamedLength = impl->targetKind == IMPL_TARGET_ARRAY &&
+                       tokenTextEquals(&impl->lengthName, "_");
+  int count = declared + (unnamedLength ? 1 : 0);
+
+  Type **params = (Type **)typesAllocRaw((size_t)count * sizeof(Type *));
+  typchkEnterGenericParams(env, impl->genericParams, /*bounds=*/NULL,
+                           impl->genericIsConst, declared, 0, isOpaque, params);
+
+  if (unnamedLength) {
+    params[declared] = typeGenericParam(impl->lengthName, declared, isOpaque);
+    params[declared]->as.genericParam.isLength = true;
+  }
+
+  Type *item = params[typchkImplParamNamed(impl, &impl->itemName)];
+  Type *receiver =
+      impl->targetKind == IMPL_TARGET_LIST
+          ? typeList(item)
+          : typeArrayOfParam(
+                item,
+                unnamedLength
+                    ? params[declared]
+                    : params[typchkImplParamNamed(impl, &impl->lengthName)]);
+
+  env->_implGenericTypes = params;
+  env->_implGenericCount = count;
   env->_currentImplReceiver = receiver;
   return receiver;
 }
@@ -4551,9 +4712,9 @@ static void typchkRegisterImplMethods(TypeEnv *env, AstNode *node) {
       declaredCount > 0
           ? (Type **)typesAllocRaw((size_t)declaredCount * sizeof(Type *))
           : NULL;
-  int previousGenericCount =
-      typchkEnterGenericParams(env, impl->genericParams, /*bounds=*/NULL,
-                               declaredCount, 0, false, implParams);
+  int previousGenericCount = typchkEnterGenericParams(
+      env, impl->genericParams, /*bounds=*/NULL,
+      /*isLength=*/NULL, declaredCount, 0, false, implParams);
   typchkInheritStructBounds(structType, implParams, declaredCount);
 
   typchkTypeEnvSetImplTargetType(env, structType);
@@ -4707,7 +4868,8 @@ static void checkImplMethodBodies(TypeEnv *env, AstNode *node) {
     fixedParams =
         (Type **)typesAllocRaw((size_t)declaredCount * sizeof(Type *));
     typchkEnterGenericParams(env, impl->genericParams, /*bounds=*/NULL,
-                             declaredCount, 0, true, fixedParams);
+                             /*isLength=*/NULL, declaredCount, 0, true,
+                             fixedParams);
     typchkInheritStructBounds(structType, fixedParams, declaredCount);
     env->_implGenericTypes = fixedParams;
     env->_implGenericCount = declaredCount;
@@ -4832,7 +4994,7 @@ static bool typchkCheckUnit(AstNode **program, int count, bool isStdlib) {
                                            sizeof(Type *));
     int previousCount = typchkEnterGenericParams(
         env, struct_->genericParams, struct_->genericBounds,
-        struct_->genericParamCount, 0, false, params);
+        /*isLength=*/NULL, struct_->genericParamCount, 0, false, params);
     typchkLeaveGenericParams(env, previousCount);
     typeStructSetGenericParams(structType, params);
   }

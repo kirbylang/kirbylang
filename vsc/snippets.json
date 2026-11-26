@@ -136,7 +136,7 @@
       "impllist"
     ],
     "body": [
-      "impl [${1:T}] {",
+      "impl[${1:T}] [${1:T}] {",
       "\tpub fun ${2:name}(self): ${3:unit} {",
       "\t\t$0",
       "\t}",
@@ -150,7 +150,7 @@
       "implarray"
     ],
     "body": [
-      "impl [${1:T}; ${2|N,_|}] {",
+      "impl[${1:T}, const ${2:N}] [${1:T}; ${2:N}] {",
       "\tpub fun ${3:name}(self): ${4:unit} {",
       "\t\t$0",
       "\t}",

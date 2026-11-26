@@ -1,5 +1,5 @@
 ```kirby
-native fun @arrEqual[T](a: [T; N], b: [T; N]): bool;
+native fun @arrEqual[T, const N](a: [T; N], b: [T; N]): bool;
 ```
 
 Shallow compares two arrays' values for equality. Both arrays must have the same length and item type.

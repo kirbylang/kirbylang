@@ -1,5 +1,5 @@
 ```kirby
-native fun @arrToList[T](array: [T; N]): [T];
+native fun @arrToList[T, const N](array: [T; N]): [T];
 ```
 
 Copies an array to a new list, which can grow and shrink.

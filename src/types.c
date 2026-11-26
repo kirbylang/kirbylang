@@ -157,6 +157,24 @@ Type *typeU8(void) { return typeNumber(NUMBER_KIND_U8); }
 
 bool typeIsNumber(const Type *type) { return type->kind == TYPE_NUMBER; }
 
+static bool lengthsEqual(const Type *a, const Type *b) {
+  if (a->as.array.lengthParam == NULL || b->as.array.lengthParam == NULL)
+    return a->as.array.lengthParam == b->as.array.lengthParam &&
+           a->as.array.length == b->as.array.length;
+
+  return typesEqual(a->as.array.lengthParam, b->as.array.lengthParam);
+}
+
+// A length that callers still have to fill accepts any length
+static bool lengthAccepts(const Type *expected, const Type *actual) {
+  const Type *param = expected->as.array.lengthParam;
+
+  if (param != NULL && !param->as.genericParam.isOpaque)
+    return true;
+
+  return lengthsEqual(expected, actual);
+}
+
 bool typeAccepts(const Type *expected, const Type *actual) {
   if (expected == NULL || actual == NULL)
     return true;
@@ -174,8 +192,7 @@ bool typeAccepts(const Type *expected, const Type *actual) {
                        actual->as.list.elementType);
 
   if (expected->kind == TYPE_ARRAY && actual->kind == TYPE_ARRAY)
-    return (ARRAY_LENGTH_IS_PLACEHOLDER(expected->as.array.length) ||
-            expected->as.array.length == actual->as.array.length) &&
+    return lengthAccepts(expected, actual) &&
            typeAccepts(expected->as.array.elementType,
                        actual->as.array.elementType);
 
@@ -295,6 +312,19 @@ Type *typeArray(Type *elementType, int length) {
   Type *type = allocType(TYPE_ARRAY);
   type->as.array.elementType = elementType;
   type->as.array.length = length;
+  return type;
+}
+
+Type *typeArrayOfParam(Type *elementType, Type *lengthParam) {
+  Type *type = typeArray(elementType, 0);
+  type->as.array.lengthParam = lengthParam;
+  return type;
+}
+
+// `array` with another item type, and the same length
+static Type *arrayWithElement(Type *array, Type *elementType) {
+  Type *type = typeArray(elementType, array->as.array.length);
+  type->as.array.lengthParam = array->as.array.lengthParam;
   return type;
 }
 
@@ -443,7 +473,7 @@ Type *typeSubstituteSelf(Type *type, Type *concrete) {
         typeSubstituteSelf(type->as.array.elementType, concrete);
     if (elementType == type->as.array.elementType)
       return type;
-    return typeArray(elementType, type->as.array.length);
+    return arrayWithElement(type, elementType);
   }
 
   default:
@@ -486,7 +516,10 @@ Type *typeFindGenericParam(Type *type, int index) {
 
   switch (type->kind) {
   case TYPE_GENERIC_PARAM:
-    return type->as.genericParam.index == index ? type : NULL;
+    return !type->as.genericParam.isOpaque &&
+                   type->as.genericParam.index == index
+               ? type
+               : NULL;
 
   case TYPE_LIST:
     return typeFindGenericParam(type->as.list.elementType, index);
@@ -499,8 +532,12 @@ Type *typeFindGenericParam(Type *type, int index) {
     }
     return NULL;
 
-  case TYPE_ARRAY:
-    return typeFindGenericParam(type->as.array.elementType, index);
+  case TYPE_ARRAY: {
+    Type *found = typeFindGenericParam(type->as.array.elementType, index);
+    return found != NULL
+               ? found
+               : typeFindGenericParam(type->as.array.lengthParam, index);
+  }
 
   case TYPE_FN: {
     for (int i = 0; i < type->as.function.paramCount; i++) {
@@ -516,9 +553,6 @@ Type *typeFindGenericParam(Type *type, int index) {
     return NULL;
   }
 }
-
-// A bound length is kept in the slot as an array type with no item type.
-static Type *lengthBinding(int length) { return typeArray(NULL, length); }
 
 int typeGenericParamCount(Type *type) {
   if (type == NULL)
@@ -546,11 +580,9 @@ int typeGenericParamCount(Type *type) {
   case TYPE_ARRAY: {
     int count = typeGenericParamCount(type->as.array.elementType);
 
-    if (ARRAY_LENGTH_IS_PLACEHOLDER(type->as.array.length)) {
-      int slots = ARRAY_LENGTH_SLOT(type->as.array.length) + 1;
-      if (slots > count)
-        count = slots;
-    }
+    int lengthCount = typeGenericParamCount(type->as.array.lengthParam);
+    if (lengthCount > count)
+      count = lengthCount;
 
     return count;
   }
@@ -570,6 +602,22 @@ int typeGenericParamCount(Type *type) {
   default:
     return 0;
   }
+}
+
+// Fills the slot of the length `param` with the length of `actual`
+static void bindLength(Type *param, Type *actual, Type **bindings, int count) {
+  if (param == NULL || param->as.genericParam.isOpaque)
+    return;
+
+  int index = param->as.genericParam.index;
+  Type *actualParam = actual->as.array.lengthParam;
+
+  // A length that nothing filled yet says nothing
+  if (index >= count || bindings[index] != NULL ||
+      (actualParam != NULL && !actualParam->as.genericParam.isOpaque))
+    return;
+
+  bindings[index] = arrayWithElement(actual, NULL);
 }
 
 void typeBindGenericParams(Type *pattern, Type *actual, Type **bindings,
@@ -615,13 +663,7 @@ void typeBindGenericParams(Type *pattern, Type *actual, Type **bindings,
     typeBindGenericParams(pattern->as.array.elementType,
                           actual->as.array.elementType, bindings, count);
 
-    if (ARRAY_LENGTH_IS_PLACEHOLDER(pattern->as.array.length)) {
-      int slot = ARRAY_LENGTH_SLOT(pattern->as.array.length);
-
-      if (slot < count && bindings[slot] == NULL &&
-          !ARRAY_LENGTH_IS_PLACEHOLDER(actual->as.array.length))
-        bindings[slot] = lengthBinding(actual->as.array.length);
-    }
+    bindLength(pattern->as.array.lengthParam, actual, bindings, count);
     return;
 
   case TYPE_FN:
@@ -725,20 +767,24 @@ static Type *substituteGenericParams(Type *type, Type **bindings, int count,
   case TYPE_ARRAY: {
     Type *elementType = substituteGenericParams(type->as.array.elementType,
                                                 bindings, count, eraseEmpty);
-    int length = type->as.array.length;
+    Type *param = type->as.array.lengthParam;
+    Type *bound = NULL;
 
-    if (ARRAY_LENGTH_IS_PLACEHOLDER(length)) {
-      int slot = ARRAY_LENGTH_SLOT(length);
+    if (param != NULL && !param->as.genericParam.isOpaque &&
+        param->as.genericParam.index < count)
+      bound = bindings[param->as.genericParam.index];
 
-      if (slot < count && bindings[slot] != NULL)
-        length = bindings[slot]->as.array.length;
+    if (bound == NULL) {
+      return elementType == type->as.array.elementType
+                 ? type
+                 : arrayWithElement(type, elementType);
     }
 
-    if (elementType == type->as.array.elementType &&
-        length == type->as.array.length)
-      return type;
+    // The slot holds the length, or the parameter that stands for it
+    if (bound->kind == TYPE_GENERIC_PARAM)
+      return typeArrayOfParam(elementType, bound);
 
-    return typeArray(elementType, length);
+    return arrayWithElement(bound, elementType);
   }
 
   case TYPE_FN: {
@@ -881,7 +927,7 @@ bool typesEqual(const Type *a, const Type *b) {
     return typesEqual(a->as.list.elementType, b->as.list.elementType);
 
   case TYPE_ARRAY:
-    return a->as.array.length == b->as.array.length &&
+    return lengthsEqual(a, b) &&
            typesEqual(a->as.array.elementType, b->as.array.elementType);
 
   case TYPE_GENERIC_PARAM:
@@ -1021,18 +1067,18 @@ TypeMember typeTraitStaticMethodAt(Type *type, int index) {
   return type->as.trait_.staticMethods[index];
 }
 
-static void appendArrayLength(StrBuf *sb, int length) {
-  if (ARRAY_LENGTH_IS_PLACEHOLDER(length)) {
-    static const char names[] = "NMLK";
-    int index = -1 - length;
-    char name[2] = {index < (int)sizeof(names) - 1 ? names[index] : '?', '\0'};
-    sb_append(sb, name);
-    return;
+static void appendArrayLength(StrBuf *sb, const Type *array) {
+  const Type *param = array->as.array.lengthParam;
+  char text[256];
+
+  if (param != NULL) {
+    snprintf(text, sizeof(text), "%.*s", param->as.genericParam.name.length,
+             internedNameChars(param->as.genericParam.name));
+  } else {
+    snprintf(text, sizeof(text), "%d", array->as.array.length);
   }
 
-  char digits[16];
-  snprintf(digits, sizeof(digits), "%d", length);
-  sb_append(sb, digits);
+  sb_append(sb, text);
 }
 
 static void appendTypeName(StrBuf *sb, Type *type) {
@@ -1098,7 +1144,7 @@ static void appendTypeName(StrBuf *sb, Type *type) {
     sb_append(sb, "[");
     appendTypeName(sb, type->as.array.elementType);
     sb_append(sb, "; ");
-    appendArrayLength(sb, type->as.array.length);
+    appendArrayLength(sb, type);
     sb_append(sb, "]");
     break;
   case TYPE_GENERIC_PARAM:

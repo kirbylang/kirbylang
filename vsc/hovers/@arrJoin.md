@@ -1,5 +1,5 @@
 ```kirby
-native fun @arrJoin(array: [string; N], separator: string): string;
+native fun @arrJoin[const N](array: [string; N], separator: string): string;
 ```
 
 Concatenates every element of an array of strings into one string, separated by a separator string.

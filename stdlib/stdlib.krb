@@ -836,7 +836,7 @@ impl Default for unit {
     fun default(): Self = ();
 }
 
-impl [T] {
+impl[T] [T] {
     // Number of items
     pub fun len(self): i64 = @listLen(self);
 
@@ -871,7 +871,7 @@ impl [T] {
     pub fun concat(self, other: [T]): [T] = @listConcat(self, other);
 }
 
-impl [T; N] {
+impl[T, const N] [T; N] {
     // Number of items
     pub fun len(self): i64 = @arrLen(self);
 
@@ -887,7 +887,7 @@ impl [T; N] {
     pub fun slice(self, start: i64, end: i64): [T] = @arrSlice(self, start, end);
 
     // A list with the items of `self`, then the items of `other`
-    pub fun concat(self, other: [T; M]): [T] = @arrConcat(self, other);
+    pub fun concat[const M](self, other: [T; M]): [T] = @arrConcat(self, other);
 
     // A list with the same items
     pub fun toList(self): [T] = @arrToList(self);
@@ -898,15 +898,15 @@ impl [T; N] {
 
 native fun @abs(value: f64): f64;
 native fun @argc(): i64;
-native fun @arrConcat[T](a: [T; N], b: [T; M]): [T];
-native fun @arrContains[T](array: [T; N], item: T): bool;
-native fun @arrCopy[T](array: [T; N]): [T; N];
-native fun @arrEqual[T](a: [T; N], b: [T; N]): bool;
-native fun @arrJoin(array: [string; N], separator: string): string;
-native fun @arrLen[T](array: [T; N]): i64;
-native fun @arrReverse[T](array: [T; N]): [T; N];
-native fun @arrSlice[T](array: [T; N], start: integer, end: integer): [T];
-native fun @arrToList[T](array: [T; N]): [T];
+native fun @arrConcat[T, const N, const M](a: [T; N], b: [T; M]): [T];
+native fun @arrContains[T, const N](array: [T; N], item: T): bool;
+native fun @arrCopy[T, const N](array: [T; N]): [T; N];
+native fun @arrEqual[T, const N](a: [T; N], b: [T; N]): bool;
+native fun @arrJoin[const N](array: [string; N], separator: string): string;
+native fun @arrLen[T, const N](array: [T; N]): i64;
+native fun @arrReverse[T, const N](array: [T; N]): [T; N];
+native fun @arrSlice[T, const N](array: [T; N], start: integer, end: integer): [T];
+native fun @arrToList[T, const N](array: [T; N]): [T];
 native fun @assert(condition: bool, message: string): unit;
 native fun @boolToString(value: bool): string;
 native fun @ceil(value: f64): f64;

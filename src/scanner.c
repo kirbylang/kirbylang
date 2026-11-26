@@ -249,7 +249,16 @@ static TokenType identifierType(Scanner *scanner) {
   case 'b':
     return checkKeyword(scanner, 1, 4, "reak", TOKEN_BREAK);
   case 'c':
-    return checkKeyword(scanner, 1, 7, "ontinue", TOKEN_CONTINUE);
+    if (scanner->current - scanner->start > 3 && scanner->start[1] == 'o' &&
+        scanner->start[2] == 'n') {
+      switch (scanner->start[3]) {
+      case 's':
+        return checkKeyword(scanner, 4, 1, "t", TOKEN_CONST);
+      case 't':
+        return checkKeyword(scanner, 4, 4, "inue", TOKEN_CONTINUE);
+      }
+    }
+    break;
   case 'e':
     return checkKeyword(scanner, 1, 3, "lse", TOKEN_ELSE);
   case 'f':

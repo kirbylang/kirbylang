@@ -295,6 +295,9 @@ typedef struct {
 typedef struct {
   AstNode *elementType;
   int length;
+  // The standard library can name the length instead, as in `[T; N]`
+  bool hasLengthName;
+  Token lengthName;
 } TypeArrayNode;
 ```
 
@@ -438,6 +441,9 @@ typedef struct {
    * 0.
    */
   GenericBounds *genericBounds;
+  /** Which parameters are lengths, declared as `const N`. NULL when none can
+   * be. */
+  bool *genericIsConst;
 } FunctionNode;
 ```
 
@@ -481,31 +487,43 @@ typedef struct {
 ```c
 typedef enum {
   IMPL_TARGET_NAME,  // `impl Box[T]`, `impl string`
-  IMPL_TARGET_LIST,  // `impl [T]`
-  IMPL_TARGET_ARRAY, // `impl [T; N]`
+  IMPL_TARGET_LIST,  // `impl[T] [T]`
+  IMPL_TARGET_ARRAY, // `impl[T, const N] [T; N]`
 } ImplTargetKind;
 
 typedef struct {
   ImplTargetKind targetKind;
   /**
-   * The type's name, or the whole `[T; N]` text for a list or array.
+   * The type's name, or the `[` token for a list or array target.
    */
   Token targetName;
   /**
    * arena-allocated array of bare generic parameter name tokens, e.g. the
-   * `T` in `impl Box[T]`. There must be as many as the struct declares. They
-   * stand for the struct's parameters in order, and the names can differ.
-   * For a list target it is the item type's name, and for an array target the
-   * item type's name and then the length's name, which can be `_`.
+   * `T` in `impl Box[T]` or `impl[T] [T]`. A struct impl has as many as the
+   * struct declares. They stand for the struct's parameters in order, and the
+   * names can differ. A list or array impl declares its own after `impl`.
    */
   Token *genericParams;
   int genericParamCount;
+  /** Which parameters are lengths, declared as `const N`. NULL for a struct
+   * impl. */
+  bool *genericIsConst;
+  /** The names in a list or array target: the item type's, and for an array
+   * the length's, which can be `_`. */
+  Token itemName;
+  Token lengthName;
   // impl Trait for Struct?
   bool hasTraitName;
   Token traitName;
   FunctionNode **methods;
   int methodCount;
   int endLine;
+  /**
+   * Set by the type checker when the block adds methods to a primitive type,
+   * such as "string" or "u8", or implements a trait for one. NULL for every
+   * other impl.
+   */
+  const char *primitiveOwner;
 } ImplNode;
 ```
 

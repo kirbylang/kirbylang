@@ -1,5 +1,5 @@
 ```kirby
-native fun @arrLen[T](array: [T; N]): i64;
+native fun @arrLen[T, const N](array: [T; N]): i64;
 ```
 
 Get the number of elements in an array, as an `i64`. The length is part of the array's type, so it is known when the program is compiled.

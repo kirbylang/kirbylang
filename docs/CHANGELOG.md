@@ -24,6 +24,12 @@
 
 ## Next
 
+- **Breaking**: `const` is a reserved word. In the standard library it declares an array length as a parameter, as in `native fun @arrConcat[T, const N, const M](a: [T; N], b: [T; M]): [T];`, in place of the fixed names `N` and `M`
+- **Breaking**: a list or array impl declares its parameters after `impl`, as in `impl[T] [T]` and `impl[T, const N] [T; N]`. Only the standard library writes these
+- **Breaking**: a method can't declare a type parameter with the same name as one of its impl's, such as `fun with[T]` in `impl Box[T]`. It is reported as `Generic parameter 'T' is already declared.`
+- Fix a standard library method being able to return one array length as another, such as a `[T; M]` as a `[T; N]`
+- Fix a false type error in an array method with four or more type parameters of its own
+- VS Code extension: highlight `const` and trait names in list and array impls, and update the impl snippets and array native hovers
 - VS Code extension: highlight `impl` blocks for primitives, lists and arrays, `native` declarations, built-in type names, every number suffix and method calls on literals, and add snippets for them, a `native` hover and an `@strToBytes` snippet
 - **Breaking**: `native` is a reserved word. The standard library declares the types of natives with it, such as `native fun @listPop[T](list: [T]): T;`
 - Fix a false `Can't tell what 'T' is from the arguments.` error when a generic function calls an array method such as `concat` on its own `[T; n]`
