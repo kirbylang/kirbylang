@@ -1,0 +1,7 @@
+fun bad(): i64 = LIMIT + "x";
+
+fun main(): unit {
+  @println(bad());
+}
+
+let LIMIT: i64 = 2;

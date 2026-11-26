@@ -1,0 +1,10 @@
+fun first_length(): i64 = NAMES[0].len();
+
+fun count(): i64 = NAMES.len();
+
+fun main(): unit {
+  @println(first_length());
+  @println(count());
+}
+
+let NAMES: [string; 2] = ["  ann ", " bob"];
