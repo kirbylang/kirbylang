@@ -752,7 +752,10 @@ static AstNode *call(Parser *p, AstNode *left, bool canAssign) {
         error_at_current(p, "Can't have more than 255 arguments.");
       }
 
-      argBuf[argCount++] = expression(p);
+      AstNode *arg = expression(p);
+
+      if (argCount < 255)
+        argBuf[argCount++] = arg;
     } while (match(p, TOKEN_COMMA));
   }
 
@@ -1363,14 +1366,18 @@ static AstNode *functionTail(Parser *p, Token name, int line, bool isMethod,
         error_at_current(p, "'self' must be the first parameter.");
       }
       consumeDeclarationIdentifier(p, "Expect parameter name.");
-      paramBuf[arity] = p->previous;
+      Token paramName = p->previous;
 
-      typeBuf[arity] = NULL;
+      AstNode *paramType = NULL;
       if (match(p, TOKEN_COLON)) {
-        typeBuf[arity] = parseType(p);
+        paramType = parseType(p);
       }
 
-      arity++;
+      if (arity < 255) {
+        paramBuf[arity] = paramName;
+        typeBuf[arity] = paramType;
+        arity++;
+      }
     } while (match(p, TOKEN_COMMA));
   }
   consume(p, TOKEN_RIGHT_PAREN, "Expect ')' after parameters.");
@@ -1452,10 +1459,9 @@ static int parseGenericParamList(Parser *p, Token *paramBuf,
         error_at_current(p, "Can't have more than 255 generic parameters.");
       }
       consumeDeclarationIdentifier(p, "Expect generic parameter name.");
-      paramBuf[count] = p->previous;
-
-      if (boundBuf != NULL)
-        memset(&boundBuf[count], 0, sizeof(GenericBounds));
+      Token name = p->previous;
+      GenericBounds bounds;
+      memset(&bounds, 0, sizeof(GenericBounds));
 
       if (match(p, TOKEN_COLON)) {
         if (boundBuf == NULL)
@@ -1477,15 +1483,19 @@ static int parseGenericParamList(Parser *p, Token *paramBuf,
         } while (match(p, TOKEN_PLUS));
 
         if (boundBuf != NULL) {
-          boundBuf[count].traits =
+          bounds.traits =
               (Token *)astAllocRaw((size_t)traitCount * sizeof(Token));
-          memcpy(boundBuf[count].traits, traitBuf,
-                 (size_t)traitCount * sizeof(Token));
-          boundBuf[count].count = traitCount;
+          memcpy(bounds.traits, traitBuf, (size_t)traitCount * sizeof(Token));
+          bounds.count = traitCount;
         }
       }
 
-      count++;
+      if (count < 255) {
+        paramBuf[count] = name;
+        if (boundBuf != NULL)
+          boundBuf[count] = bounds;
+        count++;
+      }
     } while (match(p, TOKEN_COMMA));
     consume(p, TOKEN_RIGHT_BRACKET, "Expect ']' after generic parameters.");
   }
