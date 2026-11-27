@@ -1,0 +1,30 @@
+struct Point {
+    pub x: i64;
+}
+
+struct Box[T] {
+    pub value: T;
+}
+
+impl Box[Point] {
+    pub fun get(self): Point = self.value;
+
+    pub fun other[Box](self, extra: Box): Box = extra;
+}
+
+struct Holder[Point] {
+    pub held: Point;
+}
+
+fun id[Point](x: Point): Point = x;
+
+fun main(): unit {
+    @println(id(5));
+
+    let b = Box { value: "boxed" };
+    @println(b.get());
+    @println(b.other(true));
+
+    let h: Holder[i64] = Holder { held: 7 };
+    @println(h.held);
+}

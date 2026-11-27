@@ -1,0 +1,6 @@
+fun f[string](x: string): string {
+    let s: string = "text";
+    s
+}
+
+fun main(): unit {}

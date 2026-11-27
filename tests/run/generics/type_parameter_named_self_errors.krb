@@ -1,0 +1,17 @@
+struct Box[T] {
+    pub value: T;
+}
+
+type Alias[Self] = [Self];
+
+fun f[Self](x: Self): Self = x;
+
+struct Holder[Self] {}
+
+impl Box[Self] {}
+
+impl Box[T] {
+    pub fun g[U, Self](self): unit {}
+}
+
+fun main(): unit {}

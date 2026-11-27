@@ -130,6 +130,12 @@ call or literal works out the arguments.
 
 `impl Trait for` a generic struct isn't supported yet.
 
+A type parameter hides any type of the same name inside its declaration: a
+struct, a type alias, or a type such as `string` or `i64`. In
+`fun id[string](x: string): string`, `string` is the parameter, so the function
+takes any type. A parameter can't be given type arguments, and `Self` can't be
+its name.
+
 ### Generic Functions
 
 A function can declare type parameters after its name. A call fills each one
@@ -304,7 +310,8 @@ native function of the same name. The ones that return a list (`slice`,
 The same limits as the other primitives apply. Only the standard library can
 write these blocks, and a user file gets `You can't write an impl for a
 primitive type in user code.`. The item has to be a type parameter, so
-`impl[T] [string]` is an error. There are no static methods, and a list or array
+`impl[T] [string]` is an error, while the `string` of `impl[string] [string]` is
+a parameter. There are no static methods, and a list or array
 can't fill a bounded type parameter yet. A trait impl, such as
 `impl[T] Display for [T]`, gives every list the trait with no condition on `T`,
 because these parameters can't have bounds.

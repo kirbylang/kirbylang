@@ -1,0 +1,74 @@
+== <script> ==
+0000   19 OP_CLOSURE          1 <fn id>
+0002    | OP_DEFINE_GLOBAL    0 'id'
+0004   30 OP_CLOSURE          3 <fn main>
+0006    | OP_DEFINE_GLOBAL    2 'main'
+0008    1 OP_STRUCT           4 'Point'
+0010    | OP_DEFINE_GLOBAL    4 'Point'
+0012    | OP_GET_GLOBAL       4 'Point'
+0014    2 OP_NIL
+0015    | OP_FIELD            5 'x' public immutable
+0019    3 OP_POP
+0020    5 OP_STRUCT           6 'Box'
+0022    | OP_DEFINE_GLOBAL    6 'Box'
+0024    | OP_GET_GLOBAL       6 'Box'
+0026    6 OP_NIL
+0027    | OP_FIELD            7 'value' public immutable
+0031    7 OP_POP
+0032   15 OP_STRUCT           8 'Holder'
+0034    | OP_DEFINE_GLOBAL    8 'Holder'
+0036    | OP_GET_GLOBAL       8 'Holder'
+0038   16 OP_NIL
+0039    | OP_FIELD            9 'held' public immutable
+0043   17 OP_POP
+0044    9 OP_GET_GLOBAL       6 'Box'
+0046   10 OP_CLOSURE         11 <fn get>
+0048    | OP_METHOD          10 'get'
+0050   12 OP_CLOSURE         13 <fn other>
+0052    | OP_METHOD          12 'other'
+0054   13 OP_POP
+0055   31 OP_NIL
+0056    | OP_RETURN
+== id ==
+0000   19 OP_GET_LOCAL        1
+0002    | OP_RETURN
+== main ==
+0000   22 OP_GET_GLOBAL       0 '@println'
+0002    | OP_GET_GLOBAL       1 'id'
+0004    | OP_CONSTANT         2 '5'
+0006    | OP_CALL             1
+0008    | OP_CALL             1
+0010    | OP_POP
+0011   24 OP_GET_GLOBAL       3 'Box'
+0013    | OP_CONSTANT         4 'value'
+0015    | OP_CONSTANT         5 'boxed'
+0017    | OP_STRUCT_INIT      1
+0019   25 OP_GET_GLOBAL       0 '@println'
+0021    | OP_GET_LOCAL        1
+0023    | OP_INVOKE        (0 args)    6 'get'
+0026    | OP_CALL             1
+0028    | OP_POP
+0029   26 OP_GET_GLOBAL       0 '@println'
+0031    | OP_GET_LOCAL        1
+0033    | OP_TRUE
+0034    | OP_INVOKE        (1 args)    7 'other'
+0037    | OP_CALL             1
+0039    | OP_POP
+0040   28 OP_GET_GLOBAL       8 'Holder'
+0042    | OP_CONSTANT         9 'held'
+0044    | OP_CONSTANT        10 '7'
+0046    | OP_STRUCT_INIT      1
+0048   29 OP_GET_GLOBAL       0 '@println'
+0050    | OP_GET_LOCAL        2
+0052    | OP_GET_PROPERTY     9 'held'
+0054    | OP_CALL             1
+0056    | OP_POP
+0057   30 OP_NIL
+0058    | OP_RETURN
+== get ==
+0000   10 OP_GET_LOCAL        0
+0002    | OP_GET_PROPERTY     0 'value'
+0004    | OP_RETURN
+== other ==
+0000   12 OP_GET_LOCAL        1
+0002    | OP_RETURN
