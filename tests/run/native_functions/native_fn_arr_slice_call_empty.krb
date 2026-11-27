@@ -1,0 +1,11 @@
+fun main(): unit {
+    let array = [10, 20, 30];
+
+    @println(@arrSlice(array, 0, 0));
+    @println(array.slice(2, 2));
+    @println(array.slice(3, 3));
+
+    let empty: [i64; 0] = [];
+
+    @println(empty.slice(0, 0));
+}

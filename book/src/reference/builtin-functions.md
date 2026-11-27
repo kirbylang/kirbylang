@@ -204,7 +204,7 @@ fun main(): unit {
 
 ### `@listSlice`
 
-Copy the items from `start` up to, but not including, `end` into a new list. Positions count from `0`, and `start` must be before `end`.
+Copy the items from `start` up to, but not including, `end` into a new list. Positions count from `0`, and `start` can't be after `end`. When they are equal, the result is empty.
 
 ```kirby
 fun main(): unit {
@@ -312,7 +312,7 @@ fun main(): unit {
 
 ### `@arrSlice`
 
-Copies the items from a start index up to an end index of an array into a new list. The result is a list because its length isn't known when the program is compiled. Positions count from `0`, and `start` must be before `end`.
+Copies the items from a start index up to an end index of an array into a new list. The result is a list because its length isn't known when the program is compiled. Positions count from `0`, and `start` can't be after `end`. When they are equal, the result is empty.
 
 ```kirby
 fun main(): unit {

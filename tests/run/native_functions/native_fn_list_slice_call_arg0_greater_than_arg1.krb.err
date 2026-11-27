@@ -18,5 +18,5 @@
 0008    | OP_CALL             3
 0010    | OP_NIL
 0011    | OP_RETURN
-function @listSlice expects argument 2 to be less than argument 3.
+function @listSlice expects argument 2 to be less than or equal to argument 3.
 [line 3] in main()

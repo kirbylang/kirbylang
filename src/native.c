@@ -596,10 +596,10 @@ static Value listSliceNative(VM *vm, int argCount, Value *args) {
   assertWholeNumber(vm, "@listSlice", end, 2);
   assertIsInListBounds(vm, list, end);
 
-  if (start >= end) {
-    runtimeError(
-        vm,
-        "function @listSlice expects argument 2 to be less than argument 3.");
+  if (start > end) {
+    runtimeError(vm,
+                 "function @listSlice expects argument 2 to be less than or "
+                 "equal to argument 3.");
     exit(EXIT_CODE_RUNTIME_ERR);
   }
 
@@ -846,10 +846,9 @@ static Value arrSliceNative(VM *vm, int argCount, Value *args) {
   assertWholeNumber(vm, "@arrSlice", end, 2);
   assertIsInArrayBounds(vm, array, end);
 
-  if (start >= end) {
-    runtimeError(
-        vm,
-        "function @arrSlice expects argument 2 to be less than argument 3.");
+  if (start > end) {
+    runtimeError(vm, "function @arrSlice expects argument 2 to be less than or "
+                     "equal to argument 3.");
     exit(EXIT_CODE_RUNTIME_ERR);
   }
 
