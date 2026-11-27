@@ -372,7 +372,7 @@ static void test_a_trait_names_its_method_on_every_kind(void) {
   end();
 }
 
-static void test_method_names_can_only_clash_by_shadowing(void) {
+static void test_two_traits_can_share_a_method_name(void) {
   begin();
   expectOk(tagTrait, true);
   expectOk("trait Other { fun tag(self): string; }", true);
@@ -385,7 +385,27 @@ static void test_method_names_can_only_clash_by_shadowing(void) {
            true);
 
   // Two traits with the same method name
-  expectError("impl Other for u8 { fun tag(self): string = \"other\"; }", true);
+  expectOk("impl Other for u8 { fun tag(self): string = \"other\"; }", true);
+
+  // The call has to say which trait it means
+  char *errors = errorsOf("let v: u8 = 1;\nv.tag();", false);
+  assert(strstr(errors, "Method 'tag' is in both Tag and Other. Call it as "
+                        "'Tag.tag(value)'.") != NULL);
+  free(errors);
+
+  expectOk("if (true) {\n"
+           "let v: u8 = 1;\n"
+           "@assert(Tag.tag(v) == \"u8\", \"Tag\");\n"
+           "@assert(Other.tag(v) == \"other\", \"Other\");\n"
+           "}",
+           false);
+
+  // One impl can't declare the name twice
+  expectError("impl Other for u16 {\n"
+              "  fun tag(self): string = \"a\";\n"
+              "  fun tag(self): string = \"b\";\n"
+              "}",
+              true);
 
   // An instance method and a static method with one name
   expectError("impl Maker for u8 { fun tag(): Self = 1; }", true);
@@ -1000,7 +1020,7 @@ int main(void) {
   test_a_supertrait_needs_its_own_impl();
   test_an_inherent_method_shadows_a_trait_method();
   test_a_trait_names_its_method_on_every_kind();
-  test_method_names_can_only_clash_by_shadowing();
+  test_two_traits_can_share_a_method_name();
   test_a_trait_method_must_be_called();
   test_a_trait_method_belongs_to_its_kind();
   test_only_the_stdlib_implements_traits_for_primitives();

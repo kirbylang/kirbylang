@@ -609,7 +609,7 @@ has the supertrait `Eq`.
 - A primitive can't yet be used where a type parameter has a trait bound, except a number with an operator trait
 - A generic struct can't implement a trait
 - If a struct's impl block implements a method of the same name as a trait, `value.method()` calls the struct's own method. Use `Trait.method(value)` to call the trait's version, see [Calling A Trait's Method By Name](#calling-a-traits-method-by-name).
-- Two traits can't both provide a method of the same name to one struct, and a name can't be both an instance method and a static method on one type. Both are compile errors.
+- Two traits can give one type instance methods of the same name. A call such as `value.label()` is then the error `Method 'label' is in both Named and Titled. Call it as 'Named.label(value)'.`, unless the type has its own method of that name. Two traits can't give one type static methods of the same name, and a name can't be both an instance method and a static method on one type. Both are compile errors.
 
 ### Trait Bounds
 

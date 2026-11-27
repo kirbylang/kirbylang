@@ -343,13 +343,13 @@ static void test_struct_trait_method_lookup_is_separate_from_instance(void) {
   Type *accountStruct = typeStruct(tokenFromCString("Account"), NULL, 0);
 
   Type *toStringType = typeFunction(NULL, 0, typeString());
-  typeStructAddTraitMethod(accountStruct, tokenFromCString("toString"),
-                           toStringType,
+  typeStructAddTraitMethod(accountStruct, (InternedName){0},
+                           tokenFromCString("toString"), toStringType,
                            /*hasSelf=*/true);
 
   Type *defaultType = typeFunction(NULL, 0, typeF64());
-  typeStructAddTraitMethod(accountStruct, tokenFromCString("default"),
-                           defaultType,
+  typeStructAddTraitMethod(accountStruct, (InternedName){0},
+                           tokenFromCString("default"), defaultType,
                            /*hasSelf=*/false);
 
   assert(typeStructTraitInstanceMethodLookup(

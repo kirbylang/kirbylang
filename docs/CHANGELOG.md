@@ -21,6 +21,7 @@
 
 ## Next
 
+- Allow two traits to give one type instance methods of the same name. A call such as `value.label()` is then ambiguous and is an error, so write `Named.label(value)`. It was an error to implement the second trait
 - **Breaking**: `cmp` on floats sorts `NaN` below every number and level with `NaN`. It returned `0`, which means equal. In a generic function, where `<` and the other ordering operators use `cmp`, `NaN < 1.0` is now `true`
 - Change where a source build puts `krb`: `build/debug` for `just build` and `build/release` for `just build-release`, which is now optimized. `just install` makes a release build first
 - Change a bad array length, such as `[i64; n]`, to report one error, `Array length must be a whole number, as in '[i64; 3]'.`, in place of a syntax error that was often followed by a second one

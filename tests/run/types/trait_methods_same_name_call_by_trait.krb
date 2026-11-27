@@ -1,0 +1,37 @@
+// Two traits can both have a method named `total`
+trait Priced {
+    fun total(self): i64;
+}
+
+trait Counted {
+    fun total(self): i64;
+}
+
+struct Order {
+    pub var price: i64;
+    pub var items: i64;
+}
+
+impl Priced for Order {
+    fun total(self): i64 = self.price * self.items;
+}
+
+impl Counted for Order {
+    fun total(self): i64 = self.items;
+}
+
+// A bound with one of the traits means that trait's method
+fun cost[T: Priced](value: T): i64 = value.total();
+
+fun count[T: Counted](value: T): i64 = value.total();
+
+fun main(): unit {
+    let order = Order { price: 5, items: 3 };
+
+    // Name the trait to pick its method
+    @println(Priced.total(order));
+    @println(Counted.total(order));
+
+    @println(cost(order));
+    @println(count(order));
+}

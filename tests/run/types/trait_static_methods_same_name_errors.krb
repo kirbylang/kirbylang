@@ -1,0 +1,22 @@
+trait Empty {
+    fun create(): Self;
+}
+
+trait Sample {
+    fun create(): Self;
+}
+
+struct Order {
+    pub var items: i64;
+}
+
+impl Empty for Order {
+    fun create(): Self = Order { items: 0 };
+}
+
+// Static methods from two traits can't share a name
+impl Sample for Order {
+    fun create(): Self = Order { items: 3 };
+}
+
+fun main(): unit {}

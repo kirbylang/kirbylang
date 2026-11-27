@@ -37,6 +37,8 @@ typedef struct {
 typedef struct {
   InternedName name;
   Type *type;
+  // The trait a struct got the method from. Unset for every other member.
+  InternedName trait;
 } TypeMember;
 
 struct Type {
@@ -203,8 +205,8 @@ void typeStructAddInstanceMethod(Type *type, Token name, Type *methodType,
                                  bool isPublic);
 // `hasSelf` picks which of traitInstanceMethods/traitStaticMethods the
 // method is stored in -- see the field's doc comment above.
-void typeStructAddTraitMethod(Type *type, Token name, Type *methodType,
-                              bool hasSelf);
+void typeStructAddTraitMethod(Type *type, InternedName trait, Token name,
+                              Type *methodType, bool hasSelf);
 
 // Records that `type` has an `impl Trait for` block, where `traitName` is
 // the trait's interned name. Used for flat coherence checking (has this
@@ -293,6 +295,14 @@ Type *typeStructInstanceMethodLookup(Type *type, Token methodName);
 Type *typeStructStaticMethodLookup(Type *type, Token methodName);
 Type *typeStructTraitInstanceMethodLookup(Type *type, Token methodName);
 Type *typeStructTraitStaticMethodLookup(Type *type, Token methodName);
+// The instance method of this name that `trait` gave the struct, or NULL
+Type *typeStructTraitMethodOf(Type *type, InternedName trait, Token methodName,
+                              bool hasSelf);
+// How many traits gave the struct an instance method of this name. Writes the
+// first two to `first` and `second`.
+int typeStructTraitInstanceMethodTraits(Type *type, Token methodName,
+                                        InternedName *first,
+                                        InternedName *second);
 
 bool typeStructInstanceMethodIsPublic(Type *type, Token methodName);
 bool typeStructStaticMethodIsPublic(Type *type, Token methodName);

@@ -1,0 +1,24 @@
+trait Priced {
+    fun total(self): i64;
+}
+
+trait Counted {
+    fun total(self): i64;
+}
+
+struct Order {}
+
+impl Priced for Order {
+    fun total(self): i64 = 15;
+}
+
+impl Counted for Order {
+    fun total(self): i64 = 3;
+}
+
+fun main(): unit {
+    let order = Order {};
+
+    // Either trait's method could be meant
+    @println(order.total());
+}
