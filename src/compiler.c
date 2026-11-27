@@ -1086,13 +1086,13 @@ static void compileExpr(AstNode *node) {
       emitByte(OP_GREATER);
       break;
     case TOKEN_GREATER_EQUAL:
-      emitBytes(OP_LESS, OP_NOT);
+      emitByte(OP_GREATER_EQUAL);
       break;
     case TOKEN_LESS:
       emitByte(OP_LESS);
       break;
     case TOKEN_LESS_EQUAL:
-      emitBytes(OP_GREATER, OP_NOT);
+      emitByte(OP_LESS_EQUAL);
       break;
     case TOKEN_EQUAL_EQUAL:
       emitByte(OP_EQUAL);

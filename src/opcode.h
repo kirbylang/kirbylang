@@ -53,6 +53,8 @@ typedef enum {
   OP_CAST,             // 42; operand: target number kind (0 = f64, 1 = u8)
   OP_ARRAY,            // 43; operand: item count. A fixed size array
   OP_TRAIT_METHOD,     // 44; operands: name constant, qualified name constant
+  OP_LESS_EQUAL,       // 45
+  OP_GREATER_EQUAL,    // 46
   // Sentinel
   OP_COUNT,
 } OpCode;

@@ -178,6 +178,18 @@ bool numberOpLessThan(NumberKind kind, NumberPayload a, NumberPayload b) {
   return a.u64 < b.u64;
 }
 
+bool numberOpLessOrEqual(NumberKind kind, NumberPayload a, NumberPayload b) {
+  const NumberKindInfo *info = numberKindInfo(kind);
+
+  if (info->isFloat)
+    return a.f64 <= b.f64;
+
+  if (info->isSigned)
+    return a.i64 <= b.i64;
+
+  return a.u64 <= b.u64;
+}
+
 static NumberCastResult numberCastFloatToInteger(double value, NumberKind to,
                                                  NumberPayload *result) {
   const NumberKindInfo *info = numberKindInfo(to);

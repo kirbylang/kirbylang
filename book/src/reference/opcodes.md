@@ -47,6 +47,8 @@
 |  `42` | `OP_CAST`             | `targetType`                       |          0 | Converts the value to the target number kind; the result takes its place on the stack.                        |
 |  `43` | `OP_ARRAY`            | `itemCount`                        |      -n +1 | Makes an array from the top n values.                                                                         |
 |  `44` | `OP_TRAIT_METHOD`     | `index`, `index`                   |         -1 | Pops the method, like `OP_METHOD`, and binds it under a second name, the trait's, such as `Display.toString`. |
+|  `45` | `OP_LESS_EQUAL`       |                                    |      -2 +1 | False when either float is `NaN`.                                                                             |
+|  `46` | `OP_GREATER_EQUAL`    |                                    |      -2 +1 | False when either float is `NaN`.                                                                             |
 
 **Stack** shows what an instruction pops and then pushes: `-2 +1` pops two values and pushes one, and `0` leaves the stack as it was. `n` is the instruction's count operand. The compiler tracks the stack height from the same information in `opInfos` in `src/opcode.c`, so the two must match.
 

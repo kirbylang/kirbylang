@@ -25,23 +25,20 @@
 0030    4 OP_GET_GLOBAL       0 '@println'
 0032    | OP_CONSTANT         1 '5'
 0034    | OP_CONSTANT         1 '5'
-0036    | OP_GREATER
-0037    | OP_NOT
-0038    | OP_CALL             1
-0040    | OP_POP
-0041    5 OP_GET_GLOBAL       0 '@println'
-0043    | OP_CONSTANT         5 '6'
-0045    | OP_CONSTANT         6 '7'
-0047    | OP_LESS
-0048    | OP_NOT
-0049    | OP_CALL             1
-0051    | OP_POP
-0052    6 OP_GET_GLOBAL       0 '@println'
+0036    | OP_LESS_EQUAL
+0037    | OP_CALL             1
+0039    | OP_POP
+0040    5 OP_GET_GLOBAL       0 '@println'
+0042    | OP_CONSTANT         5 '6'
+0044    | OP_CONSTANT         6 '7'
+0046    | OP_GREATER_EQUAL
+0047    | OP_CALL             1
+0049    | OP_POP
+0050    6 OP_GET_GLOBAL       0 '@println'
+0052    | OP_CONSTANT         5 '6'
 0054    | OP_CONSTANT         5 '6'
-0056    | OP_CONSTANT         5 '6'
-0058    | OP_LESS
-0059    | OP_NOT
-0060    | OP_CALL             1
-0062    | OP_POP
-0063    | OP_NIL
-0064    | OP_RETURN
+0056    | OP_GREATER_EQUAL
+0057    | OP_CALL             1
+0059    | OP_POP
+0060    | OP_NIL
+0061    | OP_RETURN

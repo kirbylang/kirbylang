@@ -1,0 +1,20 @@
+fun main(): unit {
+    var big: f64 = 10.0;
+    var i = 0;
+    while (i < 400) { big = big * 10.0; i = i + 1; }
+    let nan = big - big;
+    let one: f64 = 1.0;
+
+    // NaN has no order, so every comparison with it is false
+    @println(nan < one);
+    @println(nan > one);
+    @println(nan <= one);
+    @println(nan >= one);
+    @println(one <= nan);
+    @println(one >= nan);
+    @println(nan <= nan);
+    @println(nan >= nan);
+
+    @println(one <= one);
+    @println(one >= one);
+}

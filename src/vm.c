@@ -654,7 +654,9 @@ static bool numberThreeWayCompare(void) {
   return true;
 }
 
-static bool numberCompare(bool greater) {
+// Runs `<`, `>`, `<=` or `>=`. The greater forms swap the operands, so every
+// comparison with NaN is false.
+static bool numberCompare(bool greater, bool orEqual) {
   Value b = peekStack(0);
   Value a = peekStack(1);
 
@@ -664,9 +666,10 @@ static bool numberCompare(bool greater) {
   }
 
   NumberKind kind = a.as.number.kind;
-  bool result = greater
-                    ? numberOpLessThan(kind, b.as.number.as, a.as.number.as)
-                    : numberOpLessThan(kind, a.as.number.as, b.as.number.as);
+  NumberPayload left = greater ? b.as.number.as : a.as.number.as;
+  NumberPayload right = greater ? a.as.number.as : b.as.number.as;
+  bool result = orEqual ? numberOpLessOrEqual(kind, left, right)
+                        : numberOpLessThan(kind, left, right);
 
   popFromStack();
   popFromStack();
@@ -839,11 +842,19 @@ static InterpretResult run(void) {
       break;
     }
     case OP_GREATER:
-      if (!numberCompare(true))
+      if (!numberCompare(/*greater=*/true, /*orEqual=*/false))
         return INTERPRET_RUNTIME_ERROR;
       break;
     case OP_LESS:
-      if (!numberCompare(false))
+      if (!numberCompare(/*greater=*/false, /*orEqual=*/false))
+        return INTERPRET_RUNTIME_ERROR;
+      break;
+    case OP_LESS_EQUAL:
+      if (!numberCompare(/*greater=*/false, /*orEqual=*/true))
+        return INTERPRET_RUNTIME_ERROR;
+      break;
+    case OP_GREATER_EQUAL:
+      if (!numberCompare(/*greater=*/true, /*orEqual=*/true))
         return INTERPRET_RUNTIME_ERROR;
       break;
     case OP_POP: {

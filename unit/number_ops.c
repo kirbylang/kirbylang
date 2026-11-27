@@ -156,6 +156,19 @@ static void test_is_zero(void) {
   assert(!numberIsZero(NUMBER_KIND_F64, F64(0.5)));
 }
 
+static void test_less_or_equal(void) {
+  assert(numberOpLessOrEqual(NUMBER_KIND_I32, I64(-1), I64(0)));
+  assert(numberOpLessOrEqual(NUMBER_KIND_I32, I64(0), I64(0)));
+  assert(!numberOpLessOrEqual(NUMBER_KIND_I32, I64(0), I64(-1)));
+  assert(
+      numberOpLessOrEqual(NUMBER_KIND_U64, U64(UINT64_MAX), U64(UINT64_MAX)));
+  assert(!numberOpLessOrEqual(NUMBER_KIND_U64, U64(UINT64_MAX), U64(1)));
+  assert(numberOpLessOrEqual(NUMBER_KIND_F64, F64(0.5), F64(0.5)));
+  assert(!numberOpLessOrEqual(NUMBER_KIND_F64, F64(NAN), F64(1)));
+  assert(!numberOpLessOrEqual(NUMBER_KIND_F64, F64(1), F64(NAN)));
+  assert(!numberOpLessOrEqual(NUMBER_KIND_F64, F64(NAN), F64(NAN)));
+}
+
 static void test_less(void) {
   assert(numberOpLessThan(NUMBER_KIND_I32, I64(-1), I64(0)));
   assert(!numberOpLessThan(NUMBER_KIND_I32, I64(0), I64(-1)));
@@ -290,6 +303,7 @@ int main(void) {
   test_negate();
   test_is_zero();
   test_less();
+  test_less_or_equal();
   test_cast_float_to_integer();
   test_cast_integer_to_integer();
   test_cast_to_float();

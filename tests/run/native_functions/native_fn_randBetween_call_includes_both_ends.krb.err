@@ -11,7 +11,7 @@
 0004    | OP_GET_LOCAL        4
 0006    | OP_CONSTANT         1 '1000'
 0008    | OP_LESS
-0009    | OP_JUMP_IF_FALSE    9 -> 93
+0009    | OP_JUMP_IF_FALSE    9 -> 91
 0012    | OP_POP
 0013    | OP_JUMP            13 -> 27
 0016    | OP_GET_LOCAL        4
@@ -27,43 +27,41 @@
 0035    8 OP_GET_GLOBAL       4 '@assert'
 0037    | OP_GET_LOCAL        5
 0039    | OP_GET_LOCAL        1
-0041    | OP_LESS
-0042    | OP_NOT
-0043    | OP_JUMP_IF_FALSE   43 -> 53
-0046    | OP_POP
-0047    | OP_GET_LOCAL        5
-0049    | OP_GET_LOCAL        2
-0051    | OP_GREATER
-0052    | OP_NOT
-0053    | OP_CONSTANT         5 'out of range'
-0055    | OP_CALL             2
-0057    | OP_POP
-0058   10 OP_GET_GLOBAL       6 'list.contains'
-0060    | OP_GET_LOCAL        3
-0062    | OP_GET_LOCAL        5
-0064    | OP_CALL             2
-0066    | OP_NOT
-0067    | OP_JUMP_IF_FALSE   67 -> 86
-0070    | OP_POP
-0071   11 OP_GET_GLOBAL       7 'list.push'
-0073    | OP_GET_LOCAL        3
-0075    | OP_GET_LOCAL        5
-0077    | OP_CALL             2
-0079    | OP_POP
-0080   12 OP_NIL
-0081    | OP_CLOSE_BLOCK_EXPR    0
-0083    | OP_JUMP            83 -> 88
+0041    | OP_GREATER_EQUAL
+0042    | OP_JUMP_IF_FALSE   42 -> 51
+0045    | OP_POP
+0046    | OP_GET_LOCAL        5
+0048    | OP_GET_LOCAL        2
+0050    | OP_LESS_EQUAL
+0051    | OP_CONSTANT         5 'out of range'
+0053    | OP_CALL             2
+0055    | OP_POP
+0056   10 OP_GET_GLOBAL       6 'list.contains'
+0058    | OP_GET_LOCAL        3
+0060    | OP_GET_LOCAL        5
+0062    | OP_CALL             2
+0064    | OP_NOT
+0065    | OP_JUMP_IF_FALSE   65 -> 84
+0068    | OP_POP
+0069   11 OP_GET_GLOBAL       7 'list.push'
+0071    | OP_GET_LOCAL        3
+0073    | OP_GET_LOCAL        5
+0075    | OP_CALL             2
+0077    | OP_POP
+0078   12 OP_NIL
+0079    | OP_CLOSE_BLOCK_EXPR    0
+0081    | OP_JUMP            81 -> 86
+0084    | OP_POP
+0085    | OP_NIL
 0086    | OP_POP
-0087    | OP_NIL
-0088    | OP_POP
-0089   13 OP_POP
-0090    | OP_LOOP            90 -> 16
-0093    | OP_POP
-0094    | OP_POP
-0095   15 OP_GET_GLOBAL       8 'list.len'
-0097    | OP_GET_LOCAL        3
-0099    | OP_CALL             1
-0101    | OP_RETURN
+0087   13 OP_POP
+0088    | OP_LOOP            88 -> 16
+0091    | OP_POP
+0092    | OP_POP
+0093   15 OP_GET_GLOBAL       8 'list.len'
+0095    | OP_GET_LOCAL        3
+0097    | OP_CALL             1
+0099    | OP_RETURN
 == main ==
 0000   19 OP_GET_GLOBAL       0 '@println'
 0002    | OP_GET_GLOBAL       1 'seen'

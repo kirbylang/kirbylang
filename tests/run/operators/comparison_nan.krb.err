@@ -1,0 +1,91 @@
+== <script> ==
+0000   20 OP_CLOSURE          1 <fn main>
+0002    | OP_DEFINE_GLOBAL    0 'main'
+0004   21 OP_NIL
+0005    | OP_RETURN
+== main ==
+0000    2 OP_CONSTANT         0 '10'
+0002    3 OP_CONSTANT         1 '0'
+0004    4 OP_GET_LOCAL        2
+0006    | OP_CONSTANT         2 '400'
+0008    | OP_LESS
+0009    | OP_JUMP_IF_FALSE    9 -> 32
+0012    | OP_POP
+0013    | OP_GET_LOCAL        1
+0015    | OP_CONSTANT         0 '10'
+0017    | OP_MULTIPLY
+0018    | OP_SET_LOCAL        1
+0020    | OP_POP
+0021    | OP_GET_LOCAL        2
+0023    | OP_CONSTANT         3 '1'
+0025    | OP_ADD
+0026    | OP_SET_LOCAL        2
+0028    | OP_POP
+0029    | OP_LOOP            29 -> 4
+0032    | OP_POP
+0033    5 OP_GET_LOCAL        1
+0035    | OP_GET_LOCAL        1
+0037    | OP_SUBTRACT
+0038    6 OP_CONSTANT         4 '1'
+0040    9 OP_GET_GLOBAL       5 '@println'
+0042    | OP_GET_LOCAL        3
+0044    | OP_GET_LOCAL        4
+0046    | OP_LESS
+0047    | OP_CALL             1
+0049    | OP_POP
+0050   10 OP_GET_GLOBAL       5 '@println'
+0052    | OP_GET_LOCAL        3
+0054    | OP_GET_LOCAL        4
+0056    | OP_GREATER
+0057    | OP_CALL             1
+0059    | OP_POP
+0060   11 OP_GET_GLOBAL       5 '@println'
+0062    | OP_GET_LOCAL        3
+0064    | OP_GET_LOCAL        4
+0066    | OP_LESS_EQUAL
+0067    | OP_CALL             1
+0069    | OP_POP
+0070   12 OP_GET_GLOBAL       5 '@println'
+0072    | OP_GET_LOCAL        3
+0074    | OP_GET_LOCAL        4
+0076    | OP_GREATER_EQUAL
+0077    | OP_CALL             1
+0079    | OP_POP
+0080   13 OP_GET_GLOBAL       5 '@println'
+0082    | OP_GET_LOCAL        4
+0084    | OP_GET_LOCAL        3
+0086    | OP_LESS_EQUAL
+0087    | OP_CALL             1
+0089    | OP_POP
+0090   14 OP_GET_GLOBAL       5 '@println'
+0092    | OP_GET_LOCAL        4
+0094    | OP_GET_LOCAL        3
+0096    | OP_GREATER_EQUAL
+0097    | OP_CALL             1
+0099    | OP_POP
+0100   15 OP_GET_GLOBAL       5 '@println'
+0102    | OP_GET_LOCAL        3
+0104    | OP_GET_LOCAL        3
+0106    | OP_LESS_EQUAL
+0107    | OP_CALL             1
+0109    | OP_POP
+0110   16 OP_GET_GLOBAL       5 '@println'
+0112    | OP_GET_LOCAL        3
+0114    | OP_GET_LOCAL        3
+0116    | OP_GREATER_EQUAL
+0117    | OP_CALL             1
+0119    | OP_POP
+0120   18 OP_GET_GLOBAL       5 '@println'
+0122    | OP_GET_LOCAL        4
+0124    | OP_GET_LOCAL        4
+0126    | OP_LESS_EQUAL
+0127    | OP_CALL             1
+0129    | OP_POP
+0130   19 OP_GET_GLOBAL       5 '@println'
+0132    | OP_GET_LOCAL        4
+0134    | OP_GET_LOCAL        4
+0136    | OP_GREATER_EQUAL
+0137    | OP_CALL             1
+0139    | OP_POP
+0140   20 OP_NIL
+0141    | OP_RETURN

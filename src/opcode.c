@@ -35,6 +35,8 @@ static const OpInfo opInfos[OP_COUNT] = {
     [OP_LOOP] = {true, 2, 0, -1, 0},
     [OP_GREATER] = {true, 0, -1, -1, 0},
     [OP_LESS] = {true, 0, -1, -1, 0},
+    [OP_LESS_EQUAL] = {true, 0, -1, -1, 0},
+    [OP_GREATER_EQUAL] = {true, 0, -1, -1, 0},
     // The callee and its arguments become the result.
     [OP_CALL] = {true, 1, 0, 0, -1},
     [OP_CLOSURE] = {true, 1, 1, -1, 0},

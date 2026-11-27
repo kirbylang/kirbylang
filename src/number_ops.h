@@ -33,6 +33,9 @@ bool numberNegateValue(NumberKind kind, NumberPayload value,
 
 bool numberOpLessThan(NumberKind kind, NumberPayload a, NumberPayload b);
 
+// False when either float is NaN, unlike the negation of numberOpLessThan
+bool numberOpLessOrEqual(NumberKind kind, NumberPayload a, NumberPayload b);
+
 // Cast from one number kind to another at runtime
 NumberCastResult numberCast(NumberKind from, NumberPayload value, NumberKind to,
                             NumberPayload *result);
