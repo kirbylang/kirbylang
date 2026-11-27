@@ -1,0 +1,12 @@
+type Meters = f64;
+type Many = [i64];
+type Each[T] = [T];
+type Callback = fun () => unit;
+
+fun main(): unit {
+    let a = Meters { n: 1 };
+    let b = Many { n: 1 };
+    let c = Each { n: 1 };
+    Many.default();
+    Callback.default();
+}

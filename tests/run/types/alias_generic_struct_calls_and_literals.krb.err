@@ -1,0 +1,140 @@
+== <script> ==
+0000   49 OP_CLOSURE          1 <fn main>
+0002    | OP_DEFINE_GLOBAL    0 'main'
+0004    1 OP_STRUCT           2 'Box'
+0006    | OP_DEFINE_GLOBAL    2 'Box'
+0008    | OP_GET_GLOBAL       2 'Box'
+0010    2 OP_NIL
+0011    | OP_FIELD            3 'value' public immutable
+0015    3 OP_POP
+0016   11 OP_STRUCT           4 'Pair'
+0018    | OP_DEFINE_GLOBAL    4 'Pair'
+0020    | OP_GET_GLOBAL       4 'Pair'
+0022   12 OP_NIL
+0023    | OP_FIELD            5 'first' public immutable
+0027   13 OP_NIL
+0028    | OP_FIELD            6 'second' public immutable
+0032   14 OP_POP
+0033    5 OP_GET_GLOBAL       2 'Box'
+0035    6 OP_CLOSURE          8 <fn new>
+0037    | OP_METHOD           7 'new'
+0039    8 OP_CLOSURE         10 <fn pair>
+0041    | OP_METHOD           9 'pair'
+0043    9 OP_POP
+0044   16 OP_GET_GLOBAL       4 'Pair'
+0046   17 OP_CLOSURE         11 <fn new>
+0048    | OP_METHOD           7 'new'
+0050   18 OP_POP
+0051   50 OP_NIL
+0052    | OP_RETURN
+== main ==
+0000   26 OP_GET_GLOBAL       0 'Box'
+0002    | OP_CONSTANT         1 'value'
+0004    | OP_CONSTANT         2 '1'
+0006    | OP_STRUCT_INIT      1
+0008   27 OP_GET_GLOBAL       0 'Box'
+0010    | OP_CONSTANT         4 '2'
+0012    | OP_INVOKE        (1 args)    3 'new'
+0015    | OP_GET_PROPERTY     1 'value'
+0017   28 OP_GET_GLOBAL       0 'Box'
+0019    | OP_CONSTANT         6 '3'
+0021    | OP_CONSTANT         5 'pair'
+0023    | OP_INVOKE        (2 args)    5 'pair'
+0026   29 OP_GET_GLOBAL       7 '@println'
+0028    | OP_GET_LOCAL        1
+0030    | OP_GET_PROPERTY     1 'value'
+0032    | OP_CALL             1
+0034    | OP_POP
+0035   30 OP_GET_GLOBAL       7 '@println'
+0037    | OP_GET_LOCAL        2
+0039    | OP_CALL             1
+0041    | OP_POP
+0042   31 OP_GET_GLOBAL       7 '@println'
+0044    | OP_GET_LOCAL        3
+0046    | OP_CALL             1
+0048    | OP_POP
+0049   33 OP_GET_GLOBAL       0 'Box'
+0051    | OP_CONSTANT         1 'value'
+0053    | OP_CONSTANT         8 '4'
+0055    | OP_STRUCT_INIT      1
+0057   34 OP_GET_GLOBAL       0 'Box'
+0059    | OP_CONSTANT         1 'value'
+0061    | OP_CONSTANT         9 '5'
+0063    | OP_STRUCT_INIT      1
+0065   35 OP_GET_GLOBAL       0 'Box'
+0067    | OP_CONSTANT        10 'six'
+0069    | OP_INVOKE        (1 args)    3 'new'
+0072    | OP_GET_PROPERTY     1 'value'
+0074   36 OP_GET_GLOBAL       0 'Box'
+0076    | OP_CONSTANT        11 '7'
+0078    | OP_TRUE
+0079    | OP_INVOKE        (2 args)    5 'pair'
+0082   37 OP_GET_GLOBAL       7 '@println'
+0084    | OP_GET_LOCAL        4
+0086    | OP_GET_PROPERTY     1 'value'
+0088    | OP_CALL             1
+0090    | OP_POP
+0091   38 OP_GET_GLOBAL       7 '@println'
+0093    | OP_GET_LOCAL        5
+0095    | OP_GET_PROPERTY     1 'value'
+0097    | OP_CALL             1
+0099    | OP_POP
+0100   39 OP_GET_GLOBAL       7 '@println'
+0102    | OP_GET_LOCAL        6
+0104    | OP_CALL             1
+0106    | OP_POP
+0107   40 OP_GET_GLOBAL       7 '@println'
+0109    | OP_GET_LOCAL        7
+0111    | OP_CALL             1
+0113    | OP_POP
+0114   42 OP_GET_GLOBAL      12 'Pair'
+0116    | OP_CONSTANT        13 'first'
+0118    | OP_CONSTANT        14 'tag'
+0120    | OP_CONSTANT        15 'second'
+0122    | OP_CONSTANT        16 '8'
+0124    | OP_STRUCT_INIT      2
+0126   43 OP_GET_GLOBAL      12 'Pair'
+0128    | OP_CONSTANT        14 'tag'
+0130    | OP_FALSE
+0131    | OP_INVOKE        (2 args)    3 'new'
+0134   44 OP_GET_GLOBAL      12 'Pair'
+0136    | OP_CONSTANT        13 'first'
+0138    | OP_CONSTANT        17 '9'
+0140    | OP_CONSTANT        15 'second'
+0142    | OP_CONSTANT        18 'ten'
+0144    | OP_STRUCT_INIT      2
+0146   45 OP_GET_LOCAL       10
+0148   46 OP_GET_GLOBAL       7 '@println'
+0150    | OP_GET_LOCAL        8
+0152    | OP_GET_PROPERTY    15 'second'
+0154    | OP_CALL             1
+0156    | OP_POP
+0157   47 OP_GET_GLOBAL       7 '@println'
+0159    | OP_GET_LOCAL        9
+0161    | OP_GET_PROPERTY    15 'second'
+0163    | OP_CALL             1
+0165    | OP_POP
+0166   48 OP_GET_GLOBAL       7 '@println'
+0168    | OP_GET_LOCAL       11
+0170    | OP_GET_PROPERTY    15 'second'
+0172    | OP_CALL             1
+0174    | OP_POP
+0175   49 OP_NIL
+0176    | OP_RETURN
+== new ==
+0000    6 OP_GET_GLOBAL       0 'Box'
+0002    | OP_CONSTANT         1 'value'
+0004    | OP_GET_LOCAL        1
+0006    | OP_STRUCT_INIT      1
+0008    | OP_RETURN
+== pair ==
+0000    8 OP_GET_LOCAL        2
+0002    | OP_RETURN
+== new ==
+0000   17 OP_GET_GLOBAL       0 'Pair'
+0002    | OP_CONSTANT         1 'first'
+0004    | OP_GET_LOCAL        1
+0006    | OP_CONSTANT         2 'second'
+0008    | OP_GET_LOCAL        2
+0010    | OP_STRUCT_INIT      2
+0012    | OP_RETURN

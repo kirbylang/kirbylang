@@ -1,0 +1,15 @@
+struct Box {
+    pub v: i64;
+}
+
+type T = Box;
+
+fun f[T](x: T): unit {
+    let a = T { v: 1 };
+}
+
+fun g[Box](x: Box): unit {
+    let b = Box { v: 1 };
+}
+
+fun main(): unit {}

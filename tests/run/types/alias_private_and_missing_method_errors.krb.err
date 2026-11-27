@@ -1,0 +1,3 @@
+[line 12] Error at 'hidden': Method 'hidden' is private to 'Point'.
+[line 13] Error at 'missing': Point has no static method 'missing'.
+[line 14] Error at 'missing': Point has no field 'missing'.

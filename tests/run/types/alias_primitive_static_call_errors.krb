@@ -1,0 +1,6 @@
+type Meters = f64;
+
+fun main(): unit {
+    let y: i64 = Meters.default();
+    Meters.missing();
+}

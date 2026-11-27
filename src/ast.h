@@ -150,6 +150,11 @@ typedef struct {
 
 typedef struct {
   Token name;
+  /**
+   * Set by the type checker when the name is a type alias of a struct, as in
+   * `Alias.method()`: the struct to read instead. Its length is 0 otherwise.
+   */
+  Token structName;
 } VariableNode;
 
 typedef struct {
@@ -438,6 +443,8 @@ typedef struct {
   StructInitFieldNode *fields;
   int fieldCount;
   int endLine;
+  // The struct's name when `name` is a type alias of it, as for VariableNode
+  Token structName;
 } StructInitNode;
 
 // What an impl block is for

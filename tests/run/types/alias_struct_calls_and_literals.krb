@@ -1,0 +1,28 @@
+struct Point {
+    pub n: i64;
+}
+
+impl Point {
+    pub fun make(): Point = Point { n: 7 };
+}
+
+impl Default for Point {
+    fun default(): Self = Point { n: 0 };
+}
+
+type P = Point;
+type Q = P;
+
+fun main(): unit {
+    let a = Q { n: 2 };
+    let b: Point = P { n: 3 };
+    @println(a.n);
+    @println(b.n);
+    @println(Q.make().n);
+    @println(Q.default().n);
+
+    let q = 1;
+    let Point = 5;
+    @println(Q { n: q }.n);
+    @println(Point);
+}

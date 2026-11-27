@@ -827,7 +827,11 @@ static bool typchkCheckGenericFunctionValue(TypeEnv *env, AstNode *node,
                                             Type *genericType, Type *expected);
 static Type *typchkFillGenericFunctionValue(TypeEnv *env, AstNode *node,
                                             Type *genericType, Type *expected);
-static Type *typchkStructInitDeclaration(TypeEnv *env, StructInitNode *si);
+static Type *typchkStructInitDeclaration(TypeEnv *env, StructInitNode *si,
+                                         Type *expected);
+static Type *typchkAliasedType(TypeEnv *env, Token name, int firstIndex,
+                               Type ***params, int *count);
+static Token typchkStructNameToken(const Type *structType, int line);
 static bool typchkCheckGenericStructInit(TypeEnv *env, AstNode *node,
                                          Type *expected);
 
@@ -1272,7 +1276,8 @@ static bool typchkCheckInto(TypeEnv *env, AstNode *node, Type *expected,
   if (node->kind == NODE_STRUCT_INIT && expected != NULL &&
       expected->kind == TYPE_STRUCT && expected->as.struct_.typeArgCount > 0 &&
       typeIsFullyKnown(expected)) {
-    Type *declaration = typchkStructInitDeclaration(env, &node->as.structInit);
+    Type *declaration =
+        typchkStructInitDeclaration(env, &node->as.structInit, expected);
 
     if (declaration != NULL && declaration == typeStructDeclaration(expected) &&
         !typchkStructMembersUnreliable(declaration))
@@ -2489,26 +2494,11 @@ static void typchkMarkPrimitiveTraitCall(GetNode *get, const char *owner,
   get->primitiveIsStatic = !method->hasSelf;
 }
 
-// `f64.default()`, or `Self.default()` inside an impl for a primitive.
-// Returns false when `name` doesn't name a primitive, and true when it did,
-// with `*result` the method's type or NULL after an error.
-static bool typchkInferPrimitiveStaticGet(TypeEnv *env, GetNode *get,
-                                          Token *name, bool isCallee,
-                                          Type **result) {
-  Type *primitive = NULL;
-
-  if (tokenTextEquals(name, "Self")) {
-    if (env->_currentPrimitiveOwner != NULL)
-      primitive = env->_currentImplSelfType;
-  } else {
-    primitive = typchkPrimitiveTypeNamed(name);
-  }
-
-  if (primitive == NULL)
-    return false;
-
-  *result = NULL;
-
+// `f64.default()`, `Self.default()` inside an impl for a primitive, or the
+// same through a type alias. Returns the method's type, or NULL after an
+// error.
+static Type *typchkInferPrimitiveStaticGet(TypeEnv *env, GetNode *get,
+                                           Type *primitive, bool isCallee) {
   const char *owner = typchkPrimitiveOwner(primitive);
   assert(owner != NULL);
 
@@ -2529,18 +2519,17 @@ static bool typchkInferPrimitiveStaticGet(TypeEnv *env, GetNode *get,
       typchkErrorAtTokenFmt(&get->name, "%s has no static method '%.*s'.",
                             owner, get->name.length, get->name.start);
     }
-    return true;
+    return NULL;
   }
 
   if (!isCallee) {
     typchkErrorAtTokenFmt(&get->name, "Method '%.*s' of '%s' has to be called.",
                           get->name.length, get->name.start, owner);
-    return true;
+    return NULL;
   }
 
   typchkMarkPrimitiveTraitCall(get, owner, method);
-  *result = method->type;
-  return true;
+  return method->type;
 }
 
 // Makes the compiler run `trait`'s version of the method the get names. The
@@ -2650,11 +2639,48 @@ static Type *typchkInferGet(TypeEnv *env, AstNode *node) {
                              : typchkTypeEnvLookupStruct(env, *objIdentifier);
 
       if (structType == NULL) {
-        Type *staticResult;
+        Type *primitive = NULL;
 
-        if (typchkInferPrimitiveStaticGet(env, get, objIdentifier, isCallee,
-                                          &staticResult))
-          return staticResult;
+        if (!isSelf)
+          primitive = typchkPrimitiveTypeNamed(objIdentifier);
+        else if (env->_currentPrimitiveOwner != NULL)
+          primitive = env->_currentImplSelfType;
+
+        if (primitive != NULL)
+          return typchkInferPrimitiveStaticGet(env, get, primitive, isCallee);
+      }
+
+      if (structType == NULL && !isSelf) {
+        Type **params;
+        int count;
+        Type *target =
+            typchkAliasedType(env, *objIdentifier, 0, &params, &count);
+
+        if (target != NULL && target->kind != TYPE_STRUCT) {
+          if (typchkPrimitiveOwner(target) != NULL)
+            return typchkInferPrimitiveStaticGet(env, get, target, isCallee);
+
+          typchkErrorAtTokenFmt(&get->name, "%s has no static method '%.*s'.",
+                                typeToString(target), get->name.length,
+                                get->name.start);
+          return NULL;
+        }
+
+        if (target != NULL) {
+          Type *declaration = typeStructDeclaration(target);
+
+          // Number a generic alias's parameters after the struct's and the
+          // method's own, so they stay apart
+          int first = declaration->as.struct_.genericParamCount;
+          int used = typeGenericParamCount(
+              typeStructStaticMethodLookup(declaration, get->name));
+
+          structType =
+              typchkAliasedType(env, *objIdentifier,
+                                used > first ? used : first, &params, &count);
+          get->object->as.variable.structName =
+              typchkStructNameToken(declaration, objIdentifier->line);
+        }
       }
 
       if (structType == NULL && isSelf) {
@@ -2993,20 +3019,101 @@ static Type *typchkInferIndexSet(TypeEnv *env, AstNode *node) {
   return elementType;
 }
 
-// The struct a literal names, or NULL. Reports nothing.
-static Type *typchkStructInitDeclaration(TypeEnv *env, StructInitNode *si) {
+// The type that `name` stands for as a type alias, or NULL when it isn't one.
+// A generic alias has its parameters replaced by ones for a call or literal to
+// fill in, numbered from `firstIndex`. They are written to `params`, and their
+// number to `count`.
+static Type *typchkAliasedType(TypeEnv *env, Token name, int firstIndex,
+                               Type ***params, int *count) {
+  *params = NULL;
+  *count = 0;
+
+  Type *target = typchkTypeEnvLookupAlias(env, name);
+  if (target != NULL)
+    return target;
+
+  GenericAlias *alias = genericAliasLookup(env, name);
+  if (alias == NULL || alias->target == NULL)
+    return NULL;
+
+  Type **fresh =
+      (Type **)typesAllocRaw((size_t)alias->paramCount * sizeof(Type *));
+  for (int i = 0; i < alias->paramCount; i++) {
+    fresh[i] = (Type *)typesAllocRaw(sizeof(Type));
+    *fresh[i] = *alias->params[i];
+    fresh[i]->as.genericParam.index = firstIndex + i;
+  }
+
+  *params = fresh;
+  *count = alias->paramCount;
+  return typeSubstituteGenericParams(alias->target, fresh, alias->paramCount);
+}
+
+// A copy of the struct's name for the compiler, which outlives the checker's
+// name storage.
+static Token typchkStructNameToken(const Type *structType, int line) {
+  InternedName name = structType->as.struct_.name;
+  char *chars = (char *)astAllocRaw((size_t)name.length + 1);
+  memcpy(chars, internedNameChars(name), (size_t)name.length);
+  chars[name.length] = '\0';
+
+  Token token = tokenFromCString(chars);
+  token.line = line;
+  return token;
+}
+
+static bool typchkIsTypeParameter(TypeEnv *env, Token name) {
+  return bindingArrayLookup(env->_genericParams, env->_genericParamCount,
+                            name) != NULL;
+}
+
+// The struct that a literal expected to be `expected` declares, or NULL when
+// the literal's name can't make that type. Reports nothing.
+static Type *typchkStructInitDeclaration(TypeEnv *env, StructInitNode *si,
+                                         Type *expected) {
   if (tokenTextEquals(&si->name, "Self"))
     return typchkTypeEnvGetImplTargetType(env);
 
-  return typchkTypeEnvLookupStruct(env, si->name);
+  if (typchkIsTypeParameter(env, si->name))
+    return NULL;
+
+  Type *declaration = typchkTypeEnvLookupStruct(env, si->name);
+  if (declaration != NULL)
+    return declaration;
+
+  Type **params;
+  int count;
+  Type *target = typchkAliasedType(env, si->name, 0, &params, &count);
+  if (target == NULL || target->kind != TYPE_STRUCT)
+    return NULL;
+
+  // The arguments the alias fixes have to agree with the expected ones
+  Type **bindings = (Type **)typesAllocRaw((size_t)count * sizeof(Type *));
+  memset(bindings, 0, (size_t)count * sizeof(Type *));
+  typeBindGenericParams(target, expected, bindings, count);
+
+  if (!typesEqual(typeSubstituteGenericParams(target, bindings, count),
+                  expected))
+    return NULL;
+
+  for (int i = 0; i < count; i++) {
+    InternedName bound;
+    if (typchkFirstUnmetBound(env, params[i], bindings[i], &bound))
+      return NULL;
+  }
+
+  si->structName = typchkStructNameToken(expected, si->name.line);
+  return typeStructDeclaration(target);
 }
 
-// Infers the type arguments of a literal of a generic struct, such as
-// `Box { value: 5 }`, from its fields.
+// Infers the type arguments of a literal from its fields, such as for
+// `Box { value: 5 }`. `pattern` is the generic struct itself, or the instance
+// a generic alias stands for, and `params` are the `count` parameters to fill.
+// `owner` names whichever declared them.
 static Type *typchkInferGenericStructInit(TypeEnv *env, AstNode *node,
-                                          Type *declaration) {
+                                          Type *pattern, Type **params,
+                                          int count, InternedName owner) {
   StructInitNode *si = &node->as.structInit;
-  int count = declaration->as.struct_.genericParamCount;
   Type **bindings = (Type **)typesAllocRaw((size_t)count * sizeof(Type *));
   memset(bindings, 0, (size_t)count * sizeof(Type *));
   bool ok = true;
@@ -3014,11 +3121,11 @@ static Type *typchkInferGenericStructInit(TypeEnv *env, AstNode *node,
 
   for (int i = 0; i < si->fieldCount; i++) {
     StructInitFieldNode *field = &si->fields[i];
-    Type *fieldType = typeStructFieldLookup(declaration, field->name);
+    Type *fieldType = typeStructFieldLookup(pattern, field->name);
 
     if (fieldType == NULL) {
       typchkErrorAtTokenFmt(&field->name, "%s has no field '%.*s'.",
-                            typeToString(declaration), field->name.length,
+                            typeToString(pattern), field->name.length,
                             field->name.start);
       ok = false;
       continue;
@@ -3033,7 +3140,9 @@ static Type *typchkInferGenericStructInit(TypeEnv *env, AstNode *node,
     return NULL;
 
   for (int i = 0; i < count && !sawUnknown; i++) {
-    if (bindings[i] == NULL) {
+    // A generic alias can have a parameter its target doesn't use
+    if (bindings[i] == NULL && (pattern->as.struct_.typeArgCount == 0 ||
+                                typeFindGenericParam(pattern, i) != NULL)) {
       typchkErrorAtTokenFmt(
           &si->name,
           "Can't tell the type arguments of '%.*s' from its fields. Give the "
@@ -3043,12 +3152,15 @@ static Type *typchkInferGenericStructInit(TypeEnv *env, AstNode *node,
     }
   }
 
-  if (!typchkTypeArgsMeetBounds(env, declaration->as.struct_.name,
-                                declaration->as.struct_.genericParams, bindings,
-                                count, /*token=*/NULL, node))
+  if (!typchkTypeArgsMeetBounds(env, owner, params, bindings, count,
+                                /*token=*/NULL, node))
     return NULL;
 
-  return typeStructInstance(declaration, bindings, count);
+  // The declaration has no arguments yet to put the bindings in
+  if (pattern->as.struct_.typeArgCount == 0)
+    return typeStructInstance(pattern, bindings, count);
+
+  return typeSubstituteGenericParams(pattern, bindings, count);
 }
 
 // Checks a literal against an instance of its generic struct that the
@@ -3083,6 +3195,12 @@ static Type *typchkInferStructInit(TypeEnv *env, AstNode *node) {
   StructInitNode *si = &node->as.structInit;
 
   Type *structType;
+  // Set when the literal's name is a generic alias
+  Type **aliasParams = NULL;
+  int aliasParamCount = 0;
+  // The instance an alias stands for, such as `Box[i64]`
+  Type *aliased = NULL;
+
   if (tokenTextEquals(&si->name, "Self")) {
     structType = typchkTypeEnvGetImplTargetType(env);
     if (structType == NULL) {
@@ -3090,7 +3208,33 @@ static Type *typchkInferStructInit(TypeEnv *env, AstNode *node) {
       return NULL;
     }
   } else {
+    // A parameter hides a struct or alias of the same name
+    if (typchkIsTypeParameter(env, si->name)) {
+      typchkErrorAtTokenFmt(&si->name,
+                            "'%.*s' is a type parameter, not a struct.",
+                            si->name.length, si->name.start);
+      return NULL;
+    }
+
     structType = typchkTypeEnvLookupStruct(env, si->name);
+
+    if (structType == NULL) {
+      Type *target =
+          typchkAliasedType(env, si->name, 0, &aliasParams, &aliasParamCount);
+
+      if (target != NULL && target->kind != TYPE_STRUCT) {
+        typchkErrorAtTokenFmt(&si->name, "'%.*s' isn't a struct.",
+                              si->name.length, si->name.start);
+        return NULL;
+      }
+
+      if (target != NULL) {
+        structType = typeStructDeclaration(target);
+        si->structName = typchkStructNameToken(structType, si->name.line);
+        if (target->as.struct_.typeArgCount > 0)
+          aliased = target;
+      }
+    }
   }
 
   if (structType == NULL) {
@@ -3106,8 +3250,19 @@ static Type *typchkInferStructInit(TypeEnv *env, AstNode *node) {
     return structType; // already reported once
   }
 
+  if (aliased != NULL) {
+    if (typeGenericParamCount(aliased) == 0)
+      return typchkCheckGenericStructInit(env, node, aliased) ? aliased : NULL;
+
+    return typchkInferGenericStructInit(env, node, aliased, aliasParams,
+                                        aliasParamCount,
+                                        internTokenName(si->name));
+  }
+
   if (typeStructIsGeneric(structType))
-    return typchkInferGenericStructInit(env, node, structType);
+    return typchkInferGenericStructInit(
+        env, node, structType, structType->as.struct_.genericParams,
+        structType->as.struct_.genericParamCount, structType->as.struct_.name);
 
   // Missing required fields are a separate runtime-level check, not
   // this pass's concern.

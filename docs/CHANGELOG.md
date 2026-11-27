@@ -31,6 +31,10 @@
 - **Breaking**: a method can't declare a type parameter with the same name as one of its impl's, such as `fun with[T]` in `impl Box[T]`. It is reported as `Generic parameter 'T' is already declared.`
 - Fix a standard library method being able to return one array length as another, such as a `[T; M]` as a `[T; N]`
 - Fix a false type error in an array method with four or more type parameters of its own
+- A type alias of a struct, including a generic alias, can be used in a struct literal and to call a static method
+  - `type Alias = Struct;`: `Alias { n: 1 }` and `Alias.make()`.
+  - An alias of a primitive type can call its static methods, such as `type Meters = i64;`: `Meters.default()`
+- **Breaking**: a struct literal can't name a type parameter, such as `T { n: 1 }` inside `fun f[T]`, even when a struct is also called `T`
 - VS Code extension: highlight `const` and trait names in list and array impls, and update the impl snippets and array native hovers
 - VS Code extension: highlight `impl` blocks for primitives, lists and arrays, `native` declarations, built-in type names, every number suffix and method calls on literals, and add snippets for them, a `native` hover and an `@strToBytes` snippet
 - **Breaking**: `native` is a reserved word. The standard library declares the types of natives with it, such as `native fun @listPop[T](list: [T]): T;`

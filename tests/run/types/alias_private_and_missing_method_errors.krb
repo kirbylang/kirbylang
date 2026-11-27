@@ -1,0 +1,15 @@
+struct Point {
+    pub n: i64;
+}
+
+impl Point {
+    fun hidden(): i64 = 1;
+}
+
+type P = Point;
+
+fun main(): unit {
+    P.hidden();
+    P.missing();
+    P { missing: 1 };
+}

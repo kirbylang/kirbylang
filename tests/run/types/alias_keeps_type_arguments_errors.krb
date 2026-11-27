@@ -1,0 +1,23 @@
+struct Box[T] {
+    pub value: T;
+}
+
+impl Box[T] {
+    pub fun new(value: T): Self[T] = Self { value: value };
+}
+
+struct Pair[A, B] {
+    pub first: A;
+    pub second: B;
+}
+
+type Number = Box[i64];
+type Tagged[T] = Pair[string, T];
+
+fun main(): unit {
+    let a = Number { value: "s" };
+    let b = Number.new("s");
+    let c: Box[string] = Number { value: 1 };
+    let d = Tagged { first: 1, second: 2 };
+    let e: Pair[i64, i64] = Tagged { first: "s", second: 2 };
+}
