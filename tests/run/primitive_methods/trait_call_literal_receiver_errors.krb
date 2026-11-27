@@ -1,0 +1,10 @@
+fun main(): unit {
+    let x: u8 = 5;
+    // The literal can't be the other argument's type
+    @println(Eq.equals(300, x));
+    // Each error in an argument is reported once
+    @println(Eq.equals(5, "a" - 1));
+    @println(Add.add(5, { let bad: i64 = "no"; x }));
+    @println(Eq.equals(5, "a"));
+    @println(Eq.equals(5));
+}

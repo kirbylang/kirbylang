@@ -303,6 +303,9 @@ Numbers have methods.
 
 The float methods do what the builtin functions of the same name do.
 
+A number literal that a method is called on takes the type of an argument that
+has to be the same type, so `5.max(x)` is a `u8` when `x` is one.
+
 ```kirby
 fun main(): unit {
     let x: f64 = -2.5;

@@ -1,0 +1,101 @@
+== <script> ==
+0000   24 OP_CLOSURE          1 <fn main>
+0002    | OP_DEFINE_GLOBAL    0 'main'
+0004   25 OP_NIL
+0005    | OP_RETURN
+== main ==
+0000    2 OP_CONSTANT         0 '100'
+0002    5 OP_GET_GLOBAL       1 '@println'
+0004    | OP_GET_GLOBAL       2 'u8.Eq.equals'
+0006    | OP_CONSTANT         3 '5'
+0008    | OP_GET_LOCAL        1
+0010    | OP_CALL             2
+0012    | OP_CALL             1
+0014    | OP_POP
+0015    6 OP_GET_GLOBAL       1 '@println'
+0017    | OP_GET_GLOBAL       2 'u8.Eq.equals'
+0019    | OP_CONSTANT         0 '100'
+0021    | OP_GET_LOCAL        1
+0023    | OP_CALL             2
+0025    | OP_CALL             1
+0027    | OP_POP
+0028    7 OP_GET_GLOBAL       1 '@println'
+0030    | OP_GET_GLOBAL       4 'u8.Ord.cmp'
+0032    | OP_CONSTANT         3 '5'
+0034    | OP_GET_LOCAL        1
+0036    | OP_CALL             2
+0038    | OP_CALL             1
+0040    | OP_POP
+0041    8 OP_GET_GLOBAL       1 '@println'
+0043    | OP_GET_GLOBAL       5 'u8.Add.add'
+0045    | OP_CONSTANT         3 '5'
+0047    | OP_GET_LOCAL        1
+0049    | OP_CALL             2
+0051    | OP_CALL             1
+0053    | OP_POP
+0054   11 OP_GET_GLOBAL       1 '@println'
+0056    | OP_GET_GLOBAL       6 'u8.max'
+0058    | OP_CONSTANT         3 '5'
+0060    | OP_GET_LOCAL        1
+0062    | OP_CALL             2
+0064    | OP_CALL             1
+0066    | OP_POP
+0067   12 OP_GET_GLOBAL       1 '@println'
+0069    | OP_GET_GLOBAL       7 'u8.min'
+0071    | OP_CONSTANT         3 '5'
+0073    | OP_GET_LOCAL        1
+0075    | OP_CALL             2
+0077    | OP_CALL             1
+0079    | OP_POP
+0080   13 OP_GET_GLOBAL       1 '@println'
+0082    | OP_GET_GLOBAL       6 'u8.max'
+0084    | OP_CONSTANT         8 '1'
+0086    | OP_CONSTANT         8 '1'
+0088    | OP_ADD
+0089    | OP_GET_LOCAL        1
+0091    | OP_CALL             2
+0093    | OP_CALL             1
+0095    | OP_POP
+0096   14 OP_GET_GLOBAL       1 '@println'
+0098    | OP_GET_GLOBAL       7 'u8.min'
+0100    | OP_GET_GLOBAL       6 'u8.max'
+0102    | OP_CONSTANT         3 '5'
+0104    | OP_GET_LOCAL        1
+0106    | OP_CALL             2
+0108    | OP_CONSTANT         9 '7'
+0110    | OP_CALL             2
+0112    | OP_CALL             1
+0114    | OP_POP
+0115   16 OP_CONSTANT        10 '0.5'
+0117   17 OP_GET_GLOBAL       1 '@println'
+0119    | OP_GET_GLOBAL      11 'f64.pow'
+0121    | OP_CONSTANT        12 '2'
+0123    | OP_GET_LOCAL        2
+0125    | OP_CALL             2
+0127    | OP_CONSTANT        13 '1'
+0129    | OP_GREATER
+0130    | OP_CALL             1
+0132    | OP_POP
+0133   18 OP_GET_GLOBAL       1 '@println'
+0135    | OP_GET_GLOBAL      14 'f64.Add.add'
+0137    | OP_CONSTANT        12 '2'
+0139    | OP_GET_LOCAL        2
+0141    | OP_CALL             2
+0143    | OP_CALL             1
+0145    | OP_POP
+0146   21 OP_GET_GLOBAL      15 'i64.max'
+0148    | OP_CONSTANT        16 '5'
+0150    | OP_CONSTANT        17 '6'
+0152    | OP_CALL             2
+0154   22 OP_GET_GLOBAL       1 '@println'
+0156    | OP_GET_LOCAL        3
+0158    | OP_CALL             1
+0160    | OP_POP
+0161   23 OP_GET_GLOBAL       1 '@println'
+0163    | OP_GET_GLOBAL      18 'i64.Display.toString'
+0165    | OP_CONSTANT        16 '5'
+0167    | OP_CALL             1
+0169    | OP_CALL             1
+0171    | OP_POP
+0172   24 OP_NIL
+0173    | OP_RETURN

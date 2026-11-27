@@ -1,0 +1,24 @@
+fun main(): unit {
+    let x: u8 = 100;
+
+    // Trait methods
+    @println(5.equals(x));
+    @println(100.equals(x));
+    @println(5.cmp(x));
+    @println(5.add(x));
+
+    // The type's own methods
+    @println(5.max(x));
+    @println(5.min(x));
+    @println((1 + 1).max(x));
+    @println(5.max(x).min(7));
+
+    let half: f64 = 0.5;
+    @println(2.pow(half) > 1);
+    @println(2.add(half));
+
+    // With nothing to take a type from, the number is an i64
+    let y: i64 = 5.max(6);
+    @println(y);
+    @println(5.toString());
+}

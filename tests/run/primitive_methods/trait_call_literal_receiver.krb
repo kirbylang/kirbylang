@@ -1,0 +1,12 @@
+fun main(): unit {
+    let x: u8 = 5;
+    @println(Eq.equals(5, x));
+    @println(Eq.equals(x, 5));
+    @println(Ord.cmp(4, x));
+    @println(Add.add(2, x));
+    @println(Add.add(1 + 1, x));
+    @println(Eq.equals(5, 5));
+
+    let half: f64 = 0.5;
+    @println(Add.add(2, half));
+}

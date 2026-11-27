@@ -185,6 +185,10 @@ struct TypeEnv {
   // The type the call being checked is expected to return, passed along to the
   // call check. Read once and cleared.
   Type *_callExpected;
+  // An argument of that call which is already typed, and its type, so it isn't
+  // checked twice. The argument is read once and cleared.
+  AstNode *_checkedArg;
+  Type *_checkedArgType;
 };
 
 static GenericAlias *genericAliasLookup(TypeEnv *env, Token name) {
@@ -802,6 +806,12 @@ static Type *typchkCheckCallAgainstFunctionType(TypeEnv *env, AstNode *node,
 static Type *typchkInferGet(TypeEnv *env, AstNode *node);
 static Type *typchkInferTraitMethod(TypeEnv *env, GetNode *get,
                                     Token traitToken, Type *objectType);
+static const char *typchkPrimitiveOwner(const Type *type);
+static PrimitiveMethod *
+typchkPrimitiveMethodLookup(TypeEnv *env, const char *owner, Token name);
+static PrimitiveMethod *
+typchkPrimitiveTraitMethodLookup(TypeEnv *env, const char *owner, Token name,
+                                 const InternedName *trait);
 static Type *typchkInferSet(TypeEnv *env, AstNode *node);
 static Type *typchkInferSelf(TypeEnv *env, AstNode *node);
 static Type *typchkInferIndexGet(TypeEnv *env, AstNode *node);
@@ -1997,6 +2007,51 @@ static bool isPrintNative(Token *name) {
   return false;
 }
 
+// Whether a plain integer receiver could take its type from this argument.
+// A lambda or array literal is never a number, and needs the parameter's type.
+static bool typchkCanGiveReceiverType(AstNode *arg) {
+  return !typchkHasPlainIntegerSource(arg) && arg->kind != NODE_ARRAY &&
+         arg->kind != NODE_FUNCTION;
+}
+
+// Gives a plain integer receiver, as in `5.max(byte)`, the number type of an
+// argument, when that type's method takes the argument as its own type.
+// Returns false after reporting a receiver that can't be that type.
+static bool typchkPairMethodReceiver(TypeEnv *env, GetNode *get, int index,
+                                     Type *argType) {
+  if (!typeIsNumber(argType))
+    return true;
+
+  const char *owner = typchkPrimitiveOwner(argType);
+  PrimitiveMethod *method = typchkPrimitiveMethodLookup(env, owner, get->name);
+
+  if (method == NULL)
+    method = typchkPrimitiveTraitMethodLookup(env, owner, get->name, NULL);
+
+  if (method == NULL || !method->hasSelf ||
+      index >= method->type->as.function.paramCount ||
+      !typesEqual(method->type->as.function.paramTypes[index], argType))
+    return true;
+
+  return typchkApplyExpectedNumberType(get->object, argType);
+}
+
+// The argument a plain integer receiver takes its type from: the first one the
+// method declares as `Self` that isn't a plain integer itself. 0 if none.
+static int typchkTraitReceiverPair(CallNode *c, Type *declared) {
+  if (!typchkHasPlainIntegerSource(c->args[0]))
+    return 0;
+
+  for (int i = 1; i <= declared->as.function.paramCount && i < c->argCount;
+       i++) {
+    if (declared->as.function.paramTypes[i - 1]->kind == TYPE_SELF &&
+        typchkCanGiveReceiverType(c->args[i]))
+      return i;
+  }
+
+  return 0;
+}
+
 // `Trait.method(value, ...)` runs the trait's method on `value`, even when
 // the value's type has a method of its own with that name. The first argument
 // is the value, and the rest are checked against the method's parameters.
@@ -2025,7 +2080,8 @@ static bool typchkInferTraitCall(TypeEnv *env, AstNode *node, Type *expected,
     return false;
 
   c->isTraitCall = true;
-  int inferred = 0;
+  bool receiverTyped = false;
+  int pair = 0;
 
   if (typeTraitHasUnresolvedMembers(trait)) {
     // already reported once, at the trait's own declaration
@@ -2048,7 +2104,21 @@ static bool typchkInferTraitCall(TypeEnv *env, AstNode *node, Type *expected,
                           get->name.length, get->name.start);
   } else {
     Type *valueType = typchkInfer(env, c->args[0]);
-    inferred = 1;
+    receiverTyped = true;
+
+    Type *pairType = NULL;
+
+    if (valueType != NULL)
+      pair = typchkTraitReceiverPair(
+          c, typeTraitInstanceMethodLookup(trait, get->name));
+
+    if (pair > 0) {
+      pairType = typchkInfer(env, c->args[pair]);
+
+      if (pairType == NULL ||
+          !typchkPairNumberType(env, c->args[0], &valueType, pairType))
+        valueType = NULL;
+    }
 
     Type *method = valueType == NULL
                        ? NULL
@@ -2056,6 +2126,8 @@ static bool typchkInferTraitCall(TypeEnv *env, AstNode *node, Type *expected,
 
     if (method != NULL) {
       env->_callExpected = expected;
+      env->_checkedArg = pair > 0 ? c->args[pair] : NULL;
+      env->_checkedArgType = pairType;
       *result = typchkCheckCallAgainstFunctionType(
           env, node, method, c->args + 1, c->argCount - 1);
       return true;
@@ -2063,8 +2135,10 @@ static bool typchkInferTraitCall(TypeEnv *env, AstNode *node, Type *expected,
   }
 
   // Check the arguments anyway, to report any errors they contain
-  for (int i = inferred; i < c->argCount; i++)
-    typchkInfer(env, c->args[i]);
+  for (int i = receiverTyped ? 1 : 0; i < c->argCount; i++) {
+    if (pair == 0 || i != pair)
+      typchkInfer(env, c->args[i]);
+  }
 
   return true;
 }
@@ -2113,21 +2187,45 @@ static Type *typchkInferCall(TypeEnv *env, AstNode *node) {
     return returnType;
   }
 
-  env->_calleeNode = c->callee;
-  Type *calleeType = typchkInfer(env, c->callee);
-  env->_calleeNode = NULL;
+  // An argument typed early, to give a plain integer receiver its type
+  AstNode *pairArg = NULL;
+  Type *pairType = NULL;
+  bool receiverOk = true;
+
+  if (c->callee->kind == NODE_GET &&
+      typchkHasPlainIntegerSource(c->callee->as.get.object)) {
+    for (int i = 0; i < c->argCount && pairArg == NULL; i++) {
+      if (!typchkCanGiveReceiverType(c->args[i]))
+        continue;
+
+      pairArg = c->args[i];
+      pairType = typchkInfer(env, pairArg);
+      receiverOk =
+          pairType != NULL &&
+          typchkPairMethodReceiver(env, &c->callee->as.get, i, pairType);
+    }
+  }
+
+  Type *calleeType = NULL;
+
+  if (receiverOk) {
+    env->_calleeNode = c->callee;
+    calleeType = typchkInfer(env, c->callee);
+    env->_calleeNode = NULL;
+  }
 
   if (calleeType == NULL) {
     for (int i = 0; i < c->argCount; i++) {
-      AstNode *arg = c->args[i];
-
-      typchkInfer(env, arg);
+      if (c->args[i] != pairArg)
+        typchkInfer(env, c->args[i]);
     }
 
     return NULL;
   }
 
   env->_callExpected = expected;
+  env->_checkedArg = pairArg;
+  env->_checkedArgType = pairType;
   return typchkCheckCallAgainstFunctionType(env, node, calleeType, c->args,
                                             c->argCount);
 }
@@ -2281,6 +2379,8 @@ static Type *typchkCheckCallAgainstFunctionType(TypeEnv *env, AstNode *node,
   CallNode *c = &node->as.call;
   Type *expected = env->_callExpected;
   env->_callExpected = NULL;
+  AstNode *checkedArg = env->_checkedArg;
+  env->_checkedArg = NULL;
 
   if (calleeType->kind != TYPE_FN) {
     typchkErrorAtTokenFmt(&c->paren, "%s isn't callable.",
@@ -2301,8 +2401,15 @@ static Type *typchkCheckCallAgainstFunctionType(TypeEnv *env, AstNode *node,
 
   bool ok = true;
   for (int i = 0; i < argCount; i++) {
-    if (!typchkCheck(env, args[i], calleeType->as.function.paramTypes[i]))
+    Type *param = calleeType->as.function.paramTypes[i];
+
+    if (args[i] != checkedArg) {
+      ok = typchkCheck(env, args[i], param) && ok;
+    } else if (!typeAccepts(param, env->_checkedArgType)) {
+      typchkErrorAtNodeFmt(args[i], "Expected %s, got %s.", typeToString(param),
+                           typeToString(env->_checkedArgType));
       ok = false;
+    }
   }
   if (!ok)
     return NULL;

@@ -37,6 +37,16 @@ let byte: u8 = 200 + 55;   // 255
 let mixed = [1, 2.5];      // [f64; 2]
 ```
 
+In a method call or a `Trait.method(value)` call, a number literal that the
+method is called on takes the type of an argument that has to be the same type.
+
+```
+let x: u8 = 100;
+
+5.max(x);          // a u8
+Eq.equals(5, x);   // 5 is a u8
+```
+
 Variables, suffixed literals (`2i64`) and decimal literals keep their own type.
 
 ### Lists

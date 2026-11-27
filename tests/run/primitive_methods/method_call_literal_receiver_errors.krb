@@ -1,0 +1,14 @@
+fun main(): unit {
+    let x: u8 = 100;
+    // The number can't be the argument's type
+    @println(300.equals(x));
+    // The result has the argument's type
+    let y: i64 = 5.max(x);
+    // Each error in an argument is reported once
+    @println(5.equals("a" - 1));
+    @println(5.max({ let bad: i64 = "no"; x }));
+    @println(5.nope({ let bad: i64 = "no"; x }));
+    @println(5.max("a"));
+    @println(5.max(x, x));
+    @println(5.max([]));
+}

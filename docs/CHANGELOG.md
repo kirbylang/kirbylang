@@ -21,6 +21,7 @@
 
 ## Next
 
+- Fix a number literal not taking the number type of an argument, as it does in `5 == x`. With a `u8` named `x`, `Eq.equals(5, x)`, `5.equals(x)` and `5.max(x)` were type errors
 - `krb --help` lists the `docs` command, and no longer shows `krb docs 'search terms'`, which `krb docs` ignored
 - **Breaking**: a type parameter now hides any type of the same name inside its declaration. A struct or alias was already hidden, and now a type such as `string` or `i64` is too, as in `fun id[string](x: string): string`. A parameter given type arguments, such as `Box[i64]` where `Box` is a parameter, is an error even when a struct or alias has that name
 - **Breaking**: `Self` can't be the name of a type parameter. It was accepted and ignored, and is reported as `'Self' can't be the name of a type parameter.`

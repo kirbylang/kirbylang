@@ -1,0 +1,9 @@
+[line 4] Error: Integer literal 300 doesn't fit in u8, which holds 0 to 255.
+[line 6] Error: Expected i64, got u8.
+[line 8] Error at '-': '-' needs two numbers of the same type, got string and i64.
+[line 9] Error: Expected i64, got string.
+[line 10] Error: Expected i64, got string.
+[line 10] Error at 'nope': Can't access '.nope' on a i64.
+[line 11] Error: Expected i64, got string.
+[line 12] Error at ')': Expected 1 argument(s), got 2.
+[line 13] Error: Expected i64, got an array.

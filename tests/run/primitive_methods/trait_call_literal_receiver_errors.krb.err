@@ -1,0 +1,5 @@
+[line 4] Error: Integer literal 300 doesn't fit in u8, which holds 0 to 255.
+[line 6] Error at '-': '-' needs two numbers of the same type, got string and i64.
+[line 7] Error: Expected i64, got string.
+[line 8] Error: Expected i64, got string.
+[line 9] Error at ')': Expected 1 argument(s), got 0.
