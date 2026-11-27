@@ -711,6 +711,11 @@ if(BUILD_TESTS)
         COMMAND kirby-parser-unit-test
     )
 
+    # It reads programs by paths relative to a folder of the source tree
+    set_tests_properties(kirby-parser-unit-test PROPERTIES
+        WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/unit
+    )
+
     add_executable(kirby-lexer-unit-test
         unit/lexer.c
     )

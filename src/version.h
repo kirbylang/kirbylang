@@ -1,4 +1,4 @@
-// See ./build/generated/version.c
+// See generated/version.c in the build folder
 #ifndef VERSION_H
 #define VERSION_H
 

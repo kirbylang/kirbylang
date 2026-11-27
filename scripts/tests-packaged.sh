@@ -18,8 +18,8 @@
 
 set -euo pipefail
 
-export REAL_BIN="${BIN:-./build/kirby-test}"
-export RUNTIME_BIN="${RUNTIME_BIN:-./build/kirby-test-runtime}"
+export REAL_BIN="${BIN:-./build/debug/kirby-test}"
+export RUNTIME_BIN="${RUNTIME_BIN:-./build/debug/kirby-test-runtime}"
 
 here="$(cd "$(dirname "$0")" && pwd)"
 

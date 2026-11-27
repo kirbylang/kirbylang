@@ -2,8 +2,12 @@
 
 set -euo pipefail
 
-cp ./build/krb /usr/local/bin/krb
-cp ./build/krb-runtime /usr/local/bin/krb-runtime
+if [ ! -f ./build/release/krb ]; then
+    echo "No file found: ./build/release/krb; Try running the release build."
+fi
+
+cp ./build/release/krb /usr/local/bin/krb
+cp ./build/release/krb-runtime /usr/local/bin/krb-runtime
 
 echo "Installed at: '/usr/local/bin/krb' and '/usr/local/bin/krb-runtime'"
 

@@ -1,4 +1,4 @@
-cli := "build/krb"
+cli := "build/debug/krb"
 docker_image := "kirby"
 
 default:
@@ -21,18 +21,18 @@ cmake:
     ./scripts/cmake.sh
 
 # Build the code
-build: generate_version_c
+build:
     ./scripts/build.sh
 
 # Build the code for release
-build-release: generate_version_c
+build-release:
     ./scripts/build-release.sh
 
 # Build the code with memory checking enabled
-build-memcheck: generate_version_c
+build-memcheck:
     ./scripts/build-memcheck.sh
 
-build-tests: generate_version_c
+build-tests:
     ./scripts/build-tests.sh
 
 # Clean the build artifacts
@@ -40,7 +40,7 @@ clean:
     ./scripts/clean.sh
 
 [linux]
-install:
+install: build-release
     ./scripts/install-linux.sh
 
 [windows]
@@ -48,7 +48,7 @@ install:
     .\scripts\install-windows.cmd
 
 [macos]
-install:
+install: build-release
     ./scripts/install-macos.sh
 
 # Format the C lines changed since HEAD
@@ -81,7 +81,7 @@ test-build: build
 
 # Run the tests with memory checking enabled
 test-with-memcheck *args: build-memcheck
-    ./scripts/tests.sh {{ args }}
+    BIN=./build/memcheck/kirby-test ./scripts/tests.sh {{ args }}
 
 # Run the tests with coverage enabled
 coverage *args:
@@ -110,15 +110,11 @@ docker-build:
 docker-run:
     docker run -it --init --name {{ docker_image }} --rm {{ docker_image }} 
 
-# VERSION.txt => src/version.c
-generate_version_c:
-    ./scripts/generate_version_c.sh ./build/generated/version.c VERSION.txt
-
 increment-version *args:
     ./scripts/increment-version.sh {{ args }}
 
 # Run one of the example programs
-examples file *args:
+examples file *args: build
     ./scripts/run-example.sh {{ file }} {{ args }}
 
 man:

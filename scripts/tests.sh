@@ -2,7 +2,7 @@
 
 set -euo pipefail
 
-BIN="${BIN:-./build/kirby-test}"
+BIN="${BIN:-./build/debug/kirby-test}"
 
 # An absolute BIN lets a test's .env change directory and still run it. A bare
 # command name, such as `echo`, is left for PATH to find. BIN is exported so a

@@ -2,6 +2,9 @@
 
 set -euo pipefail
 
-BUILD_TESTS=ON ENABLE_MEMCHECK=ON ./scripts/build.sh
+BUILD_DIR=build/memcheck
 
-./scripts/tests.sh
+cmake -S . -B "$BUILD_DIR" -DCMAKE_BUILD_TYPE=Debug -DENABLE_MEMCHECK=ON
+cmake --build "$BUILD_DIR"
+
+BIN="$BUILD_DIR/kirby-test" ./scripts/tests.sh

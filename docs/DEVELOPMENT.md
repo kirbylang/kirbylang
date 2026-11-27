@@ -19,6 +19,11 @@
 
 Development [scripts](../scripts/README.md)
 
+- [Build](../scripts/README.md#build)
+- [Install](../scripts/README.md#install)
+- [Test](../scripts/README.md#test)
+- [Verify](../scripts/README.md#verify)
+
 ## Important Files
 
 | Path                             | What it holds                                                    |

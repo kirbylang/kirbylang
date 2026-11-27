@@ -48,24 +48,24 @@ jobs:
       - name: Configure
         shell: bash
         run: |
-          args=(-S . -B build -DCMAKE_BUILD_TYPE=Release)
+          args=(-S . -B build/release -DCMAKE_BUILD_TYPE=Release)
           if [[ "$RUNNER_OS" == "macOS" ]]; then
             args+=(-DCMAKE_PREFIX_PATH="$(brew --prefix readline)")
           fi
           cmake "${args[@]}"
 
       - name: Build
-        run: cmake --build build -j
+        run: cmake --build build/release -j
 
       - name: Test
-        run: ./scripts/tests.sh
+        run: BIN=./build/release/kirby-test ./scripts/tests.sh
 
       - name: Package
         shell: bash
         run: |
           mkdir -p dist
           tar -czf "dist/${{ matrix.asset }}-${GITHUB_REF_NAME}.tar.gz" \
-            -C build krb krb-runtime
+            -C build/release krb krb-runtime
           cd dist && shasum -a 256 *.tar.gz > "${{ matrix.asset }}.sha256"
 
       - uses: actions/upload-artifact@v4
