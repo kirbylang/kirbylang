@@ -21,6 +21,7 @@
 
 ## Next
 
+- **Breaking**: `cmp` on floats sorts `NaN` below every number and level with `NaN`. It returned `0`, which means equal. In a generic function, where `<` and the other ordering operators use `cmp`, `NaN < 1.0` is now `true`
 - Change where a source build puts `krb`: `build/debug` for `just build` and `build/release` for `just build-release`, which is now optimized. `just install` makes a release build first
 - Change a bad array length, such as `[i64; n]`, to report one error, `Array length must be a whole number, as in '[i64; 3]'.`, in place of a syntax error that was often followed by a second one
 - Change type mismatch errors to say "type parameter" before a type that is one. `Expected string, got string.` is now `Expected type parameter string, got string.`

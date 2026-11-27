@@ -1,0 +1,40 @@
+// A generic call compares through `Ord`
+fun order[T: Ord](a: T, b: T): i64 = a.cmp(b);
+
+fun lessThan[T: Ord](a: T, b: T): bool = a < b;
+
+fun main(): unit {
+    // Infinity minus infinity is NaN
+    let big = @parseFloat("1e308") * 10.0;
+    let nan = big - big;
+    let low = 0.0 - big;
+    let zero: f64 = 0.0;
+
+    // NaN sorts below every number, and level with NaN
+    @println(nan.cmp(low));
+    @println(low.cmp(nan));
+    @println(nan.cmp(nan));
+    @println(Ord.cmp(nan, low));
+    @println(order(nan, low));
+    @println(order(low, nan));
+    @println(order(nan, nan));
+    @println(lessThan(nan, low));
+
+    // The numbers keep their order, and -0.0 is level with 0.0
+    @println(low.cmp(big));
+    @println(order(big, low));
+    @println((-zero).cmp(zero));
+
+    // f32
+    let single = nan as f32;
+    let one = 1.0f32;
+    @println(single.cmp(one));
+    @println(one.cmp(single));
+    @println(single.cmp(single));
+    @println(order(single, one));
+    @println(order(one, single));
+
+    // Comparing NaN directly is still false
+    @println(nan < low);
+    @println(nan.equals(nan));
+}

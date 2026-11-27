@@ -12,5 +12,5 @@
 0009    4 OP_NIL
 0010    | OP_RETURN
 Cannot pop empty list.
-[line 849] in pop()
+[line 861] in pop()
 [line 3] in main()

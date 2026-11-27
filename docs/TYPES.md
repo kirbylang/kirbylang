@@ -287,7 +287,7 @@ The standard library implements these traits:
 | `bool`                        | `Display`, `Eq`, `Default`                                           |
 | `unit`                        | `Display` (`nil`), `Eq`, `Ord`, `Default`                            |
 
-`string` has no `Ord` because there is no `<` on strings yet, and `bool` has no `Ord`. `cmp` returns `-1`, `0` or `1`.
+`string` has no `Ord` because there is no `<` on strings yet, and `bool` has no `Ord`. `cmp` returns `-1`, `0` or `1`. On a float, `cmp` sorts `NaN` below every number and level with `NaN`. `<`, `<=`, `>` and `>=` written between two floats are `false` with `NaN`, but in a generic function they go through `cmp` and follow its order.
 Trait impls on a primitive can't be used with a bounded type parameter yet.
 
 #### Methods On Lists And Arrays
