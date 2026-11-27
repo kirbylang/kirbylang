@@ -1,0 +1,5 @@
+> struct string {}
+> fun main(): unit { @println(string.default() == ""); }
+> main();
+true
+> exit

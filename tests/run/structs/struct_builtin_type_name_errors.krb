@@ -1,0 +1,18 @@
+struct unit {}
+struct bool {}
+struct string { pub var x: f64; }
+struct i8 {}
+struct i16 {}
+struct i32 {}
+struct i64 {}
+struct u8 {}
+struct u16 {}
+struct u32 {}
+struct u64 {}
+struct f32 {}
+struct f64 {}
+
+// A built-in name in an annotation still means the built-in type
+fun length(s: string): i64 = s.len();
+
+fun main(): unit {}

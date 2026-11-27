@@ -92,6 +92,9 @@ Two array types are the same type when both the item type and the length match. 
 Structs are referred to as a type by name. A field is declared with its name and
 type. It is private and immutable unless it is declared with `pub` and `var`.
 
+A struct can't be named like a built-in type: `unit`, `bool`, `string` or a
+number type such as `i64`.
+
 ```
 struct Box {
     pub var value: f64;

@@ -697,6 +697,8 @@ stop the program.
 
 Structs are custom data types that group together a set of [variables](#variables) (fields) and [functions](#functions) (methods) that operate on those fields.
 
+A struct can't use the name of a built-in type, such as `string` or `i64`.
+
 #### Fields
 
 Fields are defined in the struct's declaration body.

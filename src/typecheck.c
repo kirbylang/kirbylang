@@ -832,6 +832,7 @@ static void typchkCheckVarDecl(TypeEnv *env, AstNode *node);
 static void typchkCheckFunctionDecl(TypeEnv *env, AstNode *node);
 static bool typchkStructMembersUnreliable(Type *type);
 static Type *typchkLookupVariableType(TypeEnv *env, Token *name);
+static Type *typchkPrimitiveTypeNamed(const Token *name);
 static bool typchkIsGenericNonNative(Type *type);
 static bool typchkCheckGenericFunctionValue(TypeEnv *env, AstNode *node,
                                             Type *genericType, Type *expected);
@@ -5195,6 +5196,16 @@ static bool typchkCheckUnit(AstNode **program, int count, bool isStdlib) {
   for (int i = 0; i < count; i++) {
     if (program[i]->kind == NODE_STRUCT) {
       StructNode *sn = &program[i]->as.struct_;
+
+      // Not registered, so the name keeps meaning the built-in type
+      if (typchkPrimitiveTypeNamed(&sn->name) != NULL) {
+        typchkErrorAtTokenFmt(&sn->name,
+                              "'%.*s' is a built-in type and can't be the name "
+                              "of a struct.",
+                              sn->name.length, sn->name.start);
+        continue;
+      }
+
       Type *placeholder = typeStruct(sn->name, NULL, 0);
 
       typeStructSetGenericParamCount(placeholder, sn->genericParamCount);

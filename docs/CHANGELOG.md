@@ -21,6 +21,7 @@
 
 ## Next
 
+- **Breaking**: a struct can't be named like a built-in type: `unit`, `bool`, `string` or a number type such as `i64`. It was accepted, but the name in a type annotation still meant the built-in type
 - Fix a syntax error hiding the errors in a `type` declaration that follows it
 - Change `@listSlice`, `@arrSlice` and the `slice` method to return an empty list when `start` equals `end`, as `@strSlice` does. It was an error
 - Fix `<=` and `>=` being `true` when a float is `NaN`. Every direct comparison with `NaN` is now `false`. Generic code ordering values through `Ord` is unchanged. New opcodes `OP_LESS_EQUAL` (45) and `OP_GREATER_EQUAL` (46)
