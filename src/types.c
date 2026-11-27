@@ -257,8 +257,8 @@ static void appendMember(TypeMember **array, int *count, Token name,
       (TypeMember *)typesAllocRaw(newCount * sizeof(TypeMember));
   if (*count > 0)
     memcpy(newArray, *array, (size_t)(*count) * sizeof(TypeMember));
-  newArray[newCount - 1].name = internTokenName(name);
-  newArray[newCount - 1].type = memberType;
+  newArray[newCount - 1] =
+      (TypeMember){.name = internTokenName(name), .type = memberType};
   *array = newArray;
   *count = newCount;
 }
@@ -363,15 +363,15 @@ void typeStructAddInstanceMethod(Type *type, Token name, Type *methodType,
                              methodType, isPublic);
 }
 
-void typeStructAddTraitMethod(Type *type, Token name, Type *methodType,
-                              bool hasSelf) {
-  if (hasSelf) {
-    appendMember(&type->as.struct_.traitInstanceMethods,
-                 &type->as.struct_.traitInstanceMethodCount, name, methodType);
-  } else {
-    appendMember(&type->as.struct_.traitStaticMethods,
-                 &type->as.struct_.traitStaticMethodCount, name, methodType);
-  }
+void typeStructAddTraitMethod(Type *type, InternedName trait, Token name,
+                              Type *methodType, bool hasSelf) {
+  TypeMember **members = hasSelf ? &type->as.struct_.traitInstanceMethods
+                                 : &type->as.struct_.traitStaticMethods;
+  int *count = hasSelf ? &type->as.struct_.traitInstanceMethodCount
+                       : &type->as.struct_.traitStaticMethodCount;
+
+  appendMember(members, count, name, methodType);
+  (*members)[*count - 1].trait = trait;
 }
 
 void typeStructMarkTraitImplemented(Type *type, InternedName traitName) {
@@ -1030,6 +1030,52 @@ Type *typeStructTraitStaticMethodLookup(Type *type, Token methodName) {
       type,
       memberLookup(declaration->as.struct_.traitStaticMethods,
                    declaration->as.struct_.traitStaticMethodCount, methodName));
+}
+
+Type *typeStructTraitMethodOf(Type *type, InternedName trait, Token methodName,
+                              bool hasSelf) {
+  if (type == NULL || type->kind != TYPE_STRUCT)
+    return NULL;
+
+  Type *declaration = typeStructDeclaration(type);
+  TypeMember *members = hasSelf ? declaration->as.struct_.traitInstanceMethods
+                                : declaration->as.struct_.traitStaticMethods;
+  int count = hasSelf ? declaration->as.struct_.traitInstanceMethodCount
+                      : declaration->as.struct_.traitStaticMethodCount;
+
+  for (int i = 0; i < count; i++) {
+    if (internedNamesEqual(members[i].trait, trait) &&
+        internedNameEqualsToken(members[i].name, methodName))
+      return instantiateMember(type, members[i].type);
+  }
+
+  return NULL;
+}
+
+int typeStructTraitInstanceMethodTraits(Type *type, Token methodName,
+                                        InternedName *first,
+                                        InternedName *second) {
+  if (type == NULL || type->kind != TYPE_STRUCT)
+    return 0;
+
+  Type *declaration = typeStructDeclaration(type);
+  int found = 0;
+
+  for (int i = 0; i < declaration->as.struct_.traitInstanceMethodCount; i++) {
+    TypeMember *member = &declaration->as.struct_.traitInstanceMethods[i];
+
+    if (!internedNameEqualsToken(member->name, methodName))
+      continue;
+
+    if (found == 0)
+      *first = member->trait;
+    else if (found == 1)
+      *second = member->trait;
+
+    found++;
+  }
+
+  return found;
 }
 
 Type *typeTraitInstanceMethodLookup(Type *type, Token methodName) {

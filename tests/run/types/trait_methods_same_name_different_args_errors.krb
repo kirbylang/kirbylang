@@ -1,0 +1,24 @@
+trait Priced {
+    fun total(self, taxPercent: i64): i64;
+}
+
+trait Counted {
+    fun total(self): i64;
+}
+
+struct Order {}
+
+impl Priced for Order {
+    fun total(self, taxPercent: i64): i64 = 100 + taxPercent;
+}
+
+impl Counted for Order {
+    fun total(self): i64 = 3;
+}
+
+fun main(): unit {
+    let order = Order {};
+
+    // Arguments don't pick the method, though only `Priced.total` takes one
+    @println(order.total(20));
+}

@@ -1,0 +1,39 @@
+trait Priced {
+    fun total(self): i64;
+}
+
+trait Counted {
+    fun total(self): i64;
+}
+
+struct Order {}
+
+impl Priced for Order {
+    fun total(self): i64 = 15;
+}
+
+impl Counted for Order {
+    fun total(self): i64 = 3;
+}
+
+// The struct's own method with the same name
+impl Order {
+    pub fun total(self): i64 = 100;
+}
+
+fun cost[T: Priced](value: T): i64 = value.total();
+
+fun count[T: Counted](value: T): i64 = value.total();
+
+fun main(): unit {
+    let order = Order {};
+
+    // A plain call means the struct's own method
+    @println(order.total());
+
+    // The trait methods are still reached through their trait
+    @println(Priced.total(order));
+    @println(Counted.total(order));
+    @println(cost(order));
+    @println(count(order));
+}

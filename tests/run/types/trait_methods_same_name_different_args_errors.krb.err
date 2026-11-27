@@ -1,0 +1,1 @@
+[line 23] Error at 'total': Method 'total' is in both Priced and Counted. Call it as 'Priced.total(value)'.

@@ -1,0 +1,74 @@
+== <script> ==
+0000   24 OP_CLOSURE          1 <fn cost>
+0002    | OP_DEFINE_GLOBAL    0 'cost'
+0004   26 OP_CLOSURE          3 <fn count>
+0006    | OP_DEFINE_GLOBAL    2 'count'
+0008   39 OP_CLOSURE          5 <fn main>
+0010    | OP_DEFINE_GLOBAL    4 'main'
+0012    9 OP_STRUCT           6 'Order'
+0014    | OP_DEFINE_GLOBAL    6 'Order'
+0016    | OP_GET_GLOBAL       6 'Order'
+0018    | OP_POP
+0019   11 OP_GET_GLOBAL       6 'Order'
+0021   12 OP_CLOSURE          8 <fn total>
+0023    | OP_TRAIT_METHOD     7 'total'    9 'Priced.total'
+0026   13 OP_POP
+0027   15 OP_GET_GLOBAL       6 'Order'
+0029   16 OP_CLOSURE         10 <fn total>
+0031    | OP_TRAIT_METHOD     7 'total'   11 'Counted.total'
+0034   17 OP_POP
+0035   20 OP_GET_GLOBAL       6 'Order'
+0037   21 OP_CLOSURE         12 <fn total>
+0039    | OP_METHOD           7 'total'
+0041   22 OP_POP
+0042   40 OP_NIL
+0043    | OP_RETURN
+== cost ==
+0000   24 OP_GET_LOCAL        1
+0002    | OP_INVOKE        (0 args)    0 'Priced.total'
+0005    | OP_RETURN
+== count ==
+0000   26 OP_GET_LOCAL        1
+0002    | OP_INVOKE        (0 args)    0 'Counted.total'
+0005    | OP_RETURN
+== main ==
+0000   29 OP_GET_GLOBAL       0 'Order'
+0002    | OP_STRUCT_INIT      0
+0004   32 OP_GET_GLOBAL       1 '@println'
+0006    | OP_GET_LOCAL        1
+0008    | OP_INVOKE        (0 args)    2 'total'
+0011    | OP_CALL             1
+0013    | OP_POP
+0014   35 OP_GET_GLOBAL       1 '@println'
+0016    | OP_GET_LOCAL        1
+0018    | OP_INVOKE        (0 args)    3 'Priced.total'
+0021    | OP_CALL             1
+0023    | OP_POP
+0024   36 OP_GET_GLOBAL       1 '@println'
+0026    | OP_GET_LOCAL        1
+0028    | OP_INVOKE        (0 args)    4 'Counted.total'
+0031    | OP_CALL             1
+0033    | OP_POP
+0034   37 OP_GET_GLOBAL       1 '@println'
+0036    | OP_GET_GLOBAL       5 'cost'
+0038    | OP_GET_LOCAL        1
+0040    | OP_CALL             1
+0042    | OP_CALL             1
+0044    | OP_POP
+0045   38 OP_GET_GLOBAL       1 '@println'
+0047    | OP_GET_GLOBAL       6 'count'
+0049    | OP_GET_LOCAL        1
+0051    | OP_CALL             1
+0053    | OP_CALL             1
+0055    | OP_POP
+0056   39 OP_NIL
+0057    | OP_RETURN
+== total ==
+0000   12 OP_CONSTANT         0 '15'
+0002    | OP_RETURN
+== total ==
+0000   16 OP_CONSTANT         0 '3'
+0002    | OP_RETURN
+== total ==
+0000   21 OP_CONSTANT         0 '100'
+0002    | OP_RETURN

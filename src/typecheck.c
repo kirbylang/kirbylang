@@ -866,6 +866,10 @@ static Type *typchkCheckCallAgainstFunctionType(TypeEnv *env, AstNode *node,
 static Type *typchkInferGet(TypeEnv *env, AstNode *node);
 static Type *typchkInferTraitMethod(TypeEnv *env, GetNode *get,
                                     Token traitToken, Type *objectType);
+static PrimitiveMethod *
+typchkPrimitiveOtherTraitMethod(TypeEnv *env, const PrimitiveMethod *found);
+static void typchkErrorAmbiguousMethod(Token *method, InternedName first,
+                                       InternedName second);
 static const char *typchkPrimitiveOwner(const Type *type);
 static PrimitiveMethod *
 typchkPrimitiveMethodLookup(TypeEnv *env, const char *owner, Token name);
@@ -2555,6 +2559,22 @@ typchkPrimitiveTraitMethodLookup(TypeEnv *env, const char *owner, Token name,
   return NULL;
 }
 
+// An instance method of the same name that another trait gave the same owner,
+// or NULL
+static PrimitiveMethod *
+typchkPrimitiveOtherTraitMethod(TypeEnv *env, const PrimitiveMethod *found) {
+  for (int i = 0; i < env->primitiveMethodCount; i++) {
+    PrimitiveMethod *method = &env->primitiveMethods[i];
+
+    if (method->isTrait && strcmp(method->owner, found->owner) == 0 &&
+        internedNamesEqual(method->name, found->name) &&
+        !internedNamesEqual(method->trait, found->trait))
+      return method;
+  }
+
+  return NULL;
+}
+
 static PrimitiveMethod *typchkPrimitiveMethodAppend(TypeEnv *env) {
   if (env->primitiveMethodCount == env->primitiveMethodCapacity) {
     env->primitiveMethodCapacity =
@@ -2704,6 +2724,16 @@ static Type *typchkInferPrimitiveStaticGet(TypeEnv *env, GetNode *get,
   return method->type;
 }
 
+static void typchkErrorAmbiguousMethod(Token *method, InternedName first,
+                                       InternedName second) {
+  typchkErrorAtTokenFmt(
+      method,
+      "Method '%.*s' is in both %.*s and %.*s. Call it as '%.*s.%.*s(value)'.",
+      method->length, method->start, first.length, internedNameChars(first),
+      second.length, internedNameChars(second), first.length,
+      internedNameChars(first), method->length, method->start);
+}
+
 // Makes the compiler run `trait`'s version of the method the get names. The
 // compiler outlives the checker's name storage, so it gets a copy.
 static void typchkMarkViaTrait(GetNode *get, InternedName trait) {
@@ -2764,7 +2794,8 @@ static Type *typchkInferTraitMethod(TypeEnv *env, GetNode *get,
   if (objectType->kind == TYPE_STRUCT &&
       typeStructImplementsTrait(objectType, traitName)) {
     typchkMarkViaTrait(get, traitName);
-    return typeStructTraitInstanceMethodLookup(objectType, get->name);
+    return typeStructTraitMethodOf(objectType, traitName, get->name,
+                                   /*hasSelf=*/true);
   }
 
   typchkErrorAtTokenFmt(&traitToken, "%s doesn't implement %.*s.",
@@ -2986,6 +3017,15 @@ static Type *typchkInferGet(TypeEnv *env, AstNode *node) {
     }
 
     if (traitMethod != NULL) {
+      PrimitiveMethod *other =
+          typchkPrimitiveOtherTraitMethod(env, traitMethod);
+
+      if (other != NULL) {
+        typchkErrorAmbiguousMethod(&get->name, traitMethod->trait,
+                                   other->trait);
+        return NULL;
+      }
+
       if (!isCallee) {
         typchkErrorAtTokenFmt(
             &get->name, "Method '%.*s' of '%s' has to be called.",
@@ -3030,6 +3070,14 @@ static Type *typchkInferGet(TypeEnv *env, AstNode *node) {
   }
 
   // Then look up methods that came from an `impl Trait for X` block
+  InternedName first, second;
+
+  if (typeStructTraitInstanceMethodTraits(objectType, get->name, &first,
+                                          &second) > 1) {
+    typchkErrorAmbiguousMethod(&get->name, first, second);
+    return NULL;
+  }
+
   Type *traitMethodType =
       typeStructTraitInstanceMethodLookup(objectType, get->name);
   if (traitMethodType != NULL)
@@ -4412,13 +4460,6 @@ static Type *typchkResolveImplTarget(TypeEnv *env, Token name) {
              : NULL;
 }
 
-// True if a trait implemented for the struct already provides a method with
-// this name, instance or static
-static bool typchkStructTraitProvides(Type *structType, Token name) {
-  return typeStructTraitInstanceMethodLookup(structType, name) != NULL ||
-         typeStructTraitStaticMethodLookup(structType, name) != NULL;
-}
-
 // True if the struct has a method of this name, from any impl, in the
 // category opposite to `hasSelf`. An instance method and a static method
 // share one namespace at run time, so a name can't be both
@@ -4586,13 +4627,30 @@ static void typchkRegisterPrimitiveTraitImpl(TypeEnv *env, AstNode *node,
       continue;
     }
 
-    if (typchkPrimitiveTraitMethodLookup(env, owner, method->name, NULL) !=
-        NULL) {
+    PrimitiveMethod *provided =
+        typchkPrimitiveTraitMethodLookup(env, owner, method->name, NULL);
+
+    if (typchkPrimitiveTraitMethodLookup(env, owner, method->name,
+                                         &traitName) != NULL) {
+      typchkErrorAtTokenFmt(&method->name,
+                            "'%.*s' is already declared in this impl.",
+                            method->name.length, method->name.start);
+      ok = false;
+      continue;
+    }
+
+    if (provided != NULL && !provided->hasSelf && !method->hasSelf) {
       typchkErrorAtTokenFmt(&method->name,
                             "'%.*s' is already provided to '%.*s' by another "
                             "trait.",
                             method->name.length, method->name.start,
                             target.length, target.start);
+      ok = false;
+      continue;
+    }
+
+    if (provided != NULL && provided->hasSelf != method->hasSelf) {
+      typchkErrorInstanceAndStatic(&method->name, &target);
       ok = false;
       continue;
     }
@@ -4690,12 +4748,24 @@ static void typchkRegisterTraitImpl(TypeEnv *env, AstNode *node) {
       continue;
     }
 
-    if (typchkStructTraitProvides(targetType, method->name)) {
+    // Two traits can share an instance method's name. A static method has no
+    // value to pick the trait by, so its name has to be one trait's alone
+    if (typeStructTraitStaticMethodLookup(targetType, method->name) != NULL &&
+        !method->hasSelf) {
       typchkErrorAtTokenFmt(&method->name,
                             "'%.*s' is already provided to '%.*s' by another "
                             "trait.",
                             method->name.length, method->name.start,
                             impl->targetName.length, impl->targetName.start);
+      ok = false;
+      continue;
+    }
+
+    if (typeStructTraitMethodOf(targetType, traitName, method->name,
+                                method->hasSelf) != NULL) {
+      typchkErrorAtTokenFmt(&method->name,
+                            "'%.*s' is already declared in this impl.",
+                            method->name.length, method->name.start);
       ok = false;
       continue;
     }
@@ -4707,8 +4777,8 @@ static void typchkRegisterTraitImpl(TypeEnv *env, AstNode *node) {
       continue;
     }
 
-    typeStructAddTraitMethod(targetType, method->name, concreteMethodType,
-                             method->hasSelf);
+    typeStructAddTraitMethod(targetType, traitName, method->name,
+                             concreteMethodType, method->hasSelf);
   }
 
   typchkTypeEnvSetImplTargetType(env, NULL);
@@ -5215,10 +5285,9 @@ static void checkImplMethodBodies(TypeEnv *env, AstNode *node) {
 
     if (structType != NULL) {
       if (impl->hasTraitName) {
-        methodType =
-            method->hasSelf
-                ? typeStructTraitInstanceMethodLookup(structType, method->name)
-                : typeStructTraitStaticMethodLookup(structType, method->name);
+        methodType = typeStructTraitMethodOf(structType,
+                                             internTokenName(impl->traitName),
+                                             method->name, method->hasSelf);
       } else if (method->hasSelf) {
         methodType = typeStructInstanceMethodLookup(structType, method->name);
       } else {

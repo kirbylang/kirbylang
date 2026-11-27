@@ -926,6 +926,10 @@ fun main(): unit {
 A type's own method wins over a trait's method with the same name.
 `Trait.method(value)` calls the trait's version.
 
+Two traits can have a method with the same name. When a type implements both and
+has no method of its own by that name, `value.label()` is an error that asks for
+`Named.label(value)`. Static methods can't share a name this way.
+
 ```kirby
 struct Point {
     pub var x: f64;

@@ -1,0 +1,75 @@
+== <script> ==
+0000   24 OP_CLOSURE          1 <fn cost>
+0002    | OP_DEFINE_GLOBAL    0 'cost'
+0004   26 OP_CLOSURE          3 <fn count>
+0006    | OP_DEFINE_GLOBAL    2 'count'
+0008   37 OP_CLOSURE          5 <fn main>
+0010    | OP_DEFINE_GLOBAL    4 'main'
+0012   10 OP_STRUCT           6 'Order'
+0014    | OP_DEFINE_GLOBAL    6 'Order'
+0016    | OP_GET_GLOBAL       6 'Order'
+0018   11 OP_NIL
+0019    | OP_FIELD            7 'price' public mutable
+0023   12 OP_NIL
+0024    | OP_FIELD            8 'items' public mutable
+0028   13 OP_POP
+0029   15 OP_GET_GLOBAL       6 'Order'
+0031   16 OP_CLOSURE         10 <fn total>
+0033    | OP_TRAIT_METHOD     9 'total'   11 'Priced.total'
+0036   17 OP_POP
+0037   19 OP_GET_GLOBAL       6 'Order'
+0039   20 OP_CLOSURE         12 <fn total>
+0041    | OP_TRAIT_METHOD     9 'total'   13 'Counted.total'
+0044   21 OP_POP
+0045   38 OP_NIL
+0046    | OP_RETURN
+== cost ==
+0000   24 OP_GET_LOCAL        1
+0002    | OP_INVOKE        (0 args)    0 'Priced.total'
+0005    | OP_RETURN
+== count ==
+0000   26 OP_GET_LOCAL        1
+0002    | OP_INVOKE        (0 args)    0 'Counted.total'
+0005    | OP_RETURN
+== main ==
+0000   29 OP_GET_GLOBAL       0 'Order'
+0002    | OP_CONSTANT         1 'price'
+0004    | OP_CONSTANT         2 '5'
+0006    | OP_CONSTANT         3 'items'
+0008    | OP_CONSTANT         4 '3'
+0010    | OP_STRUCT_INIT      2
+0012   32 OP_GET_GLOBAL       5 '@println'
+0014    | OP_GET_LOCAL        1
+0016    | OP_INVOKE        (0 args)    6 'Priced.total'
+0019    | OP_CALL             1
+0021    | OP_POP
+0022   33 OP_GET_GLOBAL       5 '@println'
+0024    | OP_GET_LOCAL        1
+0026    | OP_INVOKE        (0 args)    7 'Counted.total'
+0029    | OP_CALL             1
+0031    | OP_POP
+0032   35 OP_GET_GLOBAL       5 '@println'
+0034    | OP_GET_GLOBAL       8 'cost'
+0036    | OP_GET_LOCAL        1
+0038    | OP_CALL             1
+0040    | OP_CALL             1
+0042    | OP_POP
+0043   36 OP_GET_GLOBAL       5 '@println'
+0045    | OP_GET_GLOBAL       9 'count'
+0047    | OP_GET_LOCAL        1
+0049    | OP_CALL             1
+0051    | OP_CALL             1
+0053    | OP_POP
+0054   37 OP_NIL
+0055    | OP_RETURN
+== total ==
+0000   16 OP_GET_LOCAL        0
+0002    | OP_GET_PROPERTY     0 'price'
+0004    | OP_GET_LOCAL        0
+0006    | OP_GET_PROPERTY     1 'items'
+0008    | OP_MULTIPLY
+0009    | OP_RETURN
+== total ==
+0000   20 OP_GET_LOCAL        0
+0002    | OP_GET_PROPERTY     0 'items'
+0004    | OP_RETURN
