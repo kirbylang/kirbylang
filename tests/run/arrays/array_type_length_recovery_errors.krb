@@ -1,0 +1,4 @@
+fun main(): unit {
+    let a: [i64; N] = [1];
+    let b: i64 = true;
+}

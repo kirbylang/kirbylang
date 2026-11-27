@@ -1,4 +1,5 @@
 #include <assert.h>
+#include <limits.h>
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -691,6 +692,57 @@ static Type *typchkResolveLength(TypeEnv *env, Token *name) {
   return param;
 }
 
+// The number written as an array's length, or -1 after reporting that the
+// expression isn't one.
+static int typchkLiteralLength(AstNode *length) {
+  LiteralNode *literal = &length->as.literal;
+
+  if (length->kind != NODE_LITERAL || literal->kind != LITERAL_NUMBER ||
+      !literal->as.number.literalIsPlainInteger) {
+    typchkErrorAtNode(length,
+                      "Array length must be a whole number, as in '[i64; 3]'.");
+    return -1;
+  }
+
+  if (!literal->as.number.literalValueFits ||
+      literal->as.number.literalValue > INT_MAX) {
+    typchkErrorAtNode(length, "Array length is too large.");
+    return -1;
+  }
+
+  return (int)literal->as.number.literalValue;
+}
+
+// The array type with the length written as `length`, or NULL after reporting
+// why it isn't a length.
+static Type *typchkResolveArray(TypeEnv *env, Type *elementType,
+                                AstNode *length) {
+  if (length->kind == NODE_VARIABLE) {
+    Token *name = &length->as.variable.name;
+    bool isDeclared =
+        bindingArrayLookup(env->_genericParams, env->_genericParamCount,
+                           *name) != NULL;
+
+    // Only the standard library declares `const` parameters to name here
+    if (isDeclared || env->_isStdlib) {
+      Type *param = typchkResolveLength(env, name);
+
+      return elementType == NULL || param == NULL
+                 ? NULL
+                 : typeArrayOfParam(elementType, param);
+    }
+
+    typchkErrorAtToken(
+        name, "Array length must be a whole number, as in '[i64; 3]'.");
+    return NULL;
+  }
+
+  int value = typchkLiteralLength(length);
+
+  return elementType == NULL || value < 0 ? NULL
+                                          : typeArray(elementType, value);
+}
+
 Type *typchkResolveType(TypeEnv *env, AstNode *typeAnnotation) {
   if (typeAnnotation->kind == NODE_TYPE_FUNCTION) {
     TypeFunctionNode *fn = &typeAnnotation->as.typeFunction;
@@ -722,16 +774,9 @@ Type *typchkResolveType(TypeEnv *env, AstNode *typeAnnotation) {
   if (typeAnnotation->kind == NODE_TYPE_ARRAY) {
     Type *elementType =
         typchkResolveType(env, typeAnnotation->as.typeArray.elementType);
-    TypeArrayNode *array = &typeAnnotation->as.typeArray;
 
-    if (!array->hasLengthName)
-      return elementType == NULL ? NULL : typeArray(elementType, array->length);
-
-    Type *length = typchkResolveLength(env, &array->lengthName);
-
-    return elementType == NULL || length == NULL
-               ? NULL
-               : typeArrayOfParam(elementType, length);
+    return typchkResolveArray(env, elementType,
+                              typeAnnotation->as.typeArray.length);
   }
 
   TypeNode *t = &typeAnnotation->as.type_;

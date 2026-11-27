@@ -1171,29 +1171,6 @@ static AstNode *statement(Parser *p) {
   return expressionStatement(p);
 }
 
-// Reads the length of an array type from the number just consumed.
-static int parseArrayLength(Parser *p) {
-  const char *text = p->previous.start;
-  int length = p->previous.length;
-  long value = 0;
-
-  for (int i = 0; i < length; i++) {
-    if (text[i] < '0' || text[i] > '9') {
-      parse_error(p, "Array length must be a whole number.");
-      return 0;
-    }
-
-    value = value * 10 + (text[i] - '0');
-
-    if (value > INT_MAX) {
-      parse_error(p, "Array length is too large.");
-      return 0;
-    }
-  }
-
-  return (int)value;
-}
-
 static AstNode *parseType(Parser *p) {
   if (match(p, TOKEN_FUN)) {
     int line = p->previous.line;
@@ -1237,24 +1214,13 @@ static AstNode *parseType(Parser *p) {
     AstNode *elementType = parseType(p);
 
     if (match(p, TOKEN_SEMICOLON)) {
-      int length = 0;
-      Token lengthName = {0};
-      bool hasLengthName = p->isStdlib && match(p, TOKEN_IDENTIFIER);
-
-      if (hasLengthName) {
-        lengthName = p->previous;
-      } else {
-        consume(p, TOKEN_NUMBER, "Expect array length after ';'.");
-        length = parseArrayLength(p);
-      }
+      AstNode *length = expression(p);
 
       consume(p, TOKEN_RIGHT_BRACKET, "Expect ']' after array length.");
 
       AstNode *node = astAlloc(NODE_TYPE_ARRAY, line);
       node->as.typeArray.elementType = elementType;
       node->as.typeArray.length = length;
-      node->as.typeArray.hasLengthName = hasLengthName;
-      node->as.typeArray.lengthName = lengthName;
       return node;
     }
 

@@ -1,1 +1,4 @@
 fun f(a: [i64; 2.5]): unit {}
+
+
+fun main(): unit {}

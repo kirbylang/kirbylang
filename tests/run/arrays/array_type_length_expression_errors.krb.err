@@ -1,0 +1,17 @@
+[line 9] Error at 'three': Array length must be a whole number, as in '[i64; 3]'.
+[line 12] Error at 'four': Array length must be a whole number, as in '[i64; 3]'.
+[line 2] Error at 'one': Array length must be a whole number, as in '[i64; 3]'.
+[line 6] Error at 'two': Array length must be a whole number, as in '[i64; 3]'.
+[line 15] Error at 'T': 'T' is a type, not a length.
+[line 17] Error: Array length must be a whole number, as in '[i64; 3]'.
+[line 17] Error: Array length must be a whole number, as in '[i64; 3]'.
+[line 21] Error at 'n': Array length must be a whole number, as in '[i64; 3]'.
+[line 22] Error: Array length must be a whole number, as in '[i64; 3]'.
+[line 23] Error: Array length must be a whole number, as in '[i64; 3]'.
+[line 24] Error at 'five': Array length must be a whole number, as in '[i64; 3]'.
+[line 25] Error: Array length must be a whole number, as in '[i64; 3]'.
+[line 26] Error: Array length must be a whole number, as in '[i64; 3]'.
+[line 27] Error: Array length is too large.
+[line 28] Error: Array length is too large.
+[line 29] Error at '_': Array length must be a whole number, as in '[i64; 3]'.
+[line 30] Error at 'six': Array length must be a whole number, as in '[i64; 3]'.

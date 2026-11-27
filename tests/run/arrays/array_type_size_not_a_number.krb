@@ -1,2 +1,5 @@
 let n = 3;
 let a: [i64; n] = [1, 2, 3];
+
+
+fun main(): unit {}

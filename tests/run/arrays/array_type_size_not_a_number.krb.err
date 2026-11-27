@@ -1,2 +1,1 @@
-[line 2] Error at 'n': Expect array length after ';'.
-[line 2] Error at 'n': Expect ';' after expression.
+[line 2] Error at 'n': Array length must be a whole number, as in '[i64; 3]'.

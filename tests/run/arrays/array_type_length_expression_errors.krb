@@ -1,0 +1,31 @@
+struct S {
+    pub var a: [i64; one];
+}
+
+struct G[T] {
+    pub var b: [T; two];
+}
+
+type A = [i64; three];
+
+trait Shape {
+    fun corners(self): [i64; four];
+}
+
+fun typeParam[T](x: [i64; T]): unit {}
+
+fun f(x: [i64; 1 + 2]): [i64; -1] {}
+
+fun main(): unit {
+    let n = 3;
+    let c: [i64; n] = [1];
+    let d: [[i64; "a"]] = [];
+    let e: [i64; true] = [1];
+    let g = [1] as [i64; five];
+    let h: [i64; 2.5] = [1];
+    let i: [i64; 3i64] = [1];
+    let j: [i64; 99999999999999999999] = [1];
+    let k: [i64; 2147483648] = [1];
+    let l: [i64; _] = [1];
+    let m = fun (x: [i64; six]): [i64; seven] { return x; };
+}

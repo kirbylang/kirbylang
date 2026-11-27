@@ -681,13 +681,7 @@ static void printNode(StrBuf *sb, AstNode *node) {
     sb_append(sb, "[");
     printNode(sb, node->as.typeArray.elementType);
     sb_append(sb, "; ");
-    if (node->as.typeArray.hasLengthName) {
-      sb_append_token(sb, node->as.typeArray.lengthName);
-    } else {
-      char length[16];
-      snprintf(length, sizeof(length), "%d", node->as.typeArray.length);
-      sb_append(sb, length);
-    }
+    printNode(sb, node->as.typeArray.length);
     sb_append(sb, "]");
     break;
   }

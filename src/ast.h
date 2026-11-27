@@ -313,10 +313,9 @@ typedef struct {
  */
 typedef struct {
   AstNode *elementType;
-  int length;
-  // The standard library can name the length instead, as in `[T; N]`
-  bool hasLengthName;
-  Token lengthName;
+  // The expression written after `;`. The type checker accepts a whole number,
+  // or in the standard library the name of a `const` parameter.
+  AstNode *length;
 } TypeArrayNode;
 
 typedef struct {
