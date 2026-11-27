@@ -161,6 +161,7 @@ static void synchronize(Parser *p) {
     case TOKEN_STRUCT:
     case TOKEN_IMPL:
     case TOKEN_TRAIT:
+    case TOKEN_TYPE:
     case TOKEN_FUN:
     case TOKEN_VAR:
     case TOKEN_LET:

@@ -21,6 +21,7 @@
 
 ## Next
 
+- Fix a syntax error hiding the errors in a `type` declaration that follows it
 - Change `@listSlice`, `@arrSlice` and the `slice` method to return an empty list when `start` equals `end`, as `@strSlice` does. It was an error
 - Fix `<=` and `>=` being `true` when a float is `NaN`. Every direct comparison with `NaN` is now `false`. Generic code ordering values through `Ord` is unchanged. New opcodes `OP_LESS_EQUAL` (45) and `OP_GREATER_EQUAL` (46)
 - Fix a number literal not taking the number type of an argument, as it does in `5 == x`. With a `u8` named `x`, `Eq.equals(5, x)`, `5.equals(x)` and `5.max(x)` were type errors
