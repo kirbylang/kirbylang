@@ -1,0 +1,16 @@
+struct Plain {}
+
+struct Shown[T: Display] {
+    pub value: T;
+}
+
+impl Shown[T] {
+    pub fun new(value: T): Self[T] = Self { value: value };
+}
+
+type Any[T: Display] = Shown[T];
+
+fun main(): unit {
+    let a = Any { value: Plain {} };
+    let b = Any.new(Plain {});
+}

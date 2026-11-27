@@ -1,0 +1,2 @@
+[line 8] Error at 'T': 'T' is a type parameter, not a struct.
+[line 12] Error at 'Box': 'Box' is a type parameter, not a struct.

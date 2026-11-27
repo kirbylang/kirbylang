@@ -1,0 +1,49 @@
+struct Box[T] {
+    pub value: T;
+}
+
+impl Box[T] {
+    pub fun new(value: T): Self[T] = Self { value: value };
+
+    pub fun pair[U](value: T, other: U): U = other;
+}
+
+struct Pair[A, B] {
+    pub first: A;
+    pub second: B;
+}
+
+impl Pair[A, B] {
+    pub fun new(first: A, second: B): Self[A, B] = Self { first: first, second: second };
+}
+
+type Number = Box[f64];
+type Same[T] = Box[T];
+type Tagged[T] = Pair[string, T];
+type Swapped[A, B, C] = Pair[C, A];
+
+fun main(): unit {
+    let a = Number { value: 1 };
+    let b: f64 = Number.new(2).value;
+    let c: string = Number.pair(3, "pair");
+    @println(a.value);
+    @println(b);
+    @println(c);
+
+    let d: Box[i64] = Same { value: 4 };
+    let e: Box[f64] = Same { value: 5 };
+    let f: string = Same.new("six").value;
+    let g: bool = Same.pair(7, true);
+    @println(d.value);
+    @println(e.value);
+    @println(f);
+    @println(g);
+
+    let h: Pair[string, i64] = Tagged { first: "tag", second: 8 };
+    let i: Pair[string, bool] = Tagged.new("tag", false);
+    let j = Swapped { first: 9, second: "ten" };
+    let k: Pair[i64, string] = j;
+    @println(h.second);
+    @println(i.second);
+    @println(k.second);
+}

@@ -837,6 +837,27 @@ let c: Wrapped = a;                   // error: 'Wrapped' needs 1 type argument(
 The number of arguments has to match, and an alias with no parameters takes
 none.
 
+An alias of a struct also works where the struct's name would, in a literal and
+in a call of a static method. An alias of a primitive type can call its static
+methods:
+
+```
+type Number = Box[i64];
+type Meters = f64;
+
+let a = Number { value: 1 };          // Box[i64]
+let b = Wrapped { value: "hi" };      // Box[string], from the field
+let c = Meters.default();             // f64
+let d = Number { value: "hi" };       // error: Expected i64, got string.
+let e = Meters { value: 1 };          // error: 'Meters' isn't a struct.
+```
+
+The type arguments an alias fixes stay fixed. The ones it leaves as its own
+parameters are worked out from the fields or the arguments, as for the struct.
+A type parameter hides a struct or alias of the same name in a literal too, and
+can't be created with one. A generic alias can't be given arguments in a literal or a call, so
+`Wrapped[i64] { value: 1 }` isn't written.
+
 ## Operators
 
 | Operator          | Operands                        | Result    |

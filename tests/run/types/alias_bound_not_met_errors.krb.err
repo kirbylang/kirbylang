@@ -1,0 +1,2 @@
+[line 14] Error: Plain doesn't implement Display, required by Any.
+[line 15] Error: Plain doesn't implement Display, required by T.

@@ -1133,7 +1133,15 @@ static void compileExpr(AstNode *node) {
   }
 
   case NODE_VARIABLE: {
-    VarRef ref = resolveVariable(&node->as.variable.name);
+    VariableNode *variable = &node->as.variable;
+
+    if (variable->structName.length > 0) {
+      // A struct named through a type alias, which a local can't hide
+      emitBytes(OP_GET_GLOBAL, identifierConstant(&variable->structName));
+      break;
+    }
+
+    VarRef ref = resolveVariable(&variable->name);
     emitBytes(ref.getOp, ref.arg);
     break;
   }
@@ -1193,8 +1201,13 @@ static void compileExpr(AstNode *node) {
   case NODE_STRUCT_INIT: {
     StructInitNode *si = &node->as.structInit;
 
-    VarRef ref = resolveVariable(&si->name);
-    emitBytes(ref.getOp, ref.arg);
+    if (si->structName.length > 0) {
+      // A struct named through a type alias, which a local can't hide
+      emitBytes(OP_GET_GLOBAL, identifierConstant(&si->structName));
+    } else {
+      VarRef ref = resolveVariable(&si->name);
+      emitBytes(ref.getOp, ref.arg);
+    }
 
     for (int i = 0; i < si->fieldCount; i++) {
       StructInitFieldNode *field = &si->fields[i];

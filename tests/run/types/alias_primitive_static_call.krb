@@ -1,0 +1,12 @@
+type Meters = f64;
+type Distance = Meters;
+type Name = string;
+
+fun main(): unit {
+    let a: f64 = Meters.default();
+    let b: f64 = Distance.default();
+    let c: string = Name.default();
+    @println(a);
+    @println(b);
+    @println(c == "");
+}

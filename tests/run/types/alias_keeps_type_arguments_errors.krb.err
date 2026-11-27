@@ -1,0 +1,5 @@
+[line 18] Error: Expected i64, got string.
+[line 19] Error: Expected i64, got string.
+[line 20] Error: Expected Box[string], got Box[i64].
+[line 21] Error: Expected string, got i64.
+[line 22] Error: Expected Pair[i64, i64], got Pair[string, i64].
