@@ -1,7 +1,7 @@
 {
   "name": "kirby-vscode-extension",
   "version": "1.0.0",
-  "description": "VS Code extension for kirby language",
+  "description": "VS Code extension for the Kirby language",
   "engines": {
     "vscode": "^1.85.0"
   },

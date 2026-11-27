@@ -6,13 +6,19 @@ Kirby is a statically typed language.
 
 Literal values have primitive types.
 
-| Type     | Example          |
-| -------- | ---------------- |
-| `string` | `"Hello World"`  |
-| `i64`    | `42`             |
-| `f64`    | `1.2345`         |
-| `bool`   | `true` / `false` |
-| `unit`   | `()`             |
+| Type                      | Example            |
+| ------------------------- | ------------------ |
+| `string`                  | `"Hello World"`    |
+| `i64`, `i32`, `i16`, `i8` | `42`, `42i32`      |
+| `u64`, `u32`, `u16`, `u8` | `42u8`             |
+| `f64`, `f32`              | `1.2345`, `1.5f32` |
+| `bool`                    | `true` / `false`   |
+| `unit`                    | `()`               |
+
+`nil` is also a value. It can't be written as a type.
+
+`expr as Type` converts a number to another number type. A value that doesn't fit
+an integer type is an error when the program runs.
 
 ### Number Literals
 
@@ -73,7 +79,8 @@ Two array types are the same type when both the item type and the length match. 
 
 ### Structs
 
-Structs are referred to as a type by name. Fields are declared with `var`.
+Structs are referred to as a type by name. A field is declared with its name and
+type. It is private and immutable unless it is declared with `pub` and `var`.
 
 ```
 struct Box {
@@ -226,17 +233,18 @@ argument.
 
 The number types have these methods:
 
-| Type                       | Methods                                                              |
-| -------------------------- | -------------------------------------------------------------------- |
-| `f64`                      | `abs`, `ceil`, `floor`, `max`, `min`, `pow`, `round`, `sqrt`, `trunc` |
-| `f32`                      | the same as `f64`                                                    |
-| `i8`, `i16`, `i32`, `i64`  | `abs`, `max`, `min`                                                  |
-| `u8`, `u16`, `u32`, `u64`  | `max`, `min`                                                         |
+| Type                      | Methods                                                               |
+| ------------------------- | --------------------------------------------------------------------- |
+| `f64`                     | `abs`, `ceil`, `floor`, `max`, `min`, `pow`, `round`, `sqrt`, `trunc` |
+| `f32`                     | the same as `f64`                                                     |
+| `i8`, `i16`, `i32`, `i64` | `abs`, `max`, `min`                                                   |
+| `u8`, `u16`, `u32`, `u64` | `max`, `min`                                                          |
 
 The `f64` methods do what the native functions of the same name do. An `f32`
 method does its math as an `f64` and converts the result back, so a result that
 doesn't fit in an `f32` is an error. An integer `abs` of the smallest value, such
-as `-128` for an `i8`, is an overflow error. `bool` has no methods yet.
+as `-128` for an `i8`, is an overflow error. `string` has `len`. `bool` and
+`unit` only have the methods of their traits.
 
 Inside the block, `Self` is the primitive type, so `other: Self` is a `u8`
 in `impl u8`. A primitive has no fields or static methods, so `Self { }`
@@ -258,13 +266,13 @@ same name. A static method of a trait is called on the type's name: `f64.default
 
 The standard library implements these traits:
 
-| Type                          | Traits                                                  |
-| ----------------------------- | ------------------------------------------------------- |
+| Type                          | Traits                                                               |
+| ----------------------------- | -------------------------------------------------------------------- |
 | every number type             | `Display`, `Eq`, `Ord`, `Default`, `Add`, `Sub`, `Mul`, `Div`, `Mod` |
-| signed integers, `f64`, `f32` | `Neg`                                                   |
-| `string`                      | `Display`, `Eq`, `Default`, `Add`                       |
-| `bool`                        | `Display`, `Eq`, `Default`                              |
-| `unit`                        | `Display` (`nil`), `Eq`, `Ord`, `Default`               |
+| signed integers, `f64`, `f32` | `Neg`                                                                |
+| `string`                      | `Display`, `Eq`, `Default`, `Add`                                    |
+| `bool`                        | `Display`, `Eq`, `Default`                                           |
+| `unit`                        | `Display` (`nil`), `Eq`, `Ord`, `Default`                            |
 
 `string` has no `Ord` because there is no `<` on strings yet, and `bool` has no `Ord`. `cmp` returns `-1`, `0` or `1`.
 Trait impls on a primitive can't be used with a bounded type parameter yet.
@@ -288,8 +296,8 @@ impl[T, const N] [T; N] {
 }
 ```
 
-`T` stands for the item type of the value the method is called on, so `first`
-of `[string]` gives a `string`. `const N` declares a parameter that is an array
+`T` stands for the item type of the value the method is called on, so `pop` of a
+`[string]` gives a `string`. `const N` declares a parameter that is an array
 length instead of a type, so `copy` of a `[i64; 3]` gives a `[i64; 3]`. An
 impl that doesn't need the length writes `_` (`impl[T] [T; _]`), and then no
 signature can mention it. An array impl can't be for one length, such as
@@ -318,11 +326,11 @@ because these parameters can't have bounds.
 
 ### Traits
 
-A trait declares required methods for a struct to implement.
+A trait declares required methods for a type to implement.
 
 ```
-trait Display {
-    fun toString(self): string;
+trait Describe {
+    fun describe(self): string;
 }
 
 struct Point {
@@ -330,12 +338,12 @@ struct Point {
     pub var y: f64;
 }
 
-impl Display for Point {
-    fun toString(self): string = "Point";
+impl Describe for Point {
+    fun describe(self): string = "Point";
 }
 
 fun main(): unit {
-    @println((Point { x: 1, y: 2 }).toString());
+    @println((Point { x: 1, y: 2 }).describe());
 }
 ```
 
@@ -388,7 +396,10 @@ no matter which impl was loaded first.
 
 #### Builtin traits
 
-The builtin, always in scope, traits are `Display`, `Eq`, `Ord`, `Default`, and the operator traits `Add`, `Sub`, `Mul`, `Div`, `Mod` and `Neg`.
+The builtin traits, which are always in scope, are `Display`, `Eq`, `Ord`, `Default`, and the operator traits `Add`, `Sub`, `Mul`, `Div`, `Mod` and `Neg`.
+
+Their declarations are in the standard library, so a file can't declare them
+again.
 
 ##### Eq
 
@@ -396,7 +407,9 @@ The builtin, always in scope, traits are `Display`, `Eq`, `Ord`, `Default`, and 
 trait Eq {
     fun equals(self, other: Self): bool;
 }
+```
 
+```
 struct Box {
     pub var value: f64;
 }
@@ -419,18 +432,22 @@ fun main(): unit {
 trait Default {
     fun default(): Self;
 }
+```
 
+```
 struct Box {
     pub var value: f64;
 }
 
 impl Default for Box {
-    fun default(): Self = Self { value = 0 };
+    fun default(): Self = Self { value: 0 };
 }
 
-let box = Box.default();
+fun main(): unit {
+    let box = Box.default();
 
-box.value; // 0
+    @println(box.value); // 0
+}
 ```
 
 ##### Display
@@ -439,7 +456,9 @@ box.value; // 0
 trait Display {
     fun toString(self): string;
 }
+```
 
+```
 struct Box {
     pub var value: f64;
 }
@@ -463,11 +482,9 @@ trait Ord: Eq {
     // comes first
     fun cmp(self, other: Self): i64;
 }
+```
 
-trait Eq {
-    fun equals(self, other: Self): bool;
-}
-
+```
 struct Box {
     pub var value: i64;
 }
@@ -493,16 +510,16 @@ fun main(): unit {
 An operator on structs calls a method of a trait. `a + b` calls `a.add(b)`, so
 a struct supports `+` by implementing `Add`.
 
-| Operator              | Trait  | Method                          |
-| --------------------- | ------ | ------------------------------- |
-| `+`                   | `Add`  | `fun add(self, other: Self): Self` |
-| `-`                   | `Sub`  | `fun sub(self, other: Self): Self` |
-| `*`                   | `Mul`  | `fun mul(self, other: Self): Self` |
-| `/`                   | `Div`  | `fun div(self, other: Self): Self` |
-| `%`                   | `Mod`  | `fun mod(self, other: Self): Self` |
-| `-` (negate)          | `Neg`  | `fun neg(self): Self`           |
-| `==` `!=`             | `Eq`   | `fun equals(self, other: Self): bool` |
-| `<` `>` `<=` `>=`     | `Ord`  | `fun cmp(self, other: Self): i64` |
+| Operator          | Trait | Method                                |
+| ----------------- | ----- | ------------------------------------- |
+| `+`               | `Add` | `fun add(self, other: Self): Self`    |
+| `-`               | `Sub` | `fun sub(self, other: Self): Self`    |
+| `*`               | `Mul` | `fun mul(self, other: Self): Self`    |
+| `/`               | `Div` | `fun div(self, other: Self): Self`    |
+| `%`               | `Mod` | `fun mod(self, other: Self): Self`    |
+| `-` (negate)      | `Neg` | `fun neg(self): Self`                 |
+| `==` `!=`         | `Eq`  | `fun equals(self, other: Self): bool` |
+| `<` `>` `<=` `>=` | `Ord` | `fun cmp(self, other: Self): i64`     |
 
 `a != b` is `!a.equals(b)`. `a < b` is `a.cmp(b) < 0`, and `<=`, `>` and `>=`
 compare the result of `cmp` with 0 the same way.
@@ -533,7 +550,9 @@ built-in instructions, so plain number arithmetic costs nothing extra.
 
 #### `Self`
 
-`Self` is a special type/value only available in `impl` blocks and is an alias to the impl block's target struct.
+`Self` is a special type/value in `impl` blocks. It is an alias for the type the
+block is for: a struct, or in the standard library a primitive, list or array. In
+a trait's method signatures, `Self` is the type that implements the trait.
 
 ```
 struct Point {
@@ -559,21 +578,25 @@ fun main(): unit {
 `impl Sub for X`.
 
 ```
-trait Ord: Eq {
-    fun cmp(self, other: Self): i64;
+trait Named {
+    fun name(self): string;
+}
+
+trait Titled: Named {
+    fun title(self): string;
 }
 ```
 
+A type that implements `Titled` must implement `Named` too. The builtin `Ord`
+has the supertrait `Eq`.
+
 #### Limitations
 
-- Traits can be implemented for structs, and by the standard library for `string`, `bool`, `unit`, the number kinds, lists and arrays. Other code can't implement a trait for a primitive, and a primitive can't yet be used where a type parameter has a trait bound (except numbers and the operator traits)
-- Only numbers have the operator traits built in. `string` and `bool` implement `Eq` in the standard library, but can't be used where a type parameter has a bound yet. Neither has `Ord`
+- Traits can be implemented for structs, and by the standard library for `string`, `bool`, `unit`, the number kinds, lists and arrays. Other code can't implement a trait for a primitive
+- A primitive can't yet be used where a type parameter has a trait bound, except a number with an operator trait
+- A generic struct can't implement a trait
 - If a struct's impl block implements a method of the same name as a trait, `value.method()` calls the struct's own method. Use `Trait.method(value)` to call the trait's version, see [Calling A Trait's Method By Name](#calling-a-traits-method-by-name).
 - Two traits can't both provide a method of the same name to one struct, and a name can't be both an instance method and a static method on one type. Both are compile errors.
-
-#### Known Bugs
-
-- `impl Trait for UndefinedStruct` is a runtime error
 
 ### Trait Bounds
 
@@ -777,9 +800,11 @@ gives an `i64`, and `@listPush(numbers, 2.5)` is an error when `numbers` holds
 kind.
 
 ```
-let words: [string] = ["a", "b"];
-let last = @listPop(words);   // string
-@listPush(words, 1);          // Error: Expected string, got i64.
+fun main(): unit {
+    let words: [string] = ["a", "b"];
+    let last = @listPop(words);   // string
+    @listPush(words, 1);          // Error: Expected string, got i64.
+}
 ```
 
 Array natives, such as `@arrLen` and `@arrCopy`, also take the array's length
@@ -842,14 +867,21 @@ in a call of a static method. An alias of a primitive type can call its static
 methods:
 
 ```
+struct Box[T] {
+    pub var value: T;
+}
+
+type Wrapped[T] = Box[T];
 type Number = Box[i64];
 type Meters = f64;
 
-let a = Number { value: 1 };          // Box[i64]
-let b = Wrapped { value: "hi" };      // Box[string], from the field
-let c = Meters.default();             // f64
-let d = Number { value: "hi" };       // error: Expected i64, got string.
-let e = Meters { value: 1 };          // error: 'Meters' isn't a struct.
+fun main(): unit {
+    let a = Number { value: 1 };          // Box[i64]
+    let b = Wrapped { value: "hi" };      // Box[string], from the field
+    let c = Meters.default();             // f64
+    let d = Number { value: "hi" };       // error: Expected i64, got string.
+    let e = Meters { value: 1 };          // error: 'Meters' isn't a struct.
+}
 ```
 
 The type arguments an alias fixes stay fixed. The ones it leaves as its own
@@ -860,432 +892,22 @@ can't be created with one. A generic alias can't be given arguments in a literal
 
 ## Operators
 
-| Operator          | Operands                        | Result    |
-| ----------------- | ------------------------------- | --------- |
-| `+`               | two of one number type          | that type |
-| `+`               | two `string`                    | `string`  |
-| `+` `-` `*` `/` `%` | two of one struct, or one bounded type, with `Add` `Sub` `Mul` `Div` `Mod` | that type |
-| `-` `*` `/` `%`   | two of one number type          | that type |
-| `<` `>` `<=` `>=` | two of one number type          | `bool`    |
-| `<` `>` `<=` `>=` | two of one struct, or one bounded type, with `Ord` | `bool` |
-| `==` `!=`         | two of one type                 | `bool`    |
-| `and` `or`        | two `bool`                      | `bool`    |
-| `!`               | any                             | `bool`    |
-| `-` (negate)      | a signed number                 | that type |
-| `-` (negate)      | a struct, or bounded type, with `Neg` | that type |
+| Operator            | Operands                                                                   | Result              |
+| ------------------- | -------------------------------------------------------------------------- | ------------------- |
+| `+`                 | two of one number type                                                     | that type           |
+| `+`                 | two `string`                                                               | `string`            |
+| `+` `-` `*` `/` `%` | two of one struct, or one bounded type, with `Add` `Sub` `Mul` `Div` `Mod` | that type           |
+| `-` `*` `/` `%`     | two of one number type                                                     | that type           |
+| `<` `>` `<=` `>=`   | two of one number type                                                     | `bool`              |
+| `<` `>` `<=` `>=`   | two of one struct, or one bounded type, with `Ord`                         | `bool`              |
+| `==` `!=`           | two of one type                                                            | `bool`              |
+| `and` `or`          | two `bool`                                                                 | `bool`              |
+| `!`                 | any                                                                        | `bool`              |
+| `??`                | a value that may be `nil`, and a fallback                                  | the fallback's type |
+| `-` (negate)        | a signed number                                                            | that type           |
+| `-` (negate)        | a struct, or bounded type, with `Neg`                                      | that type           |
 
 `==`/`!=` between two structs, or two values of a generic parameter, requires
 `Eq`, and calls its `equals` method. A struct operator calls the trait method, so
 `a == b` and `a.equals(b)` always agree. See [Traits](#traits) and
 [Trait Bounds](#trait-bounds).
-
-# Types
-
-Kirby is a statically typed language.
-
-## Primitive Types
-
-Literal values have primitive types.
-
-| Type     | Example          |
-| -------- | ---------------- |
-| `string` | `"Hello World"`  |
-| `i64`    | `42`             |
-| `f64`    | `1.2345`         |
-| `bool`   | `true` / `false` |
-| `unit`   | `()`             |
-
-### Number Literals
-
-A whole number literal is an `i64` unless it is used where another number type
-is expected. Then it becomes that type, when its value fits exactly.
-
-The expected type comes from an annotation, a parameter or return type, or the
-other side of an arithmetic or comparison operator. It reaches through
-brackets, `if`/`else` branches, a block's last value and arithmetic made only
-of literals. The other branch of an `if`/`else` and the other elements of an
-array literal count too.
-
-```
-let half: f64 = 7 / 2;     // 3.5
-let byte: u8 = 200 + 55;   // 255
-let mixed = [1, 2.5];      // [f64; 2]
-```
-
-Variables, suffixed literals (`2i64`) and decimal literals keep their own type.
-
-### Lists
-
-A list holds items that all share one type, and can grow and shrink. The type is written as the item type in brackets: `[i64]` is a list of `i64`, and `[[string]]` is a list of lists of `string`.
-
-```
-fun main(): unit {
-    let numbers: [i64] = [1, 2, 3];
-    let names: [string] = [];
-
-    @println(numbers[0]);
-}
-```
-
-### Arrays
-
-An array holds a fixed number of items that all share one type. The length is part of the type and is written after the item type: `[i64; 3]` is an array of three `i64`s. The length is a whole number literal, and `[i64; 0]` is allowed.
-
-```
-fun first(values: [i64; 3]): i64 {
-    return values[0];
-}
-```
-
-A literal such as `[1, 2, 3]` is an array of that many items, unless its type is asked for. With a list type expected, the same literal is a list, and with an array type expected it must have exactly that many items. An empty literal `[]` has no items to learn a type from, so it needs a type to be expected, and a list or an array type both work.
-
-```
-let a = [1, 2, 3];              // [i64; 3]
-let b: [i64] = [1, 2, 3];       // [i64]
-let c: [i64; 3] = [1, 2, 3];    // [i64; 3]
-let d: [i64] = [];              // an empty list
-let f = [];                     // error: no item type
-let e: [i64; 2] = [1, 2, 3];    // error: 3 items
-```
-
-An index that is a number literal past the end of an array is an error when the program is compiled. Any other bad index is an error when the program runs.
-
-Two array types are the same type when both the item type and the length match. `[i64; 3]` is not `[i64; 4]`, and neither is `[i64]`. A list is never accepted where an array is expected, and an array is never accepted where a list is expected.
-
-### Structs
-
-Structs are referred to as a type by name. Fields are declared with `var`.
-
-```
-struct Box {
-    pub var value: f64;
-}
-
-fun main(): unit {
-    let box: Box = Box { value: 100 };
-
-    @println(box.value);
-}
-```
-
-#### Generic Structs
-
-A struct can declare type parameters in brackets. They are written as
-arguments when the type is used. `Box[f64]` and `Box[string]` are different
-types, and the number of arguments has to match.
-
-```
-struct Box[T] {
-    pub var value: T;
-}
-
-let a: Box[f64] = Box { value: 1 };
-let b = Box { value: "hi" };     // Box[string]
-let c: Box[string] = a;          // error: Expected Box[string], got Box[f64].
-```
-
-A literal works out its arguments from its fields. When a type is asked for,
-the fields are checked against it, so the `1` above can be an `f64`. A
-literal that can't work out an argument is an error.
-
-An `impl` declares the same number of parameters, and they stand for the
-struct's parameters in order. A method can declare more, which are numbered
-after the impl's.
-
-```
-impl Box[T] {
-    pub fun new(value: T): Self[T] = Self { value: value };
-    pub fun get(self): T = self.value;
-    pub fun map[U](self, f: fun (T) => U): Self[U] = Self.new(f(self.value));
-}
-
-fun main(): unit {
-    let box = Box.new(5);            // Box[i64]
-    let text = box.map(fun (n: i64): string { "n" });   // Box[string]
-}
-```
-
-In a type, `Self[T]` is the struct with arguments and a plain `Self` is
-`Box[T]`. In an expression, `Self` and `Box` are the struct itself, and a
-call or literal works out the arguments.
-
-`impl Trait for` a generic struct isn't supported yet.
-
-### Generic Functions
-
-A function can declare type parameters after its name. A call fills each one
-in from its arguments, the first argument that mentions it fills it, and every
-later argument has to agree.
-
-```
-fun id[T](x: T): T = x;
-fun first[T](xs: [T]): T = xs[0];
-fun apply[T, U](x: T, f: fun (T) => U): U = f(x);
-
-fun main(): unit {
-    let a = id(5);                  // i64
-    let b: string = id(5);          // error: Expected string, got i64.
-}
-```
-
-A parameter that appears in the signature but that no argument fills in is an
-error: `Can't tell what 'T' is from the arguments.`. A parameter that isn't in
-the signature at all is never asked for.
-
-A parameter only the return type mentions is filled in from the type the call
-is expected to return, when there is one:
-
-```
-fun empty[T](): [T] = [];
-
-fun main(): unit {
-    let a: [i64] = empty();    // T is i64
-    let b = empty();           // error: Can't tell what 'T' is from the arguments.
-}
-```
-
-A method works the same way, so `let s: Stack[i64] = Stack.new();` fills in
-the `T` of `fun new(): Self[T]`.
-
-Inside the function, each parameter is one type that is only equal to itself.
-A value of that type can be passed around, returned and stored, but it can't
-be added, indexed or have a method called on it, because nothing says its type
-supports that. A [trait bound](#trait-bounds) is the exception: it allows the
-methods of its trait. The error is reported in the function, not at the call.
-
-```
-fun add[T](a: T, b: T): T = a + b;   // error: '+' needs two numbers ... got T and T.
-fun bad[A, B](a: A): B = a;          // error: Expected B, got A.
-```
-
-A generic function can also be used as a value where a function type is
-expected. The expected type fills in the function's type parameters, and the
-result has to match. Here `id` is the function declared above, and its `T`
-becomes `i64`.
-
-```
-fun id[T](x: T): T = x;
-
-let f: fun (i64) => i64 = id;       // ok
-let g: fun (i64) => string = id;    // error: Expected fun (i64) => string, got fun (i64) => i64.
-```
-
-A generic method works the same way, such as `Box.new` for a method declared
-`fun new(value: T): Self[T]`.
-
-With no expected type, as in `let h = id;`, the value has no type and isn't
-checked.
-
-A generic function is compiled once, and the same code runs for every type.
-
-### Traits
-
-A trait declares required methods for a struct to implement.
-
-```
-trait Display {
-    fun toString(self): string;
-}
-
-struct Point {
-    pub var x: f64;
-    pub var y: f64;
-}
-
-impl Display for Point {
-    fun toString(self): string = "Point";
-}
-
-fun main(): unit {
-    @println((Point { x: 1, y: 2 }).toString());
-}
-```
-
-#### Builtin traits
-
-The builtin, always in scope, traits are `Display`, `Eq`, `Ord`, `Default`, and the operator traits `Add`, `Sub`, `Mul`, `Div`, `Mod` and `Neg`.
-
-##### Eq
-
-```
-trait Eq {
-    fun equals(self, other: Self): bool;
-}
-
-struct Box {
-    pub var value: f64;
-}
-
-impl Eq for Box {
-    fun equals(self, other: Self): bool = self.value == other.value;
-}
-
-fun main(): unit {
-    let a = Box { value: 100 };
-    let b = Box { value: 100 };
-
-    a.equals(b); // true
-}
-```
-
-##### Default
-
-```
-trait Default {
-    fun default(): Self;
-}
-
-struct Box {
-    pub var value: f64;
-}
-
-impl Default for Box {
-    fun default(): Self = Self { value = 0 };
-}
-
-let box = Box.default();
-
-box.value; // 0
-```
-
-##### Display
-
-```
-trait Display {
-    fun toString(self): string;
-}
-
-struct Box {
-    pub var value: f64;
-}
-
-impl Display for Box {
-    fun toString(self): string = @numberToString(self.value);
-}
-
-fun main(): unit {
-    let box = Box { value: 123 };
-
-    box.toString(); // "123"
-}
-```
-
-##### Ord
-
-```
-trait Ord: Eq {
-    // Negative when self comes first, zero when equal, positive when other
-    // comes first
-    fun cmp(self, other: Self): i64;
-}
-
-trait Eq {
-    fun equals(self, other: Self): bool;
-}
-
-struct Box {
-    pub var value: i64;
-}
-
-impl Eq for Box {
-    fun equals(self, other: Self): bool = self.value == other.value;
-}
-
-impl Ord for Box {
-    fun cmp(self, other: Self): i64 = self.value - other.value;
-}
-
-fun main(): unit {
-    let a = Box { value: 100 };
-    let b = Box { value: 123 };
-
-    a.cmp(b); // -23
-}
-```
-
-##### Operator traits
-
-An operator on structs calls a method of a trait. `a + b` calls `a.add(b)`, so
-a struct supports `+` by implementing `Add`.
-
-| Operator              | Trait  | Method                          |
-| --------------------- | ------ | ------------------------------- |
-| `+`                   | `Add`  | `fun add(self, other: Self): Self` |
-| `-`                   | `Sub`  | `fun sub(self, other: Self): Self` |
-| `*`                   | `Mul`  | `fun mul(self, other: Self): Self` |
-| `/`                   | `Div`  | `fun div(self, other: Self): Self` |
-| `%`                   | `Mod`  | `fun mod(self, other: Self): Self` |
-| `-` (negate)          | `Neg`  | `fun neg(self): Self`           |
-| `==` `!=`             | `Eq`   | `fun equals(self, other: Self): bool` |
-| `<` `>` `<=` `>=`     | `Ord`  | `fun cmp(self, other: Self): i64` |
-
-`a != b` is `!a.equals(b)`. `a < b` is `a.cmp(b) < 0`, and `<=`, `>` and `>=`
-compare the result of `cmp` with 0 the same way.
-
-```
-struct Vec2 {
-    pub var x: f64;
-    pub var y: f64;
-}
-
-impl Add for Vec2 {
-    fun add(self, other: Self): Self =
-        Vec2 { x: self.x + other.x, y: self.y + other.y };
-}
-
-fun main(): unit {
-    let sum = Vec2 { x: 1, y: 2 } + Vec2 { x: 3, y: 4 };   // Vec2 { x: 4, y: 6 }
-}
-```
-
-Both sides have to be the same struct. A struct without the trait is an error:
-`Money doesn't implement Add, required by '+'.`
-
-Numbers have these traits built in, so a number can fill a parameter bounded by
-one of them (see [Trait Bounds](#trait-bounds)), and `neg` is only for signed
-numbers. Number operators that don't go through a bound still compile to the
-built-in instructions, so plain number arithmetic costs nothing extra.
-
-#### `Self`
-
-`Self` is a special type/value only available in `impl` blocks and is an alias to the impl block's target struct.
-
-```
-struct Point {
-    pub var x: f64;
-    pub var y: f64;
-}
-
-impl Point {
-    pub fun origin(): Self = Self { x: 0, y: 0 };
-
-    pub fun translate(self, dx: f64, dy: f64): Self =
-        Self { x: self.x + dx, y: self.y + dy };
-}
-
-fun main(): unit {
-    var p = Point.origin().translate(3, 4);
-}
-```
-
-#### Supertraits
-
-`trait Sub: Super` declares that an `impl Super for X` must exist for any
-`impl Sub for X`.
-
-```
-trait Ord: Eq {
-    fun cmp(self, other: Self): i64;
-}
-```
-
-#### Limitations
-
-- Some native functions have no signature yet, so calls to them aren't
-  checked
-- A value of a generic type can't be indexed, and can only be added, compared
-  or called through a bound -- see [Trait Bounds](#trait-bounds)
-- A call can't be given type arguments (`parse[f64](s)`)
-- Lists have no type annotation syntax
-- `impl Trait for` a primitive type isn't supported yet -- see
-  [Traits](#traits)

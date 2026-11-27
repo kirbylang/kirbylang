@@ -2,7 +2,7 @@
   "Function declaration": {
     "prefix": "fun",
     "body": [
-      "fun ${1:name}(${2}) {",
+      "fun ${1:name}(${2}): ${3:unit} {",
       "\t$0",
       "}"
     ],
@@ -14,7 +14,7 @@
       "funx"
     ],
     "body": [
-      "fun ${1:name}(${2}) = ${3:expression};$0"
+      "fun ${1:name}(${2}): ${3:unit} = ${4:expression};$0"
     ],
     "description": "Declare a function whose body is a single expression"
   },
@@ -84,7 +84,7 @@
       "\t$0",
       "}"
     ],
-    "description": "Declare a struct"
+    "description": "Declare a trait"
   },
   "Trait method": {
     "prefix": [
@@ -100,7 +100,7 @@
     "prefix": "impl",
     "body": [
       "impl ${1:Name} {",
-      "\tfun ${2:method}(self) {",
+      "\tfun ${2:method}(self): ${3:unit} {",
       "\t\t$0",
       "\t}",
       "}"
@@ -174,7 +174,7 @@
       "method"
     ],
     "body": [
-      "fun ${1:name}(self${2}) {",
+      "fun ${1:name}(self${2}): ${3:unit} {",
       "\t$0",
       "}"
     ],
@@ -186,7 +186,7 @@
       "static"
     ],
     "body": [
-      "fun ${1:name}(${2}) {",
+      "fun ${1:name}(${2}): ${3:unit} {",
       "\t$0",
       "}"
     ],
@@ -198,8 +198,8 @@
       "constructor"
     ],
     "body": [
-      "fun new(${2:value}) {",
-      "\treturn ${1:Name} { ${3:field}: ${2:value} };",
+      "pub fun new(${1:value}: ${2:T}): Self {",
+      "\tSelf { ${3:field}: ${1:value} }",
       "}$0"
     ],
     "description": "Declare a static method that builds and returns an instance"
@@ -236,7 +236,7 @@
   "Variable declaration (no value)": {
     "prefix": "var",
     "body": [
-      "var ${1:name};$0"
+      "var ${1:name}: ${2:T};$0"
     ],
     "description": "Declare a variable"
   },
@@ -306,7 +306,7 @@
     "body": [
       "@println(${1});$0"
     ],
-    "description": "Create a print statement"
+    "description": "Print a value, followed by a newline"
   },
   "Return": {
     "prefix": [
@@ -330,7 +330,7 @@
     "body": [
       "@clock()$0"
     ],
-    "description": "Get the number of seconds since the program started"
+    "description": "Get the processor time the program has used, in seconds"
   },
   "Native: @now": {
     "prefix": "@now",
@@ -400,14 +400,14 @@
     "body": [
       "@print(${1:value})$0"
     ],
-    "description": "Write a value to stdout, the way `print` does, without a newline"
+    "description": "Write a value to stdout without a newline"
   },
   "Native: @println": {
     "prefix": "@println",
     "body": [
       "@println(${1:value})$0"
     ],
-    "description": "Write a value to stdout, the way `print` does, followed by a newline"
+    "description": "Write a value to stdout, followed by a newline"
   },
   "Native: @eprint": {
     "prefix": "@eprint",
@@ -561,7 +561,7 @@
     "body": [
       "@listCopy(${1:list})$0"
     ],
-    "description": "Copy a list into a new array"
+    "description": "Copy a list into a new list"
   },
   "Native: @listLen": {
     "prefix": "@listLen",
@@ -580,30 +580,30 @@
   "Native: @listEqual": {
     "prefix": "@listEqual",
     "body": [
-      "@listEqual(${1:array1}, ${2:array2})$0"
+      "@listEqual(${1:list1}, ${2:list2})$0"
     ],
-    "description": "Check whether two arrays have equal values"
+    "description": "Check whether two lists have equal values"
   },
   "Native: @listSlice": {
     "prefix": "@listSlice",
     "body": [
       "@listSlice(${1:list}, ${2:start}, ${3:end})$0"
     ],
-    "description": "Copy a range of a list into a new array"
+    "description": "Copy a range of a list into a new list"
   },
   "Native: @listConcat": {
     "prefix": "@listConcat",
     "body": [
-      "@listConcat(${1:array1}, ${2:array2})$0"
+      "@listConcat(${1:list1}, ${2:list2})$0"
     ],
-    "description": "Concatenate two arrays into a new array"
+    "description": "Concatenate two lists into a new list"
   },
   "Native: @listReverse": {
     "prefix": "@listReverse",
     "body": [
       "@listReverse(${1:list})$0"
     ],
-    "description": "Reverse a list into a new array"
+    "description": "Reverse a list into a new list"
   },
   "Native: @listJoin": {
     "prefix": "@listJoin",
@@ -890,7 +890,7 @@
     "body": [
       "@arrConcat(${1:a}, ${2:b})$0"
     ],
-    "description": "Concatenates two arrays in to a new list"
+    "description": "Concatenates two arrays into a new list"
   },
   "Native: @arrToList": {
     "prefix": "@arrToList",

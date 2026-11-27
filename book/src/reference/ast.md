@@ -33,45 +33,45 @@ void astFreeAll(void);
 
 ```c
 struct AstNode {
-	NodeKind kind;
-	int line;
-	union {
-		LiteralNode literal;
-		UnaryNode unary;
-		BinaryNode binary;
-		GroupingNode grouping;
-		VariableNode variable;
-		AssignNode assign;
-		LogicalNode logical;
-		CallNode call;
-		GetNode get;
-		SetNode set;
-		IndexGetNode indexGet;
-		IndexSetNode indexSet;
-		SelfNode self_;
-		ExprStmtNode exprStmt;
-		VarDeclNode varDecl;
-		BlockNode block;
-		IfNode if_;
-		WhileNode while_;
-		ForNode for_;
-		ReturnNode return_;
-		FunctionNode function;
-		StructNode struct_;
-		StructInitNode structInit;
-		ImplNode impl;
-		TraitNode trait_;
-		ArrayNode array;
-		BreakNode break_;
-		ContinueNode continue_;
-		TypeNode type_;
-		TypeAliasNode typeAlias;
-		TypeFunctionNode typeFunction;
-		TypeListNode typeList;
-		TypeArrayNode typeArray;
-		InterpStringNode interpString;
-		CastNode cast;
-	} as;
+  NodeKind kind;
+  int line;
+  union {
+    LiteralNode literal;
+    UnaryNode unary;
+    BinaryNode binary;
+    GroupingNode grouping;
+    VariableNode variable;
+    AssignNode assign;
+    LogicalNode logical;
+    CallNode call;
+    GetNode get;
+    SetNode set;
+    IndexGetNode indexGet;
+    IndexSetNode indexSet;
+    SelfNode self_;
+    ExprStmtNode exprStmt;
+    VarDeclNode varDecl;
+    BlockNode block;
+    IfNode if_;
+    WhileNode while_;
+    ForNode for_;
+    ReturnNode return_;
+    FunctionNode function;
+    StructNode struct_;
+    StructInitNode structInit;
+    ImplNode impl;
+    TraitNode trait_;
+    ArrayNode array;
+    BreakNode break_;
+    ContinueNode continue_;
+    TypeNode type_;
+    TypeAliasNode typeAlias;
+    TypeFunctionNode typeFunction;
+    TypeListNode typeList;
+    TypeArrayNode typeArray;
+    InterpStringNode interpString;
+    CastNode cast;
+  } as;
 };
 ```
 
@@ -90,7 +90,22 @@ typedef struct {
   LiteralKind kind;
   union {
     bool boolean;
-    double number;
+    struct {
+      NumberKind kind;
+      NumberPayload as;
+      /**
+       * A plain, unsuffixed integer literal, e.g. `42` -- as opposed to a
+       * suffixed (`42f64`, `42u8`) or decimal (`1.5`) literal. Its kind is
+       * i64 unless the type checker changes it to the kind that is expected.
+       */
+      bool literalIsPlainInteger;
+      /**
+       * For a plain integer literal, its exact value, unless it does not fit
+       * in 64 bits (`literalValueFits` is false).
+       */
+      uint64_t literalValue;
+      bool literalValueFits;
+    } number;
     struct {
       const char *chars;
       int length;
@@ -103,46 +118,46 @@ typedef struct {
 
 ```c
 typedef struct {
-Token op;
-AstNode *operand;
-/**
- * Set by the type checker when the operand is a struct or a generic
- * parameter, so `-a` calls the operand's trait method. NULL for a number.
- */
-const OperatorTrait *traitDispatch;
+  Token op;
+  AstNode *operand;
+  /**
+   * Set by the type checker when the operand is a struct or a generic
+   * parameter, so `-a` calls the operand's trait method. NULL for a number.
+   */
+  const OperatorTrait *traitDispatch;
 } UnaryNode;
 
 typedef struct {
-Token op;
-AstNode *left;
-AstNode *right;
-/**
- * `+` on two strings. Set by the type checker.
- */
-bool isStringConcat;
-/**
- * Set by the type checker when the operands are structs or generic
- * parameters, so the operator calls the left operand's trait method. NULL
- * for numbers and strings.
- */
-const OperatorTrait *traitDispatch;
+  Token op;
+  AstNode *left;
+  AstNode *right;
+  /**
+   * `+` on two strings. The compiler has no types, so the type checker sets
+   * this to let it join chains of strings with @strConcat.
+   */
+  bool isStringConcat;
+  /**
+   * Set by the type checker when the operands are structs or generic
+   * parameters, so the operator calls the left operand's trait method. NULL
+   * for numbers and strings.
+   */
+  const OperatorTrait *traitDispatch;
 } BinaryNode;
 
 /** One row of the operator table in `operator_traits.h`. */
 typedef struct {
-TokenType token;
-const char *trait;  // "Add"
-const char *method; // "add"
-bool isUnary;
+  TokenType token;
+  const char *trait;
+  const char *method;
+  bool isUnary;
 } OperatorTrait;
-
 ```
 
 ### Grouping Expression
 
 ```c
 typedef struct {
-AstNode *inner;
+  AstNode *inner;
 } GroupingNode;
 ```
 
@@ -163,8 +178,8 @@ typedef struct {
 
 ```c
 typedef struct {
-Token name;
-AstNode *value;
+  Token name;
+  AstNode *value;
 } AssignNode;
 ```
 
@@ -172,8 +187,8 @@ AstNode *value;
 
 ```c
 typedef struct {
-AstNode *left;
-AstNode *right;
+  AstNode *left;
+  AstNode *right;
 } LogicalNode;
 ```
 
@@ -183,7 +198,7 @@ Expressions followed by a semicolon.
 
 ```c
 typedef struct {
-AstNode *expr;
+  AstNode *expr;
 } ExprStmtNode;
 ```
 
@@ -198,6 +213,18 @@ typedef struct {
   Token paren;
   AstNode **args;
   int argCount;
+  /**
+   * A call to @print, @println, @eprint, or @eprintln whose argument's type
+   * implements Display, so it's converted with toString() first. Natives
+   * can't call Kirby methods, so the compiler does it. Set by the type
+   * checker, because the compiler has no types.
+   */
+  bool argUsesDisplay;
+  /**
+   * `Trait.method(value, ...)`: the callee's object names the trait, and the
+   * first argument is the value the method runs on. Set by the type checker.
+   */
+  bool isTraitCall;
 } CallNode;
 ```
 
@@ -207,6 +234,25 @@ typedef struct {
 typedef struct {
   AstNode *object;
   Token name;
+  /**
+   * Set by the type checker when the call is to a method of a primitive type,
+   * such as "string". NULL for every other get. The compiler turns the call
+   * into a plain function call, because it has no types of its own.
+   */
+  const char *primitiveOwner;
+  // For such a call, the name of the trait the method came from. NULL when it
+  // is a method of the type itself.
+  const char *primitiveTrait;
+  // For such a call, true when the method is static, so the call has no
+  // receiver value, as in `f64.default()`
+  bool primitiveIsStatic;
+  /**
+   * Set by the type checker on a call of a trait's method that must run that
+   * trait's version, even when the receiver has a method of its own with the
+   * same name: a call through a type parameter's bound, and `Trait.method(x)`.
+   * The name of the trait. NULL for every other get.
+   */
+  const char *viaTrait;
 } GetNode;
 ```
 
@@ -259,7 +305,8 @@ typedef struct {
    */
   Token *genericParams;
   int genericParamCount;
-  /** The traits each parameter must implement. NULL when there are none. */
+  /** The traits each parameter must implement. NULL when there are no
+   * parameters. */
   GenericBounds *genericBounds;
   /**
    * The type expression on the right of `=`.
@@ -378,7 +425,7 @@ typedef struct {
 
 ```c
 typedef struct {
-AstNode *value;
+  AstNode *value;
 } ReturnNode;
 ```
 
@@ -396,8 +443,8 @@ typedef struct {
 ```
 
 `krb parse` prints a bound after its parameter, as `T:Display+Eq`. Functions,
-structs and type aliases have bounds. An `impl` doesn't: it takes them from its
-struct.
+structs and type aliases have bounds. An `impl` doesn't: a struct's impl takes
+them from its struct, and a list or array impl has none.
 
 ### Functions
 
@@ -430,8 +477,7 @@ typedef struct {
   bool isPublic;
   // Is this a fun declaration in a trait? e.g. no body
   bool isTraitSignature;
-  // A standard library declaration of a function written in C, with no body
-  bool isNative;
+  bool isNative; // A standard library declaration of a function written in C
   /**
    * arena-allocated array of bare generic parameter name tokens, e.g. the
    * `T` in `fun sum[T](a: T, b: T): T`. NULL/0 for a non-generic function.
@@ -463,7 +509,8 @@ typedef struct {
    */
   Token *genericParams;
   int genericParamCount;
-  /** The traits each parameter must implement. NULL when there are none. */
+  /** The traits each parameter must implement. NULL when there are no
+   * parameters. */
   GenericBounds *genericBounds;
   VarDeclNode *fields;
   int fieldCount;
@@ -489,9 +536,10 @@ typedef struct {
 } StructInitNode;
 ```
 
-### Traits
+### Impls And Traits
 
 ```c
+// What an impl block is for
 typedef enum {
   IMPL_TARGET_NAME,  // `impl Box[T]`, `impl string`
   IMPL_TARGET_LIST,  // `impl[T] [T]`
@@ -552,7 +600,7 @@ typedef struct {
 
 ```c
 typedef struct {
-Token keyword;
+  Token keyword;
 } SelfNode;
 ```
 
@@ -581,6 +629,11 @@ typedef struct {
    */
   AstNode **items;
   int count;
+  /**
+   * Set by the type checker when the literal makes a fixed size array rather
+   * than a list.
+   */
+  bool isFixedSize;
 } ArrayNode;
 ```
 
@@ -597,12 +650,13 @@ typedef struct {
    */
   AstNode *type;
   /**
-   * The `as` keyword, for error reporting.
+   * The `as` keyword — used for error location.
    */
   Token as;
   /**
-   * The target number kind, set by the type checker. The compiler
-   * emits it as the operand of OP_CAST.
+   * The target's number kind, set by the type checker because the compiler
+   * has no types. Valid for casts the type checker accepted, which are
+   * always to a number kind.
    */
   NumberKind target;
 } CastNode;
@@ -614,18 +668,35 @@ typedef struct {
 compiler joins the parts with `@strConcat`.
 
 ```c
+/**
+ * How a value becomes a string, e.g. in an interpolated string.
+ */
 typedef enum {
-  STRING_CONVERSION_NONE,   // already a string
-  STRING_CONVERSION_NUMBER, // @numberToString
-  STRING_CONVERSION_BOOL,   // @boolToString
+  STRING_CONVERSION_UNDEFINED, // not yet chosen by the type checker
+  STRING_CONVERSION_STRING,    // already a string
+  STRING_CONVERSION_NUMBER,    // @numberToString
+  STRING_CONVERSION_BOOL,      // @boolToString
+  STRING_CONVERSION_DISPLAY,   // toString(), from the type's Display impl
 } StringConversion;
 
 typedef struct {
   AstNode *expr;
+  /**
+   * Set by the type checker, because the compiler has no types to choose a
+   * conversion from.
+   */
   StringConversion conversion;
 } InterpPart;
 
+/**
+ * `$"Hello {name}!"`
+ */
 typedef struct {
+  /**
+   * arena-allocated. Literal text (NODE_LITERAL strings) and placeholder
+   * expressions in source order. Empty text is left out, so `$"{a}{b}"`
+   * joins two parts, not three.
+   */
   InterpPart *parts;
   int count;
 } InterpStringNode;

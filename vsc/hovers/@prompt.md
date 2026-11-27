@@ -1,4 +1,4 @@
-Read in text from `stdin` until newline (NL) is encountered. An optional message can be passed as well.
+Read in text from `stdin` until a newline (NL) is encountered. An optional message can be passed as well.
 
 ## Usage
 

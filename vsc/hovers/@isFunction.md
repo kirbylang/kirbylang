@@ -1,4 +1,4 @@
-Returns if value is a function or not.
+Returns if a value is a function or not.
 
 ## Usage
 

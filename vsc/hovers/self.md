@@ -1,17 +1,17 @@
 ## self
 
-A reference to the instance an instance method was called on.
+A reference to the value an instance method was called on.
 
 `self` is only available inside a method that declares it as its first
-parameter -- a method without it is a static method and has no instance.
+parameter. A method without it is a static method and has no `self`.
 
 ```kirby
 struct Counter {
-    var count = 0;
+    var count: i64;
 }
 
 impl Counter {
-    fun increment(self) {
+    pub fun increment(self): unit {
         self.count = self.count + 1;
     }
 }
@@ -19,11 +19,12 @@ impl Counter {
 
 ## Self
 
-The `Self` type and value is only avaible in struct implementation blocks. It represents the target struct.
+The `Self` type and value stands for the type an `impl` block is for. In a trait's
+method signatures it is the type that implements the trait.
 
 ```kirby
 struct Counter {
-    var count = 0;
+    var count: i64;
 }
 
 impl Default for Counter {

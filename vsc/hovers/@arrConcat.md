@@ -2,7 +2,7 @@
 native fun @arrConcat[T, const N, const M](a: [T; N], b: [T; M]): [T];
 ```
 
-Concatenates two arrays in to a new list. The result is a list because its length isn't known when the program is compiled.
+Concatenates two arrays into a new list. The result is a list because its length isn't known when the program is compiled.
 
 ## Usage
 

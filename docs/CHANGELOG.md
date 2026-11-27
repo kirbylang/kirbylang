@@ -13,11 +13,8 @@
 - Debugger (compatible with VS Code)
 - Tuples
 - [Type System](https://github.com/kirbylang/kirbylang/issues/17)
-- Number types
-  - `u#` (e.g. `123u8`), `i#`, `f#`, `number`
 - Lambda body expressions `var sum = fun (a, b) a + b;`
 - Native Functions
-  - [x] `print`, `println`, `eprint`, `eprintln`
   - [ ] `arrSort(array, fn)`
   - [ ] `arrMap(array, fn)`
 - Macros
@@ -48,7 +45,7 @@
   macOS it prefers Homebrew's readline to the system `libedit`, which shows no
   prompt or echo for piped input
 - Fix a trait impl replacing a struct's own method of the same name, including a private one, when the trait impl was loaded after it, such as on a later REPL line. The own method now keeps the name, and `Trait.method(value)` calls the trait's
-- Add `krb init` to intialize a new Kirby project
+- Add `krb init` to initialize a new Kirby project
 - Add `krb config` to view the project's `kirby.project.toml` configuration
   - `krb config bin` Prints the `bin` value
   - `krb config examples` Prints the `examples` value
@@ -75,11 +72,14 @@
 - Add immutable struct fields `struct Box { let value: f64 }`
 - Add new native function `@now()` that returns the current unix timestamp
 - Add `Date` struct to `stdlib.krb`
-  - Has `new(timestamp)` and `now()` static methods
+  - Has `new(timestamp)`, `now()`, `from_parts(...)` and `from(text)` static
+    methods, and a `get_` method for the timestamp and each part
 - Allow number literals to have `f64` or `F64` suffix e.g. `123f64`, `456F64`
 - New CLI subcommand `krb docs` which opens `https://kirbylang.github.io/kirbylang/` in the default browser
 - VS Code extension: fix wrong or missing details in several native function hovers
 - Add `u8` number type
+- Add the number types `i8`, `i16`, `i32`, `u16`, `u32`, `u64` and `f32`, and
+  suffixes for every number type, such as `7i32` and `1.5f32`
 - Add `as` keyword for casting between number types (`u8` <-> `f64`)
   - New opcode: `OP_CAST`
 - An array index that is not a whole number, such as `array[1.5]` or
@@ -114,7 +114,7 @@
 - Change to require that the top level of a Kirby file must only be declarations. Any assigned values must be comptime values (literal values or references to already declared items e.g. function or let)
 - Trait Bounds
   - Functions, structs, and type aliases can define traits a type parameter must implement
-    - `fun sum[T: Add](a, T, b: T): T = a + b;`
+    - `fun sum[T: Add](a: T, b: T): T = a + b;`
     - `struct Addable[T: Add] { value: T }`
     - `type Summable[T: Display] = [T];`
   - Multiple bounds can be defined on a type parameter: `[T: Add + Eq]`
@@ -168,7 +168,7 @@
   - Output: `@print(value)`, `@println(value)`, `@eprint(value)`,
     `@eprintln(value)`. They write a value the way `print` does, using a
     struct's `Display` impl when it has one
-  - Math: `@floor(n)`, `@round(n)`, `@trunc(n)`, `@abs(n)`, `@sqrt(n)`, `@pow(base, exponent`, `@min(a, b)`, `@max(a, b)`
+  - Math: `@floor(n)`, `@round(n)`, `@trunc(n)`, `@abs(n)`, `@sqrt(n)`, `@pow(base, exponent)`, `@min(a, b)`, `@max(a, b)`
   - Arrays: `@arrJoin(array, separator)`
     - Every element must already be a string. There is no implicit conversion
       to string, so joining numbers means mapping `@numberToString` first
@@ -219,7 +219,7 @@
     - `let name = "Kirby";`
   - Functions
     - `fun map(value: f64): f64 { ... }`
-  - Lambas
+  - Lambdas
     - `let sum: fun (f64, f64) => f64 = fun (a: f64, b: f64): f64 { a + b };`
   - Struct fields
     - `struct Box { pub let value: f64; }`
@@ -237,11 +237,11 @@
       returns
     - Limitations
       - `impl Trait for` a primitive type (`f64`, `string`, `bool`, `unit`) isn't supported yet -- needs the same static call-resolution work operator overloading does
-      - No real operator overloading yet. `Eq` is only a typecheck. `==` still runs identify equality
+      - No real operator overloading yet. `Eq` is only a typecheck. `==` still runs identity equality
 - [Definite Assignment Analysis](https://en.wikipedia.org/wiki/Definite_assignment_analysis)
 - Projects
   - Directories with `kirby.project.krb` in the root
-  - `bin = "bin/main.krb` for `krb run`
+  - `bin = "bin/main.krb"` for `krb run`
   - `examples = "examples"` for `krb example NAME`
 - `krb` revamping
   - Subcommands
@@ -277,7 +277,7 @@
 
 ## 0.3.0
 
-- Support to escape characters in strings: `\n`, `\r`, `\t`, `\"`, `\\`
+- Support for escape characters in strings: `\n`, `\r`, `\t`, `\"`, `\\`
 - Function body expressions: `fun sum(a, b) = a + b;`
 - Function implicit returns: `fun sum(a, b) { a + b }`
 - Move all functions in stdlib.krb to native functions

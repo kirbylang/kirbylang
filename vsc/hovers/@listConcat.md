@@ -2,7 +2,7 @@
 native fun @listConcat[T](a: [T], b: [T]): [T];
 ```
 
-Concatenates two lists in to a new list.
+Concatenates two lists into a new list.
 
 ## Usage
 

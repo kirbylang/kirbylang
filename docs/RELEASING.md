@@ -55,7 +55,7 @@ Options:
 If anything fails before the push, the script puts the repo back exactly as it
 found it: no leftover edits, commit, or tag.
 
-## Github
+## GitHub
 
 Pushing a tag like `v0.4.0` starts [`release.yml`](../.github/workflows/release.yml):
 

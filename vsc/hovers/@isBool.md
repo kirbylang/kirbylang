@@ -1,4 +1,4 @@
-Returns if value is a bool or not.
+Returns if a value is a bool or not.
 
 ## Usage
 

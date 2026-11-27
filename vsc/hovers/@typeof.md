@@ -10,6 +10,7 @@ struct Food {}
 @println(@typeof(1.5)); // f64
 @println(@typeof("Hello World")); // string
 @println(@typeof(nil)); // nil
+@println(@typeof(())); // nil
 
 let items: [i64] = [1, 2];
 @println(@typeof(items)); // list

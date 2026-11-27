@@ -1,5 +1,5 @@
 .\" Man page for krb, the Kirby command line tool (src/main.c).
-.TH KRB 1 "October 3, 2026" "Kirby" "Kirby Manual"
+.TH KRB 1 "November 26, 2026" "Kirby" "Kirby Manual"
 .SH NAME
 krb \- run, build and explore programs written in Kirby
 .SH SYNOPSIS
@@ -83,6 +83,9 @@ If there is no
 .BR kirby.project.toml ,
 say so and suggest
 .BR "krb init" .
+.TP
+\fBdocs\fR
+Open the Kirby documentation in the default browser.
 .TP
 \fBrepl\fR
 Start an interactive session.
@@ -247,6 +250,7 @@ krb example hello                 # run examples/hello.krb
 krb exec \(aq@println("Hello World");\(aq
 krb build path/to/file.krb \-o app # make ./app, which runs the file
 krb parse path/to/file.krb
+krb docs                          # open the documentation
 krb init                          # start a project in this folder
 krb config bin                    # print the bin setting
 krb repl

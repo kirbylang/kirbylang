@@ -2,7 +2,7 @@
 
 ## Build
 
-Run `./scripts/build.sh` or `just build` to build to project in to `./build` folder.
+Run `./scripts/build.sh` or `just build` to build the project into the `./build` folder.
 
 ## Install
 
@@ -14,7 +14,7 @@ Run `just install` or the OS specific script:
 
 ## Test
 
-Run `./scripts/tests.sh` or `just test` to run the tests in `./test` folder.
+Run `./scripts/tests.sh` or `just test` to run the tests in `./tests` folder.
 
 ### Filtering Tests
 
@@ -56,7 +56,7 @@ Outputs `lcov.info` at the root of the project.
 
 ## Unit Tests
 
-Run `./sciprts/build-tests.sh && ./scripts/unit.sh` or `just unit` to run the unit tests.
+Run `./scripts/build-tests.sh && ./scripts/unit.sh` or `just unit` to run the unit tests.
 
 ## Build Unit Tests
 
@@ -69,17 +69,47 @@ Run `./scripts/build-tests.sh` or `just build-tests` to build the [unit tests](#
 ./scripts/run-example.sh hello World
 ```
 
+## Verify
+
+Run `./scripts/verify.sh` or `just verify` to run the tests, the packaged tests,
+the `krb build` tests and the unit tests.
+
+## New Test
+
+Run `just new-test tests/run/dir/name.krb` to create a test and its `.argv` file.
+
+## Format
+
+Run `just fmt` to format the C lines changed since the last commit, or
+`just fmt-all` to format every C file. **Requires:** `clang-format`
+
+## Memory Check
+
+Run `just test-with-memcheck` to run the tests with AddressSanitizer.
+
+## Release Build
+
+Run `./scripts/build-release.sh` or `just build-release`.
+
+## VS Code Extension
+
+Run `just build-vsc` to build the extension, or `just open-vsc` to open the project
+with it. **Requires:** `nvm`
+
+## Book
+
+Run `./scripts/book-serve.sh` or `just book-serve` to build the documentation site
+and serve it locally. **Requires:** `mdbook`
+
 ## Clean
 
 Run `./scripts/clean.sh` or `just clean` to remove build artifacts.
 
 ## Increment Language Version
 
-- Updates [`VERSION.txt`](../VERSION.txt)
-- Updates [`tests/run/native_functions/native_fn_version_call.krb.out`](../tests/run/native_functions/native_fn_version_call.krb.out) test snapshot
-- Creates `vVERSION` tag e.g. `v0.1.0`, `v2.5.0`
-- Commits updated `VERSION.txt` and `tests/run/native_functions/native_fn_version_call.krb.out`
-- Push tag and commits
+Cuts a release: updates [`VERSION.txt`](../VERSION.txt) and the changelog, runs
+the tests, commits, tags `vX.Y.Z` and pushes. See
+[Releasing](../docs/RELEASING.md).
 
 ```shell
 ./scripts/increment-version.sh -M # Increment major
@@ -95,7 +125,7 @@ Run `./scripts/cmake.sh` or `just cmake` to generate make files for the project.
 
 #### Definitions
 
-Different build definitions can be updated in [CMakeLists.txt](./CMakeLists.txt) run `just cmake && just build`.
+Different build definitions can be updated in [CMakeLists.txt](../CMakeLists.txt). Run `just cmake && just build` after changing them.
 
 ##### DEBUG_PRINT_CODE
 
@@ -107,9 +137,10 @@ Setting `DEBUG_TRACE_EXECUTION` will print execution trace logs.
 
 ### Generating The Language Version C File
 
-The current language version is defined in the [VERSION.txt](./VERSION.txt) file.
+The current language version is defined in the [VERSION.txt](../VERSION.txt) file.
 
-The `src/version.c` is generated automatically when the project is built. You can also generate/update the [`src/version.c`](./src/version.c) file explicit.
+`build/generated/version.c` is generated automatically when the project is built.
+You can also generate it explicitly.
 
 ```sh
 ./scripts/generate_version_c.sh

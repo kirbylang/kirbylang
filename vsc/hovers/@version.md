@@ -2,7 +2,7 @@
 native fun @version(): string;
 ```
 
-Get the current version of the kirby language.
+Get the current version of the Kirby language.
 
 ## Usage
 

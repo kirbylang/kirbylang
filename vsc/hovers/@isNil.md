@@ -1,4 +1,4 @@
-Returns if value is a nil or not.
+Returns if a value is `nil` or not.
 
 ## Usage
 

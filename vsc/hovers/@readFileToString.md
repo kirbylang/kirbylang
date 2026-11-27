@@ -2,7 +2,7 @@
 native fun @readFileToString(path: string): string;
 ```
 
-Read a file at path to string.
+Read the file at a path into a string.
 
 ## Usage
 

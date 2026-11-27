@@ -6,7 +6,12 @@ Builtin functions are prefixed, which makes them easy to tell apart from user fu
 
 This also makes `@` a reserved character in identifiers.
 
+Many of these are also [methods](./standard-library.md#methods-on-primitive-types),
+such as `list.push(item)` for `@listPush(list, item)`.
+
 ## Lists
+
+These work on lists `[T]` of any item type.
 
 ### `@listClear`
 
@@ -24,7 +29,7 @@ fun main(): unit {
 
 ### `@listConcat`
 
-Concatenates two lists in to a new list.
+Concatenates two lists into a new list.
 
 ```kirby
 fun main(): unit {
@@ -212,7 +217,20 @@ fun main(): unit {
 
 ## Arrays
 
-These work on fixed size arrays such as `[i64; 3]`. An array can't change length, so there are no push or pop functions. Use the `@list` functions on a list `[i64]`, and `@arrToList` to turn an array into a list.
+These work on fixed size arrays such as `[i64; 3]`, of any length. Their
+declarations in the standard library take the length as a `const` parameter:
+
+```
+native fun @arrCopy[T, const N](array: [T; N]): [T; N];
+native fun @arrEqual[T, const N](a: [T; N], b: [T; N]): bool;
+native fun @arrConcat[T, const N, const M](a: [T; N], b: [T; M]): [T];
+```
+
+So `@arrCopy` gives back an array of the same length, `@arrEqual` needs two arrays
+of one length, and `@arrConcat` takes any two lengths. Only the standard library
+can declare `const` parameters.
+
+An array can't change length, so there are no push or pop functions. Use the `@list` functions on a list `[i64]`, and `@arrToList` to turn an array into a list.
 
 ### `@arrLen`
 
@@ -307,7 +325,7 @@ fun main(): unit {
 
 ### `@arrConcat`
 
-Concatenates two arrays in to a new list. The result is a list because its length isn't known when the program is compiled.
+Concatenates two arrays into a new list. The result is a list because its length isn't known when the program is compiled.
 
 ```kirby
 fun main(): unit {
@@ -478,7 +496,7 @@ fun main(): unit {
 
 #### `@prompt`
 
-Read in text from `stdin` until newline (NL) is encountered. An optional message can be passed as well.
+Read in text from `stdin` until a newline (NL) is encountered. An optional message can be passed as well.
 
 ```kirby
 fun main(): unit {
@@ -490,7 +508,7 @@ fun main(): unit {
 
 #### `@stdin`
 
-Read in text from `stdin` until end of file (EOF) is encountered.
+Read in text from `stdin` until the end of file (EOF) is encountered.
 
 ```kirby
 fun main(): unit {
@@ -502,7 +520,7 @@ fun main(): unit {
 
 #### `@fileExists`
 
-Return if a file or path exists at a given path.
+Returns if a file or path exists at a given path.
 
 ```kirby
 fun main(): unit {
@@ -520,7 +538,7 @@ fun main(): unit {
 
 #### `@readFileToString`
 
-Read a file at path to string.
+Read the file at a path into a string.
 
 ```kirby
 fun main(): unit {
@@ -943,7 +961,7 @@ fun main(): unit {
 
 ### `@version`
 
-Get the current version of the kirby language.
+Get the current version of the Kirby language.
 
 ```kirby
 fun main(): unit {
@@ -969,7 +987,7 @@ fun main(): unit {
 
 ### `@typeof`
 
-Get the name of a value's type, as a string. A number gives its number type, such as `i64`, `u8` or `f64`.
+Get the name of a value's type, as a string. A number gives its number type, such as `i64`, `u8` or `f64`. `()` gives `"nil"`.
 
 ```kirby
 struct Food {}
@@ -980,6 +998,7 @@ fun main(): unit {
     @println(@typeof(1.5)); // f64
     @println(@typeof("Hello World")); // string
     @println(@typeof(nil)); // nil
+    @println(@typeof(())); // nil
 
     let items: [i64] = [1, 2];
     @println(@typeof(items)); // list
@@ -1010,7 +1029,7 @@ fun main(): unit {
 
 ### `@isBool`
 
-Returns if value is a bool or not.
+Returns if a value is a bool or not.
 
 ```kirby
 fun main(): unit {
@@ -1022,7 +1041,7 @@ fun main(): unit {
 
 ### `@isFunction`
 
-Returns if value is a function or not.
+Returns if a value is a function or not.
 
 ```kirby
 fun sum(a: i64, b: i64): i64 = a + b;
@@ -1036,7 +1055,7 @@ fun main(): unit {
 
 ### `@isNil`
 
-Returns if value is a nil or not.
+Returns if a value is `nil` or not.
 
 ```kirby
 fun main(): unit {
@@ -1047,7 +1066,7 @@ fun main(): unit {
 
 ### `@isNumber`
 
-Returns if value is a number or not.
+Returns if a value is a number or not.
 
 ```kirby
 fun main(): unit {
@@ -1058,7 +1077,7 @@ fun main(): unit {
 
 ### `@isString`
 
-Returns if value is a string or not.
+Returns if a value is a string or not.
 
 ```kirby
 fun main(): unit {

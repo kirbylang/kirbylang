@@ -1,4 +1,4 @@
-Returns if value is a string or not.
+Returns if a value is a string or not.
 
 ## Usage
 

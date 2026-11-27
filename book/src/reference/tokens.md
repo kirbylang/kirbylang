@@ -100,4 +100,4 @@ typedef struct {
 |  55 | `TOKEN_NATIVE`            |        `native` |
 |  56 | `TOKEN_CONST`             |         `const` |
 |  57 | `TOKEN_ERROR`             |             n/a |
-|  57 | `TOKEN_EOF`               |             n/a |
+|  58 | `TOKEN_EOF`               |             n/a |

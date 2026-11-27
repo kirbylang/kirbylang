@@ -41,29 +41,78 @@ The REPL and `krb exec` take snippets, which can hold statements and need no
 The examples on the rest of this page are snippets. To run one from a file, put its
 statements inside `main`.
 
+## Comments
+
+A comment starts with `//` and runs to the end of the line. There are no block
+comments.
+
+```krb
+// A comment on its own line
+fun main(): unit {} // A comment after code
+```
+
 ## Variables
 
-Variables can be a mutable binding using the `var` keyword or an immutable binding using the `let` keyword.
+A variable is either a mutable binding, using the `var` keyword, or an immutable binding, using the `let` keyword.
 
 ```krb
 let limit = 10;
 var count = 0;
 
 while (count <= limit) {
-    @println($"Count: {count});
+    @println($"Count: {count}");
 
     count = count + 1;
 }
 
-limit = 100; // Error at 'value': Cannot assign to immutable binding
+limit = 100; // Error at 'limit': Cannot assign to immutable binding
+```
+
+A `let` needs a value when it's declared. A `var` can be given its value later,
+and must have one on every path before it's read.
+
+```krb
+fun main(): unit {
+    var size: string;
+
+    if (@argc() > 1) {
+        size = "has arguments";
+    } else {
+        size = "no arguments";
+    }
+
+    @println(size);
+}
+```
+
+A `var` can be declared again, in the same block or an inner one, and the new one
+hides it. A `let` inside a function can't be declared again in its block or in the
+blocks inside it. At the top level a `let` can't be declared twice, but a function
+can use its name for a variable of its own.
+
+```krb
+let limit = 10;
+
+fun main(): unit {
+    var size = 1;
+    var size = "small"; // a new variable
+
+    let limit = 20; // hides the top-level `limit`
+
+    @println($"{size} {limit}"); // small 20
+}
 ```
 
 ### Annotating types
 
-Type annotations on variable declarations are optional (with a few exceptions).
+Type annotations on variable declarations are optional when the value says what
+the type is. They are needed when a `var` has no value yet, and for an empty list
+or array literal.
 
 ```krb
 let greeting: string = "Hello World";
+var total: i64;
+let names: [string] = [];
 ```
 
 ## Builtin Types
@@ -89,13 +138,13 @@ let greeting: string = "Hello World";
 
 ### Unit
 
-Kirby has a unit type `unit` using the literal `()`, which only has a single value that represents a function that doesn't return a value.
+Kirby has a unit type `unit` using the literal `()`, which only has a single value that represents a function that doesn't return a value. Printing it writes `nil`.
 
 ### Booleans
 
 #### Truthiness
 
-Kirby doesn't support coercsion to boolans.
+Kirby doesn't support coercion to booleans. A condition has to be a `bool`.
 
 ```kirby
 fun main(): unit {
@@ -125,13 +174,20 @@ fun main(): unit {
 
 #### String Methods
 
-`len` gives the length of a string in bytes.
+`len` gives the length of a string in bytes. Other work on strings is done by the
+`@str` [builtin functions](./reference/builtin-functions.md#strings).
 
 ```kirby
 fun main(): unit {
     @println("Hello".len()); // 5
+    @println("Hello " + "World"); // Hello World
+    @println(@strToUpper("Hello")); // HELLO
 }
 ```
+
+A string can't be indexed, and strings can't be ordered with `<`.
+
+The escapes are `\n`, `\r`, `\t`, `\"` and `\\`.
 
 #### Multiline Strings
 
@@ -147,7 +203,7 @@ fun main(): unit {
 
 #### String Interpolation
 
-Interpolated strings are prefixed with `$` using `{expr}` for interpolated values.
+Interpolated strings are prefixed with `$` and use `{expr}` for interpolated values.
 
 ```kirby
 fun main(): unit {
@@ -156,6 +212,10 @@ fun main(): unit {
     @println($"Hello {name}");
 }
 ```
+
+A placeholder can hold a `string`, a number, a `bool`, or a value whose type
+implements [`Display`](#traits). Anything else, such as a list or `()`, is an
+error. Write `{{` and `}}` for a literal brace.
 
 ### Numbers
 
@@ -175,22 +235,29 @@ fun main(): unit {
 }
 ```
 
-| From          | To         | Result                                                            |
-| ------------- | ---------- | ----------------------------------------------------------------- |
-| a float       | an integer | Must be a whole number in the integer's range. Checked at runtime |
-| an integer    | an integer | Must fit in the target. Checked at runtime                        |
-| an integer    | a float    | Rounded to the nearest float. Exact when it fits the float        |
-| the same type | itself     | Unchanged                                                         |
+| From          | To         | Result                                                             |
+| ------------- | ---------- | ------------------------------------------------------------------ |
+| a float       | an integer | Must be a whole number in the integer's range. Checked at runtime  |
+| an integer    | an integer | Must fit in the target. Checked at runtime                         |
+| an integer    | a float    | Rounded to the nearest float. Exact when it fits the float         |
+| `f64`         | `f32`      | Rounded to the nearest `f32`. A value out of its range is an error |
+| `f32`         | `f64`      | Unchanged                                                          |
+| the same type | itself     | Unchanged                                                          |
 
 ```krb
-let too_big: f64 = 300.0;
-let byte: u8 = too_big as u8; // Error: can't convert f64 300 to u8
+fun main(): unit {
+    let too_big: f64 = 300.0;
+    let byte: u8 = too_big as u8; // Error: can't convert f64 300 to u8
+}
 ```
 
 Use parentheses to cast just a part of an expression.
 
 ```krb
 fun main(): unit {
+    let a: u8 = 1;
+    let b: i64 = 2;
+
     let sum: u8 = 2 * 3 as u8;      // (2 * 3) as u8
     let total: u8 = a + (b as u8);  // cast only `b`
 }
@@ -204,6 +271,25 @@ Number literals are digits + an optional decimal point and suffix indicating the
 - `128u8`
 - `146.48290f32`
 - `105725.278123567f64`
+
+A suffix can be written in upper case, such as `255U8`.
+
+A whole number literal is an `i64`, and a decimal literal is an `f64`. A whole
+number literal without a suffix takes the type that is expected where it's used,
+when the value fits.
+
+```krb
+fun main(): unit {
+    let byte: u8 = 200 + 55;   // u8
+    let half: f64 = 7 / 2;     // 3.5
+    let whole = 7 / 2;         // i64, which is 3
+    let mixed = [1, 2.5];      // [f64; 2]
+}
+```
+
+Both sides of an operator have to be the same number type. Cast one with `as` to
+mix them. Integer math that doesn't fit its type, and dividing any number by
+zero, stop the program with an error.
 
 #### Number Methods
 
@@ -235,14 +321,15 @@ fun main(): unit {
 
 The `abs` of the smallest integer, such as `-128` for an `i8`, is an overflow error, because the result doesn't fit.
 
-Numbers, strings and bools also have the methods of the standard traits, which can be called like any method:
+Numbers, strings, bools and `()` also have the methods of the standard traits, which can be called like any method:
 
-| Type                           | Methods                                                       |
-| ------------------------------ | ------------------------------------------------------------- |
-| every number type              | `toString`, `equals`, `cmp`, `add`, `sub`, `mul`, `div`, `mod` |
-| signed integers, `f64`, `f32`  | `neg`                                                         |
-| `string`                       | `toString`, `equals`, `add`                                   |
-| `bool`                         | `toString`, `equals`                                          |
+| Type                          | Methods                                                        |
+| ----------------------------- | -------------------------------------------------------------- |
+| every number type             | `toString`, `equals`, `cmp`, `add`, `sub`, `mul`, `div`, `mod` |
+| signed integers, `f64`, `f32` | `neg`                                                          |
+| `string`                      | `toString`, `equals`, `add`                                    |
+| `bool`                        | `toString`, `equals`                                           |
+| `unit`                        | `toString`, `equals`, `cmp`                                    |
 
 `cmp` gives `-1`, `0` or `1`.
 
@@ -265,9 +352,13 @@ fun main(): unit {
 }
 ```
 
+These methods come from the standard library. You can't add your own to a
+primitive type: `impl i64 { ... }` is an error.
+
 ### Arrays
 
-Arrays, `[T; N]`, are fixed sized collections of homogenous types.
+Arrays, `[T; n]`, are fixed size collections of homogeneous types. The length is
+part of the type, so `[i64; 3]` and `[i64; 4]` are different types.
 
 ```kirby
 fun main(): unit {
@@ -276,6 +367,23 @@ fun main(): unit {
     @println(grid[0][1]); // false
 }
 ```
+
+A literal such as `[1, 2, 3]` makes an array, unless a [list](#lists) type is
+expected. An empty literal `[]` is only allowed where a list or array type is
+expected. An array's items can be changed, but its length can't.
+
+```krb
+fun main(): unit {
+    let a = [1, 2, 3];           // [i64; 3]
+    let b: [i64] = [1, 2, 3];    // [i64]
+
+    a[0] = 9;
+    @println(a); // [9, 2, 3]
+}
+```
+
+An index written as a number that is past the end, such as `a[3]`, is reported
+before the program runs. Any other bad index stops the program with an error.
 
 #### Array Methods
 
@@ -293,17 +401,58 @@ fun main(): unit {
 }
 ```
 
-### Lists
+#### Array Lengths
 
-Lists, `[T]`, are growable collections of homogenous types.
+The standard library's array methods and builtins work for an array of any length.
+They declare the length as a parameter with `const`, in the same way `T` stands
+for any item type:
 
 ```
+impl[T, const N] [T; N] {
+    pub fun copy(self): [T; N] = @arrCopy(self);
+    pub fun concat[const M](self, other: [T; M]): [T] = @arrConcat(self, other);
+}
+```
+
+So `copy` of a `[i64; 3]` is a `[i64; 3]`, and `concat` accepts an array of any
+other length and gives a list.
+
+Only the standard library can declare `const` parameters, and `const` is a
+reserved word. A function of your own names one length, such as `[i64; 3]`. To
+accept any number of items, take a list and pass `a.toList()`.
+
+```krb
+fun total(numbers: [i64]): i64 {
+    var sum = 0;
+
+    for (var i = 0; i < numbers.len(); i = i + 1) {
+        sum = sum + numbers[i];
+    }
+
+    return sum;
+}
+
+fun main(): unit {
+    let three = [1, 2, 3];
+
+    @println(total(three.toList())); // 6
+}
+```
+
+### Lists
+
+Lists, `[T]`, are growable collections of homogeneous types.
+
+```krb
 fun main(): unit {
     let scores: [i64] = [100, 53, 77, 41];
 
     @listPush(scores, 87);
 }
 ```
+
+`let` stops the name from being given a new value. The list it holds can still be
+changed.
 
 #### List Methods
 
@@ -321,6 +470,41 @@ fun main(): unit {
 }
 ```
 
+`==` on two lists, or two arrays, is only `true` when both sides are the same
+object. To compare the items use `@listEqual` or `@arrEqual`.
+
+## Operators
+
+| Operators               | Work on                                                             |
+| ----------------------- | ------------------------------------------------------------------- |
+| `+` `-` `*` `/` `%`     | two numbers of one type, or a struct with the [trait](#operators-1) |
+| `+`                     | two strings                                                         |
+| `-` (negate)            | a signed number, or a struct with `Neg`                             |
+| `<` `>` `<=` `>=`       | two numbers of one type, or a struct with `Ord`                     |
+| `==` `!=`               | two values of one type. A struct needs `Eq`                         |
+| `and` `&&`, `or` `\|\|` | two `bool`s                                                         |
+| `!`                     | any value. `!false` and `!nil` are `true`                           |
+| `??`                    | gives the right side when the left side is `nil`                    |
+| `as`                    | [casts a number](#casting-number-types)                             |
+
+Dividing two integers drops the remainder.
+
+## Blocks
+
+A block can be used as a value. It is the value of its last expression, written
+without a semicolon.
+
+```krb
+fun main(): unit {
+    let area = {
+        let side = 4;
+        side * side
+    };
+
+    @println(area); // 16
+}
+```
+
 ## Flow Control
 
 ### `if`
@@ -333,7 +517,7 @@ fun main(): unit {
     if (value % 2 == 0) {
         even_or_odd = "Even";
     } else {
-        even_or_odd = "Even";
+        even_or_odd = "Odd";
     }
 }
 ```
@@ -365,7 +549,7 @@ fun main(): unit {
 
 ### `for`
 
-```
+```krb
 fun main(): unit {
     for (var i = 0; i < 10; i = i + 1) {
         @println($"Count: {i}");
@@ -375,7 +559,24 @@ fun main(): unit {
 
 ### `break`/`continue`
 
-Available inside of `for` and `while` loops.
+Available inside of `for` and `while` loops. `break` leaves the loop, and
+`continue` starts its next turn.
+
+```krb
+fun main(): unit {
+    for (var i = 0; i < 10; i = i + 1) {
+        if (i == 1) {
+            continue;
+        }
+
+        if (i == 3) {
+            break;
+        }
+
+        @println(i); // 0, then 2
+    }
+}
+```
 
 ## Functions
 
@@ -394,12 +595,37 @@ Excluding the function name creates a lambda instead.
 ```krb
 let sum = fun (a: f64, b: f64): f64 {
     return a + b;
+};
+```
+
+The type of a function is written `fun (f64, f64) => f64`. When that type is
+already known, a lambda can leave off its parameter and return types.
+
+```krb
+fun main(): unit {
+    let double: fun (i64) => i64 = fun (n) { n * 2 };
+
+    @println(double(21)); // 42
+}
+```
+
+A lambda can read and change the variables around it.
+
+```krb
+fun main(): unit {
+    var count = 0;
+    let increment = fun () { count = count + 1; };
+
+    increment();
+    increment();
+
+    @println(count); // 2
 }
 ```
 
 ### Implicit Returns
 
-Functions and lambdas can implicit return if the last line of the body is a bare expression (no semicolon).
+Functions and lambdas can implicitly return if the last line of the body is a bare expression (no semicolon).
 
 ```krb
 fun sum(a: f64, b: f64): f64 {
@@ -410,7 +636,7 @@ fun sum(a: f64, b: f64): f64 {
 ```krb
 let sum = fun (a: f64, b: f64): f64 {
     a + b
-}
+};
 ```
 
 ### Expression Bodies
@@ -440,15 +666,33 @@ fun main(): unit {
 
 Inside the function, nothing is known about `T`, so a `T` can be passed around, returned and stored, but not added, compared or called. Every argument that uses the same `T` has to be the same type. A [trait bound](#trait-bounds) lets the function call a trait's methods on a `T`.
 
+A type parameter hides any type of the same name inside its declaration, so in
+`fun id[string](x: string): string` the function takes any type. `Self` can't be
+the name of a type parameter.
+
 ### Builtin Functions
 
-Kirby has a number of builtin functions. These are prefixed with `@`.
+Kirby has a number of [builtin functions](./reference/builtin-functions.md).
+These are prefixed with `@`.
+
+```krb
+fun main(): unit {
+    @assert(1 + 1 == 2, "math is broken");
+
+    @println(@parseInt("42") + 1); // 43
+
+    @panic("stop here"); // panic: stop here
+}
+```
+
+There are no exceptions to catch. `@assert`, `@panic` and other runtime errors
+stop the program.
 
 ## Custom Types
 
 ### Structs
 
-Structs are a custom data types that group together a set of [variables](#variables) (fields) and [functions](#functions) (methods) that operator on those fields.
+Structs are custom data types that group together a set of [variables](#variables) (fields) and [functions](#functions) (methods) that operate on those fields.
 
 #### Fields
 
@@ -470,6 +714,30 @@ Fields are private and immutable by default.
 - Use the `var` keyword to make fields mutable. This only controls whether the field can be reassigned, not whether its value can change.
 - Use the `pub` keyword to make fields public.
 
+Every field needs a type. Fields can't have default values.
+
+#### Creating A Struct
+
+A struct literal names the struct and gives every field a value. Code outside the
+struct's `impl` can only set and read its public fields.
+
+```krb
+struct Size {
+    pub width: i64;
+    pub var height: i64;
+}
+
+fun main(): unit {
+    let size = Size { width: 2, height: 3 };
+
+    size.height = 4;
+
+    @println(size.width * size.height); // 8
+}
+```
+
+A private field is set by a static method of the struct.
+
 #### Methods
 
 Methods are defined in the struct's implementation body.
@@ -484,7 +752,7 @@ impl Counter {
 
     pub fun run(self): unit {
         while (self.count <= self.limit) {
-            @println($"Count: {count});
+            @println($"Count: {self.count}");
 
             self.increment();
         }
@@ -493,6 +761,34 @@ impl Counter {
 ```
 
 Methods are private by default. Use the `pub` keyword to make methods public.
+
+A method whose first parameter is `self` is called on a value. A method without
+`self` is a static method, called on the struct's name. Inside an `impl`, `Self`
+is the struct.
+
+```krb
+struct Account {
+    var balance: i64;
+}
+
+impl Account {
+    pub fun open(): Self = Self { balance: 0 };
+
+    pub fun deposit(self, amount: i64): unit {
+        self.balance = self.balance + amount;
+    }
+
+    pub fun total(self): i64 = self.balance;
+}
+
+fun main(): unit {
+    let account = Account.open();
+
+    account.deposit(5);
+
+    @println(account.total()); // 5
+}
+```
 
 #### Generic Structs
 
@@ -520,6 +816,36 @@ fun main(): unit {
 ```
 
 `Box[i64]` and `Box[string]` are different types. The `impl` repeats the struct's types, and a method can add more, like `U` in `map`.
+
+## Type Aliases
+
+`type` gives a type another name. The two names are the same type.
+
+```krb
+type Meters = f64;
+type Callback[T] = fun (T) => T;
+
+struct Box[T] {
+    pub var value: T;
+}
+
+type Number = Box[i64];
+
+fun main(): unit {
+    let distance: Meters = 5;
+    let same: Callback[i64] = fun (n) { n };
+
+    let box = Number { value: 1 };        // an alias of a struct works in a literal
+
+    @println(same(box.value));            // 1
+    @println(Meters.default() + distance); // 5
+}
+```
+
+An alias of a struct works wherever the struct's name does: in a literal and to
+call a static method. An alias of a primitive type can call its static methods.
+Type arguments that an alias fixes stay fixed, so `Number { value: "hi" }` is an
+error.
 
 ## Traits
 
@@ -584,6 +910,39 @@ fun main(): unit {
     @println(Display.toString(p)); // trait
 }
 ```
+
+### Builtin Traits
+
+These traits are always in scope:
+
+| Trait     | Method                                | Used by               |
+| --------- | ------------------------------------- | --------------------- |
+| `Display` | `fun toString(self): string`          | printing and `$"{x}"` |
+| `Eq`      | `fun equals(self, other: Self): bool` | `==` `!=`             |
+| `Ord`     | `fun cmp(self, other: Self): i64`     | `<` `>` `<=` `>=`     |
+| `Default` | `fun default(): Self`                 | `Type.default()`      |
+| `Add`     | `fun add(self, other: Self): Self`    | `+`                   |
+| `Sub`     | `fun sub(self, other: Self): Self`    | `-`                   |
+| `Mul`     | `fun mul(self, other: Self): Self`    | `*`                   |
+| `Div`     | `fun div(self, other: Self): Self`    | `/`                   |
+| `Mod`     | `fun mod(self, other: Self): Self`    | `%`                   |
+| `Neg`     | `fun neg(self): Self`                 | `-` (negate)          |
+
+```krb
+struct Point {
+    pub x: i64;
+}
+
+impl Display for Point {
+    fun toString(self): string = $"Point({self.x})";
+}
+
+fun main(): unit {
+    @println(Point { x: 1 }); // Point(1)
+}
+```
+
+A generic struct can't implement a trait yet.
 
 ### Super Traits
 
@@ -658,6 +1017,7 @@ fun main(): unit {
 A [generic function](#generic-functions) can say that its type has to implement a trait. Write the trait after a colon. The function can then call the trait's methods on that type.
 
 ```
+// `Area` and `Rect` are declared above, under Traits
 fun double_area[T: Area](shape: T): f64 = shape.get_area() * 2;
 
 fun main(): unit {
@@ -717,3 +1077,7 @@ fun main(): unit {
 `==` on two structs calls their `equals`, so it follows the struct's `Eq` impl.
 
 Calling a static trait method through a bound, like `T.default()`, isn't supported yet.
+
+A primitive type implements its traits, but can't fill a bounded parameter yet:
+passing `"hi"` where `T: Display` is expected is an error. The exception is a
+number with an operator trait bound (`Add`, `Eq`, `Ord` and the others above).

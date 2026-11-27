@@ -2,7 +2,7 @@
 native fun @fileExists(path: string): bool;
 ```
 
-Return if a file or path exists at a given path.
+Returns if a file or path exists at a given path.
 
 ## Usage
 
