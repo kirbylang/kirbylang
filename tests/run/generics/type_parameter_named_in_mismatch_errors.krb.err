@@ -1,0 +1,9 @@
+[line 11] Error: Expected i64, got type parameter string.
+[line 16] Error: Expected type parameter P, got P.
+[line 17] Error: Expected type parameter P, got P.
+[line 21] Error: Expected type parameter T, got i64.
+[line 22] Error: Expected type parameter T, got an array.
+[line 23] Error: Expected type parameter T here, not a function.
+[line 24] Error: Expected i64, got type parameter T.
+[line 28] Error: Expected a return value of type T.
+[line 33] Error: Expected i64, got [T].

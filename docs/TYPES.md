@@ -200,7 +200,7 @@ methods of its trait. The error is reported in the function, not at the call.
 
 ```
 fun add[T](a: T, b: T): T = a + b;   // error: '+' needs two numbers ... got T and T.
-fun bad[A, B](a: A): B = a;          // error: Expected B, got A.
+fun bad[A, B](a: A): B = a;          // error: Expected type parameter B, got type parameter A.
 ```
 
 A generic function can also be used as a value where a function type is

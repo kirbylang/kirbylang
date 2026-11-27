@@ -1,1 +1,1 @@
-[line 2] Error: Expected B, got A.
+[line 2] Error: Expected type parameter B, got type parameter A.

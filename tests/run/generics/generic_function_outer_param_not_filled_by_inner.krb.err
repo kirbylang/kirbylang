@@ -1,1 +1,1 @@
-[line 6] Error: Expected i64, got T.
+[line 6] Error: Expected i64, got type parameter T.

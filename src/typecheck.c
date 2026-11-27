@@ -45,6 +45,21 @@ static void typchkErrorAtNodeFmt(AstNode *node, const char *fmt, ...) {
   typchkErrorAtNode(node, message);
 }
 
+// A type as named in an "Expected ..." message. A type parameter is called one,
+// because it can have the same name as another type.
+static const char *typchkMismatchName(Type *type) {
+  const char *name = typeToString(type);
+
+  if (type == NULL || type->kind != TYPE_GENERIC_PARAM)
+    return name;
+
+  const char *prefix = "type parameter ";
+  size_t size = strlen(prefix) + strlen(name) + 1;
+  char *result = (char *)typesAllocRaw(size);
+  snprintf(result, size, "%s%s", prefix, name);
+  return result;
+}
+
 bool typchkHadError(void) { return hadError; }
 void typchkResetError(void) { hadError = false; }
 
@@ -1238,7 +1253,7 @@ static bool typchkCheckInto(TypeEnv *env, AstNode *node, Type *expected,
   if (node->kind == NODE_ARRAY && expected != NULL) {
     if (expected->kind != TYPE_LIST && expected->kind != TYPE_ARRAY) {
       typchkErrorAtNodeFmt(node, "Expected %s, got an array.",
-                           typeToString(expected));
+                           typchkMismatchName(expected));
       return false;
     }
 
@@ -1259,9 +1274,10 @@ static bool typchkCheckInto(TypeEnv *env, AstNode *node, Type *expected,
 
     if (isArray && !lengthIsOpen &&
         (lengthParam != NULL || a->count != expected->as.array.length)) {
-      typchkErrorAtNodeFmt(
-          node, "Expected %s, got an array literal with %d %s.",
-          typeToString(expected), a->count, a->count == 1 ? "item" : "items");
+      typchkErrorAtNodeFmt(node,
+                           "Expected %s, got an array literal with %d %s.",
+                           typchkMismatchName(expected), a->count,
+                           a->count == 1 ? "item" : "items");
       ok = false;
     }
 
@@ -1311,8 +1327,9 @@ static bool typchkCheckInto(TypeEnv *env, AstNode *node, Type *expected,
     return typchkCheckGenericFunctionValue(env, node, actual, expected);
 
   if (!typeAccepts(expected, actual)) {
-    typchkErrorAtNodeFmt(node, "Expected %s, got %s.", typeToString(expected),
-                         typeToString(actual));
+    typchkErrorAtNodeFmt(node, "Expected %s, got %s.",
+                         typchkMismatchName(expected),
+                         typchkMismatchName(actual));
     return false;
   }
 
@@ -1883,8 +1900,9 @@ static bool typchkCheckGenericFunctionValue(TypeEnv *env, AstNode *node,
   if (typeAccepts(expected, typeEraseGenericParams(filled)))
     return true;
 
-  typchkErrorAtNodeFmt(node, "Expected %s, got %s.", typeToString(expected),
-                       typeToString(filled));
+  typchkErrorAtNodeFmt(node, "Expected %s, got %s.",
+                       typchkMismatchName(expected),
+                       typchkMismatchName(filled));
   return false;
 }
 
@@ -2286,8 +2304,8 @@ static bool typchkUnifyValue(TypeEnv *env, AstNode *arg, Type *pattern,
   }
 
   if (!typeAccepts(known, actual)) {
-    typchkErrorAtNodeFmt(arg, "Expected %s, got %s.", typeToString(param),
-                         typeToString(actual));
+    typchkErrorAtNodeFmt(arg, "Expected %s, got %s.", typchkMismatchName(param),
+                         typchkMismatchName(actual));
     return false;
   }
 
@@ -2407,8 +2425,9 @@ static Type *typchkCheckCallAgainstFunctionType(TypeEnv *env, AstNode *node,
     if (args[i] != checkedArg) {
       ok = typchkCheck(env, args[i], param) && ok;
     } else if (!typeAccepts(param, env->_checkedArgType)) {
-      typchkErrorAtNodeFmt(args[i], "Expected %s, got %s.", typeToString(param),
-                           typeToString(env->_checkedArgType));
+      typchkErrorAtNodeFmt(args[i], "Expected %s, got %s.",
+                           typchkMismatchName(param),
+                           typchkMismatchName(env->_checkedArgType));
       ok = false;
     }
   }
@@ -3653,7 +3672,7 @@ static Type *typchkCheckOrInferLambda(
 
   if (expected != NULL && expected->kind != TYPE_FN) {
     typchkErrorAtNodeFmt(node, "Expected %s here, not a function.",
-                         typeToString(expected));
+                         typchkMismatchName(expected));
     return NULL;
   }
 

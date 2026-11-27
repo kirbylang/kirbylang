@@ -1,0 +1,36 @@
+struct P {}
+
+fun makeP(): P {
+    return P {};
+}
+
+fun takesNumber(n: i64): unit {}
+
+// Named like a built-in type
+fun hidden[string](x: string): unit {
+    let n: i64 = x;
+}
+
+// Named like a struct
+fun both[P](x: P): P {
+    let p: P = makeP();
+    return makeP();
+}
+
+fun given[T](x: T): unit {
+    let a: T = 1;
+    let b: T = [1];
+    let c: T = fun () {};
+    takesNumber(x);
+}
+
+fun missing[T](x: T): T {
+    return;
+}
+
+// Only a type that is itself a parameter is called one
+fun nested[T](xs: [T]): unit {
+    let n: i64 = xs;
+}
+
+fun main(): unit {}

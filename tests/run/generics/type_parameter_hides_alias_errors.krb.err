@@ -1,2 +1,2 @@
 [line 8] Error at 'Many': 'Many' doesn't take type arguments.
-[line 5] Error: Expected Number, got i64.
+[line 5] Error: Expected type parameter Number, got i64.

@@ -568,7 +568,7 @@ static void test_a_list_impl_is_checked(void) {
   free(errors);
 
   errors = errorsOf("impl[T] [T] { pub fun bad(self): i64 = self[0]; }", true);
-  assert(strstr(errors, "Expected i64, got T.") != NULL);
+  assert(strstr(errors, "Expected i64, got type parameter T.") != NULL);
   free(errors);
 
   errors = errorsOf("impl[T] [T] { pub fun make(): i64 = 1; }", true);
@@ -707,7 +707,7 @@ static void test_an_array_impl_is_checked(void) {
 
   errors = errorsOf(
       "impl[T, const N] [T; N] { pub fun bad(self): i64 = self[0]; }", true);
-  assert(strstr(errors, "Expected i64, got T.") != NULL);
+  assert(strstr(errors, "Expected i64, got type parameter T.") != NULL);
   free(errors);
 
   // The same rules as a list for traits

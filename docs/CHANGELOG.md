@@ -21,6 +21,7 @@
 
 ## Next
 
+- Change type mismatch errors to say "type parameter" before a type that is one. `Expected string, got string.` is now `Expected type parameter string, got string.`
 - **Breaking**: a struct can't be named like a built-in type: `unit`, `bool`, `string` or a number type such as `i64`. It was accepted, but the name in a type annotation still meant the built-in type
 - Fix a syntax error hiding the errors in a `type` declaration that follows it
 - Change `@listSlice`, `@arrSlice` and the `slice` method to return an empty list when `start` equals `end`, as `@strSlice` does. It was an error

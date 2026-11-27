@@ -1,1 +1,1 @@
-[line 2] Error: Expected T, got bool.
+[line 2] Error: Expected type parameter T, got bool.
