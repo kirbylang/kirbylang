@@ -107,7 +107,7 @@ runs if it matches any of them. A pattern that matches no test is an error.
 
 | Variable    | Default              | Description                     |
 | ----------- | -------------------- | ------------------------------- |
-| `BIN`       | `./build/kirby-test` | The program the tests run       |
+| `BIN`       | `./build/debug/kirby-test` | The program the tests run       |
 | `TESTS_DIR` | `./tests`            | The folder that holds the tests |
 
 The `.err` snapshots hold the bytecode listing, so `BIN` must be a build that

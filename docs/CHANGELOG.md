@@ -21,6 +21,7 @@
 
 ## Next
 
+- Change where a source build puts `krb`: `build/debug` for `just build` and `build/release` for `just build-release`, which is now optimized. `just install` makes a release build first
 - Change a bad array length, such as `[i64; n]`, to report one error, `Array length must be a whole number, as in '[i64; 3]'.`, in place of a syntax error that was often followed by a second one
 - Change type mismatch errors to say "type parameter" before a type that is one. `Expected string, got string.` is now `Expected type parameter string, got string.`
 - **Breaking**: a struct can't be named like a built-in type: `unit`, `bool`, `string` or a number type such as `i64`. It was accepted, but the name in a type annotation still meant the built-in type

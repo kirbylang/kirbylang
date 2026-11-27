@@ -2,11 +2,16 @@
 
 ## Build
 
-Run `./scripts/build.sh` or `just build` to build the project into the `./build` folder.
+| Command               | Folder           | Build                           |
+| --------------------- | ---------------- | ------------------------------- |
+| `just build`          | `build/debug`    | Debug. The tests and unit tests |
+| `just build-release`  | `build/release`  | Optimized and stripped          |
+| `just build-memcheck` | `build/memcheck` | Debug with AddressSanitizer     |
 
 ## Install
 
-Run `just install` or the OS specific script:
+Run `just install`, which makes a release build and installs it. The OS
+specific scripts install what `just build-release` made:
 
 - **linux:** `./scripts/install-linux.sh`
 - **macos:** `./scripts/install-macos.sh`
@@ -139,10 +144,4 @@ Setting `DEBUG_TRACE_EXECUTION` will print execution trace logs.
 
 The current language version is defined in the [VERSION.txt](../VERSION.txt) file.
 
-`build/generated/version.c` is generated automatically when the project is built.
-You can also generate it explicitly.
-
-```sh
-./scripts/generate_version_c.sh
-just generate_version_c
-```
+`generated/version.c` is generated in the build folder when the project is built.

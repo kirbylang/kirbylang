@@ -1,4 +1,4 @@
-// See ./build/generated/stdlib.c
+// See generated/stdlib.c in the build folder
 #ifndef STDLIB_SOURCE_H
 #define STDLIB_SOURCE_H
 

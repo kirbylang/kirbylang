@@ -2,4 +2,4 @@
 
 set -euo pipefail
 
-./build/krb example $1 ${@:2}
+./build/debug/krb example $1 ${@:2}

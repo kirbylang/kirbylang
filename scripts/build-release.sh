@@ -1,15 +1,11 @@
 #!/usr/bin/env bash
 set -e
 
-BUILD_DIR=build
+BUILD_DIR=build/release
 BIN="krb"
 RUNTIME_BIN="krb-runtime"
 
-ENABLE_COVERAGE=${ENABLE_COVERAGE:-OFF}
-# Enable memory checking memory issues in code
-ENABLE_MEMCHECK=${ENABLE_MEMCHECK:-OFF}
-
-cmake -S . -B "$BUILD_DIR" -DENABLE_COVERAGE=$ENABLE_COVERAGE -DENABLE_MEMCHECK=$ENABLE_MEMCHECK
+cmake -S . -B "$BUILD_DIR" -DCMAKE_BUILD_TYPE=Release
 cmake --build "$BUILD_DIR" --config Release
 
 strip "$BUILD_DIR/$BIN"

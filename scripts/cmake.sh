@@ -1,4 +1,3 @@
 #!/usr/bin/env bash
 
-mkdir -p build
-cd build && cmake ..
+cmake -S . -B build/debug -DCMAKE_BUILD_TYPE=Debug

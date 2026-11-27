@@ -1,5 +1,21 @@
 # CLI
 
+## Building
+
+The `krb` and `krb-runtime` binaries are produced using the build scripts.
+
+| Command               | Folder           | Build                           |
+| --------------------- | ---------------- | ------------------------------- |
+| `just build`          | `build/debug`    | Debug. The tests and unit tests |
+| `just build-release`  | `build/release`  | Optimized and stripped          |
+| `just build-memcheck` | `build/memcheck` | Debug with AddressSanitizer     |
+
+## Installing
+
+Run `just install` runs the release build then installs `krb` and `krb-runtime` in OS appropriate locations (e.g. `/usr/local/bin`).
+
+## Usage
+
 ```
 kirby 0.4.0
 

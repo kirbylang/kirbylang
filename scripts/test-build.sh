@@ -4,8 +4,8 @@
 
 set -uo pipefail
 
-BIN="${BIN:-./build/krb}"
-RUNTIME_BIN="${RUNTIME_BIN:-./build/krb-runtime}"
+BIN="${BIN:-./build/debug/krb}"
+RUNTIME_BIN="${RUNTIME_BIN:-./build/debug/krb-runtime}"
 
 BIN="$(cd "$(dirname "$BIN")" && pwd)/$(basename "$BIN")"
 RUNTIME_BIN="$(cd "$(dirname "$RUNTIME_BIN")" && pwd)/$(basename "$RUNTIME_BIN")"
