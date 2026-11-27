@@ -630,7 +630,8 @@ static bool numberNegate(void) {
 }
 
 // Replaces two numbers with -1, 0 or 1 for whether the first is less than,
-// equal to or greater than the second.
+// equal to or greater than the second. NaN sorts below every number, and level
+// with NaN.
 static bool numberThreeWayCompare(void) {
   Value b = peekStack(0);
   Value a = peekStack(1);
@@ -643,7 +644,12 @@ static bool numberThreeWayCompare(void) {
   NumberKind kind = a.as.number.kind;
   int64_t order = 0;
 
-  if (numberOpLessThan(kind, a.as.number.as, b.as.number.as))
+  bool aIsNan = numberKindInfo(kind)->isFloat && isnan(a.as.number.as.f64);
+  bool bIsNan = numberKindInfo(kind)->isFloat && isnan(b.as.number.as.f64);
+
+  if (aIsNan || bIsNan)
+    order = (int64_t)bIsNan - (int64_t)aIsNan;
+  else if (numberOpLessThan(kind, a.as.number.as, b.as.number.as))
     order = -1;
   else if (numberOpLessThan(kind, b.as.number.as, a.as.number.as))
     order = 1;

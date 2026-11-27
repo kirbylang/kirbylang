@@ -30,6 +30,10 @@ See [builtin traits](../basics.md#builtin-traits).
 | `bool`                        | `Display`, `Eq`, `Default`                                           |
 | `unit`                        | `Display`, `Eq`, `Ord`, `Default`                                    |
 
+On a float, `cmp` sorts `NaN` below every number and level with `NaN`. Comparing
+two floats directly, as in `a < b`, is `false` with `NaN`. In a generic function
+bounded by `Ord`, `a < b` uses `cmp`.
+
 Lists and arrays implement no traits.
 
 ## Date
