@@ -1,0 +1,10 @@
+type Number = i64;
+type Many[T] = [T];
+
+fun f[Number](x: Number): unit {
+    let n: Number = 1;
+}
+
+fun g[Many](x: Many[i64]): unit {}
+
+fun main(): unit {}

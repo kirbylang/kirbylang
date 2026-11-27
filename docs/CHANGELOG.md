@@ -24,6 +24,8 @@
 
 ## Next
 
+- **Breaking**: a type parameter now hides any type of the same name inside its declaration. A struct or alias was already hidden, and now a type such as `string` or `i64` is too, as in `fun id[string](x: string): string`. A parameter given type arguments, such as `Box[i64]` where `Box` is a parameter, is an error even when a struct or alias has that name
+- **Breaking**: `Self` can't be the name of a type parameter. It was accepted and ignored, and is reported as `'Self' can't be the name of a type parameter.`
 - **Breaking**: `const` is a reserved word. In the standard library it declares an array length as a parameter, as in `native fun @arrConcat[T, const N, const M](a: [T; N], b: [T; M]): [T];`, in place of the fixed names `N` and `M`
 - **Breaking**: a list or array impl declares its parameters after `impl`, as in `impl[T] [T]` and `impl[T, const N] [T; N]`. Only the standard library writes these
 - **Breaking**: a method can't declare a type parameter with the same name as one of its impl's, such as `fun with[T]` in `impl Box[T]`. It is reported as `Generic parameter 'T' is already declared.`

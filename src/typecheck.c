@@ -717,6 +717,23 @@ Type *typchkResolveType(TypeEnv *env, AstNode *typeAnnotation) {
 
   TypeNode *t = &typeAnnotation->as.type_;
 
+  // A parameter hides any type of the same name inside its declaration
+  Type *genericParam =
+      bindingArrayLookup(env->_genericParams, env->_genericParamCount, t->name);
+  if (genericParam != NULL) {
+    if (genericParam->as.genericParam.isLength) {
+      typchkErrorAtTokenFmt(&t->name, "'%.*s' is a length, not a type.",
+                            t->name.length, t->name.start);
+      return NULL;
+    }
+    if (t->genericArgCount > 0) {
+      typchkErrorAtTokenFmt(&t->name, "'%.*s' doesn't take type arguments.",
+                            t->name.length, t->name.start);
+      return NULL;
+    }
+    return genericParam;
+  }
+
   if (env->_resolvingNative && t->genericArgCount == 0) {
     Type *nativeType = typchkResolveNativeTypeName(&t->name);
     if (nativeType != NULL)
@@ -741,19 +758,6 @@ Type *typchkResolveType(TypeEnv *env, AstNode *typeAnnotation) {
 
     return env->_currentImplTargetType != NULL ? env->_currentImplTargetType
                                                : typeSelfPlaceholder();
-  }
-
-  // The innermost name wins, so a parameter hides a struct or alias of the
-  // same name inside its declaration
-  Type *genericParam =
-      bindingArrayLookup(env->_genericParams, env->_genericParamCount, t->name);
-  if (genericParam != NULL) {
-    if (genericParam->as.genericParam.isLength) {
-      typchkErrorAtTokenFmt(&t->name, "'%.*s' is a length, not a type.",
-                            t->name.length, t->name.start);
-      return NULL;
-    }
-    return genericParam;
   }
 
   Type *structType = typchkTypeEnvLookupStruct(env, t->name);
@@ -4525,16 +4529,15 @@ static const char *typchkImplExample(const ImplNode *impl) {
 // right kind of parameter, and uses every name it declares.
 static bool typchkCheckListOrArrayImplNames(ImplNode *impl) {
   Token *item = &impl->itemName;
+  int itemIndex = typchkImplParamNamed(impl, item);
 
-  if (typchkPrimitiveTypeNamed(item) != NULL) {
+  if (itemIndex < 0 && typchkPrimitiveTypeNamed(item) != NULL) {
     typchkErrorAtTokenFmt(item,
                           "'%.*s' is a type. An impl names the item type "
                           "with a type parameter, as in 'impl[T] [T]'.",
                           item->length, item->start);
     return false;
   }
-
-  int itemIndex = typchkImplParamNamed(impl, item);
 
   if (itemIndex < 0) {
     typchkErrorAtTokenFmt(item,

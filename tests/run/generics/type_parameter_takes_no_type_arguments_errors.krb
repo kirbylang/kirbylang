@@ -1,0 +1,9 @@
+struct Box[T] {
+    pub value: T;
+}
+
+fun f[Box](x: Box[i64]): unit {}
+
+fun g[string](x: string[i64]): unit {}
+
+fun main(): unit {}

@@ -1,0 +1,7 @@
+struct Point {
+    pub x: i64;
+}
+
+fun f[Point](p: Point): i64 = p.x;
+
+fun main(): unit {}

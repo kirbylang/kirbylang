@@ -1473,6 +1473,8 @@ static int parseGenericParamList(Parser *p, Token *paramBuf,
 
       consumeDeclarationIdentifier(p, "Expect generic parameter name.");
       Token name = p->previous;
+      if (tokenTextEquals(&name, "Self"))
+        parse_error(p, "'Self' can't be the name of a type parameter.");
       GenericBounds bounds;
       memset(&bounds, 0, sizeof(GenericBounds));
 

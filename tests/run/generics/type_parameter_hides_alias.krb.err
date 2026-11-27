@@ -1,0 +1,45 @@
+== <script> ==
+0000    8 OP_CLOSURE          1 <fn id>
+0002    | OP_DEFINE_GLOBAL    0 'id'
+0004   10 OP_CLOSURE          3 <fn same>
+0006    | OP_DEFINE_GLOBAL    2 'same'
+0008   20 OP_CLOSURE          5 <fn main>
+0010    | OP_DEFINE_GLOBAL    4 'main'
+0012    1 OP_STRUCT           6 'Box'
+0014    | OP_DEFINE_GLOBAL    6 'Box'
+0016    | OP_GET_GLOBAL       6 'Box'
+0018    2 OP_NIL
+0019    | OP_FIELD            7 'value' public immutable
+0023    3 OP_POP
+0024   21 OP_NIL
+0025    | OP_RETURN
+== id ==
+0000    8 OP_GET_LOCAL        1
+0002    | OP_RETURN
+== same ==
+0000   10 OP_GET_LOCAL        1
+0002    | OP_RETURN
+== main ==
+0000   15 OP_GET_GLOBAL       0 '@println'
+0002    | OP_GET_GLOBAL       1 'id'
+0004    | OP_CONSTANT         2 'not a number'
+0006    | OP_CALL             1
+0008    | OP_CALL             1
+0010    | OP_POP
+0011   16 OP_GET_GLOBAL       0 '@println'
+0013    | OP_GET_GLOBAL       3 'same'
+0015    | OP_TRUE
+0016    | OP_CALL             1
+0018    | OP_CALL             1
+0020    | OP_POP
+0021   18 OP_GET_GLOBAL       4 'Box'
+0023    | OP_CONSTANT         5 'value'
+0025    | OP_CONSTANT         6 'wrapped'
+0027    | OP_STRUCT_INIT      1
+0029   19 OP_GET_GLOBAL       0 '@println'
+0031    | OP_GET_LOCAL        1
+0033    | OP_GET_PROPERTY     5 'value'
+0035    | OP_CALL             1
+0037    | OP_POP
+0038   20 OP_NIL
+0039    | OP_RETURN

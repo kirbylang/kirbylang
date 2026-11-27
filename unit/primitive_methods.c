@@ -748,6 +748,15 @@ static void expectStdlibMessage(const char *source, const char *message) {
   end();
 }
 
+static void test_an_impl_parameter_hides_a_type_name(void) {
+  begin();
+  expectOk("impl[string] [string] { pub fun first(self): string = self[0]; }",
+           true);
+  expectOk("if (true) { let xs: [i64] = [1, 2]; let n: i64 = xs.first(); }",
+           false);
+  end();
+}
+
 static void test_an_impl_declares_what_its_target_names(void) {
   expectStdlibMessage("impl[T] [U] { }",
                       "'U' isn't declared. Declare it after 'impl', as in "
@@ -1002,6 +1011,7 @@ int main(void) {
   test_arrays_can_have_methods_and_traits();
   test_an_array_impl_is_checked();
   test_an_array_impl_needs_its_trait();
+  test_an_impl_parameter_hides_a_type_name();
   test_an_impl_declares_what_its_target_names();
   test_a_length_has_to_be_declared();
   test_a_method_can_not_reuse_an_impls_name();

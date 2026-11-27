@@ -205,6 +205,14 @@ static void test_a_list_or_array_impl_has_to_be_well_formed(void) {
                     "struct, as in 'impl Box[T]'.");
 }
 
+static void test_self_can_not_name_a_type_parameter(void) {
+  const char *message = "'Self' can't be the name of a type parameter.";
+
+  expectStdlibError("fun f[Self](x: Self): Self = x;", message);
+  expectStdlibError("impl[Self] [Self] { }", message);
+  expectStdlibError("impl[T, const Self] [T; Self] { }", message);
+}
+
 static void test_functions_can_declare_const_parameters(void) {
   expectStdlibAst("native fun @x[T, const N](a: [T; N]): [T; N];",
                   "(native-fun @x[T const N] (a : [T; N]) : [T; N])\n");
@@ -325,6 +333,7 @@ int main(void) {
   test_a_native_declaration_has_to_be_well_formed();
   test_the_stdlib_can_impl_lists_and_arrays();
   test_a_list_or_array_impl_has_to_be_well_formed();
+  test_self_can_not_name_a_type_parameter();
   test_functions_can_declare_const_parameters();
   test_user_code_can_not_impl_a_primitive();
   test_user_code_can_impl_structs();
