@@ -1,1 +1,1 @@
-[line 1] Error at 'f64': You can't write an impl for a primitive type in user code.
+[line 1] Error at 'Display': Only the standard library can implement 'Display' for 'f64'.

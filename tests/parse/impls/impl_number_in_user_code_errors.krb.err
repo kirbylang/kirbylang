@@ -1,1 +1,0 @@
-[line 1] Error at 'f64': You can't write an impl for a primitive type in user code.

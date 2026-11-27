@@ -1,1 +1,1 @@
-[line 1] Error at 'bool': You can't write an impl for a primitive type in user code.
+[line 1] Error at 'bool': Only the standard library can add methods to 'bool'.

@@ -234,10 +234,9 @@ impl string {
 }
 ```
 
-`"abc".len()` calls it. Only the standard library can write these blocks, and
-the parser rejects them in a user file with `You can't write an impl for a
-primitive type in user code.`. They
-work for `string`, `bool`, `unit` and every number kind (`i64`, `u8`, `f64` and
+`"abc".len()` calls it. Only the standard library can write these blocks. In a
+user file they are the error `Only the standard library can add methods to
+'string'.`. They work for `string`, `bool`, `unit` and every number kind (`i64`, `u8`, `f64` and
 the rest), with methods that take `self`. Lists and arrays have them too, see
 [Methods On Lists And Arrays](#methods-on-lists-and-arrays). A method belongs to its own type, so a method of `f64` can't be called
 on an `i64`. A method has to be called, so `let f = "abc".len;` is an error. A
@@ -263,7 +262,7 @@ Inside the block, `Self` is the primitive type, so `other: Self` is a `u8`
 in `impl u8`. A primitive has no fields or static methods, so `Self { }`
 and `Self.name()` are errors.
 
-The standard library can also implement a trait for these types:
+These types can also implement traits:
 
 ```
 impl Display for string {
@@ -286,6 +285,27 @@ The standard library implements these traits:
 | `string`                      | `Display`, `Eq`, `Default`, `Add`                                    |
 | `bool`                        | `Display`, `Eq`, `Default`                                           |
 | `unit`                        | `Display` (`nil`), `Eq`, `Ord`, `Default`                            |
+
+Only the standard library can implement these, so `impl Display for i64` in a
+user file is the error `Only the standard library can implement 'Display' for
+'i64'.`. A program can implement the traits it declares itself:
+
+```
+trait Describe {
+    fun describe(self): string;
+}
+
+impl Describe for i64 {
+    fun describe(self): string = $"number {self}";
+}
+
+fun main(): unit {
+    let n: i64 = 7;
+    @println(n.describe()); // number 7
+}
+```
+
+An impl for a built-in type has no type parameters.
 
 `string` has no `Ord` because there is no `<` on strings yet, and `bool` has no `Ord`. `cmp` returns `-1`, `0` or `1`. On a float, `cmp` sorts `NaN` below every number and level with `NaN`. `<`, `<=`, `>` and `>=` written between two floats are `false` with `NaN`, but in a generic function they go through `cmp` and follow its order.
 Trait impls on a primitive can't be used with a bounded type parameter yet.
@@ -328,12 +348,12 @@ A list gets `len`, `isEmpty`, `push`, `pop`, `insert`, `remove`, `clear`,
 native function of the same name. The ones that return a list (`slice`,
 `concat`, `toList` of an array) return a list and not an array.
 
-The same limits as the other primitives apply. Only the standard library can
-write these blocks, and a user file gets `You can't write an impl for a
-primitive type in user code.`. The item has to be a type parameter, so
-`impl[T] [string]` is an error, while the `string` of `impl[string] [string]` is
-a parameter. There are no static methods, and a list or array
-can't fill a bounded type parameter yet. A trait impl, such as
+Only the standard library can write these blocks, even for a trait you declare,
+and a user file gets `You can't write an impl for a list or array in user
+code.`. The item has to be a type parameter, so `impl[T] [string]` is an error,
+while the `string` of `impl[string] [string]` is a parameter. There are no
+static methods, and a list or array can't fill a bounded type parameter yet. A
+trait impl, such as
 `impl[T] Display for [T]`, gives every list the trait with no condition on `T`,
 because these parameters can't have bounds.
 
@@ -564,7 +584,7 @@ built-in instructions, so plain number arithmetic costs nothing extra.
 #### `Self`
 
 `Self` is a special type/value in `impl` blocks. It is an alias for the type the
-block is for: a struct, or in the standard library a primitive, list or array. In
+block is for: a struct, a primitive, or in the standard library a list or array. In
 a trait's method signatures, `Self` is the type that implements the trait.
 
 ```
@@ -605,7 +625,7 @@ has the supertrait `Eq`.
 
 #### Limitations
 
-- Traits can be implemented for structs, and by the standard library for `string`, `bool`, `unit`, the number kinds, lists and arrays. Other code can't implement a trait for a primitive
+- Traits can be implemented for structs, `string`, `bool`, `unit` and the number kinds. Only the standard library can implement a builtin trait for a type that isn't a struct, and only it can implement traits for lists and arrays
 - A primitive can't yet be used where a type parameter has a trait bound, except a number with an operator trait
 - A generic struct can't implement a trait
 - If a struct's impl block implements a method of the same name as a trait, `value.method()` calls the struct's own method. Use `Trait.method(value)` to call the trait's version, see [Calling A Trait's Method By Name](#calling-a-traits-method-by-name).
@@ -735,10 +755,9 @@ trait method at runtime, which for a number is a built-in method (`add`, `sub`,
 
 - The trait has to exist, and a struct name isn't a trait:
   `Unknown trait 'Nope'.` A trait can be declared after the function that uses it.
-- A primitive can't fill a bounded parameter yet, even though the standard
-  library implements traits for `string`, `bool` and every number kind
-  (`string implements Display, but a primitive can't be used with a bound
-  yet`). Numbers can fill a parameter bounded by an operator trait only.
+- A primitive can't fill a bounded parameter yet, even though `string`, `bool`
+  and the number kinds implement traits (`string implements Display, but a
+  primitive can't be used with a bound yet`). Numbers can fill a parameter bounded by an operator trait only.
 - A static trait method can't be called through a bound. `T.default()` is an
   error: `Can't call a static method on type parameter 'T'.` This needs a
   separate copy of the function for each type, which is not implemented.

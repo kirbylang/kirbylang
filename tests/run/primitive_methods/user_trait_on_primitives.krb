@@ -1,0 +1,73 @@
+trait Describe {
+    fun describe(self): string;
+    fun kind(): string;
+}
+
+trait Squarable {
+    fun squared(self): Self;
+}
+
+// A super trait the standard library implements
+trait Shown: Display {
+    fun shown(self): string;
+}
+
+// Called before the impls are written
+fun main(): unit {
+    @println(7.describe());
+    @println("hi".describe());
+    @println(true.describe());
+    @println(().describe());
+
+    @println(i64.kind());
+    @println(string.kind());
+    @println(Text.kind());
+
+    let three: f64 = 3;
+    @println(three.squared());
+    @println(Squarable.squared(three));
+    @println(Describe.describe(7));
+    @println(8.shown());
+
+    // The type's own method wins over the trait's
+    @println(Shout.len("four"));
+    @println("four".len());
+}
+
+type Text = string;
+
+trait Shout {
+    fun len(self): string;
+}
+
+impl Shout for string {
+    fun len(self): string = "FOUR";
+}
+
+impl Describe for i64 {
+    fun describe(self): string = $"number {self}";
+    fun kind(): string = "i64";
+}
+
+impl Describe for string {
+    fun describe(self): string = "text " + self;
+    fun kind(): string = "string";
+}
+
+impl Describe for bool {
+    fun describe(self): string = if (self) "yes" else "no";
+    fun kind(): string = "bool";
+}
+
+impl Describe for unit {
+    fun describe(self): string = "nothing";
+    fun kind(): string = "unit";
+}
+
+impl Squarable for f64 {
+    fun squared(self): Self = self * self;
+}
+
+impl Shown for i64 {
+    fun shown(self): string = "<" + self.toString() + ">";
+}

@@ -1,9 +1,0 @@
-trait Flip {
-    fun flip(self): bool;
-}
-
-impl Flip for bool {
-    fun flip(self): bool = !self;
-}
-
-fun main(): unit {}

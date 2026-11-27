@@ -1,9 +1,0 @@
-trait Shout {
-    fun shout(self): string;
-}
-
-impl Shout for string {
-    fun shout(self): string = self;
-}
-
-fun main(): unit {}

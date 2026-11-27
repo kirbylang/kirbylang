@@ -50,16 +50,6 @@ static bool checkStdlibParsedUnitAsUser(const char *source) {
   return checkUnitParsedAs(source, true, false);
 }
 
-static bool userParseFails(const char *source) {
-  int count = 0;
-  bool hadParseError = false;
-  int endLine = 0;
-  AstNode **ast = parse(source, &count, &hadParseError, &endLine);
-  astFreeAll();
-  free(ast);
-  return hadParseError;
-}
-
 static bool traitIsBuiltin(const char *name) {
   Type *trait =
       typchkTypeEnvLookupTrait(typchkSessionEnv(), tokenFromCString(name));
@@ -156,11 +146,8 @@ static void test_only_the_stdlib_adds_methods_to_primitives(void) {
   // The method outlives the unit that declared it
   assert(checkUnit("@println(\"ab\".twice());"));
 
-  // The parser refuses it for user code, and so does the checker
+  // User code can't
   typchkResetError();
-  assert(userParseFails("impl string {\n"
-                        "  pub fun thrice(self): i64 = 3;\n"
-                        "}"));
   assert(!checkStdlibParsedUnitAsUser("impl string {\n"
                                       "  pub fun thrice(self): i64 = 3;\n"
                                       "}"));
@@ -185,9 +172,6 @@ static void test_only_the_stdlib_adds_methods_to_primitives(void) {
                          "}"));
 
   typchkResetError();
-  assert(userParseFails("impl unit {\n"
-                        "  pub fun nothing(self): unit {}\n"
-                        "}"));
   assert(!checkStdlibParsedUnitAsUser("impl unit {\n"
                                       "  pub fun nothing(self): unit {}\n"
                                       "}"));

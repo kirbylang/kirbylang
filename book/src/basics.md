@@ -355,8 +355,9 @@ fun main(): unit {
 }
 ```
 
-These methods come from the standard library. You can't add your own to a
-primitive type: `impl i64 { ... }` is an error.
+These methods come from the standard library. A plain `impl i64 { ... }` block
+is an error, but you can give a primitive type the methods of a
+[trait you declare](#traits-on-primitive-types).
 
 ### Arrays
 
@@ -951,6 +952,34 @@ fun main(): unit {
     @println(Display.toString(p)); // trait
 }
 ```
+
+#### Traits On Primitive Types
+
+A trait you declare can be implemented for `string`, `bool`, `unit` and every
+number type.
+
+```kirby
+trait Describe {
+    fun describe(self): string;
+}
+
+impl Describe for i64 {
+    fun describe(self): string = $"number {self}";
+}
+
+impl Describe for string {
+    fun describe(self): string = "text " + self;
+}
+
+fun main(): unit {
+    @println(7.describe()); // number 7
+    @println("hi".describe()); // text hi
+}
+```
+
+The builtin traits below are already implemented for these types by the standard
+library, and you can't implement them yourself. Lists and arrays can't implement
+traits.
 
 ### Builtin Traits
 

@@ -1,1 +1,1 @@
-[line 1] Error at '[': You can't write an impl for a primitive type in user code.
+[line 1] Error at '[': You can't write an impl for a list or array in user code.

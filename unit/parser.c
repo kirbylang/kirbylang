@@ -147,19 +147,19 @@ static void expectStdlibError(const char *source, const char *message) {
   freeResult(&result);
 }
 
-static const char *primitiveImplMessage =
-    "You can't write an impl for a primitive type in user code.";
+static const char *listImplMessage =
+    "You can't write an impl for a list or array in user code.";
 
-// The only error a user gets for a primitive impl, however the rest of the
+// The only error a user gets for a list or array impl, however the rest of the
 // block reads
-static void expectUserPrimitiveError(const char *source) {
+static void expectUserListError(const char *source) {
   ParseResult result = parseText(source, false);
   assert(result.hadError);
 
-  if (strstr(result.errors, primitiveImplMessage) == NULL)
-    fprintf(stderr, "Wanted the primitive error in:\n%s\n", result.errors);
+  if (strstr(result.errors, listImplMessage) == NULL)
+    fprintf(stderr, "Wanted the list impl error in:\n%s\n", result.errors);
 
-  assert(strstr(result.errors, primitiveImplMessage) != NULL);
+  assert(strstr(result.errors, listImplMessage) != NULL);
   freeResult(&result);
 }
 
@@ -255,28 +255,36 @@ static void test_a_native_declaration_has_to_be_well_formed(void) {
                     "'native' declarations can only appear at the top level.");
 }
 
-static void test_user_code_can_not_impl_a_primitive(void) {
+static void test_user_code_can_impl_a_primitive(void) {
   int count = (int)(sizeof(primitiveNames) / sizeof(primitiveNames[0]));
   char source[256];
 
   for (int i = 0; i < count; i++) {
     snprintf(source, sizeof(source), "impl %s { pub fun a(self): %s = self; }",
              primitiveNames[i], primitiveNames[i]);
-    expectUserPrimitiveError(source);
+    ParseResult plain = parseText(source, false);
+    assert(!plain.hadError);
+    freeResult(&plain);
 
     snprintf(source, sizeof(source),
-             "impl Display for %s { fun toString(self): string = \"\"; }",
+             "impl Label for %s { fun label(self): string = \"\"; }",
              primitiveNames[i]);
-    expectUserPrimitiveError(source);
+    ParseResult trait = parseText(source, false);
+    assert(!trait.hadError);
+    freeResult(&trait);
 
-    // The standard library can
-    snprintf(source, sizeof(source), "impl %s { pub fun a(self): %s = self; }",
-             primitiveNames[i], primitiveNames[i]);
-    ParseResult result = parseText(source, true);
-    assert(!result.hadError);
-    freeResult(&result);
+    snprintf(source, sizeof(source), "impl[T] Label for %s { }",
+             primitiveNames[i]);
+    ParseResult generic = parseText(source, false);
+    assert(generic.hadError);
+    assert(strstr(generic.errors,
+                  "An impl for a built-in type has no type parameters.") !=
+           NULL);
+    freeResult(&generic);
   }
+}
 
+static void test_user_code_can_not_impl_a_list_or_array(void) {
   const char *others[] = {
       "impl [T] { }",
       "impl [T; N] { }",
@@ -295,7 +303,7 @@ static void test_user_code_can_not_impl_a_primitive(void) {
   };
 
   for (size_t i = 0; i < sizeof(others) / sizeof(others[0]); i++) {
-    expectUserPrimitiveError(others[i]);
+    expectUserListError(others[i]);
 
     ParseResult result = parseText(others[i], false);
     assert(strstr(result.errors, "Expect") == NULL);
@@ -335,7 +343,8 @@ int main(void) {
   test_a_list_or_array_impl_has_to_be_well_formed();
   test_self_can_not_name_a_type_parameter();
   test_functions_can_declare_const_parameters();
-  test_user_code_can_not_impl_a_primitive();
+  test_user_code_can_impl_a_primitive();
+  test_user_code_can_not_impl_a_list_or_array();
   test_user_code_can_impl_structs();
 
   assert_ast("../tests/run/empty.krb", "(fun main () : unit (block))\n");

@@ -442,17 +442,39 @@ static void test_a_trait_method_belongs_to_its_kind(void) {
   end();
 }
 
-static void test_only_the_stdlib_implements_traits_for_primitives(void) {
+static void test_user_code_implements_its_own_traits_for_primitives(void) {
   begin();
-  expectOk(tagTrait, true);
+  expectOk(tagTrait, false);
 
   for (int i = 0; i < kindCount; i++) {
-    char *program = format("impl Tag for %1$s {\n"
-                           "  fun tag(self): string = \"x\";\n"
-                           "  fun make(): Self = %2$s;\n"
+    char *program = formatMany("impl Tag for %1$s {\n"
+                               "  fun tag(self): string = \"%1$s\";\n"
+                               "  fun make(): Self = %2$s;\n"
+                               "}\n"
+                               "if (true) {\n"
+                               "  let v: %1$s = %1$s.make();\n"
+                               "  @assert(v.tag() == \"%1$s\", \"tag\");\n"
+                               "}",
+                               kinds[i].type, kinds[i].value, "", "");
+    expectOk(program, false);
+    free(program);
+  }
+
+  end();
+}
+
+static void test_only_the_stdlib_implements_builtin_traits(void) {
+  beginWithStdlib();
+
+  for (int i = 0; i < kindCount; i++) {
+    char *program = format("impl Display for %1$s {\n"
+                           "  fun toString(self): string = \"x\";\n"
                            "}",
                            kinds[i].type, kinds[i].value);
-    expectError(program, false);
+    char *errors = errorsOf(program, false);
+    assert(strstr(errors,
+                  "Only the standard library can implement 'Display'") != NULL);
+    free(errors);
     free(program);
   }
 
@@ -1023,7 +1045,8 @@ int main(void) {
   test_two_traits_can_share_a_method_name();
   test_a_trait_method_must_be_called();
   test_a_trait_method_belongs_to_its_kind();
-  test_only_the_stdlib_implements_traits_for_primitives();
+  test_user_code_implements_its_own_traits_for_primitives();
+  test_only_the_stdlib_implements_builtin_traits();
   test_a_primitive_can_not_fill_a_bound_yet();
   test_lists_can_have_methods_and_traits();
   test_a_list_impl_is_checked();
