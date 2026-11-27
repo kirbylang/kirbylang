@@ -21,6 +21,7 @@
 
 ## Next
 
+- `krb --help` lists the `docs` command, and no longer shows `krb docs 'search terms'`, which `krb docs` ignored
 - **Breaking**: a type parameter now hides any type of the same name inside its declaration. A struct or alias was already hidden, and now a type such as `string` or `i64` is too, as in `fun id[string](x: string): string`. A parameter given type arguments, such as `Box[i64]` where `Box` is a parameter, is an error even when a struct or alias has that name
 - **Breaking**: `Self` can't be the name of a type parameter. It was accepted and ignored, and is reported as `'Self' can't be the name of a type parameter.`
 - **Breaking**: `const` is a reserved word. In the standard library it declares an array length as a parameter, as in `native fun @arrConcat[T, const N, const M](a: [T; N], b: [T; M]): [T];`, in place of the fixed names `N` and `M`

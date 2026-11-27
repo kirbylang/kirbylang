@@ -7,7 +7,7 @@ Usage: krb [-h] [-v] <command> [args]
 
 Commands:
 
-  init                   Initialize a new kirby project in the current directory
+  init                   Initialize a new Kirby project in the current directory
   run [path] [args...]   Run a file. Without a path, runs the "bin" file
                          from kirby.project.toml. Extra args are passed
                          to the script
@@ -27,6 +27,7 @@ Commands:
                          --runtime says otherwise
   lex <path>             Print the tokens of a file
   parse <path>           Print the AST of a file
+  docs                   Open the documentation in a browser
 
 Examples:
 
@@ -38,7 +39,6 @@ krb run                           # runs the project's "bin" file
 krb run -- arg1 arg2              # passes args to the project's "bin"
 krb example hello                 # runs examples/hello.krb
 krb docs                          # Open the Kirby docs
-krb docs 'search terms'           # Open the Kirby docs with a search term
 krb config                        # print kirby.project.toml
 krb config bin                    # print 'bin' kirby.project.toml
 krb config examples               # print 'examples' kirby.project.toml
@@ -52,7 +52,6 @@ krb exec '@println("Hello World");'
 ## Docs
 
 `krb docs` opens <https://kirbylang.github.io/kirbylang/> in the default browser.
-It ignores any arguments, including the search terms the usage text mentions.
 
 ## Script Arguments
 

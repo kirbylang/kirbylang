@@ -53,7 +53,7 @@ const char *help_message =
     "\n"
     "Commands:\n"
     "\n"
-    "  init                   Initialize a new kirby project in the current "
+    "  init                   Initialize a new Kirby project in the current "
     "directory\n"
     "  run [path] [args...]   Run a file. Without a path, runs the \"bin\" "
     "file\n"
@@ -75,6 +75,7 @@ const char *help_message =
     "                         --runtime says otherwise\n"
     "  lex <path>             Print the tokens of a file\n"
     "  parse <path>           Print the AST of a file\n"
+    "  docs                   Open the documentation in a browser\n"
     "\n"
     "Examples:\n"
     "\n"
@@ -86,8 +87,6 @@ const char *help_message =
     "krb run -- arg1 arg2              # passes args to the project's \"bin\"\n"
     "krb example hello                 # runs examples/hello.krb\n"
     "krb docs                          # Open the Kirby docs\n"
-    "krb docs 'search terms'           # Open the Kirby docs with a search "
-    "term\n"
     "krb config                        # print kirby.project.toml\n"
     "krb config bin                    # print 'bin' kirby.project.toml\n"
     "krb config examples               # print 'examples' kirby.project.toml\n"
@@ -246,8 +245,7 @@ static int cmdRun(int argc, char *argv[]) {
   return 0;
 }
 
-/* krb run [path] [args...]
- * With no path, or "--" in place of the path, the project's "bin" file runs. */
+/* krb docs */
 static int cmdDocs(int argc, char *argv[]) {
   char *url = "https://kirbylang.github.io/kirbylang/";
 
