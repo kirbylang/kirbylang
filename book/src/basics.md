@@ -718,8 +718,7 @@ Every field needs a type. Fields can't have default values.
 
 #### Creating A Struct
 
-A struct literal names the struct and gives every field a value. Code outside the
-struct's `impl` can only set and read its public fields.
+To create a struct, write its name, then give every field a value inside `{ }`.
 
 ```krb
 struct Size {
@@ -736,7 +735,40 @@ fun main(): unit {
 }
 ```
 
-A private field is set by a static method of the struct.
+#### Private Fields
+
+Fields without `pub` are private. Only the code in the struct's
+[`impl` block](#methods) can use them, including to give them their first value.
+This means other code can't create the struct by writing out its fields. The
+struct needs to provide a function that does it.
+
+```krb
+struct Account {
+    pub owner: string;
+    balance: i64;
+}
+
+impl Account {
+    pub fun open(owner: string): Self {
+        Self { owner: owner, balance: 0 }
+    }
+
+    pub fun get_balance(self): i64 {
+        self.balance
+    }
+}
+
+fun main(): unit {
+    let account = Account.open("Sam");
+
+    @println(account.owner); // Sam
+    @println(account.get_balance()); // 0
+}
+```
+
+`open` is inside `impl Account`, so it can set `balance`. Inside that block,
+`Self` means `Account`. You call `open` on the struct's name,
+`Account.open("Sam")`, because you don't have an account yet.
 
 #### Methods
 
