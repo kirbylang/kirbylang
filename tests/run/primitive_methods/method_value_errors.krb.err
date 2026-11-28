@@ -1,0 +1,7 @@
+[line 18] Error at 'n': Method 'n' is in both A and B. Call it as 'A.n(value)'.
+[line 20] Error: Expected fun () => string, got fun () => i64.
+[line 24] Error: Expected i64, got string.
+[line 25] Error at ')': Expected 1 argument(s), got 0.
+[line 27] Error at 'nope': Can't access '.nope' on a i64.
+[line 28] Error at 'max': 'max' is an instance method. Call it on a value of 'i64'.
+[line 29] Error at 'default': 'default' is a static method. Access it on 'i64' instead of a value.

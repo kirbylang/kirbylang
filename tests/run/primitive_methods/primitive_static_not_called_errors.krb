@@ -1,3 +1,0 @@
-fun main(): unit {
-  let f = u8.default;
-}

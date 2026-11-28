@@ -196,11 +196,36 @@ static bool call(ObjClosure *closure, int argCount) {
   return true;
 }
 
+// Moves the arguments up a slot and puts the receiver before them. The callee's
+// slot holds the method itself, as in a plain call of it.
+static bool callWithReceiverArgument(ObjBoundMethod *bound, int argCount) {
+  Value receiver = bound->receiver;
+  ObjClosure *method = bound->method;
+  Value *args = vm.stackTop - argCount;
+
+  // The extra slot is only sure to exist while another frame fits
+  if (vm.frameCount == FRAMES_MAX) {
+    runtimeError(&vm, "Stack overflow.");
+    return false;
+  }
+
+  memmove(args + 1, args, (size_t)argCount * sizeof(Value));
+  args[0] = receiver;
+  args[-1] = OBJ_VAL(method);
+  vm.stackTop++;
+
+  return call(method, argCount + 1);
+}
+
 static bool callValue(Value callee, int argCount) {
   if (IS_OBJ(callee)) {
     switch (OBJ_TYPE(callee)) {
     case OBJ_BOUND_METHOD: {
       ObjBoundMethod *bound = AS_BOUND_METHOD(callee);
+
+      if (bound->receiverIsArgument)
+        return callWithReceiverArgument(bound, argCount);
+
       vm.stackTop[-argCount - 1] = bound->receiver;
       return call(bound->method, argCount);
     }
@@ -287,6 +312,37 @@ static bool invokeStatic(ObjStruct *struct_, ObjString *name, int argCount) {
   }
 
   return call(AS_CLOSURE(method), argCount);
+}
+
+// Replaces the value and the method on top of the stack with the two bound
+// together
+static void bindArgumentMethod(void) {
+  ObjBoundMethod *bound =
+      newBoundMethod(vm.gc, peekStack(1), AS_CLOSURE(peekStack(0)));
+  bound->receiverIsArgument = true;
+  popFromStack();
+  popFromStack();
+  pushOnStack(OBJ_VAL(bound));
+}
+
+// Binds a number on top of the stack to its method for an operator trait, such
+// as `Add.add`, which the standard library declares as `u8.Add.add`
+static bool bindNumberMethod(ObjString *name) {
+  const char *kind = numberKindInfo(peekStack(0).as.number.kind)->name;
+  char global[64];
+  int length = snprintf(global, sizeof(global), "%s.%s", kind, name->chars);
+
+  Value method;
+
+  if (length >= (int)sizeof(global) ||
+      !tableGet(&vm.globals, copyString(vm.gc, global, length), &method)) {
+    runtimeError(&vm, "Undefined property '%s'.", name->chars);
+    return false;
+  }
+
+  pushOnStack(method);
+  bindArgumentMethod();
+  return true;
 }
 
 #define NUMBERS_OF_SAME_TYPE "Operands must be two numbers of the same type."
@@ -1085,6 +1141,13 @@ static InterpretResult run(void) {
         break;
       }
 
+      if (IS_NUMBER(peekStack(0))) {
+        if (!bindNumberMethod(READ_STRING()))
+          return INTERPRET_RUNTIME_ERROR;
+
+        break;
+      }
+
       if (!IS_INSTANCE(peekStack(0))) {
         runtimeError(&vm, "Only instances have properties.");
         return INTERPRET_RUNTIME_ERROR;
@@ -1219,6 +1282,10 @@ static InterpretResult run(void) {
         return INTERPRET_RUNTIME_ERROR;
       }
 
+      break;
+    }
+    case OP_BIND_METHOD: {
+      bindArgumentMethod();
       break;
     }
     case OP_INVOKE: {

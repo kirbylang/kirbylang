@@ -60,6 +60,7 @@ static const OpInfo opInfos[OP_COUNT] = {
     // the operand's place on the stack.
     [OP_CAST] = {true, 1, 0, -1, 0},
     [OP_ARRAY] = {true, 1, 1, 0, -1},
+    [OP_BIND_METHOD] = {true, 0, -1, -1, 0},
 };
 
 const OpInfo *opInfo(OpCode op) {

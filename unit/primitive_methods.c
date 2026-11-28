@@ -414,7 +414,7 @@ static void test_two_traits_can_share_a_method_name(void) {
   end();
 }
 
-static void test_a_trait_method_must_be_called(void) {
+static void test_a_trait_method_can_be_a_value(void) {
   begin();
   expectOk(tagTrait, true);
   expectOk("impl Tag for u8 {\n"
@@ -423,7 +423,14 @@ static void test_a_trait_method_must_be_called(void) {
            "}",
            true);
 
-  expectError("let v: u8 = 1;\nlet f = v.tag;", false);
+  expectOk("if (true) {\n"
+           "  let v: u8 = 1;\n"
+           "  let tag = v.tag;\n"
+           "  let make = u8.make;\n"
+           "  @assert(tag() == \"u8\", \"tag\");\n"
+           "  @assert(make() == v, \"make\");\n"
+           "}",
+           false);
 
   end();
 }
@@ -584,9 +591,9 @@ static void test_lists_can_have_methods_and_traits(void) {
               "let s: string = xs.first();",
               false);
 
-  // A private method is private to the impl, and a method is called
+  // A private method is private to the impl, called or not
   expectError("let xs: [i64] = [1];\nxs.hidden();", false);
-  expectError("let xs: [i64] = [1];\nlet f = xs.first;", false);
+  expectError("let xs: [i64] = [1];\nif (true) { let f = xs.hidden; }", false);
   expectError("let xs: [i64] = [1];\nxs.missing();", false);
 
   end();
@@ -1043,7 +1050,7 @@ int main(void) {
   test_an_inherent_method_shadows_a_trait_method();
   test_a_trait_names_its_method_on_every_kind();
   test_two_traits_can_share_a_method_name();
-  test_a_trait_method_must_be_called();
+  test_a_trait_method_can_be_a_value();
   test_a_trait_method_belongs_to_its_kind();
   test_user_code_implements_its_own_traits_for_primitives();
   test_only_the_stdlib_implements_builtin_traits();

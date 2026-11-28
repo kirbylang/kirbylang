@@ -30,6 +30,7 @@ ObjBoundMethod *newBoundMethod(GC *gc, Value receiver, ObjClosure *method) {
   ObjBoundMethod *bound = ALLOCATE_OBJ(gc, ObjBoundMethod, OBJ_BOUND_METHOD);
   bound->receiver = receiver;
   bound->method = method;
+  bound->receiverIsArgument = false;
   return bound;
 }
 

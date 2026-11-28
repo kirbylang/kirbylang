@@ -1,3 +1,0 @@
-fun main(): unit {
-    let f = (1.5).floor;
-}

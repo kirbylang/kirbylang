@@ -1,0 +1,118 @@
+== <script> ==
+0000   19 OP_CLOSURE          1 <fn nameOf>
+0002    | OP_DEFINE_GLOBAL    0 'nameOf'
+0004   24 OP_CLOSURE          3 <fn sum>
+0006    | OP_DEFINE_GLOBAL    2 'sum'
+0008   29 OP_CLOSURE          5 <fn negate>
+0010    | OP_DEFINE_GLOBAL    4 'negate'
+0012   34 OP_CLOSURE          7 <fn same>
+0014    | OP_DEFINE_GLOBAL    6 'same'
+0016   39 OP_CLOSURE          9 <fn order>
+0018    | OP_DEFINE_GLOBAL    8 'order'
+0020   53 OP_CLOSURE         11 <fn main>
+0022    | OP_DEFINE_GLOBAL   10 'main'
+0024    6 OP_STRUCT          12 'Point'
+0026    | OP_DEFINE_GLOBAL   12 'Point'
+0028    | OP_GET_GLOBAL      12 'Point'
+0030    | OP_POP
+0031   12 OP_GET_GLOBAL      12 'Point'
+0033   13 OP_CLOSURE         14 <fn name>
+0035    | OP_TRAIT_METHOD    13 'name'   15 'Name.name'
+0038   14 OP_POP
+0039    8 OP_GET_GLOBAL      12 'Point'
+0041    9 OP_CLOSURE         16 <fn name>
+0043    | OP_METHOD          13 'name'
+0045   10 OP_POP
+0046   54 OP_NIL
+0047    | OP_RETURN
+== nameOf ==
+0000   17 OP_GET_LOCAL        1
+0002    | OP_GET_PROPERTY     0 'Name.name'
+0004   18 OP_GET_LOCAL        2
+0006    | OP_CALL             0
+0008    | OP_RETURN
+== sum ==
+0000   22 OP_GET_LOCAL        1
+0002    | OP_GET_PROPERTY     0 'Add.add'
+0004   23 OP_GET_LOCAL        3
+0006    | OP_GET_LOCAL        2
+0008    | OP_CALL             1
+0010    | OP_RETURN
+== negate ==
+0000   27 OP_GET_LOCAL        1
+0002    | OP_GET_PROPERTY     0 'Neg.neg'
+0004   28 OP_GET_LOCAL        2
+0006    | OP_CALL             0
+0008    | OP_RETURN
+== same ==
+0000   32 OP_GET_LOCAL        1
+0002    | OP_GET_PROPERTY     0 'Eq.equals'
+0004   33 OP_GET_LOCAL        3
+0006    | OP_GET_LOCAL        2
+0008    | OP_CALL             1
+0010    | OP_RETURN
+== order ==
+0000   37 OP_GET_LOCAL        1
+0002    | OP_GET_PROPERTY     0 'Ord.cmp'
+0004   38 OP_GET_LOCAL        3
+0006    | OP_GET_LOCAL        2
+0008    | OP_CALL             1
+0010    | OP_RETURN
+== main ==
+0000   42 OP_GET_GLOBAL       0 'Point'
+0002    | OP_STRUCT_INIT      0
+0004   43 OP_GET_GLOBAL       1 '@println'
+0006    | OP_GET_GLOBAL       2 'nameOf'
+0008    | OP_GET_LOCAL        1
+0010    | OP_CALL             1
+0012    | OP_CALL             1
+0014    | OP_POP
+0015   44 OP_GET_GLOBAL       1 '@println'
+0017    | OP_GET_LOCAL        1
+0019    | OP_INVOKE        (0 args)    3 'name'
+0022    | OP_CALL             1
+0024    | OP_POP
+0025   46 OP_CONSTANT         4 '2'
+0027   47 OP_CONSTANT         5 '3'
+0029   48 OP_GET_GLOBAL       1 '@println'
+0031    | OP_GET_GLOBAL       6 'sum'
+0033    | OP_GET_LOCAL        2
+0035    | OP_GET_LOCAL        3
+0037    | OP_CALL             2
+0039    | OP_CALL             1
+0041    | OP_POP
+0042   49 OP_GET_GLOBAL       1 '@println'
+0044    | OP_GET_GLOBAL       6 'sum'
+0046    | OP_CONSTANT         7 '1.5'
+0048    | OP_CONSTANT         8 '2'
+0050    | OP_CALL             2
+0052    | OP_CALL             1
+0054    | OP_POP
+0055   50 OP_GET_GLOBAL       1 '@println'
+0057    | OP_GET_GLOBAL       9 'negate'
+0059    | OP_CONSTANT        10 '4'
+0061    | OP_CALL             1
+0063    | OP_CALL             1
+0065    | OP_POP
+0066   51 OP_GET_GLOBAL       1 '@println'
+0068    | OP_GET_GLOBAL      11 'same'
+0070    | OP_GET_LOCAL        2
+0072    | OP_GET_LOCAL        3
+0074    | OP_CALL             2
+0076    | OP_CALL             1
+0078    | OP_POP
+0079   52 OP_GET_GLOBAL       1 '@println'
+0081    | OP_GET_GLOBAL      12 'order'
+0083    | OP_GET_LOCAL        2
+0085    | OP_GET_LOCAL        3
+0087    | OP_CALL             2
+0089    | OP_CALL             1
+0091    | OP_POP
+0092   53 OP_NIL
+0093    | OP_RETURN
+== name ==
+0000   13 OP_CONSTANT         0 'trait'
+0002    | OP_RETURN
+== name ==
+0000    9 OP_CONSTANT         0 'own'
+0002    | OP_RETURN

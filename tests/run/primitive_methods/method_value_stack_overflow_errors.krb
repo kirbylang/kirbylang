@@ -1,0 +1,14 @@
+trait Forever {
+    fun again(self): i64;
+}
+
+impl Forever for i64 {
+    fun again(self): i64 {
+        let again = self.again;
+        return again();
+    }
+}
+
+fun main(): unit {
+    @println(1.again());
+}

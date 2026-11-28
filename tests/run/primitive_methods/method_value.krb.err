@@ -1,0 +1,192 @@
+== <script> ==
+0000    2 OP_CLOSURE          1 <fn apply>
+0002    | OP_DEFINE_GLOBAL    0 'apply'
+0004   21 OP_CLOSURE          3 <fn counted>
+0006    | OP_DEFINE_GLOBAL    2 'counted'
+0008   23 OP_CLOSURE          5 <fn adder>
+0010    | OP_DEFINE_GLOBAL    4 'adder'
+0012   64 OP_CLOSURE          7 <fn main>
+0014    | OP_DEFINE_GLOBAL    6 'main'
+0016    4 OP_STRUCT           8 'Holder'
+0018    | OP_DEFINE_GLOBAL    8 'Holder'
+0020    | OP_GET_GLOBAL       8 'Holder'
+0022    5 OP_NIL
+0023    | OP_FIELD            9 'call' public mutable
+0027    6 OP_POP
+0028   15 OP_CLOSURE         10 <fn installMethods>
+0030    | OP_CALL             0
+0032    | OP_POP
+0033   65 OP_NIL
+0034    | OP_RETURN
+== apply ==
+0000    2 OP_GET_LOCAL        1
+0002    | OP_GET_LOCAL        2
+0004    | OP_CALL             1
+0006    | OP_RETURN
+== counted ==
+0000   19 OP_GET_GLOBAL       0 '@println'
+0002    | OP_CONSTANT         1 'taken from '
+0004    | OP_GET_LOCAL        1
+0006    | OP_ADD
+0007    | OP_CALL             1
+0009    | OP_POP
+0010   20 OP_GET_LOCAL        1
+0012    | OP_RETURN
+== adder ==
+0000   23 OP_GET_LOCAL        1
+0002    | OP_GET_GLOBAL       0 'i64.Add.add'
+0004    | OP_BIND_METHOD
+0005    | OP_RETURN
+== main ==
+0000   26 OP_CONSTANT         0 'ab'
+0002   27 OP_GET_LOCAL        1
+0004    | OP_GET_GLOBAL       1 'string.len'
+0006    | OP_BIND_METHOD
+0007   28 OP_CONSTANT         2 'abcd'
+0009    | OP_SET_LOCAL        1
+0011    | OP_POP
+0012   29 OP_GET_GLOBAL       3 '@println'
+0014    | OP_GET_LOCAL        2
+0016    | OP_CALL             0
+0018    | OP_CALL             1
+0020    | OP_POP
+0021   30 OP_GET_GLOBAL       3 '@println'
+0023    | OP_GET_LOCAL        2
+0025    | OP_CALL             1
+0027    | OP_POP
+0028   31 OP_GET_GLOBAL       3 '@println'
+0030    | OP_GET_GLOBAL       4 '@typeof'
+0032    | OP_GET_LOCAL        2
+0034    | OP_CALL             1
+0036    | OP_CALL             1
+0038    | OP_POP
+0039   34 OP_GET_GLOBAL       5 'counted'
+0041    | OP_CONSTANT         6 'xyz'
+0043    | OP_CALL             1
+0045    | OP_GET_GLOBAL       1 'string.len'
+0047    | OP_BIND_METHOD
+0048   35 OP_GET_GLOBAL       3 '@println'
+0050    | OP_GET_LOCAL        3
+0052    | OP_CALL             0
+0054    | OP_GET_LOCAL        3
+0056    | OP_CALL             0
+0058    | OP_ADD
+0059    | OP_CALL             1
+0061    | OP_POP
+0062   37 OP_CONSTANT         7 '7'
+0064   38 OP_GET_GLOBAL       3 '@println'
+0066    | OP_GET_GLOBAL       8 'apply'
+0068    | OP_GET_LOCAL        4
+0070    | OP_GET_GLOBAL       9 'i64.max'
+0072    | OP_BIND_METHOD
+0073    | OP_CONSTANT        10 '3'
+0075    | OP_CALL             2
+0077    | OP_CALL             1
+0079    | OP_POP
+0080   39 OP_GET_GLOBAL       3 '@println'
+0082    | OP_GET_GLOBAL       8 'apply'
+0084    | OP_GET_GLOBAL      11 'adder'
+0086    | OP_CONSTANT        12 '10'
+0088    | OP_CALL             1
+0090    | OP_CONSTANT        13 '5'
+0092    | OP_CALL             2
+0094    | OP_CALL             1
+0096    | OP_POP
+0097   41 OP_GET_GLOBAL      14 'Holder'
+0099    | OP_CONSTANT        15 'call'
+0101    | OP_CONSTANT        16 'hello'
+0103    | OP_GET_GLOBAL       1 'string.len'
+0105    | OP_BIND_METHOD
+0106    | OP_STRUCT_INIT      1
+0108   42 OP_GET_GLOBAL       3 '@println'
+0110    | OP_GET_LOCAL        5
+0112    | OP_INVOKE        (0 args)   15 'call'
+0115    | OP_CALL             1
+0117    | OP_POP
+0118   44 OP_GET_LOCAL        4
+0120    | OP_GET_GLOBAL      17 'i64.Describe.describe'
+0122    | OP_BIND_METHOD
+0123   45 OP_GET_GLOBAL       3 '@println'
+0125    | OP_GET_LOCAL        6
+0127    | OP_CONSTANT        18 'number '
+0129    | OP_CALL             1
+0131    | OP_CALL             1
+0133    | OP_POP
+0134   47 OP_GET_GLOBAL      19 'i64.Describe.kind'
+0136   48 OP_GET_GLOBAL       3 '@println'
+0138    | OP_GET_LOCAL        7
+0140    | OP_CALL             0
+0142    | OP_CALL             1
+0144    | OP_POP
+0145   50 OP_GET_GLOBAL      20 'f64.Default.default'
+0147   51 OP_GET_GLOBAL       3 '@println'
+0149    | OP_GET_LOCAL        8
+0151    | OP_CALL             0
+0153    | OP_CALL             1
+0155    | OP_POP
+0156   53 OP_CONSTANT        21 '1'
+0158    | OP_CONSTANT        22 '2'
+0160    | OP_LIST             2
+0162   54 OP_GET_LOCAL        9
+0164    | OP_GET_GLOBAL      23 'list.push'
+0166    | OP_BIND_METHOD
+0167   55 OP_GET_LOCAL       10
+0169    | OP_CONSTANT        10 '3'
+0171    | OP_CALL             1
+0173    | OP_POP
+0174   56 OP_GET_GLOBAL       3 '@println'
+0176    | OP_GET_GLOBAL      24 'list.len'
+0178    | OP_GET_LOCAL        9
+0180    | OP_CALL             1
+0182    | OP_CALL             1
+0184    | OP_POP
+0185   57 OP_GET_GLOBAL       3 '@println'
+0187    | OP_GET_LOCAL        9
+0189    | OP_CONSTANT        22 '2'
+0191    | OP_GET_INDEX
+0192    | OP_CALL             1
+0194    | OP_POP
+0195   59 OP_CONSTANT        25 '8'
+0197    | OP_CONSTANT        26 '9'
+0199    | OP_ARRAY            2
+0201   60 OP_GET_LOCAL       11
+0203    | OP_GET_GLOBAL      27 'array.toList'
+0205    | OP_BIND_METHOD
+0206   61 OP_GET_GLOBAL       3 '@println'
+0208    | OP_GET_LOCAL       12
+0210    | OP_CALL             0
+0212    | OP_CONSTANT        21 '1'
+0214    | OP_GET_INDEX
+0215    | OP_CALL             1
+0217    | OP_POP
+0218   62 OP_GET_LOCAL       11
+0220    | OP_GET_GLOBAL      28 'array.concat'
+0222    | OP_BIND_METHOD
+0223   63 OP_GET_GLOBAL       3 '@println'
+0225    | OP_GET_GLOBAL      24 'list.len'
+0227    | OP_GET_LOCAL       13
+0229    | OP_CONSTANT        12 '10'
+0231    | OP_ARRAY            1
+0233    | OP_CALL             1
+0235    | OP_CALL             1
+0237    | OP_CALL             1
+0239    | OP_POP
+0240   64 OP_NIL
+0241    | OP_RETURN
+== installMethods ==
+0000   14 OP_CLOSURE          0 <fn describe>
+0002    | OP_DEFINE_GLOBAL    1 'i64.Describe.describe'
+0004   15 OP_CLOSURE          2 <fn kind>
+0006    | OP_DEFINE_GLOBAL    3 'i64.Describe.kind'
+0008    | OP_NIL
+0009    | OP_RETURN
+== describe ==
+0000   14 OP_GET_LOCAL        2
+0002    | OP_GET_GLOBAL       0 'i64.Display.toString'
+0004    | OP_GET_LOCAL        1
+0006    | OP_CALL             1
+0008    | OP_ADD
+0009    | OP_RETURN
+== kind ==
+0000   15 OP_CONSTANT         0 'i64'
+0002    | OP_RETURN

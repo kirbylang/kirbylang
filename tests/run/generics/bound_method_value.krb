@@ -1,0 +1,53 @@
+// A method taken from a value of a type parameter is the bound's version
+trait Name {
+    fun name(self): string;
+}
+
+struct Point {}
+
+impl Point {
+    pub fun name(self): string = "own";
+}
+
+impl Name for Point {
+    fun name(self): string = "trait";
+}
+
+fun nameOf[T: Name](x: T): string {
+    let name = x.name;
+    return name();
+}
+
+fun sum[T: Add](x: T, y: T): T {
+    let add = x.add;
+    return add(y);
+}
+
+fun negate[T: Neg](x: T): T {
+    let neg = x.neg;
+    return neg();
+}
+
+fun same[T: Eq](x: T, y: T): bool {
+    let equals = x.equals;
+    return equals(y);
+}
+
+fun order[T: Ord](x: T, y: T): i64 {
+    let cmp = x.cmp;
+    return cmp(y);
+}
+
+fun main(): unit {
+    let p = Point {};
+    @println(nameOf(p));
+    @println(p.name());
+
+    let two: u8 = 2;
+    let three: u8 = 3;
+    @println(sum(two, three));
+    @println(sum(1.5, 2));
+    @println(negate(4));
+    @println(same(two, three));
+    @println(order(two, three));
+}
