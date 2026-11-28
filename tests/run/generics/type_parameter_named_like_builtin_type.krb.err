@@ -1,0 +1,51 @@
+== <script> ==
+0000    3 OP_CLOSURE          1 <fn first>
+0002    | OP_DEFINE_GLOBAL    0 'first'
+0004   22 OP_CLOSURE          3 <fn main>
+0006    | OP_DEFINE_GLOBAL    2 'main'
+0008    6 OP_STRUCT           4 'Reading'
+0010    | OP_DEFINE_GLOBAL    4 'Reading'
+0012    | OP_GET_GLOBAL       4 'Reading'
+0014    7 OP_NIL
+0015    | OP_FIELD            5 'value' public mutable
+0019    8 OP_POP
+0020   23 OP_NIL
+0021    | OP_RETURN
+== first ==
+0000    3 OP_GET_LOCAL        1
+0002    | OP_CONSTANT         0 '0'
+0004    | OP_GET_INDEX
+0005    | OP_RETURN
+== main ==
+0000   11 OP_CONSTANT         0 '31'
+0002    | OP_CONSTANT         1 '45'
+0004    | OP_LIST             2
+0006   12 OP_GET_GLOBAL       2 '@println'
+0008    | OP_GET_GLOBAL       3 'first'
+0010    | OP_GET_LOCAL        1
+0012    | OP_CALL             1
+0014    | OP_CONSTANT         4 '1'
+0016    | OP_ADD
+0017    | OP_CALL             1
+0019    | OP_POP
+0020   14 OP_GET_GLOBAL       5 'Reading'
+0022    | OP_CONSTANT         6 'value'
+0024    | OP_CONSTANT         7 'offline'
+0026    | OP_STRUCT_INIT      1
+0028   15 OP_GET_GLOBAL       2 '@println'
+0030    | OP_GET_LOCAL        2
+0032    | OP_GET_PROPERTY     6 'value'
+0034    | OP_CALL             1
+0036    | OP_POP
+0037   18 OP_CONSTANT         8 'Lisbon'
+0039   19 OP_CONSTANT         9 '38.7'
+0041   20 OP_GET_GLOBAL       2 '@println'
+0043    | OP_GET_LOCAL        3
+0045    | OP_CALL             1
+0047    | OP_POP
+0048   21 OP_GET_GLOBAL       2 '@println'
+0050    | OP_GET_LOCAL        4
+0052    | OP_CALL             1
+0054    | OP_POP
+0055   22 OP_NIL
+0056    | OP_RETURN

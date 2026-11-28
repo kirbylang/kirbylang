@@ -1,0 +1,13 @@
+trait bool {
+    fun isEnabled(self): bool;
+}
+
+trait string {
+    fun format(self): string;
+}
+
+trait i64 {
+    fun toCents(self): i64;
+}
+
+fun main(): unit {}

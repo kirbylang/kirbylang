@@ -1,0 +1,2 @@
+[line 1] Error at 'string': 'string' is a built-in type and can't be the name of a trait.
+[line 10] Error at 'string': Unknown trait 'string'.

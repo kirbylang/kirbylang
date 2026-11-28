@@ -1,0 +1,14 @@
+trait string {
+    fun format(self): string;
+}
+
+struct Invoice {
+    pub var total: i64;
+}
+
+// The trait above was rejected, so there is no trait to implement
+impl string for Invoice {
+    fun format(self): string = self.total.toString();
+}
+
+fun main(): unit {}

@@ -5287,6 +5287,18 @@ static void checkImplMethodBodies(TypeEnv *env, AstNode *node) {
   typchkLeaveGenericParams(env, previousGenericCount);
 }
 
+// Reports a declaration that takes a built-in type's name. The caller doesn't
+// register it, so the name keeps meaning the built-in type.
+static bool typchkRejectBuiltinTypeName(Token *name, const char *kind) {
+  if (typchkPrimitiveTypeNamed(name) == NULL)
+    return false;
+
+  typchkErrorAtTokenFmt(
+      name, "'%.*s' is a built-in type and can't be the name of %s.",
+      name->length, name->start, kind);
+  return true;
+}
+
 // Checks one unit. The traits the standard library declares are builtin, so a
 // later unit can't declare one with the same name.
 static bool typchkCheckUnit(AstNode **program, int count, bool isStdlib) {
@@ -5306,14 +5318,8 @@ static bool typchkCheckUnit(AstNode **program, int count, bool isStdlib) {
     if (program[i]->kind == NODE_STRUCT) {
       StructNode *sn = &program[i]->as.struct_;
 
-      // Not registered, so the name keeps meaning the built-in type
-      if (typchkPrimitiveTypeNamed(&sn->name) != NULL) {
-        typchkErrorAtTokenFmt(&sn->name,
-                              "'%.*s' is a built-in type and can't be the name "
-                              "of a struct.",
-                              sn->name.length, sn->name.start);
+      if (typchkRejectBuiltinTypeName(&sn->name, "a struct"))
         continue;
-      }
 
       Type *placeholder = typeStruct(sn->name, NULL, 0);
 
@@ -5329,6 +5335,13 @@ static bool typchkCheckUnit(AstNode **program, int count, bool isStdlib) {
   for (int i = 0; i < count; i++) {
     if (program[i]->kind == NODE_TRAIT) {
       TraitNode *trait_ = &program[i]->as.trait_;
+
+      if (typchkRejectBuiltinTypeName(&trait_->name, "a trait")) {
+        if (isDuplicateTrait != NULL)
+          isDuplicateTrait[i] = true;
+
+        continue;
+      }
 
       Type *existing = typchkTypeEnvLookupTrait(env, trait_->name);
 
@@ -5397,7 +5410,9 @@ static bool typchkCheckUnit(AstNode **program, int count, bool isStdlib) {
   for (int i = 0; i < count; i++) {
     // Generic aliases aren't checked yet. Remember their names so that using
     // one reports "not supported" instead of "Unknown type."
-    if (program[i]->kind == NODE_TYPE_ALIAS) {
+    if (program[i]->kind == NODE_TYPE_ALIAS &&
+        !typchkRejectBuiltinTypeName(&program[i]->as.typeAlias.name,
+                                     "a type alias")) {
       pendingAliasCount++;
     }
   }
@@ -5408,7 +5423,8 @@ static bool typchkCheckUnit(AstNode **program, int count, bool isStdlib) {
 
     int next = 0;
     for (int i = 0; i < count; i++) {
-      if (program[i]->kind == NODE_TYPE_ALIAS)
+      if (program[i]->kind == NODE_TYPE_ALIAS &&
+          typchkPrimitiveTypeNamed(&program[i]->as.typeAlias.name) == NULL)
         unresolvedAliasAliases[next++].node = program[i];
     }
 
