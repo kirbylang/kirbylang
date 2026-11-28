@@ -868,10 +868,9 @@ length that only equals itself, so a `[T; M]` can't be returned as a `[T; N]`.
 Only the standard library can declare `const` parameters.
 
 A native whose type can't be spelled yet has no declaration, and calls to it
-are checked at runtime instead. That covers `@typeof`, `@instanceOf`, the
-`@is*` family and the print natives, which take a value of any type, and
-`@argv`, `@prompt` and `@stdin`, which return nothing on some paths and so
-need `Option[T]`.
+are checked at runtime instead. That covers `@typeof`, the `@is*` family and
+the print natives, which take a value of any type, and `@argv`, `@prompt` and
+`@stdin`, which return nothing on some paths and so need `Option[T]`.
 
 ## Type Aliases
 

@@ -14,9 +14,8 @@
 // them, but they aren't signed yet. The print natives also have their own
 // Display check.
 static const char *awaitingAnyTypeSignature[] = {
-    "@typeof", "@is",       "@isNumber", "@isFunction",
-    "@isBool", "@isString", "@isNil",    "@instanceOf",
-    "@print",  "@println",  "@eprint",   "@eprintln",
+    "@typeof", "@is",    "@isNumber", "@isFunction", "@isBool",   "@isString",
+    "@isNil",  "@print", "@println",  "@eprint",     "@eprintln",
 };
 
 // Natives that return nothing on some paths, so their type needs Option[T].

@@ -21,6 +21,7 @@
 
 ## Next
 
+- **Breaking**: remove `@instanceOf`
 - **Breaking**: a trait or type alias can't be named like a built-in type. It was accepted and then ignored
 - Allow a method of a built-in type to be used as a value, as in `let length = "abc".len;`
 - Fix a method used as a value in a generic function. On a struct it could run the type's own method instead of the trait's, and on a number it was a runtime error

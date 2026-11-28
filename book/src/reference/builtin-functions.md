@@ -971,20 +971,6 @@ fun main(): unit {
 
 ## Types/Values
 
-### `@instanceOf`
-
-Returns if a value is an instance of a struct.
-
-```kirby
-struct Food {}
-
-fun main(): unit {
-    let food = Food {};
-
-    @println(@instanceOf(food, Food)); // true
-}
-```
-
 ### `@typeof`
 
 Get the name of a value's type, as a string. A number gives its number type, such as `i64`, `u8` or `f64`. `()` gives `"nil"`.

@@ -1,3 +1,0 @@
-struct Struct {}
-
-fun main(): unit { @println(@instanceOf(Struct, Struct)); }

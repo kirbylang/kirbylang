@@ -386,24 +386,6 @@ static Value isNilNative(VM *vm, int argCount, Value *args) {
   return BOOL_VAL(equals);
 }
 
-static Value instanceOfNative(VM *vm, int argCount, Value *args) {
-  assertArgCount(vm, "@instanceOf", 2, argCount);
-  assertArgIsStruct(vm, "@instanceOf", args, 1);
-
-  Value value = args[0];
-
-  if (!IS_INSTANCE(value)) {
-    return BOOL_VAL(false);
-  }
-
-  Value struct1 = args[1];
-
-  ObjInstance *instance = AS_INSTANCE(value);
-  ObjStruct *struct2 = AS_STRUCT(struct1);
-
-  return BOOL_VAL(instance->struct_ == struct2);
-}
-
 static Value listPushNative(VM *vm, int argCount, Value *args) {
   assertArgCount(vm, "@listPush", 2, argCount);
   assertArgIsList(vm, "@listPush", args, 0);
@@ -1682,7 +1664,6 @@ const NativeDefinition nativeDefinitions[] = {
     {"@argc", argcNative},
     {"@parseInt", parseIntNative},
     {"@parseFloat", parseFloatNative},
-    {"@instanceOf", instanceOfNative},
     {"@prompt", promptNative},
     {"@stdin", stdinNative},
     {"@listPush", listPushNative},

@@ -31,14 +31,6 @@ void assertArgIsBool(VM *vm, const char *function, Value *args, int index) {
   }
 }
 
-void assertArgIsStruct(VM *vm, const char *function, Value *args, int index) {
-  if (!IS_STRUCT(args[index])) {
-    runtimeError(vm, "function %s expects argument %d to be a struct.",
-                 function, index + 1);
-    exit(EXIT_CODE_RUNTIME_ERR);
-  }
-}
-
 void assertArgIsList(VM *vm, const char *function, Value *args, int index) {
   if (!IS_LIST(args[index])) {
     runtimeError(vm, "function %s expects argument %d to be a list.", function,

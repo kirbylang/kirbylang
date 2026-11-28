@@ -1,5 +1,0 @@
-struct Struct {}
-
-fun test(): unit {}
-
-fun main(): unit { @println(@instanceOf(test, Struct)); }

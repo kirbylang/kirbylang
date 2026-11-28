@@ -493,13 +493,6 @@
     ],
     "description": "Parse a string into an f64"
   },
-  "Native: @instanceOf": {
-    "prefix": "@instanceOf",
-    "body": [
-      "@instanceOf(${1:value}, ${2:Struct})$0"
-    ],
-    "description": "Check whether a value is an instance of a struct"
-  },
   "Native: @prompt": {
     "prefix": "@prompt",
     "body": [

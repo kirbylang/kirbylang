@@ -55,9 +55,6 @@ fun main(): unit { @println(@exit);
 @println(@stdin);
 @println(@typeof(@stdin));
 
-@println(@instanceOf);
-@println(@typeof(@instanceOf));
-
 @println(@parseInt);
 @println(@typeof(@parseInt));
 
