@@ -39,17 +39,33 @@ build-tests:
 clean:
     ./scripts/clean.sh
 
+# Install the debug build, made by 'just build'
 [linux]
-install: build-release
+install:
     ./scripts/install-linux.sh
+
+# Install the release build, made by 'just build-release'
+[linux]
+install-release:
+    BUILD_DIR=build/release ./scripts/install-linux.sh
 
 [windows]
 install:
     .\scripts\install-windows.cmd
 
+[windows]
+install-release:
+    .\scripts\install-windows.cmd
+
+# Install the debug build, made by 'just build'
 [macos]
-install: build-release
+install:
     ./scripts/install-macos.sh
+
+# Install the release build, made by 'just build-release'
+[macos]
+install-release:
+    BUILD_DIR=build/release ./scripts/install-macos.sh
 
 # Format the C lines changed since HEAD
 fmt *paths:
@@ -116,6 +132,10 @@ increment-version *args:
 # Run one of the example programs
 examples file *args: build
     ./scripts/run-example.sh {{ file }} {{ args }}
+
+# Run one of the example programs with the release build
+examples-release file *args: build-release
+    BUILD_DIR=build/release ./scripts/run-example.sh {{ file }} {{ args }}
 
 man:
     man ./docs/man/man1/krb.1

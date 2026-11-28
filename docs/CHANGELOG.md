@@ -27,7 +27,7 @@
 - Allow a program to implement its own traits on `string`, `bool`, `unit` and the number types, as in `impl Describe for i64`. Only the standard library can implement the builtin traits for them
 - Allow two traits to give one type instance methods of the same name. A call such as `value.label()` is then ambiguous and is an error, so write `Named.label(value)`. It was an error to implement the second trait
 - **Breaking**: `cmp` on floats sorts `NaN` below every number and level with `NaN`. It returned `0`, which means equal. In a generic function, where `<` and the other ordering operators use `cmp`, `NaN < 1.0` is now `true`
-- Change where a source build puts `krb`: `build/debug` for `just build` and `build/release` for `just build-release`, which is now optimized. `just install` makes a release build first
+- Change where a source build puts `krb`: `build/debug` for `just build` and `build/release` for `just build-release`, which is now optimized. `just install` installs the debug build and `just install-release` the release build. Neither builds, so run `just build` or `just build-release` first
 - Change a bad array length, such as `[i64; n]`, to report one error, `Array length must be a whole number, as in '[i64; 3]'.`, in place of a syntax error that was often followed by a second one
 - Change type mismatch errors to say "type parameter" before a type that is one. `Expected string, got string.` is now `Expected type parameter string, got string.`
 - **Breaking**: a struct can't be named like a built-in type: `unit`, `bool`, `string` or a number type such as `i64`. It was accepted, but the name in a type annotation still meant the built-in type

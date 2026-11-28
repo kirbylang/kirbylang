@@ -12,7 +12,10 @@ The `krb` and `krb-runtime` binaries are produced using the build scripts.
 
 ## Installing
 
-Run `just install` runs the release build then installs `krb` and `krb-runtime` in OS appropriate locations (e.g. `/usr/local/bin`).
+| Debug/Release | Command                |
+| ------------- | ---------------------- |
+| Debug         | `just install`         |
+| Release       | `just install-release` |
 
 ## Usage
 

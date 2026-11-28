@@ -10,12 +10,17 @@
 
 ## Install
 
-Run `just install`, which makes a release build and installs it. The OS
-specific scripts install what `just build-release` made:
+| Command                | Installs                                 |
+| ---------------------- | ---------------------------------------- |
+| `just install`         | The debug build (`just build`)           |
+| `just install-release` | The release build (`just build-release`) |
 
-- **linux:** `./scripts/install-linux.sh`
-- **macos:** `./scripts/install-macos.sh`
-- **windows:** `.\scripts\install-windows.cmd`
+## Examples
+
+| Command                        | Runs with         |
+| ------------------------------ | ----------------- |
+| `just examples <name>`         | The debug build   |
+| `just examples-release <name>` | The release build |
 
 ## Test
 
