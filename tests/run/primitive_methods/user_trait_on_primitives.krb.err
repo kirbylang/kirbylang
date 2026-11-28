@@ -1,0 +1,168 @@
+== <script> ==
+0000   35 OP_CLOSURE          1 <fn main>
+0002    | OP_DEFINE_GLOBAL    0 'main'
+0004   72 OP_CLOSURE          2 <fn installMethods>
+0006    | OP_CALL             0
+0008    | OP_POP
+0009   74 OP_NIL
+0010    | OP_RETURN
+== main ==
+0000   17 OP_GET_GLOBAL       0 '@println'
+0002    | OP_GET_GLOBAL       1 'i64.Describe.describe'
+0004    | OP_CONSTANT         2 '7'
+0006    | OP_CALL             1
+0008    | OP_CALL             1
+0010    | OP_POP
+0011   18 OP_GET_GLOBAL       0 '@println'
+0013    | OP_GET_GLOBAL       3 'string.Describe.describe'
+0015    | OP_CONSTANT         4 'hi'
+0017    | OP_CALL             1
+0019    | OP_CALL             1
+0021    | OP_POP
+0022   19 OP_GET_GLOBAL       0 '@println'
+0024    | OP_GET_GLOBAL       5 'bool.Describe.describe'
+0026    | OP_TRUE
+0027    | OP_CALL             1
+0029    | OP_CALL             1
+0031    | OP_POP
+0032   20 OP_GET_GLOBAL       0 '@println'
+0034    | OP_GET_GLOBAL       6 'unit.Describe.describe'
+0036    | OP_NIL
+0037    | OP_CALL             1
+0039    | OP_CALL             1
+0041    | OP_POP
+0042   22 OP_GET_GLOBAL       0 '@println'
+0044    | OP_GET_GLOBAL       7 'i64.Describe.kind'
+0046    | OP_CALL             0
+0048    | OP_CALL             1
+0050    | OP_POP
+0051   23 OP_GET_GLOBAL       0 '@println'
+0053    | OP_GET_GLOBAL       8 'string.Describe.kind'
+0055    | OP_CALL             0
+0057    | OP_CALL             1
+0059    | OP_POP
+0060   24 OP_GET_GLOBAL       0 '@println'
+0062    | OP_GET_GLOBAL       8 'string.Describe.kind'
+0064    | OP_CALL             0
+0066    | OP_CALL             1
+0068    | OP_POP
+0069   26 OP_CONSTANT         9 '3'
+0071   27 OP_GET_GLOBAL       0 '@println'
+0073    | OP_GET_GLOBAL      10 'f64.Squarable.squared'
+0075    | OP_GET_LOCAL        1
+0077    | OP_CALL             1
+0079    | OP_CALL             1
+0081    | OP_POP
+0082   28 OP_GET_GLOBAL       0 '@println'
+0084    | OP_GET_GLOBAL      10 'f64.Squarable.squared'
+0086    | OP_GET_LOCAL        1
+0088    | OP_CALL             1
+0090    | OP_CALL             1
+0092    | OP_POP
+0093   29 OP_GET_GLOBAL       0 '@println'
+0095    | OP_GET_GLOBAL       1 'i64.Describe.describe'
+0097    | OP_CONSTANT         2 '7'
+0099    | OP_CALL             1
+0101    | OP_CALL             1
+0103    | OP_POP
+0104   30 OP_GET_GLOBAL       0 '@println'
+0106    | OP_GET_GLOBAL      11 'i64.Shown.shown'
+0108    | OP_CONSTANT        12 '8'
+0110    | OP_CALL             1
+0112    | OP_CALL             1
+0114    | OP_POP
+0115   33 OP_GET_GLOBAL       0 '@println'
+0117    | OP_GET_GLOBAL      13 'string.Shout.len'
+0119    | OP_CONSTANT        14 'four'
+0121    | OP_CALL             1
+0123    | OP_CALL             1
+0125    | OP_POP
+0126   34 OP_GET_GLOBAL       0 '@println'
+0128    | OP_GET_GLOBAL      15 'string.len'
+0130    | OP_CONSTANT        14 'four'
+0132    | OP_CALL             1
+0134    | OP_CALL             1
+0136    | OP_POP
+0137   35 OP_NIL
+0138    | OP_RETURN
+== installMethods ==
+0000   44 OP_CLOSURE          0 <fn len>
+0002    | OP_DEFINE_GLOBAL    1 'string.Shout.len'
+0004   48 OP_CLOSURE          2 <fn describe>
+0006    | OP_DEFINE_GLOBAL    3 'i64.Describe.describe'
+0008   49 OP_CLOSURE          4 <fn kind>
+0010    | OP_DEFINE_GLOBAL    5 'i64.Describe.kind'
+0012   53 OP_CLOSURE          6 <fn describe>
+0014    | OP_DEFINE_GLOBAL    7 'string.Describe.describe'
+0016   54 OP_CLOSURE          8 <fn kind>
+0018    | OP_DEFINE_GLOBAL    9 'string.Describe.kind'
+0020   58 OP_CLOSURE         10 <fn describe>
+0022    | OP_DEFINE_GLOBAL   11 'bool.Describe.describe'
+0024   59 OP_CLOSURE         12 <fn kind>
+0026    | OP_DEFINE_GLOBAL   13 'bool.Describe.kind'
+0028   63 OP_CLOSURE         14 <fn describe>
+0030    | OP_DEFINE_GLOBAL   15 'unit.Describe.describe'
+0032   64 OP_CLOSURE         16 <fn kind>
+0034    | OP_DEFINE_GLOBAL   17 'unit.Describe.kind'
+0036   68 OP_CLOSURE         18 <fn squared>
+0038    | OP_DEFINE_GLOBAL   19 'f64.Squarable.squared'
+0040   72 OP_CLOSURE         20 <fn shown>
+0042    | OP_DEFINE_GLOBAL   21 'i64.Shown.shown'
+0044    | OP_NIL
+0045    | OP_RETURN
+== len ==
+0000   44 OP_CONSTANT         0 'FOUR'
+0002    | OP_RETURN
+== describe ==
+0000   48 OP_GET_GLOBAL       0 '@strConcat'
+0002    | OP_CONSTANT         1 'number '
+0004    | OP_GET_GLOBAL       2 '@numberToString'
+0006    | OP_GET_LOCAL        1
+0008    | OP_CALL             1
+0010    | OP_LIST             2
+0012    | OP_CALL             1
+0014    | OP_RETURN
+== kind ==
+0000   49 OP_CONSTANT         0 'i64'
+0002    | OP_RETURN
+== describe ==
+0000   53 OP_CONSTANT         0 'text '
+0002    | OP_GET_LOCAL        1
+0004    | OP_ADD
+0005    | OP_RETURN
+== kind ==
+0000   54 OP_CONSTANT         0 'string'
+0002    | OP_RETURN
+== describe ==
+0000   58 OP_GET_LOCAL        1
+0002    | OP_JUMP_IF_FALSE    2 -> 11
+0005    | OP_POP
+0006    | OP_CONSTANT         0 'yes'
+0008    | OP_JUMP             8 -> 14
+0011    | OP_POP
+0012    | OP_CONSTANT         1 'no'
+0014    | OP_RETURN
+== kind ==
+0000   59 OP_CONSTANT         0 'bool'
+0002    | OP_RETURN
+== describe ==
+0000   63 OP_CONSTANT         0 'nothing'
+0002    | OP_RETURN
+== kind ==
+0000   64 OP_CONSTANT         0 'unit'
+0002    | OP_RETURN
+== squared ==
+0000   68 OP_GET_LOCAL        1
+0002    | OP_GET_LOCAL        1
+0004    | OP_MULTIPLY
+0005    | OP_RETURN
+== shown ==
+0000   72 OP_GET_GLOBAL       0 '@strConcat'
+0002    | OP_CONSTANT         1 '<'
+0004    | OP_GET_GLOBAL       2 'i64.Display.toString'
+0006    | OP_GET_LOCAL        1
+0008    | OP_CALL             1
+0010    | OP_CONSTANT         3 '>'
+0012    | OP_LIST             3
+0014    | OP_CALL             1
+0016    | OP_RETURN

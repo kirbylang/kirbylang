@@ -1,0 +1,41 @@
+trait Describe {
+    fun describe(self): string;
+}
+
+trait Other {
+    fun toString(self): string;
+}
+
+impl Display for f64 {
+    fun toString(self): string = "mine";
+}
+
+impl Eq for string {
+    fun equals(self, other: Self): bool = true;
+}
+
+impl string {
+    pub fun shout(self): string = self;
+}
+
+impl Describe for u8 {
+    fun describe(self): string = "u8";
+}
+
+impl Describe for u8 {
+    fun describe(self): string = "again";
+}
+
+impl Other for i64 {
+    fun toString(self): string = "other";
+}
+
+fun show[T: Describe](value: T): string = value.describe();
+
+fun main(): unit {
+    let n: u8 = 1;
+    let m: i64 = 2;
+    @println(show(n));
+    @println(m.toString());
+    @println("s".describe());
+}

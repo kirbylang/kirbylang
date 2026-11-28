@@ -36,6 +36,10 @@ bounded by `Ord`, `a < b` uses `cmp`.
 
 Lists and arrays implement no traits.
 
+You can implement
+[traits you declare](../basics.md#traits-on-primitive-types) for every type in
+this table, but not these builtin ones.
+
 ## Date
 
 `Date` is a date and time in UTC. It implements `Display`, `Eq` and `Ord`.

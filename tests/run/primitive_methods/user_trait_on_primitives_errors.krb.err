@@ -1,0 +1,7 @@
+[line 9] Error at 'Display': Only the standard library can implement 'Display' for 'f64'.
+[line 13] Error at 'Eq': Only the standard library can implement 'Eq' for 'string'.
+[line 17] Error at 'string': Only the standard library can add methods to 'string'.
+[line 25] Error at 'Describe': 'u8' already implements 'Describe'.
+[line 38] Error: u8 implements Describe, but a primitive can't be used with a bound yet, required by T.
+[line 39] Error at 'toString': Method 'toString' is in both Display and Other. Call it as 'Display.toString(value)'.
+[line 40] Error at 'describe': Can't access '.describe' on a string.

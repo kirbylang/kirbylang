@@ -4589,10 +4589,13 @@ static void typchkRegisterPrimitiveTraitImpl(TypeEnv *env, AstNode *node,
   ImplNode *impl = &node->as.impl;
   Token target = impl->targetName;
 
-  if (!env->_isStdlib) {
+  // A program can implement the traits it declares, and no others
+  if (!env->_isStdlib && typeTraitIsBuiltin(traitType)) {
     typchkErrorAtTokenFmt(
-        &target, "Only the standard library can implement traits for '%.*s'.",
-        target.length, target.start);
+        &impl->traitName,
+        "Only the standard library can implement '%.*s' for '%.*s'.",
+        impl->traitName.length, impl->traitName.start, target.length,
+        target.start);
     return;
   }
 

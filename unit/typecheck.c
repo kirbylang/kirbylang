@@ -941,15 +941,6 @@ static bool typecheckSource(const char *source) {
   return typecheckSourceParsedAs(source, false);
 }
 
-// True when the user-code parser refuses the source
-static bool userParseFails(const char *source) {
-  int outCount = 0;
-  bool hadParseError = false;
-  int endLine = 0;
-  parse(source, &outCount, &hadParseError, &endLine);
-  return hadParseError;
-}
-
 static void test_struct_private_instance_method_uncallable_from_outside(void) {
   // Structs now get compile-time visibility enforcement instead of only
   // failing at runtime via canAccess() in vm.c.
@@ -1347,28 +1338,21 @@ static void test_program_equality_between_primitives_unaffected(void) {
   assert(ok);
 }
 
-static void test_program_trait_impl_on_primitive_deferred_fails(void) {
+static void test_program_own_trait_impl_on_primitive_ok(void) {
   typchkResetError();
-  assert(userParseFails("impl Display for f64 {\n"
-                        "  pub fun toString(self): string = \"n\";\n"
-                        "}\n"));
-  bool ok =
-      typecheckSourceParsedAs("impl Display for f64 {\n"
-                              "  pub fun toString(self): string = \"n\";\n"
-                              "}\n",
-                              true);
-  assert(!ok);
+  bool ok = typecheckSource("trait Label { fun label(self): string; }\n"
+                            "impl Label for f64 {\n"
+                            "  fun label(self): string = \"n\";\n"
+                            "}\n"
+                            "@println((1.5).label());\n");
+  assert(ok);
 }
 
 static void test_program_plain_impl_on_primitive_fails(void) {
   typchkResetError();
-  assert(userParseFails("impl f64 {\n"
-                        "  pub fun double(self): f64 = self * 2;\n"
-                        "}\n"));
-  bool ok = typecheckSourceParsedAs("impl f64 {\n"
-                                    "  pub fun double(self): f64 = self * 2;\n"
-                                    "}\n",
-                                    true);
+  bool ok = typecheckSource("impl f64 {\n"
+                            "  pub fun double(self): f64 = self * 2;\n"
+                            "}\n");
   assert(!ok);
 }
 
@@ -1678,7 +1662,7 @@ int main(void) {
   test_program_equality_requires_eq_for_structs();
   test_program_equality_ok_once_eq_implemented();
   test_program_equality_between_primitives_unaffected();
-  test_program_trait_impl_on_primitive_deferred_fails();
+  test_program_own_trait_impl_on_primitive_ok();
   test_program_plain_impl_on_primitive_fails();
   test_trait_qualified_call_keeps_the_written_tree();
   test_program_trait_alongside_plain_impl();

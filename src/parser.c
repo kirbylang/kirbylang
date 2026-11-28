@@ -1686,16 +1686,15 @@ static bool isPrimitiveImplTarget(const Token *token) {
          numberKindFromName(token->start, token->length, &kind);
 }
 
-// Only the standard library writes impls for the types the language defines.
-// Reported before the rest of the target is read. Returns true after reporting
-// it, and then the caller returns the result of skipRejectedImpl().
-static bool rejectPrimitiveImplInUserCode(Parser *p, Token *target) {
+// Only the standard library writes impls for lists and arrays. Reported before
+// the rest of the target is read. Returns true after reporting it, and then the
+// caller returns the result of skipRejectedImpl().
+static bool rejectListImplInUserCode(Parser *p, Token *target) {
   if (p->isStdlib)
     return false;
 
   parse_error_at(p, target,
-                 "You can't write an impl for a primitive type in user "
-                 "code.");
+                 "You can't write an impl for a list or array in user code.");
   return true;
 }
 
@@ -1787,15 +1786,18 @@ static AstNode *implDeclaration(Parser *p) {
       advance(p);
       skipBracketed(p);
 
-      // Naming a struct after the brackets is a different mistake
+      // Naming a type after the brackets is a different mistake
       if (match(p, TOKEN_IDENTIFIER) &&
-          (!match(p, TOKEN_FOR) || (check(p, TOKEN_IDENTIFIER) &&
-                                    !isPrimitiveImplTarget(&p->current)))) {
-        parse_error_at(p, &bracket, structImplParamsMessage);
+          (!match(p, TOKEN_FOR) || check(p, TOKEN_IDENTIFIER))) {
+        parse_error_at(p, &bracket,
+                       isPrimitiveImplTarget(&p->current)
+                           ? "An impl for a built-in type has no type "
+                             "parameters."
+                           : structImplParamsMessage);
         return skipRejectedImpl(p, bracket);
       }
 
-      rejectPrimitiveImplInUserCode(p, &bracket);
+      rejectListImplInUserCode(p, &bracket);
       return skipRejectedImpl(p, bracket);
     }
 
@@ -1839,9 +1841,6 @@ static AstNode *implDeclaration(Parser *p) {
     targetName = name;
     traitName = name;
 
-    if (isPrimitiveImplTarget(&name) && rejectPrimitiveImplInUserCode(p, &name))
-      return skipRejectedImpl(p, name);
-
     genericParamCount = parseGenericParamList(
         p, genericParamBuf, /*boundBuf=*/NULL,
         "An impl's type parameters take their bounds from the struct.",
@@ -1853,7 +1852,7 @@ static AstNode *implDeclaration(Parser *p) {
       if (match(p, TOKEN_LEFT_BRACKET)) {
         targetName = p->previous;
 
-        if (!rejectPrimitiveImplInUserCode(p, &targetName)) {
+        if (!rejectListImplInUserCode(p, &targetName)) {
           parse_error_at(p, &targetName,
                          "Declare the type parameter after 'impl', as in "
                          "'impl[T] Display for [T]'.");
@@ -1866,10 +1865,6 @@ static AstNode *implDeclaration(Parser *p) {
               "Expect struct or primitive type name after 'for'.");
 
       targetName = p->previous;
-
-      if (isPrimitiveImplTarget(&targetName) &&
-          rejectPrimitiveImplInUserCode(p, &targetName))
-        return skipRejectedImpl(p, targetName);
     }
   }
 

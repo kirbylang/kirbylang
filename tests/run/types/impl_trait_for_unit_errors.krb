@@ -1,9 +1,0 @@
-trait Nothing {
-    fun nothing(self): unit;
-}
-
-impl Nothing for unit {
-    fun nothing(self): unit {}
-}
-
-fun main(): unit {}
