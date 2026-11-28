@@ -1,0 +1,22 @@
+// A type parameter can have the name of a built-in type. Inside `first`,
+// `string` is whatever type the list holds
+fun first[string](items: [string]): string = items[0];
+
+// Inside `Reading`, `f64` is whatever type the value has
+struct Reading[f64] {
+    pub var value: f64;
+}
+
+fun main(): unit {
+    let ages: [i64] = [31, 45];
+    @println(first(ages) + 1);
+
+    let reading = Reading { value: "offline" };
+    @println(reading.value);
+
+    // Everywhere else, the names mean the built-in types
+    let city: string = "Lisbon";
+    let latitude: f64 = 38.7;
+    @println(city);
+    @println(latitude);
+}

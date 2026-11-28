@@ -1,0 +1,5 @@
+[line 2] Error at 'i64': 'i64' is a built-in type and can't be the name of a type alias.
+[line 3] Error at 'string': 'string' is a built-in type and can't be the name of a type alias.
+[line 4] Error at 'bool': 'bool' is a built-in type and can't be the name of a type alias.
+[line 5] Error at 'unit': 'unit' is a built-in type and can't be the name of a type alias.
+[line 8] Error at 'f64': 'f64' is a built-in type and can't be the name of a type alias.

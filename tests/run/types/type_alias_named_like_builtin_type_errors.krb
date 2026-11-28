@@ -1,0 +1,17 @@
+// An alias can't change what a built-in type name means
+type i64 = i32;
+type string = [u8];
+type bool = u8;
+type unit = i64;
+
+// A generic alias can't either
+type f64[T] = [T];
+
+fun main(): unit {
+    // The names still mean the built-in types, so these are not more errors.
+    // The population is too large for an i32
+    let population: i64 = 8000000000;
+    let city: string = "Lisbon";
+    let isCapital: bool = true;
+    let latitude: f64 = 38.7;
+}
