@@ -828,6 +828,28 @@ fun main(): unit {
 }
 ```
 
+A method can also be used as a value. This works for the methods of built-in
+types too. The method keeps the value it was taken from.
+
+```kirby
+struct Account {
+    pub var balance: i64;
+}
+
+impl Account {
+    pub fun total(self): i64 = self.balance;
+}
+
+fun main(): unit {
+    let account = Account { balance: 5 };
+    let total = account.total;
+    @println(total()); // 5
+
+    let length = "hello".len;
+    @println(length()); // 5
+}
+```
+
 #### Generic Structs
 
 A struct can take types too. Write them in brackets after the name, and give them when you use the type.

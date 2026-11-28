@@ -21,6 +21,8 @@
 
 ## Next
 
+- Allow a method of a built-in type to be used as a value, as in `let length = "abc".len;`
+- Fix a method used as a value in a generic function. On a struct it could run the type's own method instead of the trait's, and on a number it was a runtime error
 - Allow a program to implement its own traits on `string`, `bool`, `unit` and the number types, as in `impl Describe for i64`. Only the standard library can implement the builtin traits for them
 - Allow two traits to give one type instance methods of the same name. A call such as `value.label()` is then ambiguous and is an error, so write `Named.label(value)`. It was an error to implement the second trait
 - **Breaking**: `cmp` on floats sorts `NaN` below every number and level with `NaN`. It returned `0`, which means equal. In a generic function, where `<` and the other ordering operators use `cmp`, `NaN < 1.0` is now `true`

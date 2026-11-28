@@ -239,9 +239,20 @@ user file they are the error `Only the standard library can add methods to
 'string'.`. They work for `string`, `bool`, `unit` and every number kind (`i64`, `u8`, `f64` and
 the rest), with methods that take `self`. Lists and arrays have them too, see
 [Methods On Lists And Arrays](#methods-on-lists-and-arrays). A method belongs to its own type, so a method of `f64` can't be called
-on an `i64`. A method has to be called, so `let f = "abc".len;` is an error. A
-call to one is compiled as a plain function call with the value as the first
-argument.
+on an `i64`. A call to a method is compiled as a plain function call with the
+value as the first argument.
+
+A method can also be used as a value. It keeps the value it was taken from, which
+is worked out at that moment:
+
+```
+var text = "ab";
+let len = text.len;
+text = "abcd";
+@println(len()); // 2
+```
+
+A static method is a value too, as in `let zero = f64.default;`.
 
 The number types have these methods:
 
@@ -414,8 +425,8 @@ a struct, for a primitive that implements the trait (`Display.toString(7)`), and
 for a value of a type parameter whose bound includes the trait. It is an error
 when the value's type doesn't implement the trait (`i64 doesn't implement
 Greet.`), when the trait has no such method, and for a static method of the
-trait, which is called on a type. A trait's method has to be called, so
-`let f = Greet.hello;` is an error.
+trait, which is called on a type. A method named through its trait has to be
+called, so `let f = Greet.hello;` is an error.
 
 Code that is written for a trait always runs the trait's version. A call
 through a type parameter's bound (`x.toString()` with `T: Display`), an

@@ -55,6 +55,7 @@ typedef enum {
   OP_TRAIT_METHOD,     // 44; operands: name constant, qualified name constant
   OP_LESS_EQUAL,       // 45
   OP_GREATER_EQUAL,    // 46
+  OP_BIND_METHOD, // 47; a value and a built-in type's method become one value
   // Sentinel
   OP_COUNT,
 } OpCode;

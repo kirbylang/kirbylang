@@ -1,4 +1,0 @@
-fun main(): unit {
-    let xs = [1, 2];
-    let f = xs.len;
-}

@@ -714,6 +714,24 @@ static uint8_t traitMethodConstant(const char *trait, int traitLength,
   return constant;
 }
 
+static void emitGetPrimitiveMethod(const GetNode *g) {
+  emitBytes(OP_GET_GLOBAL,
+            primitiveMethodConstant(
+                g->primitiveOwner, (int)strlen(g->primitiveOwner),
+                g->primitiveTrait,
+                g->primitiveTrait != NULL ? (int)strlen(g->primitiveTrait) : 0,
+                &g->name));
+}
+
+// The name to look a method or field up by
+static uint8_t propertyConstant(const GetNode *g) {
+  if (g->viaTrait != NULL)
+    return traitMethodConstant(g->viaTrait, (int)strlen(g->viaTrait),
+                               g->name.start, g->name.length);
+
+  return identifierConstant((Token *)&g->name);
+}
+
 static void compileCall(CallNode *c) {
   // The value a method runs on, and the arguments after it. `Trait.method(x)`
   // has the value as its first argument, and any other method call has it as
@@ -737,13 +755,7 @@ static void compileCall(CallNode *c) {
     // The checker matched the count to the method, which has at most 254
     // parameters plus the receiver
     assert(argCount + 1 <= UINT8_MAX);
-    emitBytes(
-        OP_GET_GLOBAL,
-        primitiveMethodConstant(
-            g->primitiveOwner, (int)strlen(g->primitiveOwner),
-            g->primitiveTrait,
-            g->primitiveTrait != NULL ? (int)strlen(g->primitiveTrait) : 0,
-            &g->name));
+    emitGetPrimitiveMethod(g);
     // A static method has no receiver value
     int receiverCount = g->primitiveIsStatic ? 0 : 1;
     if (receiverCount == 1)
@@ -759,11 +771,7 @@ static void compileCall(CallNode *c) {
   if (c->callee->kind == NODE_GET) {
     GetNode *g = &c->callee->as.get;
     compileExpr(receiver);
-    uint8_t name =
-        g->viaTrait != NULL
-            ? traitMethodConstant(g->viaTrait, (int)strlen(g->viaTrait),
-                                  g->name.start, g->name.length)
-            : identifierConstant(&g->name);
+    uint8_t name = propertyConstant(g);
     for (int i = 0; i < argCount; i++) {
       compileExpr(args[i]);
     }
@@ -1225,9 +1233,21 @@ static void compileExpr(AstNode *node) {
 
   case NODE_GET: {
     GetNode *g = &node->as.get;
+
+    if (g->primitiveOwner != NULL) {
+      // A static method is the function itself
+      if (!g->primitiveIsStatic)
+        compileExpr(g->object);
+
+      emitGetPrimitiveMethod(g);
+
+      if (!g->primitiveIsStatic)
+        emitByte(OP_BIND_METHOD);
+      break;
+    }
+
     compileExpr(g->object);
-    uint8_t name = identifierConstant(&g->name);
-    emitBytes(OP_GET_PROPERTY, name);
+    emitBytes(OP_GET_PROPERTY, propertyConstant(g));
     break;
   }
 

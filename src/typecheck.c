@@ -182,8 +182,6 @@ struct TypeEnv {
   bool _isStdlib; // The unit being checked is the standard library
   // Owner of the primitive impl block being checked, NULL outside one
   const char *_currentPrimitiveOwner;
-  // The get expression being called, so `a.b` alone can be told from `a.b()`
-  AstNode *_calleeNode;
 
   // Generic parameters of the declarations being checked, innermost last
   TypeEnvBinding *_genericParams;
@@ -2277,9 +2275,7 @@ static Type *typchkInferCall(TypeEnv *env, AstNode *node) {
   Type *calleeType = NULL;
 
   if (receiverOk) {
-    env->_calleeNode = c->callee;
     calleeType = typchkInfer(env, c->callee);
-    env->_calleeNode = NULL;
   }
 
   if (calleeType == NULL) {
@@ -2690,7 +2686,7 @@ static void typchkMarkPrimitiveTraitCall(GetNode *get, const char *owner,
 // same through a type alias. Returns the method's type, or NULL after an
 // error.
 static Type *typchkInferPrimitiveStaticGet(TypeEnv *env, GetNode *get,
-                                           Type *primitive, bool isCallee) {
+                                           Type *primitive) {
   const char *owner = typchkPrimitiveOwner(primitive);
   assert(owner != NULL);
 
@@ -2711,12 +2707,6 @@ static Type *typchkInferPrimitiveStaticGet(TypeEnv *env, GetNode *get,
       typchkErrorAtTokenFmt(&get->name, "%s has no static method '%.*s'.",
                             owner, get->name.length, get->name.start);
     }
-    return NULL;
-  }
-
-  if (!isCallee) {
-    typchkErrorAtTokenFmt(&get->name, "Method '%.*s' of '%s' has to be called.",
-                          get->name.length, get->name.start, owner);
     return NULL;
   }
 
@@ -2808,9 +2798,6 @@ static Type *typchkInferTraitMethod(TypeEnv *env, GetNode *get,
 static Type *typchkInferGet(TypeEnv *env, AstNode *node) {
   GetNode *get = &node->as.get;
 
-  // Read before inferring the object, which may contain calls of its own
-  bool isCallee = env->_calleeNode == node;
-
   if (get->object->kind == NODE_VARIABLE) {
     Token *objIdentifier = &get->object->as.variable.name;
 
@@ -2850,7 +2837,7 @@ static Type *typchkInferGet(TypeEnv *env, AstNode *node) {
           primitive = env->_currentImplSelfType;
 
         if (primitive != NULL)
-          return typchkInferPrimitiveStaticGet(env, get, primitive, isCallee);
+          return typchkInferPrimitiveStaticGet(env, get, primitive);
       }
 
       if (structType == NULL && !isSelf) {
@@ -2861,7 +2848,7 @@ static Type *typchkInferGet(TypeEnv *env, AstNode *node) {
 
         if (target != NULL && target->kind != TYPE_STRUCT) {
           if (typchkPrimitiveOwner(target) != NULL)
-            return typchkInferPrimitiveStaticGet(env, get, target, isCallee);
+            return typchkInferPrimitiveStaticGet(env, get, target);
 
           typchkErrorAtTokenFmt(&get->name, "%s has no static method '%.*s'.",
                                 typeToString(target), get->name.length,
@@ -2994,13 +2981,6 @@ static Type *typchkInferGet(TypeEnv *env, AstNode *node) {
         return NULL;
       }
 
-      if (!isCallee) {
-        typchkErrorAtTokenFmt(
-            &get->name, "Method '%.*s' of '%s' has to be called.",
-            get->name.length, get->name.start, primitiveOwner);
-        return NULL;
-      }
-
       get->primitiveOwner = primitiveOwner;
       return typchkPrimitiveMethodType(method, objectType);
     }
@@ -3023,13 +3003,6 @@ static Type *typchkInferGet(TypeEnv *env, AstNode *node) {
       if (other != NULL) {
         typchkErrorAmbiguousMethod(&get->name, traitMethod->trait,
                                    other->trait);
-        return NULL;
-      }
-
-      if (!isCallee) {
-        typchkErrorAtTokenFmt(
-            &get->name, "Method '%.*s' of '%s' has to be called.",
-            get->name.length, get->name.start, primitiveOwner);
         return NULL;
       }
 

@@ -124,6 +124,9 @@ typedef struct {
   Obj obj;
   Value receiver;
   ObjClosure *method;
+  // A built-in type's method takes the receiver as its first argument, and a
+  // struct's method finds it in the callee's stack slot
+  bool receiverIsArgument;
 } ObjBoundMethod;
 
 ObjList *newList(GC *gc);

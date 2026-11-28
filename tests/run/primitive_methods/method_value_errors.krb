@@ -1,0 +1,30 @@
+trait A {
+    fun n(self): string;
+}
+
+trait B {
+    fun n(self): string;
+}
+
+impl A for bool {
+    fun n(self): string = "A";
+}
+
+impl B for bool {
+    fun n(self): string = "B";
+}
+
+fun main(): unit {
+    let ambiguous = true.n;
+
+    let wrongType: fun () => string = "ab".len;
+
+    let seven: i64 = 7;
+    let max = seven.max;
+    max("a");
+    max();
+
+    let missing = seven.nope;
+    let instance = i64.max;
+    let static = seven.default;
+}
